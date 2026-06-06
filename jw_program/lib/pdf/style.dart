@@ -45,6 +45,13 @@ class S140 {
   /// columna de rol.
   static const double anchoBanda = anchoContenido + colGap + anchoRol;
 
+  /// Piso del ancho de la columna de título cuando la de nombres crece de forma
+  /// adaptativa (los títulos siguen legibles, envolviendo ≤ ~3 líneas).
+  static const double minContenido = 0.40 * contentWidth;
+
+  /// Holgura que se suma al ancho medido del nombre más largo.
+  static const double nomPad = 6;
+
   // ---- Colores oficiales (tex:31-35) ----
   static final PdfColor tesoros = PdfColor.fromHex('575A5D'); // gris
   static final PdfColor maestros = PdfColor.fromHex('BE8900'); // dorado

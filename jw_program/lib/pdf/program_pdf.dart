@@ -8,12 +8,14 @@ import '../models/week.dart';
 import '../schedule/rules.dart';
 import 'style.dart';
 
-// Tema con las fuentes Carlito cargado UNA sola vez (las fuentes pesan ~2.7 MB
-// y recargarlas en cada pulsación rompería el live preview en tiempo real).
-pw.ThemeData? _themeCache;
+// Tema + fuentes Carlito cargados UNA sola vez (las fuentes pesan ~2.7 MB y
+// recargarlas en cada pulsación rompería el live preview en tiempo real).
+// Se guarda también `regular` para poder MEDIR el ancho de los nombres.
+typedef _Carlito = ({pw.ThemeData theme, pw.Font regular, pw.Font bold});
+_Carlito? _carlitoCache;
 
-Future<pw.ThemeData> _carlitoTheme() async {
-  if (_themeCache != null) return _themeCache!;
+Future<_Carlito> _carlito() async {
+  if (_carlitoCache != null) return _carlitoCache!;
   // Carlito (clon de Calibri) — \setmainfont{Carlito} (tex:17-22).
   final regular =
       pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Regular.ttf'));
@@ -23,12 +25,59 @@ Future<pw.ThemeData> _carlitoTheme() async {
       pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Italic.ttf'));
   final boldItalic =
       pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-BoldItalic.ttf'));
-  return _themeCache = pw.ThemeData.withFont(
+  final theme = pw.ThemeData.withFont(
     base: regular,
     bold: bold,
     italic: italic,
     boldItalic: boldItalic,
   );
+  return _carlitoCache = (theme: theme, regular: regular, bold: bold);
+}
+
+/// Anchos de columna calculados por documento (la celda X/contenido es implícita
+/// vía Expanded, así que solo necesitamos rol, nombre y banda).
+class _Cols {
+  final double rol;
+  final double nomPrin;
+  final double banda;
+  const _Cols({required this.rol, required this.nomPrin, required this.banda});
+}
+
+/// Calcula los anchos de columna de forma adaptativa: si los nombres traen mucho
+/// texto, ensancha la columna de nombres tomando espacio de la de título (con un
+/// piso mínimo). Mide con la métrica real de Carlito. Si los nombres son cortos,
+/// devuelve exactamente los anchos por defecto (layout idéntico al de siempre).
+_Cols _calcularColumnas(ProgramSchedule sched, PdfFont regular) {
+  double medir(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
+  double maxNom = 0;
+  for (final f in [
+    ...sched.apertura,
+    ...sched.tesoros,
+    ...sched.seamos,
+    ...sched.vida,
+  ]) {
+    double w;
+    if (f.rol == 'Estudiante/Ayudante:' && f.nombres.length == 2) {
+      // Estos se APILAN si no caben, así que el ancho que importa es el del
+      // nombre individual más largo (no la pareja unida). Así no comprimen los
+      // títulos de más: si solo hay parejas largas, se apilan y los títulos
+      // vuelven a su ancho por defecto.
+      final a = medir(f.nombres[0]);
+      final b = medir(f.nombres[1]);
+      w = a > b ? a : b;
+    } else {
+      final t = f.nombreTexto;
+      if (t.isEmpty) continue;
+      w = medir(t);
+    }
+    if (w > maxNom) maxNom = w;
+  }
+  const rol = S140.anchoRol; // fijo (etiquetas de rol, no entrada del usuario)
+  final maxNomOK = S140.contentWidth - 2 * S140.colGap - rol - S140.minContenido;
+  final nomPrin =
+      (maxNom + S140.nomPad).clamp(S140.anchoNomPrin, maxNomOK).toDouble();
+  final contenido = S140.contentWidth - 2 * S140.colGap - rol - nomPrin;
+  return _Cols(rol: rol, nomPrin: nomPrin, banda: contenido + S140.colGap + rol);
 }
 
 /// Genera el PDF del programa reproduciendo programa-vmc.tex (formato S-140-S)
@@ -39,13 +88,13 @@ Future<Uint8List> buildProgramPdf({
   required ProgramSchedule sched,
   String presidente = '',
 }) async {
-  final theme = await _carlitoTheme();
+  final carlito = await _carlito();
 
   final doc = pw.Document();
   doc.addPage(
     pw.MultiPage(
       pageTheme: pw.PageTheme(
-        theme: theme,
+        theme: carlito.theme,
         pageFormat: const PdfPageFormat(
           S140.pageWidth,
           S140.pageHeight,
@@ -63,23 +112,32 @@ Future<Uint8List> buildProgramPdf({
           style: pw.TextStyle(fontSize: S140.footnote),
         ),
       ),
-      build: (ctx) => [
-        _encabezado(cong),
-        pw.SizedBox(height: 4),
-        _reglafg(),
-        pw.SizedBox(height: 3), // \par\smallskip
-        _lineaSemana(semana, presidente),
-        pw.SizedBox(height: 8), // \addvspace{8pt}
-        _tabla(sched.apertura),
-        _banda(S140.tesoros, 'TESOROS DE LA BIBLIA', 'Auditorio principal'),
-        _tabla(sched.tesoros),
-        _banda(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal'),
-        _tabla(sched.seamos),
-        _banda(S140.vida, 'NUESTRA VIDA CRISTIANA', ''),
-        _tabla(sched.vida),
-        pw.SizedBox(height: 4), // \addvspace{4pt}
-        _reglafg(),
-      ],
+      build: (ctx) {
+        // Anchos adaptativos según el contenido real de los nombres (mide con
+        // la métrica de Carlito; getFont necesita el Context del build).
+        final reg = carlito.regular.getFont(ctx);
+        final cols = _calcularColumnas(sched, reg);
+        // Ancho de un texto a tamaño base, para decidir saltos de línea.
+        double medir(String s) => reg.stringMetrics(s).advanceWidth * S140.base;
+        return [
+          _encabezado(cong),
+          pw.SizedBox(height: 4),
+          _reglafg(),
+          pw.SizedBox(height: 3), // \par\smallskip
+          _lineaSemana(semana, presidente),
+          pw.SizedBox(height: 8), // \addvspace{8pt}
+          _tabla(sched.apertura, cols, medir),
+          _banda(S140.tesoros, 'TESOROS DE LA BIBLIA', 'Auditorio principal', cols),
+          _tabla(sched.tesoros, cols, medir),
+          _banda(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
+              cols),
+          _tabla(sched.seamos, cols, medir),
+          _banda(S140.vida, 'NUESTRA VIDA CRISTIANA', '', cols),
+          _tabla(sched.vida, cols, medir),
+          pw.SizedBox(height: 4), // \addvspace{4pt}
+          _reglafg(),
+        ];
+      },
     ),
   );
   return doc.save();
@@ -161,7 +219,7 @@ pw.Widget _lineaSemana(Week s, String presidente) {
 }
 
 // ---- Banda de sección (tex:135-145, modo no-aux) ----
-pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt) {
+pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt, _Cols cols) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -171,8 +229,8 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt) {
         children: [
           pw.Container(
             // Llega hasta el borde derecho de las etiquetas de rol
-            // (Estudiante/Ayudante), en las tres secciones.
-            width: S140.anchoBanda,
+            // (Estudiante/Ayudante), en las tres secciones (ancho adaptativo).
+            width: cols.banda,
             color: color,
             padding: const pw.EdgeInsets.all(S140.fboxsep),
             child: pw.Text(
@@ -205,14 +263,15 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt) {
 }
 
 // ---- Tabla de filas (tabularx @{}X R P@{}) ----
-pw.Widget _tabla(List<ProgramRow> filas) {
+pw.Widget _tabla(
+    List<ProgramRow> filas, _Cols cols, double Function(String) medir) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [for (final f in filas) _fila(f)],
+    children: [for (final f in filas) _fila(f, cols, medir)],
   );
 }
 
-pw.Widget _fila(ProgramRow r) {
+pw.Widget _fila(ProgramRow r, _Cols cols, double Function(String) medir) {
   final horaStyle = pw.TextStyle(
     fontSize: S140.small,
     fontWeight: pw.FontWeight.bold,
@@ -223,7 +282,25 @@ pw.Widget _fila(ProgramRow r) {
     fontWeight: pw.FontWeight.bold,
     color: S140.rotulo,
   );
-  final nombre = r.nombreTexto;
+  final nombreStyle = pw.TextStyle(fontSize: S140.base);
+
+  // Regla Seamos: Estudiante/Ayudante se apila (línea 1 Ayudante, línea 2
+  // Estudiante) solo si no cabe en una línea.
+  final esEstAyud = r.rol == 'Estudiante/Ayudante:' && r.nombres.length == 2;
+  final apilado = esEstAyud && medir(r.nombreTexto) > cols.nomPrin;
+
+  final pw.Widget nombreWidget = apilado
+      ? pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Text(r.nombres[1],
+                textAlign: pw.TextAlign.right, style: nombreStyle), // Ayudante
+            pw.Text(r.nombres[0],
+                textAlign: pw.TextAlign.right, style: nombreStyle), // Estudiante
+          ],
+        )
+      : pw.Text(r.nombreTexto,
+          textAlign: pw.TextAlign.right, style: nombreStyle);
 
   // Celda X: hora en caja fija + título con sangría francesa (Expanded).
   final celdaX = pw.Row(
@@ -264,23 +341,19 @@ pw.Widget _fila(ProgramRow r) {
   return pw.Padding(
     padding: const pw.EdgeInsets.only(bottom: S140.filaSep),
     child: pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      // Si el participante quedó en dos líneas, el título (y el rol) se centran
+      // verticalmente respecto al bloque de nombres; si no, alineados arriba.
+      crossAxisAlignment:
+          apilado ? pw.CrossAxisAlignment.center : pw.CrossAxisAlignment.start,
       children: [
         pw.Expanded(child: celdaX),
         pw.SizedBox(width: S140.colGap),
         pw.SizedBox(
-          width: S140.anchoRol,
+          width: cols.rol,
           child: pw.Text(r.rol, textAlign: pw.TextAlign.right, style: rolStyle),
         ),
         pw.SizedBox(width: S140.colGap),
-        pw.SizedBox(
-          width: S140.anchoNomPrin,
-          child: pw.Text(
-            nombre,
-            textAlign: pw.TextAlign.right,
-            style: pw.TextStyle(fontSize: S140.base),
-          ),
-        ),
+        pw.SizedBox(width: cols.nomPrin, child: nombreWidget),
       ],
     ),
   );

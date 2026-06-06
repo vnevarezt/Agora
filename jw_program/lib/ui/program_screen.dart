@@ -33,6 +33,12 @@ class _ProgramScreenState extends State<ProgramScreen> {
   List<Week>? _semanas;
   int _semanaIdx = 0;
 
+  // Límites razonables de caracteres (evitan que un texto enorme rompa el
+  // layout del PDF; un nombre completo largo cabe de sobra).
+  static const int _maxNombre = 30; // por participante (1 nombre)
+  static const int _maxEstAyud = 25; // pareja Estudiante/Ayudante (2 por fila)
+  static const int _maxCong = 40; // nombre de la congregación
+
   ProgramSchedule? _sched;
   // Controladores de los campos de nombre, por fila (uno por slot).
   final Map<ProgramRow, List<TextEditingController>> _nameCtrls = {};
@@ -467,7 +473,11 @@ class _ProgramScreenState extends State<ProgramScreen> {
             width: 260,
             child: TextField(
               controller: _congCtrl,
-              decoration: const InputDecoration(labelText: 'Congregación'),
+              maxLength: _maxCong,
+              decoration: const InputDecoration(
+                labelText: 'Congregación',
+                counterText: '',
+              ),
             ),
           ),
         ],
@@ -486,10 +496,12 @@ class _ProgramScreenState extends State<ProgramScreen> {
               // Presidente.
               TextField(
                 controller: _presidenteCtrl,
+                maxLength: _maxNombre,
                 decoration: const InputDecoration(
                   labelText: 'Presidente',
                   isDense: true,
                   border: OutlineInputBorder(),
+                  counterText: '',
                 ),
               ),
               const SizedBox(height: 8),
@@ -531,6 +543,8 @@ class _ProgramScreenState extends State<ProgramScreen> {
 
   Widget _campoFila(ProgramRow f) {
     final ctrls = _nameCtrls[f]!;
+    final esEstAyud = ctrls.length == 2 && !f.rol.contains('Conductor');
+    final maxLen = esEstAyud ? _maxEstAyud : _maxNombre;
     // Etiquetas para los dos nombres según el rol.
     final labels = ctrls.length == 2
         ? (f.rol.contains('Conductor')
@@ -557,10 +571,12 @@ class _ProgramScreenState extends State<ProgramScreen> {
                 Expanded(
                   child: TextField(
                     controller: ctrls[i],
+                    maxLength: maxLen,
                     decoration: InputDecoration(
                       labelText: labels[i],
                       isDense: true,
                       border: const OutlineInputBorder(),
+                      counterText: '',
                     ),
                   ),
                 ),
