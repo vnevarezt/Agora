@@ -36,6 +36,15 @@ class S140 {
   static const double filaSep = 10; // \filasep (tex:61)
   static const double fboxsep = 3; // padding por defecto de \colorbox
 
+  /// Ancho de la columna de contenido (celda X = hora + título).
+  static const double anchoContenido =
+      contentWidth - 2 * colGap - anchoRol - anchoNomPrin;
+
+  /// Ancho de la banda de color: llega hasta el BORDE DERECHO de las etiquetas
+  /// de rol (Estudiante/Ayudante) = fin de la columna de contenido + hueco +
+  /// columna de rol.
+  static const double anchoBanda = anchoContenido + colGap + anchoRol;
+
   // ---- Colores oficiales (tex:31-35) ----
   static final PdfColor tesoros = PdfColor.fromHex('575A5D'); // gris
   static final PdfColor maestros = PdfColor.fromHex('BE8900'); // dorado

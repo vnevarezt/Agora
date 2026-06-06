@@ -170,7 +170,9 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt) {
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Container(
-            width: 0.63 * S140.contentWidth,
+            // Llega hasta el borde derecho de las etiquetas de rol
+            // (Estudiante/Ayudante), en las tres secciones.
+            width: S140.anchoBanda,
             color: color,
             padding: const pw.EdgeInsets.all(S140.fboxsep),
             child: pw.Text(
