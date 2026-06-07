@@ -39,9 +39,13 @@ class _ProgramScreenState extends State<ProgramScreen> {
   static const int _maxEstAyud = 25; // pareja Estudiante/Ayudante (2 por fila)
   static const int _maxCong = 40; // nombre de la congregación
 
+  bool _aux = false; // modo Sala Auxiliar (4 columnas)
+
   ProgramSchedule? _sched;
   // Controladores de los campos de nombre, por fila (uno por slot).
   final Map<ProgramRow, List<TextEditingController>> _nameCtrls = {};
+  // Controladores de los nombres de Sala Auxiliar (solo filas elegibles).
+  final Map<ProgramRow, List<TextEditingController>> _auxCtrls = {};
 
   ui.Image? _previewImg; // página rasterizada (pdfium) para el live preview
   int _genSeq = 0; // descarta renders obsoletos
@@ -74,12 +78,14 @@ class _ProgramScreenState extends State<ProgramScreen> {
   }
 
   void _disposeNameCtrls() {
-    for (final list in _nameCtrls.values) {
-      for (final c in list) {
-        c.dispose();
+    for (final m in [_nameCtrls, _auxCtrls]) {
+      for (final list in m.values) {
+        for (final c in list) {
+          c.dispose();
+        }
       }
+      m.clear();
     }
-    _nameCtrls.clear();
   }
 
   int get _inicioMin {
@@ -131,6 +137,14 @@ class _ProgramScreenState extends State<ProgramScreen> {
               ..addListener(_scheduleLive)),
         ];
       }
+      // Campos de Sala Auxiliar (solo si el modo está activo y la fila es elegible).
+      if (_aux && fila.auxSlots > 0) {
+        _auxCtrls[fila] = [
+          for (var i = 0; i < fila.auxSlots; i++)
+            (TextEditingController(text: fila.nombresAux[i])
+              ..addListener(_scheduleLive)),
+        ];
+      }
     }
     setState(() => _sched = sched);
     _generarLive(); // primer render sin esperar
@@ -141,6 +155,11 @@ class _ProgramScreenState extends State<ProgramScreen> {
     _nameCtrls.forEach((fila, ctrls) {
       for (var i = 0; i < ctrls.length; i++) {
         fila.nombres[i] = ctrls[i].text.trim();
+      }
+    });
+    _auxCtrls.forEach((fila, ctrls) {
+      for (var i = 0; i < ctrls.length; i++) {
+        fila.nombresAux[i] = ctrls[i].text.trim();
       }
     });
   }
@@ -155,6 +174,7 @@ class _ProgramScreenState extends State<ProgramScreen> {
       semana: semanas[_semanaIdx],
       sched: sched,
       presidente: _presidenteCtrl.text.trim(),
+      aux: _aux,
     );
   }
 
@@ -480,6 +500,20 @@ class _ProgramScreenState extends State<ProgramScreen> {
               ),
             ),
           ),
+          if (_semanas != null)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Switch(
+                  value: _aux,
+                  onChanged: (v) {
+                    _aux = v;
+                    _prepararSemana(); // recrea campos aux y re-render
+                  },
+                ),
+                const Text('Sala Auxiliar'),
+              ],
+            ),
         ],
       ),
     );
@@ -542,15 +576,9 @@ class _ProgramScreenState extends State<ProgramScreen> {
   }
 
   Widget _campoFila(ProgramRow f) {
-    final ctrls = _nameCtrls[f]!;
-    final esEstAyud = ctrls.length == 2 && !f.rol.contains('Conductor');
-    final maxLen = esEstAyud ? _maxEstAyud : _maxNombre;
-    // Etiquetas para los dos nombres según el rol.
-    final labels = ctrls.length == 2
-        ? (f.rol.contains('Conductor')
-            ? const ['Conductor', 'Lector']
-            : const ['Estudiante', 'Ayudante'])
-        : [f.rol.isNotEmpty ? f.rol.replaceAll(':', '') : 'Nombre'];
+    final prinCtrls = _nameCtrls[f]!;
+    final auxCtrls = _auxCtrls[f]; // null si no es elegible / aux apagado
+    final conSalas = _aux && auxCtrls != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -564,27 +592,57 @@ class _ProgramScreenState extends State<ProgramScreen> {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 3),
-          Row(
-            children: [
-              for (var i = 0; i < ctrls.length; i++) ...[
-                if (i > 0) const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: ctrls[i],
-                    maxLength: maxLen,
-                    decoration: InputDecoration(
-                      labelText: labels[i],
-                      isDense: true,
-                      border: const OutlineInputBorder(),
-                      counterText: '',
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+          if (conSalas) ...[
+            _grupoLabel('Auditorio principal'),
+            _grupoCampos(prinCtrls, f.rol),
+            const SizedBox(height: 6),
+            _grupoLabel('Sala Auxiliar'),
+            _grupoCampos(auxCtrls, f.rol),
+          ] else
+            _grupoCampos(prinCtrls, f.rol),
         ],
       ),
+    );
+  }
+
+  Widget _grupoLabel(String t) => Padding(
+        padding: const EdgeInsets.only(top: 2, bottom: 3),
+        child: Text(
+          t,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      );
+
+  Widget _grupoCampos(List<TextEditingController> ctrls, String rol) {
+    final esEstAyud = ctrls.length == 2 && !rol.contains('Conductor');
+    final maxLen = esEstAyud ? _maxEstAyud : _maxNombre;
+    final labels = ctrls.length == 2
+        ? (rol.contains('Conductor')
+            ? const ['Conductor', 'Lector']
+            : const ['Estudiante', 'Ayudante'])
+        : [rol.isNotEmpty ? rol.replaceAll(':', '') : 'Nombre'];
+    return Row(
+      children: [
+        for (var i = 0; i < ctrls.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: ctrls[i],
+              maxLength: maxLen,
+              decoration: InputDecoration(
+                labelText: labels[i],
+                isDense: true,
+                border: const OutlineInputBorder(),
+                counterText: '',
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

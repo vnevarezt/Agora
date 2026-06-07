@@ -35,49 +35,89 @@ Future<_Carlito> _carlito() async {
 }
 
 /// Anchos de columna calculados por documento (la celda X/contenido es implícita
-/// vía Expanded, así que solo necesitamos rol, nombre y banda).
+/// vía Expanded, así que solo necesitamos rol, aux, nombre y banda).
 class _Cols {
   final double rol;
   final double nomPrin;
+  final double anchoAux; // 0 cuando el modo Sala Auxiliar está apagado
   final double banda;
-  const _Cols({required this.rol, required this.nomPrin, required this.banda});
+  const _Cols({
+    required this.rol,
+    required this.nomPrin,
+    required this.anchoAux,
+    required this.banda,
+  });
 }
 
-/// Calcula los anchos de columna de forma adaptativa: si los nombres traen mucho
-/// texto, ensancha la columna de nombres tomando espacio de la de título (con un
-/// piso mínimo). Mide con la métrica real de Carlito. Si los nombres son cortos,
-/// devuelve exactamente los anchos por defecto (layout idéntico al de siempre).
-_Cols _calcularColumnas(ProgramSchedule sched, PdfFont regular) {
+/// Ancho que necesita la columna de nombres de una fila. Para Estudiante/Ayudante
+/// se usa el nombre individual más largo (se apila), para el resto el texto unido.
+double _anchoNombres(
+    String rol, List<String> nombres, double Function(String) medir) {
+  if (nombres.isEmpty) return 0;
+  if (rol == 'Estudiante/Ayudante:' && nombres.length == 2) {
+    final a = medir(nombres[0]);
+    final b = medir(nombres[1]);
+    return a > b ? a : b;
+  }
+  final joined =
+      nombres.length >= 2 ? '${nombres[0]} / ${nombres[1]}' : nombres[0];
+  return medir(joined);
+}
+
+/// Calcula los anchos de columna de forma adaptativa. En modo Sala Auxiliar
+/// reparte el espacio entre DOS columnas de nombres (aux + principal) dejando un
+/// piso para el título. Mide con la métrica real de Carlito.
+_Cols _calcularColumnas(ProgramSchedule sched, PdfFont regular, bool aux) {
   double medir(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
-  double maxNom = 0;
-  for (final f in [
+  final filas = [
     ...sched.apertura,
     ...sched.tesoros,
     ...sched.seamos,
     ...sched.vida,
-  ]) {
-    double w;
-    if (f.rol == 'Estudiante/Ayudante:' && f.nombres.length == 2) {
-      // Estos se APILAN si no caben, así que el ancho que importa es el del
-      // nombre individual más largo (no la pareja unida). Así no comprimen los
-      // títulos de más: si solo hay parejas largas, se apilan y los títulos
-      // vuelven a su ancho por defecto.
-      final a = medir(f.nombres[0]);
-      final b = medir(f.nombres[1]);
-      w = a > b ? a : b;
-    } else {
-      final t = f.nombreTexto;
-      if (t.isEmpty) continue;
-      w = medir(t);
+  ];
+  double maxPrin = 0, maxAux = 0;
+  for (final f in filas) {
+    final wp = _anchoNombres(f.rol, f.nombres, medir);
+    if (wp > maxPrin) maxPrin = wp;
+    if (aux) {
+      final wa = _anchoNombres(f.rol, f.nombresAux, medir);
+      if (wa > maxAux) maxAux = wa;
     }
-    if (w > maxNom) maxNom = w;
   }
   const rol = S140.anchoRol; // fijo (etiquetas de rol, no entrada del usuario)
-  final maxNomOK = S140.contentWidth - 2 * S140.colGap - rol - S140.minContenido;
-  final nomPrin =
-      (maxNom + S140.nomPad).clamp(S140.anchoNomPrin, maxNomOK).toDouble();
-  final contenido = S140.contentWidth - 2 * S140.colGap - rol - nomPrin;
-  return _Cols(rol: rol, nomPrin: nomPrin, banda: contenido + S140.colGap + rol);
+
+  if (!aux) {
+    final maxNomOK =
+        S140.contentWidth - 2 * S140.colGap - rol - S140.minContenido;
+    final nomPrin =
+        (maxPrin + S140.nomPad).clamp(S140.anchoNomPrin, maxNomOK).toDouble();
+    final contenido = S140.contentWidth - 2 * S140.colGap - rol - nomPrin;
+    return _Cols(
+        rol: rol,
+        nomPrin: nomPrin,
+        anchoAux: 0,
+        banda: contenido + S140.colGap + rol);
+  }
+
+  // --- Modo Sala Auxiliar: 4 columnas (X R A P), 3 huecos ---
+  final dispo =
+      S140.contentWidth - 3 * S140.colGap - rol - S140.minContenidoAux;
+  var nomPrin = maxPrin + S140.nomPad;
+  var nomAux = maxAux + S140.nomPad;
+  if (nomPrin < S140.minColAux) nomPrin = S140.minColAux;
+  if (nomAux < S140.minColAux) nomAux = S140.minColAux;
+  if (nomPrin + nomAux > dispo) {
+    final factor = dispo / (nomPrin + nomAux);
+    nomPrin = (nomPrin * factor).clamp(S140.minColAux, dispo).toDouble();
+    nomAux = (nomAux * factor).clamp(S140.minColAux, dispo).toDouble();
+  }
+  final contenido =
+      S140.contentWidth - 3 * S140.colGap - rol - nomPrin - nomAux;
+  return _Cols(
+      rol: rol,
+      nomPrin: nomPrin,
+      anchoAux: nomAux,
+      banda: contenido + S140.colGap + rol);
 }
 
 /// Genera el PDF del programa reproduciendo programa-vmc.tex (formato S-140-S)
@@ -87,6 +127,7 @@ Future<Uint8List> buildProgramPdf({
   required Week semana,
   required ProgramSchedule sched,
   String presidente = '',
+  bool aux = false,
 }) async {
   final carlito = await _carlito();
 
@@ -116,7 +157,7 @@ Future<Uint8List> buildProgramPdf({
         // Anchos adaptativos según el contenido real de los nombres (mide con
         // la métrica de Carlito; getFont necesita el Context del build).
         final reg = carlito.regular.getFont(ctx);
-        final cols = _calcularColumnas(sched, reg);
+        final cols = _calcularColumnas(sched, reg, aux);
         // Ancho de un texto a tamaño base, para decidir saltos de línea.
         double medir(String s) => reg.stringMetrics(s).advanceWidth * S140.base;
         return [
@@ -126,14 +167,17 @@ Future<Uint8List> buildProgramPdf({
           pw.SizedBox(height: 3), // \par\smallskip
           _lineaSemana(semana, presidente),
           pw.SizedBox(height: 8), // \addvspace{8pt}
-          _tabla(sched.apertura, cols, medir),
-          _banda(S140.tesoros, 'TESOROS DE LA BIBLIA', 'Auditorio principal', cols),
-          _tabla(sched.tesoros, cols, medir),
+          // Encabezado único de salas (solo en modo aux).
+          if (aux) ...[_encabezadoSalas(cols), pw.SizedBox(height: 2)],
+          _tabla(sched.apertura, cols, medir, aux),
+          _banda(S140.tesoros, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
+              cols, aux),
+          _tabla(sched.tesoros, cols, medir, aux),
           _banda(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
-              cols),
-          _tabla(sched.seamos, cols, medir),
-          _banda(S140.vida, 'NUESTRA VIDA CRISTIANA', '', cols),
-          _tabla(sched.vida, cols, medir),
+              cols, aux),
+          _tabla(sched.seamos, cols, medir, aux),
+          _banda(S140.vida, 'NUESTRA VIDA CRISTIANA', '', cols, aux),
+          _tabla(sched.vida, cols, medir, aux),
           pw.SizedBox(height: 4), // \addvspace{4pt}
           _reglafg(),
         ];
@@ -218,8 +262,29 @@ pw.Widget _lineaSemana(Week s, String presidente) {
   );
 }
 
-// ---- Banda de sección (tex:135-145, modo no-aux) ----
-pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt, _Cols cols) {
+// ---- Encabezado único de salas (tex:150-155, solo modo aux) ----
+pw.Widget _encabezadoSalas(_Cols cols) {
+  final st = pw.TextStyle(
+    fontSize: S140.footnote,
+    fontWeight: pw.FontWeight.bold,
+    color: S140.rotulo,
+  );
+  return pw.Row(
+    children: [
+      pw.Expanded(child: pw.SizedBox()), // zona título + rol
+      pw.SizedBox(width: S140.colGap),
+      pw.SizedBox(width: cols.anchoAux, child: pw.Text('Sala Auxiliar', style: st)),
+      pw.SizedBox(width: S140.colGap),
+      pw.SizedBox(
+          width: cols.nomPrin,
+          child: pw.Text('Auditorio principal', style: st)),
+    ],
+  );
+}
+
+// ---- Banda de sección (tex:135-145) ----
+pw.Widget _banda(
+    PdfColor color, String titulo, String rotuloTxt, _Cols cols, bool aux) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -243,7 +308,8 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt, _Cols cols) {
             ),
           ),
           pw.Spacer(), // \hfill
-          if (rotuloTxt.isNotEmpty)
+          // En modo aux el rótulo va una sola vez en el encabezado de salas.
+          if (!aux && rotuloTxt.isNotEmpty)
             pw.Padding(
               padding: const pw.EdgeInsets.only(bottom: 2), // \raisebox{2pt}
               child: pw.Text(
@@ -262,16 +328,47 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt, _Cols cols) {
   );
 }
 
-// ---- Tabla de filas (tabularx @{}X R P@{}) ----
-pw.Widget _tabla(
-    List<ProgramRow> filas, _Cols cols, double Function(String) medir) {
+// ---- Tabla de filas (tabularx @{}X R P@{} o @{}X R A P@{} en aux) ----
+pw.Widget _tabla(List<ProgramRow> filas, _Cols cols,
+    double Function(String) medir, bool aux) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [for (final f in filas) _fila(f, cols, medir)],
+    children: [for (final f in filas) _fila(f, cols, medir, aux)],
   );
 }
 
-pw.Widget _fila(ProgramRow r, _Cols cols, double Function(String) medir) {
+// Celda de nombres (Principal o Sala Auxiliar). Regla Seamos: si la pareja
+// Estudiante/Ayudante no cabe en una línea, se apila SIEMPRE: línea 1 Ayudante,
+// línea 2 Estudiante. Devuelve el widget y si quedó apilada (2 líneas).
+({pw.Widget widget, bool apilado}) _celdaNombres(
+    String rol, List<String> nombres, double ancho,
+    double Function(String) medir, pw.TextStyle style) {
+  final joined = nombres.isEmpty
+      ? ''
+      : (nombres.length >= 2 ? '${nombres[0]} / ${nombres[1]}' : nombres[0]);
+  final esEstAyud = rol == 'Estudiante/Ayudante:' && nombres.length == 2;
+  if (esEstAyud && medir(joined) > ancho) {
+    return (
+      widget: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        children: [
+          pw.Text(nombres[1],
+              textAlign: pw.TextAlign.right, style: style), // Ayudante
+          pw.Text(nombres[0],
+              textAlign: pw.TextAlign.right, style: style), // Estudiante
+        ],
+      ),
+      apilado: true,
+    );
+  }
+  return (
+    widget: pw.Text(joined, textAlign: pw.TextAlign.right, style: style),
+    apilado: false,
+  );
+}
+
+pw.Widget _fila(
+    ProgramRow r, _Cols cols, double Function(String) medir, bool aux) {
   final horaStyle = pw.TextStyle(
     fontSize: S140.small,
     fontWeight: pw.FontWeight.bold,
@@ -284,23 +381,12 @@ pw.Widget _fila(ProgramRow r, _Cols cols, double Function(String) medir) {
   );
   final nombreStyle = pw.TextStyle(fontSize: S140.base);
 
-  // Regla Seamos: Estudiante/Ayudante se apila (línea 1 Ayudante, línea 2
-  // Estudiante) solo si no cabe en una línea.
-  final esEstAyud = r.rol == 'Estudiante/Ayudante:' && r.nombres.length == 2;
-  final apilado = esEstAyud && medir(r.nombreTexto) > cols.nomPrin;
-
-  final pw.Widget nombreWidget = apilado
-      ? pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Text(r.nombres[1],
-                textAlign: pw.TextAlign.right, style: nombreStyle), // Ayudante
-            pw.Text(r.nombres[0],
-                textAlign: pw.TextAlign.right, style: nombreStyle), // Estudiante
-          ],
-        )
-      : pw.Text(r.nombreTexto,
-          textAlign: pw.TextAlign.right, style: nombreStyle);
+  final prin = _celdaNombres(r.rol, r.nombres, cols.nomPrin, medir, nombreStyle);
+  final auxCell = aux
+      ? _celdaNombres(r.rol, r.nombresAux, cols.anchoAux, medir, nombreStyle)
+      : null;
+  // El título se centra verticalmente si cualquiera de las columnas se apila.
+  final apilado = prin.apilado || (auxCell?.apilado ?? false);
 
   // Celda X: hora en caja fija + título con sangría francesa (Expanded).
   final celdaX = pw.Row(
@@ -352,8 +438,12 @@ pw.Widget _fila(ProgramRow r, _Cols cols, double Function(String) medir) {
           width: cols.rol,
           child: pw.Text(r.rol, textAlign: pw.TextAlign.right, style: rolStyle),
         ),
+        if (aux) ...[
+          pw.SizedBox(width: S140.colGap),
+          pw.SizedBox(width: cols.anchoAux, child: auxCell!.widget),
+        ],
         pw.SizedBox(width: S140.colGap),
-        pw.SizedBox(width: cols.nomPrin, child: nombreWidget),
+        pw.SizedBox(width: cols.nomPrin, child: prin.widget),
       ],
     ),
   );

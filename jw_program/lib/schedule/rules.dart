@@ -62,29 +62,43 @@ class ProgramRow {
   /// Marcada como auxiliar-elegible (informativo; no afecta el render no-aux).
   final bool auxElegible;
 
-  /// Nombres editables de los participantes. Su longitud = nº de campos
-  /// (0 = sin asignación, p. ej. intro/conclusión/canción sin oración;
-  /// 1 = un nombre; 2 = pareja, mostrados unidos por " / ").
+  /// Nombres editables de los participantes (Auditorio Principal). Su longitud =
+  /// nº de campos (0 = sin asignación, p. ej. intro/conclusión/canción sin
+  /// oración; 1 = un nombre; 2 = pareja, mostrados unidos por " / ").
   final List<String> nombres;
+
+  /// Nombres de la Sala Auxiliar (solo filas auxiliar-elegibles; vacío en las
+  /// demás). Misma cardinalidad que `nombres` cuando aplica.
+  final List<String> nombresAux;
 
   ProgramRow({
     required this.hora,
     required this.contenido,
     this.rol = '',
     int slots = 1,
+    int auxSlots = 0,
     this.vineta = false,
     this.auxElegible = false,
-  }) : nombres = List<String>.filled(slots, '');
+  })  : nombres = List<String>.filled(slots, ''),
+        nombresAux = List<String>.filled(auxSlots, '');
 
-  /// Nº de campos de nombre de esta fila.
+  /// Nº de campos de nombre de esta fila (Auditorio Principal).
   int get slots => nombres.length;
 
-  /// Cadena de nombres para el PDF: 2 campos -> "a / b", 1 -> "a", 0 -> "".
-  String get nombreTexto {
-    if (slots == 0) return '';
-    if (slots >= 2) return '${nombres[0]} / ${nombres[1]}';
-    return nombres[0];
+  /// Nº de campos de nombre en Sala Auxiliar.
+  int get auxSlots => nombresAux.length;
+
+  static String _texto(List<String> n) {
+    if (n.isEmpty) return '';
+    if (n.length >= 2) return '${n[0]} / ${n[1]}';
+    return n[0];
   }
+
+  /// Cadena de nombres (Principal): 2 campos -> "a / b", 1 -> "a", 0 -> "".
+  String get nombreTexto => _texto(nombres);
+
+  /// Cadena de nombres (Sala Auxiliar).
+  String get nombreAuxTexto => _texto(nombresAux);
 }
 
 /// Filas calculadas por bloque + duración real de la reunión.
@@ -109,12 +123,14 @@ ProgramRow _fila(Seccion seccion, int t, Part p) {
   final rn = rolYNombres(seccion, p.titulo);
   final mins = p.min ?? 0;
   final cont = mins > 0 ? '${p.titulo} ($mins mins.)' : p.titulo;
+  final elegible = esAuxElegible(seccion, p.titulo);
   return ProgramRow(
     hora: hhmm(t),
     contenido: cont,
     rol: rn.rol,
     slots: rn.n,
-    auxElegible: esAuxElegible(seccion, p.titulo),
+    auxSlots: elegible ? rn.n : 0, // misma cardinalidad que el principal
+    auxElegible: elegible,
   );
 }
 

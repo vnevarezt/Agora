@@ -61,7 +61,8 @@ Week _semana() => Week(
       ],
     );
 
-Future<void> _dump(String nombreArchivo, List<String> nombres) async {
+Future<void> _dump(String nombreArchivo, List<String> nombres,
+    {bool aux = false}) async {
   final s = _semana();
   final sched = construirFilas(s, 18 * 60, 105);
   var k = 0;
@@ -76,10 +77,17 @@ Future<void> _dump(String nombreArchivo, List<String> nombres) async {
       // en el ancho por defecto -> los títulos deben volver a su ancho default.
       f.nombres[0] = 'Maximiliano Vargas H'; // Estudiante
       f.nombres[1] = 'Concepción Navarro'; // Ayudante
+      if (f.auxSlots == 2) {
+        f.nombresAux[0] = 'Ernesto Salas R'; // Estudiante aux
+        f.nombresAux[1] = 'Pablo Treviño'; // Ayudante aux
+      }
       continue;
     }
     for (var i = 0; i < f.slots; i++) {
       f.nombres[i] = nombres[k++ % nombres.length];
+    }
+    for (var i = 0; i < f.auxSlots; i++) {
+      f.nombresAux[i] = 'Aux ${nombres[k++ % nombres.length]}';
     }
   }
   final pdf = await buildProgramPdf(
@@ -87,6 +95,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres) async {
     semana: s,
     sched: sched,
     presidente: 'Rafael G',
+    aux: aux,
   );
   final doc = await PdfDocument.openData(pdf);
   final page = doc.pages.first;
@@ -126,5 +135,8 @@ void main() {
     // Caso largo: solo las parejas Estudiante/Ayudante son largas (se apilan);
     // el resto es corto, así los títulos deben quedar a ancho ~default.
     await _dump('jw_largo.png', ['Rafael González', 'Luis Vargas', 'José M']);
+    // Caso Sala Auxiliar: 4 columnas, encabezado de salas, nombres en ambas.
+    await _dump('jw_aux.png', ['Rafael González', 'Luis Vargas', 'José M'],
+        aux: true);
   });
 }

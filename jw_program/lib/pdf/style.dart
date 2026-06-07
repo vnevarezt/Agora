@@ -49,6 +49,13 @@ class S140 {
   /// adaptativa (los títulos siguen legibles, envolviendo ≤ ~3 líneas).
   static const double minContenido = 0.40 * contentWidth;
 
+  /// Piso del título en modo Sala Auxiliar (4 columnas): el título puede ceder
+  /// algo más para dejar sitio a las dos columnas de nombres.
+  static const double minContenidoAux = 0.34 * contentWidth;
+
+  /// Ancho mínimo de cada columna de nombres en modo Sala Auxiliar.
+  static const double minColAux = 60;
+
   /// Holgura que se suma al ancho medido del nombre más largo.
   static const double nomPad = 6;
 
