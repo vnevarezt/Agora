@@ -2,9 +2,10 @@
 // válido (sin red ni GUI).
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jw_program/domain/schedule_rules.dart';
+import 'package:jw_program/models/program_row.dart';
 import 'package:jw_program/models/week.dart';
-import 'package:jw_program/pdf/program_pdf.dart';
-import 'package:jw_program/schedule/rules.dart';
+import 'package:jw_program/pdf/program_document.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +15,6 @@ void main() {
       fecha: '18-24 DE MAYO',
       lectura: 'ISAÍAS 62-64',
       cancionInicial: '44',
-      cancionMedia: '115',
-      cancionFinal: '151',
       partes: const [
         Part(seccion: Seccion.tesoros, num: 1, titulo: 'El Alfarero', min: 10),
         Part(
@@ -36,14 +35,17 @@ void main() {
       ],
     );
     final sched = construirFilas(semana, 18 * 60, 105);
+    // Nombres por id de fila (la primera de Tesoros lleva uno de ejemplo).
+    final asg = Asignaciones({sched.tesoros.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
       cong: 'CONSTITUCIÓN J.A CASTRO',
       semana: semana,
       sched: sched,
+      asignaciones: asg,
+      presidente: 'Rafael G',
     );
 
     expect(bytes.length, greaterThan(1000));
-    // Cabecera de un PDF: "%PDF".
     expect(String.fromCharCodes(bytes.sublist(0, 4)), '%PDF');
   });
 }
