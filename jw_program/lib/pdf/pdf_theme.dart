@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 /// Constantes de maquetación tomadas EXACTAMENTE de programa-vmc.tex.
 /// (Formato oficial S-140-S.) 1 cm = 28.3465 pt; 1 in = 72 pt.
@@ -41,16 +43,13 @@ class S140 {
       contentWidth - 2 * colGap - anchoRol - anchoNomPrin;
 
   /// Ancho de la banda de color: llega hasta el BORDE DERECHO de las etiquetas
-  /// de rol (Estudiante/Ayudante) = fin de la columna de contenido + hueco +
-  /// columna de rol.
+  /// de rol (Estudiante/Ayudante).
   static const double anchoBanda = anchoContenido + colGap + anchoRol;
 
-  /// Piso del ancho de la columna de título cuando la de nombres crece de forma
-  /// adaptativa (los títulos siguen legibles, envolviendo ≤ ~3 líneas).
+  /// Piso del título cuando la columna de nombres crece de forma adaptativa.
   static const double minContenido = 0.40 * contentWidth;
 
-  /// Piso del título en modo Sala Auxiliar (4 columnas): el título puede ceder
-  /// algo más para dejar sitio a las dos columnas de nombres.
+  /// Piso del título en modo Sala Auxiliar (4 columnas).
   static const double minContenidoAux = 0.34 * contentWidth;
 
   /// Ancho mínimo de cada columna de nombres en modo Sala Auxiliar.
@@ -66,4 +65,31 @@ class S140 {
   static final PdfColor rotulo = PdfColor.fromHex('575A5D'); // gris (rótulos)
   static final PdfColor linea = PdfColor.fromHex('A6A6A6'); // gris claro
   static final PdfColor blanco = PdfColor.fromHex('FFFFFF');
+}
+
+/// Tema + fuentes Carlito del documento. `regular` se usa además para MEDIR el
+/// ancho de los nombres (anchos adaptativos).
+typedef Carlito = ({pw.ThemeData theme, pw.Font regular, pw.Font bold});
+
+Carlito? _cache;
+
+/// Carga (una sola vez) Carlito — clon libre de Calibri (tex:17-22). Cachear es
+/// imprescindible: recargar ~2.7 MB en cada pulsación rompería el live preview.
+Future<Carlito> carlitoFonts() async {
+  if (_cache != null) return _cache!;
+  final regular =
+      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Regular.ttf'));
+  final bold =
+      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Bold.ttf'));
+  final italic =
+      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Italic.ttf'));
+  final boldItalic =
+      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-BoldItalic.ttf'));
+  final theme = pw.ThemeData.withFont(
+    base: regular,
+    bold: bold,
+    italic: italic,
+    boldItalic: boldItalic,
+  );
+  return _cache = (theme: theme, regular: regular, bold: bold);
 }
