@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
-import '../widgets/app_button.dart';
+import 'app_button.dart';
 
 /// Pill de filtro (`.chip`): alterna activo/inactivo. Opcionalmente con un
 /// punto de color a la izquierda (congregación) y un contador a la derecha.

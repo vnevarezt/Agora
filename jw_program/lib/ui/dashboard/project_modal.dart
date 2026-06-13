@@ -9,59 +9,17 @@ import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
+import '../widgets/danger_button.dart';
 import '../widgets/labeled_field.dart';
 
-const _scrim = Color(0x52000000);
-
-/// Abre el modal de creación/edición de proyecto: diálogo centrado en
-/// escritorio/tablet y bottom sheet en móvil. [proyecto] null = alta nueva.
+/// Abre el modal de creación/edición de proyecto. [proyecto] null = alta nueva.
 Future<void> mostrarProyectoModal(BuildContext context, {Proyecto? proyecto}) {
-  if (context.isMobile) {
-    final t = context.tokens;
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: t.surface,
-      barrierColor: _scrim,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(Dimens.rSheet)),
-      ),
-      builder: (sheetContext) => Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.9),
-          child: ProjectModal(
-            original: proyecto,
-            sheet: true,
-            onClose: () => Navigator.of(sheetContext).pop(),
-          ),
-        ),
-      ),
-    );
-  }
-  return showDialog<void>(
-    context: context,
-    barrierColor: _scrim,
-    builder: (dialogContext) => Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      insetPadding: const EdgeInsets.all(24),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 520,
-          maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.9,
-        ),
-        child: ProjectModal(
-          original: proyecto,
-          sheet: false,
-          onClose: () => Navigator.of(dialogContext).pop(),
-        ),
-      ),
-    ),
+  return showAppModal<void>(
+    context,
+    builder: (ctx, sheet, close) =>
+        ProjectModal(original: proyecto, sheet: sheet, onClose: close),
   );
 }
 
@@ -382,7 +340,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                 ),
                 if (!_esNuevo) ...[
                   const SizedBox(width: 8),
-                  _DangerButton(onTap: _eliminar),
+                  DangerButton(onTap: _eliminar),
                 ],
               ],
             ),
@@ -390,7 +348,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         : [
             Row(
               children: [
-                if (!_esNuevo) _DangerButton(onTap: _eliminar),
+                if (!_esNuevo) DangerButton(onTap: _eliminar),
                 const Spacer(),
                 AppButton(
                   variant: AppButtonVariant.ghost,
@@ -421,39 +379,6 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
-      ),
-    );
-  }
-}
-
-/// Botón "Eliminar" en color de error (no hay variante danger en `AppButton`).
-class _DangerButton extends StatelessWidget {
-  const _DangerButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final err = Theme.of(context).colorScheme.error;
-    return Pressable(
-      onTap: onTap,
-      builder: (context, hovered, _) => AnimatedContainer(
-        duration: Dimens.dFast,
-        height: Dimens.hControl,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: hovered ? err.withValues(alpha: 0.10) : Colors.transparent,
-          borderRadius: BorderRadius.circular(Dimens.rControl),
-        ),
-        child: Text(
-          'Eliminar',
-          style: TextStyle(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w700,
-            color: err,
-          ),
-        ),
       ),
     );
   }

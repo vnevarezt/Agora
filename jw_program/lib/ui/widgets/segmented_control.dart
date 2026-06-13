@@ -4,7 +4,7 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 
-typedef Segment = ({IconData icon, String label});
+typedef Segment = ({IconData? icon, String label});
 
 /// Control segmentado (`.seg`): pestañas Asignar/Vista previa en móvil y el
 /// chip estático de la barra de la vista previa ([onChanged] nulo).
@@ -74,9 +74,11 @@ class SegmentedTabs extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(segments[i].icon,
-                  size: 15, color: activo ? t.text : t.textDim),
-              const SizedBox(width: 6),
+              if (segments[i].icon != null) ...[
+                Icon(segments[i].icon,
+                    size: 15, color: activo ? t.text : t.textDim),
+                const SizedBox(width: 6),
+              ],
               Text(
                 segments[i].label,
                 style: TextStyle(

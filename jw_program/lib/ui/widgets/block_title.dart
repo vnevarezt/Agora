@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
-import '../widgets/app_button.dart';
+import 'app_button.dart';
 
 /// Título de bloque del dashboard (`.block-title`): título uppercase, contador
 /// "· N" y un enlace opcional alineado a la derecha ("Ver todo").
