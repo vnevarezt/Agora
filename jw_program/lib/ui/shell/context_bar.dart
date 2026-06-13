@@ -43,6 +43,16 @@ class ContextBar extends ConsumerWidget {
                 horizontal: isMobile ? 14 : 18, vertical: isMobile ? 8 : 10),
             child: Row(
               children: [
+                // Cuando el editor se abre desde el dashboard, ofrecer volver.
+                if (Navigator.of(context).canPop()) ...[
+                  AppIconButton(
+                    icon: Icons.arrow_back,
+                    bordered: true,
+                    tooltip: 'Volver',
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 // En tablet la marca y el anillo van compactos para dejar
                 // sitio a los chips (el mock los recorta por overflow).
                 _Brand(compact: size != ScreenSize.desktop),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'state/ui_state.dart';
-import 'ui/shell/program_shell.dart';
+import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/tokens.dart';
 
@@ -17,7 +17,7 @@ class JwProgramApp extends ConsumerWidget {
       theme: buildAppTheme(pizarra.light, Brightness.light),
       darkTheme: buildAppTheme(pizarra.dark, Brightness.dark),
       themeMode: ref.watch(themeModeProvider),
-      home: const ProgramShell(),
+      home: const AppShell(),
     );
   }
 }

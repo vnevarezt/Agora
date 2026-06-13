@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-enum _ChipKind { time, allMeeting, duration, tag, aux }
+enum _ChipKind { time, allMeeting, duration, tag, aux, week }
 
 /// Chip pequeño del rediseño. Un único widget con presets que replican
 /// `.time-badge`, `.time-badge--all`, `.dur-chip`, `.fixed-line__tag` y
@@ -27,6 +27,9 @@ class MiniChip extends StatelessWidget {
   /// Indicador de sala auxiliar (pill accent con icono de edificio).
   const MiniChip.aux(this.texto, {super.key}) : _kind = _ChipKind.aux;
 
+  /// Pill de semana del dashboard ("4–10 MAY"): neutra, con cifras tabulares.
+  const MiniChip.week(this.texto, {super.key}) : _kind = _ChipKind.week;
+
   final String texto;
   final _ChipKind _kind;
 
@@ -41,6 +44,7 @@ class MiniChip extends StatelessWidget {
       _ChipKind.duration => (t.surface2, t.border2, t.textMute, 6.0),
       _ChipKind.tag => (t.surface2, t.border2, t.textMute, Dimens.rPill),
       _ChipKind.aux => (t.accentSoft, null, t.accentStrong, Dimens.rPill),
+      _ChipKind.week => (t.surface2, t.border2, t.textDim, 6.0),
     };
 
     final estilo = switch (_kind) {
@@ -52,12 +56,19 @@ class MiniChip extends StatelessWidget {
         TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
       _ChipKind.aux =>
         TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: fg),
+      _ChipKind.week => TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          color: fg,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
     };
 
     final padding = switch (_kind) {
       _ChipKind.duration => const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
       _ChipKind.tag || _ChipKind.aux =>
         const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+      _ChipKind.week => const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       _ => const EdgeInsets.symmetric(horizontal: 9, vertical: 2.5),
     };
 
