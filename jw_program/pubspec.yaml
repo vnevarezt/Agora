@@ -41,10 +41,28 @@ dependencies:
   html: ^0.15.6
   path_provider: ^2.1.5
   flutter_riverpod: ^3.3.1
+  # BD local de hermanos (cifrada con SQLite3MultipleCiphers, ver `hooks`).
+  drift: ^2.34.0
+  sqlite3: ^3.3.0
+  flutter_secure_storage: ^10.0.0
+  # Export .jwpp: AES-256-GCM + PBKDF2 + SHA-256 (puro Dart, isolate-friendly).
+  cryptography: ^2.9.0
+  file_selector: ^1.0.3
+  share_plus: ^11.0.0
+  uuid: ^4.5.1
+
+# Selecciona la variante cifrada de sqlite3 (SQLite3MultipleCiphers) que
+# compila el hook nativo de package:sqlite3. PRAGMA key como en SQLCipher.
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  drift_dev: ^2.34.0
+  build_runner: ^2.6.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
