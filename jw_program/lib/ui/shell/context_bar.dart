@@ -9,7 +9,7 @@ import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
-import '../personas/personas_screen.dart';
+import '../personas/hermanos_view.dart';
 import '../widgets/app_button.dart';
 import '../widgets/export_button.dart';
 import '../widgets/progress_ring.dart';
@@ -79,7 +79,10 @@ class ContextBar extends ConsumerWidget {
                   tooltip: 'Hermanos',
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                        builder: (_) => const PersonasScreen()),
+                      builder: (_) => const Scaffold(
+                        body: SafeArea(child: HermanosView()),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

@@ -22,6 +22,13 @@ extension PrivilegioX on Privilegio {
         Privilegio.siervoMinisterial => 'Siervo ministerial',
         Privilegio.publicador => 'Publicador',
       };
+
+  /// Plural para los chips de filtro de la pantalla de hermanos.
+  String get plural => switch (this) {
+        Privilegio.anciano => 'Ancianos',
+        Privilegio.siervoMinisterial => 'Siervos ministeriales',
+        Privilegio.publicador => 'Publicadores',
+      };
 }
 
 class Hermano {
