@@ -5,6 +5,19 @@ import 'assignment_ops.dart';
 
 /// Estado efímero de la UI (no afecta al PDF ni al formulario).
 
+/// Sección activa del shell (barra lateral): dashboard, hermanos o config.
+enum AppSeccion { inicio, hermanos, config }
+
+final appSeccionProvider =
+    NotifierProvider<AppSeccionController, AppSeccion>(AppSeccionController.new);
+
+class AppSeccionController extends Notifier<AppSeccion> {
+  @override
+  AppSeccion build() => AppSeccion.inicio;
+
+  void seleccionar(AppSeccion seccion) => state = seccion;
+}
+
 /// Modo claro/oscuro, alternado desde la barra de contexto. Solo en memoria.
 final themeModeProvider =
     NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
