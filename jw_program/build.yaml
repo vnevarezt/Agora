@@ -1,0 +1,9 @@
+# Opciones de codegen de drift.
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Fechas como texto ISO-8601 en la BD (legible en exports/debug y
+          # estable para la fusión de imports).
+          store_date_time_values_as_text: true
