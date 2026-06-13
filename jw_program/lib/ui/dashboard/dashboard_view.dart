@@ -11,6 +11,7 @@ import 'block_title.dart';
 import 'filter_pill.dart';
 import 'new_project_card.dart';
 import 'project_card.dart';
+import 'project_modal.dart';
 import 'reminder_card.dart';
 
 /// Vista de Inicio (`HomeView` del mock): saludo, filtros, cuadrícula de
@@ -106,7 +107,7 @@ class _Topbar extends ConsumerWidget {
         AppButton(
           icon: Icons.add,
           label: isMobile ? null : 'Nuevo proyecto',
-          onPressed: () {}, // modal diferido a una fase posterior
+          onPressed: () => mostrarProyectoModal(context),
         ),
       ],
     );
@@ -216,7 +217,9 @@ class _ProyectosSection extends ConsumerWidget {
               children: [
                 SizedBox(
                   width: colW,
-                  child: NewProjectCard(onTap: () {}),
+                  child: NewProjectCard(
+                    onTap: () => mostrarProyectoModal(context),
+                  ),
                 ),
                 for (final p in proyectos)
                   SizedBox(
@@ -228,6 +231,7 @@ class _ProyectosSection extends ConsumerWidget {
                         MaterialPageRoute<void>(
                             builder: (_) => const ProgramShell()),
                       ),
+                      onEdit: () => mostrarProyectoModal(context, proyecto: p),
                     ),
                   ),
               ],
