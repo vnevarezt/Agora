@@ -1,8 +1,10 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/assignment_ops.dart';
-import '../../state/people_provider.dart';
+import '../../state/hermanos_provider.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
 import '../responsive.dart';
@@ -32,7 +34,8 @@ class SlotField extends ConsumerWidget {
       switch (resultado) {
         case PickNombre(:final nombre):
           escribirAsignacion(ref, spec.ref, nombre);
-          ref.read(peopleProvider.notifier).registrarUso(nombre);
+          // Fire-and-forget: el directorio se actualiza solo (stream).
+          unawaited(ref.read(hermanosAccionesProvider).registrarUso(nombre));
         case PickQuitar():
           escribirAsignacion(ref, spec.ref, '');
         case null:

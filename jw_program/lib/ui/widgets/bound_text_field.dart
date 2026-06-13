@@ -11,6 +11,7 @@ class BoundTextField extends StatefulWidget {
     this.hint,
     this.style,
     this.maxLength,
+    this.maxLines = 1,
     this.keyboardType,
     this.onSubmitted,
     this.dense = false,
@@ -25,6 +26,7 @@ class BoundTextField extends StatefulWidget {
   final String? hint;
   final TextStyle? style;
   final int? maxLength;
+  final int maxLines;
   final TextInputType? keyboardType;
   final ValueChanged<String>? onSubmitted;
   final bool dense;
@@ -47,6 +49,7 @@ class _BoundTextFieldState extends State<BoundTextField> {
     return TextField(
       controller: _controller,
       maxLength: widget.maxLength,
+      maxLines: widget.maxLines,
       keyboardType: widget.keyboardType,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,

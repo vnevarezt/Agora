@@ -74,11 +74,9 @@ class AppDropdown<T> extends StatelessWidget {
               child: Text(itemLabel(item), overflow: TextOverflow.ellipsis),
             ),
         ],
-        onChanged: onChanged == null
-            ? null
-            : (v) {
-                if (v != null) onChanged!(v);
-              },
+        // Pasa el valor tal cual: con T nullable, null es una opción válida
+        // (p. ej. el filtro "Todos" de la pantalla de personas).
+        onChanged: onChanged == null ? null : (v) => onChanged!(v as T),
       ),
     );
   }

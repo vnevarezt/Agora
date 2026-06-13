@@ -9,6 +9,7 @@ import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../personas/personas_screen.dart';
 import '../widgets/app_button.dart';
 import '../widgets/export_button.dart';
 import '../widgets/progress_ring.dart';
@@ -62,6 +63,16 @@ class ContextBar extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(width: 14),
+                AppIconButton(
+                  icon: Icons.people_outline,
+                  bordered: true,
+                  tooltip: 'Hermanos',
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                        builder: (_) => const PersonasScreen()),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 AppIconButton(
                   icon: esOscuro
                       ? Icons.light_mode_outlined

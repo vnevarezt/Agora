@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../state/people_provider.dart';
+import '../../models/hermano.dart';
+import '../../state/hermanos_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -43,17 +44,15 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final people = ref.watch(peopleProvider);
+    final activos = ref.watch(hermanosActivosProvider);
 
-    final filtrados = people.nombres
-        .where((n) => n.toLowerCase().contains(_busqueda.toLowerCase()))
+    final clave = normalizarNombre(_busqueda);
+    final filtrados = activos
+        .where((h) => normalizarNombre(h.nombre).contains(clave))
         .toList();
     final recientes = _busqueda.isEmpty
-        ? people.recientes
-            .where((n) => people.nombres.contains(n))
-            .take(4)
-            .toList()
-        : const <String>[];
+        ? ref.watch(recientesProvider).take(4).toList()
+        : const <Hermano>[];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -87,20 +86,10 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                 ),
               if (recientes.isNotEmpty) ...[
                 _grupo(t, 'Recientes'),
-                for (final n in recientes)
-                  _PersonRow(
-                    nombre: n,
-                    selected: n == widget.actual,
-                    onTap: () => _devolver(PickNombre(n)),
-                  ),
+                for (final h in recientes) _fila(h),
                 _grupo(t, 'Todos'),
               ],
-              for (final n in filtrados)
-                _PersonRow(
-                  nombre: n,
-                  selected: n == widget.actual,
-                  onTap: () => _devolver(PickNombre(n)),
-                ),
+              for (final h in filtrados) _fila(h),
               if (filtrados.isEmpty && _busqueda.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -120,6 +109,16 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
         ),
         _pie(t),
       ],
+    );
+  }
+
+  /// Fila de un hermano: privilegio como etiqueta (solo anciano/siervo).
+  Widget _fila(Hermano h) {
+    return _PersonRow(
+      nombre: h.nombre,
+      tag: h.privilegio == Privilegio.publicador ? null : h.privilegio.etiqueta,
+      selected: h.nombre == widget.actual,
+      onTap: () => _devolver(PickNombre(h.nombre)),
     );
   }
 
@@ -215,6 +214,7 @@ class _PersonRow extends StatelessWidget {
   const _PersonRow({
     required this.nombre,
     required this.onTap,
+    this.tag,
     this.selected = false,
     this.avatarVacio = false,
     this.muted = false,
@@ -222,6 +222,7 @@ class _PersonRow extends StatelessWidget {
 
   final String nombre;
   final VoidCallback onTap;
+  final String? tag;
   final bool selected;
   final bool avatarVacio;
   final bool muted;
@@ -259,8 +260,21 @@ class _PersonRow extends StatelessWidget {
                   ),
                 ),
               ),
-              if (selected && !avatarVacio)
+              if (tag != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  tag!,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: t.textMute,
+                  ),
+                ),
+              ],
+              if (selected && !avatarVacio) ...[
+                const SizedBox(width: 8),
                 Icon(Icons.check, size: 18, color: t.accent),
+              ],
             ],
           ),
         );
