@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../data/dashboard_sample.dart';
 import '../models/congregacion.dart';
+import '../models/cuaderno.dart';
 import '../models/proyecto.dart';
 import '../models/recordatorio.dart';
 
@@ -14,11 +16,67 @@ final usuarioProvider = Provider((ref) => usuarioEjemplo);
 final congregacionesDashProvider =
     Provider<List<Congregacion>>((ref) => congregacionesEjemplo);
 
-final proyectosProvider =
-    Provider<List<Proyecto>>((ref) => proyectosEjemplo);
+final cuadernosProvider =
+    Provider<List<Cuaderno>>((ref) => cuadernosEjemplo);
 
 final recordatoriosProvider =
     Provider<List<Recordatorio>>((ref) => recordatoriosEjemplo);
+
+/// Lista de proyectos editable en memoria. El modal de proyectos crea, edita y
+/// elimina aquí; la persistencia llega en una fase posterior.
+class ProyectosController extends Notifier<List<Proyecto>> {
+  @override
+  List<Proyecto> build() => proyectosEjemplo;
+
+  /// 14 partes asignables por semana (réplica del cálculo del mock).
+  static int _total(int semanas) => semanas * 14;
+
+  void crear({
+    required String nombre,
+    required String congregacionId,
+    required List<String> semanas,
+  }) {
+    final nuevo = Proyecto(
+      id: const Uuid().v4(),
+      nombre: nombre,
+      congregacionId: congregacionId,
+      semanas: semanas,
+      done: 0,
+      total: _total(semanas.length),
+      estado: EstadoProyecto.borrador,
+      editado: 'ahora mismo',
+    );
+    state = [nuevo, ...state];
+  }
+
+  void actualizar(
+    String id, {
+    required String nombre,
+    required String congregacionId,
+    required List<String> semanas,
+  }) {
+    state = [
+      for (final p in state)
+        if (p.id == id)
+          p.copyWith(
+            nombre: nombre,
+            congregacionId: congregacionId,
+            semanas: semanas,
+            total: _total(semanas.length),
+            editado: 'ahora mismo',
+          )
+        else
+          p,
+    ];
+  }
+
+  void eliminar(String id) =>
+      state = [for (final p in state) if (p.id != id) p];
+}
+
+final proyectosProvider =
+    NotifierProvider<ProyectosController, List<Proyecto>>(
+        ProyectosController.new);
 
 /// Filtros activos: congregación (`'all'` = todas) y estado (`null` = todos).
 class DashFiltros {
