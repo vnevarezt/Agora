@@ -1,6 +1,7 @@
 import 'package:flutter/painting.dart';
 
 import '../models/congregacion.dart';
+import '../models/cuaderno.dart';
 import '../models/proyecto.dart';
 import '../models/recordatorio.dart';
 
@@ -130,5 +131,37 @@ const recordatoriosEjemplo = <Recordatorio>[
     titulo: 'Nuevo cuaderno disponible: Julio–Agosto',
     meta: 'jw.org · hace 2 días',
     cta: 'Descargar',
+  ),
+];
+
+const cuadernosEjemplo = <Cuaderno>[
+  Cuaderno(
+    id: '202605',
+    label: 'Mayo–Junio 2026',
+    semanas: [
+      '4–10 MAY',
+      '11–17 MAY',
+      '18–24 MAY',
+      '25–31 MAY',
+      '1–7 JUN',
+      '8–14 JUN',
+      '15–21 JUN',
+      '22–28 JUN',
+    ],
+  ),
+  Cuaderno(
+    id: '202607',
+    label: 'Julio–Agosto 2026',
+    semanas: [
+      '29 JUN–5 JUL',
+      '6–12 JUL',
+      '13–19 JUL',
+      '20–26 JUL',
+      '27 JUL–2 AGO',
+      '3–9 AGO',
+      '10–16 AGO',
+      '17–23 AGO',
+      '24–30 AGO',
+    ],
   ),
 ];

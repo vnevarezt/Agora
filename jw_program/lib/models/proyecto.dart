@@ -44,4 +44,25 @@ class Proyecto {
 
   /// Fracción de avance 0..1 para la barra de progreso.
   double get progreso => total == 0 ? 0 : done / total;
+
+  Proyecto copyWith({
+    String? nombre,
+    String? congregacionId,
+    List<String>? semanas,
+    int? done,
+    int? total,
+    EstadoProyecto? estado,
+    String? editado,
+  }) {
+    return Proyecto(
+      id: id,
+      nombre: nombre ?? this.nombre,
+      congregacionId: congregacionId ?? this.congregacionId,
+      semanas: semanas ?? this.semanas,
+      done: done ?? this.done,
+      total: total ?? this.total,
+      estado: estado ?? this.estado,
+      editado: editado ?? this.editado,
+    );
+  }
 }
