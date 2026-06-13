@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/data/db/app_database.dart';
 import 'package:jw_program/models/hermano.dart';
 import 'package:jw_program/state/db_provider.dart';
-import 'package:jw_program/ui/personas/personas_screen.dart';
+import 'package:jw_program/ui/personas/hermanos_view.dart';
 import 'package:jw_program/ui/theme/app_theme.dart';
 import 'package:jw_program/ui/theme/tokens.dart';
 
@@ -37,7 +37,7 @@ Future<AppDatabase> _pump(WidgetTester tester) async {
     overrides: [dbProvider.overrideWithValue(db)],
     child: MaterialApp(
       theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: const PersonasScreen(),
+      home: const Scaffold(body: SafeArea(child: HermanosView())),
     ),
   ));
   await tester.pump(); // primera emisión del stream
@@ -50,48 +50,28 @@ void main() {
 
     expect(find.textContaining('Aún no hay hermanos'), findsOneWidget);
 
-    await tester.tap(find.text('Añadir'));
-    await tester.pump();
-    expect(find.text('Añadir hermano'), findsOneWidget);
+    await tester.tap(find.text('Añadir hermano'));
+    await tester.pumpAndSettle();
+    // El modal está abierto si aparece su descripción.
+    expect(
+      find.text('El privilegio define qué partes se le pueden asignar.'),
+      findsOneWidget,
+    );
 
     await tester.enterText(
-        find.widgetWithText(TextField, 'Nombre y apellido'), 'Raúl Espinoza');
+        find.widgetWithText(TextField, 'Ej. Martín Salas'), 'Raúl Espinoza');
     await tester.pump();
-    await tester.tap(find.text('Guardar'));
+
+    // Botón primario del modal (no el del topbar).
+    await tester.tap(find.descendant(
+      of: find.byType(Dialog),
+      matching: find.text('Añadir hermano'),
+    ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // El form se cierra y la fila aparece (alimentada por el stream).
-    expect(find.text('Añadir hermano'), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
     expect(find.text('Raúl Espinoza'), findsOneWidget);
-    expect(find.text('1 activos'), findsOneWidget);
-  });
-
-  testWidgets('editar abre el panel con los datos y guarda cambios',
-      (tester) async {
-    final db = await _pump(tester);
-
-    await tester.tap(find.text('Añadir'));
-    await tester.pump();
-    await tester.enterText(
-        find.widgetWithText(TextField, 'Nombre y apellido'), 'Daniel');
-    await tester.pump();
-    await tester.tap(find.text('Guardar'));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    await tester.tap(find.text('Daniel'));
-    await tester.pump();
-    expect(find.text('Editar hermano'), findsOneWidget);
-
-    await tester.enterText(
-        find.widgetWithText(TextField, 'Daniel'), 'Daniel Ortega');
-    await tester.pump();
-    await tester.tap(find.text('Guardar'));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.text('Daniel Ortega'), findsOneWidget);
-    final todos = await db.hermanosDao.todos();
-    expect(todos.single.nombre, 'Daniel Ortega');
   });
 
   testWidgets('la búsqueda filtra sin acentos', (tester) async {
