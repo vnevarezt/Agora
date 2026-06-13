@@ -7,11 +7,15 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:jw_program/app.dart';
+import 'package:jw_program/data/db/app_database.dart';
+import 'package:jw_program/models/hermano.dart';
 import 'package:jw_program/models/week.dart';
+import 'package:jw_program/state/db_provider.dart';
 import 'package:jw_program/state/program_form.dart';
 import 'package:jw_program/state/weeks_provider.dart';
 import 'package:jw_program/ui/shell/program_shell.dart';
@@ -103,12 +107,43 @@ void main() {
     tester.view.physicalSize = const Size(1440, 880);
     addTearDown(tester.view.reset);
 
+    // BD en memoria (sin llavero) sembrada con el directorio de demo.
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await tester.runAsync(() async {
+      final t = DateTime.utc(2026, 5, 1);
+      const nombres = [
+        ('p1', 'Andrés Beltrán', Privilegio.anciano),
+        ('p2', 'Raúl Espinoza', Privilegio.anciano),
+        ('p3', 'Daniel Ortega', Privilegio.siervoMinisterial),
+        ('p4', 'Joel Paredes', Privilegio.publicador),
+        ('p5', 'Esteban Ríos', Privilegio.publicador),
+        ('p6', 'Felipe Cordero', Privilegio.publicador),
+        ('p7', 'Saúl Bravo', Privilegio.anciano),
+      ];
+      for (final (id, nombre, priv) in nombres) {
+        await db.hermanosDao.upsert(Hermano(
+          id: id,
+          nombre: nombre,
+          sexo: Sexo.hombre,
+          privilegio: priv,
+          congregacion: 'CONSTITUCIÓN J.A CASTRO',
+          activo: true,
+          notas: '',
+          createdAt: t,
+          updatedAt: t,
+          ultimoUso: id == 'p1' || id == 'p2' ? t : null,
+        ));
+      }
+    });
+
     await tester.pumpWidget(
       RepaintBoundary(
         key: _shotKey,
         child: ProviderScope(
           overrides: [
             weeksProvider.overrideWith(_FakeWeeksController.new),
+            dbProvider.overrideWithValue(db),
           ],
           child: const JwProgramApp(),
         ),
@@ -143,6 +178,16 @@ void main() {
     await _shot(tester, 'ui_desktop_picker.png');
     await tester.tapAt(const Offset(20, 860)); // scrim
     await _esperar(tester, 300);
+
+    // Pantalla de gestión de hermanos.
+    await tester.tap(find.byIcon(Icons.people_outline));
+    await _esperar(tester, 500);
+    await _shot(tester, 'ui_desktop_personas.png');
+    await tester.tap(find.text('Raúl Espinoza').first); // abre edición
+    await _esperar(tester, 300);
+    await _shot(tester, 'ui_desktop_personas_form.png');
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await _esperar(tester, 400);
 
     // Modo oscuro.
     await tester.tap(find.byIcon(Icons.dark_mode_outlined));
