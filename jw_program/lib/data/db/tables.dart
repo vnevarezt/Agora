@@ -8,15 +8,15 @@ import '../../models/participant.dart';
 @UseRowClass(Participant, generateInsertable: true)
 class Participants extends Table {
   TextColumn get id => text()();
-  TextColumn get nombre => text().withLength(min: 1, max: 60)();
-  TextColumn get sexo => textEnum<Gender>()();
-  TextColumn get privilegio => textEnum<Role>()();
-  TextColumn get congregacion => text().withDefault(const Constant(''))();
-  BoolColumn get activo => boolean().withDefault(const Constant(true))();
-  TextColumn get notas => text().withDefault(const Constant(''))();
+  TextColumn get name => text().withLength(min: 1, max: 60)();
+  TextColumn get gender => textEnum<Gender>()();
+  TextColumn get role => textEnum<Role>()();
+  TextColumn get congregation => text().withDefault(const Constant(''))();
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
+  TextColumn get notes => text().withDefault(const Constant(''))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
-  DateTimeColumn get ultimoUso => dateTime().nullable()();
+  DateTimeColumn get lastUsed => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -12,37 +12,37 @@ void main() {
 
   test('buildProgramPdf genera un PDF válido', () async {
     final semana = Week(
-      fecha: '18-24 DE MAYO',
-      lectura: 'ISAÍAS 62-64',
-      cancionInicial: '44',
-      partes: const [
-        Part(seccion: Section.treasures, num: 1, titulo: 'El Alfarero', min: 10),
+      date: '18-24 DE MAYO',
+      reading: 'ISAÍAS 62-64',
+      openingSong: '44',
+      parts: const [
+        Part(section: Section.treasures, number: 1, title: 'El Alfarero', minutes: 10),
         Part(
-            seccion: Section.treasures,
-            num: 3,
-            titulo: 'Lectura de la Biblia',
-            min: 4),
+            section: Section.treasures,
+            number: 3,
+            title: 'Lectura de la Biblia',
+            minutes: 4),
         Part(
-            seccion: Section.ministry,
-            num: 4,
-            titulo: 'Empiece conversaciones',
-            min: 3),
+            section: Section.ministry,
+            number: 4,
+            title: 'Empiece conversaciones',
+            minutes: 3),
         Part(
-            seccion: Section.christianLife,
-            num: 7,
-            titulo: 'Estudio bíblico de la congregación',
-            min: 30),
+            section: Section.christianLife,
+            number: 7,
+            title: 'Estudio bíblico de la congregación',
+            minutes: 30),
       ],
     );
     final sched = buildSchedule(semana, 18 * 60, 105);
     // Nombres por id de fila (la primera de Tesoros lleva uno de ejemplo).
-    final asg = Assignments({sched.tesoros.first.id: const ['Rafael G']}, {});
+    final asg = Assignments({sched.treasures.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
       cong: 'CONSTITUCIÓN J.A CASTRO',
       semana: semana,
       sched: sched,
       asignaciones: asg,
-      presidente: 'Rafael G',
+      chairman: 'Rafael G',
     );
 
     expect(bytes.length, greaterThan(1000));

@@ -15,7 +15,7 @@ Future<Uint8List> buildProgramPdf({
   required Week semana,
   required ProgramSchedule sched,
   Assignments asignaciones = Assignments.empty,
-  String presidente = '',
+  String chairman = '',
   bool aux = false,
 }) async {
   final carlito = await carlitoFonts();
@@ -49,18 +49,18 @@ Future<Uint8List> buildProgramPdf({
           pw.SizedBox(height: 4),
           _reglafg(),
           pw.SizedBox(height: 3), // \par\smallskip
-          _lineaSemana(semana, presidente),
+          _lineaSemana(semana, chairman),
           pw.SizedBox(height: 8), // \addvspace{8pt}
           if (aux) ...[_encabezadoSalas(cols), pw.SizedBox(height: 2)],
-          _tabla(sched.apertura, asignaciones, cols, medir, aux),
-          _banda(S140.tesoros, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
+          _tabla(sched.opening, asignaciones, cols, medir, aux),
+          _banda(S140.treasures, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
               cols, aux),
-          _tabla(sched.tesoros, asignaciones, cols, medir, aux),
+          _tabla(sched.treasures, asignaciones, cols, medir, aux),
           _banda(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
               cols, aux),
-          _tabla(sched.seamos, asignaciones, cols, medir, aux),
-          _banda(S140.vida, 'NUESTRA VIDA CRISTIANA', '', cols, aux),
-          _tabla(sched.vida, asignaciones, cols, medir, aux),
+          _tabla(sched.ministry, asignaciones, cols, medir, aux),
+          _banda(S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, aux),
+          _tabla(sched.christianLife, asignaciones, cols, medir, aux),
           pw.SizedBox(height: 4), // \addvspace{4pt}
           _reglafg(),
         ];
@@ -88,7 +88,7 @@ pw.Widget _encabezado(String cong) {
           'Programa para la reunión de entre semana',
           textAlign: pw.TextAlign.right,
           style:
-              pw.TextStyle(fontSize: S140.titulo, fontWeight: pw.FontWeight.bold),
+              pw.TextStyle(fontSize: S140.title, fontWeight: pw.FontWeight.bold),
         ),
       ),
     ],
@@ -107,8 +107,8 @@ pw.Widget _reglafg() {
   );
 }
 
-// ---- Línea de semana + presidente + lectura (tex:183-187) ----
-pw.Widget _lineaSemana(Week s, String presidente) {
+// ---- Línea de semana + chairman + lectura (tex:183-187) ----
+pw.Widget _lineaSemana(Week s, String chairman) {
   final semanaStyle =
       pw.TextStyle(fontSize: S140.semana, fontWeight: pw.FontWeight.bold);
   final rol = pw.TextStyle(
@@ -122,14 +122,14 @@ pw.Widget _lineaSemana(Week s, String presidente) {
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Expanded(
-            child: pw.Text('${s.fecha}   |   LECTURA SEMANAL DE LA BIBLIA',
+            child: pw.Text('${s.date}   |   LECTURA SEMANAL DE LA BIBLIA',
                 style: semanaStyle),
           ),
           pw.Text('Presidente: ', style: rol),
-          pw.Text(presidente, style: pw.TextStyle(fontSize: S140.semana)),
+          pw.Text(chairman, style: pw.TextStyle(fontSize: S140.semana)),
         ],
       ),
-      pw.Text(s.lectura, style: semanaStyle),
+      pw.Text(s.reading, style: semanaStyle),
     ],
   );
 }
@@ -241,9 +241,9 @@ pw.Widget _fila(ProgramRow r, Assignments asg, ColumnWidths cols,
   final nombreStyle = pw.TextStyle(fontSize: S140.base);
 
   final prin =
-      _celdaNombres(r.rol, asg.principal(r), cols.nomPrin, medir, nombreStyle);
+      _celdaNombres(r.role, asg.main(r), cols.nomPrin, medir, nombreStyle);
   final auxCell = aux
-      ? _celdaNombres(r.rol, asg.auxiliar(r), cols.aux, medir, nombreStyle)
+      ? _celdaNombres(r.role, asg.auxiliary(r), cols.aux, medir, nombreStyle)
       : null;
   // El título se centra verticalmente si cualquiera de las columnas se apila.
   final apilado = prin.apilado || (auxCell?.apilado ?? false);
@@ -254,10 +254,10 @@ pw.Widget _fila(ProgramRow r, Assignments asg, ColumnWidths cols,
     children: [
       pw.SizedBox(
         width: S140.anchoHora,
-        child: r.vineta
+        child: r.bullet
             ? pw.Row(
                 children: [
-                  pw.Text(r.hora, style: horaStyle),
+                  pw.Text(r.time, style: horaStyle),
                   pw.Expanded(
                     child: pw.Align(
                       alignment: pw.Alignment.centerRight,
@@ -272,10 +272,10 @@ pw.Widget _fila(ProgramRow r, Assignments asg, ColumnWidths cols,
                   ),
                 ],
               )
-            : pw.Text(r.hora, style: horaStyle),
+            : pw.Text(r.time, style: horaStyle),
       ),
       pw.Expanded(
-        child: pw.Text(r.contenido, style: pw.TextStyle(fontSize: S140.base)),
+        child: pw.Text(r.content, style: pw.TextStyle(fontSize: S140.base)),
       ),
     ],
   );
@@ -291,8 +291,8 @@ pw.Widget _fila(ProgramRow r, Assignments asg, ColumnWidths cols,
         pw.Expanded(child: celdaX),
         pw.SizedBox(width: S140.colGap),
         pw.SizedBox(
-          width: cols.rol,
-          child: pw.Text(r.rol, textAlign: pw.TextAlign.right, style: rolStyle),
+          width: cols.role,
+          child: pw.Text(r.role, textAlign: pw.TextAlign.right, style: rolStyle),
         ),
         if (aux) ...[
           pw.SizedBox(width: S140.colGap),

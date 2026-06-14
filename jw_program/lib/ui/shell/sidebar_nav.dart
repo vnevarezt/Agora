@@ -11,11 +11,11 @@ import '../widgets/avatar.dart';
 
 /// Ítems de navegación del shell (mismo orden en barra lateral y barra
 /// inferior).
-const _items = <({AppSection seccion, IconData icon, String label})>[
-  (seccion: AppSection.home, icon: Icons.home_outlined, label: 'Inicio'),
-  (seccion: AppSection.participants, icon: Icons.people_outline, label: 'Participants'),
+const _items = <({AppSection section, IconData icon, String label})>[
+  (section: AppSection.home, icon: Icons.home_outlined, label: 'Inicio'),
+  (section: AppSection.participants, icon: Icons.people_outline, label: 'Participants'),
   (
-    seccion: AppSection.settings,
+    section: AppSection.settings,
     icon: Icons.settings_outlined,
     label: 'Configuración'
   ),
@@ -24,7 +24,7 @@ const _items = <({AppSection seccion, IconData icon, String label})>[
 /// Nº de recordatorios urgentes; se muestra como badge en "Inicio".
 final _alertasProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
-    .where((r) => r.tipo == ReminderType.alert)
+    .where((r) => r.type == ReminderType.alert)
     .length);
 
 /// Barra lateral (`.sidebar`): marca, navegación y tarjeta de usuario.
@@ -37,7 +37,7 @@ class Sidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final seccion = ref.watch(appSectionProvider);
+    final section = ref.watch(appSectionProvider);
     final usuario = ref.watch(sessionUserProvider);
     final alertas = ref.watch(_alertasProvider);
 
@@ -55,19 +55,19 @@ class Sidebar extends ConsumerWidget {
           const SizedBox(height: 6),
           for (final it in _items) ...[
             _NavItem(
-              seccion: it.seccion,
+              section: it.section,
               icon: it.icon,
               label: it.label,
               compact: compact,
-              active: seccion == it.seccion,
-              badge: it.seccion == AppSection.home ? alertas : 0,
+              active: section == it.section,
+              badge: it.section == AppSection.home ? alertas : 0,
             ),
             const SizedBox(height: 2),
           ],
           const Spacer(),
           _UserCard(
-            nombre: usuario.nombre,
-            rol: usuario.rol,
+            name: usuario.name,
+            role: usuario.role,
             compact: compact,
           ),
         ],
@@ -129,7 +129,7 @@ class _Brand extends StatelessWidget {
 
 class _NavItem extends ConsumerWidget {
   const _NavItem({
-    required this.seccion,
+    required this.section,
     required this.icon,
     required this.label,
     required this.compact,
@@ -137,7 +137,7 @@ class _NavItem extends ConsumerWidget {
     required this.badge,
   });
 
-  final AppSection seccion;
+  final AppSection section;
   final IconData icon;
   final String label;
   final bool compact;
@@ -148,7 +148,7 @@ class _NavItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     return Pressable(
-      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(seccion),
+      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(section),
       tooltip: compact ? label : null,
       builder: (context, hovered, _) {
         final fg = active ? t.accentStrong : (hovered ? t.text : t.textDim);
@@ -220,22 +220,22 @@ class _NavItem extends ConsumerWidget {
 
 class _UserCard extends StatelessWidget {
   const _UserCard({
-    required this.nombre,
-    required this.rol,
+    required this.name,
+    required this.role,
     required this.compact,
   });
 
-  final String nombre;
-  final String rol;
+  final String name;
+  final String role;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     // Sin usuario en sesión (sin backend) no se muestra la tarjeta.
-    if (nombre.isEmpty) return const SizedBox.shrink();
+    if (name.isEmpty) return const SizedBox.shrink();
     if (compact) {
-      return Center(child: PersonAvatar(nombre: nombre, size: 32));
+      return Center(child: PersonAvatar(name: name, size: 32));
     }
     return Container(
       padding: const EdgeInsets.all(10),
@@ -246,7 +246,7 @@ class _UserCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          PersonAvatar(nombre: nombre, size: 32),
+          PersonAvatar(name: name, size: 32),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -254,7 +254,7 @@ class _UserCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  nombre,
+                  name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -265,7 +265,7 @@ class _UserCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  rol,
+                  role,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -290,7 +290,7 @@ class BottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final seccion = ref.watch(appSectionProvider);
+    final section = ref.watch(appSectionProvider);
     final alertas = ref.watch(_alertasProvider);
 
     return Container(
@@ -307,11 +307,11 @@ class BottomNav extends ConsumerWidget {
               for (final it in _items)
                 Expanded(
                   child: _BottomItem(
-                    seccion: it.seccion,
+                    section: it.section,
                     icon: it.icon,
                     label: it.label,
-                    active: seccion == it.seccion,
-                    badge: it.seccion == AppSection.home ? alertas : 0,
+                    active: section == it.section,
+                    badge: it.section == AppSection.home ? alertas : 0,
                   ),
                 ),
             ],
@@ -324,14 +324,14 @@ class BottomNav extends ConsumerWidget {
 
 class _BottomItem extends ConsumerWidget {
   const _BottomItem({
-    required this.seccion,
+    required this.section,
     required this.icon,
     required this.label,
     required this.active,
     required this.badge,
   });
 
-  final AppSection seccion;
+  final AppSection section;
   final IconData icon;
   final String label;
   final bool active;
@@ -343,7 +343,7 @@ class _BottomItem extends ConsumerWidget {
     final fg = active ? t.accentStrong : t.textMute;
 
     return Pressable(
-      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(seccion),
+      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(section),
       builder: (context, hovered, _) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Column(

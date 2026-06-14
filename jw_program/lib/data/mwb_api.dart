@@ -12,7 +12,7 @@ class MwbApi {
       'https://app.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS';
 
   /// Devuelve (url, fechaFormateada) del EPUB para el [issue] dado (YYYYMM).
-  static Future<({String url, String fecha})> epubUrl(
+  static Future<({String url, String date})> epubUrl(
     String issue, {
     String lang = 'S',
   }) async {
@@ -31,7 +31,7 @@ class MwbApi {
       final url = (((data['files'] as Map)[lang] as Map)['EPUB'] as List)[0]
           ['file']['url'] as String;
       final fecha = (data['formattedDate'] as String?) ?? '';
-      return (url: url, fecha: fecha);
+      return (url: url, date: fecha);
     } catch (_) {
       throw Exception('No se encontró el EPUB para issue=$issue lang=$lang.');
     }

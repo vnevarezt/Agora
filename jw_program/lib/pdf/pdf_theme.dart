@@ -23,7 +23,7 @@ class S140 {
   static const double small = 9; // \small
   static const double footnote = 8; // \footnotesize
   static const double large = 12; // \large
-  static const double titulo = 16.5; // título de cabecera
+  static const double title = 16.5; // título de cabecera
   static const double semana = 12; // línea de semana / lectura
 
   // ---- Anchos de columna (tex:57-61) ----
@@ -59,9 +59,9 @@ class S140 {
   static const double nomPad = 6;
 
   // ---- Colores oficiales (tex:31-35) ----
-  static final PdfColor tesoros = PdfColor.fromHex('575A5D'); // gris
+  static final PdfColor treasures = PdfColor.fromHex('575A5D'); // gris
   static final PdfColor maestros = PdfColor.fromHex('BE8900'); // dorado
-  static final PdfColor vida = PdfColor.fromHex('7E0024'); // granate
+  static final PdfColor christianLife = PdfColor.fromHex('7E0024'); // granate
   static final PdfColor rotulo = PdfColor.fromHex('575A5D'); // gris (rótulos)
   static final PdfColor linea = PdfColor.fromHex('A6A6A6'); // gris claro
   static final PdfColor blanco = PdfColor.fromHex('FFFFFF');

@@ -16,7 +16,7 @@ class PersonaCard extends StatelessWidget {
   final Participant hermano;
   final VoidCallback onTap;
 
-  String get _sexoLabel => switch (hermano.sexo) {
+  String get _sexoLabel => switch (hermano.gender) {
         Gender.male => 'Participant',
         Gender.female => 'Hermana',
         Gender.unspecified => 'Sin definir',
@@ -26,7 +26,7 @@ class PersonaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final h = hermano;
-    final cong = h.congregacion.trim();
+    final cong = h.congregation.trim();
     final sub = cong.isEmpty ? _sexoLabel : '$_sexoLabel · $cong';
 
     return Pressable(
@@ -42,7 +42,7 @@ class PersonaCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              PersonAvatar(nombre: h.nombre, size: 38),
+              PersonAvatar(name: h.name, size: 38),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -53,7 +53,7 @@ class PersonaCard extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            h.nombre,
+                            h.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -64,7 +64,7 @@ class PersonaCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 7),
-                        _DotDisponible(activo: h.activo),
+                        _DotDisponible(active: h.active),
                       ],
                     ),
                     const SizedBox(height: 1),
@@ -82,10 +82,10 @@ class PersonaCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              if (h.incompleto)
+              if (h.isIncomplete)
                 const _IncompletoBadge()
               else
-                PrivBadge(privilegio: h.privilegio),
+                PrivBadge(role: h.role),
             ],
           ),
         );
@@ -94,11 +94,11 @@ class PersonaCard extends StatelessWidget {
   }
 }
 
-/// Punto de disponibilidad (`.dot-avail`): verde si activo, gris si no.
+/// Punto de disponibilidad (`.dot-avail`): verde si active, gris si no.
 class _DotDisponible extends StatelessWidget {
-  const _DotDisponible({required this.activo});
+  const _DotDisponible({required this.active});
 
-  final bool activo;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +107,7 @@ class _DotDisponible extends StatelessWidget {
       width: 9,
       height: 9,
       decoration: BoxDecoration(
-        color: activo ? const Color(0xFF4FA06A) : t.border,
+        color: active ? const Color(0xFF4FA06A) : t.border,
         shape: BoxShape.circle,
       ),
     );

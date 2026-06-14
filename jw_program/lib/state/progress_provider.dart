@@ -11,61 +11,61 @@ typedef Progress = ({int done, int total});
 /// Cuenta huecos asignados/totales de un horario dado contra unas asignaciones
 /// (presidente + listas por fila). Slots, no filas: parejas y sala auxiliar
 /// pesan cada una lo suyo.
-Progress _progresoDe(
+Progress _progressOf(
   ProgramSchedule sched, {
-  required String presidente,
-  required Map<String, List<String>> principal,
-  required Map<String, List<String>> auxiliar,
-  required bool aux,
+  required String chairman,
+  required Map<String, List<String>> main,
+  required Map<String, List<String>> auxiliary,
+  required bool auxRoom,
 }) {
   var total = 1; // presidente
-  var done = presidente.trim().isEmpty ? 0 : 1;
-  for (final ProgramRow row in sched.filas) {
+  var done = chairman.trim().isEmpty ? 0 : 1;
+  for (final ProgramRow row in sched.rows) {
     total += row.slots;
-    done += filledNames(principal[row.id], row.slots);
-    if (aux && row.auxSlots > 0) {
+    done += filledNames(main[row.id], row.slots);
+    if (auxRoom && row.auxSlots > 0) {
       total += row.auxSlots;
-      done += filledNames(auxiliar[row.id], row.auxSlots);
+      done += filledNames(auxiliary[row.id], row.auxSlots);
     }
   }
   return (done: done, total: total);
 }
 
-/// Progress de la semana activa. Alimenta el anillo del selector y la bottom
+/// Progreso de la semana activa. Alimenta el anillo del selector y la bottom
 /// bar móvil.
 final progressProvider = Provider<Progress>((ref) {
   final sched = ref.watch(scheduleProvider);
   if (sched == null) return (done: 0, total: 0);
   final f = ref.watch(formProvider);
-  return _progresoDe(sched,
-      presidente: f.presidente,
-      principal: f.principal,
-      auxiliar: f.auxiliar,
-      aux: f.aux);
+  return _progressOf(sched,
+      chairman: f.chairman,
+      main: f.main,
+      auxiliary: f.auxiliary,
+      auxRoom: f.auxRoom);
 });
 
-/// Progress de cada semana del cuaderno (para los meters de "Ir a la semana").
-final progresoPorSemanaProvider = Provider<List<Progress>>((ref) {
+/// Progreso de cada semana del cuaderno (para los meters de "Ir a la semana").
+final progressPerWeekProvider = Provider<List<Progress>>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return const [];
   final f = ref.watch(formProvider);
   return [
     for (var i = 0; i < weeks.length; i++)
-      _progresoDe(
-        buildSchedule(weeks[i], f.inicioMin, f.duracion),
-        presidente: f.presidentePorSemana[i] ?? '',
-        principal: f.principalPorSemana[i] ?? const {},
-        auxiliar: f.auxiliarPorSemana[i] ?? const {},
-        aux: f.aux,
+      _progressOf(
+        buildSchedule(weeks[i], f.startMinutes, f.duration),
+        chairman: f.chairmanByWeek[i] ?? '',
+        main: f.mainByWeek[i] ?? const {},
+        auxiliary: f.auxByWeek[i] ?? const {},
+        auxRoom: f.auxRoom,
       ),
   ];
 });
 
-/// Progress agregado de todo el proyecto (suma de todas las semanas).
-final progresoProyectoProvider = Provider<Progress>((ref) {
-  final lista = ref.watch(progresoPorSemanaProvider);
+/// Progreso agregado de todo el proyecto (suma de todas las semanas).
+final projectProgressProvider = Provider<Progress>((ref) {
+  final list = ref.watch(progressPerWeekProvider);
   var done = 0, total = 0;
-  for (final p in lista) {
+  for (final p in list) {
     done += p.done;
     total += p.total;
   }

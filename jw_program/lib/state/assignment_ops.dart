@@ -4,8 +4,8 @@ import '../models/program_row.dart';
 import 'program_form.dart';
 
 /// Referencia a un hueco de asignación concreto de la UI. Mapea sobre el
-/// almacenamiento existente del formulario ([FormModel.principal] /
-/// [FormModel.auxiliar], listas por `ProgramRow.id`) sin cambiar su contrato.
+/// almacenamiento existente del formulario ([FormModel.main] /
+/// [FormModel.auxiliary], listas por `ProgramRow.id`) sin cambiar su contrato.
 sealed class SlotRef {
   const SlotRef();
 
@@ -19,7 +19,7 @@ sealed class SlotRef {
   int get hashCode => key.hashCode;
 }
 
-/// Presidente de la reunión ([FormModel.presidente]).
+/// Presidente de la reunión ([FormModel.chairman]).
 class ChairmanSlot extends SlotRef {
   const ChairmanSlot();
 
@@ -65,9 +65,9 @@ int filledNames(List<String>? nombres, int slots) {
 /// Nombre actualmente asignado a [slot] ('' si está vacío).
 String slotName(FormModel f, SlotRef slot) {
   return switch (slot) {
-    ChairmanSlot() => f.presidente,
+    ChairmanSlot() => f.chairman,
     RowSlot(:final row, :final index, :final aux) => () {
-        final lista = aux ? f.auxiliar[row.id] : f.principal[row.id];
+        final lista = aux ? f.auxiliary[row.id] : f.main[row.id];
         return (lista != null && index < lista.length) ? lista[index] : '';
       }(),
   };
@@ -83,7 +83,7 @@ void writeAssignment(WidgetRef ref, SlotRef slot, String nombre) {
     case RowSlot(:final row, :final index, :final aux):
       final f = ref.read(formProvider);
       final lista = listWithName(
-        aux ? f.auxiliar[row.id] : f.principal[row.id],
+        aux ? f.auxiliary[row.id] : f.main[row.id],
         aux ? row.auxSlots : row.slots,
         index,
         nombre,

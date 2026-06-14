@@ -1,4 +1,4 @@
-/// Estado de un proyecto en el tablero (espejo de `status` del mock).
+/// Estado de un proyecto en el tablero.
 enum ProjectStatus { draft, complete, exported }
 
 extension ProjectStatusX on ProjectStatus {
@@ -17,52 +17,51 @@ extension ProjectStatusX on ProjectStatus {
       };
 }
 
-/// Project del dashboard: el programa de un mes/periodo de una congregación.
-/// Solo presentación por ahora (sin persistencia ni lógica de asignación).
+/// Proyecto del dashboard: el programa de un mes/periodo de una congregación.
 class Project {
   final String id;
-  final String nombre;
-  final String congregacionId;
-  final List<String> semanas;
+  final String name;
+  final String congregationId;
+  final List<String> weeks;
   final int done;
   final int total;
-  final ProjectStatus estado;
+  final ProjectStatus status;
 
   /// Texto relativo de última edición ("hace 2 horas"); placeholder de UI.
-  final String editado;
+  final String editedLabel;
 
   const Project({
     required this.id,
-    required this.nombre,
-    required this.congregacionId,
-    required this.semanas,
+    required this.name,
+    required this.congregationId,
+    required this.weeks,
     required this.done,
     required this.total,
-    required this.estado,
-    required this.editado,
+    required this.status,
+    required this.editedLabel,
   });
 
   /// Fracción de avance 0..1 para la barra de progreso.
-  double get progreso => total == 0 ? 0 : done / total;
+  double get progress => total == 0 ? 0 : done / total;
 
   Project copyWith({
-    String? nombre,
-    String? congregacionId,
-    List<String>? semanas,
+    String? name,
+    String? congregationId,
+    List<String>? weeks,
     int? done,
     int? total,
-    ProjectStatus? estado,
-    String? editado,
+    ProjectStatus? status,
+    String? editedLabel,
   }) {
     return Project(
       id: id,
-      nombre: nombre ?? this.nombre,
-      congregacionId: congregacionId ?? this.congregacionId,
-      semanas: semanas ?? this.semanas,
+      name: name ?? this.name,
+      congregationId: congregationId ?? this.congregationId,
+      weeks: weeks ?? this.weeks,
       done: done ?? this.done,
       total: total ?? this.total,
-      estado: estado ?? this.estado,
-      editado: editado ?? this.editado,
+      status: status ?? this.status,
+      editedLabel: editedLabel ?? this.editedLabel,
     );
   }
 }

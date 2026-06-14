@@ -23,12 +23,12 @@ Participant _h(String id, String nombre) {
   final t = DateTime.utc(2026, 6, 1);
   return Participant(
     id: id,
-    nombre: nombre,
-    sexo: Gender.male,
-    privilegio: Role.publisher,
-    congregacion: 'TEST',
-    activo: true,
-    notas: '',
+    name: nombre,
+    gender: Gender.male,
+    role: Role.publisher,
+    congregation: 'TEST',
+    active: true,
+    notes: '',
     createdAt: t,
     updatedAt: t,
   );

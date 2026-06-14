@@ -18,10 +18,10 @@ class $ParticipantsTable extends Participants
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
-    'nombre',
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
     aliasedName,
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
@@ -32,52 +32,52 @@ class $ParticipantsTable extends Participants
     requiredDuringInsert: true,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Gender, String> sexo =
+  late final GeneratedColumnWithTypeConverter<Gender, String> gender =
       GeneratedColumn<String>(
-        'sexo',
+        'gender',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: true,
-      ).withConverter<Gender>($ParticipantsTable.$convertersexo);
+      ).withConverter<Gender>($ParticipantsTable.$convertergender);
   @override
-  late final GeneratedColumnWithTypeConverter<Role, String> privilegio =
+  late final GeneratedColumnWithTypeConverter<Role, String> role =
       GeneratedColumn<String>(
-        'privilegio',
+        'role',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: true,
-      ).withConverter<Role>($ParticipantsTable.$converterprivilegio);
-  static const VerificationMeta _congregacionMeta = const VerificationMeta(
-    'congregacion',
+      ).withConverter<Role>($ParticipantsTable.$converterrole);
+  static const VerificationMeta _congregationMeta = const VerificationMeta(
+    'congregation',
   );
   @override
-  late final GeneratedColumn<String> congregacion = GeneratedColumn<String>(
-    'congregacion',
+  late final GeneratedColumn<String> congregation = GeneratedColumn<String>(
+    'congregation',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
-  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
   @override
-  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
-    'activo',
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+    'active',
     aliasedName,
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("activo" IN (0, 1))',
+      'CHECK ("active" IN (0, 1))',
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _notasMeta = const VerificationMeta('notas');
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
-  late final GeneratedColumn<String> notas = GeneratedColumn<String>(
-    'notas',
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -106,12 +106,12 @@ class $ParticipantsTable extends Participants
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _ultimoUsoMeta = const VerificationMeta(
-    'ultimoUso',
+  static const VerificationMeta _lastUsedMeta = const VerificationMeta(
+    'lastUsed',
   );
   @override
-  late final GeneratedColumn<DateTime> ultimoUso = GeneratedColumn<DateTime>(
-    'ultimo_uso',
+  late final GeneratedColumn<DateTime> lastUsed = GeneratedColumn<DateTime>(
+    'last_used',
     aliasedName,
     true,
     type: DriftSqlType.dateTime,
@@ -120,15 +120,15 @@ class $ParticipantsTable extends Participants
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    nombre,
-    sexo,
-    privilegio,
-    congregacion,
-    activo,
-    notas,
+    name,
+    gender,
+    role,
+    congregation,
+    active,
+    notes,
     createdAt,
     updatedAt,
-    ultimoUso,
+    lastUsed,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -147,33 +147,33 @@ class $ParticipantsTable extends Participants
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('nombre')) {
+    if (data.containsKey('name')) {
       context.handle(
-        _nombreMeta,
-        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
       );
     } else if (isInserting) {
-      context.missing(_nombreMeta);
+      context.missing(_nameMeta);
     }
-    if (data.containsKey('congregacion')) {
+    if (data.containsKey('congregation')) {
       context.handle(
-        _congregacionMeta,
-        congregacion.isAcceptableOrUnknown(
-          data['congregacion']!,
-          _congregacionMeta,
+        _congregationMeta,
+        congregation.isAcceptableOrUnknown(
+          data['congregation']!,
+          _congregationMeta,
         ),
       );
     }
-    if (data.containsKey('activo')) {
+    if (data.containsKey('active')) {
       context.handle(
-        _activoMeta,
-        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+        _activeMeta,
+        active.isAcceptableOrUnknown(data['active']!, _activeMeta),
       );
     }
-    if (data.containsKey('notas')) {
+    if (data.containsKey('notes')) {
       context.handle(
-        _notasMeta,
-        notas.isAcceptableOrUnknown(data['notas']!, _notasMeta),
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -192,10 +192,10 @@ class $ParticipantsTable extends Participants
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
-    if (data.containsKey('ultimo_uso')) {
+    if (data.containsKey('last_used')) {
       context.handle(
-        _ultimoUsoMeta,
-        ultimoUso.isAcceptableOrUnknown(data['ultimo_uso']!, _ultimoUsoMeta),
+        _lastUsedMeta,
+        lastUsed.isAcceptableOrUnknown(data['last_used']!, _lastUsedMeta),
       );
     }
     return context;
@@ -211,33 +211,33 @@ class $ParticipantsTable extends Participants
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
-      nombre: attachedDatabase.typeMapping.read(
+      name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}nombre'],
+        data['${effectivePrefix}name'],
       )!,
-      sexo: $ParticipantsTable.$convertersexo.fromSql(
+      gender: $ParticipantsTable.$convertergender.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
-          data['${effectivePrefix}sexo'],
+          data['${effectivePrefix}gender'],
         )!,
       ),
-      privilegio: $ParticipantsTable.$converterprivilegio.fromSql(
+      role: $ParticipantsTable.$converterrole.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
-          data['${effectivePrefix}privilegio'],
+          data['${effectivePrefix}role'],
         )!,
       ),
-      congregacion: attachedDatabase.typeMapping.read(
+      congregation: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}congregacion'],
+        data['${effectivePrefix}congregation'],
       )!,
-      activo: attachedDatabase.typeMapping.read(
+      active: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
-        data['${effectivePrefix}activo'],
+        data['${effectivePrefix}active'],
       )!,
-      notas: attachedDatabase.typeMapping.read(
+      notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}notas'],
+        data['${effectivePrefix}notes'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -247,9 +247,9 @@ class $ParticipantsTable extends Participants
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
-      ultimoUso: attachedDatabase.typeMapping.read(
+      lastUsed: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}ultimo_uso'],
+        data['${effectivePrefix}last_used'],
       ),
     );
   }
@@ -259,107 +259,107 @@ class $ParticipantsTable extends Participants
     return $ParticipantsTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<Gender, String, String> $convertersexo =
+  static JsonTypeConverter2<Gender, String, String> $convertergender =
       const EnumNameConverter<Gender>(Gender.values);
-  static JsonTypeConverter2<Role, String, String> $converterprivilegio =
+  static JsonTypeConverter2<Role, String, String> $converterrole =
       const EnumNameConverter<Role>(Role.values);
 }
 
 class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String> id;
-  final Value<String> nombre;
-  final Value<Gender> sexo;
-  final Value<Role> privilegio;
-  final Value<String> congregacion;
-  final Value<bool> activo;
-  final Value<String> notas;
+  final Value<String> name;
+  final Value<Gender> gender;
+  final Value<Role> role;
+  final Value<String> congregation;
+  final Value<bool> active;
+  final Value<String> notes;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  final Value<DateTime?> ultimoUso;
+  final Value<DateTime?> lastUsed;
   final Value<int> rowid;
   const ParticipantsCompanion({
     this.id = const Value.absent(),
-    this.nombre = const Value.absent(),
-    this.sexo = const Value.absent(),
-    this.privilegio = const Value.absent(),
-    this.congregacion = const Value.absent(),
-    this.activo = const Value.absent(),
-    this.notas = const Value.absent(),
+    this.name = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.role = const Value.absent(),
+    this.congregation = const Value.absent(),
+    this.active = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.ultimoUso = const Value.absent(),
+    this.lastUsed = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ParticipantsCompanion.insert({
     required String id,
-    required String nombre,
-    required Gender sexo,
-    required Role privilegio,
-    this.congregacion = const Value.absent(),
-    this.activo = const Value.absent(),
-    this.notas = const Value.absent(),
+    required String name,
+    required Gender gender,
+    required Role role,
+    this.congregation = const Value.absent(),
+    this.active = const Value.absent(),
+    this.notes = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
-    this.ultimoUso = const Value.absent(),
+    this.lastUsed = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       nombre = Value(nombre),
-       sexo = Value(sexo),
-       privilegio = Value(privilegio),
+       name = Value(name),
+       gender = Value(gender),
+       role = Value(role),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<Participant> custom({
     Expression<String>? id,
-    Expression<String>? nombre,
-    Expression<String>? sexo,
-    Expression<String>? privilegio,
-    Expression<String>? congregacion,
-    Expression<bool>? activo,
-    Expression<String>? notas,
+    Expression<String>? name,
+    Expression<String>? gender,
+    Expression<String>? role,
+    Expression<String>? congregation,
+    Expression<bool>? active,
+    Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
-    Expression<DateTime>? ultimoUso,
+    Expression<DateTime>? lastUsed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (nombre != null) 'nombre': nombre,
-      if (sexo != null) 'sexo': sexo,
-      if (privilegio != null) 'privilegio': privilegio,
-      if (congregacion != null) 'congregacion': congregacion,
-      if (activo != null) 'activo': activo,
-      if (notas != null) 'notas': notas,
+      if (name != null) 'name': name,
+      if (gender != null) 'gender': gender,
+      if (role != null) 'role': role,
+      if (congregation != null) 'congregation': congregation,
+      if (active != null) 'active': active,
+      if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (ultimoUso != null) 'ultimo_uso': ultimoUso,
+      if (lastUsed != null) 'last_used': lastUsed,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   ParticipantsCompanion copyWith({
     Value<String>? id,
-    Value<String>? nombre,
-    Value<Gender>? sexo,
-    Value<Role>? privilegio,
-    Value<String>? congregacion,
-    Value<bool>? activo,
-    Value<String>? notas,
+    Value<String>? name,
+    Value<Gender>? gender,
+    Value<Role>? role,
+    Value<String>? congregation,
+    Value<bool>? active,
+    Value<String>? notes,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
-    Value<DateTime?>? ultimoUso,
+    Value<DateTime?>? lastUsed,
     Value<int>? rowid,
   }) {
     return ParticipantsCompanion(
       id: id ?? this.id,
-      nombre: nombre ?? this.nombre,
-      sexo: sexo ?? this.sexo,
-      privilegio: privilegio ?? this.privilegio,
-      congregacion: congregacion ?? this.congregacion,
-      activo: activo ?? this.activo,
-      notas: notas ?? this.notas,
+      name: name ?? this.name,
+      gender: gender ?? this.gender,
+      role: role ?? this.role,
+      congregation: congregation ?? this.congregation,
+      active: active ?? this.active,
+      notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      ultimoUso: ultimoUso ?? this.ultimoUso,
+      lastUsed: lastUsed ?? this.lastUsed,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -370,27 +370,27 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (nombre.present) {
-      map['nombre'] = Variable<String>(nombre.value);
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
     }
-    if (sexo.present) {
-      map['sexo'] = Variable<String>(
-        $ParticipantsTable.$convertersexo.toSql(sexo.value),
+    if (gender.present) {
+      map['gender'] = Variable<String>(
+        $ParticipantsTable.$convertergender.toSql(gender.value),
       );
     }
-    if (privilegio.present) {
-      map['privilegio'] = Variable<String>(
-        $ParticipantsTable.$converterprivilegio.toSql(privilegio.value),
+    if (role.present) {
+      map['role'] = Variable<String>(
+        $ParticipantsTable.$converterrole.toSql(role.value),
       );
     }
-    if (congregacion.present) {
-      map['congregacion'] = Variable<String>(congregacion.value);
+    if (congregation.present) {
+      map['congregation'] = Variable<String>(congregation.value);
     }
-    if (activo.present) {
-      map['activo'] = Variable<bool>(activo.value);
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
     }
-    if (notas.present) {
-      map['notas'] = Variable<String>(notas.value);
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -398,8 +398,8 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
-    if (ultimoUso.present) {
-      map['ultimo_uso'] = Variable<DateTime>(ultimoUso.value);
+    if (lastUsed.present) {
+      map['last_used'] = Variable<DateTime>(lastUsed.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -411,15 +411,15 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   String toString() {
     return (StringBuffer('ParticipantsCompanion(')
           ..write('id: $id, ')
-          ..write('nombre: $nombre, ')
-          ..write('sexo: $sexo, ')
-          ..write('privilegio: $privilegio, ')
-          ..write('congregacion: $congregacion, ')
-          ..write('activo: $activo, ')
-          ..write('notas: $notas, ')
+          ..write('name: $name, ')
+          ..write('gender: $gender, ')
+          ..write('role: $role, ')
+          ..write('congregation: $congregation, ')
+          ..write('active: $active, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('ultimoUso: $ultimoUso, ')
+          ..write('lastUsed: $lastUsed, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -433,15 +433,15 @@ class _$ParticipantInsertable implements Insertable<Participant> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     return ParticipantsCompanion(
       id: Value(_object.id),
-      nombre: Value(_object.nombre),
-      sexo: Value(_object.sexo),
-      privilegio: Value(_object.privilegio),
-      congregacion: Value(_object.congregacion),
-      activo: Value(_object.activo),
-      notas: Value(_object.notas),
+      name: Value(_object.name),
+      gender: Value(_object.gender),
+      role: Value(_object.role),
+      congregation: Value(_object.congregation),
+      active: Value(_object.active),
+      notes: Value(_object.notes),
       createdAt: Value(_object.createdAt),
       updatedAt: Value(_object.updatedAt),
-      ultimoUso: Value(_object.ultimoUso),
+      lastUsed: Value(_object.lastUsed),
     ).toColumns(false);
   }
 }
@@ -472,29 +472,29 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$ParticipantsTableCreateCompanionBuilder =
     ParticipantsCompanion Function({
       required String id,
-      required String nombre,
-      required Gender sexo,
-      required Role privilegio,
-      Value<String> congregacion,
-      Value<bool> activo,
-      Value<String> notas,
+      required String name,
+      required Gender gender,
+      required Role role,
+      Value<String> congregation,
+      Value<bool> active,
+      Value<String> notes,
       required DateTime createdAt,
       required DateTime updatedAt,
-      Value<DateTime?> ultimoUso,
+      Value<DateTime?> lastUsed,
       Value<int> rowid,
     });
 typedef $$ParticipantsTableUpdateCompanionBuilder =
     ParticipantsCompanion Function({
       Value<String> id,
-      Value<String> nombre,
-      Value<Gender> sexo,
-      Value<Role> privilegio,
-      Value<String> congregacion,
-      Value<bool> activo,
-      Value<String> notas,
+      Value<String> name,
+      Value<Gender> gender,
+      Value<Role> role,
+      Value<String> congregation,
+      Value<bool> active,
+      Value<String> notes,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
-      Value<DateTime?> ultimoUso,
+      Value<DateTime?> lastUsed,
       Value<int> rowid,
     });
 
@@ -512,35 +512,35 @@ class $$ParticipantsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get nombre => $composableBuilder(
-    column: $table.nombre,
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<Gender, Gender, String> get sexo =>
+  ColumnWithTypeConverterFilters<Gender, Gender, String> get gender =>
       $composableBuilder(
-        column: $table.sexo,
+        column: $table.gender,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnWithTypeConverterFilters<Role, Role, String> get privilegio =>
+  ColumnWithTypeConverterFilters<Role, Role, String> get role =>
       $composableBuilder(
-        column: $table.privilegio,
+        column: $table.role,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnFilters<String> get congregacion => $composableBuilder(
-    column: $table.congregacion,
+  ColumnFilters<String> get congregation => $composableBuilder(
+    column: $table.congregation,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get activo => $composableBuilder(
-    column: $table.activo,
+  ColumnFilters<bool> get active => $composableBuilder(
+    column: $table.active,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get notas => $composableBuilder(
-    column: $table.notas,
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -554,8 +554,8 @@ class $$ParticipantsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get ultimoUso => $composableBuilder(
-    column: $table.ultimoUso,
+  ColumnFilters<DateTime> get lastUsed => $composableBuilder(
+    column: $table.lastUsed,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -574,33 +574,33 @@ class $$ParticipantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get nombre => $composableBuilder(
-    column: $table.nombre,
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get sexo => $composableBuilder(
-    column: $table.sexo,
+  ColumnOrderings<String> get gender => $composableBuilder(
+    column: $table.gender,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get privilegio => $composableBuilder(
-    column: $table.privilegio,
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get congregacion => $composableBuilder(
-    column: $table.congregacion,
+  ColumnOrderings<String> get congregation => $composableBuilder(
+    column: $table.congregation,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get activo => $composableBuilder(
-    column: $table.activo,
+  ColumnOrderings<bool> get active => $composableBuilder(
+    column: $table.active,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get notas => $composableBuilder(
-    column: $table.notas,
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -614,8 +614,8 @@ class $$ParticipantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get ultimoUso => $composableBuilder(
-    column: $table.ultimoUso,
+  ColumnOrderings<DateTime> get lastUsed => $composableBuilder(
+    column: $table.lastUsed,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -632,28 +632,25 @@ class $$ParticipantsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get nombre =>
-      $composableBuilder(column: $table.nombre, builder: (column) => column);
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Gender, String> get sexo =>
-      $composableBuilder(column: $table.sexo, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Gender, String> get gender =>
+      $composableBuilder(column: $table.gender, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Role, String> get privilegio =>
-      $composableBuilder(
-        column: $table.privilegio,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<Role, String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
 
-  GeneratedColumn<String> get congregacion => $composableBuilder(
-    column: $table.congregacion,
+  GeneratedColumn<String> get congregation => $composableBuilder(
+    column: $table.congregation,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get activo =>
-      $composableBuilder(column: $table.activo, builder: (column) => column);
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
 
-  GeneratedColumn<String> get notas =>
-      $composableBuilder(column: $table.notas, builder: (column) => column);
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -661,8 +658,8 @@ class $$ParticipantsTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get ultimoUso =>
-      $composableBuilder(column: $table.ultimoUso, builder: (column) => column);
+  GeneratedColumn<DateTime> get lastUsed =>
+      $composableBuilder(column: $table.lastUsed, builder: (column) => column);
 }
 
 class $$ParticipantsTableTableManager
@@ -697,53 +694,53 @@ class $$ParticipantsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> nombre = const Value.absent(),
-                Value<Gender> sexo = const Value.absent(),
-                Value<Role> privilegio = const Value.absent(),
-                Value<String> congregacion = const Value.absent(),
-                Value<bool> activo = const Value.absent(),
-                Value<String> notas = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<Gender> gender = const Value.absent(),
+                Value<Role> role = const Value.absent(),
+                Value<String> congregation = const Value.absent(),
+                Value<bool> active = const Value.absent(),
+                Value<String> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
-                Value<DateTime?> ultimoUso = const Value.absent(),
+                Value<DateTime?> lastUsed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ParticipantsCompanion(
                 id: id,
-                nombre: nombre,
-                sexo: sexo,
-                privilegio: privilegio,
-                congregacion: congregacion,
-                activo: activo,
-                notas: notas,
+                name: name,
+                gender: gender,
+                role: role,
+                congregation: congregation,
+                active: active,
+                notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                ultimoUso: ultimoUso,
+                lastUsed: lastUsed,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String id,
-                required String nombre,
-                required Gender sexo,
-                required Role privilegio,
-                Value<String> congregacion = const Value.absent(),
-                Value<bool> activo = const Value.absent(),
-                Value<String> notas = const Value.absent(),
+                required String name,
+                required Gender gender,
+                required Role role,
+                Value<String> congregation = const Value.absent(),
+                Value<bool> active = const Value.absent(),
+                Value<String> notes = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
-                Value<DateTime?> ultimoUso = const Value.absent(),
+                Value<DateTime?> lastUsed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ParticipantsCompanion.insert(
                 id: id,
-                nombre: nombre,
-                sexo: sexo,
-                privilegio: privilegio,
-                congregacion: congregacion,
-                activo: activo,
-                notas: notas,
+                name: name,
+                gender: gender,
+                role: role,
+                congregation: congregation,
+                active: active,
+                notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
-                ultimoUso: ultimoUso,
+                lastUsed: lastUsed,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -76,19 +76,19 @@ Week parseWeek(String xhtml) {
     final low = texto.toLowerCase();
     final mcan = _reCancion.firstMatch(texto);
     if (low.contains('palabras de introducci')) {
-      if (mcan != null) semana.cancionInicial = mcan.group(1);
-      semana.introMin = _duracion(texto) ?? 1;
+      if (mcan != null) semana.openingSong = mcan.group(1);
+      semana.introMinutes = _duracion(texto) ?? 1;
       continue;
     }
     if (low.contains('palabras de conclusi')) {
-      if (mcan != null) semana.cancionFinal = mcan.group(1);
-      semana.conclusionMin = _duracion(texto) ?? 3;
+      if (mcan != null) semana.closingSong = mcan.group(1);
+      semana.conclusionMinutes = _duracion(texto) ?? 3;
       continue;
     }
     if (mcan != null &&
         (clase.contains('dc-icon--music') ||
             _reCancionSola.hasMatch(texto))) {
-      semana.cancionMedia = mcan.group(1);
+      semana.middleSong = mcan.group(1);
       continue;
     }
     // ----- parte numerada (h3 'N. Título') -----
@@ -97,22 +97,22 @@ Week parseWeek(String xhtml) {
       final num = int.parse(mnum.group(1)!);
       final titulo = mnum.group(2)!.trim();
       final dur = _duracion(cuerpo) ?? _duracion(texto);
-      semana.partes.add(Part(
-        seccion: seccionActual,
-        num: num,
-        titulo: titulo,
-        min: dur,
+      semana.parts.add(Part(
+        section: seccionActual,
+        number: num,
+        title: titulo,
+        minutes: dur,
       ));
       continue;
     }
     // ----- fecha (primer h1) y lectura (h2 antes de TESOROS) -----
-    if (tag == 'h1' && semana.fecha.isEmpty) {
-      semana.fecha = texto.toUpperCase();
+    if (tag == 'h1' && semana.date.isEmpty) {
+      semana.date = texto.toUpperCase();
     } else if (tag == 'h2' &&
         seccionActual == null &&
-        semana.lectura.isEmpty &&
+        semana.reading.isEmpty &&
         texto.isNotEmpty) {
-      semana.lectura = texto;
+      semana.reading = texto;
     }
   }
   return semana;
@@ -132,7 +132,7 @@ List<Week> parseEpub(Uint8List bytes) {
     final f = archivo.findFile(n)!;
     final xhtml = utf8.decode(f.content as List<int>);
     final s = parseWeek(xhtml);
-    if (s.partes.isNotEmpty) semanas.add(s); // ignora portada/índices
+    if (s.parts.isNotEmpty) semanas.add(s); // ignora portada/índices
   }
   return semanas;
 }

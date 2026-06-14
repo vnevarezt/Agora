@@ -4,14 +4,14 @@ import '../models/program_row.dart';
 import 'pdf_theme.dart';
 
 /// Anchos de columna calculados por documento. La celda de contenido (X) es
-/// implícita (Expanded), así que solo guardamos rol, aux, nombre y banda.
+/// implícita (Expanded), así que solo guardamos role, aux, nombre y banda.
 class ColumnWidths {
-  final double rol;
+  final double role;
   final double nomPrin;
   final double aux; // 0 cuando el modo Sala Auxiliar está apagado
   final double banda;
   const ColumnWidths({
-    required this.rol,
+    required this.role,
     required this.nomPrin,
     required this.aux,
     required this.banda,
@@ -21,9 +21,9 @@ class ColumnWidths {
 /// Ancho que necesita la columna de nombres de una fila. Para Estudiante/Ayudante
 /// se usa el nombre individual más largo (se apila), para el resto el texto unido.
 double anchoNombres(
-    String rol, List<String> nombres, double Function(String) medir) {
+    String role, List<String> nombres, double Function(String) medir) {
   if (nombres.isEmpty) return 0;
-  if (rol == 'Estudiante/Ayudante:' && nombres.length == 2) {
+  if (role == 'Estudiante/Ayudante:' && nombres.length == 2) {
     final a = medir(nombres[0]);
     final b = medir(nombres[1]);
     return a > b ? a : b;
@@ -42,29 +42,29 @@ ColumnWidths calcularColumnas(
 ) {
   double medir(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
   double maxPrin = 0, maxAux = 0;
-  for (final f in sched.filas) {
-    final wp = anchoNombres(f.rol, asg.principal(f), medir);
+  for (final f in sched.rows) {
+    final wp = anchoNombres(f.role, asg.main(f), medir);
     if (wp > maxPrin) maxPrin = wp;
     if (aux) {
-      final wa = anchoNombres(f.rol, asg.auxiliar(f), medir);
+      final wa = anchoNombres(f.role, asg.auxiliary(f), medir);
       if (wa > maxAux) maxAux = wa;
     }
   }
-  const rol = S140.anchoRol; // fijo (etiquetas de rol, no entrada del usuario)
+  const role = S140.anchoRol; // fijo (etiquetas de role, no entrada del usuario)
 
   if (!aux) {
     final maxNomOK =
-        S140.contentWidth - 2 * S140.colGap - rol - S140.minContenido;
+        S140.contentWidth - 2 * S140.colGap - role - S140.minContenido;
     final nomPrin =
         (maxPrin + S140.nomPad).clamp(S140.anchoNomPrin, maxNomOK).toDouble();
-    final contenido = S140.contentWidth - 2 * S140.colGap - rol - nomPrin;
+    final contenido = S140.contentWidth - 2 * S140.colGap - role - nomPrin;
     return ColumnWidths(
-        rol: rol, nomPrin: nomPrin, aux: 0, banda: contenido + S140.colGap + rol);
+        role: role, nomPrin: nomPrin, aux: 0, banda: contenido + S140.colGap + role);
   }
 
   // --- Modo Sala Auxiliar: 4 columnas (X R A P), 3 huecos ---
   final dispo =
-      S140.contentWidth - 3 * S140.colGap - rol - S140.minContenidoAux;
+      S140.contentWidth - 3 * S140.colGap - role - S140.minContenidoAux;
   var nomPrin = maxPrin + S140.nomPad;
   var nomAux = maxAux + S140.nomPad;
   if (nomPrin < S140.minColAux) nomPrin = S140.minColAux;
@@ -75,10 +75,10 @@ ColumnWidths calcularColumnas(
     nomAux = (nomAux * factor).clamp(S140.minColAux, dispo).toDouble();
   }
   final contenido =
-      S140.contentWidth - 3 * S140.colGap - rol - nomPrin - nomAux;
+      S140.contentWidth - 3 * S140.colGap - role - nomPrin - nomAux;
   return ColumnWidths(
-      rol: rol,
+      role: role,
       nomPrin: nomPrin,
       aux: nomAux,
-      banda: contenido + S140.colGap + rol);
+      banda: contenido + S140.colGap + role);
 }

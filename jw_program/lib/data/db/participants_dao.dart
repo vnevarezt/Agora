@@ -16,13 +16,13 @@ class ParticipantsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<Participant>> watchAll() {
     return (select(participants)
-          ..orderBy([(t) => OrderingTerm.asc(t.nombre)]))
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
         .watch();
   }
 
   Future<List<Participant>> todos() {
     return (select(participants)
-          ..orderBy([(t) => OrderingTerm.asc(t.nombre)]))
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
         .get();
   }
 
@@ -35,12 +35,12 @@ class ParticipantsDao extends DatabaseAccessor<AppDatabase>
   /// `updatedAt`, cada asignación pisaría ediciones reales al fusionar.
   Future<void> markUsed(String id, DateTime cuando) {
     return (update(participants)..where((t) => t.id.equals(id)))
-        .write(ParticipantsCompanion(ultimoUso: Value(cuando)));
+        .write(ParticipantsCompanion(lastUsed: Value(cuando)));
   }
 
   Future<void> setActive(String id, bool v, DateTime cuando) {
     return (update(participants)..where((t) => t.id.equals(id))).write(
-      ParticipantsCompanion(activo: Value(v), updatedAt: Value(cuando)),
+      ParticipantsCompanion(active: Value(v), updatedAt: Value(cuando)),
     );
   }
 

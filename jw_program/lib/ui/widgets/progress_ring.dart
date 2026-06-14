@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Anillo de progreso de asignaciones (`.ring` + `.progress__txt`): arco
+/// Anillo de progress de asignaciones (`.ring` + `.progress__txt`): arco
 /// accent sobre base de color borde, número al centro y, opcionalmente, el
 /// texto "N/M asignados" al costado.
 class ProgressRing extends StatelessWidget {
@@ -32,7 +32,7 @@ class ProgressRing extends StatelessWidget {
       height: size,
       child: CustomPaint(
         painter: _RingPainter(
-          progreso: pct,
+          progress: pct,
           colorArco: t.accent,
           colorBase: t.border,
         ),
@@ -81,12 +81,12 @@ class ProgressRing extends StatelessWidget {
 
 class _RingPainter extends CustomPainter {
   const _RingPainter({
-    required this.progreso,
+    required this.progress,
     required this.colorArco,
     required this.colorBase,
   });
 
-  final double progreso;
+  final double progress;
   final Color colorArco;
   final Color colorBase;
 
@@ -101,7 +101,7 @@ class _RingPainter extends CustomPainter {
       ..color = colorBase;
     canvas.drawCircle(centro, radio, base);
 
-    if (progreso > 0) {
+    if (progress > 0) {
       final arco = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = grosor
@@ -109,7 +109,7 @@ class _RingPainter extends CustomPainter {
       canvas.drawArc(
         Rect.fromCircle(center: centro, radius: radio),
         -math.pi / 2,
-        2 * math.pi * progreso.clamp(0.0, 1.0),
+        2 * math.pi * progress.clamp(0.0, 1.0),
         false,
         arco,
       );
@@ -118,7 +118,7 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.progreso != progreso ||
+      old.progress != progress ||
       old.colorArco != colorArco ||
       old.colorBase != colorBase;
 }

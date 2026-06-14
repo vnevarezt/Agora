@@ -66,9 +66,9 @@ class _TopBar extends ConsumerWidget {
     final t = context.tokens;
     final isMobile = context.isMobile;
     final usuario = ref.watch(sessionUserProvider);
-    final saludo = usuario.nombre.isEmpty
+    final saludo = usuario.name.isEmpty
         ? _greeting()
-        : '${_greeting()}, ${usuario.nombre}';
+        : '${_greeting()}, ${usuario.name}';
 
     return Row(
       children: [
@@ -136,27 +136,27 @@ class _Filters extends ConsumerWidget {
         FilterPill(
           label: 'Todas',
           count: proyectos.length,
-          active: filtros.congId == 'all',
+          active: filtros.congregationId == 'all',
           onTap: () => notifier.setCongregation('all'),
         ),
         for (final c in congs)
           FilterPill(
-            label: c.nombre,
+            label: c.name,
             dotColor: Color(c.color),
-            count: proyectos.where((p) => p.congregacionId == c.id).length,
-            active: filtros.congId == c.id,
+            count: proyectos.where((p) => p.congregationId == c.id).length,
+            active: filtros.congregationId == c.id,
             onTap: () => notifier.setCongregation(c.id),
           ),
         Container(width: 1, height: 22, color: t.border),
         FilterPill(
           label: 'Todo estado',
-          active: filtros.estado == null,
+          active: filtros.status == null,
           onTap: () => notifier.setStatus(null),
         ),
         for (final e in ProjectStatus.values)
           FilterPill(
             label: e.plural,
-            active: filtros.estado == e,
+            active: filtros.status == e,
             onTap: () => notifier.setStatus(e),
           ),
       ],
@@ -229,7 +229,7 @@ class _ProjectsSection extends ConsumerWidget {
                     width: colW,
                     child: ProjectCard(
                       proyecto: p,
-                      congregacion: porId[p.congregacionId],
+                      congregation: porId[p.congregationId],
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                             builder: (_) => ProgramShell(proyecto: p)),

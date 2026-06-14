@@ -4,19 +4,19 @@ import '../../models/participant.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Insignia de privilegio (`.priv--*`): anciano (accent), siervo (ámbar) y
+/// Insignia de role (`.priv--*`): anciano (accent), siervo (ámbar) y
 /// publicador (neutro). El ámbar lleva variante para modo oscuro.
 class PrivBadge extends StatelessWidget {
-  const PrivBadge({super.key, required this.privilegio});
+  const PrivBadge({super.key, required this.role});
 
-  final Role privilegio;
+  final Role role;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     final oscuro = Theme.of(context).brightness == Brightness.dark;
 
-    final (Color bg, Color fg, Color? borde) = switch (privilegio) {
+    final (Color bg, Color fg, Color? borde) = switch (role) {
       Role.elder => (t.accentSoft, t.accentStrong, null),
       Role.ministerialServant => oscuro
           ? (const Color(0xFF3A3115), const Color(0xFFD9C27A), null)
@@ -32,7 +32,7 @@ class PrivBadge extends StatelessWidget {
         border: borde != null ? Border.all(color: borde) : null,
       ),
       child: Text(
-        privilegio.etiqueta.toUpperCase(),
+        role.etiqueta.toUpperCase(),
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w800,

@@ -14,22 +14,22 @@ const _pdfNameFormats = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre']
 
 const _notifications = [
   (
-    titulo: 'Partes sin asignar',
+    title: 'Partes sin asignar',
     desc: 'Avisar cuando falten asignaciones a 3 días de la reunión',
     inicial: true,
   ),
   (
-    titulo: 'Carga de asignaciones',
+    title: 'Carga de asignaciones',
     desc: 'Avisar si un hermano acumula muchas asignaciones',
     inicial: true,
   ),
   (
-    titulo: 'Nuevos cuadernos',
+    title: 'Nuevos cuadernos',
     desc: 'Avisar cuando haya un nuevo cuaderno disponible',
     inicial: true,
   ),
   (
-    titulo: 'Exportaciones pendientes',
+    title: 'Exportaciones pendientes',
     desc: 'Recordar exportar el programa antes del fin de semana',
     inicial: false,
   ),
@@ -148,7 +148,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
         for (var i = 0; i < _notifications.length; i++)
           SettingRow(
             first: i == 0,
-            title: _notifications[i].titulo,
+            title: _notifications[i].title,
             subtitle: _notifications[i].desc,
             trailing: Transform.scale(
               scale: 0.85,

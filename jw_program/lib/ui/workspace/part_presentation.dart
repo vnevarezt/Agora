@@ -19,7 +19,7 @@ class SlotSpec {
   final SlotRef ref;
   final int maxLength;
 
-  /// Slots de sala auxiliar: label en color accent.
+  /// Slots de sala auxiliary: label en color accent.
   final bool accent;
 
   const SlotSpec({
@@ -70,17 +70,17 @@ final _duracionSufijo = RegExp(r'\s*\((\d+)\s*mins?\.\)$');
 /// Labels de slot según el rol de la fila (misma regla que el editor previo).
 List<String> _labelsDeRol(ProgramRow row) {
   if (row.slots == 2) {
-    return row.rol.contains('Conductor')
+    return row.role.contains('Conductor')
         ? const ['Conductor', 'Lector']
         : const ['Estudiante', 'Ayudante'];
   }
-  return [row.rol.isNotEmpty ? row.rol.replaceAll(':', '') : 'Encargado'];
+  return [row.role.isNotEmpty ? row.role.replaceAll(':', '') : 'Encargado'];
 }
 
 int _maxLengthDeRol(ProgramRow row) =>
-    row.slots == 2 && !row.rol.contains('Conductor')
+    row.slots == 2 && !row.role.contains('Conductor')
         ? Limites.estAyud
-        : Limites.nombre;
+        : Limites.name;
 
 /// Tarjeta sintética del presidente de la reunión.
 PartView presidenteView() {
@@ -93,7 +93,7 @@ PartView presidenteView() {
       SlotSpec(
         label: 'Presidente',
         ref: ChairmanSlot(),
-        maxLength: Limites.nombre,
+        maxLength: Limites.name,
       ),
     ],
   );
@@ -102,16 +102,16 @@ PartView presidenteView() {
 /// Mapea una fila del horario a su tarjeta. [auxActivo] = switch Sala
 /// Auxiliar del formulario.
 PartView mapRow(ProgramRow row, {required bool auxActivo}) {
-  final match = _duracionSufijo.firstMatch(row.contenido);
-  final titulo = row.contenido.replaceAll(_duracionSufijo, '');
+  final match = _duracionSufijo.firstMatch(row.content);
+  final titulo = row.content.replaceAll(_duracionSufijo, '');
   final duracion = match != null ? '${match.group(1)} min' : null;
-  final esCancion = row.contenido.startsWith('Canción');
+  final esCancion = row.content.startsWith('Canción');
 
   if (row.slots == 0) {
     return PartView(
       id: row.id,
       kind: PartKind.fixedLine,
-      time: row.hora,
+      time: row.time,
       title: titulo,
       durationLabel: duracion,
       fixedTag: esCancion ? 'Cántico' : 'A cargo del presidente',
@@ -125,7 +125,7 @@ PartView mapRow(ProgramRow row, {required bool auxActivo}) {
   return PartView(
     id: row.id,
     kind: PartKind.role,
-    time: row.hora,
+    time: row.time,
     title: titulo,
     durationLabel: duracion,
     // La canción inicial/final lleva el slot de oración en el modelo: se

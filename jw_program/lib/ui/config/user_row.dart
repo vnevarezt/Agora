@@ -4,18 +4,18 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/avatar.dart';
 
-/// Fila de usuario con acceso (`.user-row`): avatar, nombre, email y un control
-/// a la derecha (pill de rol o selector). [first] omite el borde superior.
+/// Fila de usuario con acceso (`.user-row`): avatar, name, email y un control
+/// a la derecha (pill de role o selector). [first] omite el borde superior.
 class UserRow extends StatelessWidget {
   const UserRow({
     super.key,
-    required this.nombre,
+    required this.name,
     required this.email,
     this.trailing,
     this.first = false,
   });
 
-  final String nombre;
+  final String name;
   final String email;
   final Widget? trailing;
   final bool first;
@@ -32,14 +32,14 @@ class UserRow extends StatelessWidget {
             ),
       child: Row(
         children: [
-          PersonAvatar(nombre: nombre, size: 34),
+          PersonAvatar(name: name, size: 34),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  nombre,
+                  name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -71,11 +71,11 @@ class UserRow extends StatelessWidget {
   }
 }
 
-/// Pill neutra de rol (`.role-pill`): uppercase pequeña sobre `surface2`.
+/// Pill neutra de role (`.role-pill`): uppercase pequeña sobre `surface2`.
 class RolePill extends StatelessWidget {
-  const RolePill({super.key, required this.rol});
+  const RolePill({super.key, required this.role});
 
-  final String rol;
+  final String role;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +88,7 @@ class RolePill extends StatelessWidget {
         border: Border.all(color: t.border2),
       ),
       child: Text(
-        rol.toUpperCase(),
+        role.toUpperCase(),
         style: TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w800,

@@ -31,7 +31,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     ref.listen(scheduleProvider, (_, _) => _programar());
     ref.listen(assignmentsProvider, (_, _) => _programar());
     ref.listen(
-      formProvider.select((f) => (f.cong, f.presidente, f.aux)),
+      formProvider.select((f) => (f.congregationId, f.chairman, f.auxRoom)),
       (_, _) => _programar(),
     );
     _programar();
@@ -51,12 +51,12 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final f = ref.read(formProvider);
     try {
       final pdf = await buildProgramPdf(
-        cong: f.cong,
+        cong: f.congregationId,
         semana: semana,
         sched: sched,
         asignaciones: ref.read(assignmentsProvider),
-        presidente: f.presidente,
-        aux: f.aux,
+        chairman: f.chairman,
+        aux: f.auxRoom,
       );
       final img = await rasterizarPagina(pdf, scale: _scale);
       if (seq != _seq) {
@@ -90,17 +90,17 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     }
     final f = ref.read(formProvider);
     final pdf = await buildProgramPdf(
-      cong: f.cong,
+      cong: f.congregationId,
       semana: semana,
       sched: sched,
       asignaciones: ref.read(assignmentsProvider),
-      presidente: f.presidente,
-      aux: f.aux,
+      chairman: f.chairman,
+      aux: f.auxRoom,
     );
     final dir =
         (await getDownloadsDirectory()) ?? await getApplicationDocumentsDirectory();
     final ruta =
-        '${dir.path}${Platform.pathSeparator}programa-${f.issue}-s${f.semanaIdx + 1}.pdf';
+        '${dir.path}${Platform.pathSeparator}programa-${f.issue}-s${f.weekIndex + 1}.pdf';
     await File(ruta).writeAsBytes(pdf);
     return ruta;
   }

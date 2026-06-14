@@ -32,10 +32,10 @@ class SlotField extends ConsumerWidget {
         maxLength: spec.maxLength,
       );
       switch (resultado) {
-        case PickNombre(:final nombre):
-          writeAssignment(ref, spec.ref, nombre);
+        case PickNombre(:final name):
+          writeAssignment(ref, spec.ref, name);
           // Fire-and-forget: el directorio se actualiza solo (stream).
-          unawaited(ref.read(participantActionsProvider).recordUsage(nombre));
+          unawaited(ref.read(participantActionsProvider).recordUsage(name));
         case PickQuitar():
           writeAssignment(ref, spec.ref, '');
         case null:
@@ -49,7 +49,7 @@ class SlotField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final nombre =
+    final name =
         ref.watch(formProvider.select((f) => slotName(f, spec.ref)));
 
     return Column(
@@ -66,10 +66,10 @@ class SlotField extends ConsumerWidget {
         // Builder: ancla del popover = solo el botón, no el label.
         Builder(
           builder: (anchorContext) => AssigneeButton(
-            nombre: nombre.isEmpty ? null : nombre,
+            name: name.isEmpty ? null : name,
             alwaysShowClear: context.isMobile,
-            onTap: () => _openPicker(anchorContext, ref, nombre),
-            onClear: nombre.isEmpty
+            onTap: () => _openPicker(anchorContext, ref, name),
+            onClear: name.isEmpty
                 ? null
                 : () => writeAssignment(ref, spec.ref, ''),
           ),

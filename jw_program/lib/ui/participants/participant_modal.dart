@@ -16,7 +16,7 @@ import '../widgets/labeled_field.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/segmented_control.dart';
 
-/// Descripción de cada privilegio en las radio-cards del modal.
+/// Descripción de cada role en las radio-cards del modal.
 const _roleDesc = {
   Role.publisher:
       'Participa en "Seamos mejores maestros" (hermanos y hermanas)',
@@ -53,12 +53,12 @@ class PersonModal extends ConsumerStatefulWidget {
 }
 
 class _PersonModalState extends ConsumerState<PersonModal> {
-  late String _nombre = widget.original?.nombre ?? '';
-  late Gender _sexo = widget.original?.sexo ?? Gender.male;
+  late String _nombre = widget.original?.name ?? '';
+  late Gender _sexo = widget.original?.gender ?? Gender.male;
   late Role _privilegio =
-      widget.original?.privilegio ?? Role.publisher;
+      widget.original?.role ?? Role.publisher;
   late String _congregacion;
-  late bool _activo = widget.original?.activo ?? true;
+  late bool _activo = widget.original?.active ?? true;
   bool _guardando = false;
 
   /// Bump para re-sembrar el campo de congregación al tocar un chip.
@@ -69,7 +69,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   @override
   void initState() {
     super.initState();
-    _congregacion = widget.original?.congregacion ?? ref.read(formProvider).cong;
+    _congregacion = widget.original?.congregation ?? ref.read(formProvider).congregationId;
   }
 
   void _setGender(Gender s) => setState(() {
@@ -85,21 +85,21 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       final h = _isCreating
           ? Participant(
               id: const Uuid().v4(),
-              nombre: _nombre.trim(),
-              sexo: _sexo,
-              privilegio: _privilegio,
-              congregacion: _congregacion.trim(),
-              activo: _activo,
-              notas: '',
+              name: _nombre.trim(),
+              gender: _sexo,
+              role: _privilegio,
+              congregation: _congregacion.trim(),
+              active: _activo,
+              notes: '',
               createdAt: ahora,
               updatedAt: ahora,
             )
           : widget.original!.copyWith(
-              nombre: _nombre.trim(),
-              sexo: _sexo,
-              privilegio: _privilegio,
-              congregacion: _congregacion.trim(),
-              activo: _activo,
+              name: _nombre.trim(),
+              gender: _sexo,
+              role: _privilegio,
+              congregation: _congregacion.trim(),
+              active: _activo,
             );
       await ref.read(participantActionsProvider).guardar(h);
       widget.onClose();
@@ -114,7 +114,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar definitivamente?'),
         content: Text(
-          'Se eliminará a ${widget.original!.nombre} del directorio. '
+          'Se eliminará a ${widget.original!.name} del directorio. '
           'Esta acción no se puede deshacer. Las asignaciones ya escritas '
           'en programas no se ven afectadas.',
         ),
@@ -252,7 +252,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           label: 'Nombre completo',
           child: BoundTextField(
             initial: _nombre,
-            maxLength: Limites.nombre,
+            maxLength: Limites.name,
             hint: 'Ej. Martín Salas',
             onChanged: (v) => setState(() => _nombre = v),
           ),
@@ -263,7 +263,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           child: BoundTextField(
             key: ValueKey('cong-$_congVersion'),
             initial: _congregacion,
-            maxLength: Limites.cong,
+            maxLength: Limites.congregationId,
             onChanged: (v) => setState(() => _congregacion = v),
           ),
         ),
@@ -306,7 +306,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               for (final p in privsDisponibles) ...[
                 if (p != privsDisponibles.first) const SizedBox(height: 8),
                 _RoleOption(
-                  privilegio: p,
+                  role: p,
                   selected: _privilegio == p,
                   onTap: () => setState(() => _privilegio = p),
                 ),
@@ -316,7 +316,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         ),
         const SizedBox(height: 16),
         _AvailableRow(
-          activo: _activo,
+          active: _activo,
           onChanged: (v) => setState(() => _activo = v),
         ),
       ],
@@ -394,15 +394,15 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   }
 }
 
-/// Radio-card de privilegio (`.priv-option`): círculo + título + descripción.
+/// Radio-card de role (`.priv-option`): círculo + título + descripción.
 class _RoleOption extends StatelessWidget {
   const _RoleOption({
-    required this.privilegio,
+    required this.role,
     required this.selected,
     required this.onTap,
   });
 
-  final Role privilegio;
+  final Role role;
   final bool selected;
   final VoidCallback onTap;
 
@@ -455,7 +455,7 @@ class _RoleOption extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      privilegio.etiqueta,
+                      role.etiqueta,
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,
@@ -464,7 +464,7 @@ class _RoleOption extends StatelessWidget {
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      _roleDesc[privilegio]!,
+                      _roleDesc[role]!,
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
@@ -483,11 +483,11 @@ class _RoleOption extends StatelessWidget {
   }
 }
 
-/// Fila "Disponible" con switch (`.set-row`): mapea a `activo`.
+/// Fila "Disponible" con switch (`.set-row`): mapea a `active`.
 class _AvailableRow extends StatelessWidget {
-  const _AvailableRow({required this.activo, required this.onChanged});
+  const _AvailableRow({required this.active, required this.onChanged});
 
-  final bool activo;
+  final bool active;
   final ValueChanged<bool> onChanged;
 
   @override
@@ -521,7 +521,7 @@ class _AvailableRow extends StatelessWidget {
         const SizedBox(width: 12),
         Transform.scale(
           scale: 0.85,
-          child: Switch(value: activo, onChanged: onChanged),
+          child: Switch(value: active, onChanged: onChanged),
         ),
       ],
     );

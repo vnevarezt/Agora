@@ -44,10 +44,10 @@ class ProjectModal extends ConsumerStatefulWidget {
 }
 
 class _ProjectModalState extends ConsumerState<ProjectModal> {
-  late String _nombre = widget.original?.nombre ?? '';
+  late String _nombre = widget.original?.name ?? '';
   late String _congId;
   late String _cuadernoId;
-  late List<String> _semanas = List.of(widget.original?.semanas ?? const []);
+  late List<String> _semanas = List.of(widget.original?.weeks ?? const []);
 
   bool get _isNew => widget.original == null;
 
@@ -56,7 +56,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     super.initState();
     final congs = ref.read(congregationsProvider);
     final cuadernos = ref.read(notebooksProvider);
-    _congId = widget.original?.congregacionId ??
+    _congId = widget.original?.congregationId ??
         (congs.isNotEmpty ? congs.first.id : '');
     _cuadernoId = cuadernos.isNotEmpty ? cuadernos.first.id : '';
   }
@@ -69,9 +69,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         _semanas = _semanas.where((x) => x != w).toList();
       } else {
         final extra =
-            _semanas.where((x) => !cuaderno.semanas.contains(x)).toList();
+            _semanas.where((x) => !cuaderno.weeks.contains(x)).toList();
         _semanas = [
-          ...cuaderno.semanas.where((x) => _semanas.contains(x) || x == w),
+          ...cuaderno.weeks.where((x) => _semanas.contains(x) || x == w),
           ...extra,
         ];
       }
@@ -94,11 +94,11 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final nombre = _autoName(cuaderno);
     final notifier = ref.read(projectsProvider.notifier);
     if (_isNew) {
-      notifier.crear(
-          nombre: nombre, congregacionId: _congId, semanas: _semanas);
+      notifier.create(
+          name: nombre, congregationId: _congId, weeks: _semanas);
     } else {
       notifier.update(widget.original!.id,
-          nombre: nombre, congregacionId: _congId, semanas: _semanas);
+          name: nombre, congregationId: _congId, weeks: _semanas);
     }
     widget.onClose();
   }
@@ -109,7 +109,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar proyecto?'),
         content: Text(
-          'Se eliminará "${widget.original!.nombre}". '
+          'Se eliminará "${widget.original!.name}". '
           'Esta acción no se puede deshacer.',
         ),
         actions: [
@@ -126,7 +126,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       ),
     );
     if (confirmado != true || !mounted) return;
-    ref.read(projectsProvider.notifier).eliminar(widget.original!.id);
+    ref.read(projectsProvider.notifier).delete(widget.original!.id);
     widget.onClose();
   }
 
@@ -156,7 +156,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       final cuaderno = cuadernos.firstWhere((c) => c.id == _cuadernoId,
           orElse: () => cuadernos.first);
       final extra =
-          _semanas.where((x) => !cuaderno.semanas.contains(x)).toList();
+          _semanas.where((x) => !cuaderno.weeks.contains(x)).toList();
       final autoName = _autoName(cuaderno);
       card = Column(
         mainAxisSize: MainAxisSize.min,
@@ -293,7 +293,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       child: AppDropdown<String>(
         value: _congId,
         items: [for (final c in congs) c.id],
-        itemLabel: (id) => congs.firstWhere((c) => c.id == id).nombre,
+        itemLabel: (id) => congs.firstWhere((c) => c.id == id).name,
         onChanged: (v) => setState(() => _congId = v),
       ),
     );
@@ -331,7 +331,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
             spacing: 6,
             runSpacing: 6,
             children: [
-              for (final w in cuaderno.semanas)
+              for (final w in cuaderno.weeks)
                 _WeekToggle(
                   label: w,
                   active: _semanas.contains(w),

@@ -18,7 +18,7 @@ class ReminderCard extends StatelessWidget {
     final r = recordatorio;
 
     final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
-        switch (r.tipo) {
+        switch (r.type) {
       ReminderType.alert => oscuro
           ? (
               Icons.warning_amber_rounded,
@@ -65,7 +65,7 @@ class ReminderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  r.titulo,
+                  r.title,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,

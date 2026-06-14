@@ -12,8 +12,8 @@ import '../models/reminder.dart';
 
 /// Usuario en sesión (saludo y tarjeta lateral). Sin identidad real todavía:
 /// neutro hasta que haya autenticación.
-final sessionUserProvider = Provider<({String nombre, String rol})>(
-    (ref) => (nombre: '', rol: ''));
+final sessionUserProvider = Provider<({String name, String role})>(
+    (ref) => (name: '', role: ''));
 
 /// Paleta para el punto de color de cada congregación nueva (se cicla).
 const _congColors = <int>[
@@ -30,14 +30,14 @@ class CongregationsController extends Notifier<List<Congregation>> {
   @override
   List<Congregation> build() => const [];
 
-  void add({required String nombre, required String numero}) {
+  void add({required String name, required String number}) {
     final color = _congColors[state.length % _congColors.length];
     state = [
       ...state,
       Congregation(
         id: const Uuid().v4(),
-        nombre: nombre,
-        numero: numero,
+        name: name,
+        number: number,
         color: color,
       ),
     ];
@@ -62,48 +62,48 @@ class ProjectsController extends Notifier<List<Project>> {
   List<Project> build() => const [];
 
   /// 14 partes asignables por semana.
-  static int _total(int semanas) => semanas * 14;
+  static int _total(int weeks) => weeks * 14;
 
-  void crear({
-    required String nombre,
-    required String congregacionId,
-    required List<String> semanas,
+  void create({
+    required String name,
+    required String congregationId,
+    required List<String> weeks,
   }) {
     final nuevo = Project(
       id: const Uuid().v4(),
-      nombre: nombre,
-      congregacionId: congregacionId,
-      semanas: semanas,
+      name: name,
+      congregationId: congregationId,
+      weeks: weeks,
       done: 0,
-      total: _total(semanas.length),
-      estado: ProjectStatus.draft,
-      editado: 'ahora mismo',
+      total: _total(weeks.length),
+      status: ProjectStatus.draft,
+      editedLabel: 'ahora mismo',
     );
     state = [nuevo, ...state];
   }
 
   void update(
     String id, {
-    required String nombre,
-    required String congregacionId,
-    required List<String> semanas,
+    required String name,
+    required String congregationId,
+    required List<String> weeks,
   }) {
     state = [
       for (final p in state)
         if (p.id == id)
           p.copyWith(
-            nombre: nombre,
-            congregacionId: congregacionId,
-            semanas: semanas,
-            total: _total(semanas.length),
-            editado: 'ahora mismo',
+            name: name,
+            congregationId: congregationId,
+            weeks: weeks,
+            total: _total(weeks.length),
+            editedLabel: 'ahora mismo',
           )
         else
           p,
     ];
   }
 
-  void eliminar(String id) =>
+  void delete(String id) =>
       state = [for (final p in state) if (p.id != id) p];
 }
 
@@ -114,12 +114,12 @@ final projectsProvider =
 /// Filtros activos: congregación (`'all'` = todas) y estado (`null` = todos).
 class DashboardFilters {
   /// `'all'` o el id de una congregación.
-  final String congId;
+  final String congregationId;
 
   /// `null` = todo estado.
-  final ProjectStatus? estado;
+  final ProjectStatus? status;
 
-  const DashboardFilters({this.congId = 'all', this.estado});
+  const DashboardFilters({this.congregationId = 'all', this.status});
 }
 
 class DashboardFiltersController extends Notifier<DashboardFilters> {
@@ -127,10 +127,10 @@ class DashboardFiltersController extends Notifier<DashboardFilters> {
   DashboardFilters build() => const DashboardFilters();
 
   void setCongregation(String congId) =>
-      state = DashboardFilters(congId: congId, estado: state.estado);
+      state = DashboardFilters(congregationId: congId, status: state.status);
 
   void setStatus(ProjectStatus? estado) =>
-      state = DashboardFilters(congId: state.congId, estado: estado);
+      state = DashboardFilters(congregationId: state.congregationId, status: estado);
 }
 
 final dashboardFiltersProvider =
@@ -143,7 +143,7 @@ final filteredProjectsProvider = Provider<List<Project>>((ref) {
   final f = ref.watch(dashboardFiltersProvider);
   return proyectos
       .where((p) =>
-          (f.congId == 'all' || p.congregacionId == f.congId) &&
-          (f.estado == null || p.estado == f.estado))
+          (f.congregationId == 'all' || p.congregationId == f.congregationId) &&
+          (f.status == null || p.status == f.status))
       .toList();
 });

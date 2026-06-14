@@ -43,7 +43,7 @@ class ProjectBar extends ConsumerWidget {
   }
 
   Widget _desktop(BuildContext context, WidgetRef ref, AppTokens t) {
-    final progreso = ref.watch(progresoProyectoProvider);
+    final progreso = ref.watch(projectProgressProvider);
     return Row(
       children: [
         _back(context),
@@ -110,10 +110,10 @@ class _ProjId extends ConsumerWidget {
 
     final Congregation? cong = proyecto == null
         ? null
-        : congs.where((c) => c.id == proyecto!.congregacionId).firstOrNull;
-    final nombre = proyecto?.nombre ?? 'Programa';
+        : congs.where((c) => c.id == proyecto!.congregationId).firstOrNull;
+    final nombre = proyecto?.name ?? 'Programa';
     final congNombre =
-        cong?.nombre ?? (proyecto == null ? ref.watch(formProvider).cong : '');
+        cong?.name ?? (proyecto == null ? ref.watch(formProvider).congregationId : '');
     final congColor = cong == null ? t.accent : Color(cong.color);
 
     return Column(
@@ -211,18 +211,18 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final weeks = ref.watch(weeksProvider).asData?.value ?? const [];
-    final idx = ref.watch(formProvider.select((f) => f.semanaIdx));
+    final idx = ref.watch(formProvider.select((f) => f.weekIndex));
     final progreso = ref.watch(progressProvider);
     final notifier = ref.read(formProvider.notifier);
 
     final n = weeks.length;
-    final activo = n == 0 ? 0 : idx.clamp(0, n - 1);
-    final fecha = n == 0 ? '—' : weeks[activo].fecha;
+    final active = n == 0 ? 0 : idx.clamp(0, n - 1);
+    final fecha = n == 0 ? '—' : weeks[active].date;
     final done = progreso.done == progreso.total && progreso.total > 0;
 
     void go(int d) {
       if (n == 0) return;
-      notifier.selectWeek((activo + d).clamp(0, n - 1));
+      notifier.selectWeek((active + d).clamp(0, n - 1));
     }
 
     final current = MenuAnchor(
@@ -237,7 +237,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
       menuChildren: [
         _WeekMenu(
           weeks: weeks,
-          activo: activo,
+          active: active,
           onPick: (i) {
             notifier.selectWeek(i);
             _menu.close();
@@ -280,7 +280,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                       children: [
                         Text.rich(
                           TextSpan(
-                            text: 'Semana ${n == 0 ? '—' : activo + 1}',
+                            text: 'Semana ${n == 0 ? '—' : active + 1}',
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w700,
@@ -325,13 +325,13 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
     return Row(
       mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        _Arrow(icon: Icons.chevron_left, onTap: activo == 0 ? null : () => go(-1)),
+        _Arrow(icon: Icons.chevron_left, onTap: active == 0 ? null : () => go(-1)),
         const SizedBox(width: 6),
         widget.expand ? Expanded(child: current) : current,
         const SizedBox(width: 6),
         _Arrow(
             icon: Icons.chevron_right,
-            onTap: (n == 0 || activo >= n - 1) ? null : () => go(1)),
+            onTap: (n == 0 || active >= n - 1) ? null : () => go(1)),
       ],
     );
   }
@@ -400,19 +400,19 @@ class _PctBadge extends StatelessWidget {
 class _WeekMenu extends ConsumerWidget {
   const _WeekMenu({
     required this.weeks,
-    required this.activo,
+    required this.active,
     required this.onPick,
   });
 
   final List weeks;
-  final int activo;
+  final int active;
   final ValueChanged<int> onPick;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final aux = ref.watch(formProvider.select((f) => f.aux));
-    final progresos = ref.watch(progresoPorSemanaProvider);
+    final aux = ref.watch(formProvider.select((f) => f.auxRoom));
+    final progresos = ref.watch(progressPerWeekProvider);
 
     return Container(
       width: 280,
@@ -455,7 +455,7 @@ class _WeekMenu extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
                   decoration: BoxDecoration(
-                    color: i == activo
+                    color: i == active
                         ? t.accentTint
                         : (hovered ? t.surface2 : Colors.transparent),
                     borderRadius: BorderRadius.circular(10),
@@ -470,14 +470,14 @@ class _WeekMenu extends ConsumerWidget {
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
-                            color: i == activo ? t.accentStrong : t.textMute,
+                            color: i == active ? t.accentStrong : t.textMute,
                           ),
                         ),
                       ),
                       SizedBox(
                         width: 76,
                         child: Text(
-                          weeks[i].fecha as String,
+                          weeks[i].date as String,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppText.mono(
@@ -677,13 +677,13 @@ class _ExportCard extends StatelessWidget {
         children: [
           _ExportItem(
             icon: Icons.description_outlined,
-            titulo: 'Semana actual',
+            title: 'Semana actual',
             sub: 'Una hoja PDF',
             onTap: haySemana ? onSemana : null,
           ),
           _ExportItem(
             icon: Icons.layers_outlined,
-            titulo: 'Project completo',
+            title: 'Project completo',
             sub: 'Todas las semanas en un PDF',
             onTap: null, // próximamente
           ),
@@ -694,7 +694,7 @@ class _ExportCard extends StatelessWidget {
           ),
           _ExportItem(
             icon: Icons.list_alt_outlined,
-            titulo: 'Hojas de participación',
+            title: 'Hojas de participación',
             sub: 'Una por hermano asignado',
             onTap: null, // próximamente
           ),
@@ -707,13 +707,13 @@ class _ExportCard extends StatelessWidget {
 class _ExportItem extends StatelessWidget {
   const _ExportItem({
     required this.icon,
-    required this.titulo,
+    required this.title,
     required this.sub,
     required this.onTap,
   });
 
   final IconData icon;
-  final String titulo;
+  final String title;
   final String sub;
   final VoidCallback? onTap;
 
@@ -739,7 +739,7 @@ class _ExportItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(titulo,
+                    Text(title,
                         style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,

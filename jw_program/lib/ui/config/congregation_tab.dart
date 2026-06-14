@@ -41,8 +41,8 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
   void _select(Congregation cong, {bool notificar = true}) {
     void aplicar() {
       _congId = cong.id;
-      _nombre = cong.nombre;
-      _numero = cong.numero;
+      _nombre = cong.name;
+      _numero = cong.number;
       _idioma = meetingLanguages.first;
       _diaEntre = 'Martes';
       _horaEntre = '19:00';
@@ -119,7 +119,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
       children: [
         for (final c in congs)
           _CongChip(
-            congregacion: c,
+            congregation: c,
             acceso: '',
             active: _congId == c.id,
             onTap: () => _select(c),
@@ -266,13 +266,13 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
 /// Chip selector de congregación: punto de color + nombre + pill de rol.
 class _CongChip extends StatelessWidget {
   const _CongChip({
-    required this.congregacion,
+    required this.congregation,
     required this.acceso,
     required this.active,
     required this.onTap,
   });
 
-  final Congregation congregacion;
+  final Congregation congregation;
   final String acceso;
   final bool active;
   final VoidCallback onTap;
@@ -302,13 +302,13 @@ class _CongChip extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Color(congregacion.color),
+                  color: Color(congregation.color),
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 7),
               Text(
-                congregacion.nombre,
+                congregation.name,
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
@@ -317,7 +317,7 @@ class _CongChip extends StatelessWidget {
               ),
               if (acceso.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                RolePill(rol: acceso),
+                RolePill(role: acceso),
               ],
             ],
           ),

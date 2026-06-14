@@ -18,7 +18,7 @@ class WeeksController extends AsyncNotifier<List<Week>> {
   Future<void> load(String issue) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => ref.read(repositoryProvider).semanas(issue),
+      () => ref.read(repositoryProvider).weeks(issue),
     );
   }
 }

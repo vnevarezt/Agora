@@ -17,48 +17,48 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 Week _semana() => Week(
-      fecha: '18-24 DE MAYO',
-      lectura: 'ISAÍAS 62-64',
-      cancionInicial: '44',
-      cancionMedia: '115',
-      cancionFinal: '151',
-      partes: const [
+      date: '18-24 DE MAYO',
+      reading: 'ISAÍAS 62-64',
+      openingSong: '44',
+      middleSong: '115',
+      closingSong: '151',
+      parts: const [
         Part(
-            seccion: Section.treasures,
-            num: 1,
-            titulo: 'Disfrute al máximo de la bendición de Jehová',
-            min: 10),
+            section: Section.treasures,
+            number: 1,
+            title: 'Disfrute al máximo de la bendición de Jehová',
+            minutes: 10),
         Part(
-            seccion: Section.treasures,
-            num: 2,
-            titulo: 'Busquemos perlas escondidas',
-            min: 10),
+            section: Section.treasures,
+            number: 2,
+            title: 'Busquemos perlas escondidas',
+            minutes: 10),
         Part(
-            seccion: Section.treasures,
-            num: 3,
-            titulo: 'Lectura de la Biblia',
-            min: 4),
+            section: Section.treasures,
+            number: 3,
+            title: 'Lectura de la Biblia',
+            minutes: 4),
         Part(
-            seccion: Section.ministry,
-            num: 4,
-            titulo: 'Empiece conversaciones',
-            min: 3),
+            section: Section.ministry,
+            number: 4,
+            title: 'Empiece conversaciones',
+            minutes: 3),
         Part(
-            seccion: Section.ministry,
-            num: 5,
-            titulo: 'Empiece conversaciones',
-            min: 4),
-        Part(seccion: Section.ministry, num: 6, titulo: 'Discurso', min: 5),
+            section: Section.ministry,
+            number: 5,
+            title: 'Empiece conversaciones',
+            minutes: 4),
+        Part(section: Section.ministry, number: 6, title: 'Discurso', minutes: 5),
         Part(
-            seccion: Section.christianLife,
-            num: 7,
-            titulo: 'Sean siempre hospitalarios',
-            min: 15),
+            section: Section.christianLife,
+            number: 7,
+            title: 'Sean siempre hospitalarios',
+            minutes: 15),
         Part(
-            seccion: Section.christianLife,
-            num: 8,
-            titulo: 'Estudio bíblico de la congregación',
-            min: 30),
+            section: Section.christianLife,
+            number: 8,
+            title: 'Estudio bíblico de la congregación',
+            minutes: 30),
       ],
     );
 
@@ -69,9 +69,9 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
   final principal = <String, List<String>>{};
   final auxiliar = <String, List<String>>{};
   var k = 0;
-  for (final f in sched.filas) {
+  for (final f in sched.rows) {
     if (f.slots == 0) continue;
-    if (f.rol == 'Estudiante/Ayudante:' && f.slots == 2) {
+    if (f.role == 'Estudiante/Ayudante:' && f.slots == 2) {
       principal[f.id] = ['Maximiliano Vargas H', 'Concepción Navarro'];
       if (f.auxSlots == 2) auxiliar[f.id] = ['Ernesto Salas R', 'Pablo Treviño'];
       continue;
@@ -88,7 +88,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
     semana: s,
     sched: sched,
     asignaciones: Assignments(principal, auxiliar),
-    presidente: 'Rafael G',
+    chairman: 'Rafael G',
     aux: aux,
   );
   final img = await rasterizarPagina(pdf, scale: 2);

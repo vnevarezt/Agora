@@ -28,12 +28,12 @@ class ParticipantsController extends Notifier<List<Participant>> {
 
   void markUsed(String id, DateTime cuando) => state = [
         for (final x in state)
-          x.id == id ? x.copyWith(ultimoUso: cuando) : x,
+          x.id == id ? x.copyWith(lastUsed: cuando) : x,
       ];
 
   void setActive(String id, bool v, DateTime cuando) => state = [
         for (final x in state)
-          x.id == id ? x.copyWith(activo: v, updatedAt: cuando) : x,
+          x.id == id ? x.copyWith(active: v, updatedAt: cuando) : x,
       ];
 
   void eliminar(String id) =>
@@ -47,16 +47,16 @@ final participantsProvider =
 /// Activos ordenados por nombre normalizado (lista del picker).
 final activeParticipantsProvider = Provider<List<Participant>>((ref) {
   final todos = ref.watch(participantsProvider);
-  return todos.where((h) => h.activo).toList()
+  return todos.where((h) => h.active).toList()
     ..sort((a, b) =>
-        normalizeName(a.nombre).compareTo(normalizeName(b.nombre)));
+        normalizeName(a.name).compareTo(normalizeName(b.name)));
 });
 
 /// Recientes (por `ultimoUso` desc), máx. 6.
 final recentParticipantsProvider = Provider<List<Participant>>((ref) {
   final activos = ref.watch(activeParticipantsProvider);
-  final conUso = activos.where((h) => h.ultimoUso != null).toList()
-    ..sort((a, b) => b.ultimoUso!.compareTo(a.ultimoUso!));
+  final conUso = activos.where((h) => h.lastUsed != null).toList()
+    ..sort((a, b) => b.lastUsed!.compareTo(a.lastUsed!));
   return conUso.take(6).toList();
 });
 
@@ -65,7 +65,7 @@ final participantCongregationsProvider = Provider<List<String>>((ref) {
   final todos = ref.watch(participantsProvider);
   final distintas = <String>{
     for (final h in todos)
-      if (h.congregacion.trim().isNotEmpty) h.congregacion.trim(),
+      if (h.congregation.trim().isNotEmpty) h.congregation.trim(),
   };
   return distintas.toList()..sort();
 });
@@ -74,17 +74,17 @@ final participantCongregationsProvider = Provider<List<String>>((ref) {
 List<Participant> filterParticipants(
   List<Participant> todos, {
   String query = '',
-  Role? privilegio,
-  String? congregacion,
+  Role? role,
+  String? congregation,
   bool incluirInactivos = false,
 }) {
   final q = normalizeName(query);
   return [
     for (final h in todos)
-      if ((incluirInactivos || h.activo) &&
-          (privilegio == null || h.privilegio == privilegio) &&
-          (congregacion == null || h.congregacion == congregacion) &&
-          (q.isEmpty || normalizeName(h.nombre).contains(q)))
+      if ((incluirInactivos || h.active) &&
+          (role == null || h.role == role) &&
+          (congregation == null || h.congregation == congregation) &&
+          (q.isEmpty || normalizeName(h.name).contains(q)))
         h,
   ];
 }
@@ -111,22 +111,22 @@ class ParticipantActions {
     final ahora = DateTime.now().toUtc();
     final clave = normalizeName(limpio);
     for (final h in _ref.read(participantsProvider)) {
-      if (normalizeName(h.nombre) == clave) {
+      if (normalizeName(h.name) == clave) {
         _dir.markUsed(h.id, ahora);
         return;
       }
     }
     _dir.upsert(Participant(
       id: _uuid.v4(),
-      nombre: limpio,
-      sexo: Gender.unspecified,
-      privilegio: Role.publisher,
-      congregacion: _ref.read(formProvider).cong,
-      activo: true,
-      notas: '',
+      name: limpio,
+      gender: Gender.unspecified,
+      role: Role.publisher,
+      congregation: _ref.read(formProvider).congregationId,
+      active: true,
+      notes: '',
       createdAt: ahora,
       updatedAt: ahora,
-      ultimoUso: ahora,
+      lastUsed: ahora,
     ));
   }
 

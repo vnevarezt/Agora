@@ -171,8 +171,8 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
     final filtrados = filterParticipants(
       todos,
       query: _query,
-      privilegio: _privilegio,
-      congregacion: _congregacion,
+      role: _privilegio,
+      congregation: _congregacion,
       incluirInactivos: true,
     );
 

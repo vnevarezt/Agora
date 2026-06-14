@@ -10,11 +10,11 @@ sealed class PickResult {
   const PickResult();
 }
 
-/// Asignar [nombre] al slot.
+/// Asignar [name] al slot.
 class PickNombre extends PickResult {
-  const PickNombre(this.nombre);
+  const PickNombre(this.name);
 
-  final String nombre;
+  final String name;
 }
 
 /// Quitar la asignación actual.

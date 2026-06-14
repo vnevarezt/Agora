@@ -48,7 +48,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
 
     final clave = normalizeName(_busqueda);
     final filtrados = activos
-        .where((h) => normalizeName(h.nombre).contains(clave))
+        .where((h) => normalizeName(h.name).contains(clave))
         .toList();
     final recientes = _busqueda.isEmpty
         ? ref.watch(recentParticipantsProvider).take(4).toList()
@@ -78,7 +78,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             children: [
               if (widget.actual.isNotEmpty)
                 _PersonRow(
-                  nombre: 'Quitar asignación',
+                  name: 'Quitar asignación',
                   avatarVacio: true,
                   muted: true,
                   selected: true,
@@ -115,10 +115,10 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   /// Fila de un hermano: privilegio como etiqueta (solo anciano/siervo).
   Widget _fila(Participant h) {
     return _PersonRow(
-      nombre: h.nombre,
-      tag: h.privilegio == Role.publisher ? null : h.privilegio.etiqueta,
-      selected: h.nombre == widget.actual,
-      onTap: () => _devolver(PickNombre(h.nombre)),
+      name: h.name,
+      tag: h.role == Role.publisher ? null : h.role.etiqueta,
+      selected: h.name == widget.actual,
+      onTap: () => _devolver(PickNombre(h.name)),
     );
   }
 
@@ -163,7 +163,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// Pie "Añadir": asigna el nombre tecleado y lo suma al directorio en
+  /// Pie "Añadir": asigna el name tecleado y lo suma al directorio en
   /// memoria (la gestión de personas llegará en otra fase).
   Widget _pie(AppTokens t) {
     final habilitado = _busqueda.isNotEmpty;
@@ -212,7 +212,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
 
 class _PersonRow extends StatelessWidget {
   const _PersonRow({
-    required this.nombre,
+    required this.name,
     required this.onTap,
     this.tag,
     this.selected = false,
@@ -220,7 +220,7 @@ class _PersonRow extends StatelessWidget {
     this.muted = false,
   });
 
-  final String nombre;
+  final String name;
   final VoidCallback onTap;
   final String? tag;
   final bool selected;
@@ -246,11 +246,11 @@ class _PersonRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              PersonAvatar(nombre: avatarVacio ? null : nombre),
+              PersonAvatar(name: avatarVacio ? null : name),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  nombre,
+                  name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

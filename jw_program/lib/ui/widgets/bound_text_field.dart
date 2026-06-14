@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Campo de texto ligado al estado: se siembra una vez con [initial] y
+/// Campo de texto ligado al status: se siembra una vez con [initial] y
 /// notifica cambios con [onChanged] (la fuente de la verdad es el provider).
 class BoundTextField extends StatefulWidget {
   const BoundTextField({

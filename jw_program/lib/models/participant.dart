@@ -2,7 +2,7 @@
 // la tabla está en `data/db/tables.dart` y mapea a esta clase.
 //
 // IMPORTANTE: las asignaciones del programa siguen siendo strings planos en
-// el formulario (FormModel.principal) — este directorio NO es una FK.
+// el formulario (FormModel.main) — este directorio NO es una FK.
 
 enum Gender { male, female, unspecified }
 
@@ -33,12 +33,12 @@ extension RoleX on Role {
 
 class Participant {
   final String id; // uuid v4, estable: clave de la fusión de imports
-  final String nombre;
-  final Gender sexo;
-  final Role privilegio;
-  final String congregacion;
-  final bool activo; // false = oculto del picker sin borrar
-  final String notas;
+  final String name;
+  final Gender gender;
+  final Role role;
+  final String congregation;
+  final bool active; // false = oculto del picker sin borrar
+  final String notes;
   final DateTime createdAt; // UTC
 
   /// UTC. Solo cambia con ediciones de usuario: decide quién gana al
@@ -46,45 +46,45 @@ class Participant {
   final DateTime updatedAt;
 
   /// Última vez asignado desde el picker (recientes persistentes).
-  final DateTime? ultimoUso;
+  final DateTime? lastUsed;
 
   const Participant({
     required this.id,
-    required this.nombre,
-    required this.sexo,
-    required this.privilegio,
-    required this.congregacion,
-    required this.activo,
-    required this.notas,
+    required this.name,
+    required this.gender,
+    required this.role,
+    required this.congregation,
+    required this.active,
+    required this.notes,
     required this.createdAt,
     required this.updatedAt,
-    this.ultimoUso,
+    this.lastUsed,
   });
 
   /// Alta mínima desde el picker: queda marcado como incompleto.
-  bool get incompleto => sexo == Gender.unspecified;
+  bool get isIncomplete => gender == Gender.unspecified;
 
   Participant copyWith({
-    String? nombre,
-    Gender? sexo,
-    Role? privilegio,
-    String? congregacion,
-    bool? activo,
-    String? notas,
+    String? name,
+    Gender? gender,
+    Role? role,
+    String? congregation,
+    bool? active,
+    String? notes,
     DateTime? updatedAt,
-    DateTime? ultimoUso,
+    DateTime? lastUsed,
   }) {
     return Participant(
       id: id,
-      nombre: nombre ?? this.nombre,
-      sexo: sexo ?? this.sexo,
-      privilegio: privilegio ?? this.privilegio,
-      congregacion: congregacion ?? this.congregacion,
-      activo: activo ?? this.activo,
-      notas: notas ?? this.notas,
+      name: name ?? this.name,
+      gender: gender ?? this.gender,
+      role: role ?? this.role,
+      congregation: congregation ?? this.congregation,
+      active: active ?? this.active,
+      notes: notes ?? this.notes,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      ultimoUso: ultimoUso ?? this.ultimoUso,
+      lastUsed: lastUsed ?? this.lastUsed,
     );
   }
 

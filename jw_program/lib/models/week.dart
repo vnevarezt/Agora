@@ -4,50 +4,48 @@
 // (generador/generar_programa.py:68-70 y :104-105).
 
 /// Sección de la reunión a la que pertenece una parte.
-/// Coincide con los valores de SECCION_POR_COLOR del .py:
-///   teal -> tesoros, gold -> seamos, maroon -> vida.
 enum Section { treasures, ministry, christianLife }
 
 /// Una parte numerada del programa (h3 "N. Título" en el EPUB).
 class Part {
-  final Section seccion;
-  final int num;
-  final String titulo;
+  final Section section;
+  final int number;
+  final String title;
 
   /// Duración en minutos, o null si el EPUB no la especifica.
-  final int? min;
+  final int? minutes;
 
   const Part({
-    required this.seccion,
-    required this.num,
-    required this.titulo,
-    this.min,
+    required this.section,
+    required this.number,
+    required this.title,
+    this.minutes,
   });
 }
 
 /// Programa completo de una semana.
 class Week {
-  String fecha;
-  String lectura;
+  String date;
+  String reading;
 
   /// Número de canción (como String) o null si no aparece.
-  String? cancionInicial;
-  String? cancionMedia;
-  String? cancionFinal;
+  String? openingSong;
+  String? middleSong;
+  String? closingSong;
 
-  int introMin;
-  int conclusionMin;
+  int introMinutes;
+  int conclusionMinutes;
 
-  final List<Part> partes;
+  final List<Part> parts;
 
   Week({
-    this.fecha = '',
-    this.lectura = '',
-    this.cancionInicial,
-    this.cancionMedia,
-    this.cancionFinal,
-    this.introMin = 1,
-    this.conclusionMin = 3,
-    List<Part>? partes,
-  }) : partes = partes ?? <Part>[];
+    this.date = '',
+    this.reading = '',
+    this.openingSong,
+    this.middleSong,
+    this.closingSong,
+    this.introMinutes = 1,
+    this.conclusionMinutes = 3,
+    List<Part>? parts,
+  }) : parts = parts ?? <Part>[];
 }

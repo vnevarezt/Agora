@@ -4,19 +4,19 @@ import '../../models/project.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Insignia de estado del proyecto (`.status--*`): borrador (accent), completo
+/// Insignia de status del proyecto (`.status--*`): borrador (accent), completo
 /// (verde) y exportado (neutro). El verde lleva variante para modo oscuro.
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({super.key, required this.estado});
+  const StatusBadge({super.key, required this.status});
 
-  final ProjectStatus estado;
+  final ProjectStatus status;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     final oscuro = Theme.of(context).brightness == Brightness.dark;
 
-    final (Color bg, Color fg, Color? borde) = switch (estado) {
+    final (Color bg, Color fg, Color? borde) = switch (status) {
       ProjectStatus.draft => (t.accentSoft, t.accentStrong, null),
       ProjectStatus.complete => oscuro
           ? (const Color(0xFF1E3A2A), const Color(0xFFA9D8B8), null)
@@ -32,7 +32,7 @@ class StatusBadge extends StatelessWidget {
         border: borde != null ? Border.all(color: borde) : null,
       ),
       child: Text(
-        estado.etiqueta.toUpperCase(),
+        status.etiqueta.toUpperCase(),
         style: TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w800,

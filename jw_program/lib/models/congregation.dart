@@ -2,14 +2,14 @@
 /// identifica su punto en los filtros/tarjetas; la UI lo envuelve en Color.
 class Congregation {
   final String id;
-  final String nombre;
-  final String numero;
+  final String name;
+  final String number;
   final int color;
 
   const Congregation({
     required this.id,
-    required this.nombre,
-    required this.numero,
+    required this.name,
+    required this.number,
     required this.color,
   });
 }

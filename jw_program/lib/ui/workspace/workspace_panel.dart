@@ -24,7 +24,7 @@ class WorkspacePanel extends ConsumerWidget {
     final sched = ref.watch(scheduleProvider);
     if (sched == null) return const _EmptyState();
 
-    final aux = ref.watch(formProvider.select((f) => f.aux));
+    final aux = ref.watch(formProvider.select((f) => f.auxRoom));
     final isMobile = context.isMobile;
     final lado = isMobile ? 14.0 : 18.0;
 
@@ -33,23 +33,23 @@ class WorkspacePanel extends ConsumerWidget {
       children: [
         PartCard(view: presidenteView()),
         const SizedBox(height: 22),
-        _SectionBlock(title: 'Apertura', rows: sched.apertura, aux: aux),
+        _SectionBlock(title: 'Apertura', rows: sched.opening, aux: aux),
         _SectionBlock(
           title: 'Tesoros de la Biblia',
           dotColor: kSectionColors[Section.treasures],
-          rows: sched.tesoros,
+          rows: sched.treasures,
           aux: aux,
         ),
         _SectionBlock(
           title: 'Seamos mejores maestros',
           dotColor: kSectionColors[Section.ministry],
-          rows: sched.seamos,
+          rows: sched.ministry,
           aux: aux,
         ),
         _SectionBlock(
           title: 'Nuestra vida cristiana',
           dotColor: kSectionColors[Section.christianLife],
-          rows: sched.vida,
+          rows: sched.christianLife,
           aux: aux,
         ),
       ],
@@ -78,10 +78,10 @@ class _SectionBlock extends ConsumerWidget {
     var done = 0;
     for (final row in rows) {
       total += row.slots;
-      done += filledNames(f.principal[row.id], row.slots);
+      done += filledNames(f.main[row.id], row.slots);
       if (aux && row.auxSlots > 0) {
         total += row.auxSlots;
-        done += filledNames(f.auxiliar[row.id], row.auxSlots);
+        done += filledNames(f.auxiliary[row.id], row.auxSlots);
       }
     }
 

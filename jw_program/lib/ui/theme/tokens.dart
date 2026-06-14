@@ -135,6 +135,6 @@ const pizarra = AppPalette(
 );
 
 extension AppTokensX on BuildContext {
-  /// Acceso corto a los tokens del theme activo: `context.tokens.accent`.
+  /// Acceso corto a los tokens del theme active: `context.tokens.accent`.
   AppTokens get tokens => Theme.of(this).extension<AppTokens>()!;
 }

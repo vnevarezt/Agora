@@ -48,8 +48,8 @@ class _NuevaCongregacionModalState
   /// aún no se persisten (sin backend); solo se guarda nombre y número.
   void _crear() {
     ref.read(congregationsProvider.notifier).add(
-          nombre: _nombre.trim(),
-          numero: _numero.trim(),
+          name: _nombre.trim(),
+          number: _numero.trim(),
         );
     widget.onClose();
   }

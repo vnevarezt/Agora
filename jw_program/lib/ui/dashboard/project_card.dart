@@ -16,13 +16,13 @@ class ProjectCard extends StatelessWidget {
   const ProjectCard({
     super.key,
     required this.proyecto,
-    required this.congregacion,
+    required this.congregation,
     required this.onTap,
     required this.onEdit,
   });
 
   final Project proyecto;
-  final Congregation? congregacion;
+  final Congregation? congregation;
   final VoidCallback onTap;
   final VoidCallback onEdit;
 
@@ -70,7 +70,7 @@ class ProjectCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              p.nombre,
+                              p.name,
                               style: TextStyle(
                                 fontSize: 15.5,
                                 fontWeight: FontWeight.w800,
@@ -82,12 +82,12 @@ class ProjectCard extends StatelessWidget {
                             const SizedBox(height: 3),
                             Row(
                               children: [
-                                if (congregacion != null) ...[
+                                if (congregation != null) ...[
                                   Container(
                                     width: 7,
                                     height: 7,
                                     decoration: BoxDecoration(
-                                      color: Color(congregacion!.color),
+                                      color: Color(congregation!.color),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -95,7 +95,7 @@ class ProjectCard extends StatelessWidget {
                                 ],
                                 Flexible(
                                   child: Text(
-                                    congregacion?.nombre ?? '',
+                                    congregation?.name ?? '',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -111,7 +111,7 @@ class ProjectCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      StatusBadge(estado: p.estado),
+                      StatusBadge(status: p.status),
                       // Hueco para el kebab superpuesto (no pisar la insignia).
                       const SizedBox(width: 22),
                     ],
@@ -120,12 +120,12 @@ class ProjectCard extends StatelessWidget {
                   Wrap(
                     spacing: 5,
                     runSpacing: 5,
-                    children: [for (final w in p.semanas) MiniChip.week(w)],
+                    children: [for (final w in p.weeks) MiniChip.week(w)],
                   ),
                   const SizedBox(height: 13),
                   Row(
                     children: [
-                      Expanded(child: ProgressMeter(value: p.progreso)),
+                      Expanded(child: ProgressMeter(value: p.progress)),
                       const SizedBox(width: 10),
                       Text(
                         '${p.done}/${p.total}',
@@ -139,7 +139,7 @@ class ProjectCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 9),
                   Text(
-                    'Editado ${p.editado}',
+                    'Editado ${p.editedLabel}',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
