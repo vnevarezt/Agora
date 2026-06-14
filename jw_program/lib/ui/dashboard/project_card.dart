@@ -10,18 +10,18 @@ import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
 
-/// Tarjeta de proyecto (`.project`): name, congregación, estado, semanas,
+/// Tarjeta de project (`.project`): name, congregación, estado, semanas,
 /// progreso y fecha de edición. Al tocarla se abre el editor.
 class ProjectCard extends StatelessWidget {
   const ProjectCard({
     super.key,
-    required this.proyecto,
+    required this.project,
     required this.congregation,
     required this.onTap,
     required this.onEdit,
   });
 
-  final Project proyecto;
+  final Project project;
   final Congregation? congregation;
   final VoidCallback onTap;
   final VoidCallback onEdit;
@@ -29,7 +29,7 @@ class ProjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final p = proyecto;
+    final p = project;
 
     return Pressable(
       onTap: onTap,

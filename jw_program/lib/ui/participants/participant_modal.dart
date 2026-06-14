@@ -81,7 +81,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      final ahora = DateTime.now().toUtc();
+      final now = DateTime.now().toUtc();
       final h = _isCreating
           ? Participant(
               id: const Uuid().v4(),
@@ -91,8 +91,8 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               congregation: _congregation.trim(),
               active: _active,
               notes: '',
-              createdAt: ahora,
-              updatedAt: ahora,
+              createdAt: now,
+              updatedAt: now,
             )
           : widget.original!.copyWith(
               name: _name.trim(),

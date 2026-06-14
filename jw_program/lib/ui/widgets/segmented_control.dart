@@ -50,7 +50,7 @@ class SegmentedTabs extends StatelessWidget {
 
   Widget _boton(AppTokens t, bool esOscuro, int i) {
     final activo = i == index;
-    final boton = Pressable(
+    final button = Pressable(
       onTap: onChanged == null || activo ? null : () => onChanged!(i),
       builder: (context, hovered, _) {
         return AnimatedContainer(
@@ -92,6 +92,6 @@ class SegmentedTabs extends StatelessWidget {
         );
       },
     );
-    return expand ? Expanded(child: boton) : boton;
+    return expand ? Expanded(child: button) : button;
   }
 }

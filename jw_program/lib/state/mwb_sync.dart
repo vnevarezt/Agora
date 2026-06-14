@@ -22,7 +22,7 @@ class SyncReport {
   });
 
   /// True when every needed issue ended up cached (nothing failed or backed
-  /// off). False means a needed cuaderno couldn't be fetched yet (e.g. the next
+  /// off). False means a needed notebook couldn't be fetched yet (e.g. the next
   /// one isn't published).
   bool get complete => failed.isEmpty && skippedBackoff.isEmpty;
 }

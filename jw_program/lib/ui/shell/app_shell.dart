@@ -17,9 +17,9 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = context.screenSize;
-    final seccion = ref.watch(appSectionProvider);
+    final section = ref.watch(appSectionProvider);
 
-    final body = switch (seccion) {
+    final body = switch (section) {
       AppSection.home => const DashboardView(),
       AppSection.participants => const ParticipantsView(),
       AppSection.settings => const SettingsView(),

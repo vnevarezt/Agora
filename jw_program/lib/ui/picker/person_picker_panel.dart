@@ -46,9 +46,9 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     final t = context.tokens;
     final active = ref.watch(activeParticipantsProvider);
 
-    final clave = normalizeName(_search);
+    final key = normalizeName(_search);
     final filtered = active
-        .where((h) => normalizeName(h.name).contains(clave))
+        .where((h) => normalizeName(h.name).contains(key))
         .toList();
     final recent = _search.isEmpty
         ? ref.watch(recentParticipantsProvider).take(4).toList()
@@ -155,10 +155,10 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  Widget _group(AppTokens t, String titulo) {
+  Widget _group(AppTokens t, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
-      child: Text(titulo.toUpperCase(),
+      child: Text(title.toUpperCase(),
           style: AppText.label(color: t.textMute)),
     );
   }

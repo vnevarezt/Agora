@@ -50,13 +50,13 @@ Future<PickResult?> showPersonPicker(
             BorderRadius.vertical(top: Radius.circular(Dimens.rSheet)),
       ),
       builder: (context) {
-        final alto = MediaQuery.sizeOf(context).height;
+        final height = MediaQuery.sizeOf(context).height;
         return Padding(
           // Deja el buscador visible when aparece el teclado.
           padding: EdgeInsets.only(
               bottom: MediaQuery.viewInsetsOf(context).bottom),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: alto * 0.78),
+            constraints: BoxConstraints(maxHeight: height * 0.78),
             child: PersonPickerPanel(
               roleLabel: roleLabel,
               current: current,

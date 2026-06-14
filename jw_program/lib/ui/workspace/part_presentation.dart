@@ -103,7 +103,7 @@ PartView presidenteView() {
 /// Auxiliar del formulario.
 PartView mapRow(ProgramRow row, {required bool auxActivo}) {
   final match = _duracionSufijo.firstMatch(row.content);
-  final titulo = row.content.replaceAll(_duracionSufijo, '');
+  final title = row.content.replaceAll(_duracionSufijo, '');
   final duracion = match != null ? '${match.group(1)} min' : null;
   final esCancion = row.content.startsWith('Canción');
 
@@ -112,7 +112,7 @@ PartView mapRow(ProgramRow row, {required bool auxActivo}) {
       id: row.id,
       kind: PartKind.fixedLine,
       time: row.time,
-      title: titulo,
+      title: title,
       durationLabel: duracion,
       fixedTag: esCancion ? 'Cántico' : 'A cargo del presidente',
     );
@@ -126,7 +126,7 @@ PartView mapRow(ProgramRow row, {required bool auxActivo}) {
     id: row.id,
     kind: PartKind.role,
     time: row.time,
-    title: titulo,
+    title: title,
     durationLabel: duracion,
     // La canción inicial/final lleva el slot de oración en el modelo: se
     // muestra como tarjeta de rol con el chip "Cántico".

@@ -17,12 +17,12 @@ import '../widgets/app_button.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
-/// Barra del editor (`.projbar`): identidad del proyecto, progress, selector
+/// Barra del editor (`.projbar`): identidad del project, progress, selector
 /// de semanas y exportar. Reemplaza a la antigua barra de contexto.
 class ProjectBar extends ConsumerWidget {
-  const ProjectBar({super.key, this.proyecto});
+  const ProjectBar({super.key, this.project});
 
-  final Project? proyecto;
+  final Project? project;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,7 +48,7 @@ class ProjectBar extends ConsumerWidget {
       children: [
         _back(context),
         const SizedBox(width: 14),
-        Flexible(child: _ProjectId(proyecto: proyecto)),
+        Flexible(child: _ProjectId(project: project)),
         const SizedBox(width: 14),
         Container(
           padding: const EdgeInsets.only(left: 14),
@@ -77,7 +77,7 @@ class ProjectBar extends ConsumerWidget {
           children: [
             _back(context),
             const SizedBox(width: 10),
-            Expanded(child: _ProjectId(proyecto: proyecto)),
+            Expanded(child: _ProjectId(project: project)),
             const SizedBox(width: 10),
             const _ExportMenu(compact: true),
           ],
@@ -96,11 +96,11 @@ class ProjectBar extends ConsumerWidget {
       );
 }
 
-/// Identidad del proyecto: name + congregación + nº de semanas.
+/// Identidad del project: name + congregación + nº de semanas.
 class _ProjectId extends ConsumerWidget {
-  const _ProjectId({this.proyecto});
+  const _ProjectId({this.project});
 
-  final Project? proyecto;
+  final Project? project;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,12 +108,12 @@ class _ProjectId extends ConsumerWidget {
     final congregations = ref.watch(congregationsProvider);
     final weekCount = ref.watch(weeksProvider).asData?.value.length ?? 0;
 
-    final Congregation? cong = proyecto == null
+    final Congregation? cong = project == null
         ? null
-        : congregations.where((c) => c.id == proyecto!.congregationId).firstOrNull;
-    final name = proyecto?.name ?? 'Programa';
+        : congregations.where((c) => c.id == project!.congregationId).firstOrNull;
+    final name = project?.name ?? 'Programa';
     final congName =
-        cong?.name ?? (proyecto == null ? ref.watch(formProvider).congregationId : '');
+        cong?.name ?? (project == null ? ref.watch(formProvider).congregationId : '');
     final congColor = cong == null ? t.accent : Color(cong.color);
 
     return Column(
@@ -590,7 +590,7 @@ class _AuxToggle extends StatelessWidget {
   }
 }
 
-/// Botón Exportar con menú (`.menu`): semana actual (real), proyecto y hojas
+/// Botón Exportar con menú (`.menu`): semana actual (real), project y hojas
 /// (UI por ahora).
 class _ExportMenu extends ConsumerWidget {
   const _ExportMenu({this.compact = false});

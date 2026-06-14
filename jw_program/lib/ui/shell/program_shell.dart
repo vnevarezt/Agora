@@ -13,10 +13,10 @@ import 'project_bar.dart';
 /// tablet en dos paneles (46/54) y móvil en una columna con pestañas; ambos
 /// arreglos usan los mismos [WorkspacePanel] y [PreviewPane].
 class ProgramShell extends StatelessWidget {
-  const ProgramShell({super.key, this.proyecto});
+  const ProgramShell({super.key, this.project});
 
   /// Project abierto desde el dashboard (identidad de la barra). Opcional.
-  final Project? proyecto;
+  final Project? project;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class ProgramShell extends StatelessWidget {
         bottom: false, // la bottom bar móvil gestiona su propio inset
         child: Column(
           children: [
-            ProjectBar(proyecto: proyecto),
+            ProjectBar(project: project),
             if (isMobile) const MobileTabs(),
             Expanded(
               child: isMobile

@@ -54,10 +54,10 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     outlineVariant: t.border2,
   );
 
-  OutlineInputBorder borde(Color color, [double ancho = 1]) {
+  OutlineInputBorder border(Color color, [double width = 1]) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(Dimens.rControl),
-      borderSide: BorderSide(color: color, width: ancho),
+      borderSide: BorderSide(color: color, width: width),
     );
   }
 
@@ -105,9 +105,9 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       hintStyle: TextStyle(
           color: t.textMute, fontWeight: FontWeight.w600, fontSize: 13.5),
-      border: borde(t.border),
-      enabledBorder: borde(t.border),
-      focusedBorder: borde(t.accent, 1.5),
+      border: border(t.border),
+      enabledBorder: border(t.border),
+      focusedBorder: border(t.accent, 1.5),
     ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: t.accent,

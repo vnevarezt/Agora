@@ -23,9 +23,9 @@ class PersonAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final vacio = name == null || name!.trim().isEmpty;
+    final empty = name == null || name!.trim().isEmpty;
 
-    if (vacio) {
+    if (empty) {
       return DashedBorder(
         color: t.border,
         radius: size / 2,

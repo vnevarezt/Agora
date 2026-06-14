@@ -17,16 +17,16 @@ import '../widgets/danger_button.dart';
 import '../widgets/filter_pill.dart';
 import '../widgets/labeled_field.dart';
 
-/// Abre el modal de creación/edición de proyecto. [proyecto] null = alta nueva.
-Future<void> showProjectModal(BuildContext context, {Project? proyecto}) {
+/// Abre el modal de creación/edición de project. [project] null = alta nueva.
+Future<void> showProjectModal(BuildContext context, {Project? project}) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
-        ProjectModal(original: proyecto, sheet: sheet, onClose: close),
+        ProjectModal(original: project, sheet: sheet, onClose: close),
   );
 }
 
-/// Contenido del modal de proyecto. Lee/escribe vía Riverpod, como `PersonaForm`.
+/// Contenido del modal de project. Lee/escribe vía Riverpod, como `PersonaForm`.
 class ProjectModal extends ConsumerStatefulWidget {
   const ProjectModal({
     super.key,
@@ -35,7 +35,7 @@ class ProjectModal extends ConsumerStatefulWidget {
     this.sheet = false,
   });
 
-  /// null = nuevo proyecto.
+  /// null = nuevo project.
   final Project? original;
   final VoidCallback onClose;
 
@@ -358,7 +358,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
 
   Widget _footer(AppTokens t, bool isMobile, Notebook notebook) {
     final puedeGuardar = _weeks.isNotEmpty;
-    final etiquetaPrimary = _isNew ? 'Crear proyecto' : 'Guardar cambios';
+    final etiquetaPrimary = _isNew ? 'Crear project' : 'Guardar cambios';
 
     final children = isMobile
         ? [

@@ -322,13 +322,13 @@ class _ProjectsSection extends ConsumerWidget {
                   SizedBox(
                     width: colW,
                     child: ProjectCard(
-                      proyecto: p,
+                      project: p,
                       congregation: porId[p.congregationId],
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                            builder: (_) => ProgramShell(proyecto: p)),
+                            builder: (_) => ProgramShell(project: p)),
                       ),
-                      onEdit: () => showProjectModal(context, proyecto: p),
+                      onEdit: () => showProjectModal(context, project: p),
                     ),
                   ),
               ],

@@ -4,7 +4,7 @@ import '../../models/project.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 
-/// Insignia de status del proyecto: borrador (accent), completo (verde) y
+/// Insignia de status del project: borrador (accent), completo (verde) y
 /// exportado (neutro). El verde lleva variante para modo dark.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.status});
