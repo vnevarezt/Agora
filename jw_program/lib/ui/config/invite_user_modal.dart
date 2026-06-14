@@ -6,7 +6,7 @@ import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
 
-/// Abre el modal para invitar a un usuario a la congregación (solo UI).
+/// Abre el modal para invitar a un user a la congregación (solo UI).
 Future<void> showInviteUser(BuildContext context) {
   return showAppModal<void>(
     context,
@@ -50,7 +50,7 @@ class _InvitarUsuarioModalState extends State<InvitarUsuarioModal> {
             label: 'Correo electrónico',
             child: BoundTextField(
               initial: _email,
-              hint: 'nombre@correo.com',
+              hint: 'name@correo.com',
               keyboardType: TextInputType.emailAddress,
               onChanged: (v) => setState(() => _email = v),
             ),

@@ -19,7 +19,7 @@ import '../widgets/segmented_control.dart';
 /// Descripción de cada role en las radio-cards del modal.
 const _roleDesc = {
   Role.publisher:
-      'Participa en "Seamos mejores maestros" (todos)',
+      'Participa en "Seamos mejores maestros" (all)',
   Role.ministerialServant:
       'Publicador + lectura, oración y algunas partes asignables',
   Role.elder: 'Puede recibir cualquier asignación del programa',

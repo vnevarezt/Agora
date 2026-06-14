@@ -21,13 +21,13 @@ const _items = <({AppSection section, IconData icon, String label})>[
   ),
 ];
 
-/// Nº de recordatorios urgentes; se muestra como badge en "Inicio".
+/// Nº de reminders urgentes; se muestra como badge en "Inicio".
 final _alertsProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
     .where((r) => r.type == ReminderType.alert)
     .length);
 
-/// Barra lateral (`.sidebar`): marca, navegación y tarjeta de usuario.
+/// Barra lateral (`.sidebar`): marca, navegación y tarjeta de user.
 /// Con [compact] queda en modo solo-iconos (64px) para tablet.
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key, this.compact = false});
@@ -38,7 +38,7 @@ class Sidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final section = ref.watch(appSectionProvider);
-    final usuario = ref.watch(sessionUserProvider);
+    final user = ref.watch(sessionUserProvider);
     final alerts = ref.watch(_alertsProvider);
 
     return Container(
@@ -66,8 +66,8 @@ class Sidebar extends ConsumerWidget {
           ],
           const Spacer(),
           _UserCard(
-            name: usuario.name,
-            role: usuario.role,
+            name: user.name,
+            role: user.role,
             compact: compact,
           ),
         ],
@@ -232,7 +232,7 @@ class _UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    // Sin usuario en sesión (sin backend) no se muestra la tarjeta.
+    // Sin user en sesión (sin backend) no se muestra la tarjeta.
     if (name.isEmpty) return const SizedBox.shrink();
     if (compact) {
       return Center(child: PersonAvatar(name: name, size: 32));

@@ -86,7 +86,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final sched = ref.read(scheduleProvider);
     final semana = ref.read(currentWeekProvider);
     if (sched == null || semana == null) {
-      throw Exception('Descarga un cuaderno y elige una semana primero.');
+      throw Exception('Descarga un notebook y elige una semana primero.');
     }
     final f = ref.read(formProvider);
     final pdf = await buildProgramPdf(

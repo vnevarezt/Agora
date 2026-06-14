@@ -15,7 +15,7 @@ import 'project_modal.dart';
 import 'reminder_card.dart';
 
 /// Vista de Inicio (`HomeView` del mock): greeting, filters, cuadrícula de
-/// proyectos y panel de recordatorios. Los datos son de ejemplo (solo UI).
+/// projects y panel de reminders. Los datos son de ejemplo (solo UI).
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
 
@@ -65,10 +65,10 @@ class _TopBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final isMobile = context.isMobile;
-    final usuario = ref.watch(sessionUserProvider);
-    final greeting = usuario.name.isEmpty
+    final user = ref.watch(sessionUserProvider);
+    final greeting = user.name.isEmpty
         ? _greeting()
-        : '${_greeting()}, ${usuario.name}';
+        : '${_greeting()}, ${user.name}';
 
     return Row(
       children: [
@@ -124,7 +124,7 @@ class _Filters extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final congregations = ref.watch(congregationsProvider);
-    final proyectos = ref.watch(projectsProvider);
+    final projects = ref.watch(projectsProvider);
     final filters = ref.watch(dashboardFiltersProvider);
     final notifier = ref.read(dashboardFiltersProvider.notifier);
 
@@ -135,7 +135,7 @@ class _Filters extends ConsumerWidget {
       children: [
         FilterPill(
           label: 'Todas',
-          count: proyectos.length,
+          count: projects.length,
           active: filters.congregationId == 'all',
           onTap: () => notifier.setCongregation('all'),
         ),
@@ -143,7 +143,7 @@ class _Filters extends ConsumerWidget {
           FilterPill(
             label: c.name,
             dotColor: Color(c.color),
-            count: proyectos.where((p) => p.congregationId == c.id).length,
+            count: projects.where((p) => p.congregationId == c.id).length,
             active: filters.congregationId == c.id,
             onTap: () => notifier.setCongregation(c.id),
           ),
@@ -171,16 +171,16 @@ class _HomeGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const proyectos = _ProjectsSection();
-    const recordatorios = _RemindersSection();
+    const projects = _ProjectsSection();
+    const reminders = _RemindersSection();
 
     if (stacked) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          proyectos,
+          projects,
           SizedBox(height: 24),
-          recordatorios,
+          reminders,
         ],
       );
     }
@@ -188,9 +188,9 @@ class _HomeGrid extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        Expanded(child: proyectos),
+        Expanded(child: projects),
         SizedBox(width: 22),
-        SizedBox(width: 312, child: recordatorios),
+        SizedBox(width: 312, child: reminders),
       ],
     );
   }
@@ -202,13 +202,13 @@ class _ProjectsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final congregations = ref.watch(congregationsProvider);
-    final proyectos = ref.watch(filteredProjectsProvider);
+    final projects = ref.watch(filteredProjectsProvider);
     final porId = {for (final c in congregations) c.id: c};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: 'Proyectos', count: proyectos.length),
+        BlockTitle(title: 'Proyectos', count: projects.length),
         LayoutBuilder(
           builder: (context, c) {
             const gap = 14.0;
@@ -224,7 +224,7 @@ class _ProjectsSection extends ConsumerWidget {
                     onTap: () => showProjectModal(context),
                   ),
                 ),
-                for (final p in proyectos)
+                for (final p in projects)
                   SizedBox(
                     width: colW,
                     child: ProjectCard(
@@ -251,20 +251,20 @@ class _RemindersSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recordatorios = ref.watch(remindersProvider);
+    final reminders = ref.watch(remindersProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BlockTitle(
           title: 'Recordatorios',
-          count: recordatorios.length,
+          count: reminders.length,
           linkLabel: 'Ver todo',
           onLink: () {},
         ),
-        for (var i = 0; i < recordatorios.length; i++) ...[
+        for (var i = 0; i < reminders.length; i++) ...[
           if (i > 0) const SizedBox(height: 9),
-          ReminderCard(recordatorio: recordatorios[i]),
+          ReminderCard(recordatorio: reminders[i]),
         ],
       ],
     );

@@ -8,7 +8,7 @@ import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import 'priv_badge.dart';
 
-/// Tarjeta de participant (`.person-card`): avatar, nombre con punto de
+/// Tarjeta de participant (`.person-card`): avatar, name con punto de
 /// disponibilidad, subtítulo (sexo · congregación) e insignia de privilegio.
 /// Al tocarla se abre el modal de edición.
 class ParticipantCard extends StatelessWidget {

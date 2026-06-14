@@ -123,7 +123,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
             LabeledField(
               label: 'Nombre',
               child: BoundTextField(
-                key: ValueKey('$_congregationId-nombre'),
+                key: ValueKey('$_congregationId-name'),
                 initial: _name,
                 onChanged: (v) => _name = v,
               ),
@@ -131,7 +131,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
             LabeledField(
               label: 'Número',
               child: BoundTextField(
-                key: ValueKey('$_congregationId-numero'),
+                key: ValueKey('$_congregationId-number'),
                 initial: _number,
                 style: AppText.mono(size: 13.5, color: t.text),
                 onChanged: (v) => _number = v,
@@ -246,7 +246,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
   }
 }
 
-/// Chip selector de congregación: punto de color + nombre + pill de rol.
+/// Chip selector de congregación: punto de color + name + pill de rol.
 class _CongChip extends StatelessWidget {
   const _CongChip({
     required this.congregation,

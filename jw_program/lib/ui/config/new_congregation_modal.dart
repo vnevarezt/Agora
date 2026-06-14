@@ -45,7 +45,7 @@ class _NuevaCongregacionModalState
   String _weekendTime = '10:00';
 
   /// Añade la congregación al estado en memoria y cierra. Los horarios/idioma
-  /// aún no se persisten (sin backend); solo se guarda nombre y número.
+  /// aún no se persisten (sin backend); solo se guarda name y número.
   void _crear() {
     ref.read(congregationsProvider.notifier).add(
           name: _name.trim(),

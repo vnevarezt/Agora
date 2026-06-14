@@ -15,7 +15,7 @@ import 'part_card.dart';
 import 'part_presentation.dart';
 
 /// Columna de asignaciones: tarjeta del presidente + las cuatro secciones
-/// del programa. Estado vacío con CTA de descarga when no hay cuaderno.
+/// del programa. Estado vacío con CTA de descarga when no hay notebook.
 class WorkspacePanel extends ConsumerWidget {
   const WorkspacePanel({super.key});
 
@@ -112,7 +112,7 @@ class _EmptyState extends ConsumerWidget {
 
     return EmptyState(
       icon: Icons.description_outlined,
-      title: 'Descarga un cuaderno para empezar.',
+      title: 'Descarga un notebook para empezar.',
       message: 'El programa de la semana se generará automáticamente.',
       action: AppButton(
         icon: Icons.file_download_outlined,

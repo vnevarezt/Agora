@@ -168,9 +168,9 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
 
   Widget _result(BuildContext context) {
     final t = context.tokens;
-    final todos = ref.watch(participantsProvider);
+    final all = ref.watch(participantsProvider);
     final filtered = filterParticipants(
-      todos,
+      all,
       query: _query,
       role: _role,
       congregation: _congregation,
@@ -182,7 +182,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       children: [
         BlockTitle(title: 'Participantes', count: filtered.length),
         if (filtered.isEmpty)
-          _empty(t, todos.isEmpty)
+          _empty(t, all.isEmpty)
         else
           _grid(filtered),
       ],

@@ -41,7 +41,7 @@ class Participant {
   final String notes;
   final DateTime createdAt; // UTC
 
-  /// UTC. Solo cambia con ediciones de usuario: decide quién gana al
+  /// UTC. Solo cambia con ediciones de user: decide quién gana al
   /// fusionar imports (NO se toca al registrar uso).
   final DateTime updatedAt;
 

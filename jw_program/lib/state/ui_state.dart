@@ -57,7 +57,7 @@ class ActiveSlotController extends Notifier<SlotRef?> {
   void set(SlotRef? slot) => state = slot;
 }
 
-/// Exportación de PDF en curso: deshabilita todos los botones de exportar
+/// Exportación de PDF en curso: deshabilita all los botones de exportar
 /// (barra de contexto y bottom bar móvil) a la vez.
 final exportBusyProvider =
     NotifierProvider<ExportBusyController, bool>(ExportBusyController.new);

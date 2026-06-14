@@ -20,14 +20,14 @@ class ParticipantsDao extends DatabaseAccessor<AppDatabase>
         .watch();
   }
 
-  Future<List<Participant>> todos() {
+  Future<List<Participant>> all() {
     return (select(participants)
           ..orderBy([(t) => OrderingTerm.asc(t.name)]))
         .get();
   }
 
   /// Inserta o actualiza por id. El caller es responsable de fijar
-  /// `updatedAt` when el cambio es una edición de usuario.
+  /// `updatedAt` when el cambio es una edición de user.
   Future<void> upsert(Participant h) =>
       into(participants).insertOnConflictUpdate(h.toInsertable());
 

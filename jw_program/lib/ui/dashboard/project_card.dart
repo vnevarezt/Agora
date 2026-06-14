@@ -10,7 +10,7 @@ import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
 
-/// Tarjeta de proyecto (`.project`): nombre, congregación, estado, semanas,
+/// Tarjeta de proyecto (`.project`): name, congregación, estado, semanas,
 /// progreso y fecha de edición. Al tocarla se abre el editor.
 class ProjectCard extends StatelessWidget {
   const ProjectCard({

@@ -44,7 +44,7 @@ final progressProvider = Provider<Progress>((ref) {
       auxRoom: f.auxRoom);
 });
 
-/// Progreso de cada semana del cuaderno (para los meters de "Ir a la semana").
+/// Progreso de cada semana del notebook (para los meters de "Ir a la semana").
 final progressPerWeekProvider = Provider<List<Progress>>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return const [];

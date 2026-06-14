@@ -10,7 +10,7 @@ import 'settings_card.dart';
 const _appLanguages = ['Español', 'English', 'Português'];
 const _timeFormats = ['24 horas (18:00)', '12 horas (6:00 p. m.)'];
 const _weekStarts = ['Lunes', 'Domingo'];
-const _pdfNameFormats = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre'];
+const _pdfNameFormats = ['Nombre y apellido', 'Apellido, name', 'Solo name'];
 
 const _notifications = [
   (
@@ -24,8 +24,8 @@ const _notifications = [
     inicial: true,
   ),
   (
-    title: 'Nuevos cuadernos',
-    desc: 'Avisar when haya un nuevo cuaderno disponible',
+    title: 'Nuevos notebooks',
+    desc: 'Avisar when haya un nuevo notebook disponible',
     inicial: true,
   ),
   (

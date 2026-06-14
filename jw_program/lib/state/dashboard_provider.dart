@@ -48,14 +48,14 @@ final congregationsProvider =
     NotifierProvider<CongregationsController, List<Congregation>>(
         CongregationsController.new);
 
-/// Catálogo de cuadernos disponibles. Vacío sin backend (se poblará con la
+/// Catálogo de notebooks disponibles. Vacío sin backend (se poblará con la
 /// descarga real del editor).
 final notebooksProvider = Provider<List<Notebook>>((ref) => const []);
 
 /// Recordatorios/alerts. Vacío sin backend (son alerts derivadas).
 final remindersProvider = Provider<List<Reminder>>((ref) => const []);
 
-/// Lista de proyectos editable en memoria. El modal de proyectos crea, edita y
+/// Lista de projects editable en memoria. El modal de projects crea, edita y
 /// elimina aquí; la persistencia llega en una fase posterior.
 class ProjectsController extends Notifier<List<Project>> {
   @override
@@ -111,7 +111,7 @@ final projectsProvider =
     NotifierProvider<ProjectsController, List<Project>>(
         ProjectsController.new);
 
-/// Filtros active: congregación (`'all'` = todas) y estado (`null` = todos).
+/// Filtros active: congregación (`'all'` = todas) y estado (`null` = all).
 class DashboardFilters {
   /// `'all'` o el id de una congregación.
   final String congregationId;
@@ -139,9 +139,9 @@ final dashboardFiltersProvider =
 
 /// Proyectos visibles tras apply los filters active.
 final filteredProjectsProvider = Provider<List<Project>>((ref) {
-  final proyectos = ref.watch(projectsProvider);
+  final projects = ref.watch(projectsProvider);
   final f = ref.watch(dashboardFiltersProvider);
-  return proyectos
+  return projects
       .where((p) =>
           (f.congregationId == 'all' || p.congregationId == f.congregationId) &&
           (f.status == null || p.status == f.status))

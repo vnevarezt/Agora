@@ -28,7 +28,7 @@ class LabeledField extends StatelessWidget {
   }
 }
 
-/// Dropdown estilizado como `.field__input` (semana del cuaderno).
+/// Dropdown estilizado como `.field__input` (semana del notebook).
 class AppDropdown<T> extends StatelessWidget {
   const AppDropdown({
     super.key,

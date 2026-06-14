@@ -6,7 +6,7 @@ import 'package:html/parser.dart' as html_parser;
 
 import '../models/week.dart';
 
-/// Parseo del EPUB del cuaderno mwb -> list de semanas.
+/// Parseo del EPUB del notebook mwb -> list de semanas.
 ///
 /// Port 1:1 de `parsear_epub` / `parsear_semana` / `_texto` / `_duracion`
 /// de generar_programa.py:54-124. Conserva las MISMAS expresiones regulares.
@@ -50,7 +50,7 @@ int? _duracion(String segmento) {
 }
 
 Week parseWeek(String xhtml) {
-  // Posiciones de todos los encabezados h1/h2/h3 en orden de aparición.
+  // Posiciones de all los encabezados h1/h2/h3 en orden de aparición.
   final enc = _reEncabezados.allMatches(xhtml).toList();
   final semana = Week();
   Section? seccionActual;

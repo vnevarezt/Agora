@@ -96,7 +96,7 @@ class ProjectBar extends ConsumerWidget {
       );
 }
 
-/// Identidad del proyecto: nombre + congregación + nº de semanas.
+/// Identidad del proyecto: name + congregación + nº de semanas.
 class _ProjId extends ConsumerWidget {
   const _ProjId({this.proyecto});
 
@@ -111,7 +111,7 @@ class _ProjId extends ConsumerWidget {
     final Congregation? cong = proyecto == null
         ? null
         : congregations.where((c) => c.id == proyecto!.congregationId).firstOrNull;
-    final nombre = proyecto?.name ?? 'Programa';
+    final name = proyecto?.name ?? 'Programa';
     final congName =
         cong?.name ?? (proyecto == null ? ref.watch(formProvider).congregationId : '');
     final congColor = cong == null ? t.accent : Color(cong.color);
@@ -121,7 +121,7 @@ class _ProjId extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          nombre,
+          name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(

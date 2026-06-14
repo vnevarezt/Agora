@@ -44,10 +44,10 @@ class ParticipantsController extends Notifier<List<Participant>> {
 final participantsProvider =
     NotifierProvider<ParticipantsController, List<Participant>>(ParticipantsController.new);
 
-/// Activos ordenados por nombre normalizado (list del picker).
+/// Activos ordenados por name normalizado (list del picker).
 final activeParticipantsProvider = Provider<List<Participant>>((ref) {
-  final todos = ref.watch(participantsProvider);
-  return todos.where((h) => h.active).toList()
+  final all = ref.watch(participantsProvider);
+  return all.where((h) => h.active).toList()
     ..sort((a, b) =>
         normalizeName(a.name).compareTo(normalizeName(b.name)));
 });
@@ -62,9 +62,9 @@ final recentParticipantsProvider = Provider<List<Participant>>((ref) {
 
 /// Congregaciones distintas (suggestions del formulario de personas).
 final participantCongregationsProvider = Provider<List<String>>((ref) {
-  final todos = ref.watch(participantsProvider);
+  final all = ref.watch(participantsProvider);
   final distintas = <String>{
-    for (final h in todos)
+    for (final h in all)
       if (h.congregation.trim().isNotEmpty) h.congregation.trim(),
   };
   return distintas.toList()..sort();
@@ -72,7 +72,7 @@ final participantCongregationsProvider = Provider<List<String>>((ref) {
 
 /// Filtro de la pantalla de gestión (puro, testeable).
 List<Participant> filterParticipants(
-  List<Participant> todos, {
+  List<Participant> all, {
   String query = '',
   Role? role,
   String? congregation,
@@ -80,7 +80,7 @@ List<Participant> filterParticipants(
 }) {
   final q = normalizeName(query);
   return [
-    for (final h in todos)
+    for (final h in all)
       if ((includeInactive || h.active) &&
           (role == null || h.role == role) &&
           (congregation == null || h.congregation == congregation) &&
@@ -102,11 +102,11 @@ class ParticipantActions {
 
   ParticipantsController get _dir => _ref.read(participantsProvider.notifier);
 
-  /// Asignación hecha desde el picker: si el nombre ya existe (normalizado)
+  /// Asignación hecha desde el picker: si el name ya existe (normalizado)
   /// solo marca uso; si no, alta mínima que queda como 'Incompleto' en la
   /// pantalla de gestión (sexo sin especificar).
-  Future<void> recordUsage(String nombre) async {
-    final clean = nombre.trim();
+  Future<void> recordUsage(String name) async {
+    final clean = name.trim();
     if (clean.isEmpty) return;
     final ahora = DateTime.now().toUtc();
     final clave = normalizeName(clean);

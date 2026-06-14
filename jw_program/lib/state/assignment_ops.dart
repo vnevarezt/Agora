@@ -40,14 +40,14 @@ class RowSlot extends SlotRef {
   String get key => aux ? '${row.id}:aux:$index' : '${row.id}:$index';
 }
 
-/// Lista de [slots] entradas con [nombre] colocado en [index], conservando
+/// Lista de [slots] entradas con [name] colocado en [index], conservando
 /// los demás valores de [actual] (función pura, testeable).
 List<String> listWithName(
-    List<String>? actual, int slots, int index, String nombre) {
+    List<String>? actual, int slots, int index, String name) {
   return [
     for (var i = 0; i < slots; i++)
       i == index
-          ? nombre
+          ? name
           : (actual != null && i < actual.length ? actual[i] : ''),
   ];
 }
@@ -73,20 +73,20 @@ String slotName(FormModel f, SlotRef slot) {
   };
 }
 
-/// Escribe [nombre] en [slot] usando los setters existentes del formulario.
+/// Escribe [name] en [slot] usando los setters existentes del formulario.
 /// Limpiar = escribir ''.
-void writeAssignment(WidgetRef ref, SlotRef slot, String nombre) {
+void writeAssignment(WidgetRef ref, SlotRef slot, String name) {
   final notifier = ref.read(formProvider.notifier);
   switch (slot) {
     case ChairmanSlot():
-      notifier.setChairman(nombre);
+      notifier.setChairman(name);
     case RowSlot(:final row, :final index, :final aux):
       final f = ref.read(formProvider);
       final list = listWithName(
         aux ? f.auxiliary[row.id] : f.main[row.id],
         aux ? row.auxSlots : row.slots,
         index,
-        nombre,
+        name,
       );
       aux
           ? notifier.setAuxNames(row.id, list)

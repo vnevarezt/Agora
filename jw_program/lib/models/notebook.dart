@@ -1,5 +1,5 @@
 /// Cuaderno (issue) de Vida y Ministerio: un periodo con sus semanas. Sirve al
-/// modal de proyectos para ofrecer las semanas disponibles.
+/// modal de projects para ofrecer las semanas disponibles.
 class Notebook {
   final String id;
   final String label;

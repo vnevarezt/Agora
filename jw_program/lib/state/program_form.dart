@@ -115,7 +115,7 @@ class FormController extends Notifier<FormModel> {
   }
 }
 
-/// Semana seleccionada (o null si aún no se ha descargado el cuaderno).
+/// Semana seleccionada (o null si aún no se ha descargado el notebook).
 final currentWeekProvider = Provider<Week?>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return null;

@@ -55,7 +55,7 @@ class S140 {
   /// Ancho mínimo de cada columna de nombres en modo Sala Auxiliar.
   static const double minColAux = 60;
 
-  /// Holgura que se suma al ancho medido del nombre más largo.
+  /// Holgura que se suma al ancho medido del name más largo.
   static const double nomPad = 6;
 
   // ---- Colores oficiales (tex:31-35) ----

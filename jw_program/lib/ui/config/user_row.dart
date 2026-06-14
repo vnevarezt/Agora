@@ -4,7 +4,7 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/avatar.dart';
 
-/// Fila de usuario con acceso (`.user-row`): avatar, name, email y un control
+/// Fila de user con acceso (`.user-row`): avatar, name, email y un control
 /// a la derecha (pill de role o selector). [first] omite el borde superior.
 class UserRow extends StatelessWidget {
   const UserRow({

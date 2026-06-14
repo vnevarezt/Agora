@@ -4,7 +4,7 @@ import '../models/program_row.dart';
 import 'pdf_theme.dart';
 
 /// Anchos de columna calculados por documento. La celda de contenido (X) es
-/// implícita (Expanded), así que solo guardamos role, aux, nombre y banda.
+/// implícita (Expanded), así que solo guardamos role, aux, name y banda.
 class ColumnWidths {
   final double role;
   final double nomPrin;
@@ -19,7 +19,7 @@ class ColumnWidths {
 }
 
 /// Ancho que necesita la columna de nombres de una fila. Para Estudiante/Ayudante
-/// se usa el nombre individual más largo (se apila), para el resto el texto unido.
+/// se usa el name individual más largo (se apila), para el resto el texto unido.
 double anchoNombres(
     String role, List<String> nombres, double Function(String) medir) {
   if (nombres.isEmpty) return 0;
@@ -50,7 +50,7 @@ ColumnWidths calcularColumnas(
       if (wa > maxAux) maxAux = wa;
     }
   }
-  const role = S140.anchoRol; // fijo (etiquetas de role, no entrada del usuario)
+  const role = S140.anchoRol; // fijo (etiquetas de role, no entrada del user)
 
   if (!aux) {
     final maxNomOK =

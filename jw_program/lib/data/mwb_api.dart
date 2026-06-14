@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 /// Acceso a la API pública de medios de jw.org para obtener el EPUB del
-/// cuaderno "Guía de actividades para la reunión Vida y Ministerio Cristianos".
+/// notebook "Guía de actividades para la reunión Vida y Ministerio Cristianos".
 ///
 /// Port de `url_epub` / `descargar_epub` de generar_programa.py:33-49.
 class MwbApi {
