@@ -229,7 +229,7 @@ class _ProyectosSection extends ConsumerWidget {
                       congregacion: porId[p.congregacionId],
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                            builder: (_) => const ProgramShell()),
+                            builder: (_) => ProgramShell(proyecto: p)),
                       ),
                       onEdit: () => mostrarProyectoModal(context, proyecto: p),
                     ),

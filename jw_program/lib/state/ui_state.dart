@@ -46,19 +46,6 @@ class MobileTabController extends Notifier<MobileTab> {
   void seleccionar(MobileTab tab) => state = tab;
 }
 
-/// Panel de configuración (cuaderno/semana/inicio/congregación) expandido.
-final configExpandedProvider =
-    NotifierProvider<ConfigExpandedController, bool>(
-        ConfigExpandedController.new);
-
-class ConfigExpandedController extends Notifier<bool> {
-  @override
-  bool build() => false;
-
-  void alternar() => state = !state;
-  void cerrar() => state = false;
-}
-
 /// Slot cuyo picker está abierto; su tarjeta se resalta con el ring accent.
 final activeSlotProvider =
     NotifierProvider<ActiveSlotController, SlotRef?>(ActiveSlotController.new);
