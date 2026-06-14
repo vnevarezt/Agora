@@ -11,8 +11,8 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
-import '../widgets/danger_button.dart';
 import '../widgets/labeled_field.dart';
+import '../widgets/modal_shell.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/segmented_control.dart';
 
@@ -43,7 +43,7 @@ class PersonModal extends ConsumerStatefulWidget {
     this.sheet = false,
   });
 
-  /// null = alta nueva.
+  /// null = new.
   final Participant? original;
   final VoidCallback onClose;
   final bool sheet;
@@ -74,7 +74,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
   void _setGender(Gender s) => setState(() {
         _gender = s;
-        // Las hermanas solo participan como publicadoras.
+        // Women only participate as publishers.
         if (s == Gender.female) _role = Role.publisher;
       });
 
@@ -138,100 +138,18 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-
-    final card = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (widget.sheet) _handle(t),
-        _header(t),
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-            child: _body(t),
-          ),
-        ),
-        _footer(t),
-      ],
-    );
-
-    if (widget.sheet) return card;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: t.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: t.border),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x33000000), blurRadius: 40, offset: Offset(0, 12)),
-          BoxShadow(
-              color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 4)),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: card,
+    return ModalShell(
+      sheet: widget.sheet,
+      onClose: widget.onClose,
+      title: _isCreating ? 'Añadir participante' : 'Editar participante',
+      desc: 'El privilegio define qué partes se le pueden asignar.',
+      body: _body(context.tokens),
+      primaryLabel: _isCreating ? 'Añadir participante' : 'Guardar cambios',
+      primaryBusy: _saving,
+      onPrimary: (_name.trim().isNotEmpty && !_saving) ? _save : null,
+      onDanger: _isCreating ? null : _delete,
     );
   }
-
-  Widget _handle(AppTokens t) => Padding(
-        padding: const EdgeInsets.only(top: 9),
-        child: Center(
-          child: Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: t.border,
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-        ),
-      );
-
-  Widget _header(AppTokens t) => Padding(
-        padding: EdgeInsets.fromLTRB(18, widget.sheet ? 12 : 18, 12, 4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _isCreating ? 'Añadir participante' : 'Editar participante',
-                    style: TextStyle(
-                      fontSize: 16.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                      color: t.text,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'El privilegio define qué partes se le pueden asignar.',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      height: 1.35,
-                      color: t.textMute,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            AppIconButton(
-              icon: Icons.close,
-              bordered: true,
-              tooltip: 'Cerrar',
-              size: 32,
-              onPressed: widget.onClose,
-            ),
-          ],
-        ),
-      );
 
   Widget _body(AppTokens t) {
     final suggestions = ref
@@ -323,75 +241,6 @@ class _PersonModalState extends ConsumerState<PersonModal> {
     );
   }
 
-  Widget _footer(AppTokens t) {
-    final puedeGuardar = _name.trim().isNotEmpty && !_saving;
-    final primary = _isCreating ? 'Añadir participante' : 'Guardar cambios';
-
-    final children = widget.sheet
-        ? [
-            AppButton(
-              label: primary,
-              expand: true,
-              busy: _saving,
-              height: Dimens.hExportMobile,
-              onPressed: puedeGuardar ? _save : null,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    variant: AppButtonVariant.ghost,
-                    label: 'Cancelar',
-                    expand: true,
-                    onPressed: widget.onClose,
-                  ),
-                ),
-                if (!_isCreating) ...[
-                  const SizedBox(width: 8),
-                  DangerButton(onTap: _delete),
-                ],
-              ],
-            ),
-          ]
-        : [
-            Row(
-              children: [
-                if (!_isCreating) DangerButton(onTap: _delete),
-                const Spacer(),
-                AppButton(
-                  variant: AppButtonVariant.ghost,
-                  label: 'Cancelar',
-                  onPressed: widget.onClose,
-                ),
-                const SizedBox(width: 8),
-                AppButton(
-                  label: primary,
-                  busy: _saving,
-                  onPressed: puedeGuardar ? _save : null,
-                ),
-              ],
-            ),
-          ];
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        18,
-        12,
-        18,
-        widget.sheet ? 12 + MediaQuery.paddingOf(context).bottom : 12,
-      ),
-      decoration: BoxDecoration(
-        color: t.surface2,
-        border: Border(top: BorderSide(color: t.border2)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
-      ),
-    );
-  }
 }
 
 /// Role radio card (`.priv-option`): circle + title + description.
