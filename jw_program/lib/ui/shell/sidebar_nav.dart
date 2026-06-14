@@ -9,8 +9,8 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 
-/// Ítems de navegación del shell (mismo orden en barra lateral y barra
-/// inferior).
+/// Shell navigation items (same order in the side bar and the bottom
+/// bar).
 const _items = <({AppSection section, IconData icon, String label})>[
   (section: AppSection.home, icon: Icons.home_outlined, label: 'Inicio'),
   (section: AppSection.participants, icon: Icons.people_outline, label: 'Participantes'),
@@ -21,14 +21,14 @@ const _items = <({AppSection section, IconData icon, String label})>[
   ),
 ];
 
-/// Nº de reminders urgentes; se muestra como badge en "Inicio".
+/// Number of urgent reminders; shown as a badge on "Inicio".
 final _alertsProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
     .where((r) => r.type == ReminderType.alert)
     .length);
 
-/// Barra lateral (`.sidebar`): marca, navegación y tarjeta de user.
-/// Con [compact] queda en modo solo-iconos (64px) para tablet.
+/// Side bar (`.sidebar`): brand, navigation and user card.
+/// With [compact] it goes icon-only (64px) for tablet.
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key, this.compact = false});
 
@@ -232,7 +232,7 @@ class _UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    // Sin user en sesión (sin backend) no se muestra la tarjeta.
+    // No session user (no backend): the card is hidden.
     if (name.isEmpty) return const SizedBox.shrink();
     if (compact) {
       return Center(child: PersonAvatar(name: name, size: 32));
@@ -283,7 +283,7 @@ class _UserCard extends StatelessWidget {
   }
 }
 
-/// Barra de navegación inferior para móvil (`.bottom-nav`).
+/// Mobile bottom navigation bar (`.bottom-nav`).
 class BottomNav extends ConsumerWidget {
   const BottomNav({super.key});
 

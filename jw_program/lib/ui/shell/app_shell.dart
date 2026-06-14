@@ -8,9 +8,9 @@ import '../participants/participants_view.dart';
 import '../responsive.dart';
 import 'sidebar_nav.dart';
 
-/// Shell raíz de la app: navegación lateral + área de contenido que conmuta
-/// entre Inicio (dashboard), Participants y Configuración. En móvil la barra
-/// lateral se reemplaza por una barra inferior.
+/// App root shell: side navigation + content area that switches between
+/// Home (dashboard), Participants and Settings. On mobile the side bar is
+/// replaced by a bottom bar.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
 

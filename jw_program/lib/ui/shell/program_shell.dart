@@ -9,13 +9,13 @@ import '../workspace/workspace_panel.dart';
 import 'mobile_bars.dart';
 import 'project_bar.dart';
 
-/// Pantalla raíz del editor. Único lugar que decide el layout: escritorio/
-/// tablet en dos paneles (46/54) y móvil en una columna con pestañas; ambos
-/// arreglos usan los mismos [WorkspacePanel] y [PreviewPane].
+/// Editor root screen. The single place that decides the layout: desktop/
+/// tablet in two panels (46/54) and mobile in one column with tabs; both
+/// arrangements use the same [WorkspacePanel] and [PreviewPane].
 class ProgramShell extends StatelessWidget {
   const ProgramShell({super.key, this.project});
 
-  /// Project abierto desde el dashboard (identidad de la barra). Opcional.
+  /// Project opened from the dashboard (bar identity). Optional.
   final Project? project;
 
   @override
@@ -50,9 +50,9 @@ class ProgramShell extends StatelessWidget {
   }
 }
 
-/// Cuerpo móvil: las pestañas alternan los paneles con [IndexedStack] (el
-/// zoom del preview sobrevive al cambio de pestaña) y la bottom bar flota
-/// encima con su vidrio esmerilado.
+/// Mobile body: the tabs switch panels with [IndexedStack] (the preview
+/// zoom survives tab changes) and the bottom bar floats above with its
+/// frosted glass.
 class _MobileBody extends ConsumerWidget {
   const _MobileBody();
 

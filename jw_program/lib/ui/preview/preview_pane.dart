@@ -6,8 +6,8 @@ import '../theme/tokens.dart';
 import '../widgets/segmented_control.dart';
 import 'pdf_preview_view.dart';
 
-/// Panel de vista previa (`.preview-pane`): barra superior con el chip
-/// "Vista previa" y el % de zoom, y el visor del PDF real debajo.
+/// Preview panel (`.preview-pane`): top bar with the "Vista previa" chip
+/// and the zoom %, with the real PDF viewer below.
 class PreviewPane extends StatefulWidget {
   const PreviewPane({super.key, this.showLeftBorder = false});
 

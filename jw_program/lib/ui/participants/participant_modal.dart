@@ -16,7 +16,7 @@ import '../widgets/labeled_field.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/segmented_control.dart';
 
-/// Descripción de cada role en las radio-cards del modal.
+/// Description of each role in the modal radio cards.
 const _roleDesc = {
   Role.publisher:
       'Participa en "Seamos mejores maestros" (todos)',
@@ -25,7 +25,7 @@ const _roleDesc = {
   Role.elder: 'Puede recibir cualquier asignación del programa',
 };
 
-/// Abre el modal de alta/edición de participant. [original] null = alta nueva.
+/// Opens the create/edit participant modal. [original] null = new.
 Future<void> showParticipantModal(BuildContext context, {Participant? original}) {
   return showAppModal<void>(
     context,
@@ -34,7 +34,7 @@ Future<void> showParticipantModal(BuildContext context, {Participant? original})
   );
 }
 
-/// Contenido del modal de participant. Lee/escribe vía Riverpod.
+/// Participant modal content. Reads/writes via Riverpod.
 class PersonModal extends ConsumerStatefulWidget {
   const PersonModal({
     super.key,
@@ -61,7 +61,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   late bool _active = widget.original?.active ?? true;
   bool _saving = false;
 
-  /// Bump para re-sembrar el campo de congregación al tocar un chip.
+  /// Bump to re-seed the congregation field when tapping a chip.
   int _congVersion = 0;
 
   bool get _isCreating => widget.original == null;
@@ -394,7 +394,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   }
 }
 
-/// Radio-card de role (`.priv-option`): círculo + título + descripción.
+/// Role radio card (`.priv-option`): circle + title + description.
 class _RoleOption extends StatelessWidget {
   const _RoleOption({
     required this.role,
@@ -483,7 +483,7 @@ class _RoleOption extends StatelessWidget {
   }
 }
 
-/// Fila "Disponible" con switch (`.set-row`): mapea a `active`.
+/// "Disponible" row with a switch (`.set-row`): maps to `active`.
 class _AvailableRow extends StatelessWidget {
   const _AvailableRow({required this.active, required this.onChanged});
 

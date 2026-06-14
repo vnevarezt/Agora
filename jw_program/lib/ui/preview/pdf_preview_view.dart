@@ -9,13 +9,13 @@ import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
-/// Visor del PDF rasterizado (pdfrx). La lógica de zoom/calidad es la misma
-/// de siempre; solo cambia el chrome: fondo de tokens, hoja con el radio y
-/// las sombras del mock, y FABs de zoom del catálogo.
+/// Rasterized PDF viewer (pdfrx). The zoom/quality logic is unchanged;
+/// only the chrome changes: token background, a sheet with the radius and
+/// shadows, and catalog zoom FABs.
 class PdfPreviewView extends ConsumerWidget {
   const PdfPreviewView({super.key, required this.controller});
 
-  /// Controlado por [PreviewPane], que muestra el % de zoom en su barra.
+  /// Driven by [PreviewPane], which shows the zoom % in its bar.
   final TransformationController controller;
 
   @override
@@ -144,7 +144,7 @@ class _Vista extends ConsumerWidget {
             ),
             Positioned(
               right: 16,
-              // En móvil la bottom bar flota sobre el panel: sube los FABs.
+              // On mobile the bottom bar floats over the panel: raise the FABs.
               bottom: context.isMobile ? 96 : 16,
               child: Column(
                 mainAxisSize: MainAxisSize.min,

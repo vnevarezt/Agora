@@ -17,8 +17,8 @@ import '../widgets/app_button.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
-/// Barra del editor (`.projbar`): identidad del project, progress, selector
-/// de semanas y exportar. Reemplaza a la antigua barra de contexto.
+/// Editor bar (`.projbar`): project identity, progress, week selector and
+/// export.
 class ProjectBar extends ConsumerWidget {
   const ProjectBar({super.key, this.project});
 
@@ -96,7 +96,7 @@ class ProjectBar extends ConsumerWidget {
       );
 }
 
-/// Identidad del project: name + congregación + nº de semanas.
+/// Project identity: name + congregation + week count.
 class _ProjectId extends ConsumerWidget {
   const _ProjectId({this.project});
 
@@ -193,8 +193,8 @@ class _ProjectId extends ConsumerWidget {
   }
 }
 
-/// Selector de semanas (`.week-nav`): flechas + botón central con popover
-/// "Ir a la semana".
+/// Week selector (`.week-nav`): arrows + central button with a "Go to
+/// week" popover.
 class _WeekNav extends ConsumerStatefulWidget {
   const _WeekNav({this.expand = false});
 
@@ -396,7 +396,7 @@ class _PctBadge extends StatelessWidget {
   }
 }
 
-/// Contenido del popover "Ir a la semana" (`.week-menu`) + toggle Sala auxiliar.
+/// "Go to week" popover content (`.week-menu`) + Auxiliary Room toggle.
 class _WeekMenu extends ConsumerWidget {
   const _WeekMenu({
     required this.weeks,
@@ -590,8 +590,8 @@ class _AuxToggle extends StatelessWidget {
   }
 }
 
-/// Botón Exportar con menú (`.menu`): semana actual (real), project y hojas
-/// (UI por ahora).
+/// Export button with a menu (`.menu`): current week (real), project and
+/// sheets (UI for now).
 class _ExportMenu extends ConsumerWidget {
   const _ExportMenu({this.compact = false});
 

@@ -5,27 +5,27 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'person_picker_panel.dart';
 
-/// Resultado del picker de personas.
+/// Result of the person picker.
 sealed class PickResult {
   const PickResult();
 }
 
-/// Asignar [name] al slot.
+/// Assign [name] to the slot.
 class PickName extends PickResult {
   const PickName(this.name);
 
   final String name;
 }
 
-/// Quitar la asignación current.
+/// Remove the current assignment.
 class PickRemove extends PickResult {
   const PickRemove();
 }
 
 const _scrim = Color(0x47000000); // rgba(0,0,0,.28) del mock
 
-/// Abre el picker: popover anclado a [anchorContext] en escritorio/tablet,
-/// bottom sheet en móvil. Devuelve null si se cierra sin elegir.
+/// Opens the picker: popover anchored to [anchorContext] on desktop/tablet,
+/// bottom sheet on mobile. Returns null if closed without choosing.
 Future<PickResult?> showPersonPicker(
   BuildContext anchorContext, {
   required String roleLabel,
@@ -52,7 +52,7 @@ Future<PickResult?> showPersonPicker(
       builder: (context) {
         final height = MediaQuery.sizeOf(context).height;
         return Padding(
-          // Deja el buscador visible when aparece el teclado.
+          // Keeps the search box visible when the keyboard appears.
           padding: EdgeInsets.only(
               bottom: MediaQuery.viewInsetsOf(context).bottom),
           child: ConstrainedBox(
@@ -76,8 +76,8 @@ Future<PickResult?> showPersonPicker(
   );
 }
 
-/// Popover de escritorio: scrim suave + panel anclado al botón con la
-/// animación "pop" del mock (escala 0.96 → 1 en 160 ms).
+/// Desktop popover: soft scrim + panel anchored to the button with the
+/// "pop" animation (scale 0.96 -> 1 over 160 ms).
 class _PickerPopupRoute extends PopupRoute<PickResult> {
   _PickerPopupRoute({required this.anchor, required this.panel});
 
@@ -132,8 +132,8 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   }
 }
 
-/// Posiciona el popover bajo el ancla, sujeto a los bordes de la ventana;
-/// si no cabe abajo, lo coloca encima (igual que el cálculo del mock).
+/// Positions the popover under the anchor, clamped to the window edges;
+/// if it does not fit below, places it above.
 class _PopoverLayout extends SingleChildLayoutDelegate {
   _PopoverLayout({required this.anchor});
 

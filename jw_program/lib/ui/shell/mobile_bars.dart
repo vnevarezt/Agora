@@ -10,7 +10,7 @@ import '../widgets/export_button.dart';
 import '../widgets/progress_ring.dart';
 import '../widgets/segmented_control.dart';
 
-/// Pestañas Asignar / Vista previa (`.mobile-tabs`).
+/// Assign / Preview tabs (`.mobile-tabs`).
 class MobileTabs extends ConsumerWidget {
   const MobileTabs({super.key});
 
@@ -40,8 +40,8 @@ class MobileTabs extends ConsumerWidget {
   }
 }
 
-/// Barra inferior fija de móvil (`.bottom-bar`): vidrio esmerilado con el
-/// anillo de progreso y el botón Exportar a lo ancho.
+/// Fixed mobile bottom bar (`.bottom-bar`): frosted glass with the progress
+/// ring and a full-width Export button.
 class MobileBottomBar extends ConsumerWidget {
   const MobileBottomBar({super.key});
 

@@ -10,9 +10,9 @@ import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import 'person_picker.dart';
 
-/// Contenido del picker de personas, compartido entre el popover de
-/// escritorio y el bottom sheet móvil. Devuelve el resultado haciendo pop
-/// de su propia ruta con un [PickResult].
+/// Person picker content, shared between the desktop popover and the
+/// mobile bottom sheet. Returns the result by popping its own route with
+/// a [PickResult].
 class PersonPickerPanel extends ConsumerStatefulWidget {
   const PersonPickerPanel({
     super.key,
@@ -24,7 +24,7 @@ class PersonPickerPanel extends ConsumerStatefulWidget {
 
   final String roleLabel;
 
-  /// Nombre actualmente asignado ('' si el slot está vacío).
+  /// Currently assigned name ('' if the slot is empty).
   final String current;
   final int maxLength;
   final bool mobile;
@@ -112,7 +112,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// Fila de un participant: privilegio como label (solo anciano/siervo).
+  /// A participant row: privilege as a label (only elder/servant).
   Widget _row(Participant h) {
     return _PersonRow(
       name: h.name,
@@ -163,8 +163,8 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// Pie "Añadir": asigna el name tecleado y lo suma al directorio en
-  /// memoria (la gestión de personas llegará en otra fase).
+  /// "Añadir" footer: assigns the typed name and adds it to the in-memory
+  /// directory (full management comes in another phase).
   Widget _footer(AppTokens t) {
     final enabled = _search.isNotEmpty;
     final label =

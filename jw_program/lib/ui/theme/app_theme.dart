@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'dimens.dart';
 import 'tokens.dart';
 
-/// Estilos de texto que no caben en el TextTheme de Material.
+/// Text styles that do not fit in the Material TextTheme.
 abstract final class AppText {
   static const String family = 'Manrope';
   static const String monoFamily = 'JetBrainsMono';
 
-  /// JetBrains Mono para horas, códigos y porcentajes (cifras tabulares).
+  /// JetBrains Mono for times, codes and percentages (tabular figures).
   static TextStyle mono({
     double size = 12,
     FontWeight weight = FontWeight.w600,
@@ -23,8 +23,8 @@ abstract final class AppText {
     );
   }
 
-  /// Etiquetas uppercase pequeñas (labels de campo, slot y grupo del picker).
-  /// El texto debe pasarse ya en mayúsculas.
+  /// Small uppercase labels (field, slot and picker-group labels).
+  /// The text must be passed already uppercased.
   static TextStyle label({double size = 10.5, Color? color}) {
     return TextStyle(
       fontSize: size,
@@ -35,7 +35,7 @@ abstract final class AppText {
   }
 }
 
-/// Construye el [ThemeData] de la app a partir de los tokens de una paleta.
+/// Builds the app [ThemeData] from a palette tokens.
 ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
   final esClaro = brightness == Brightness.light;
 

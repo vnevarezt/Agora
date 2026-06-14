@@ -12,9 +12,9 @@ import '../widgets/filter_pill.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
 
-/// Vista de Participants (`PeopleView` del mock): topbar, filters y cuadrícula de
-/// tarjetas alimentada por la BD (`participantsProvider`). Vive dentro del
-/// shell; al abrirse desde el editor muestra botón de volver.
+/// Participants view (`PeopleView`): topbar, filters and a grid of cards
+/// fed by `participantsProvider`. Lives inside the shell; shows a back
+/// button when opened from the editor.
 class ParticipantsView extends ConsumerStatefulWidget {
   const ParticipantsView({super.key});
 

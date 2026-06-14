@@ -8,9 +8,9 @@ import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import 'priv_badge.dart';
 
-/// Tarjeta de participant (`.person-card`): avatar, name con punto de
-/// disponibilidad, subtítulo (sexo · congregación) e insignia de privilegio.
-/// Al tocarla se abre el modal de edición.
+/// Participant card (`.person-card`): avatar, name with an availability
+/// dot, subtitle (gender · congregation) and a privilege badge.
+/// Tapping it opens the edit modal.
 class ParticipantCard extends StatelessWidget {
   const ParticipantCard({super.key, required this.participant, required this.onTap});
 
@@ -95,7 +95,7 @@ class ParticipantCard extends StatelessWidget {
   }
 }
 
-/// Punto de disponibilidad (`.dot-avail`): verde si active, gris si no.
+/// Availability dot (`.dot-avail`): green if active, gray otherwise.
 class _AvailabilityDot extends StatelessWidget {
   const _AvailabilityDot({required this.active});
 
@@ -115,7 +115,7 @@ class _AvailabilityDot extends StatelessWidget {
   }
 }
 
-/// Insignia ámbar para participantes con datos incompletos (sexo sin definir).
+/// Amber badge for participants with incomplete data (gender unset).
 class _IncompleteBadge extends StatelessWidget {
   const _IncompleteBadge();
 

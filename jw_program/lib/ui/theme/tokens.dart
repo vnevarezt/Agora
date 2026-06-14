@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Tokens de color del rediseño — espejo de las variables CSS del mock
-/// (`--bg`, `--surface`, `--accent`…), convertidas de oklch a sRGB exacto.
+/// Color tokens — mirror of the mock CSS variables
+/// (`--bg`, `--surface`, `--accent`…), converted from oklch to exact sRGB.
 ///
-/// Cada paleta define su versión clara y oscura; add una paleta nueva
+/// Each palette defines its light and dark version; add a new palette
 /// (Granate, Salvia, Biblioteca) es declarar otra constante [AppPalette].
 class AppTokens extends ThemeExtension<AppTokens> {
   final Color bg;
@@ -90,8 +90,8 @@ class AppTokens extends ThemeExtension<AppTokens> {
   }
 }
 
-/// Paleta con sus dos modos. La app usa [pizarra]; las demás del mock se
-/// agregan aquí when se necesiten.
+/// A palette with its two modes. The app uses [pizarra]; the others are
+/// added here when needed.
 class AppPalette {
   final String id;
   final AppTokens light;
@@ -135,6 +135,6 @@ const pizarra = AppPalette(
 );
 
 extension AppTokensX on BuildContext {
-  /// Acceso corto a los tokens del theme active: `context.tokens.accent`.
+  /// Shortcut to the active theme tokens: `context.tokens.accent`.
   AppTokens get tokens => Theme.of(this).extension<AppTokens>()!;
 }
