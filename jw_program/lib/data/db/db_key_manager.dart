@@ -46,7 +46,7 @@ class DbKeyManager {
       final verificada = await _storage.read(key: _kClave);
       if (verificada != hex) {
         throw const ClaveDbException(
-            'No se pudo guardar la clave en el llavero del sistema. '
+            'No se pudo save la clave en el llavero del sistema. '
             'La base de datos local no puede abrirse.');
       }
       return hex;

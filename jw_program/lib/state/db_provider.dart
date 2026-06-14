@@ -7,10 +7,10 @@ import '../data/db/participants_dao.dart';
 
 final dbKeyManagerProvider = Provider<DbKeyManager>((ref) => DbKeyManager());
 
-/// Base de datos local cifrada. En tests se hace override con
-/// `AppDatabase(NativeDatabase.memory())` (sin llavero ni cifrado).
+/// Encrypted local database. Tests override it with
+/// `AppDatabase(NativeDatabase.memory())` (no keychain, no encryption).
 final dbProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase(abrirEjecutorCifrado(ref.watch(dbKeyManagerProvider)));
+  final db = AppDatabase(openEncryptedExecutor(ref.watch(dbKeyManagerProvider)));
   ref.onDispose(db.close);
   return db;
 });

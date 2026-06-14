@@ -44,7 +44,7 @@ class ParticipantsDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
-  Future<void> eliminar(String id) =>
+  Future<void> deleteById(String id) =>
       (delete(participants)..where((t) => t.id.equals(id))).go();
 
   /// Import en modo fusionar: upsert masivo en una transacción.

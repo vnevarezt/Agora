@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'assignment_ops.dart';
 
-/// Estado efímero de la UI (no afecta al PDF ni al formulario).
+/// Ephemeral UI state (doesn't affect the PDF or the form).
 
-/// Sección activa del shell (barra lateral): dashboard, participants o config.
+/// Active shell section (sidebar): dashboard, participants or settings.
 enum AppSection { home, participants, settings }
 
 final appSectionProvider =
@@ -15,10 +15,10 @@ class AppSectionController extends Notifier<AppSection> {
   @override
   AppSection build() => AppSection.home;
 
-  void seleccionar(AppSection seccion) => state = seccion;
+  void select(AppSection section) => state = section;
 }
 
-/// Modo claro/dark, alternado desde la barra de contexto. Solo en memoria.
+/// Light/dark mode. In-memory only.
 final themeModeProvider =
     NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
 
@@ -26,27 +26,27 @@ class ThemeModeController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() => ThemeMode.light;
 
-  void alternar() =>
+  void toggle() =>
       state = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
 
-  /// Fija el modo explícitamente (Claro / Oscuro / Sistema en Configuración).
-  void set(ThemeMode modo) => state = modo;
+  /// Sets the mode explicitly (Light / Dark / System in Settings).
+  void set(ThemeMode mode) => state = mode;
 }
 
-/// Pestaña activa en el layout móvil.
-enum MobileTab { asignar, vista }
+/// Active tab in the mobile layout.
+enum MobileTab { assign, preview }
 
 final mobileTabProvider =
     NotifierProvider<MobileTabController, MobileTab>(MobileTabController.new);
 
 class MobileTabController extends Notifier<MobileTab> {
   @override
-  MobileTab build() => MobileTab.asignar;
+  MobileTab build() => MobileTab.assign;
 
-  void seleccionar(MobileTab tab) => state = tab;
+  void select(MobileTab tab) => state = tab;
 }
 
-/// Slot cuyo picker está abierto; su tarjeta se resalta con el ring accent.
+/// Slot whose picker is open; its card is highlighted with the accent ring.
 final activeSlotProvider =
     NotifierProvider<ActiveSlotController, SlotRef?>(ActiveSlotController.new);
 
@@ -57,8 +57,8 @@ class ActiveSlotController extends Notifier<SlotRef?> {
   void set(SlotRef? slot) => state = slot;
 }
 
-/// Exportación de PDF en curso: deshabilita all los botones de exportar
-/// (barra de contexto y bottom bar móvil) a la vez.
+/// PDF export in progress: disables every export button (project bar and
+/// mobile bottom bar) at once.
 final exportBusyProvider =
     NotifierProvider<ExportBusyController, bool>(ExportBusyController.new);
 

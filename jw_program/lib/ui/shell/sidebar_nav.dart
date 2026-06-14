@@ -148,7 +148,7 @@ class _NavItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     return Pressable(
-      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(section),
+      onTap: () => ref.read(appSectionProvider.notifier).select(section),
       tooltip: compact ? label : null,
       builder: (context, hovered, _) {
         final fg = active ? t.accentStrong : (hovered ? t.text : t.textDim);
@@ -343,7 +343,7 @@ class _BottomItem extends ConsumerWidget {
     final fg = active ? t.accentStrong : t.textMute;
 
     return Pressable(
-      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(section),
+      onTap: () => ref.read(appSectionProvider.notifier).select(section),
       builder: (context, hovered, _) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Column(

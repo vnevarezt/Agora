@@ -34,7 +34,7 @@ class MobileTabs extends ConsumerWidget {
         ],
         onChanged: (i) => ref
             .read(mobileTabProvider.notifier)
-            .seleccionar(MobileTab.values[i]),
+            .select(MobileTab.values[i]),
       ),
     );
   }

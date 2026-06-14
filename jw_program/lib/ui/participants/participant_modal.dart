@@ -101,7 +101,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               congregation: _congregation.trim(),
               active: _active,
             );
-      await ref.read(participantActionsProvider).guardar(h);
+      await ref.read(participantActionsProvider).save(h);
       widget.onClose();
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -114,7 +114,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar definitivamente?'),
         content: Text(
-          'Se eliminará a ${widget.original!.name} del directorio. '
+          'Se deleteá a ${widget.original!.name} del directorio. '
           'Esta acción no se puede deshacer. Las asignaciones ya escritas '
           'en programas no se ven afectadas.',
         ),
@@ -132,7 +132,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    await ref.read(participantActionsProvider).eliminar(widget.original!.id);
+    await ref.read(participantActionsProvider).delete(widget.original!.id);
     widget.onClose();
   }
 

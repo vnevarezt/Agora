@@ -4,26 +4,26 @@ import 'package:uuid/uuid.dart';
 import '../models/participant.dart';
 import 'program_form.dart';
 
-// INVARIANTE: las asignaciones del programa siguen siendo strings planos
-// por ProgramRow.id en formProvider (contrato del PDF). El directorio de
-// participants es solo un catálogo de personas, NO una clave foránea.
+// INVARIANT: program assignments are still plain strings keyed by ProgramRow.id
+// in formProvider (the PDF contract). The participant directory is just a
+// catalog of people, NOT a foreign key.
 //
-// SOLO UI: directorio en memoria efímera (sin BD ni persistencia). El
-// andamiaje de la BD cifrada (data/db/*, db_provider) queda latente, sin que
-// ninguna ruta activa lo use, listo para reconectar en el futuro.
+// UI-ONLY: ephemeral in-memory directory (no DB, no persistence). The encrypted
+// DB scaffolding (data/db/*, db_provider) stays dormant — no active route uses
+// it — ready to be reconnected later.
 
-/// Directorio en memoria. Arranca vacío; las altas/ediciones viven solo en la
-/// sesión. Mantiene la semántica que tenía la BD: `markUsed` toca `ultimoUso`
-/// sin alterar `updatedAt`.
+/// In-memory directory. Starts empty; creates/edits live only for the session.
+/// Keeps the DB semantics: `markUsed` touches `lastUsed` without altering
+/// `updatedAt`.
 class ParticipantsController extends Notifier<List<Participant>> {
   @override
   List<Participant> build() => const [];
 
-  void upsert(Participant h) {
-    final i = state.indexWhere((x) => x.id == h.id);
+  void upsert(Participant p) {
+    final i = state.indexWhere((x) => x.id == p.id);
     state = i < 0
-        ? [...state, h]
-        : [for (final x in state) x.id == h.id ? h : x];
+        ? [...state, p]
+        : [for (final x in state) x.id == p.id ? p : x];
   }
 
   void markUsed(String id, DateTime when) => state = [
@@ -36,41 +36,41 @@ class ParticipantsController extends Notifier<List<Participant>> {
           x.id == id ? x.copyWith(active: v, updatedAt: when) : x,
       ];
 
-  void eliminar(String id) =>
+  void delete(String id) =>
       state = [for (final x in state) if (x.id != id) x];
 }
 
-/// Directorio completo (reactivo). Antes venía de la BD; ahora es memoria.
+/// Full directory (reactive). Used to come from the DB; now it's in memory.
 final participantsProvider =
-    NotifierProvider<ParticipantsController, List<Participant>>(ParticipantsController.new);
+    NotifierProvider<ParticipantsController, List<Participant>>(
+        ParticipantsController.new);
 
-/// Activos ordenados por name normalizado (list del picker).
+/// Active ones sorted by normalized name (picker list).
 final activeParticipantsProvider = Provider<List<Participant>>((ref) {
   final all = ref.watch(participantsProvider);
-  return all.where((h) => h.active).toList()
-    ..sort((a, b) =>
-        normalizeName(a.name).compareTo(normalizeName(b.name)));
+  return all.where((p) => p.active).toList()
+    ..sort((a, b) => normalizeName(a.name).compareTo(normalizeName(b.name)));
 });
 
-/// Recientes (por `ultimoUso` desc), máx. 6.
+/// Recently used (by `lastUsed` desc), max 6.
 final recentParticipantsProvider = Provider<List<Participant>>((ref) {
   final active = ref.watch(activeParticipantsProvider);
-  final conUso = active.where((h) => h.lastUsed != null).toList()
+  final withUsage = active.where((p) => p.lastUsed != null).toList()
     ..sort((a, b) => b.lastUsed!.compareTo(a.lastUsed!));
-  return conUso.take(6).toList();
+  return withUsage.take(6).toList();
 });
 
-/// Congregaciones distintas (suggestions del formulario de personas).
+/// Distinct congregations (suggestions for the participant form).
 final participantCongregationsProvider = Provider<List<String>>((ref) {
   final all = ref.watch(participantsProvider);
-  final distintas = <String>{
-    for (final h in all)
-      if (h.congregation.trim().isNotEmpty) h.congregation.trim(),
+  final distinct = <String>{
+    for (final p in all)
+      if (p.congregation.trim().isNotEmpty) p.congregation.trim(),
   };
-  return distintas.toList()..sort();
+  return distinct.toList()..sort();
 });
 
-/// Filtro de la pantalla de gestión (puro, testeable).
+/// Filter for the management screen (pure, testable).
 List<Participant> filterParticipants(
   List<Participant> all, {
   String query = '',
@@ -80,20 +80,20 @@ List<Participant> filterParticipants(
 }) {
   final q = normalizeName(query);
   return [
-    for (final h in all)
-      if ((includeInactive || h.active) &&
-          (role == null || h.role == role) &&
-          (congregation == null || h.congregation == congregation) &&
-          (q.isEmpty || normalizeName(h.name).contains(q)))
-        h,
+    for (final p in all)
+      if ((includeInactive || p.active) &&
+          (role == null || p.role == role) &&
+          (congregation == null || p.congregation == congregation) &&
+          (q.isEmpty || normalizeName(p.name).contains(q)))
+        p,
   ];
 }
 
 final participantActionsProvider =
     Provider<ParticipantActions>(ParticipantActions.new);
 
-/// Escrituras al directorio en memoria. `guardar` siempre sella `updatedAt`;
-/// `recordUsage` NO lo toca (solo `ultimoUso`).
+/// Writes to the in-memory directory. `save` always stamps `updatedAt`;
+/// `recordUsage` does NOT (only `lastUsed`).
 class ParticipantActions {
   ParticipantActions(this._ref);
 
@@ -102,17 +102,17 @@ class ParticipantActions {
 
   ParticipantsController get _dir => _ref.read(participantsProvider.notifier);
 
-  /// Asignación hecha desde el picker: si el name ya existe (normalizado)
-  /// solo marca uso; si no, alta mínima que queda como 'Incompleto' en la
-  /// pantalla de gestión (sexo sin especificar).
+  /// Assignment made from the picker: if the name already exists (normalized),
+  /// just mark usage; otherwise create a minimal entry that shows as
+  /// "Incompleto" on the management screen (gender unspecified).
   Future<void> recordUsage(String name) async {
     final clean = name.trim();
     if (clean.isEmpty) return;
-    final ahora = DateTime.now().toUtc();
-    final clave = normalizeName(clean);
-    for (final h in _ref.read(participantsProvider)) {
-      if (normalizeName(h.name) == clave) {
-        _dir.markUsed(h.id, ahora);
+    final now = DateTime.now().toUtc();
+    final key = normalizeName(clean);
+    for (final p in _ref.read(participantsProvider)) {
+      if (normalizeName(p.name) == key) {
+        _dir.markUsed(p.id, now);
         return;
       }
     }
@@ -124,17 +124,17 @@ class ParticipantActions {
       congregation: _ref.read(formProvider).congregationId,
       active: true,
       notes: '',
-      createdAt: ahora,
-      updatedAt: ahora,
-      lastUsed: ahora,
+      createdAt: now,
+      updatedAt: now,
+      lastUsed: now,
     ));
   }
 
-  Future<void> guardar(Participant h) async =>
-      _dir.upsert(h.copyWith(updatedAt: DateTime.now().toUtc()));
+  Future<void> save(Participant p) async =>
+      _dir.upsert(p.copyWith(updatedAt: DateTime.now().toUtc()));
 
   Future<void> setActive(String id, bool v) async =>
       _dir.setActive(id, v, DateTime.now().toUtc());
 
-  Future<void> eliminar(String id) async => _dir.eliminar(id);
+  Future<void> delete(String id) async => _dir.delete(id);
 }

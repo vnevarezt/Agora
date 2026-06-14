@@ -10,7 +10,7 @@ import 'db_key_manager.dart';
 /// `hooks` del pubspec). La clave se lee del llavero ANTES de crear el
 /// ejecutor: el callback `setup` corre en un isolate de fondo donde los
 /// platform channels (flutter_secure_storage) no funcionan.
-QueryExecutor abrirEjecutorCifrado(DbKeyManager keys) {
+QueryExecutor openEncryptedExecutor(DbKeyManager keys) {
   return LazyDatabase(() async {
     final dir = await getApplicationSupportDirectory();
     await dir.create(recursive: true);
