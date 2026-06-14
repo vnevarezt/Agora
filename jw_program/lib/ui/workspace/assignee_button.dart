@@ -6,9 +6,9 @@ import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import '../widgets/dashed_border.dart';
 
-/// Botón de asignación (`.assignee`): vacío muestra borde discontinuo y
-/// "Asignar…"; lleno muestra avatar + name + X para limpiar (visible al
-/// pasar el cursor, o siempre en táctil con [alwaysShowClear]).
+/// Assignment button (`.assignee`): empty shows a dashed border and
+/// "Asignar…"; filled shows avatar + name + X to clear (visible on hover, or
+/// always on touch via [alwaysShowClear]).
 class AssigneeButton extends StatelessWidget {
   const AssigneeButton({
     super.key,
@@ -23,7 +23,7 @@ class AssigneeButton extends StatelessWidget {
   final VoidCallback? onClear;
   final bool alwaysShowClear;
 
-  bool get _lleno => name != null && name!.trim().isNotEmpty;
+  bool get _filled => name != null && name!.trim().isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -31,24 +31,24 @@ class AssigneeButton extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) {
-        final contenido = AnimatedContainer(
+        final content = AnimatedContainer(
           duration: Dimens.dFast,
           height: Dimens.hAssignee,
           padding: const EdgeInsets.only(left: 8, right: 10),
           decoration: BoxDecoration(
-            color: _lleno ? t.surface : t.surface2,
+            color: _filled ? t.surface : t.surface2,
             borderRadius: BorderRadius.circular(Dimens.rAssignee),
-            border: _lleno
+            border: _filled
                 ? Border.all(
                     color: hovered ? t.accent : t.border, width: 1.5)
                 : null,
           ),
           child: Row(
             children: [
-              PersonAvatar(name: _lleno ? name : null),
+              PersonAvatar(name: _filled ? name : null),
               const SizedBox(width: 9),
               Expanded(
-                child: _lleno
+                child: _filled
                     ? Text(
                         name!,
                         maxLines: 1,
@@ -68,7 +68,7 @@ class AssigneeButton extends StatelessWidget {
                         ),
                       ),
               ),
-              if (_lleno && onClear != null)
+              if (_filled && onClear != null)
                 AnimatedOpacity(
                   duration: Dimens.dFast,
                   opacity: hovered || alwaysShowClear ? 1 : 0,
@@ -78,12 +78,12 @@ class AssigneeButton extends StatelessWidget {
           ),
         );
 
-        // El estado vacío lleva borde discontinuo (no soportado por Border).
-        if (_lleno) return contenido;
+        // The empty state uses a dashed border (not supported by Border).
+        if (_filled) return content;
         return DashedBorder(
           color: hovered ? t.accent : t.border,
           radius: Dimens.rAssignee,
-          child: contenido,
+          child: content,
         );
       },
     );

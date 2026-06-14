@@ -82,7 +82,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                   avatarVacio: true,
                   muted: true,
                   selected: true,
-                  onTap: () => _pop(const PickQuitar()),
+                  onTap: () => _pop(const PickRemove()),
                 ),
               if (recent.isNotEmpty) ...[
                 _group(t, 'Recientes'),
@@ -118,7 +118,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
       name: h.name,
       tag: h.role == Role.publisher ? null : h.role.label,
       selected: h.name == widget.current,
-      onTap: () => _pop(PickNombre(h.name)),
+      onTap: () => _pop(PickName(h.name)),
     );
   }
 
@@ -176,7 +176,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
       ),
       child: Pressable(
         onTap: enabled
-            ? () => _pop(PickNombre(
+            ? () => _pop(PickName(
                 _search.length > widget.maxLength
                     ? _search.substring(0, widget.maxLength)
                     : _search))

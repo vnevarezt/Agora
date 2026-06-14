@@ -9,9 +9,9 @@ import '../widgets/mini_chip.dart';
 import 'part_presentation.dart';
 import 'slot_field.dart';
 
-/// Tarjeta de una parte del programa (`.part`). Un único widget: el tipo de
-/// cuerpo (línea fija o tarjeta de rol) lo decide [PartView.kind] y la
-/// tarjeta del presidente es el mismo widget con una vista sintética.
+/// Card for a program part (`.part`). A single widget: the body kind (fixed
+/// line or role card) is decided by [PartView.kind], and the chairman card is
+/// the same widget with a synthetic view.
 class PartCard extends ConsumerWidget {
   const PartCard({super.key, required this.view});
 
@@ -20,8 +20,8 @@ class PartCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    // Resalta la tarjeta dueña del picker abierto (ring accent del mock).
-    final activa = ref.watch(activeSlotProvider.select(
+    // Highlight the card that owns the open picker (accent ring).
+    final active = ref.watch(activeSlotProvider.select(
       (s) => s != null && view.slots.any((spec) => spec.ref == s),
     ));
 
@@ -30,8 +30,8 @@ class PartCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rCard),
-        border: Border.all(color: activa ? t.accent : t.border),
-        boxShadow: activa
+        border: Border.all(color: active ? t.accent : t.border),
+        boxShadow: active
             ? [BoxShadow(color: t.accentSoft, spreadRadius: 3)]
             : null,
       ),
@@ -42,8 +42,8 @@ class PartCard extends ConsumerWidget {
   }
 }
 
-/// Canción media / palabras de introducción y conclusión: una sola línea
-/// con hora, título y label a la derecha.
+/// Middle song / intro and conclusion words: a single line with time, title
+/// and a right-hand label.
 class _FixedLineBody extends StatelessWidget {
   const _FixedLineBody({required this.view});
 
@@ -77,10 +77,10 @@ class _FixedLineBody extends StatelessWidget {
                 children: [
                   if (view.durationLabel != null)
                     TextSpan(
-                      // Sin espacios partibles: "· 1 min" salta de línea
-                      // como unidad en anchos estrechos.
+                      // Non-breaking spaces: "· 1 min" wraps as a unit on
+                      // narrow widths.
                       text:
-                          '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
+                          '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: t.textMute,
@@ -102,7 +102,7 @@ class _FixedLineBody extends StatelessWidget {
   }
 }
 
-/// Tarjeta con cabecera de chips, título y huecos de asignación.
+/// Card with a chip header, title and assignment slots.
 class _RoleBody extends StatelessWidget {
   const _RoleBody({required this.view});
 
@@ -149,8 +149,8 @@ class _RoleBody extends StatelessWidget {
   }
 }
 
-/// Huecos en fila (se reparten el ancho); a ancho muy estrecho (≤460 del
-/// mock) caen a columna, uno por línea.
+/// Slots in a row (sharing the width); on very narrow widths (≤460 in the
+/// mock) they collapse to a column, one per line.
 class _Slots extends StatelessWidget {
   const _Slots({required this.slots});
 
@@ -160,8 +160,8 @@ class _Slots extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final porFila = c.maxWidth < 340 ? 1 : 2;
-        if (slots.length == 1 || porFila == 1) {
+        final perRow = c.maxWidth < 340 ? 1 : 2;
+        if (slots.length == 1 || perRow == 1) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -174,16 +174,16 @@ class _Slots extends StatelessWidget {
         }
         return Column(
           children: [
-            for (var fila = 0; fila * porFila < slots.length; fila++) ...[
-              if (fila > 0) const SizedBox(height: 8),
+            for (var row = 0; row * perRow < slots.length; row++) ...[
+              if (row > 0) const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var j = 0; j < porFila; j++) ...[
+                  for (var j = 0; j < perRow; j++) ...[
                     if (j > 0) const SizedBox(width: 8),
                     Expanded(
-                      child: fila * porFila + j < slots.length
-                          ? SlotField(spec: slots[fila * porFila + j])
+                      child: row * perRow + j < slots.length
+                          ? SlotField(spec: slots[row * perRow + j])
                           : const SizedBox.shrink(),
                     ),
                   ],

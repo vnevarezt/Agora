@@ -14,8 +14,8 @@ import '../widgets/section_header.dart';
 import 'part_card.dart';
 import 'part_presentation.dart';
 
-/// Columna de asignaciones: tarjeta del presidente + las cuatro secciones
-/// del programa. Estado vacío con CTA de descarga when no hay notebook.
+/// Assignments column: chairman card + the program's four sections. Empty
+/// state with a download CTA when there's no notebook.
 class WorkspacePanel extends ConsumerWidget {
   const WorkspacePanel({super.key});
 
@@ -57,7 +57,7 @@ class WorkspacePanel extends ConsumerWidget {
   }
 }
 
-/// Una sección del programa: cabecera con contador propio + sus tarjetas.
+/// One program section: header with its own counter + its cards.
 class _SectionBlock extends ConsumerWidget {
   const _SectionBlock({
     required this.title,

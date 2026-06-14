@@ -11,15 +11,15 @@ sealed class PickResult {
 }
 
 /// Asignar [name] al slot.
-class PickNombre extends PickResult {
-  const PickNombre(this.name);
+class PickName extends PickResult {
+  const PickName(this.name);
 
   final String name;
 }
 
 /// Quitar la asignación current.
-class PickQuitar extends PickResult {
-  const PickQuitar();
+class PickRemove extends PickResult {
+  const PickRemove();
 }
 
 const _scrim = Color(0x47000000); // rgba(0,0,0,.28) del mock

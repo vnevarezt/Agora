@@ -263,7 +263,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           child: BoundTextField(
             key: ValueKey('cong-$_congVersion'),
             initial: _congregation,
-            maxLength: Limits.congregationId,
+            maxLength: Limits.congregation,
             onChanged: (v) => setState(() => _congregation = v),
           ),
         ),

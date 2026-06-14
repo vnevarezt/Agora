@@ -79,7 +79,7 @@ List<String> _labelsForRole(ProgramRow row) {
 
 int _maxLengthForRole(ProgramRow row) =>
     row.slots == 2 && !row.role.contains('Conductor')
-        ? Limits.estAyud
+        ? Limits.studentAssistant
         : Limits.name;
 
 /// Synthetic card for the meeting chairman.

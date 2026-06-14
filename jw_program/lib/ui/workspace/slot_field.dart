@@ -14,8 +14,8 @@ import '../picker/person_picker.dart';
 import 'assignee_button.dart';
 import 'part_presentation.dart';
 
-/// Un hueco de asignación: label uppercase + [AssigneeButton]. Abre el
-/// picker y escribe el resultado en el formulario vía [writeAssignment].
+/// An assignment slot: uppercase label + [AssigneeButton]. Opens the picker
+/// and writes the result into the form via [writeAssignment].
 class SlotField extends ConsumerWidget {
   const SlotField({super.key, required this.spec});
 
@@ -25,18 +25,18 @@ class SlotField extends ConsumerWidget {
       BuildContext anchorContext, WidgetRef ref, String current) async {
     ref.read(activeSlotProvider.notifier).set(spec.ref);
     try {
-      final resultado = await showPersonPicker(
+      final result = await showPersonPicker(
         anchorContext,
         roleLabel: spec.label,
         current: current,
         maxLength: spec.maxLength,
       );
-      switch (resultado) {
-        case PickNombre(:final name):
+      switch (result) {
+        case PickName(:final name):
           writeAssignment(ref, spec.ref, name);
-          // Fire-and-forget: el directorio se actualiza solo (stream).
+          // Fire-and-forget: the directory updates itself.
           unawaited(ref.read(participantActionsProvider).recordUsage(name));
-        case PickQuitar():
+        case PickRemove():
           writeAssignment(ref, spec.ref, '');
         case null:
           break;
@@ -63,7 +63,7 @@ class SlotField extends ConsumerWidget {
                 color: spec.accent ? t.accentStrong : t.textMute),
           ),
         ),
-        // Builder: ancla del popover = solo el botón, no el label.
+        // Builder: popover anchor = the button only, not the label.
         Builder(
           builder: (anchorContext) => AssigneeButton(
             name: name.isEmpty ? null : name,
