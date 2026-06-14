@@ -9,14 +9,14 @@ import 'congregation_tab.dart';
 
 /// Vista de Configuración (`SettingsView` del mock): topbar + pestañas
 /// Aplicación / Congregación. Vive dentro del shell.
-class ConfiguracionView extends StatefulWidget {
-  const ConfiguracionView({super.key});
+class SettingsView extends StatefulWidget {
+  const SettingsView({super.key});
 
   @override
-  State<ConfiguracionView> createState() => _ConfiguracionViewState();
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
-class _ConfiguracionViewState extends State<ConfiguracionView> {
+class _SettingsViewState extends State<SettingsView> {
   int _tab = 0;
 
   @override
@@ -49,7 +49,7 @@ class _ConfiguracionViewState extends State<ConfiguracionView> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                _tab == 0 ? const AplicacionTab() : const CongregacionTab(),
+                _tab == 0 ? const ApplicationTab() : const CongregationTab(),
               ],
             ),
           ),

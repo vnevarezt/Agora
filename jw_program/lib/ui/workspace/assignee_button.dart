@@ -72,7 +72,7 @@ class AssigneeButton extends StatelessWidget {
                 AnimatedOpacity(
                   duration: Dimens.dFast,
                   opacity: hovered || alwaysShowClear ? 1 : 0,
-                  child: _BotonLimpiar(onClear: onClear!),
+                  child: _ClearButton(onClear: onClear!),
                 ),
             ],
           ),
@@ -90,8 +90,8 @@ class AssigneeButton extends StatelessWidget {
   }
 }
 
-class _BotonLimpiar extends StatelessWidget {
-  const _BotonLimpiar({required this.onClear});
+class _ClearButton extends StatelessWidget {
+  const _ClearButton({required this.onClear});
 
   final VoidCallback onClear;
 

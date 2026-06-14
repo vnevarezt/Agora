@@ -48,7 +48,7 @@ class ProjectBar extends ConsumerWidget {
       children: [
         _back(context),
         const SizedBox(width: 14),
-        Flexible(child: _ProjId(proyecto: proyecto)),
+        Flexible(child: _ProjectId(proyecto: proyecto)),
         const SizedBox(width: 14),
         Container(
           padding: const EdgeInsets.only(left: 14),
@@ -77,7 +77,7 @@ class ProjectBar extends ConsumerWidget {
           children: [
             _back(context),
             const SizedBox(width: 10),
-            Expanded(child: _ProjId(proyecto: proyecto)),
+            Expanded(child: _ProjectId(proyecto: proyecto)),
             const SizedBox(width: 10),
             const _ExportMenu(compact: true),
           ],
@@ -97,8 +97,8 @@ class ProjectBar extends ConsumerWidget {
 }
 
 /// Identidad del proyecto: name + congregación + nº de semanas.
-class _ProjId extends ConsumerWidget {
-  const _ProjId({this.proyecto});
+class _ProjectId extends ConsumerWidget {
+  const _ProjectId({this.proyecto});
 
   final Project? proyecto;
 

@@ -19,14 +19,14 @@ import 'user_row.dart';
 
 /// Pestaña "Congregación" de Configuración. Selector de congregación + datos,
 /// horarios y usuarios. Solo-UI: estado local sembrado de datos de ejemplo.
-class CongregacionTab extends ConsumerStatefulWidget {
-  const CongregacionTab({super.key});
+class CongregationTab extends ConsumerStatefulWidget {
+  const CongregationTab({super.key});
 
   @override
-  ConsumerState<CongregacionTab> createState() => _CongregacionTabState();
+  ConsumerState<CongregationTab> createState() => _CongregationTabState();
 }
 
-class _CongregacionTabState extends ConsumerState<CongregacionTab> {
+class _CongregationTabState extends ConsumerState<CongregationTab> {
   String? _congregationId;
   String _name = '';
   String _number = '';
@@ -101,7 +101,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         for (final c in congregations)
-          _CongChip(
+          _CongregationChip(
             congregation: c,
             acceso: '',
             active: _congregationId == c.id,
@@ -247,8 +247,8 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
 }
 
 /// Chip selector de congregación: punto de color + name + pill de rol.
-class _CongChip extends StatelessWidget {
-  const _CongChip({
+class _CongregationChip extends StatelessWidget {
+  const _CongregationChip({
     required this.congregation,
     required this.acceso,
     required this.active,

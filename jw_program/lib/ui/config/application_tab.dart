@@ -37,14 +37,14 @@ const _notifications = [
 
 /// Pestaña "Aplicación" de Configuración. Solo el tema es funcional; el resto
 /// son controles de UI con estado local (sin persistencia).
-class AplicacionTab extends ConsumerStatefulWidget {
-  const AplicacionTab({super.key});
+class ApplicationTab extends ConsumerStatefulWidget {
+  const ApplicationTab({super.key});
 
   @override
-  ConsumerState<AplicacionTab> createState() => _AplicacionTabState();
+  ConsumerState<ApplicationTab> createState() => _ApplicationTabState();
 }
 
-class _AplicacionTabState extends ConsumerState<AplicacionTab> {
+class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   String _language = _appLanguages.first;
   String _format = _timeFormats.first;
   String _weekStart = _weekStarts.first;

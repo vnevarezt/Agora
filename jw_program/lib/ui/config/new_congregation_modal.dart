@@ -15,12 +15,12 @@ Future<void> showNewCongregation(BuildContext context) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
-        NuevaCongregacionModal(sheet: sheet, onClose: close),
+        NewCongregationModal(sheet: sheet, onClose: close),
   );
 }
 
-class NuevaCongregacionModal extends ConsumerStatefulWidget {
-  const NuevaCongregacionModal({
+class NewCongregationModal extends ConsumerStatefulWidget {
+  const NewCongregationModal({
     super.key,
     required this.sheet,
     required this.onClose,
@@ -30,12 +30,12 @@ class NuevaCongregacionModal extends ConsumerStatefulWidget {
   final VoidCallback onClose;
 
   @override
-  ConsumerState<NuevaCongregacionModal> createState() =>
-      _NuevaCongregacionModalState();
+  ConsumerState<NewCongregationModal> createState() =>
+      _NewCongregationModalState();
 }
 
-class _NuevaCongregacionModalState
-    extends ConsumerState<NuevaCongregacionModal> {
+class _NewCongregationModalState
+    extends ConsumerState<NewCongregationModal> {
   String _name = '';
   String _number = '';
   String _language = meetingLanguages.first;

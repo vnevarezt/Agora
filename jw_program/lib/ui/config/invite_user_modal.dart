@@ -11,12 +11,12 @@ Future<void> showInviteUser(BuildContext context) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
-        InvitarUsuarioModal(sheet: sheet, onClose: close),
+        InviteUserModal(sheet: sheet, onClose: close),
   );
 }
 
-class InvitarUsuarioModal extends StatefulWidget {
-  const InvitarUsuarioModal({
+class InviteUserModal extends StatefulWidget {
+  const InviteUserModal({
     super.key,
     required this.sheet,
     required this.onClose,
@@ -26,10 +26,10 @@ class InvitarUsuarioModal extends StatefulWidget {
   final VoidCallback onClose;
 
   @override
-  State<InvitarUsuarioModal> createState() => _InvitarUsuarioModalState();
+  State<InviteUserModal> createState() => _InviteUserModalState();
 }
 
-class _InvitarUsuarioModalState extends State<InvitarUsuarioModal> {
+class _InviteUserModalState extends State<InviteUserModal> {
   String _email = '';
   String _rol = 'Editor';
 

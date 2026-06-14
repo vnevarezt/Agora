@@ -65,7 +65,7 @@ class ParticipantCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 7),
-                        _DotDisponible(active: h.active),
+                        _AvailabilityDot(active: h.active),
                       ],
                     ),
                     const SizedBox(height: 1),
@@ -84,7 +84,7 @@ class ParticipantCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               if (h.isIncomplete)
-                const _IncompletoBadge()
+                const _IncompleteBadge()
               else
                 PrivBadge(role: h.role),
             ],
@@ -96,8 +96,8 @@ class ParticipantCard extends StatelessWidget {
 }
 
 /// Punto de disponibilidad (`.dot-avail`): verde si active, gris si no.
-class _DotDisponible extends StatelessWidget {
-  const _DotDisponible({required this.active});
+class _AvailabilityDot extends StatelessWidget {
+  const _AvailabilityDot({required this.active});
 
   final bool active;
 
@@ -116,8 +116,8 @@ class _DotDisponible extends StatelessWidget {
 }
 
 /// Insignia ámbar para participantes con datos incompletos (sexo sin definir).
-class _IncompletoBadge extends StatelessWidget {
-  const _IncompletoBadge();
+class _IncompleteBadge extends StatelessWidget {
+  const _IncompleteBadge();
 
   @override
   Widget build(BuildContext context) {
