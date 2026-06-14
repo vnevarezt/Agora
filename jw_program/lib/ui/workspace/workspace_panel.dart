@@ -31,7 +31,7 @@ class WorkspacePanel extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(side, side, side, isMobile ? 150 : 120),
       children: [
-        PartCard(view: presidenteView()),
+        PartCard(view: chairmanView()),
         const SizedBox(height: 22),
         _SectionBlock(title: 'Apertura', rows: sched.opening, aux: aux),
         _SectionBlock(
@@ -94,7 +94,7 @@ class _SectionBlock extends ConsumerWidget {
               title: title, dotColor: dotColor, done: done, total: total),
           for (var i = 0; i < rows.length; i++) ...[
             if (i > 0) const SizedBox(height: 10),
-            PartCard(view: mapRow(rows[i], auxActivo: aux)),
+            PartCard(view: mapRow(rows[i], auxActive: aux)),
           ],
         ],
       ),

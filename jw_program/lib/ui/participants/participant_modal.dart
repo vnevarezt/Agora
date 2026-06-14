@@ -252,7 +252,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           label: 'Nombre completo',
           child: BoundTextField(
             initial: _name,
-            maxLength: Limites.name,
+            maxLength: Limits.name,
             hint: 'Ej. Martín Salas',
             onChanged: (v) => setState(() => _name = v),
           ),
@@ -263,7 +263,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           child: BoundTextField(
             key: ValueKey('cong-$_congVersion'),
             initial: _congregation,
-            maxLength: Limites.congregationId,
+            maxLength: Limits.congregationId,
             onChanged: (v) => setState(() => _congregation = v),
           ),
         ),

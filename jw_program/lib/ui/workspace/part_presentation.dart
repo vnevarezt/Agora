@@ -2,24 +2,24 @@ import '../../models/program_row.dart';
 import '../../state/assignment_ops.dart';
 import '../limits.dart';
 
-/// Mapper puro fila → vista de tarjeta. Único lugar donde vive la lógica de
-/// presentación de las partes (tipo de tarjeta, chips, labels de slots).
+/// Pure row → card-view mapper. The single place where the parts' presentation
+/// logic lives (card kind, chips, slot labels).
 
 enum PartKind {
-  /// Línea de una sola fila sin asignación (canción media, intro/conclusión).
+  /// Single fixed line with no assignment (middle song, intro/conclusion).
   fixedLine,
 
-  /// Tarjeta con huecos de asignación.
+  /// Card with assignment slots.
   role,
 }
 
-/// Un hueco de asignación dentro de una tarjeta.
+/// An assignment slot inside a card.
 class SlotSpec {
   final String label;
   final SlotRef ref;
   final int maxLength;
 
-  /// Slots de sala auxiliary: label en color accent.
+  /// Auxiliary-room slot: label in accent color.
   final bool accent;
 
   const SlotSpec({
@@ -30,24 +30,24 @@ class SlotSpec {
   });
 }
 
-/// Datos listos para pintar de una tarjeta del workspace.
+/// Ready-to-render data for a workspace card.
 class PartView {
   final String id;
   final PartKind kind;
   final String time;
   final String title;
 
-  /// "10 min" (extraído del sufijo "(10 mins.)" de `contenido`).
+  /// "10 min" (extracted from the "(10 mins.)" suffix of `content`).
   final String? durationLabel;
 
-  /// Etiqueta de la derecha en líneas fijas ("Cántico", "A cargo del
-  /// presidente"); en tarjetas de rol, chip extra de la cabecera.
+  /// Right-hand label on fixed lines ("Cántico", "A cargo del presidente"); on
+  /// role cards, an extra header chip.
   final String? fixedTag;
 
-  /// Mostrar "TODA LA REUNIÓN" en lugar de la hora (presidente).
+  /// Show "TODA LA REUNIÓN" instead of the time (chairman).
   final bool allMeetingBadge;
 
-  /// Indicador "Sala auxiliar" en la cabecera.
+  /// "Auxiliary room" indicator in the header.
   final bool auxFlag;
 
   final List<SlotSpec> slots;
@@ -65,10 +65,10 @@ class PartView {
   });
 }
 
-final _duracionSufijo = RegExp(r'\s*\((\d+)\s*mins?\.\)$');
+final _durationSuffix = RegExp(r'\s*\((\d+)\s*mins?\.\)$');
 
-/// Labels de slot según el rol de la fila (misma regla que el editor previo).
-List<String> _labelsDeRol(ProgramRow row) {
+/// Slot labels based on the row's role (same rule as the old editor).
+List<String> _labelsForRole(ProgramRow row) {
   if (row.slots == 2) {
     return row.role.contains('Conductor')
         ? const ['Conductor', 'Lector']
@@ -77,13 +77,13 @@ List<String> _labelsDeRol(ProgramRow row) {
   return [row.role.isNotEmpty ? row.role.replaceAll(':', '') : 'Encargado'];
 }
 
-int _maxLengthDeRol(ProgramRow row) =>
+int _maxLengthForRole(ProgramRow row) =>
     row.slots == 2 && !row.role.contains('Conductor')
-        ? Limites.estAyud
-        : Limites.name;
+        ? Limits.estAyud
+        : Limits.name;
 
-/// Tarjeta sintética del presidente de la reunión.
-PartView presidenteView() {
+/// Synthetic card for the meeting chairman.
+PartView chairmanView() {
   return const PartView(
     id: 'presidente',
     kind: PartKind.role,
@@ -93,19 +93,19 @@ PartView presidenteView() {
       SlotSpec(
         label: 'Presidente',
         ref: ChairmanSlot(),
-        maxLength: Limites.name,
+        maxLength: Limits.name,
       ),
     ],
   );
 }
 
-/// Mapea una fila del horario a su tarjeta. [auxActivo] = switch Sala
-/// Auxiliar del formulario.
-PartView mapRow(ProgramRow row, {required bool auxActivo}) {
-  final match = _duracionSufijo.firstMatch(row.content);
-  final title = row.content.replaceAll(_duracionSufijo, '');
-  final duracion = match != null ? '${match.group(1)} min' : null;
-  final esCancion = row.content.startsWith('Canción');
+/// Maps a schedule row to its card. [auxActive] = the form's Auxiliary Room
+/// switch.
+PartView mapRow(ProgramRow row, {required bool auxActive}) {
+  final match = _durationSuffix.firstMatch(row.content);
+  final title = row.content.replaceAll(_durationSuffix, '');
+  final duration = match != null ? '${match.group(1)} min' : null;
+  final isSong = row.content.startsWith('Canción');
 
   if (row.slots == 0) {
     return PartView(
@@ -113,25 +113,25 @@ PartView mapRow(ProgramRow row, {required bool auxActivo}) {
       kind: PartKind.fixedLine,
       time: row.time,
       title: title,
-      durationLabel: duracion,
-      fixedTag: esCancion ? 'Cántico' : 'A cargo del presidente',
+      durationLabel: duration,
+      fixedTag: isSong ? 'Cántico' : 'A cargo del presidente',
     );
   }
 
-  final labels = _labelsDeRol(row);
-  final maxLength = _maxLengthDeRol(row);
-  final conAux = auxActivo && row.auxSlots > 0;
+  final labels = _labelsForRole(row);
+  final maxLength = _maxLengthForRole(row);
+  final withAux = auxActive && row.auxSlots > 0;
 
   return PartView(
     id: row.id,
     kind: PartKind.role,
     time: row.time,
     title: title,
-    durationLabel: duracion,
-    // La canción inicial/final lleva el slot de oración en el modelo: se
-    // muestra como tarjeta de rol con el chip "Cántico".
-    fixedTag: esCancion ? 'Cántico' : null,
-    auxFlag: conAux,
+    durationLabel: duration,
+    // The opening/closing song carries the prayer slot in the model: it shows
+    // as a role card with the "Cántico" chip.
+    fixedTag: isSong ? 'Cántico' : null,
+    auxFlag: withAux,
     slots: [
       for (var i = 0; i < row.slots; i++)
         SlotSpec(
@@ -139,7 +139,7 @@ PartView mapRow(ProgramRow row, {required bool auxActivo}) {
           ref: RowSlot(row, i),
           maxLength: maxLength,
         ),
-      if (conAux)
+      if (withAux)
         for (var i = 0; i < row.auxSlots; i++)
           SlotSpec(
             label: '${labels[i]} · Aux.',
