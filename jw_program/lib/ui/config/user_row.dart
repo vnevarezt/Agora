@@ -4,8 +4,8 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/avatar.dart';
 
-/// Fila de user con acceso (`.user-row`): avatar, name, email y un control
-/// a la derecha (pill de role o selector). [first] omite el borde superior.
+/// User-with-access row (`.user-row`): avatar, name, email and a control
+/// on the right (role pill or selector). [first] omits the top border.
 class UserRow extends StatelessWidget {
   const UserRow({
     super.key,
@@ -71,7 +71,7 @@ class UserRow extends StatelessWidget {
   }
 }
 
-/// Pill neutra de role (`.role-pill`): uppercase pequeña sobre `surface2`.
+/// Neutral role pill (`.role-pill`): small uppercase on `surface2`.
 class RolePill extends StatelessWidget {
   const RolePill({super.key, required this.role});
 

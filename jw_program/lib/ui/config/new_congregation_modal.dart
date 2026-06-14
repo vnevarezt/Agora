@@ -10,7 +10,7 @@ import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
 
-/// Abre el modal de alta de congregación (solo UI en esta fase).
+/// Opens the new-congregation modal (UI-only at this phase).
 Future<void> showNewCongregation(BuildContext context) {
   return showAppModal<void>(
     context,
@@ -44,8 +44,8 @@ class _NewCongregationModalState
   String _weekendDay = 'Domingo';
   String _weekendTime = '10:00';
 
-  /// Añade la congregación al estado en memoria y cierra. Los horarios/idioma
-  /// aún no se persisten (sin backend); solo se guarda name y número.
+  /// Adds the congregation to in-memory state and closes. Schedule/language
+  /// are not persisted yet (no backend); only name and number are saved.
   void _crear() {
     ref.read(congregationsProvider.notifier).add(
           name: _name.trim(),

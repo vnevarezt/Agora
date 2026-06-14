@@ -16,8 +16,8 @@ import 'project_card.dart';
 import 'project_modal.dart';
 import 'reminder_card.dart';
 
-/// Vista de Inicio (`HomeView` del mock): greeting, filters, cuadrícula de
-/// projects y panel de reminders. Los datos son de ejemplo (solo UI).
+/// Home view (`HomeView`): greeting, filters, a grid of projects and a
+/// reminders panel. Data is example-only (UI-only).
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
 
@@ -52,7 +52,7 @@ class DashboardView extends ConsumerWidget {
   }
 }
 
-/// Saludo según la hora del día.
+/// Greeting based on the time of day.
 String _greeting() {
   final h = DateTime.now().hour;
   if (h < 12) return 'Buenos días';
@@ -135,7 +135,7 @@ _CatalogState _catalogState(AsyncValue<SyncReport> sync) {
 }
 
 /// Persistent card next to the notifications button: spinner while syncing,
-/// a check when everything is up to date, a warning when a cuaderno is missing.
+/// a check when everything is up to date, a warning when a notebook is missing.
 /// On mobile it collapses to an icon-only square to save space.
 class _SyncIndicator extends StatelessWidget {
   const _SyncIndicator({required this.state, this.compact = false});

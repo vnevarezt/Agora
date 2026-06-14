@@ -17,8 +17,8 @@ import 'new_congregation_modal.dart';
 import 'settings_card.dart';
 import 'user_row.dart';
 
-/// Pestaña "Congregación" de Configuración. Selector de congregación + datos,
-/// horarios y usuarios. Solo-UI: estado local sembrado de datos de ejemplo.
+/// Settings "Congregación" tab. Congregation selector + details,
+/// schedule and users. UI-only: local state seeded with example data.
 class CongregationTab extends ConsumerStatefulWidget {
   const CongregationTab({super.key});
 
@@ -37,8 +37,8 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   String _weekendTime = '10:00';
   bool _auxRoom = false;
 
-  /// Selecciona una congregación y siembra los campos. Los horarios aún no se
-  /// persisten (sin backend): se muestran con valores por defecto.
+  /// Selects a congregation and seeds the fields. The schedule is not
+  /// persisted yet (no backend): shown with default values.
   void _select(Congregation congregation, {bool notify = true}) {
     void apply() {
       _congregationId = congregation.id;
@@ -63,7 +63,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   Widget build(BuildContext context) {
     final congregations = ref.watch(congregationsProvider);
 
-    // Mantener una selección válida (la list cambia en memoria).
+    // Keep a valid selection (the list changes in memory).
     if (congregations.isEmpty) {
       _congregationId = null;
     } else if (_congregationId == null || !congregations.any((c) => c.id == _congregationId)) {
@@ -246,7 +246,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   }
 }
 
-/// Chip selector de congregación: punto de color + name + pill de rol.
+/// Congregation selector chip: color dot + name + role pill.
 class _CongregationChip extends StatelessWidget {
   const _CongregationChip({
     required this.congregation,
@@ -310,7 +310,7 @@ class _CongregationChip extends StatelessWidget {
   }
 }
 
-/// Chip punteado "Nueva congregación" (`.chip--add`).
+/// Dashed "Nueva congregación" chip (`.chip--add`).
 class _AddChip extends StatelessWidget {
   const _AddChip({required this.onTap});
 

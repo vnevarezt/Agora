@@ -35,8 +35,8 @@ const _notifications = [
   ),
 ];
 
-/// Pestaña "Aplicación" de Configuración. Solo el tema es funcional; el resto
-/// son controles de UI con estado local (sin persistencia).
+/// Settings "Aplicación" tab. Only the theme is functional; the rest are
+/// UI controls with local state (no persistence).
 class ApplicationTab extends ConsumerStatefulWidget {
   const ApplicationTab({super.key});
 

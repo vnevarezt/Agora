@@ -17,7 +17,7 @@ import '../widgets/danger_button.dart';
 import '../widgets/filter_pill.dart';
 import '../widgets/labeled_field.dart';
 
-/// Abre el modal de creación/edición de project. [project] null = alta nueva.
+/// Opens the create/edit project modal. [project] null = new.
 Future<void> showProjectModal(BuildContext context, {Project? project}) {
   return showAppModal<void>(
     context,
@@ -26,7 +26,7 @@ Future<void> showProjectModal(BuildContext context, {Project? project}) {
   );
 }
 
-/// Contenido del modal de project. Lee/escribe vía Riverpod, como `PersonaForm`.
+/// Project modal content. Reads/writes via Riverpod.
 class ProjectModal extends ConsumerStatefulWidget {
   const ProjectModal({
     super.key,
@@ -35,11 +35,11 @@ class ProjectModal extends ConsumerStatefulWidget {
     this.sheet = false,
   });
 
-  /// null = nuevo project.
+  /// null = new project.
   final Project? original;
   final VoidCallback onClose;
 
-  /// true when se presenta como bottom sheet (móvil).
+  /// true when presented as a bottom sheet (mobile).
   final bool sheet;
 
   @override
@@ -61,16 +61,16 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final notebooks = ref.read(notebooksProvider);
     _congregationId = widget.original?.congregationId ??
         (congregations.isNotEmpty ? congregations.first.id : '');
-    // New project: arranca en el cuaderno actual (el que contiene hoy), no en
-    // el más antiguo en caché. En edición se mantiene el primero del catálogo.
+    // New project: starts at the current notebook (the one covering today), not
+    // the oldest cached one. When editing, keep the first in the catalog.
     final current = issueForDate(DateTime.now());
     _notebookId = _isNew && notebooks.any((n) => n.id == current)
         ? current
         : (notebooks.isNotEmpty ? notebooks.first.id : '');
   }
 
-  /// Alterna una semana del notebook, manteniendo el orden del notebook y las
-  /// semanas "extra" (de otros notebooks) al final. Réplica de `toggleWeek`.
+  /// Toggles a notebook week, preserving the notebook order and the "extra"
+  /// weeks (from other notebooks) at the end.
   void _toggle(String w, Notebook notebook) {
     setState(() {
       if (_weeks.contains(w)) {
@@ -89,7 +89,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   void _remove(String w) =>
       setState(() => _weeks = _weeks.where((x) => x != w).toList());
 
-  /// Nombre por defecto when el campo está vacío.
+  /// Default name when the field is empty.
   String _autoName(Notebook notebook) {
     if (_name.trim().isNotEmpty) return _name.trim();
     if (_weeks.isEmpty) return '';
@@ -147,7 +147,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
 
     final Widget card;
     if (notebooks.isEmpty) {
-      // Sin catálogo de notebooks no se pueden elegir semanas todavía.
+      // Without a notebook catalog, weeks cannot be picked yet.
       card = Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -303,9 +303,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Cuaderno como pestañas: al elegir uno, cambian las semanas de
-              // abajo. Las semanas ya elegidas de OTROS cuadernos siguen como
-              // "extra" (chips marcados al final).
+              // Notebooks as tabs: picking one changes the week chips below. Weeks
+              // already picked from OTHER notebooks stay as "extra" chips (marked, at
+              // the end).
               if (notebooks.length > 1) ...[
                 Wrap(
                   spacing: 6,
@@ -425,7 +425,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   }
 }
 
-/// Toggle de semana (`.week-toggle`): rectangular, borde 1.5, cifras tabulares.
+/// Week toggle (`.week-toggle`): rectangular, 1.5 border, tabular figures.
 class _WeekToggle extends StatelessWidget {
   const _WeekToggle({
     required this.label,
@@ -438,7 +438,7 @@ class _WeekToggle extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  /// Semana de otro notebook: tocar la quita.
+  /// Week from another notebook: tap removes it.
   final bool extra;
 
   @override

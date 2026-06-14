@@ -5,8 +5,8 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/dashed_border.dart';
 
-/// Tarjeta "Nuevo proyecto" (`.project--new`): borde discontinuo y aro con "+".
-/// El modal de creación llega en una fase posterior; por ahora [onTap] queda
+/// "Nuevo proyecto" card (`.project--new`): dashed border and a "+" ring.
+/// The creation modal comes in a later phase; for now [onTap] stays
 /// como gancho opcional.
 class NewProjectCard extends StatelessWidget {
   const NewProjectCard({super.key, this.onTap});

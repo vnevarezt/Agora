@@ -4,8 +4,8 @@ import '../../models/reminder.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
-/// Tarjeta de recordatorio (`.reminder`): icono coloreado por tipo, título,
-/// meta y CTA. Sin lógica en esta fase (el CTA no realiza ninguna acción).
+/// Reminder card (`.reminder`): icon colored by type, title, meta and
+/// CTA. No logic at this phase (the CTA does nothing).
 class ReminderCard extends StatelessWidget {
   const ReminderCard({super.key, required this.recordatorio});
 

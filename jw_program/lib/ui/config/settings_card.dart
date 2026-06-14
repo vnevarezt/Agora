@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 
 /// Distribuye tarjetas en dos columnas (`.settings__cols`) en escritorio y en
-/// una sola columna en pantallas estrechas.
+/// a single column on narrow screens.
 class SettingsColumns extends StatelessWidget {
   const SettingsColumns({super.key, required this.left, required this.right});
 
@@ -50,7 +50,7 @@ class SettingsColumns extends StatelessWidget {
   }
 }
 
-/// Rejilla de campos dentro de una tarjeta (`.set-grid`): 2 columnas en
+/// Field grid inside a card (`.set-grid`): 2 columns on wide screens,
 /// escritorio, 1 en estrecho.
 class SettingsGrid extends StatelessWidget {
   const SettingsGrid({super.key, required this.children});
@@ -76,7 +76,7 @@ class SettingsGrid extends StatelessWidget {
   }
 }
 
-/// Tarjeta de configuración (`.set-card`): título uppercase, descripción y
+/// Settings card (`.set-card`): uppercase title, description and
 /// contenido.
 class SettingsCard extends StatelessWidget {
   const SettingsCard({
@@ -132,8 +132,8 @@ class SettingsCard extends StatelessWidget {
   }
 }
 
-/// Fila de ajuste (`.set-row`): título + descripción a la izquierda y un
-/// control a la derecha. [first] omite el borde superior.
+/// Setting row (`.set-row`): title + description on the left and a
+/// control on the right. [first] omits the top border.
 class SettingRow extends StatelessWidget {
   const SettingRow({
     super.key,

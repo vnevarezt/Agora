@@ -10,8 +10,8 @@ import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
 
-/// Tarjeta de project (`.project`): name, congregación, estado, semanas,
-/// progreso y fecha de edición. Al tocarla se abre el editor.
+/// Project card (`.project`): name, congregation, status, weeks,
+/// progress and edited date. Tapping it opens the editor.
 class ProjectCard extends StatelessWidget {
   const ProjectCard({
     super.key,
@@ -34,7 +34,7 @@ class ProjectCard extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) {
-        // En escritorio el kebab aparece al hover; en móvil siempre.
+        // On desktop the kebab appears on hover; on mobile always.
         final mostrarKebab = hovered || context.isMobile;
         return Stack(
           clipBehavior: Clip.none,
@@ -112,7 +112,7 @@ class ProjectCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       StatusBadge(status: p.status),
-                      // Hueco para el kebab superpuesto (no pisar la insignia).
+                      // Space for the overlaid kebab (keep clear of the badge).
                       const SizedBox(width: 22),
                     ],
                   ),

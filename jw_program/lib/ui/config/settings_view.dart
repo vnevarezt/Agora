@@ -7,8 +7,8 @@ import '../widgets/segmented_control.dart';
 import 'application_tab.dart';
 import 'congregation_tab.dart';
 
-/// Vista de Configuración (`SettingsView` del mock): topbar + pestañas
-/// Aplicación / Congregación. Vive dentro del shell.
+/// Settings view (`SettingsView`): topbar + Application / Congregation
+/// tabs. Lives inside the shell.
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 

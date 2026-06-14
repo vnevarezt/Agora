@@ -6,7 +6,7 @@ import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
 
-/// Abre el modal para invitar a un user a la congregación (solo UI).
+/// Opens the modal to invite a user to the congregation (UI-only).
 Future<void> showInviteUser(BuildContext context) {
   return showAppModal<void>(
     context,
