@@ -74,7 +74,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Participants',
+                'Participantes',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -180,7 +180,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: 'Participants', count: filtrados.length),
+        BlockTitle(title: 'Participantes', count: filtrados.length),
         if (filtrados.isEmpty)
           _vacio(t, todos.isEmpty)
         else

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/pill.dart';
 
 import '../../models/participant.dart';
 import '../theme/dimens.dart';
@@ -17,7 +18,7 @@ class ParticipantCard extends StatelessWidget {
   final VoidCallback onTap;
 
   String get _genderLabel => switch (participant.gender) {
-        Gender.male => 'Participant',
+        Gender.male => 'Hombre',
         Gender.female => 'Mujer',
         Gender.unspecified => 'Sin definir',
       };
@@ -114,30 +115,17 @@ class _DotDisponible extends StatelessWidget {
   }
 }
 
-/// Insignia ámbar para participants con datos incompletos (sexo sin definir).
+/// Insignia ámbar para participantes con datos incompletos (sexo sin definir).
 class _IncompletoBadge extends StatelessWidget {
   const _IncompletoBadge();
 
   @override
   Widget build(BuildContext context) {
-    final oscuro = Theme.of(context).brightness == Brightness.dark;
-    final bg = oscuro ? const Color(0xFF3A3115) : const Color(0xFFF3ECD2);
-    final fg = oscuro ? const Color(0xFFD9C27A) : const Color(0xFF7A6512);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(Dimens.rPill),
-      ),
-      child: Text(
-        'INCOMPLETO',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.4,
-          color: fg,
-        ),
-      ),
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Pill(
+      label: 'Incompleto',
+      background: dark ? const Color(0xFF3A3115) : const Color(0xFFF3ECD2),
+      foreground: dark ? const Color(0xFFD9C27A) : const Color(0xFF7A6512),
     );
   }
 }

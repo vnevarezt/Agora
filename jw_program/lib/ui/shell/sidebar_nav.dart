@@ -13,7 +13,7 @@ import '../widgets/avatar.dart';
 /// inferior).
 const _items = <({AppSection section, IconData icon, String label})>[
   (section: AppSection.home, icon: Icons.home_outlined, label: 'Inicio'),
-  (section: AppSection.participants, icon: Icons.people_outline, label: 'Participants'),
+  (section: AppSection.participants, icon: Icons.people_outline, label: 'Participantes'),
   (
     section: AppSection.settings,
     icon: Icons.settings_outlined,
