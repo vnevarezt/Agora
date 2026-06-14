@@ -695,7 +695,7 @@ class _ExportCard extends StatelessWidget {
           _ExportItem(
             icon: Icons.list_alt_outlined,
             title: 'Hojas de participación',
-            sub: 'Una por hermano asignado',
+            sub: 'Una por participante asignado',
             onTap: null, // próximamente
           ),
         ],

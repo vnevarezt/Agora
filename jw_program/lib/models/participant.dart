@@ -1,4 +1,4 @@
-// Directorio local de hermanos de la congregación. Modelo puro (sin drift);
+// Directorio local de participants de la congregación. Modelo puro (sin drift);
 // la tabla está en `data/db/tables.dart` y mapea a esta clase.
 //
 // IMPORTANTE: las asignaciones del programa siguen siendo strings planos en
@@ -23,7 +23,7 @@ extension RoleX on Role {
         Role.publisher => 'Publicador',
       };
 
-  /// Plural para los chips de filtro de la pantalla de hermanos.
+  /// Plural para los chips de filtro de la pantalla de participants.
   String get plural => switch (this) {
         Role.elder => 'Ancianos',
         Role.ministerialServant => 'Siervos ministeriales',

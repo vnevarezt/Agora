@@ -19,13 +19,13 @@ import '../widgets/segmented_control.dart';
 /// Descripción de cada role en las radio-cards del modal.
 const _roleDesc = {
   Role.publisher:
-      'Participa en "Seamos mejores maestros" (hermanos y hermanas)',
+      'Participa en "Seamos mejores maestros" (todos)',
   Role.ministerialServant:
       'Publicador + lectura, oración y algunas partes asignables',
   Role.elder: 'Puede recibir cualquier asignación del programa',
 };
 
-/// Abre el modal de alta/edición de hermano. [original] null = alta nueva.
+/// Abre el modal de alta/edición de participant. [original] null = alta nueva.
 Future<void> showParticipantModal(BuildContext context, {Participant? original}) {
   return showAppModal<void>(
     context,
@@ -34,7 +34,7 @@ Future<void> showParticipantModal(BuildContext context, {Participant? original})
   );
 }
 
-/// Contenido del modal de hermano. Lee/escribe vía Riverpod.
+/// Contenido del modal de participant. Lee/escribe vía Riverpod.
 class PersonModal extends ConsumerStatefulWidget {
   const PersonModal({
     super.key,
@@ -200,7 +200,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _isCreating ? 'Añadir hermano' : 'Editar hermano',
+                    _isCreating ? 'Añadir participante' : 'Editar participante',
                     style: TextStyle(
                       fontSize: 16.5,
                       fontWeight: FontWeight.w800,
@@ -325,7 +325,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
   Widget _footer(AppTokens t) {
     final puedeGuardar = _nombre.trim().isNotEmpty && !_guardando;
-    final primary = _isCreating ? 'Añadir hermano' : 'Guardar cambios';
+    final primary = _isCreating ? 'Añadir participante' : 'Guardar cambios';
 
     final children = widget.sheet
         ? [

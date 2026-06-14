@@ -21,7 +21,7 @@ class AppShell extends ConsumerWidget {
 
     final body = switch (seccion) {
       AppSection.home => const DashboardView(),
-      AppSection.participants => const HermanosView(),
+      AppSection.participants => const ParticipantsView(),
       AppSection.settings => const ConfiguracionView(),
     };
 

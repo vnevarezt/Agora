@@ -7,27 +7,27 @@ import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import 'priv_badge.dart';
 
-/// Tarjeta de hermano (`.person-card`): avatar, nombre con punto de
+/// Tarjeta de participant (`.person-card`): avatar, nombre con punto de
 /// disponibilidad, subtítulo (sexo · congregación) e insignia de privilegio.
 /// Al tocarla se abre el modal de edición.
-class PersonaCard extends StatelessWidget {
-  const PersonaCard({super.key, required this.hermano, required this.onTap});
+class ParticipantCard extends StatelessWidget {
+  const ParticipantCard({super.key, required this.participant, required this.onTap});
 
-  final Participant hermano;
+  final Participant participant;
   final VoidCallback onTap;
 
-  String get _sexoLabel => switch (hermano.gender) {
+  String get _genderLabel => switch (participant.gender) {
         Gender.male => 'Participant',
-        Gender.female => 'Hermana',
+        Gender.female => 'Mujer',
         Gender.unspecified => 'Sin definir',
       };
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final h = hermano;
+    final h = participant;
     final cong = h.congregation.trim();
-    final sub = cong.isEmpty ? _sexoLabel : '$_sexoLabel · $cong';
+    final sub = cong.isEmpty ? _genderLabel : '$_genderLabel · $cong';
 
     return Pressable(
       onTap: onTap,
@@ -114,7 +114,7 @@ class _DotDisponible extends StatelessWidget {
   }
 }
 
-/// Insignia ámbar para hermanos con datos incompletos (sexo sin definir).
+/// Insignia ámbar para participants con datos incompletos (sexo sin definir).
 class _IncompletoBadge extends StatelessWidget {
   const _IncompletoBadge();
 

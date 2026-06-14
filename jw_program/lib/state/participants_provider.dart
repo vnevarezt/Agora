@@ -6,7 +6,7 @@ import 'program_form.dart';
 
 // INVARIANTE: las asignaciones del programa siguen siendo strings planos
 // por ProgramRow.id en formProvider (contrato del PDF). El directorio de
-// hermanos es solo un catálogo de personas, NO una clave foránea.
+// participants es solo un catálogo de personas, NO una clave foránea.
 //
 // SOLO UI: directorio en memoria efímera (sin BD ni persistencia). El
 // andamiaje de la BD cifrada (data/db/*, db_provider) queda latente, sin que

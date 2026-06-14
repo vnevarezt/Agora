@@ -112,7 +112,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// Fila de un hermano: privilegio como etiqueta (solo anciano/siervo).
+  /// Fila de un participant: privilegio como etiqueta (solo anciano/siervo).
   Widget _fila(Participant h) {
     return _PersonRow(
       name: h.name,
@@ -144,7 +144,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                 fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
             decoration: InputDecoration(
               counterText: '',
-              hintText: 'Buscar hermano…',
+              hintText: 'Buscar participante…',
               prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 36, minHeight: 16),
@@ -168,7 +168,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   Widget _pie(AppTokens t) {
     final habilitado = _busqueda.isNotEmpty;
     final etiqueta =
-        habilitado ? 'Añadir “$_busqueda”' : 'Añadir persona';
+        habilitado ? 'Añadir “$_busqueda”' : 'Añadir participante';
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(

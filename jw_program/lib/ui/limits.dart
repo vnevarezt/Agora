@@ -5,5 +5,5 @@ class Limites {
   static const int name = 30; // por participante (1 name)
   static const int estAyud = 25; // pareja Estudiante/Ayudante (2 por fila)
   static const int congregationId = 40; // name de la congregación
-  static const int notes = 200; // notes de un hermano (directorio)
+  static const int notes = 200; // notes de un participant (directorio)
 }

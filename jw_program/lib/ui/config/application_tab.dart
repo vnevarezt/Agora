@@ -20,7 +20,7 @@ const _notifications = [
   ),
   (
     title: 'Carga de asignaciones',
-    desc: 'Avisar si un hermano acumula muchas asignaciones',
+    desc: 'Avisar si un participante acumula muchas asignaciones',
     inicial: true,
   ),
   (
@@ -165,7 +165,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
   Widget _datos() {
     return SettingsCard(
       title: 'Datos',
-      desc: 'Copia de seguridad de tus proyectos, hermanos y congregaciones. '
+      desc: 'Copia de seguridad de tus proyectos, participantes y congregaciones. '
           'Útil también para mover datos entre el modo local y la nube.',
       children: [
         SettingRow(

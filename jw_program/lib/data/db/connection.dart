@@ -15,7 +15,7 @@ QueryExecutor abrirEjecutorCifrado(DbKeyManager keys) {
     final dir = await getApplicationSupportDirectory();
     await dir.create(recursive: true);
     final file =
-        File('${dir.path}${Platform.pathSeparator}hermanos.db');
+        File('${dir.path}${Platform.pathSeparator}participants.db');
     final claveHex = await keys.obtenerOCrearClaveHex();
 
     return NativeDatabase.createInBackground(

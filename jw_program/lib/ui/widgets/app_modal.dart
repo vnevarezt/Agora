@@ -8,7 +8,7 @@ const _scrim = Color(0x52000000);
 
 /// Presenta un modal de la app: diálogo centrado en escritorio/tablet y bottom
 /// sheet en móvil. [builder] recibe si se muestra como hoja (`sheet`) y un
-/// callback para cerrarlo. Lo usan los modales de proyecto y de hermano.
+/// callback para cerrarlo. Lo usan los modales de proyecto y de participant.
 Future<T?> showAppModal<T>(
   BuildContext context, {
   required Widget Function(BuildContext context, bool sheet, VoidCallback close)

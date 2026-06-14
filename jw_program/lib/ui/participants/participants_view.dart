@@ -14,14 +14,14 @@ import 'participant_modal.dart';
 /// Vista de Participants (`PeopleView` del mock): topbar, filtros y cuadrícula de
 /// tarjetas alimentada por la BD (`participantsProvider`). Vive dentro del
 /// shell; al abrirse desde el editor muestra botón de volver.
-class HermanosView extends ConsumerStatefulWidget {
-  const HermanosView({super.key});
+class ParticipantsView extends ConsumerStatefulWidget {
+  const ParticipantsView({super.key});
 
   @override
-  ConsumerState<HermanosView> createState() => _HermanosViewState();
+  ConsumerState<ParticipantsView> createState() => _ParticipantsViewState();
 }
 
-class _HermanosViewState extends ConsumerState<HermanosView> {
+class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   String _query = '';
   Role? _privilegio;
   String? _congregacion;
@@ -105,7 +105,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
         const SizedBox(width: 8),
         AppButton(
           icon: Icons.person_add_alt,
-          label: isMobile ? null : 'Añadir hermano',
+          label: isMobile ? null : 'Añadir participante',
           onPressed: () => showParticipantModal(context),
         ),
       ],
@@ -155,7 +155,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
         style: TextStyle(
             fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
         decoration: InputDecoration(
-          hintText: 'Buscar hermano…',
+          hintText: 'Buscar participante…',
           prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
           prefixIconConstraints:
               const BoxConstraints(minWidth: 36, minHeight: 16),
@@ -188,7 +188,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
     );
   }
 
-  Widget _grid(List<Participant> hermanos) {
+  Widget _grid(List<Participant> participants) {
     return LayoutBuilder(
       builder: (context, c) {
         const gap = 10.0;
@@ -198,11 +198,11 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
           spacing: gap,
           runSpacing: gap,
           children: [
-            for (final h in hermanos)
+            for (final h in participants)
               SizedBox(
                 width: colW,
-                child: PersonaCard(
-                  hermano: h,
+                child: ParticipantCard(
+                  participant: h,
                   onTap: () => showParticipantModal(context, original: h),
                 ),
               ),
@@ -223,7 +223,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
             const SizedBox(height: 12),
             Text(
               sinDatos
-                  ? 'Aún no hay hermanos.\nAñade el primero con "Añadir hermano".'
+                  ? 'Aún no hay participantes.\nAñade el primero con "Añadir participante".'
                   : 'Sin resultados con esos filtros.',
               textAlign: TextAlign.center,
               style: TextStyle(

@@ -8,7 +8,7 @@ import 'package:jw_program/ui/participants/participants_view.dart';
 import 'package:jw_program/ui/theme/app_theme.dart';
 import 'package:jw_program/ui/theme/tokens.dart';
 
-// Probamos solo la UI de HermanosView, alimentando el directorio en memoria
+// Probamos solo la UI de ParticipantsView, alimentando el directorio en memoria
 // con una lista fija para que sea determinista y rápido.
 class _FakeHermanos extends ParticipantsController {
   _FakeHermanos(this._lista);
@@ -45,7 +45,7 @@ Future<void> _pump(WidgetTester tester, List<Participant> lista) async {
     ],
     child: MaterialApp(
       theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: const Scaffold(body: SafeArea(child: HermanosView())),
+      home: const Scaffold(body: SafeArea(child: ParticipantsView())),
     ),
   ));
   await tester.pump();
@@ -60,7 +60,7 @@ void main() {
     expect(find.text('Saúl Bravo'), findsOneWidget);
 
     await tester.enterText(
-        find.widgetWithText(TextField, 'Buscar hermano…'), 'raul');
+        find.widgetWithText(TextField, 'Buscar participante…'), 'raul');
     await tester.pump();
 
     expect(find.text('Raúl Espinoza'), findsOneWidget);
@@ -70,9 +70,9 @@ void main() {
   testWidgets('estado vacío y abre el modal de alta', (tester) async {
     await _pump(tester, const []);
 
-    expect(find.textContaining('Aún no hay hermanos'), findsOneWidget);
+    expect(find.textContaining('Aún no hay participantes'), findsOneWidget);
 
-    await tester.tap(find.text('Añadir hermano'));
+    await tester.tap(find.text('Añadir participante'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

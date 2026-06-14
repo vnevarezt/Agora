@@ -5,7 +5,7 @@ import 'assignment_ops.dart';
 
 /// Estado efímero de la UI (no afecta al PDF ni al formulario).
 
-/// Sección activa del shell (barra lateral): dashboard, hermanos o config.
+/// Sección activa del shell (barra lateral): dashboard, participants o config.
 enum AppSection { home, participants, settings }
 
 final appSectionProvider =
