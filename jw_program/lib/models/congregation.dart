@@ -1,5 +1,5 @@
-/// Congregación a la que pertenece un proyecto. El [color] (0xAARRGGBB)
-/// identifica su punto en los filters/tarjetas; la UI lo envuelve en Color.
+/// Congregation a project belongs to. The [color] (0xAARRGGBB) is its dot in
+/// the filters/cards; the UI wraps it in a Color.
 class Congregation {
   final String id;
   final String name;

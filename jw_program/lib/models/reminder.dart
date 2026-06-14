@@ -1,8 +1,8 @@
-/// Tipo de recordatorio: define el icono y los colores de la tarjeta.
+/// Reminder type: drives the card's icon and colors.
 enum ReminderType { alert, task, info }
 
-/// Recordatorio del dashboard. Puramente visual en esta fase: el [cta] no
-/// dispara ninguna acción todavía.
+/// Dashboard reminder. Purely visual for now: the [cta] doesn't trigger any
+/// action yet.
 class Reminder {
   final String id;
   final ReminderType type;

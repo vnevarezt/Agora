@@ -1,31 +1,31 @@
-// Estructura (inmutable) del programa: filas y bloques. Los NOMBRES de los
-// participantes NO viven aquí, sino en el estado del formulario; aquí solo está
-// la estructura que produce el cálculo del horario. Ver [Assignments].
+// Immutable program structure: rows and blocks. Participant NAMES do NOT live
+// here but in the form state; this only holds the structure produced by the
+// schedule calculation. See [Assignments].
 
-/// Una fila del programa (una asignación, canción, palabras de intro/conclusión).
+/// A program row (an assignment, a song, or intro/conclusion words).
 class ProgramRow {
-  /// Id estable dentro del horario (bloque + índice), para asociar los nombres.
+  /// Stable id within the schedule (block + index), used to link the names.
   final String id;
 
-  /// Hora "h:mm".
+  /// Time "h:mm".
   final String time;
 
-  /// Texto del contenido (título + duración, o "Canción N").
+  /// Content text (title + duration, or "Canción N").
   final String content;
 
-  /// Etiqueta de rol ("Estudiante:", "Estudiante/Ayudante:", "Oración:"…) o "".
+  /// Role label ("Estudiante:", "Estudiante/Ayudante:", "Oración:"…) or "".
   final String role;
 
-  /// Nº de nombres en Auditorio Principal (0 = sin asignación; 1; 2 = pareja).
+  /// Number of names in the Main Hall (0 = no assignment; 1; 2 = pair).
   final int slots;
 
-  /// Nº de nombres en Sala Auxiliar (>0 solo en filas auxiliar-elegibles).
+  /// Number of names in the Auxiliary Room (>0 only on aux-eligible rows).
   final int auxSlots;
 
-  /// Con viñeta (canciones, intro y conclusión).
+  /// Bulleted (songs, intro and conclusion).
   final bool bullet;
 
-  /// Puede tener asignación paralela en Sala Auxiliar (S-38 §26).
+  /// Can have a parallel assignment in the Auxiliary Room (S-38 §26).
   final bool auxEligible;
 
   const ProgramRow({
@@ -40,7 +40,7 @@ class ProgramRow {
   });
 }
 
-/// Filas calculadas por bloque + duración real de la reunión.
+/// Rows computed per block + the meeting's actual duration.
 class ProgramSchedule {
   final List<ProgramRow> opening;
   final List<ProgramRow> treasures;
@@ -56,13 +56,13 @@ class ProgramSchedule {
     required this.actualMinutes,
   });
 
-  /// Todas las filas en orden de aparición.
+  /// All rows in order of appearance.
   List<ProgramRow> get rows =>
       [...opening, ...treasures, ...ministry, ...christianLife];
 }
 
-/// Nombres de los participantes, indexados por `ProgramRow.id`. Es el puente
-/// entre el estado editable (formulario) y la generación del PDF.
+/// Participant names, indexed by `ProgramRow.id`. The bridge between the
+/// editable form state and PDF generation.
 class Assignments {
   final Map<String, List<String>> _main;
   final Map<String, List<String>> _auxiliary;
@@ -78,7 +78,7 @@ class Assignments {
       _auxiliary[r.id] ?? List<String>.filled(r.auxSlots, '');
 }
 
-/// Une 1–2 nombres como los muestra el formato: "a / b", "a" o "".
+/// Joins 1–2 names as the format shows them: "a / b", "a" or "".
 String joinedNames(List<String> n) {
   if (n.isEmpty) return '';
   if (n.length >= 2) return '${n[0]} / ${n[1]}';

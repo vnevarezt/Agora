@@ -1,15 +1,15 @@
-/// Estado de un proyecto en el tablero.
+/// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
 
 extension ProjectStatusX on ProjectStatus {
-  /// Etiqueta singular para la insignia ("Borrador").
+  /// Singular label for the badge ("Borrador").
   String get label => switch (this) {
         ProjectStatus.draft => 'Borrador',
         ProjectStatus.complete => 'Completo',
         ProjectStatus.exported => 'Exportado',
       };
 
-  /// Etiqueta plural para los chips de filtro ("Borradores").
+  /// Plural label for the filter chips ("Borradores").
   String get plural => switch (this) {
         ProjectStatus.draft => 'Borradores',
         ProjectStatus.complete => 'Completos',
@@ -17,7 +17,7 @@ extension ProjectStatusX on ProjectStatus {
       };
 }
 
-/// Proyecto del dashboard: el programa de un mes/periodo de una congregación.
+/// Dashboard project: the program for a month/period of a congregation.
 class Project {
   final String id;
   final String name;
@@ -27,7 +27,7 @@ class Project {
   final int total;
   final ProjectStatus status;
 
-  /// Texto relativo de última edición ("hace 2 horas"); placeholder de UI.
+  /// Relative last-edited text ("hace 2 horas"); UI placeholder.
   final String editedLabel;
 
   const Project({
@@ -41,7 +41,7 @@ class Project {
     required this.editedLabel,
   });
 
-  /// Fracción de avance 0..1 para la barra de progreso.
+  /// Progress fraction 0..1 for the progress bar.
   double get progress => total == 0 ? 0 : done / total;
 
   Project copyWith({

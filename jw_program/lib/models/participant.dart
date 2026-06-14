@@ -1,8 +1,8 @@
-// Directorio local de participants de la congregación. Modelo puro (sin drift);
-// la tabla está en `data/db/tables.dart` y mapea a esta clase.
+// Local directory of meeting participants. Pure model (no drift); the table
+// lives in `data/db/tables.dart` and maps to this class.
 //
-// IMPORTANTE: las asignaciones del programa siguen siendo strings planos en
-// el formulario (FormModel.main) — este directorio NO es una FK.
+// IMPORTANT: program assignments are still plain strings in the form
+// (FormModel.main) — this directory is NOT a foreign key.
 
 enum Gender { male, female, unspecified }
 
@@ -23,7 +23,7 @@ extension RoleX on Role {
         Role.publisher => 'Publicador',
       };
 
-  /// Plural para los chips de filtro de la pantalla de participants.
+  /// Plural form used by the filter chips on the participants screen.
   String get plural => switch (this) {
         Role.elder => 'Ancianos',
         Role.ministerialServant => 'Siervos ministeriales',
@@ -32,20 +32,20 @@ extension RoleX on Role {
 }
 
 class Participant {
-  final String id; // uuid v4, estable: clave de la fusión de imports
+  final String id; // uuid v4, stable: merge key for imports
   final String name;
   final Gender gender;
   final Role role;
   final String congregation;
-  final bool active; // false = oculto del picker sin borrar
+  final bool active; // false = hidden from the picker without deleting
   final String notes;
   final DateTime createdAt; // UTC
 
-  /// UTC. Solo cambia con ediciones de user: decide quién gana al
-  /// fusionar imports (NO se toca al registrar uso).
+  /// UTC. Only changes on user edits: decides the winner when merging
+  /// imports (NOT touched when recording usage).
   final DateTime updatedAt;
 
-  /// Última vez asignado desde el picker (recent persistentes).
+  /// Last time assigned from the picker (persistent "recent" list).
   final DateTime? lastUsed;
 
   const Participant({
@@ -61,7 +61,7 @@ class Participant {
     this.lastUsed,
   });
 
-  /// Alta mínima desde el picker: queda marcado como incompleto.
+  /// Minimal entry created from the picker: stays marked as incomplete.
   bool get isIncomplete => gender == Gender.unspecified;
 
   Participant copyWith({
@@ -99,8 +99,8 @@ class Participant {
 const _diacritics = 'áàäâéèëêíìïîóòöôúùüûñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑ';
 const _plain = 'aaaaeeeeiiiioooouuuunAAAAEEEEIIIIOOOOUUUUN';
 
-/// Normaliza para búsqueda y detección de duplicados en español:
-/// trim, espacios colapsados, minúsculas y sin acentos (ñ→n).
+/// Normalizes for accent-insensitive search and duplicate detection:
+/// trim, collapse whitespace, lowercase and strip accents (ñ→n).
 String normalizeName(String s) {
   final sb = StringBuffer();
   for (final ch in s.trim().replaceAll(RegExp(r'\s+'), ' ').split('')) {

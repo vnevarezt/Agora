@@ -1,18 +1,18 @@
-// Modelos de datos de una semana del programa Vida y Ministerio Cristiano.
+// Data models for one week of the Christian Life and Ministry program.
 //
-// Espejo del dict que produce `parsear_semana` en generar_programa.py
-// (generador/generar_programa.py:68-70 y :104-105).
+// Mirrors the dict produced by `parsear_semana` in generar_programa.py
+// (generador/generar_programa.py:68-70 and :104-105).
 
-/// Sección de la reunión a la que pertenece una parte.
+/// Meeting section a part belongs to.
 enum Section { treasures, ministry, christianLife }
 
-/// Una parte numerada del programa (h3 "N. Título" en el EPUB).
+/// A numbered program part (h3 "N. Title" in the EPUB).
 class Part {
   final Section section;
   final int number;
   final String title;
 
-  /// Duración en minutos, o null si el EPUB no la especifica.
+  /// Duration in minutes, or null if the EPUB doesn't specify it.
   final int? minutes;
 
   const Part({
@@ -23,12 +23,12 @@ class Part {
   });
 }
 
-/// Programa completo de una semana.
+/// Full program of one week.
 class Week {
   String date;
   String reading;
 
-  /// Número de canción (como String) o null si no aparece.
+  /// Song number (as String) or null if absent.
   String? openingSong;
   String? middleSong;
   String? closingSong;

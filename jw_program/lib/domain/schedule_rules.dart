@@ -1,41 +1,42 @@
 import '../models/program_row.dart';
 import '../models/week.dart';
 
-/// Reglas de asignación y cálculo del reloj de la reunión (lógica pura).
+/// Assignment rules and meeting-clock calculation (pure logic).
 ///
-/// Port de generar_programa.py:129-246 (rol_y_nombres, es_aux_elegible,
-/// construir_filas, hhmm) y de las constantes SEAMOS_MIN / CONSEJO_MIN.
+/// Port of generar_programa.py:129-246 (rol_y_nombres, es_aux_elegible,
+/// construir_filas, hhmm) and the SEAMOS_MIN / CONSEJO_MIN constants.
 
-const int ministryMinutes = 15; // "Seamos mejores maestros" dura 15 min (S-38 §6)
-const int adviceMinutes = 1; // consejo del presidente tras cada estudiante (§18)
+const int ministryMinutes = 15; // "Apply Yourself" section lasts 15 min (S-38 §6)
+const int adviceMinutes = 1; // chairman's counsel after each student (§18)
 
-/// hh:mm sin cero a la izquierda en la hora.
-String hhmm(int minutos) {
-  final h = minutos ~/ 60;
-  final m = minutos % 60;
+/// hh:mm with no leading zero on the hour.
+String hhmm(int minutes) {
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
   return '$h:${m.toString().padLeft(2, '0')}';
 }
 
-/// Etiqueta de role + nº de nombres para una parte.
+/// Role label + number of names for a part. The match strings stay in Spanish
+/// because they test the title parsed from the jw.org workbook.
 ({String role, int n}) roleAndNames(Section section, String title) {
   final t = title.toLowerCase();
   switch (section) {
     case Section.treasures:
       if (t.contains('lectura de la biblia')) return (role: 'Estudiante:', n: 1);
-      return (role: '', n: 1); // discurso / perlas
+      return (role: '', n: 1); // talk / spiritual gems
     case Section.ministry:
       if (t.contains('discurso')) return (role: 'Estudiante:', n: 1);
-      return (role: 'Estudiante/Ayudante:', n: 2); // demostración
+      return (role: 'Estudiante/Ayudante:', n: 2); // demonstration
     case Section.christianLife:
       if (t.contains('estudio bíblico de la congregaci')) {
         return (role: 'Conductor/Lector:', n: 2);
       }
-      return (role: '', n: 1); // análisis / discurso
+      return (role: '', n: 1); // discussion / talk
   }
 }
 
-/// Partes con asignación paralela en sala auxiliar (S-38 §26): Lectura de la
-/// Biblia + todas las partes de "Seamos mejores maestros".
+/// Parts with a parallel assignment in the auxiliary room (S-38 §26): Bible
+/// Reading + every part of the "Apply Yourself to the Ministry" section.
 bool isAuxEligible(Section section, String title) {
   if (section == Section.treasures &&
       title.toLowerCase().contains('lectura de la biblia')) {
@@ -46,59 +47,60 @@ bool isAuxEligible(Section section, String title) {
 }
 
 ProgramRow _row(String id, Section section, int t, Part p) {
-  final rn = roleAndNames(section, p.title);
+  final roleNames = roleAndNames(section, p.title);
   final mins = p.minutes ?? 0;
-  final cont = mins > 0 ? '${p.title} ($mins mins.)' : p.title;
+  final content = mins > 0 ? '${p.title} ($mins mins.)' : p.title;
   final eligible = isAuxEligible(section, p.title);
   return ProgramRow(
     id: id,
     time: hhmm(t),
-    content: cont,
-    role: rn.role,
-    slots: rn.n,
-    auxSlots: eligible ? rn.n : 0,
+    content: content,
+    role: roleNames.role,
+    slots: roleNames.n,
+    auxSlots: eligible ? roleNames.n : 0,
     auxEligible: eligible,
   );
 }
 
-/// Construye el horario respetando duración total, los 15 min de Seamos y el
-/// minuto de consejo tras cada asignación de estudiante.
+/// Builds the schedule honoring the total duration, the fixed 15 min of the
+/// ministry section and the one-minute counsel after each student assignment.
 ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
-  final P = week.parts;
-  final tesoros = P.where((p) => p.section == Section.treasures).toList();
-  final seamos = P.where((p) => p.section == Section.ministry).toList();
-  final vida = P.where((p) => p.section == Section.christianLife).toList();
+  final parts = week.parts;
+  final treasures = parts.where((p) => p.section == Section.treasures).toList();
+  final ministry = parts.where((p) => p.section == Section.ministry).toList();
+  final life = parts.where((p) => p.section == Section.christianLife).toList();
   Part? cbs;
-  for (final p in vida) {
+  for (final p in life) {
     if (p.title.toLowerCase().contains('estudio bíblico de la congrega')) {
       cbs = p;
       break;
     }
   }
-  final nvPre = vida.where((p) => !identical(p, cbs)).toList();
+  final lifeNoCbs = life.where((p) => !identical(p, cbs)).toList();
 
   final intro = week.introMinutes;
   final concl = week.conclusionMinutes;
   final treasuresBlock =
-      tesoros.fold<int>(0, (s, p) => s + (p.minutes ?? 0)) + adviceMinutes;
-  final nvPreSum = nvPre.fold<int>(0, (s, p) => s + (p.minutes ?? 0));
-  final cbsMin = (cbs?.minutes ?? 30);
-  final fixed = intro + treasuresBlock + ministryMinutes + nvPreSum + cbsMin + concl;
+      treasures.fold<int>(0, (s, p) => s + (p.minutes ?? 0)) + adviceMinutes;
+  final lifeNoCbsSum = lifeNoCbs.fold<int>(0, (s, p) => s + (p.minutes ?? 0));
+  final cbsMinutes = (cbs?.minutes ?? 30);
+  final fixed =
+      intro + treasuresBlock + ministryMinutes + lifeNoCbsSum + cbsMinutes + concl;
   final slack = (duration - fixed) > 9 ? (duration - fixed) : 9;
   final sOpen = slack ~/ 3;
   final sMid = slack ~/ 3;
   final sClose = slack - sOpen - sMid;
 
   var t = startMinutes;
-  final apertura = <ProgramRow>[];
-  final outTesoros = <ProgramRow>[];
-  final outSeamos = <ProgramRow>[];
-  final outVida = <ProgramRow>[];
+  final opening = <ProgramRow>[];
+  final treasuresRows = <ProgramRow>[];
+  final ministryRows = <ProgramRow>[];
+  final lifeRows = <ProgramRow>[];
 
-  // --- Apertura ---
+  // --- Opening ---
   if (week.openingSong != null) {
-    apertura.add(ProgramRow(
-      id: 'ap${apertura.length}',
+    opening.add(ProgramRow(
+      id: 'ap${opening.length}',
       time: hhmm(t),
       content: 'Canción ${week.openingSong}',
       role: 'Oración:',
@@ -106,8 +108,8 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
     ));
     t += sOpen;
   }
-  apertura.add(ProgramRow(
-    id: 'ap${apertura.length}',
+  opening.add(ProgramRow(
+    id: 'ap${opening.length}',
     time: hhmm(t),
     content: 'Palabras de introducción ($intro min.)',
     bullet: true,
@@ -115,27 +117,27 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
   ));
   t += intro;
 
-  // --- Tesoros de la Biblia (consejo tras la Lectura) ---
-  for (final p in tesoros) {
-    outTesoros.add(_row('te${outTesoros.length}', Section.treasures, t, p));
+  // --- Treasures From God's Word (counsel after the Bible Reading) ---
+  for (final p in treasures) {
+    treasuresRows.add(_row('te${treasuresRows.length}', Section.treasures, t, p));
     t += (p.minutes ?? 0);
     if (p.title.toLowerCase().contains('lectura de la biblia')) {
       t += adviceMinutes;
     }
   }
 
-  // --- Seamos mejores maestros: bloque de 15 min, +1 de consejo por parte ---
-  final seamosIni = t;
-  for (final p in seamos) {
-    outSeamos.add(_row('se${outSeamos.length}', Section.ministry, t, p));
+  // --- Apply Yourself: 15-min block, +1 of counsel per part ---
+  final ministryStart = t;
+  for (final p in ministry) {
+    ministryRows.add(_row('se${ministryRows.length}', Section.ministry, t, p));
     t += (p.minutes ?? 0) + adviceMinutes;
   }
-  t = seamosIni + ministryMinutes; // fija la sección a 15 min
+  t = ministryStart + ministryMinutes; // pin the section to 15 min
 
-  // --- Nuestra vida cristiana ---
+  // --- Living as Christians ---
   if (week.middleSong != null) {
-    outVida.add(ProgramRow(
-      id: 'vi${outVida.length}',
+    lifeRows.add(ProgramRow(
+      id: 'vi${lifeRows.length}',
       time: hhmm(t),
       content: 'Canción ${week.middleSong}',
       bullet: true,
@@ -143,18 +145,18 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
     ));
     t += sMid;
   }
-  for (final p in nvPre) {
-    outVida.add(_row('vi${outVida.length}', Section.christianLife, t, p));
+  for (final p in lifeNoCbs) {
+    lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, p));
     t += (p.minutes ?? 0);
   }
   if (cbs != null) {
-    outVida.add(_row('vi${outVida.length}', Section.christianLife, t, cbs));
-    t += cbsMin;
+    lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, cbs));
+    t += cbsMinutes;
   }
 
-  // --- Conclusión y canción final ---
-  outVida.add(ProgramRow(
-    id: 'vi${outVida.length}',
+  // --- Conclusion and closing song ---
+  lifeRows.add(ProgramRow(
+    id: 'vi${lifeRows.length}',
     time: hhmm(t),
     content: 'Palabras de conclusión ($concl min.)',
     bullet: true,
@@ -162,8 +164,8 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
   ));
   t += concl;
   if (week.closingSong != null) {
-    outVida.add(ProgramRow(
-      id: 'vi${outVida.length}',
+    lifeRows.add(ProgramRow(
+      id: 'vi${lifeRows.length}',
       time: hhmm(t),
       content: 'Canción ${week.closingSong}',
       role: 'Oración:',
@@ -173,10 +175,10 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
   }
 
   return ProgramSchedule(
-    opening: apertura,
-    treasures: outTesoros,
-    ministry: outSeamos,
-    christianLife: outVida,
+    opening: opening,
+    treasures: treasuresRows,
+    ministry: ministryRows,
+    christianLife: lifeRows,
     actualMinutes: t - startMinutes,
   );
 }

@@ -1,5 +1,5 @@
-/// Cuaderno (issue) de Vida y Ministerio: un periodo con sus semanas. Sirve al
-/// modal de projects para ofrecer las semanas disponibles.
+/// Workbook (issue) of the Christian Life and Ministry: a period with its
+/// weeks. Feeds the project modal to offer the available weeks.
 class Notebook {
   final String id;
   final String label;
