@@ -13,25 +13,25 @@ import 'program_form.dart';
 // ninguna ruta activa lo use, listo para reconectar en el futuro.
 
 /// Directorio en memoria. Arranca vacío; las altas/ediciones viven solo en la
-/// sesión. Mantiene la semántica que tenía la BD: `marcarUso` toca `ultimoUso`
+/// sesión. Mantiene la semántica que tenía la BD: `markUsed` toca `ultimoUso`
 /// sin alterar `updatedAt`.
-class HermanosController extends Notifier<List<Hermano>> {
+class ParticipantsController extends Notifier<List<Participant>> {
   @override
-  List<Hermano> build() => const [];
+  List<Participant> build() => const [];
 
-  void upsert(Hermano h) {
+  void upsert(Participant h) {
     final i = state.indexWhere((x) => x.id == h.id);
     state = i < 0
         ? [...state, h]
         : [for (final x in state) x.id == h.id ? h : x];
   }
 
-  void marcarUso(String id, DateTime cuando) => state = [
+  void markUsed(String id, DateTime cuando) => state = [
         for (final x in state)
           x.id == id ? x.copyWith(ultimoUso: cuando) : x,
       ];
 
-  void setActivo(String id, bool v, DateTime cuando) => state = [
+  void setActive(String id, bool v, DateTime cuando) => state = [
         for (final x in state)
           x.id == id ? x.copyWith(activo: v, updatedAt: cuando) : x,
       ];
@@ -41,28 +41,28 @@ class HermanosController extends Notifier<List<Hermano>> {
 }
 
 /// Directorio completo (reactivo). Antes venía de la BD; ahora es memoria.
-final hermanosTodosProvider =
-    NotifierProvider<HermanosController, List<Hermano>>(HermanosController.new);
+final participantsProvider =
+    NotifierProvider<ParticipantsController, List<Participant>>(ParticipantsController.new);
 
 /// Activos ordenados por nombre normalizado (lista del picker).
-final hermanosActivosProvider = Provider<List<Hermano>>((ref) {
-  final todos = ref.watch(hermanosTodosProvider);
+final activeParticipantsProvider = Provider<List<Participant>>((ref) {
+  final todos = ref.watch(participantsProvider);
   return todos.where((h) => h.activo).toList()
     ..sort((a, b) =>
-        normalizarNombre(a.nombre).compareTo(normalizarNombre(b.nombre)));
+        normalizeName(a.nombre).compareTo(normalizeName(b.nombre)));
 });
 
 /// Recientes (por `ultimoUso` desc), máx. 6.
-final recientesProvider = Provider<List<Hermano>>((ref) {
-  final activos = ref.watch(hermanosActivosProvider);
+final recentParticipantsProvider = Provider<List<Participant>>((ref) {
+  final activos = ref.watch(activeParticipantsProvider);
   final conUso = activos.where((h) => h.ultimoUso != null).toList()
     ..sort((a, b) => b.ultimoUso!.compareTo(a.ultimoUso!));
   return conUso.take(6).toList();
 });
 
 /// Congregaciones distintas (sugerencias del formulario de personas).
-final congregacionesProvider = Provider<List<String>>((ref) {
-  final todos = ref.watch(hermanosTodosProvider);
+final participantCongregationsProvider = Provider<List<String>>((ref) {
+  final todos = ref.watch(participantsProvider);
   final distintas = <String>{
     for (final h in todos)
       if (h.congregacion.trim().isNotEmpty) h.congregacion.trim(),
@@ -71,56 +71,56 @@ final congregacionesProvider = Provider<List<String>>((ref) {
 });
 
 /// Filtro de la pantalla de gestión (puro, testeable).
-List<Hermano> filtrarHermanos(
-  List<Hermano> todos, {
+List<Participant> filterParticipants(
+  List<Participant> todos, {
   String query = '',
-  Privilegio? privilegio,
+  Role? privilegio,
   String? congregacion,
   bool incluirInactivos = false,
 }) {
-  final q = normalizarNombre(query);
+  final q = normalizeName(query);
   return [
     for (final h in todos)
       if ((incluirInactivos || h.activo) &&
           (privilegio == null || h.privilegio == privilegio) &&
           (congregacion == null || h.congregacion == congregacion) &&
-          (q.isEmpty || normalizarNombre(h.nombre).contains(q)))
+          (q.isEmpty || normalizeName(h.nombre).contains(q)))
         h,
   ];
 }
 
-final hermanosAccionesProvider =
-    Provider<HermanosAcciones>(HermanosAcciones.new);
+final participantActionsProvider =
+    Provider<ParticipantActions>(ParticipantActions.new);
 
 /// Escrituras al directorio en memoria. `guardar` siempre sella `updatedAt`;
-/// `registrarUso` NO lo toca (solo `ultimoUso`).
-class HermanosAcciones {
-  HermanosAcciones(this._ref);
+/// `recordUsage` NO lo toca (solo `ultimoUso`).
+class ParticipantActions {
+  ParticipantActions(this._ref);
 
   final Ref _ref;
   static const _uuid = Uuid();
 
-  HermanosController get _dir => _ref.read(hermanosTodosProvider.notifier);
+  ParticipantsController get _dir => _ref.read(participantsProvider.notifier);
 
   /// Asignación hecha desde el picker: si el nombre ya existe (normalizado)
   /// solo marca uso; si no, alta mínima que queda como 'Incompleto' en la
   /// pantalla de gestión (sexo sin especificar).
-  Future<void> registrarUso(String nombre) async {
+  Future<void> recordUsage(String nombre) async {
     final limpio = nombre.trim();
     if (limpio.isEmpty) return;
     final ahora = DateTime.now().toUtc();
-    final clave = normalizarNombre(limpio);
-    for (final h in _ref.read(hermanosTodosProvider)) {
-      if (normalizarNombre(h.nombre) == clave) {
-        _dir.marcarUso(h.id, ahora);
+    final clave = normalizeName(limpio);
+    for (final h in _ref.read(participantsProvider)) {
+      if (normalizeName(h.nombre) == clave) {
+        _dir.markUsed(h.id, ahora);
         return;
       }
     }
-    _dir.upsert(Hermano(
+    _dir.upsert(Participant(
       id: _uuid.v4(),
       nombre: limpio,
-      sexo: Sexo.noEspecificado,
-      privilegio: Privilegio.publicador,
+      sexo: Gender.noEspecificado,
+      privilegio: Role.publicador,
       congregacion: _ref.read(formProvider).cong,
       activo: true,
       notas: '',
@@ -130,11 +130,11 @@ class HermanosAcciones {
     ));
   }
 
-  Future<void> guardar(Hermano h) async =>
+  Future<void> guardar(Participant h) async =>
       _dir.upsert(h.copyWith(updatedAt: DateTime.now().toUtc()));
 
-  Future<void> setActivo(String id, bool v) async =>
-      _dir.setActivo(id, v, DateTime.now().toUtc());
+  Future<void> setActive(String id, bool v) async =>
+      _dir.setActive(id, v, DateTime.now().toUtc());
 
   Future<void> eliminar(String id) async => _dir.eliminar(id);
 }

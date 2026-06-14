@@ -20,8 +20,8 @@ sealed class SlotRef {
 }
 
 /// Presidente de la reunión ([FormModel.presidente]).
-class PresidenteSlot extends SlotRef {
-  const PresidenteSlot();
+class ChairmanSlot extends SlotRef {
+  const ChairmanSlot();
 
   @override
   String get key => 'presidente';
@@ -42,7 +42,7 @@ class RowSlot extends SlotRef {
 
 /// Lista de [slots] entradas con [nombre] colocado en [index], conservando
 /// los demás valores de [actual] (función pura, testeable).
-List<String> listaConNombre(
+List<String> listWithName(
     List<String>? actual, int slots, int index, String nombre) {
   return [
     for (var i = 0; i < slots; i++)
@@ -53,7 +53,7 @@ List<String> listaConNombre(
 }
 
 /// Cuántas de las primeras [slots] entradas de [nombres] están llenas.
-int nombresLlenos(List<String>? nombres, int slots) {
+int filledNames(List<String>? nombres, int slots) {
   if (nombres == null) return 0;
   var n = 0;
   for (var i = 0; i < slots && i < nombres.length; i++) {
@@ -63,9 +63,9 @@ int nombresLlenos(List<String>? nombres, int slots) {
 }
 
 /// Nombre actualmente asignado a [slot] ('' si está vacío).
-String nombreDeSlot(FormModel f, SlotRef slot) {
+String slotName(FormModel f, SlotRef slot) {
   return switch (slot) {
-    PresidenteSlot() => f.presidente,
+    ChairmanSlot() => f.presidente,
     RowSlot(:final row, :final index, :final aux) => () {
         final lista = aux ? f.auxiliar[row.id] : f.principal[row.id];
         return (lista != null && index < lista.length) ? lista[index] : '';
@@ -75,21 +75,21 @@ String nombreDeSlot(FormModel f, SlotRef slot) {
 
 /// Escribe [nombre] en [slot] usando los setters existentes del formulario.
 /// Limpiar = escribir ''.
-void escribirAsignacion(WidgetRef ref, SlotRef slot, String nombre) {
+void writeAssignment(WidgetRef ref, SlotRef slot, String nombre) {
   final notifier = ref.read(formProvider.notifier);
   switch (slot) {
-    case PresidenteSlot():
-      notifier.setPresidente(nombre);
+    case ChairmanSlot():
+      notifier.setChairman(nombre);
     case RowSlot(:final row, :final index, :final aux):
       final f = ref.read(formProvider);
-      final lista = listaConNombre(
+      final lista = listWithName(
         aux ? f.auxiliar[row.id] : f.principal[row.id],
         aux ? row.auxSlots : row.slots,
         index,
         nombre,
       );
       aux
-          ? notifier.setNombresAux(row.id, lista)
-          : notifier.setNombresPrincipal(row.id, lista);
+          ? notifier.setAuxNames(row.id, lista)
+          : notifier.setMainNames(row.id, lista);
   }
 }

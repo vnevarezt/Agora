@@ -15,7 +15,7 @@ import '../widgets/danger_button.dart';
 import '../widgets/labeled_field.dart';
 
 /// Abre el modal de creación/edición de proyecto. [proyecto] null = alta nueva.
-Future<void> mostrarProyectoModal(BuildContext context, {Proyecto? proyecto}) {
+Future<void> showProjectModal(BuildContext context, {Project? proyecto}) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
@@ -33,7 +33,7 @@ class ProjectModal extends ConsumerStatefulWidget {
   });
 
   /// null = nuevo proyecto.
-  final Proyecto? original;
+  final Project? original;
   final VoidCallback onClose;
 
   /// true cuando se presenta como bottom sheet (móvil).
@@ -49,13 +49,13 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   late String _cuadernoId;
   late List<String> _semanas = List.of(widget.original?.semanas ?? const []);
 
-  bool get _esNuevo => widget.original == null;
+  bool get _isNew => widget.original == null;
 
   @override
   void initState() {
     super.initState();
-    final congs = ref.read(congregacionesDashProvider);
-    final cuadernos = ref.read(cuadernosProvider);
+    final congs = ref.read(congregationsProvider);
+    final cuadernos = ref.read(notebooksProvider);
     _congId = widget.original?.congregacionId ??
         (congs.isNotEmpty ? congs.first.id : '');
     _cuadernoId = cuadernos.isNotEmpty ? cuadernos.first.id : '';
@@ -63,7 +63,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
 
   /// Alterna una semana del cuaderno, manteniendo el orden del cuaderno y las
   /// semanas "extra" (de otros cuadernos) al final. Réplica de `toggleWeek`.
-  void _toggle(String w, Cuaderno cuaderno) {
+  void _toggle(String w, Notebook cuaderno) {
     setState(() {
       if (_semanas.contains(w)) {
         _semanas = _semanas.where((x) => x != w).toList();
@@ -78,11 +78,11 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     });
   }
 
-  void _quitar(String w) =>
+  void _remove(String w) =>
       setState(() => _semanas = _semanas.where((x) => x != w).toList());
 
   /// Nombre por defecto cuando el campo está vacío.
-  String _autoName(Cuaderno cuaderno) {
+  String _autoName(Notebook cuaderno) {
     if (_nombre.trim().isNotEmpty) return _nombre.trim();
     if (_semanas.isEmpty) return '';
     final base = cuaderno.label.split('–').first.trim();
@@ -90,20 +90,20 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     return '$base · $n ${n == 1 ? 'semana' : 'semanas'}';
   }
 
-  void _guardar(Cuaderno cuaderno) {
+  void _save(Notebook cuaderno) {
     final nombre = _autoName(cuaderno);
-    final notifier = ref.read(proyectosProvider.notifier);
-    if (_esNuevo) {
+    final notifier = ref.read(projectsProvider.notifier);
+    if (_isNew) {
       notifier.crear(
           nombre: nombre, congregacionId: _congId, semanas: _semanas);
     } else {
-      notifier.actualizar(widget.original!.id,
+      notifier.update(widget.original!.id,
           nombre: nombre, congregacionId: _congId, semanas: _semanas);
     }
     widget.onClose();
   }
 
-  Future<void> _eliminar() async {
+  Future<void> _delete() async {
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -126,7 +126,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       ),
     );
     if (confirmado != true || !mounted) return;
-    ref.read(proyectosProvider.notifier).eliminar(widget.original!.id);
+    ref.read(projectsProvider.notifier).eliminar(widget.original!.id);
     widget.onClose();
   }
 
@@ -134,8 +134,8 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final isMobile = context.isMobile;
-    final congs = ref.watch(congregacionesDashProvider);
-    final cuadernos = ref.watch(cuadernosProvider);
+    final congs = ref.watch(congregationsProvider);
+    final cuadernos = ref.watch(notebooksProvider);
 
     final Widget card;
     if (cuadernos.isEmpty) {
@@ -148,7 +148,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           _header(t),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
-            child: _sinCuadernos(t),
+            child: _noNotebooks(t),
           ),
         ],
       );
@@ -167,7 +167,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-              child: _cuerpo(
+              child: _body(
                   t, isMobile, congs, cuadernos, cuaderno, extra, autoName),
             ),
           ),
@@ -218,7 +218,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _esNuevo ? 'Nuevo proyecto' : 'Editar proyecto',
+                    _isNew ? 'Nuevo proyecto' : 'Editar proyecto',
                     style: TextStyle(
                       fontSize: 16.5,
                       fontWeight: FontWeight.w800,
@@ -252,7 +252,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         ),
       );
 
-  Widget _sinCuadernos(AppTokens t) {
+  Widget _noNotebooks(AppTokens t) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -279,12 +279,12 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     );
   }
 
-  Widget _cuerpo(
+  Widget _body(
     AppTokens t,
     bool isMobile,
-    List<Congregacion> congs,
-    List<Cuaderno> cuadernos,
-    Cuaderno cuaderno,
+    List<Congregation> congs,
+    List<Notebook> cuadernos,
+    Notebook cuaderno,
     List<String> extra,
     String autoName,
   ) {
@@ -342,7 +342,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                   label: w,
                   active: true,
                   extra: true,
-                  onTap: () => _quitar(w),
+                  onTap: () => _remove(w),
                 ),
             ],
           ),
@@ -360,9 +360,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     );
   }
 
-  Widget _footer(AppTokens t, bool isMobile, Cuaderno cuaderno) {
+  Widget _footer(AppTokens t, bool isMobile, Notebook cuaderno) {
     final puedeGuardar = _semanas.isNotEmpty;
-    final etiquetaPrimary = _esNuevo ? 'Crear proyecto' : 'Guardar cambios';
+    final etiquetaPrimary = _isNew ? 'Crear proyecto' : 'Guardar cambios';
 
     final children = isMobile
         ? [
@@ -370,7 +370,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
               label: etiquetaPrimary,
               expand: true,
               height: Dimens.hExportMobile,
-              onPressed: puedeGuardar ? () => _guardar(cuaderno) : null,
+              onPressed: puedeGuardar ? () => _save(cuaderno) : null,
             ),
             const SizedBox(height: 8),
             Row(
@@ -383,9 +383,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                     onPressed: widget.onClose,
                   ),
                 ),
-                if (!_esNuevo) ...[
+                if (!_isNew) ...[
                   const SizedBox(width: 8),
-                  DangerButton(onTap: _eliminar),
+                  DangerButton(onTap: _delete),
                 ],
               ],
             ),
@@ -393,7 +393,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         : [
             Row(
               children: [
-                if (!_esNuevo) DangerButton(onTap: _eliminar),
+                if (!_isNew) DangerButton(onTap: _delete),
                 const Spacer(),
                 AppButton(
                   variant: AppButtonVariant.ghost,
@@ -403,7 +403,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                 const SizedBox(width: 8),
                 AppButton(
                   label: etiquetaPrimary,
-                  onPressed: puedeGuardar ? () => _guardar(cuaderno) : null,
+                  onPressed: puedeGuardar ? () => _save(cuaderno) : null,
                 ),
               ],
             ),

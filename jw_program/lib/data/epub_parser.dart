@@ -12,10 +12,10 @@ import '../models/week.dart';
 /// de generar_programa.py:54-124. Conserva las MISMAS expresiones regulares.
 
 // color del encabezado en el EPUB -> sección (SECCION_POR_COLOR, py:24-28)
-const Map<String, Seccion> _seccionPorColor = {
-  'teal': Seccion.tesoros,
-  'gold': Seccion.seamos,
-  'maroon': Seccion.vida,
+const Map<String, Section> _seccionPorColor = {
+  'teal': Section.tesoros,
+  'gold': Section.seamos,
+  'maroon': Section.vida,
 };
 
 final _rePageNum = RegExp(
@@ -49,11 +49,11 @@ int? _duracion(String segmento) {
   return m != null ? int.parse(m.group(1)!) : null;
 }
 
-Week parsearSemana(String xhtml) {
+Week parseWeek(String xhtml) {
   // Posiciones de todos los encabezados h1/h2/h3 en orden de aparición.
   final enc = _reEncabezados.allMatches(xhtml).toList();
   final semana = Week();
-  Seccion? seccionActual;
+  Section? seccionActual;
 
   for (var i = 0; i < enc.length; i++) {
     final m = enc[i];
@@ -119,7 +119,7 @@ Week parsearSemana(String xhtml) {
 }
 
 /// Parsea el EPUB completo (bytes) y devuelve las semanas con partes.
-List<Week> parsearEpub(Uint8List bytes) {
+List<Week> parseEpub(Uint8List bytes) {
   final archivo = ZipDecoder().decodeBytes(bytes);
   // Los archivos semanales son OEBPS/NNNNNNNNN.xhtml (sin '-extracted').
   final nombres = archivo.files
@@ -131,7 +131,7 @@ List<Week> parsearEpub(Uint8List bytes) {
   for (final n in nombres) {
     final f = archivo.findFile(n)!;
     final xhtml = utf8.decode(f.content as List<int>);
-    final s = parsearSemana(xhtml);
+    final s = parseWeek(xhtml);
     if (s.partes.isNotEmpty) semanas.add(s); // ignora portada/índices
   }
   return semanas;

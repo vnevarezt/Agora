@@ -10,22 +10,22 @@ import 'package:jw_program/ui/theme/tokens.dart';
 
 // Probamos solo la UI de HermanosView, alimentando el directorio en memoria
 // con una lista fija para que sea determinista y rápido.
-class _FakeHermanos extends HermanosController {
+class _FakeHermanos extends ParticipantsController {
   _FakeHermanos(this._lista);
 
-  final List<Hermano> _lista;
+  final List<Participant> _lista;
 
   @override
-  List<Hermano> build() => _lista;
+  List<Participant> build() => _lista;
 }
 
-Hermano _h(String id, String nombre) {
+Participant _h(String id, String nombre) {
   final t = DateTime.utc(2026, 6, 1);
-  return Hermano(
+  return Participant(
     id: id,
     nombre: nombre,
-    sexo: Sexo.hombre,
-    privilegio: Privilegio.publicador,
+    sexo: Gender.hombre,
+    privilegio: Role.publicador,
     congregacion: 'TEST',
     activo: true,
     notas: '',
@@ -34,14 +34,14 @@ Hermano _h(String id, String nombre) {
   );
 }
 
-Future<void> _pump(WidgetTester tester, List<Hermano> lista) async {
+Future<void> _pump(WidgetTester tester, List<Participant> lista) async {
   tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(ProviderScope(
     overrides: [
-      hermanosTodosProvider.overrideWith(() => _FakeHermanos(lista)),
+      participantsProvider.overrideWith(() => _FakeHermanos(lista)),
     ],
     child: MaterialApp(
       theme: buildAppTheme(pizarra.light, Brightness.light),

@@ -15,13 +15,13 @@ import 'assignee_button.dart';
 import 'part_presentation.dart';
 
 /// Un hueco de asignación: label uppercase + [AssigneeButton]. Abre el
-/// picker y escribe el resultado en el formulario vía [escribirAsignacion].
+/// picker y escribe el resultado en el formulario vía [writeAssignment].
 class SlotField extends ConsumerWidget {
   const SlotField({super.key, required this.spec});
 
   final SlotSpec spec;
 
-  Future<void> _abrirPicker(
+  Future<void> _openPicker(
       BuildContext anchorContext, WidgetRef ref, String actual) async {
     ref.read(activeSlotProvider.notifier).set(spec.ref);
     try {
@@ -33,11 +33,11 @@ class SlotField extends ConsumerWidget {
       );
       switch (resultado) {
         case PickNombre(:final nombre):
-          escribirAsignacion(ref, spec.ref, nombre);
+          writeAssignment(ref, spec.ref, nombre);
           // Fire-and-forget: el directorio se actualiza solo (stream).
-          unawaited(ref.read(hermanosAccionesProvider).registrarUso(nombre));
+          unawaited(ref.read(participantActionsProvider).recordUsage(nombre));
         case PickQuitar():
-          escribirAsignacion(ref, spec.ref, '');
+          writeAssignment(ref, spec.ref, '');
         case null:
           break;
       }
@@ -50,7 +50,7 @@ class SlotField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final nombre =
-        ref.watch(formProvider.select((f) => nombreDeSlot(f, spec.ref)));
+        ref.watch(formProvider.select((f) => slotName(f, spec.ref)));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,10 +68,10 @@ class SlotField extends ConsumerWidget {
           builder: (anchorContext) => AssigneeButton(
             nombre: nombre.isEmpty ? null : nombre,
             alwaysShowClear: context.isMobile,
-            onTap: () => _abrirPicker(anchorContext, ref, nombre),
+            onTap: () => _openPicker(anchorContext, ref, nombre),
             onClear: nombre.isEmpty
                 ? null
-                : () => escribirAsignacion(ref, spec.ref, ''),
+                : () => writeAssignment(ref, spec.ref, ''),
           ),
         ),
       ],

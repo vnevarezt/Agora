@@ -5,19 +5,19 @@ import 'package:jw_program/state/assignment_ops.dart';
 import 'package:jw_program/state/program_form.dart';
 
 void main() {
-  group('listaConNombre', () {
+  group('listWithName', () {
     test('rellena hasta el nº de slots y coloca el nombre en su posición',
         () {
-      expect(listaConNombre(null, 2, 0, 'Ana'), ['Ana', '']);
-      expect(listaConNombre(null, 2, 1, 'Luis'), ['', 'Luis']);
+      expect(listWithName(null, 2, 0, 'Ana'), ['Ana', '']);
+      expect(listWithName(null, 2, 1, 'Luis'), ['', 'Luis']);
     });
 
     test('conserva los demás valores existentes', () {
-      expect(listaConNombre(['Ana', 'Luis'], 2, 1, 'Eva'), ['Ana', 'Eva']);
+      expect(listWithName(['Ana', 'Luis'], 2, 1, 'Eva'), ['Ana', 'Eva']);
     });
 
     test('limpiar = escribir cadena vacía', () {
-      expect(listaConNombre(['Ana', 'Luis'], 2, 0, ''), ['', 'Luis']);
+      expect(listWithName(['Ana', 'Luis'], 2, 0, ''), ['', 'Luis']);
     });
   });
 
@@ -26,7 +26,7 @@ void main() {
         id: 'se1', hora: '18:31', contenido: 'Demostración', slots: 2);
 
     test('claves estables para principal y auxiliar', () {
-      expect(const PresidenteSlot().key, 'presidente');
+      expect(const ChairmanSlot().key, 'presidente');
       expect(const RowSlot(fila, 0).key, 'se1:0');
       expect(const RowSlot(fila, 1, aux: true).key, 'se1:aux:1');
     });
@@ -38,7 +38,7 @@ void main() {
     });
   });
 
-  group('nombreDeSlot / nombresLlenos', () {
+  group('slotName / filledNames', () {
     const fila = ProgramRow(
         id: 'te0', hora: '18:06', contenido: 'Discurso', slots: 1);
 
@@ -49,16 +49,16 @@ void main() {
           'te0': ['Daniel'],
         },
       );
-      expect(nombreDeSlot(f, const PresidenteSlot()), 'Andrés');
-      expect(nombreDeSlot(f, const RowSlot(fila, 0)), 'Daniel');
-      expect(nombreDeSlot(f, const RowSlot(fila, 0, aux: true)), '');
+      expect(slotName(f, const ChairmanSlot()), 'Andrés');
+      expect(slotName(f, const RowSlot(fila, 0)), 'Daniel');
+      expect(slotName(f, const RowSlot(fila, 0, aux: true)), '');
     });
 
     test('cuenta solo entradas no vacías dentro del nº de slots', () {
-      expect(nombresLlenos(null, 2), 0);
-      expect(nombresLlenos(['Ana', ''], 2), 1);
-      expect(nombresLlenos(['Ana', 'Luis'], 2), 2);
-      expect(nombresLlenos(['  '], 1), 0);
+      expect(filledNames(null, 2), 0);
+      expect(filledNames(['Ana', ''], 2), 1);
+      expect(filledNames(['Ana', 'Luis'], 2), 2);
+      expect(filledNames(['  '], 1), 0);
     });
   });
 }

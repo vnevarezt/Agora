@@ -6,11 +6,11 @@
 /// Sección de la reunión a la que pertenece una parte.
 /// Coincide con los valores de SECCION_POR_COLOR del .py:
 ///   teal -> tesoros, gold -> seamos, maroon -> vida.
-enum Seccion { tesoros, seamos, vida }
+enum Section { tesoros, seamos, vida }
 
 /// Una parte numerada del programa (h3 "N. Título" en el EPUB).
 class Part {
-  final Seccion seccion;
+  final Section seccion;
   final int num;
   final String titulo;
 

@@ -3,11 +3,12 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $HermanosTable extends Hermanos with TableInfo<$HermanosTable, Hermano> {
+class $ParticipantsTable extends Participants
+    with TableInfo<$ParticipantsTable, Participant> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $HermanosTable(this.attachedDatabase, [this._alias]);
+  $ParticipantsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -31,23 +32,23 @@ class $HermanosTable extends Hermanos with TableInfo<$HermanosTable, Hermano> {
     requiredDuringInsert: true,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Sexo, String> sexo =
+  late final GeneratedColumnWithTypeConverter<Gender, String> sexo =
       GeneratedColumn<String>(
         'sexo',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: true,
-      ).withConverter<Sexo>($HermanosTable.$convertersexo);
+      ).withConverter<Gender>($ParticipantsTable.$convertersexo);
   @override
-  late final GeneratedColumnWithTypeConverter<Privilegio, String> privilegio =
+  late final GeneratedColumnWithTypeConverter<Role, String> privilegio =
       GeneratedColumn<String>(
         'privilegio',
         aliasedName,
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: true,
-      ).withConverter<Privilegio>($HermanosTable.$converterprivilegio);
+      ).withConverter<Role>($ParticipantsTable.$converterprivilegio);
   static const VerificationMeta _congregacionMeta = const VerificationMeta(
     'congregacion',
   );
@@ -133,10 +134,10 @@ class $HermanosTable extends Hermanos with TableInfo<$HermanosTable, Hermano> {
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'hermanos';
+  static const String $name = 'participants';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Hermano> instance, {
+    Insertable<Participant> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -203,9 +204,9 @@ class $HermanosTable extends Hermanos with TableInfo<$HermanosTable, Hermano> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Hermano map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Hermano(
+    return Participant(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -214,13 +215,13 @@ class $HermanosTable extends Hermanos with TableInfo<$HermanosTable, Hermano> {
         DriftSqlType.string,
         data['${effectivePrefix}nombre'],
       )!,
-      sexo: $HermanosTable.$convertersexo.fromSql(
+      sexo: $ParticipantsTable.$convertersexo.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}sexo'],
         )!,
       ),
-      privilegio: $HermanosTable.$converterprivilegio.fromSql(
+      privilegio: $ParticipantsTable.$converterprivilegio.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}privilegio'],
@@ -254,21 +255,21 @@ class $HermanosTable extends Hermanos with TableInfo<$HermanosTable, Hermano> {
   }
 
   @override
-  $HermanosTable createAlias(String alias) {
-    return $HermanosTable(attachedDatabase, alias);
+  $ParticipantsTable createAlias(String alias) {
+    return $ParticipantsTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<Sexo, String, String> $convertersexo =
-      const EnumNameConverter<Sexo>(Sexo.values);
-  static JsonTypeConverter2<Privilegio, String, String> $converterprivilegio =
-      const EnumNameConverter<Privilegio>(Privilegio.values);
+  static JsonTypeConverter2<Gender, String, String> $convertersexo =
+      const EnumNameConverter<Gender>(Gender.values);
+  static JsonTypeConverter2<Role, String, String> $converterprivilegio =
+      const EnumNameConverter<Role>(Role.values);
 }
 
-class HermanosCompanion extends UpdateCompanion<Hermano> {
+class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String> id;
   final Value<String> nombre;
-  final Value<Sexo> sexo;
-  final Value<Privilegio> privilegio;
+  final Value<Gender> sexo;
+  final Value<Role> privilegio;
   final Value<String> congregacion;
   final Value<bool> activo;
   final Value<String> notas;
@@ -276,7 +277,7 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> ultimoUso;
   final Value<int> rowid;
-  const HermanosCompanion({
+  const ParticipantsCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.sexo = const Value.absent(),
@@ -289,11 +290,11 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
     this.ultimoUso = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  HermanosCompanion.insert({
+  ParticipantsCompanion.insert({
     required String id,
     required String nombre,
-    required Sexo sexo,
-    required Privilegio privilegio,
+    required Gender sexo,
+    required Role privilegio,
     this.congregacion = const Value.absent(),
     this.activo = const Value.absent(),
     this.notas = const Value.absent(),
@@ -307,7 +308,7 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
        privilegio = Value(privilegio),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
-  static Insertable<Hermano> custom({
+  static Insertable<Participant> custom({
     Expression<String>? id,
     Expression<String>? nombre,
     Expression<String>? sexo,
@@ -335,11 +336,11 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
     });
   }
 
-  HermanosCompanion copyWith({
+  ParticipantsCompanion copyWith({
     Value<String>? id,
     Value<String>? nombre,
-    Value<Sexo>? sexo,
-    Value<Privilegio>? privilegio,
+    Value<Gender>? sexo,
+    Value<Role>? privilegio,
     Value<String>? congregacion,
     Value<bool>? activo,
     Value<String>? notas,
@@ -348,7 +349,7 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
     Value<DateTime?>? ultimoUso,
     Value<int>? rowid,
   }) {
-    return HermanosCompanion(
+    return ParticipantsCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       sexo: sexo ?? this.sexo,
@@ -374,12 +375,12 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
     }
     if (sexo.present) {
       map['sexo'] = Variable<String>(
-        $HermanosTable.$convertersexo.toSql(sexo.value),
+        $ParticipantsTable.$convertersexo.toSql(sexo.value),
       );
     }
     if (privilegio.present) {
       map['privilegio'] = Variable<String>(
-        $HermanosTable.$converterprivilegio.toSql(privilegio.value),
+        $ParticipantsTable.$converterprivilegio.toSql(privilegio.value),
       );
     }
     if (congregacion.present) {
@@ -408,7 +409,7 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
 
   @override
   String toString() {
-    return (StringBuffer('HermanosCompanion(')
+    return (StringBuffer('ParticipantsCompanion(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('sexo: $sexo, ')
@@ -425,12 +426,12 @@ class HermanosCompanion extends UpdateCompanion<Hermano> {
   }
 }
 
-class _$HermanoInsertable implements Insertable<Hermano> {
-  Hermano _object;
-  _$HermanoInsertable(this._object);
+class _$ParticipantInsertable implements Insertable<Participant> {
+  Participant _object;
+  _$ParticipantInsertable(this._object);
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
-    return HermanosCompanion(
+    return ParticipantsCompanion(
       id: Value(_object.id),
       nombre: Value(_object.nombre),
       sexo: Value(_object.sexo),
@@ -445,33 +446,35 @@ class _$HermanoInsertable implements Insertable<Hermano> {
   }
 }
 
-extension HermanoToInsertable on Hermano {
-  _$HermanoInsertable toInsertable() {
-    return _$HermanoInsertable(this);
+extension ParticipantToInsertable on Participant {
+  _$ParticipantInsertable toInsertable() {
+    return _$ParticipantInsertable(this);
   }
 }
 
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $HermanosTable hermanos = $HermanosTable(this);
-  late final HermanosDao hermanosDao = HermanosDao(this as AppDatabase);
+  late final $ParticipantsTable participants = $ParticipantsTable(this);
+  late final ParticipantsDao participantsDao = ParticipantsDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [hermanos];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [participants];
   @override
   DriftDatabaseOptions get options =>
       const DriftDatabaseOptions(storeDateTimeAsText: true);
 }
 
-typedef $$HermanosTableCreateCompanionBuilder =
-    HermanosCompanion Function({
+typedef $$ParticipantsTableCreateCompanionBuilder =
+    ParticipantsCompanion Function({
       required String id,
       required String nombre,
-      required Sexo sexo,
-      required Privilegio privilegio,
+      required Gender sexo,
+      required Role privilegio,
       Value<String> congregacion,
       Value<bool> activo,
       Value<String> notas,
@@ -480,12 +483,12 @@ typedef $$HermanosTableCreateCompanionBuilder =
       Value<DateTime?> ultimoUso,
       Value<int> rowid,
     });
-typedef $$HermanosTableUpdateCompanionBuilder =
-    HermanosCompanion Function({
+typedef $$ParticipantsTableUpdateCompanionBuilder =
+    ParticipantsCompanion Function({
       Value<String> id,
       Value<String> nombre,
-      Value<Sexo> sexo,
-      Value<Privilegio> privilegio,
+      Value<Gender> sexo,
+      Value<Role> privilegio,
       Value<String> congregacion,
       Value<bool> activo,
       Value<String> notas,
@@ -495,9 +498,9 @@ typedef $$HermanosTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-class $$HermanosTableFilterComposer
-    extends Composer<_$AppDatabase, $HermanosTable> {
-  $$HermanosTableFilterComposer({
+class $$ParticipantsTableFilterComposer
+    extends Composer<_$AppDatabase, $ParticipantsTable> {
+  $$ParticipantsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -514,17 +517,17 @@ class $$HermanosTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<Sexo, Sexo, String> get sexo =>
+  ColumnWithTypeConverterFilters<Gender, Gender, String> get sexo =>
       $composableBuilder(
         column: $table.sexo,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnWithTypeConverterFilters<Privilegio, Privilegio, String>
-  get privilegio => $composableBuilder(
-    column: $table.privilegio,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Role, Role, String> get privilegio =>
+      $composableBuilder(
+        column: $table.privilegio,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get congregacion => $composableBuilder(
     column: $table.congregacion,
@@ -557,9 +560,9 @@ class $$HermanosTableFilterComposer
   );
 }
 
-class $$HermanosTableOrderingComposer
-    extends Composer<_$AppDatabase, $HermanosTable> {
-  $$HermanosTableOrderingComposer({
+class $$ParticipantsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ParticipantsTable> {
+  $$ParticipantsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -617,9 +620,9 @@ class $$HermanosTableOrderingComposer
   );
 }
 
-class $$HermanosTableAnnotationComposer
-    extends Composer<_$AppDatabase, $HermanosTable> {
-  $$HermanosTableAnnotationComposer({
+class $$ParticipantsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ParticipantsTable> {
+  $$ParticipantsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -632,10 +635,10 @@ class $$HermanosTableAnnotationComposer
   GeneratedColumn<String> get nombre =>
       $composableBuilder(column: $table.nombre, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Sexo, String> get sexo =>
+  GeneratedColumnWithTypeConverter<Gender, String> get sexo =>
       $composableBuilder(column: $table.sexo, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Privilegio, String> get privilegio =>
+  GeneratedColumnWithTypeConverter<Role, String> get privilegio =>
       $composableBuilder(
         column: $table.privilegio,
         builder: (column) => column,
@@ -662,38 +665,41 @@ class $$HermanosTableAnnotationComposer
       $composableBuilder(column: $table.ultimoUso, builder: (column) => column);
 }
 
-class $$HermanosTableTableManager
+class $$ParticipantsTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $HermanosTable,
-          Hermano,
-          $$HermanosTableFilterComposer,
-          $$HermanosTableOrderingComposer,
-          $$HermanosTableAnnotationComposer,
-          $$HermanosTableCreateCompanionBuilder,
-          $$HermanosTableUpdateCompanionBuilder,
-          (Hermano, BaseReferences<_$AppDatabase, $HermanosTable, Hermano>),
-          Hermano,
+          $ParticipantsTable,
+          Participant,
+          $$ParticipantsTableFilterComposer,
+          $$ParticipantsTableOrderingComposer,
+          $$ParticipantsTableAnnotationComposer,
+          $$ParticipantsTableCreateCompanionBuilder,
+          $$ParticipantsTableUpdateCompanionBuilder,
+          (
+            Participant,
+            BaseReferences<_$AppDatabase, $ParticipantsTable, Participant>,
+          ),
+          Participant,
           PrefetchHooks Function()
         > {
-  $$HermanosTableTableManager(_$AppDatabase db, $HermanosTable table)
+  $$ParticipantsTableTableManager(_$AppDatabase db, $ParticipantsTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$HermanosTableFilterComposer($db: db, $table: table),
+              $$ParticipantsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$HermanosTableOrderingComposer($db: db, $table: table),
+              $$ParticipantsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$HermanosTableAnnotationComposer($db: db, $table: table),
+              $$ParticipantsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
-                Value<Sexo> sexo = const Value.absent(),
-                Value<Privilegio> privilegio = const Value.absent(),
+                Value<Gender> sexo = const Value.absent(),
+                Value<Role> privilegio = const Value.absent(),
                 Value<String> congregacion = const Value.absent(),
                 Value<bool> activo = const Value.absent(),
                 Value<String> notas = const Value.absent(),
@@ -701,7 +707,7 @@ class $$HermanosTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> ultimoUso = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => HermanosCompanion(
+              }) => ParticipantsCompanion(
                 id: id,
                 nombre: nombre,
                 sexo: sexo,
@@ -718,8 +724,8 @@ class $$HermanosTableTableManager
               ({
                 required String id,
                 required String nombre,
-                required Sexo sexo,
-                required Privilegio privilegio,
+                required Gender sexo,
+                required Role privilegio,
                 Value<String> congregacion = const Value.absent(),
                 Value<bool> activo = const Value.absent(),
                 Value<String> notas = const Value.absent(),
@@ -727,7 +733,7 @@ class $$HermanosTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> ultimoUso = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => HermanosCompanion.insert(
+              }) => ParticipantsCompanion.insert(
                 id: id,
                 nombre: nombre,
                 sexo: sexo,
@@ -748,24 +754,27 @@ class $$HermanosTableTableManager
       );
 }
 
-typedef $$HermanosTableProcessedTableManager =
+typedef $$ParticipantsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $HermanosTable,
-      Hermano,
-      $$HermanosTableFilterComposer,
-      $$HermanosTableOrderingComposer,
-      $$HermanosTableAnnotationComposer,
-      $$HermanosTableCreateCompanionBuilder,
-      $$HermanosTableUpdateCompanionBuilder,
-      (Hermano, BaseReferences<_$AppDatabase, $HermanosTable, Hermano>),
-      Hermano,
+      $ParticipantsTable,
+      Participant,
+      $$ParticipantsTableFilterComposer,
+      $$ParticipantsTableOrderingComposer,
+      $$ParticipantsTableAnnotationComposer,
+      $$ParticipantsTableCreateCompanionBuilder,
+      $$ParticipantsTableUpdateCompanionBuilder,
+      (
+        Participant,
+        BaseReferences<_$AppDatabase, $ParticipantsTable, Participant>,
+      ),
+      Participant,
       PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$HermanosTableTableManager get hermanos =>
-      $$HermanosTableTableManager(_db, _db.hermanos);
+  $$ParticipantsTableTableManager get participants =>
+      $$ParticipantsTableTableManager(_db, _db.participants);
 }

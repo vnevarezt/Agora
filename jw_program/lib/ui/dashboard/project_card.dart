@@ -21,8 +21,8 @@ class ProjectCard extends StatelessWidget {
     required this.onEdit,
   });
 
-  final Proyecto proyecto;
-  final Congregacion? congregacion;
+  final Project proyecto;
+  final Congregation? congregacion;
   final VoidCallback onTap;
   final VoidCallback onEdit;
 

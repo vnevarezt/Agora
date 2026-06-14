@@ -7,7 +7,7 @@ import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
 
 /// Abre el modal para invitar a un usuario a la congregación (solo UI).
-Future<void> mostrarInvitarUsuario(BuildContext context) {
+Future<void> showInviteUser(BuildContext context) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
@@ -60,7 +60,7 @@ class _InvitarUsuarioModalState extends State<InvitarUsuarioModal> {
             label: 'Rol',
             child: AppDropdown<String>(
               value: _rol,
-              items: rolesAcceso,
+              items: accessRoles,
               itemLabel: (s) => s,
               onChanged: (v) => setState(() => _rol = v),
             ),

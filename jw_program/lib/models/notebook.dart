@@ -1,12 +1,12 @@
-/// Cuaderno (issue) de Vida y Ministerio: un periodo con sus semanas. Sirve al
+/// Notebook (issue) de Vida y Ministerio: un periodo con sus semanas. Sirve al
 /// modal de proyectos para ofrecer las semanas disponibles. Espejo de
 /// `cuadernos` del mock.
-class Cuaderno {
+class Notebook {
   final String id;
   final String label;
   final List<String> semanas;
 
-  const Cuaderno({
+  const Notebook({
     required this.id,
     required this.label,
     required this.semanas,

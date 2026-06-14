@@ -11,11 +11,11 @@ import '../widgets/avatar.dart';
 
 /// Ítems de navegación del shell (mismo orden en barra lateral y barra
 /// inferior).
-const _items = <({AppSeccion seccion, IconData icon, String label})>[
-  (seccion: AppSeccion.inicio, icon: Icons.home_outlined, label: 'Inicio'),
-  (seccion: AppSeccion.hermanos, icon: Icons.people_outline, label: 'Hermanos'),
+const _items = <({AppSection seccion, IconData icon, String label})>[
+  (seccion: AppSection.inicio, icon: Icons.home_outlined, label: 'Inicio'),
+  (seccion: AppSection.hermanos, icon: Icons.people_outline, label: 'Participants'),
   (
-    seccion: AppSeccion.config,
+    seccion: AppSection.config,
     icon: Icons.settings_outlined,
     label: 'Configuración'
   ),
@@ -23,8 +23,8 @@ const _items = <({AppSeccion seccion, IconData icon, String label})>[
 
 /// Nº de recordatorios urgentes; se muestra como badge en "Inicio".
 final _alertasProvider = Provider<int>((ref) => ref
-    .watch(recordatoriosProvider)
-    .where((r) => r.tipo == TipoRecordatorio.alerta)
+    .watch(remindersProvider)
+    .where((r) => r.tipo == ReminderType.alerta)
     .length);
 
 /// Barra lateral (`.sidebar`): marca, navegación y tarjeta de usuario.
@@ -37,8 +37,8 @@ class Sidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final seccion = ref.watch(appSeccionProvider);
-    final usuario = ref.watch(usuarioProvider);
+    final seccion = ref.watch(appSectionProvider);
+    final usuario = ref.watch(sessionUserProvider);
     final alertas = ref.watch(_alertasProvider);
 
     return Container(
@@ -60,7 +60,7 @@ class Sidebar extends ConsumerWidget {
               label: it.label,
               compact: compact,
               active: seccion == it.seccion,
-              badge: it.seccion == AppSeccion.inicio ? alertas : 0,
+              badge: it.seccion == AppSection.inicio ? alertas : 0,
             ),
             const SizedBox(height: 2),
           ],
@@ -137,7 +137,7 @@ class _NavItem extends ConsumerWidget {
     required this.badge,
   });
 
-  final AppSeccion seccion;
+  final AppSection seccion;
   final IconData icon;
   final String label;
   final bool compact;
@@ -148,7 +148,7 @@ class _NavItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     return Pressable(
-      onTap: () => ref.read(appSeccionProvider.notifier).seleccionar(seccion),
+      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(seccion),
       tooltip: compact ? label : null,
       builder: (context, hovered, _) {
         final fg = active ? t.accentStrong : (hovered ? t.text : t.textDim);
@@ -290,7 +290,7 @@ class BottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final seccion = ref.watch(appSeccionProvider);
+    final seccion = ref.watch(appSectionProvider);
     final alertas = ref.watch(_alertasProvider);
 
     return Container(
@@ -311,7 +311,7 @@ class BottomNav extends ConsumerWidget {
                     icon: it.icon,
                     label: it.label,
                     active: seccion == it.seccion,
-                    badge: it.seccion == AppSeccion.inicio ? alertas : 0,
+                    badge: it.seccion == AppSection.inicio ? alertas : 0,
                   ),
                 ),
             ],
@@ -331,7 +331,7 @@ class _BottomItem extends ConsumerWidget {
     required this.badge,
   });
 
-  final AppSeccion seccion;
+  final AppSection seccion;
   final IconData icon;
   final String label;
   final bool active;
@@ -343,7 +343,7 @@ class _BottomItem extends ConsumerWidget {
     final fg = active ? t.accentStrong : t.textMute;
 
     return Pressable(
-      onTap: () => ref.read(appSeccionProvider.notifier).seleccionar(seccion),
+      onTap: () => ref.read(appSectionProvider.notifier).seleccionar(seccion),
       builder: (context, hovered, _) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Column(

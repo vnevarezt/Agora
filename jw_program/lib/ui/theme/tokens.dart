@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Tokens de color del rediseño — espejo de las variables CSS del mock
 /// (`--bg`, `--surface`, `--accent`…), convertidas de oklch a sRGB exacto.
 ///
-/// Cada paleta define su versión clara y oscura; agregar una paleta nueva
+/// Cada paleta define su versión clara y oscura; add una paleta nueva
 /// (Granate, Salvia, Biblioteca) es declarar otra constante [AppPalette].
 class AppTokens extends ThemeExtension<AppTokens> {
   final Color bg;

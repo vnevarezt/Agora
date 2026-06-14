@@ -7,12 +7,12 @@ import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
 import 'settings_card.dart';
 
-const _idiomasApp = ['Español', 'English', 'Português'];
-const _formatosHora = ['24 horas (18:00)', '12 horas (6:00 p. m.)'];
-const _iniciosSemana = ['Lunes', 'Domingo'];
-const _nombresPdf = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre'];
+const _appLanguages = ['Español', 'English', 'Português'];
+const _timeFormats = ['24 horas (18:00)', '12 horas (6:00 p. m.)'];
+const _weekStarts = ['Lunes', 'Domingo'];
+const _pdfNameFormats = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre'];
 
-const _notificaciones = [
+const _notifications = [
   (
     titulo: 'Partes sin asignar',
     desc: 'Avisar cuando falten asignaciones a 3 días de la reunión',
@@ -45,11 +45,11 @@ class AplicacionTab extends ConsumerStatefulWidget {
 }
 
 class _AplicacionTabState extends ConsumerState<AplicacionTab> {
-  String _idioma = _idiomasApp.first;
-  String _formato = _formatosHora.first;
-  String _inicio = _iniciosSemana.first;
-  String _nombrePdf = _nombresPdf.first;
-  late final List<bool> _notif = [for (final n in _notificaciones) n.inicial];
+  String _idioma = _appLanguages.first;
+  String _formato = _timeFormats.first;
+  String _inicio = _weekStarts.first;
+  String _nombrePdf = _pdfNameFormats.first;
+  late final List<bool> _notif = [for (final n in _notifications) n.inicial];
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +102,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
               label: 'Idioma de la app',
               child: AppDropdown<String>(
                 value: _idioma,
-                items: _idiomasApp,
+                items: _appLanguages,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _idioma = v),
               ),
@@ -111,7 +111,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
               label: 'Formato de hora',
               child: AppDropdown<String>(
                 value: _formato,
-                items: _formatosHora,
+                items: _timeFormats,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _formato = v),
               ),
@@ -120,7 +120,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
               label: 'Inicio de semana',
               child: AppDropdown<String>(
                 value: _inicio,
-                items: _iniciosSemana,
+                items: _weekStarts,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _inicio = v),
               ),
@@ -129,7 +129,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
               label: 'Nombre en los PDF',
               child: AppDropdown<String>(
                 value: _nombrePdf,
-                items: _nombresPdf,
+                items: _pdfNameFormats,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _nombrePdf = v),
               ),
@@ -145,11 +145,11 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
       title: 'Notificaciones',
       desc: 'Recordatorios que genera la app.',
       children: [
-        for (var i = 0; i < _notificaciones.length; i++)
+        for (var i = 0; i < _notifications.length; i++)
           SettingRow(
             first: i == 0,
-            title: _notificaciones[i].titulo,
-            subtitle: _notificaciones[i].desc,
+            title: _notifications[i].titulo,
+            subtitle: _notifications[i].desc,
             trailing: Transform.scale(
               scale: 0.85,
               child: Switch(

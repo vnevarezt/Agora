@@ -11,7 +11,7 @@ import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
 
 /// Abre el modal de alta de congregación (solo UI en esta fase).
-Future<void> mostrarNuevaCongregacion(BuildContext context) {
+Future<void> showNewCongregation(BuildContext context) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
@@ -38,7 +38,7 @@ class _NuevaCongregacionModalState
     extends ConsumerState<NuevaCongregacionModal> {
   String _nombre = '';
   String _numero = '';
-  String _idioma = idiomasReunion.first;
+  String _idioma = meetingLanguages.first;
   String _diaEntre = 'Martes';
   String _horaEntre = '19:00';
   String _diaFin = 'Domingo';
@@ -47,7 +47,7 @@ class _NuevaCongregacionModalState
   /// Añade la congregación al estado en memoria y cierra. Los horarios/idioma
   /// aún no se persisten (sin backend); solo se guarda nombre y número.
   void _crear() {
-    ref.read(congregacionesDashProvider.notifier).agregar(
+    ref.read(congregationsProvider.notifier).add(
           nombre: _nombre.trim(),
           numero: _numero.trim(),
         );
@@ -110,7 +110,7 @@ class _NuevaCongregacionModalState
                 label: 'Idioma de la reunión',
                 child: AppDropdown<String>(
                   value: _idioma,
-                  items: idiomasReunion,
+                  items: meetingLanguages,
                   itemLabel: (s) => s,
                   onChanged: (v) => setState(() => _idioma = v),
                 ),
@@ -122,7 +122,7 @@ class _NuevaCongregacionModalState
                 label: 'Entre semana · día',
                 child: AppDropdown<String>(
                   value: _diaEntre,
-                  items: diasSemana,
+                  items: daysOfWeek,
                   itemLabel: (s) => s,
                   onChanged: (v) => setState(() => _diaEntre = v),
                 ),
@@ -145,7 +145,7 @@ class _NuevaCongregacionModalState
                 label: 'Fin de semana · día',
                 child: AppDropdown<String>(
                   value: _diaFin,
-                  items: diasSemana,
+                  items: daysOfWeek,
                   itemLabel: (s) => s,
                   onChanged: (v) => setState(() => _diaFin = v),
                 ),

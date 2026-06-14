@@ -29,7 +29,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     });
     // Re-render cuando cambian estructura, nombres o congregación/presidente/aux.
     ref.listen(scheduleProvider, (_, _) => _programar());
-    ref.listen(asignacionesProvider, (_, _) => _programar());
+    ref.listen(assignmentsProvider, (_, _) => _programar());
     ref.listen(
       formProvider.select((f) => (f.cong, f.presidente, f.aux)),
       (_, _) => _programar(),
@@ -45,7 +45,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
 
   Future<void> _render() async {
     final sched = ref.read(scheduleProvider);
-    final semana = ref.read(semanaActualProvider);
+    final semana = ref.read(currentWeekProvider);
     if (sched == null || semana == null) return;
     final seq = ++_seq;
     final f = ref.read(formProvider);
@@ -54,7 +54,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
         cong: f.cong,
         semana: semana,
         sched: sched,
-        asignaciones: ref.read(asignacionesProvider),
+        asignaciones: ref.read(assignmentsProvider),
         presidente: f.presidente,
         aux: f.aux,
       );
@@ -84,7 +84,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   /// Devuelve la ruta del archivo.
   Future<String> exportar() async {
     final sched = ref.read(scheduleProvider);
-    final semana = ref.read(semanaActualProvider);
+    final semana = ref.read(currentWeekProvider);
     if (sched == null || semana == null) {
       throw Exception('Descarga un cuaderno y elige una semana primero.');
     }
@@ -93,7 +93,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       cong: f.cong,
       semana: semana,
       sched: sched,
-      asignaciones: ref.read(asignacionesProvider),
+      asignaciones: ref.read(assignmentsProvider),
       presidente: f.presidente,
       aux: f.aux,
     );

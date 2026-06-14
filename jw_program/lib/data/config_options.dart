@@ -2,7 +2,7 @@
 // Los datos reales de congregaciones/usuarios/ajustes viven en estado (en
 // memoria por ahora); aquí solo quedan las listas de opciones de los dropdowns.
 
-const diasSemana = [
+const daysOfWeek = [
   'Lunes',
   'Martes',
   'Miércoles',
@@ -11,5 +11,5 @@ const diasSemana = [
   'Sábado',
   'Domingo',
 ];
-const idiomasReunion = ['Español', 'Lengua de señas', 'English'];
-const rolesAcceso = ['Administrador', 'Editor', 'Lector'];
+const meetingLanguages = ['Español', 'Lengua de señas', 'English'];
+const accessRoles = ['Administrador', 'Editor', 'Lector'];

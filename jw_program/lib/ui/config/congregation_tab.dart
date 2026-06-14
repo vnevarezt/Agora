@@ -29,7 +29,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
   String? _congId;
   String _nombre = '';
   String _numero = '';
-  String _idioma = idiomasReunion.first;
+  String _idioma = meetingLanguages.first;
   String _diaEntre = 'Martes';
   String _horaEntre = '19:00';
   String _diaFin = 'Domingo';
@@ -38,12 +38,12 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
 
   /// Selecciona una congregación y siembra los campos. Los horarios aún no se
   /// persisten (sin backend): se muestran con valores por defecto.
-  void _seleccionar(Congregacion cong, {bool notificar = true}) {
+  void _select(Congregation cong, {bool notificar = true}) {
     void aplicar() {
       _congId = cong.id;
       _nombre = cong.nombre;
       _numero = cong.numero;
-      _idioma = idiomasReunion.first;
+      _idioma = meetingLanguages.first;
       _diaEntre = 'Martes';
       _horaEntre = '19:00';
       _diaFin = 'Domingo';
@@ -60,13 +60,13 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
 
   @override
   Widget build(BuildContext context) {
-    final congs = ref.watch(congregacionesDashProvider);
+    final congs = ref.watch(congregationsProvider);
 
     // Mantener una selección válida (la lista cambia en memoria).
     if (congs.isEmpty) {
       _congId = null;
     } else if (_congId == null || !congs.any((c) => c.id == _congId)) {
-      _seleccionar(congs.first, notificar: false);
+      _select(congs.first, notificar: false);
     }
 
     return Column(
@@ -111,7 +111,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
     );
   }
 
-  Widget _selectorCongregaciones(List<Congregacion> congs) {
+  Widget _selectorCongregaciones(List<Congregation> congs) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -122,9 +122,9 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
             congregacion: c,
             acceso: '',
             active: _congId == c.id,
-            onTap: () => _seleccionar(c),
+            onTap: () => _select(c),
           ),
-        _AddChip(onTap: () => mostrarNuevaCongregacion(context)),
+        _AddChip(onTap: () => showNewCongregation(context)),
       ],
     );
   }
@@ -158,7 +158,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
               label: 'Idioma de la reunión',
               child: AppDropdown<String>(
                 value: _idioma,
-                items: idiomasReunion,
+                items: meetingLanguages,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _idioma = v),
               ),
@@ -182,7 +182,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
               label: 'Entre semana · día',
               child: AppDropdown<String>(
                 value: _diaEntre,
-                items: diasSemana,
+                items: daysOfWeek,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _diaEntre = v),
               ),
@@ -200,7 +200,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
               label: 'Fin de semana · día',
               child: AppDropdown<String>(
                 value: _diaFin,
-                items: diasSemana,
+                items: daysOfWeek,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _diaFin = v),
               ),
@@ -255,7 +255,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
             variant: AppButtonVariant.ghost,
             icon: Icons.person_add_alt,
             label: 'Invitar usuario',
-            onPressed: () => mostrarInvitarUsuario(context),
+            onPressed: () => showInviteUser(context),
           ),
         ),
       ],
@@ -272,7 +272,7 @@ class _CongChip extends StatelessWidget {
     required this.onTap,
   });
 
-  final Congregacion congregacion;
+  final Congregation congregacion;
   final String acceso;
   final bool active;
   final VoidCallback onTap;

@@ -9,7 +9,7 @@ import '../widgets/app_button.dart';
 class ReminderCard extends StatelessWidget {
   const ReminderCard({super.key, required this.recordatorio});
 
-  final Recordatorio recordatorio;
+  final Reminder recordatorio;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class ReminderCard extends StatelessWidget {
 
     final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
         switch (r.tipo) {
-      TipoRecordatorio.alerta => oscuro
+      ReminderType.alerta => oscuro
           ? (
               Icons.warning_amber_rounded,
               const Color(0xFF40231C),
@@ -32,9 +32,9 @@ class ReminderCard extends StatelessWidget {
               const Color(0xFFB5562F),
               null
             ),
-      TipoRecordatorio.tarea =>
+      ReminderType.tarea =>
         (Icons.schedule, t.accentSoft, t.accentStrong, null),
-      TipoRecordatorio.info =>
+      ReminderType.info =>
         (Icons.auto_awesome_outlined, t.surface2, t.textDim, t.border2),
     };
 

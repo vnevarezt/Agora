@@ -12,11 +12,11 @@ import '../models/reminder.dart';
 
 /// Usuario en sesión (saludo y tarjeta lateral). Sin identidad real todavía:
 /// neutro hasta que haya autenticación.
-final usuarioProvider = Provider<({String nombre, String rol})>(
+final sessionUserProvider = Provider<({String nombre, String rol})>(
     (ref) => (nombre: '', rol: ''));
 
 /// Paleta para el punto de color de cada congregación nueva (se cicla).
-const _coloresCong = <int>[
+const _congColors = <int>[
   0xFF7A2230,
   0xFF3E6651,
   0xFF3F6193,
@@ -26,15 +26,15 @@ const _coloresCong = <int>[
 
 /// Congregaciones en memoria. Vacío al inicio; el modal "Nueva congregación"
 /// las añade durante la sesión.
-class CongregacionesController extends Notifier<List<Congregacion>> {
+class CongregationsController extends Notifier<List<Congregation>> {
   @override
-  List<Congregacion> build() => const [];
+  List<Congregation> build() => const [];
 
-  void agregar({required String nombre, required String numero}) {
-    final color = _coloresCong[state.length % _coloresCong.length];
+  void add({required String nombre, required String numero}) {
+    final color = _congColors[state.length % _congColors.length];
     state = [
       ...state,
-      Congregacion(
+      Congregation(
         id: const Uuid().v4(),
         nombre: nombre,
         numero: numero,
@@ -44,22 +44,22 @@ class CongregacionesController extends Notifier<List<Congregacion>> {
   }
 }
 
-final congregacionesDashProvider =
-    NotifierProvider<CongregacionesController, List<Congregacion>>(
-        CongregacionesController.new);
+final congregationsProvider =
+    NotifierProvider<CongregationsController, List<Congregation>>(
+        CongregationsController.new);
 
 /// Catálogo de cuadernos disponibles. Vacío sin backend (se poblará con la
 /// descarga real del editor).
-final cuadernosProvider = Provider<List<Cuaderno>>((ref) => const []);
+final notebooksProvider = Provider<List<Notebook>>((ref) => const []);
 
 /// Recordatorios/alertas. Vacío sin backend (son alertas derivadas).
-final recordatoriosProvider = Provider<List<Recordatorio>>((ref) => const []);
+final remindersProvider = Provider<List<Reminder>>((ref) => const []);
 
 /// Lista de proyectos editable en memoria. El modal de proyectos crea, edita y
 /// elimina aquí; la persistencia llega en una fase posterior.
-class ProyectosController extends Notifier<List<Proyecto>> {
+class ProjectsController extends Notifier<List<Project>> {
   @override
-  List<Proyecto> build() => const [];
+  List<Project> build() => const [];
 
   /// 14 partes asignables por semana.
   static int _total(int semanas) => semanas * 14;
@@ -69,20 +69,20 @@ class ProyectosController extends Notifier<List<Proyecto>> {
     required String congregacionId,
     required List<String> semanas,
   }) {
-    final nuevo = Proyecto(
+    final nuevo = Project(
       id: const Uuid().v4(),
       nombre: nombre,
       congregacionId: congregacionId,
       semanas: semanas,
       done: 0,
       total: _total(semanas.length),
-      estado: EstadoProyecto.borrador,
+      estado: ProjectStatus.borrador,
       editado: 'ahora mismo',
     );
     state = [nuevo, ...state];
   }
 
-  void actualizar(
+  void update(
     String id, {
     required String nombre,
     required String congregacionId,
@@ -107,40 +107,40 @@ class ProyectosController extends Notifier<List<Proyecto>> {
       state = [for (final p in state) if (p.id != id) p];
 }
 
-final proyectosProvider =
-    NotifierProvider<ProyectosController, List<Proyecto>>(
-        ProyectosController.new);
+final projectsProvider =
+    NotifierProvider<ProjectsController, List<Project>>(
+        ProjectsController.new);
 
 /// Filtros activos: congregación (`'all'` = todas) y estado (`null` = todos).
-class DashFiltros {
+class DashboardFilters {
   /// `'all'` o el id de una congregación.
   final String congId;
 
   /// `null` = todo estado.
-  final EstadoProyecto? estado;
+  final ProjectStatus? estado;
 
-  const DashFiltros({this.congId = 'all', this.estado});
+  const DashboardFilters({this.congId = 'all', this.estado});
 }
 
-class DashFiltrosController extends Notifier<DashFiltros> {
+class DashboardFiltersController extends Notifier<DashboardFilters> {
   @override
-  DashFiltros build() => const DashFiltros();
+  DashboardFilters build() => const DashboardFilters();
 
-  void setCong(String congId) =>
-      state = DashFiltros(congId: congId, estado: state.estado);
+  void setCongregation(String congId) =>
+      state = DashboardFilters(congId: congId, estado: state.estado);
 
-  void setEstado(EstadoProyecto? estado) =>
-      state = DashFiltros(congId: state.congId, estado: estado);
+  void setStatus(ProjectStatus? estado) =>
+      state = DashboardFilters(congId: state.congId, estado: estado);
 }
 
-final dashFiltrosProvider =
-    NotifierProvider<DashFiltrosController, DashFiltros>(
-        DashFiltrosController.new);
+final dashboardFiltersProvider =
+    NotifierProvider<DashboardFiltersController, DashboardFilters>(
+        DashboardFiltersController.new);
 
 /// Proyectos visibles tras aplicar los filtros activos.
-final proyectosFiltradosProvider = Provider<List<Proyecto>>((ref) {
-  final proyectos = ref.watch(proyectosProvider);
-  final f = ref.watch(dashFiltrosProvider);
+final filteredProjectsProvider = Provider<List<Project>>((ref) {
+  final proyectos = ref.watch(projectsProvider);
+  final f = ref.watch(dashboardFiltersProvider);
   return proyectos
       .where((p) =>
           (f.congId == 'all' || p.congregacionId == f.congId) &&

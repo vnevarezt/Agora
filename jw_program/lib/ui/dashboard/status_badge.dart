@@ -9,7 +9,7 @@ import '../theme/tokens.dart';
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.estado});
 
-  final EstadoProyecto estado;
+  final ProjectStatus estado;
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +17,11 @@ class StatusBadge extends StatelessWidget {
     final oscuro = Theme.of(context).brightness == Brightness.dark;
 
     final (Color bg, Color fg, Color? borde) = switch (estado) {
-      EstadoProyecto.borrador => (t.accentSoft, t.accentStrong, null),
-      EstadoProyecto.completo => oscuro
+      ProjectStatus.borrador => (t.accentSoft, t.accentStrong, null),
+      ProjectStatus.completo => oscuro
           ? (const Color(0xFF1E3A2A), const Color(0xFFA9D8B8), null)
           : (const Color(0xFFDCF0E0), const Color(0xFF2E6A3E), null),
-      EstadoProyecto.exportado => (t.surface2, t.textMute, t.border2),
+      ProjectStatus.exportado => (t.surface2, t.textMute, t.border2),
     };
 
     return Container(

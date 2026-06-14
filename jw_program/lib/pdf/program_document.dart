@@ -14,7 +14,7 @@ Future<Uint8List> buildProgramPdf({
   required String cong,
   required Week semana,
   required ProgramSchedule sched,
-  Asignaciones asignaciones = Asignaciones.empty,
+  Assignments asignaciones = Assignments.empty,
   String presidente = '',
   bool aux = false,
 }) async {
@@ -192,7 +192,7 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt,
 }
 
 // ---- Tabla de filas (tabularx @{}X R P@{} o @{}X R A P@{} en aux) ----
-pw.Widget _tabla(List<ProgramRow> filas, Asignaciones asg, ColumnWidths cols,
+pw.Widget _tabla(List<ProgramRow> filas, Assignments asg, ColumnWidths cols,
     double Function(String) medir, bool aux) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -206,7 +206,7 @@ pw.Widget _tabla(List<ProgramRow> filas, Asignaciones asg, ColumnWidths cols,
 ({pw.Widget widget, bool apilado}) _celdaNombres(String rol,
     List<String> nombres, double ancho, double Function(String) medir,
     pw.TextStyle style) {
-  final joined = nombresUnidos(nombres);
+  final joined = joinedNames(nombres);
   final esEstAyud = rol == 'Estudiante/Ayudante:' && nombres.length == 2;
   if (esEstAyud && medir(joined) > ancho) {
     return (
@@ -228,7 +228,7 @@ pw.Widget _tabla(List<ProgramRow> filas, Asignaciones asg, ColumnWidths cols,
   );
 }
 
-pw.Widget _fila(ProgramRow r, Asignaciones asg, ColumnWidths cols,
+pw.Widget _fila(ProgramRow r, Assignments asg, ColumnWidths cols,
     double Function(String) medir, bool aux) {
   final horaStyle = pw.TextStyle(
       fontSize: S140.small,

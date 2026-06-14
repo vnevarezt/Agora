@@ -1,16 +1,16 @@
 /// Tipo de recordatorio: define el icono y los colores de la tarjeta.
-enum TipoRecordatorio { alerta, tarea, info }
+enum ReminderType { alerta, tarea, info }
 
-/// Recordatorio del dashboard. Puramente visual en esta fase: el [cta] no
+/// Reminder del dashboard. Puramente visual en esta fase: el [cta] no
 /// dispara ninguna acción todavía.
-class Recordatorio {
+class Reminder {
   final String id;
-  final TipoRecordatorio tipo;
+  final ReminderType tipo;
   final String titulo;
   final String meta;
   final String cta;
 
-  const Recordatorio({
+  const Reminder({
     required this.id,
     required this.tipo,
     required this.titulo,

@@ -44,15 +44,15 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final activos = ref.watch(hermanosActivosProvider);
+    final activos = ref.watch(activeParticipantsProvider);
 
-    final clave = normalizarNombre(_busqueda);
+    final clave = normalizeName(_busqueda);
     final filtrados = activos
-        .where((h) => normalizarNombre(h.nombre).contains(clave))
+        .where((h) => normalizeName(h.nombre).contains(clave))
         .toList();
     final recientes = _busqueda.isEmpty
-        ? ref.watch(recientesProvider).take(4).toList()
-        : const <Hermano>[];
+        ? ref.watch(recentParticipantsProvider).take(4).toList()
+        : const <Participant>[];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -113,10 +113,10 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   }
 
   /// Fila de un hermano: privilegio como etiqueta (solo anciano/siervo).
-  Widget _fila(Hermano h) {
+  Widget _fila(Participant h) {
     return _PersonRow(
       nombre: h.nombre,
-      tag: h.privilegio == Privilegio.publicador ? null : h.privilegio.etiqueta,
+      tag: h.privilegio == Role.publicador ? null : h.privilegio.etiqueta,
       selected: h.nombre == widget.actual,
       onTap: () => _devolver(PickNombre(h.nombre)),
     );

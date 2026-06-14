@@ -1,15 +1,15 @@
 import 'package:drift/drift.dart';
 
 import '../../models/participant.dart';
-import 'hermanos_dao.dart';
-import 'tablas.dart';
+import 'participants_dao.dart';
+import 'tables.dart';
 
 part 'app_database.g.dart';
 
 /// Base de datos local (SQLite cifrado con SQLite3MultipleCiphers en
-/// producción — ver `conexion.dart`). El ejecutor se INYECTA para que los
+/// producción — ver `connection.dart`). El ejecutor se INYECTA para que los
 /// tests usen `NativeDatabase.memory()` sin llavero ni cifrado.
-@DriftDatabase(tables: [Hermanos], daos: [HermanosDao])
+@DriftDatabase(tables: [Participants], daos: [ParticipantsDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 

@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/db/app_database.dart';
-import '../data/db/conexion.dart';
+import '../data/db/connection.dart';
 import '../data/db/db_key_manager.dart';
-import '../data/db/hermanos_dao.dart';
+import '../data/db/participants_dao.dart';
 
 final dbKeyManagerProvider = Provider<DbKeyManager>((ref) => DbKeyManager());
 
@@ -15,5 +15,5 @@ final dbProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-final hermanosDaoProvider =
-    Provider<HermanosDao>((ref) => ref.watch(dbProvider).hermanosDao);
+final participantsDaoProvider =
+    Provider<ParticipantsDao>((ref) => ref.watch(dbProvider).participantsDao);

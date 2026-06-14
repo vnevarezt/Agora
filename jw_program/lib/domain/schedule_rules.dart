@@ -17,16 +17,16 @@ String hhmm(int minutos) {
 }
 
 /// Etiqueta de rol + nº de nombres para una parte.
-({String rol, int n}) rolYNombres(Seccion seccion, String titulo) {
+({String rol, int n}) roleAndNames(Section seccion, String titulo) {
   final t = titulo.toLowerCase();
   switch (seccion) {
-    case Seccion.tesoros:
+    case Section.tesoros:
       if (t.contains('lectura de la biblia')) return (rol: 'Estudiante:', n: 1);
       return (rol: '', n: 1); // discurso / perlas
-    case Seccion.seamos:
+    case Section.seamos:
       if (t.contains('discurso')) return (rol: 'Estudiante:', n: 1);
       return (rol: 'Estudiante/Ayudante:', n: 2); // demostración
-    case Seccion.vida:
+    case Section.vida:
       if (t.contains('estudio bíblico de la congregaci')) {
         return (rol: 'Conductor/Lector:', n: 2);
       }
@@ -36,20 +36,20 @@ String hhmm(int minutos) {
 
 /// Partes con asignación paralela en sala auxiliar (S-38 §26): Lectura de la
 /// Biblia + todas las partes de "Seamos mejores maestros".
-bool esAuxElegible(Seccion seccion, String titulo) {
-  if (seccion == Seccion.tesoros &&
+bool isAuxEligible(Section seccion, String titulo) {
+  if (seccion == Section.tesoros &&
       titulo.toLowerCase().contains('lectura de la biblia')) {
     return true;
   }
-  if (seccion == Seccion.seamos) return true;
+  if (seccion == Section.seamos) return true;
   return false;
 }
 
-ProgramRow _fila(String id, Seccion seccion, int t, Part p) {
-  final rn = rolYNombres(seccion, p.titulo);
+ProgramRow _fila(String id, Section seccion, int t, Part p) {
+  final rn = roleAndNames(seccion, p.titulo);
   final mins = p.min ?? 0;
   final cont = mins > 0 ? '${p.titulo} ($mins mins.)' : p.titulo;
-  final elegible = esAuxElegible(seccion, p.titulo);
+  final elegible = isAuxEligible(seccion, p.titulo);
   return ProgramRow(
     id: id,
     hora: hhmm(t),
@@ -63,11 +63,11 @@ ProgramRow _fila(String id, Seccion seccion, int t, Part p) {
 
 /// Construye el horario respetando duración total, los 15 min de Seamos y el
 /// minuto de consejo tras cada asignación de estudiante.
-ProgramSchedule construirFilas(Week semana, int inicioMin, int duracion) {
+ProgramSchedule buildSchedule(Week semana, int inicioMin, int duracion) {
   final P = semana.partes;
-  final tesoros = P.where((p) => p.seccion == Seccion.tesoros).toList();
-  final seamos = P.where((p) => p.seccion == Seccion.seamos).toList();
-  final vida = P.where((p) => p.seccion == Seccion.vida).toList();
+  final tesoros = P.where((p) => p.seccion == Section.tesoros).toList();
+  final seamos = P.where((p) => p.seccion == Section.seamos).toList();
+  final vida = P.where((p) => p.seccion == Section.vida).toList();
   Part? cbs;
   for (final p in vida) {
     if (p.titulo.toLowerCase().contains('estudio bíblico de la congrega')) {
@@ -117,7 +117,7 @@ ProgramSchedule construirFilas(Week semana, int inicioMin, int duracion) {
 
   // --- Tesoros de la Biblia (consejo tras la Lectura) ---
   for (final p in tesoros) {
-    outTesoros.add(_fila('te${outTesoros.length}', Seccion.tesoros, t, p));
+    outTesoros.add(_fila('te${outTesoros.length}', Section.tesoros, t, p));
     t += (p.min ?? 0);
     if (p.titulo.toLowerCase().contains('lectura de la biblia')) {
       t += consejoMin;
@@ -127,7 +127,7 @@ ProgramSchedule construirFilas(Week semana, int inicioMin, int duracion) {
   // --- Seamos mejores maestros: bloque de 15 min, +1 de consejo por parte ---
   final seamosIni = t;
   for (final p in seamos) {
-    outSeamos.add(_fila('se${outSeamos.length}', Seccion.seamos, t, p));
+    outSeamos.add(_fila('se${outSeamos.length}', Section.seamos, t, p));
     t += (p.min ?? 0) + consejoMin;
   }
   t = seamosIni + seamosMin; // fija la sección a 15 min
@@ -144,11 +144,11 @@ ProgramSchedule construirFilas(Week semana, int inicioMin, int duracion) {
     t += sMid;
   }
   for (final p in nvPre) {
-    outVida.add(_fila('vi${outVida.length}', Seccion.vida, t, p));
+    outVida.add(_fila('vi${outVida.length}', Section.vida, t, p));
     t += (p.min ?? 0);
   }
   if (cbs != null) {
-    outVida.add(_fila('vi${outVida.length}', Seccion.vida, t, cbs));
+    outVida.add(_fila('vi${outVida.length}', Section.vida, t, cbs));
     t += cbsMin;
   }
 

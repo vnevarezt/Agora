@@ -24,38 +24,38 @@ Week _semana() => Week(
       cancionFinal: '151',
       partes: const [
         Part(
-            seccion: Seccion.tesoros,
+            seccion: Section.tesoros,
             num: 1,
             titulo: 'Disfrute al máximo de la bendición de Jehová',
             min: 10),
         Part(
-            seccion: Seccion.tesoros,
+            seccion: Section.tesoros,
             num: 2,
             titulo: 'Busquemos perlas escondidas',
             min: 10),
         Part(
-            seccion: Seccion.tesoros,
+            seccion: Section.tesoros,
             num: 3,
             titulo: 'Lectura de la Biblia',
             min: 4),
         Part(
-            seccion: Seccion.seamos,
+            seccion: Section.seamos,
             num: 4,
             titulo: 'Empiece conversaciones',
             min: 3),
         Part(
-            seccion: Seccion.seamos,
+            seccion: Section.seamos,
             num: 5,
             titulo: 'Empiece conversaciones',
             min: 4),
-        Part(seccion: Seccion.seamos, num: 6, titulo: 'Discurso', min: 5),
+        Part(seccion: Section.seamos, num: 6, titulo: 'Discurso', min: 5),
         Part(
-            seccion: Seccion.vida,
+            seccion: Section.vida,
             num: 7,
             titulo: 'Sean siempre hospitalarios',
             min: 15),
         Part(
-            seccion: Seccion.vida,
+            seccion: Section.vida,
             num: 8,
             titulo: 'Estudio bíblico de la congregación',
             min: 30),
@@ -65,7 +65,7 @@ Week _semana() => Week(
 Future<void> _dump(String nombreArchivo, List<String> nombres,
     {bool aux = false}) async {
   final s = _semana();
-  final sched = construirFilas(s, 18 * 60, 105);
+  final sched = buildSchedule(s, 18 * 60, 105);
   final principal = <String, List<String>>{};
   final auxiliar = <String, List<String>>{};
   var k = 0;
@@ -87,7 +87,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
     cong: 'CONSTITUCIÓN J.A CASTRO',
     semana: s,
     sched: sched,
-    asignaciones: Asignaciones(principal, auxiliar),
+    asignaciones: Assignments(principal, auxiliar),
     presidente: 'Rafael G',
     aux: aux,
   );

@@ -1,37 +1,37 @@
 /// Estado de un proyecto en el tablero (espejo de `status` del mock).
-enum EstadoProyecto { borrador, completo, exportado }
+enum ProjectStatus { borrador, completo, exportado }
 
-extension EstadoProyectoX on EstadoProyecto {
+extension ProjectStatusX on ProjectStatus {
   /// Etiqueta singular para la insignia ("Borrador").
   String get etiqueta => switch (this) {
-        EstadoProyecto.borrador => 'Borrador',
-        EstadoProyecto.completo => 'Completo',
-        EstadoProyecto.exportado => 'Exportado',
+        ProjectStatus.borrador => 'Borrador',
+        ProjectStatus.completo => 'Completo',
+        ProjectStatus.exportado => 'Exportado',
       };
 
   /// Etiqueta plural para los chips de filtro ("Borradores").
   String get plural => switch (this) {
-        EstadoProyecto.borrador => 'Borradores',
-        EstadoProyecto.completo => 'Completos',
-        EstadoProyecto.exportado => 'Exportados',
+        ProjectStatus.borrador => 'Borradores',
+        ProjectStatus.completo => 'Completos',
+        ProjectStatus.exportado => 'Exportados',
       };
 }
 
-/// Proyecto del dashboard: el programa de un mes/periodo de una congregación.
+/// Project del dashboard: el programa de un mes/periodo de una congregación.
 /// Solo presentación por ahora (sin persistencia ni lógica de asignación).
-class Proyecto {
+class Project {
   final String id;
   final String nombre;
   final String congregacionId;
   final List<String> semanas;
   final int done;
   final int total;
-  final EstadoProyecto estado;
+  final ProjectStatus estado;
 
   /// Texto relativo de última edición ("hace 2 horas"); placeholder de UI.
   final String editado;
 
-  const Proyecto({
+  const Project({
     required this.id,
     required this.nombre,
     required this.congregacionId,
@@ -45,16 +45,16 @@ class Proyecto {
   /// Fracción de avance 0..1 para la barra de progreso.
   double get progreso => total == 0 ? 0 : done / total;
 
-  Proyecto copyWith({
+  Project copyWith({
     String? nombre,
     String? congregacionId,
     List<String>? semanas,
     int? done,
     int? total,
-    EstadoProyecto? estado,
+    ProjectStatus? estado,
     String? editado,
   }) {
-    return Proyecto(
+    return Project(
       id: id,
       nombre: nombre ?? this.nombre,
       congregacionId: congregacionId ?? this.congregacionId,

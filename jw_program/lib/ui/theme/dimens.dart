@@ -35,8 +35,8 @@ abstract final class Dimens {
 
 /// Colores identitarios de cada sección del programa (bandas del S-140).
 /// `apertura` no lleva color en el mock.
-const Map<Seccion, Color> kSectionColors = {
-  Seccion.tesoros: Color(0xFF5C5C5C),
-  Seccion.seamos: Color(0xFFB9890F),
-  Seccion.vida: Color(0xFF8C1B2E),
+const Map<Section, Color> kSectionColors = {
+  Section.tesoros: Color(0xFF5C5C5C),
+  Section.seamos: Color(0xFFB9890F),
+  Section.vida: Color(0xFF8C1B2E),
 };

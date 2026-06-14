@@ -9,7 +9,7 @@ import '../theme/tokens.dart';
 class PrivBadge extends StatelessWidget {
   const PrivBadge({super.key, required this.privilegio});
 
-  final Privilegio privilegio;
+  final Role privilegio;
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +17,11 @@ class PrivBadge extends StatelessWidget {
     final oscuro = Theme.of(context).brightness == Brightness.dark;
 
     final (Color bg, Color fg, Color? borde) = switch (privilegio) {
-      Privilegio.anciano => (t.accentSoft, t.accentStrong, null),
-      Privilegio.siervoMinisterial => oscuro
+      Role.anciano => (t.accentSoft, t.accentStrong, null),
+      Role.siervoMinisterial => oscuro
           ? (const Color(0xFF3A3115), const Color(0xFFD9C27A), null)
           : (const Color(0xFFF3ECD2), const Color(0xFF7A6512), null),
-      Privilegio.publicador => (t.surface2, t.textDim, t.border2),
+      Role.publicador => (t.surface2, t.textDim, t.border2),
     };
 
     return Container(

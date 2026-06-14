@@ -28,7 +28,7 @@ double anchoNombres(
     final b = medir(nombres[1]);
     return a > b ? a : b;
   }
-  return medir(nombresUnidos(nombres));
+  return medir(joinedNames(nombres));
 }
 
 /// Calcula los anchos de forma adaptativa: si los nombres traen mucho texto,
@@ -36,7 +36,7 @@ double anchoNombres(
 /// En modo aux reparte entre dos columnas de nombres. Mide con Carlito.
 ColumnWidths calcularColumnas(
   ProgramSchedule sched,
-  Asignaciones asg,
+  Assignments asg,
   PdfFont regular,
   bool aux,
 ) {

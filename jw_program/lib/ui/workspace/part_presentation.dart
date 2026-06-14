@@ -92,7 +92,7 @@ PartView presidenteView() {
     slots: [
       SlotSpec(
         label: 'Presidente',
-        ref: PresidenteSlot(),
+        ref: ChairmanSlot(),
         maxLength: Limites.nombre,
       ),
     ],

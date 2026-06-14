@@ -42,7 +42,7 @@ class FormModel {
     semanaIdx: 0,
   );
 
-  // Asignaciones de la semana activa (contrato estable para el resto de la app).
+  // Assignments de la semana activa (contrato estable para el resto de la app).
   String get presidente => presidentePorSemana[semanaIdx] ?? '';
   Map<String, List<String>> get principal =>
       principalPorSemana[semanaIdx] ?? const {};
@@ -102,26 +102,26 @@ class FormController extends Notifier<FormModel> {
   FormModel build() => FormModel.inicial;
 
   void setIssue(String v) => state = state.copyWith(issue: v);
-  void setCong(String v) => state = state.copyWith(cong: v);
-  void setInicio(String v) => state = state.copyWith(inicio: v);
-  void setDuracion(int v) => state = state.copyWith(duracion: v);
-  void setPresidente(String v) => state = state.copyWith(presidente: v);
-  void setAux(bool v) => state = state.copyWith(aux: v);
+  void setCongregation(String v) => state = state.copyWith(cong: v);
+  void setStartTime(String v) => state = state.copyWith(inicio: v);
+  void setDuration(int v) => state = state.copyWith(duracion: v);
+  void setChairman(String v) => state = state.copyWith(presidente: v);
+  void setAuxRoom(bool v) => state = state.copyWith(aux: v);
 
   /// Cambia de semana conservando las asignaciones de cada una.
-  void seleccionarSemana(int idx) => state = state.copyWith(semanaIdx: idx);
+  void selectWeek(int idx) => state = state.copyWith(semanaIdx: idx);
 
-  void setNombresPrincipal(String rowId, List<String> nombres) {
+  void setMainNames(String rowId, List<String> nombres) {
     state = state.copyWith(principal: {...state.principal, rowId: nombres});
   }
 
-  void setNombresAux(String rowId, List<String> nombres) {
+  void setAuxNames(String rowId, List<String> nombres) {
     state = state.copyWith(auxiliar: {...state.auxiliar, rowId: nombres});
   }
 }
 
 /// Semana seleccionada (o null si aún no se ha descargado el cuaderno).
-final semanaActualProvider = Provider<Week?>((ref) {
+final currentWeekProvider = Provider<Week?>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return null;
   final idx = ref.watch(formProvider.select((f) => f.semanaIdx));
@@ -136,12 +136,12 @@ final scheduleProvider = Provider<ProgramSchedule?>((ref) {
   final sel =
       ref.watch(formProvider.select((f) => (f.semanaIdx, f.inicioMin, f.duracion)));
   final week = weeks[sel.$1.clamp(0, weeks.length - 1)];
-  return construirFilas(week, sel.$2, sel.$3);
+  return buildSchedule(week, sel.$2, sel.$3);
 });
 
 /// Nombres como los consume el PDF (derivados del formulario).
-final asignacionesProvider = Provider<Asignaciones>((ref) {
+final assignmentsProvider = Provider<Assignments>((ref) {
   final maps =
       ref.watch(formProvider.select((f) => (f.principal, f.auxiliar)));
-  return Asignaciones(maps.$1, maps.$2);
+  return Assignments(maps.$1, maps.$2);
 });

@@ -9,7 +9,7 @@ import '../responsive.dart';
 import 'sidebar_nav.dart';
 
 /// Shell raíz de la app: navegación lateral + área de contenido que conmuta
-/// entre Inicio (dashboard), Hermanos y Configuración. En móvil la barra
+/// entre Inicio (dashboard), Participants y Configuración. En móvil la barra
 /// lateral se reemplaza por una barra inferior.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
@@ -17,12 +17,12 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = context.screenSize;
-    final seccion = ref.watch(appSeccionProvider);
+    final seccion = ref.watch(appSectionProvider);
 
     final body = switch (seccion) {
-      AppSeccion.inicio => const DashboardView(),
-      AppSeccion.hermanos => const HermanosView(),
-      AppSeccion.config => const ConfiguracionView(),
+      AppSection.inicio => const DashboardView(),
+      AppSection.hermanos => const HermanosView(),
+      AppSection.config => const ConfiguracionView(),
     };
 
     if (size == ScreenSize.mobile) {

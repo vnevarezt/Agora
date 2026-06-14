@@ -1,41 +1,41 @@
 // Directorio local de hermanos de la congregación. Modelo puro (sin drift);
-// la tabla está en `data/db/tablas.dart` y mapea a esta clase.
+// la tabla está en `data/db/tables.dart` y mapea a esta clase.
 //
 // IMPORTANTE: las asignaciones del programa siguen siendo strings planos en
 // el formulario (FormModel.principal) — este directorio NO es una FK.
 
-enum Sexo { hombre, mujer, noEspecificado }
+enum Gender { hombre, mujer, noEspecificado }
 
-extension SexoX on Sexo {
+extension GenderX on Gender {
   String get etiqueta => switch (this) {
-        Sexo.hombre => 'Hombre',
-        Sexo.mujer => 'Mujer',
-        Sexo.noEspecificado => 'No especificado',
+        Gender.hombre => 'Hombre',
+        Gender.mujer => 'Mujer',
+        Gender.noEspecificado => 'No especificado',
       };
 }
 
-enum Privilegio { anciano, siervoMinisterial, publicador }
+enum Role { anciano, siervoMinisterial, publicador }
 
-extension PrivilegioX on Privilegio {
+extension RoleX on Role {
   String get etiqueta => switch (this) {
-        Privilegio.anciano => 'Anciano',
-        Privilegio.siervoMinisterial => 'Siervo ministerial',
-        Privilegio.publicador => 'Publicador',
+        Role.anciano => 'Anciano',
+        Role.siervoMinisterial => 'Siervo ministerial',
+        Role.publicador => 'Publicador',
       };
 
   /// Plural para los chips de filtro de la pantalla de hermanos.
   String get plural => switch (this) {
-        Privilegio.anciano => 'Ancianos',
-        Privilegio.siervoMinisterial => 'Siervos ministeriales',
-        Privilegio.publicador => 'Publicadores',
+        Role.anciano => 'Ancianos',
+        Role.siervoMinisterial => 'Siervos ministeriales',
+        Role.publicador => 'Publicadores',
       };
 }
 
-class Hermano {
+class Participant {
   final String id; // uuid v4, estable: clave de la fusión de imports
   final String nombre;
-  final Sexo sexo;
-  final Privilegio privilegio;
+  final Gender sexo;
+  final Role privilegio;
   final String congregacion;
   final bool activo; // false = oculto del picker sin borrar
   final String notas;
@@ -48,7 +48,7 @@ class Hermano {
   /// Última vez asignado desde el picker (recientes persistentes).
   final DateTime? ultimoUso;
 
-  const Hermano({
+  const Participant({
     required this.id,
     required this.nombre,
     required this.sexo,
@@ -62,19 +62,19 @@ class Hermano {
   });
 
   /// Alta mínima desde el picker: queda marcado como incompleto.
-  bool get incompleto => sexo == Sexo.noEspecificado;
+  bool get incompleto => sexo == Gender.noEspecificado;
 
-  Hermano copyWith({
+  Participant copyWith({
     String? nombre,
-    Sexo? sexo,
-    Privilegio? privilegio,
+    Gender? sexo,
+    Role? privilegio,
     String? congregacion,
     bool? activo,
     String? notas,
     DateTime? updatedAt,
     DateTime? ultimoUso,
   }) {
-    return Hermano(
+    return Participant(
       id: id,
       nombre: nombre ?? this.nombre,
       sexo: sexo ?? this.sexo,
@@ -90,22 +90,22 @@ class Hermano {
 
   @override
   bool operator ==(Object other) =>
-      other is Hermano && other.id == id && other.updatedAt == updatedAt;
+      other is Participant && other.id == id && other.updatedAt == updatedAt;
 
   @override
   int get hashCode => Object.hash(id, updatedAt);
 }
 
-const _diacriticos = 'áàäâéèëêíìïîóòöôúùüûñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑ';
-const _planos = 'aaaaeeeeiiiioooouuuunAAAAEEEEIIIIOOOOUUUUN';
+const _diacritics = 'áàäâéèëêíìïîóòöôúùüûñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑ';
+const _plain = 'aaaaeeeeiiiioooouuuunAAAAEEEEIIIIOOOOUUUUN';
 
 /// Normaliza para búsqueda y detección de duplicados en español:
 /// trim, espacios colapsados, minúsculas y sin acentos (ñ→n).
-String normalizarNombre(String s) {
+String normalizeName(String s) {
   final sb = StringBuffer();
   for (final ch in s.trim().replaceAll(RegExp(r'\s+'), ' ').split('')) {
-    final i = _diacriticos.indexOf(ch);
-    sb.write(i >= 0 ? _planos[i] : ch);
+    final i = _diacritics.indexOf(ch);
+    sb.write(i >= 0 ? _plain[i] : ch);
   }
   return sb.toString().toLowerCase();
 }

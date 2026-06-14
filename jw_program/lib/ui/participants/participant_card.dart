@@ -13,13 +13,13 @@ import 'priv_badge.dart';
 class PersonaCard extends StatelessWidget {
   const PersonaCard({super.key, required this.hermano, required this.onTap});
 
-  final Hermano hermano;
+  final Participant hermano;
   final VoidCallback onTap;
 
   String get _sexoLabel => switch (hermano.sexo) {
-        Sexo.hombre => 'Hermano',
-        Sexo.mujer => 'Hermana',
-        Sexo.noEspecificado => 'Sin definir',
+        Gender.hombre => 'Participant',
+        Gender.mujer => 'Hermana',
+        Gender.noEspecificado => 'Sin definir',
       };
 
   @override

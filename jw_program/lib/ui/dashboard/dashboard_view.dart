@@ -30,7 +30,7 @@ class DashboardView extends ConsumerWidget {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
-          child: const _Topbar(),
+          child: const _TopBar(),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -38,7 +38,7 @@ class DashboardView extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _Filtros(),
+                const _Filters(),
                 const SizedBox(height: 18),
                 _HomeGrid(stacked: size != ScreenSize.desktop),
               ],
@@ -51,24 +51,24 @@ class DashboardView extends ConsumerWidget {
 }
 
 /// Saludo según la hora del día.
-String _saludo() {
+String _greeting() {
   final h = DateTime.now().hour;
   if (h < 12) return 'Buenos días';
   if (h < 19) return 'Buenas tardes';
   return 'Buenas noches';
 }
 
-class _Topbar extends ConsumerWidget {
-  const _Topbar();
+class _TopBar extends ConsumerWidget {
+  const _TopBar();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final isMobile = context.isMobile;
-    final usuario = ref.watch(usuarioProvider);
+    final usuario = ref.watch(sessionUserProvider);
     final saludo = usuario.nombre.isEmpty
-        ? _saludo()
-        : '${_saludo()}, ${usuario.nombre}';
+        ? _greeting()
+        : '${_greeting()}, ${usuario.nombre}';
 
     return Row(
       children: [
@@ -110,23 +110,23 @@ class _Topbar extends ConsumerWidget {
         AppButton(
           icon: Icons.add,
           label: isMobile ? null : 'Nuevo proyecto',
-          onPressed: () => mostrarProyectoModal(context),
+          onPressed: () => showProjectModal(context),
         ),
       ],
     );
   }
 }
 
-class _Filtros extends ConsumerWidget {
-  const _Filtros();
+class _Filters extends ConsumerWidget {
+  const _Filters();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final congs = ref.watch(congregacionesDashProvider);
-    final proyectos = ref.watch(proyectosProvider);
-    final filtros = ref.watch(dashFiltrosProvider);
-    final notifier = ref.read(dashFiltrosProvider.notifier);
+    final congs = ref.watch(congregationsProvider);
+    final proyectos = ref.watch(projectsProvider);
+    final filtros = ref.watch(dashboardFiltersProvider);
+    final notifier = ref.read(dashboardFiltersProvider.notifier);
 
     return Wrap(
       spacing: 8,
@@ -137,7 +137,7 @@ class _Filtros extends ConsumerWidget {
           label: 'Todas',
           count: proyectos.length,
           active: filtros.congId == 'all',
-          onTap: () => notifier.setCong('all'),
+          onTap: () => notifier.setCongregation('all'),
         ),
         for (final c in congs)
           FilterPill(
@@ -145,19 +145,19 @@ class _Filtros extends ConsumerWidget {
             dotColor: Color(c.color),
             count: proyectos.where((p) => p.congregacionId == c.id).length,
             active: filtros.congId == c.id,
-            onTap: () => notifier.setCong(c.id),
+            onTap: () => notifier.setCongregation(c.id),
           ),
         Container(width: 1, height: 22, color: t.border),
         FilterPill(
           label: 'Todo estado',
           active: filtros.estado == null,
-          onTap: () => notifier.setEstado(null),
+          onTap: () => notifier.setStatus(null),
         ),
-        for (final e in EstadoProyecto.values)
+        for (final e in ProjectStatus.values)
           FilterPill(
             label: e.plural,
             active: filtros.estado == e,
-            onTap: () => notifier.setEstado(e),
+            onTap: () => notifier.setStatus(e),
           ),
       ],
     );
@@ -171,8 +171,8 @@ class _HomeGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const proyectos = _ProyectosSection();
-    const recordatorios = _RecordatoriosSection();
+    const proyectos = _ProjectsSection();
+    const recordatorios = _RemindersSection();
 
     if (stacked) {
       return Column(
@@ -196,13 +196,13 @@ class _HomeGrid extends ConsumerWidget {
   }
 }
 
-class _ProyectosSection extends ConsumerWidget {
-  const _ProyectosSection();
+class _ProjectsSection extends ConsumerWidget {
+  const _ProjectsSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final congs = ref.watch(congregacionesDashProvider);
-    final proyectos = ref.watch(proyectosFiltradosProvider);
+    final congs = ref.watch(congregationsProvider);
+    final proyectos = ref.watch(filteredProjectsProvider);
     final porId = {for (final c in congs) c.id: c};
 
     return Column(
@@ -221,7 +221,7 @@ class _ProyectosSection extends ConsumerWidget {
                 SizedBox(
                   width: colW,
                   child: NewProjectCard(
-                    onTap: () => mostrarProyectoModal(context),
+                    onTap: () => showProjectModal(context),
                   ),
                 ),
                 for (final p in proyectos)
@@ -234,7 +234,7 @@ class _ProyectosSection extends ConsumerWidget {
                         MaterialPageRoute<void>(
                             builder: (_) => ProgramShell(proyecto: p)),
                       ),
-                      onEdit: () => mostrarProyectoModal(context, proyecto: p),
+                      onEdit: () => showProjectModal(context, proyecto: p),
                     ),
                   ),
               ],
@@ -246,12 +246,12 @@ class _ProyectosSection extends ConsumerWidget {
   }
 }
 
-class _RecordatoriosSection extends ConsumerWidget {
-  const _RecordatoriosSection();
+class _RemindersSection extends ConsumerWidget {
+  const _RemindersSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recordatorios = ref.watch(recordatoriosProvider);
+    final recordatorios = ref.watch(remindersProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

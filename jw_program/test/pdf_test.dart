@@ -16,27 +16,27 @@ void main() {
       lectura: 'ISAÍAS 62-64',
       cancionInicial: '44',
       partes: const [
-        Part(seccion: Seccion.tesoros, num: 1, titulo: 'El Alfarero', min: 10),
+        Part(seccion: Section.tesoros, num: 1, titulo: 'El Alfarero', min: 10),
         Part(
-            seccion: Seccion.tesoros,
+            seccion: Section.tesoros,
             num: 3,
             titulo: 'Lectura de la Biblia',
             min: 4),
         Part(
-            seccion: Seccion.seamos,
+            seccion: Section.seamos,
             num: 4,
             titulo: 'Empiece conversaciones',
             min: 3),
         Part(
-            seccion: Seccion.vida,
+            seccion: Section.vida,
             num: 7,
             titulo: 'Estudio bíblico de la congregación',
             min: 30),
       ],
     );
-    final sched = construirFilas(semana, 18 * 60, 105);
+    final sched = buildSchedule(semana, 18 * 60, 105);
     // Nombres por id de fila (la primera de Tesoros lleva uno de ejemplo).
-    final asg = Asignaciones({sched.tesoros.first.id: const ['Rafael G']}, {});
+    final asg = Assignments({sched.tesoros.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
       cong: 'CONSTITUCIÓN J.A CASTRO',
       semana: semana,

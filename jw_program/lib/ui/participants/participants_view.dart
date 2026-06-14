@@ -11,8 +11,8 @@ import '../widgets/filter_pill.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
 
-/// Vista de Hermanos (`PeopleView` del mock): topbar, filtros y cuadrícula de
-/// tarjetas alimentada por la BD (`hermanosTodosProvider`). Vive dentro del
+/// Vista de Participants (`PeopleView` del mock): topbar, filtros y cuadrícula de
+/// tarjetas alimentada por la BD (`participantsProvider`). Vive dentro del
 /// shell; al abrirse desde el editor muestra botón de volver.
 class HermanosView extends ConsumerStatefulWidget {
   const HermanosView({super.key});
@@ -23,7 +23,7 @@ class HermanosView extends ConsumerStatefulWidget {
 
 class _HermanosViewState extends ConsumerState<HermanosView> {
   String _query = '';
-  Privilegio? _privilegio;
+  Role? _privilegio;
   String? _congregacion;
 
   @override
@@ -73,7 +73,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hermanos',
+                'Participants',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -106,7 +106,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
         AppButton(
           icon: Icons.person_add_alt,
           label: isMobile ? null : 'Añadir hermano',
-          onPressed: () => mostrarPersonaModal(context),
+          onPressed: () => showParticipantModal(context),
         ),
       ],
     );
@@ -114,7 +114,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
 
   Widget _filtros(BuildContext context) {
     final t = context.tokens;
-    final congregaciones = ref.watch(congregacionesProvider);
+    final congregaciones = ref.watch(participantCongregationsProvider);
 
     return Wrap(
       spacing: 8,
@@ -140,7 +140,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
           active: _privilegio == null,
           onTap: () => setState(() => _privilegio = null),
         ),
-        for (final p in Privilegio.values)
+        for (final p in Role.values)
           FilterPill(
             label: p.plural,
             active: _privilegio == p,
@@ -167,8 +167,8 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
 
   Widget _resultado(BuildContext context) {
     final t = context.tokens;
-    final todos = ref.watch(hermanosTodosProvider);
-    final filtrados = filtrarHermanos(
+    final todos = ref.watch(participantsProvider);
+    final filtrados = filterParticipants(
       todos,
       query: _query,
       privilegio: _privilegio,
@@ -179,7 +179,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: 'Hermanos', count: filtrados.length),
+        BlockTitle(title: 'Participants', count: filtrados.length),
         if (filtrados.isEmpty)
           _vacio(t, todos.isEmpty)
         else
@@ -188,7 +188,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
     );
   }
 
-  Widget _grid(List<Hermano> hermanos) {
+  Widget _grid(List<Participant> hermanos) {
     return LayoutBuilder(
       builder: (context, c) {
         const gap = 10.0;
@@ -203,7 +203,7 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
                 width: colW,
                 child: PersonaCard(
                   hermano: h,
-                  onTap: () => mostrarPersonaModal(context, original: h),
+                  onTap: () => showParticipantModal(context, original: h),
                 ),
               ),
           ],

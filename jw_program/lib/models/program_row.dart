@@ -1,6 +1,6 @@
 // Estructura (inmutable) del programa: filas y bloques. Los NOMBRES de los
 // participantes NO viven aquí, sino en el estado del formulario; aquí solo está
-// la estructura que produce el cálculo del horario. Ver [Asignaciones].
+// la estructura que produce el cálculo del horario. Ver [Assignments].
 
 /// Una fila del programa (una asignación, canción, palabras de intro/conclusión).
 class ProgramRow {
@@ -63,13 +63,13 @@ class ProgramSchedule {
 
 /// Nombres de los participantes, indexados por `ProgramRow.id`. Es el puente
 /// entre el estado editable (formulario) y la generación del PDF.
-class Asignaciones {
+class Assignments {
   final Map<String, List<String>> _principal;
   final Map<String, List<String>> _auxiliar;
 
-  const Asignaciones(this._principal, this._auxiliar);
+  const Assignments(this._principal, this._auxiliar);
 
-  static const empty = Asignaciones({}, {});
+  static const empty = Assignments({}, {});
 
   List<String> principal(ProgramRow r) =>
       _principal[r.id] ?? List<String>.filled(r.slots, '');
@@ -79,7 +79,7 @@ class Asignaciones {
 }
 
 /// Une 1–2 nombres como los muestra el formato: "a / b", "a" o "".
-String nombresUnidos(List<String> n) {
+String joinedNames(List<String> n) {
   if (n.isEmpty) return '';
   if (n.length >= 2) return '${n[0]} / ${n[1]}';
   return n[0];

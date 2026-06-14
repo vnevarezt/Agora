@@ -15,8 +15,8 @@ import 'project_bar.dart';
 class ProgramShell extends StatelessWidget {
   const ProgramShell({super.key, this.proyecto});
 
-  /// Proyecto abierto desde el dashboard (identidad de la barra). Opcional.
-  final Proyecto? proyecto;
+  /// Project abierto desde el dashboard (identidad de la barra). Opcional.
+  final Project? proyecto;
 
   @override
   Widget build(BuildContext context) {

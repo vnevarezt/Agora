@@ -17,16 +17,16 @@ import '../widgets/mini_chip.dart';
 import '../widgets/segmented_control.dart';
 
 /// Descripción de cada privilegio en las radio-cards del modal.
-const _privDesc = {
-  Privilegio.publicador:
+const _roleDesc = {
+  Role.publicador:
       'Participa en "Seamos mejores maestros" (hermanos y hermanas)',
-  Privilegio.siervoMinisterial:
+  Role.siervoMinisterial:
       'Publicador + lectura, oración y algunas partes asignables',
-  Privilegio.anciano: 'Puede recibir cualquier asignación del programa',
+  Role.anciano: 'Puede recibir cualquier asignación del programa',
 };
 
 /// Abre el modal de alta/edición de hermano. [original] null = alta nueva.
-Future<void> mostrarPersonaModal(BuildContext context, {Hermano? original}) {
+Future<void> showParticipantModal(BuildContext context, {Participant? original}) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
@@ -44,7 +44,7 @@ class PersonModal extends ConsumerStatefulWidget {
   });
 
   /// null = alta nueva.
-  final Hermano? original;
+  final Participant? original;
   final VoidCallback onClose;
   final bool sheet;
 
@@ -54,9 +54,9 @@ class PersonModal extends ConsumerStatefulWidget {
 
 class _PersonModalState extends ConsumerState<PersonModal> {
   late String _nombre = widget.original?.nombre ?? '';
-  late Sexo _sexo = widget.original?.sexo ?? Sexo.hombre;
-  late Privilegio _privilegio =
-      widget.original?.privilegio ?? Privilegio.publicador;
+  late Gender _sexo = widget.original?.sexo ?? Gender.hombre;
+  late Role _privilegio =
+      widget.original?.privilegio ?? Role.publicador;
   late String _congregacion;
   late bool _activo = widget.original?.activo ?? true;
   bool _guardando = false;
@@ -64,7 +64,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   /// Bump para re-sembrar el campo de congregación al tocar un chip.
   int _congVersion = 0;
 
-  bool get _esAlta => widget.original == null;
+  bool get _isCreating => widget.original == null;
 
   @override
   void initState() {
@@ -72,18 +72,18 @@ class _PersonModalState extends ConsumerState<PersonModal> {
     _congregacion = widget.original?.congregacion ?? ref.read(formProvider).cong;
   }
 
-  void _setSexo(Sexo s) => setState(() {
+  void _setGender(Gender s) => setState(() {
         _sexo = s;
         // Las hermanas solo participan como publicadoras.
-        if (s == Sexo.mujer) _privilegio = Privilegio.publicador;
+        if (s == Gender.mujer) _privilegio = Role.publicador;
       });
 
-  Future<void> _guardar() async {
+  Future<void> _save() async {
     setState(() => _guardando = true);
     try {
       final ahora = DateTime.now().toUtc();
-      final h = _esAlta
-          ? Hermano(
+      final h = _isCreating
+          ? Participant(
               id: const Uuid().v4(),
               nombre: _nombre.trim(),
               sexo: _sexo,
@@ -101,14 +101,14 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               congregacion: _congregacion.trim(),
               activo: _activo,
             );
-      await ref.read(hermanosAccionesProvider).guardar(h);
+      await ref.read(participantActionsProvider).guardar(h);
       widget.onClose();
     } finally {
       if (mounted) setState(() => _guardando = false);
     }
   }
 
-  Future<void> _eliminar() async {
+  Future<void> _delete() async {
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -132,7 +132,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       ),
     );
     if (confirmado != true || !mounted) return;
-    await ref.read(hermanosAccionesProvider).eliminar(widget.original!.id);
+    await ref.read(participantActionsProvider).eliminar(widget.original!.id);
     widget.onClose();
   }
 
@@ -149,7 +149,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         Flexible(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-            child: _cuerpo(t),
+            child: _body(t),
           ),
         ),
         _footer(t),
@@ -200,7 +200,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _esAlta ? 'Añadir hermano' : 'Editar hermano',
+                    _isCreating ? 'Añadir hermano' : 'Editar hermano',
                     style: TextStyle(
                       fontSize: 16.5,
                       fontWeight: FontWeight.w800,
@@ -233,17 +233,17 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         ),
       );
 
-  Widget _cuerpo(AppTokens t) {
+  Widget _body(AppTokens t) {
     final sugerencias = ref
-        .watch(congregacionesProvider)
+        .watch(participantCongregationsProvider)
         .where((c) => c != _congregacion.trim())
         .take(3)
         .toList();
     final sexoIdx =
-        switch (_sexo) { Sexo.hombre => 0, Sexo.mujer => 1, _ => -1 };
-    final privsDisponibles = _sexo == Sexo.mujer
-        ? const [Privilegio.publicador]
-        : Privilegio.values;
+        switch (_sexo) { Gender.hombre => 0, Gender.mujer => 1, _ => -1 };
+    final privsDisponibles = _sexo == Gender.mujer
+        ? const [Role.publicador]
+        : Role.values;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -290,12 +290,12 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           label: 'Es',
           child: SegmentedTabs(
             segments: const [
-              (icon: null, label: 'Hermano'),
-              (icon: null, label: 'Hermana'),
+              (icon: null, label: 'Hombre'),
+              (icon: null, label: 'Mujer'),
             ],
             index: sexoIdx,
             expand: true,
-            onChanged: (i) => _setSexo(i == 0 ? Sexo.hombre : Sexo.mujer),
+            onChanged: (i) => _setGender(i == 0 ? Gender.hombre : Gender.mujer),
           ),
         ),
         const SizedBox(height: 14),
@@ -305,7 +305,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             children: [
               for (final p in privsDisponibles) ...[
                 if (p != privsDisponibles.first) const SizedBox(height: 8),
-                _PrivOption(
+                _RoleOption(
                   privilegio: p,
                   selected: _privilegio == p,
                   onTap: () => setState(() => _privilegio = p),
@@ -315,7 +315,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           ),
         ),
         const SizedBox(height: 16),
-        _FilaDisponible(
+        _AvailableRow(
           activo: _activo,
           onChanged: (v) => setState(() => _activo = v),
         ),
@@ -325,7 +325,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
   Widget _footer(AppTokens t) {
     final puedeGuardar = _nombre.trim().isNotEmpty && !_guardando;
-    final primary = _esAlta ? 'Añadir hermano' : 'Guardar cambios';
+    final primary = _isCreating ? 'Añadir hermano' : 'Guardar cambios';
 
     final children = widget.sheet
         ? [
@@ -334,7 +334,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               expand: true,
               busy: _guardando,
               height: Dimens.hExportMobile,
-              onPressed: puedeGuardar ? _guardar : null,
+              onPressed: puedeGuardar ? _save : null,
             ),
             const SizedBox(height: 8),
             Row(
@@ -347,9 +347,9 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                     onPressed: widget.onClose,
                   ),
                 ),
-                if (!_esAlta) ...[
+                if (!_isCreating) ...[
                   const SizedBox(width: 8),
-                  DangerButton(onTap: _eliminar),
+                  DangerButton(onTap: _delete),
                 ],
               ],
             ),
@@ -357,7 +357,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         : [
             Row(
               children: [
-                if (!_esAlta) DangerButton(onTap: _eliminar),
+                if (!_isCreating) DangerButton(onTap: _delete),
                 const Spacer(),
                 AppButton(
                   variant: AppButtonVariant.ghost,
@@ -368,7 +368,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 AppButton(
                   label: primary,
                   busy: _guardando,
-                  onPressed: puedeGuardar ? _guardar : null,
+                  onPressed: puedeGuardar ? _save : null,
                 ),
               ],
             ),
@@ -395,14 +395,14 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 }
 
 /// Radio-card de privilegio (`.priv-option`): círculo + título + descripción.
-class _PrivOption extends StatelessWidget {
-  const _PrivOption({
+class _RoleOption extends StatelessWidget {
+  const _RoleOption({
     required this.privilegio,
     required this.selected,
     required this.onTap,
   });
 
-  final Privilegio privilegio;
+  final Role privilegio;
   final bool selected;
   final VoidCallback onTap;
 
@@ -464,7 +464,7 @@ class _PrivOption extends StatelessWidget {
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      _privDesc[privilegio]!,
+                      _roleDesc[privilegio]!,
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
@@ -484,8 +484,8 @@ class _PrivOption extends StatelessWidget {
 }
 
 /// Fila "Disponible" con switch (`.set-row`): mapea a `activo`.
-class _FilaDisponible extends StatelessWidget {
-  const _FilaDisponible({required this.activo, required this.onChanged});
+class _AvailableRow extends StatelessWidget {
+  const _AvailableRow({required this.activo, required this.onChanged});
 
   final bool activo;
   final ValueChanged<bool> onChanged;

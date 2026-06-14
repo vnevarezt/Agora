@@ -36,19 +36,19 @@ class WorkspacePanel extends ConsumerWidget {
         _SectionBlock(title: 'Apertura', rows: sched.apertura, aux: aux),
         _SectionBlock(
           title: 'Tesoros de la Biblia',
-          dotColor: kSectionColors[Seccion.tesoros],
+          dotColor: kSectionColors[Section.tesoros],
           rows: sched.tesoros,
           aux: aux,
         ),
         _SectionBlock(
           title: 'Seamos mejores maestros',
-          dotColor: kSectionColors[Seccion.seamos],
+          dotColor: kSectionColors[Section.seamos],
           rows: sched.seamos,
           aux: aux,
         ),
         _SectionBlock(
           title: 'Nuestra vida cristiana',
-          dotColor: kSectionColors[Seccion.vida],
+          dotColor: kSectionColors[Section.vida],
           rows: sched.vida,
           aux: aux,
         ),
@@ -78,10 +78,10 @@ class _SectionBlock extends ConsumerWidget {
     var done = 0;
     for (final row in rows) {
       total += row.slots;
-      done += nombresLlenos(f.principal[row.id], row.slots);
+      done += filledNames(f.principal[row.id], row.slots);
       if (aux && row.auxSlots > 0) {
         total += row.auxSlots;
-        done += nombresLlenos(f.auxiliar[row.id], row.auxSlots);
+        done += filledNames(f.auxiliar[row.id], row.auxSlots);
       }
     }
 
@@ -143,7 +143,7 @@ class _EmptyState extends ConsumerWidget {
                   ? null
                   : () => ref
                       .read(weeksProvider.notifier)
-                      .cargar(ref.read(formProvider).issue),
+                      .load(ref.read(formProvider).issue),
             ),
             if (weeks.hasError) ...[
               const SizedBox(height: 14),

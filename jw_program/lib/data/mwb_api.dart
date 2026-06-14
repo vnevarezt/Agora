@@ -38,7 +38,7 @@ class MwbApi {
   }
 
   /// Descarga el EPUB completo en memoria (bytes).
-  static Future<Uint8List> descargarEpub(String issue, {String lang = 'S'}) async {
+  static Future<Uint8List> downloadEpub(String issue, {String lang = 'S'}) async {
     final info = await epubUrl(issue, lang: lang);
     final resp = await http.get(Uri.parse(info.url));
     if (resp.statusCode != 200) {

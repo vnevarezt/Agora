@@ -22,7 +22,7 @@ import '../widgets/progress_ring.dart';
 class ProjectBar extends ConsumerWidget {
   const ProjectBar({super.key, this.proyecto});
 
-  final Proyecto? proyecto;
+  final Project? proyecto;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -100,15 +100,15 @@ class ProjectBar extends ConsumerWidget {
 class _ProjId extends ConsumerWidget {
   const _ProjId({this.proyecto});
 
-  final Proyecto? proyecto;
+  final Project? proyecto;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final congs = ref.watch(congregacionesDashProvider);
+    final congs = ref.watch(congregationsProvider);
     final nSemanas = ref.watch(weeksProvider).asData?.value.length ?? 0;
 
-    final Congregacion? cong = proyecto == null
+    final Congregation? cong = proyecto == null
         ? null
         : congs.where((c) => c.id == proyecto!.congregacionId).firstOrNull;
     final nombre = proyecto?.nombre ?? 'Programa';
@@ -222,7 +222,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
 
     void go(int d) {
       if (n == 0) return;
-      notifier.seleccionarSemana((activo + d).clamp(0, n - 1));
+      notifier.selectWeek((activo + d).clamp(0, n - 1));
     }
 
     final current = MenuAnchor(
@@ -239,7 +239,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
           weeks: weeks,
           activo: activo,
           onPick: (i) {
-            notifier.seleccionarSemana(i);
+            notifier.selectWeek(i);
             _menu.close();
           },
         ),
@@ -532,7 +532,7 @@ class _WeekMenu extends ConsumerWidget {
           ),
           _AuxToggle(
             aux: aux,
-            onChanged: (v) => ref.read(formProvider.notifier).setAux(v),
+            onChanged: (v) => ref.read(formProvider.notifier).setAuxRoom(v),
           ),
         ],
       ),
@@ -683,7 +683,7 @@ class _ExportCard extends StatelessWidget {
           ),
           _ExportItem(
             icon: Icons.layers_outlined,
-            titulo: 'Proyecto completo',
+            titulo: 'Project completo',
             sub: 'Todas las semanas en un PDF',
             onTap: null, // próximamente
           ),
