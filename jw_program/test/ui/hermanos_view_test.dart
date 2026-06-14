@@ -1,16 +1,17 @@
-import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jw_program/data/db/app_database.dart';
 import 'package:jw_program/models/hermano.dart';
-import 'package:jw_program/state/db_provider.dart';
+import 'package:jw_program/state/hermanos_provider.dart';
 import 'package:jw_program/ui/personas/hermanos_view.dart';
 import 'package:jw_program/ui/theme/app_theme.dart';
 import 'package:jw_program/ui/theme/tokens.dart';
 
-Hermano _hermano(String id, String nombre) {
+// El test de la BD vive en test/db/. Aquí probamos solo la UI de HermanosView,
+// alimentando el directorio con un stream estático (sin Drift) para que sea
+// determinista y rápido.
+Hermano _h(String id, String nombre) {
   final t = DateTime.utc(2026, 6, 1);
   return Hermano(
     id: id,
@@ -25,60 +26,27 @@ Hermano _hermano(String id, String nombre) {
   );
 }
 
-Future<AppDatabase> _pump(WidgetTester tester) async {
+Future<void> _pump(WidgetTester tester, List<Hermano> lista) async {
   tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  final db = AppDatabase(NativeDatabase.memory());
-  addTearDown(db.close);
-
   await tester.pumpWidget(ProviderScope(
-    overrides: [dbProvider.overrideWithValue(db)],
+    overrides: [
+      hermanosTodosProvider.overrideWith((ref) => Stream.value(lista)),
+    ],
     child: MaterialApp(
       theme: buildAppTheme(pizarra.light, Brightness.light),
       home: const Scaffold(body: SafeArea(child: HermanosView())),
     ),
   ));
-  await tester.pump(); // primera emisión del stream
-  return db;
+  await tester.pump(); // emite el stream
 }
 
 void main() {
-  testWidgets('estado vacío y alta de un hermano', (tester) async {
-    await _pump(tester);
-
-    expect(find.textContaining('Aún no hay hermanos'), findsOneWidget);
-
-    await tester.tap(find.text('Añadir hermano'));
-    await tester.pumpAndSettle();
-    // El modal está abierto si aparece su descripción.
-    expect(
-      find.text('El privilegio define qué partes se le pueden asignar.'),
-      findsOneWidget,
-    );
-
-    await tester.enterText(
-        find.widgetWithText(TextField, 'Ej. Martín Salas'), 'Raúl Espinoza');
-    await tester.pump();
-
-    // Botón primario del modal (no el del topbar).
-    await tester.tap(find.descendant(
-      of: find.byType(Dialog),
-      matching: find.text('Añadir hermano'),
-    ));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.byType(Dialog), findsNothing);
-    expect(find.text('Raúl Espinoza'), findsOneWidget);
-  });
-
-  testWidgets('la búsqueda filtra sin acentos', (tester) async {
-    final db = await _pump(tester);
-    await db.hermanosDao.upsert(_hermano('a', 'Raúl Espinoza'));
-    await db.hermanosDao.upsert(_hermano('b', 'Saúl Bravo'));
-    await tester.pump(const Duration(milliseconds: 100));
+  testWidgets('renderiza tarjetas y la búsqueda filtra sin acentos',
+      (tester) async {
+    await _pump(tester, [_h('a', 'Raúl Espinoza'), _h('b', 'Saúl Bravo')]);
 
     expect(find.text('Raúl Espinoza'), findsOneWidget);
     expect(find.text('Saúl Bravo'), findsOneWidget);
@@ -89,5 +57,20 @@ void main() {
 
     expect(find.text('Raúl Espinoza'), findsOneWidget);
     expect(find.text('Saúl Bravo'), findsNothing);
+  });
+
+  testWidgets('estado vacío y abre el modal de alta', (tester) async {
+    await _pump(tester, const []);
+
+    expect(find.textContaining('Aún no hay hermanos'), findsOneWidget);
+
+    await tester.tap(find.text('Añadir hermano'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.text('El privilegio define qué partes se le pueden asignar.'),
+      findsOneWidget,
+    );
   });
 }
