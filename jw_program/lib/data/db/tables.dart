@@ -2,9 +2,9 @@ import 'package:drift/drift.dart';
 
 import '../../models/participant.dart';
 
-/// Tabla del directorio de participants. Mapea al modelo puro [Participant];
-/// los enums se guardan como TEXTO (legible en exports/debug y estable
-/// ante reordenamientos del enum).
+/// Participant directory table. Maps to the pure model [Participant];
+/// enums are stored as TEXT (readable in exports/debug and stable
+/// against enum reordering).
 @UseRowClass(Participant, generateInsertable: true)
 class Participants extends Table {
   TextColumn get id => text()();
