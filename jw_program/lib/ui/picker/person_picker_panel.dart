@@ -17,7 +17,7 @@ class PersonPickerPanel extends ConsumerStatefulWidget {
   const PersonPickerPanel({
     super.key,
     required this.roleLabel,
-    required this.actual,
+    required this.current,
     required this.maxLength,
     this.mobile = false,
   });
@@ -25,7 +25,7 @@ class PersonPickerPanel extends ConsumerStatefulWidget {
   final String roleLabel;
 
   /// Nombre actualmente asignado ('' si el slot está vacío).
-  final String actual;
+  final String current;
   final int maxLength;
   final bool mobile;
 
@@ -76,7 +76,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             shrinkWrap: true,
             padding: const EdgeInsets.all(6),
             children: [
-              if (widget.actual.isNotEmpty)
+              if (widget.current.isNotEmpty)
                 _PersonRow(
                   name: 'Quitar asignación',
                   avatarVacio: true,
@@ -117,7 +117,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     return _PersonRow(
       name: h.name,
       tag: h.role == Role.publisher ? null : h.role.label,
-      selected: h.name == widget.actual,
+      selected: h.name == widget.current,
       onTap: () => _pop(PickNombre(h.name)),
     );
   }

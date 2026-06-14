@@ -27,8 +27,8 @@ class ParticipantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final h = participant;
-    final cong = h.congregation.trim();
-    final sub = cong.isEmpty ? _genderLabel : '$_genderLabel · $cong';
+    final congregation = h.congregation.trim();
+    final sub = congregation.isEmpty ? _genderLabel : '$_genderLabel · $congregation';
 
     return Pressable(
       onTap: onTap,

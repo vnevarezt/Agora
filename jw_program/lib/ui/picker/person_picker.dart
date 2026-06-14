@@ -17,7 +17,7 @@ class PickNombre extends PickResult {
   final String name;
 }
 
-/// Quitar la asignación actual.
+/// Quitar la asignación current.
 class PickQuitar extends PickResult {
   const PickQuitar();
 }
@@ -29,12 +29,12 @@ const _scrim = Color(0x47000000); // rgba(0,0,0,.28) del mock
 Future<PickResult?> showPersonPicker(
   BuildContext anchorContext, {
   required String roleLabel,
-  required String actual,
+  required String current,
   required int maxLength,
 }) {
   final panel = PersonPickerPanel(
     roleLabel: roleLabel,
-    actual: actual,
+    current: current,
     maxLength: maxLength,
   );
 
@@ -59,7 +59,7 @@ Future<PickResult?> showPersonPicker(
             constraints: BoxConstraints(maxHeight: alto * 0.78),
             child: PersonPickerPanel(
               roleLabel: roleLabel,
-              actual: actual,
+              current: current,
               maxLength: maxLength,
               mobile: true,
             ),

@@ -26,10 +26,10 @@ class WorkspacePanel extends ConsumerWidget {
 
     final aux = ref.watch(formProvider.select((f) => f.auxRoom));
     final isMobile = context.isMobile;
-    final lado = isMobile ? 14.0 : 18.0;
+    final side = isMobile ? 14.0 : 18.0;
 
     return ListView(
-      padding: EdgeInsets.fromLTRB(lado, lado, lado, isMobile ? 150 : 120),
+      padding: EdgeInsets.fromLTRB(side, side, side, isMobile ? 150 : 120),
       children: [
         PartCard(view: presidenteView()),
         const SizedBox(height: 22),

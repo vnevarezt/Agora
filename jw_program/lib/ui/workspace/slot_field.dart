@@ -22,13 +22,13 @@ class SlotField extends ConsumerWidget {
   final SlotSpec spec;
 
   Future<void> _openPicker(
-      BuildContext anchorContext, WidgetRef ref, String actual) async {
+      BuildContext anchorContext, WidgetRef ref, String current) async {
     ref.read(activeSlotProvider.notifier).set(spec.ref);
     try {
       final resultado = await showPersonPicker(
         anchorContext,
         roleLabel: spec.label,
-        actual: actual,
+        current: current,
         maxLength: spec.maxLength,
       );
       switch (resultado) {

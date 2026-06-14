@@ -17,7 +17,7 @@ import '../widgets/app_button.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
-/// Barra del editor (`.projbar`): identidad del proyecto, progreso, selector
+/// Barra del editor (`.projbar`): identidad del proyecto, progress, selector
 /// de semanas y exportar. Reemplaza a la antigua barra de contexto.
 class ProjectBar extends ConsumerWidget {
   const ProjectBar({super.key, this.proyecto});
@@ -43,7 +43,7 @@ class ProjectBar extends ConsumerWidget {
   }
 
   Widget _desktop(BuildContext context, WidgetRef ref, AppTokens t) {
-    final progreso = ref.watch(projectProgressProvider);
+    final progress = ref.watch(projectProgressProvider);
     return Row(
       children: [
         _back(context),
@@ -56,8 +56,8 @@ class ProjectBar extends ConsumerWidget {
             border: Border(left: BorderSide(color: t.border2)),
           ),
           child: ProgressRing(
-            done: progreso.done,
-            total: progreso.total,
+            done: progress.done,
+            total: progress.total,
             showLabel: true,
           ),
         ),
@@ -212,13 +212,13 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
     final t = context.tokens;
     final weeks = ref.watch(weeksProvider).asData?.value ?? const [];
     final idx = ref.watch(formProvider.select((f) => f.weekIndex));
-    final progreso = ref.watch(progressProvider);
+    final progress = ref.watch(progressProvider);
     final notifier = ref.read(formProvider.notifier);
 
     final n = weeks.length;
     final active = n == 0 ? 0 : idx.clamp(0, n - 1);
-    final fecha = n == 0 ? '—' : weeks[active].date;
-    final done = progreso.done == progreso.total && progreso.total > 0;
+    final date = n == 0 ? '—' : weeks[active].date;
+    final done = progress.done == progress.total && progress.total > 0;
 
     void go(int d) {
       if (n == 0) return;
@@ -296,7 +296,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                           ),
                         ),
                         Text(
-                          fecha,
+                          date,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppText.mono(
@@ -307,7 +307,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                   ),
                   const SizedBox(width: 10),
                   _PctBadge(
-                      done: done, label: '${progreso.done}/${progreso.total}'),
+                      done: done, label: '${progress.done}/${progress.total}'),
                   const SizedBox(width: 4),
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
@@ -411,7 +411,7 @@ class _WeekMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final aux = ref.watch(formProvider.select((f) => f.auxRoom));
+    final auxRoom = ref.watch(formProvider.select((f) => f.auxRoom));
     final progressList = ref.watch(progressPerWeekProvider);
 
     return Container(
@@ -531,7 +531,7 @@ class _WeekMenu extends ConsumerWidget {
             color: t.border2,
           ),
           _AuxToggle(
-            aux: aux,
+            auxRoom: auxRoom,
             onChanged: (v) => ref.read(formProvider.notifier).setAuxRoom(v),
           ),
         ],
@@ -541,16 +541,16 @@ class _WeekMenu extends ConsumerWidget {
 }
 
 class _AuxToggle extends StatelessWidget {
-  const _AuxToggle({required this.aux, required this.onChanged});
+  const _AuxToggle({required this.auxRoom, required this.onChanged});
 
-  final bool aux;
+  final bool auxRoom;
   final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Pressable(
-      onTap: () => onChanged(!aux),
+      onTap: () => onChanged(!auxRoom),
       builder: (context, hovered, _) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         decoration: BoxDecoration(
@@ -560,7 +560,7 @@ class _AuxToggle extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.apartment_outlined,
-                size: 16, color: aux ? t.accentStrong : t.textMute),
+                size: 16, color: auxRoom ? t.accentStrong : t.textMute),
             const SizedBox(width: 11),
             Expanded(
               child: Column(
@@ -581,7 +581,7 @@ class _AuxToggle extends StatelessWidget {
             ),
             Transform.scale(
               scale: 0.8,
-              child: Switch(value: aux, onChanged: onChanged),
+              child: Switch(value: auxRoom, onChanged: onChanged),
             ),
           ],
         ),

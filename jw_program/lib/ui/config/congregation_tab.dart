@@ -39,11 +39,11 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
   /// Selecciona una congregación y siembra los campos. Los horarios aún no se
   /// persisten (sin backend): se muestran con valores por defecto.
-  void _select(Congregation cong, {bool notify = true}) {
+  void _select(Congregation congregation, {bool notify = true}) {
     void apply() {
-      _congregationId = cong.id;
-      _name = cong.name;
-      _number = cong.number;
+      _congregationId = congregation.id;
+      _name = congregation.name;
+      _number = congregation.number;
       _language = meetingLanguages.first;
       _weekdayDay = 'Martes';
       _weekdayTime = '19:00';
