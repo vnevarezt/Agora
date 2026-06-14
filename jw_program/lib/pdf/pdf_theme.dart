@@ -24,7 +24,7 @@ class S140 {
   static const double footnote = 8; // \footnotesize
   static const double large = 12; // \large
   static const double title = 16.5; // título de cabecera
-  static const double semana = 12; // línea de semana / lectura
+  static const double week = 12; // línea de week / lectura
 
   // ---- Anchos de columna (tex:57-61) ----
   static const double cm = 28.3465;

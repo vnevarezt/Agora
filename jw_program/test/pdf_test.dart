@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('buildProgramPdf genera un PDF válido', () async {
-    final semana = Week(
+    final week = Week(
       date: '18-24 DE MAYO',
       reading: 'ISAÍAS 62-64',
       openingSong: '44',
@@ -34,12 +34,12 @@ void main() {
             minutes: 30),
       ],
     );
-    final sched = buildSchedule(semana, 18 * 60, 105);
+    final sched = buildSchedule(week, 18 * 60, 105);
     // Nombres por id de fila (la primera de Tesoros lleva uno de ejemplo).
     final asg = Assignments({sched.treasures.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
       cong: 'CONSTITUCIÓN J.A CASTRO',
-      semana: semana,
+      week: week,
       sched: sched,
       asignaciones: asg,
       chairman: 'Rafael G',

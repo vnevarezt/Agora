@@ -12,7 +12,7 @@ import 'pdf_theme.dart';
 /// Los nombres se leen de [asignaciones] (separados de la estructura).
 Future<Uint8List> buildProgramPdf({
   required String cong,
-  required Week semana,
+  required Week week,
   required ProgramSchedule sched,
   Assignments asignaciones = Assignments.empty,
   String chairman = '',
@@ -49,18 +49,18 @@ Future<Uint8List> buildProgramPdf({
           pw.SizedBox(height: 4),
           _reglafg(),
           pw.SizedBox(height: 3), // \par\smallskip
-          _lineaSemana(semana, chairman),
+          _weekLine(week, chairman),
           pw.SizedBox(height: 8), // \addvspace{8pt}
           if (aux) ...[_encabezadoSalas(cols), pw.SizedBox(height: 2)],
-          _tabla(sched.opening, asignaciones, cols, medir, aux),
-          _banda(S140.treasures, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
+          _table(sched.opening, asignaciones, cols, medir, aux),
+          _band(S140.treasures, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
               cols, aux),
-          _tabla(sched.treasures, asignaciones, cols, medir, aux),
-          _banda(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
+          _table(sched.treasures, asignaciones, cols, medir, aux),
+          _band(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
               cols, aux),
-          _tabla(sched.ministry, asignaciones, cols, medir, aux),
-          _banda(S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, aux),
-          _tabla(sched.christianLife, asignaciones, cols, medir, aux),
+          _table(sched.ministry, asignaciones, cols, medir, aux),
+          _band(S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, aux),
+          _table(sched.christianLife, asignaciones, cols, medir, aux),
           pw.SizedBox(height: 4), // \addvspace{4pt}
           _reglafg(),
         ];
@@ -85,7 +85,7 @@ pw.Widget _encabezado(String cong) {
       pw.SizedBox(
         width: 0.64 * S140.contentWidth,
         child: pw.Text(
-          'Programa para la reunión de entre semana',
+          'Programa para la reunión de entre week',
           textAlign: pw.TextAlign.right,
           style:
               pw.TextStyle(fontSize: S140.title, fontWeight: pw.FontWeight.bold),
@@ -107,10 +107,10 @@ pw.Widget _reglafg() {
   );
 }
 
-// ---- Línea de semana + chairman + lectura (tex:183-187) ----
-pw.Widget _lineaSemana(Week s, String chairman) {
+// ---- Línea de week + chairman + lectura (tex:183-187) ----
+pw.Widget _weekLine(Week s, String chairman) {
   final semanaStyle =
-      pw.TextStyle(fontSize: S140.semana, fontWeight: pw.FontWeight.bold);
+      pw.TextStyle(fontSize: S140.week, fontWeight: pw.FontWeight.bold);
   final rol = pw.TextStyle(
       fontSize: S140.footnote,
       fontWeight: pw.FontWeight.bold,
@@ -126,7 +126,7 @@ pw.Widget _lineaSemana(Week s, String chairman) {
                 style: semanaStyle),
           ),
           pw.Text('Presidente: ', style: rol),
-          pw.Text(chairman, style: pw.TextStyle(fontSize: S140.semana)),
+          pw.Text(chairman, style: pw.TextStyle(fontSize: S140.week)),
         ],
       ),
       pw.Text(s.reading, style: semanaStyle),
@@ -153,7 +153,7 @@ pw.Widget _encabezadoSalas(ColumnWidths cols) {
 }
 
 // ---- Banda de sección (tex:135-145) ----
-pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt,
+pw.Widget _band(PdfColor color, String title, String labelText,
     ColumnWidths cols, bool aux) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -167,18 +167,18 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt,
             width: cols.banda,
             color: color,
             padding: const pw.EdgeInsets.all(S140.fboxsep),
-            child: pw.Text(titulo,
+            child: pw.Text(title,
                 style: pw.TextStyle(
                     fontSize: S140.base,
                     fontWeight: pw.FontWeight.bold,
                     color: S140.blanco)),
           ),
           pw.Spacer(), // \hfill
-          // En modo aux el rótulo va una sola vez en el encabezado de salas.
-          if (!aux && rotuloTxt.isNotEmpty)
+          // En modo aux el rótulo va una sola vez en el header de salas.
+          if (!aux && labelText.isNotEmpty)
             pw.Padding(
               padding: const pw.EdgeInsets.only(bottom: 2), // \raisebox{2pt}
-              child: pw.Text(rotuloTxt,
+              child: pw.Text(labelText,
                   style: pw.TextStyle(
                       fontSize: S140.footnote,
                       fontWeight: pw.FontWeight.bold,
@@ -191,12 +191,12 @@ pw.Widget _banda(PdfColor color, String titulo, String rotuloTxt,
   );
 }
 
-// ---- Tabla de filas (tabularx @{}X R P@{} o @{}X R A P@{} en aux) ----
-pw.Widget _tabla(List<ProgramRow> filas, Assignments asg, ColumnWidths cols,
+// ---- Tabla de rows (tabularx @{}X R P@{} o @{}X R A P@{} en aux) ----
+pw.Widget _table(List<ProgramRow> rows, Assignments asg, ColumnWidths cols,
     double Function(String) medir, bool aux) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [for (final f in filas) _row(f, asg, cols, medir, aux)],
+    children: [for (final f in rows) _row(f, asg, cols, medir, aux)],
   );
 }
 

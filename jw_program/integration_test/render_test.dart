@@ -16,7 +16,7 @@ import 'package:jw_program/pdf/program_document.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 
-Week _semana() => Week(
+Week _week() => Week(
       date: '18-24 DE MAYO',
       reading: 'ISAÍAS 62-64',
       openingSong: '44',
@@ -64,7 +64,7 @@ Week _semana() => Week(
 
 Future<void> _dump(String nombreArchivo, List<String> nombres,
     {bool aux = false}) async {
-  final s = _semana();
+  final s = _week();
   final sched = buildSchedule(s, 18 * 60, 105);
   final principal = <String, List<String>>{};
   final auxiliar = <String, List<String>>{};
@@ -85,7 +85,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
   }
   final pdf = await buildProgramPdf(
     cong: 'CONSTITUCIÓN J.A CASTRO',
-    semana: s,
+    week: s,
     sched: sched,
     asignaciones: Assignments(principal, auxiliar),
     chairman: 'Rafael G',

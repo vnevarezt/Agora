@@ -29,7 +29,7 @@ class ExportButton extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     ref.read(exportBusyProvider.notifier).set(true);
     try {
-      final ruta = await ref.read(previewProvider.notifier).exportar();
+      final ruta = await ref.read(previewProvider.notifier).export();
       messenger.showSnackBar(SnackBar(content: Text('PDF exportado: $ruta')));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Error al exportar: $e')));

@@ -45,14 +45,14 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
 
   Future<void> _render() async {
     final sched = ref.read(scheduleProvider);
-    final semana = ref.read(currentWeekProvider);
-    if (sched == null || semana == null) return;
+    final week = ref.read(currentWeekProvider);
+    if (sched == null || week == null) return;
     final seq = ++_seq;
     final f = ref.read(formProvider);
     try {
       final pdf = await buildProgramPdf(
         cong: f.congregationId,
-        semana: semana,
+        week: week,
         sched: sched,
         asignaciones: ref.read(assignmentsProvider),
         chairman: f.chairman,
@@ -81,17 +81,17 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   }
 
   /// Construye el PDF con los datos actuales y lo guarda en Descargas.
-  /// Devuelve la ruta del archivo.
-  Future<String> exportar() async {
+  /// Devuelve la path del archivo.
+  Future<String> export() async {
     final sched = ref.read(scheduleProvider);
-    final semana = ref.read(currentWeekProvider);
-    if (sched == null || semana == null) {
-      throw Exception('Descarga un notebook y elige una semana primero.');
+    final week = ref.read(currentWeekProvider);
+    if (sched == null || week == null) {
+      throw Exception('Descarga un notebook y elige una week primero.');
     }
     final f = ref.read(formProvider);
     final pdf = await buildProgramPdf(
       cong: f.congregationId,
-      semana: semana,
+      week: week,
       sched: sched,
       asignaciones: ref.read(assignmentsProvider),
       chairman: f.chairman,
@@ -99,9 +99,9 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     );
     final dir =
         (await getDownloadsDirectory()) ?? await getApplicationDocumentsDirectory();
-    final ruta =
+    final path =
         '${dir.path}${Platform.pathSeparator}programa-${f.issue}-s${f.weekIndex + 1}.pdf';
-    await File(ruta).writeAsBytes(pdf);
-    return ruta;
+    await File(path).writeAsBytes(pdf);
+    return path;
   }
 }

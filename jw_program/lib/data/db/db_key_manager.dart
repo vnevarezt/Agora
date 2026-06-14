@@ -31,7 +31,7 @@ class DbKeyManager {
 
   static const _kClave = 'jw_program.db_key.v1';
 
-  Future<String> obtenerOCrearClaveHex() async {
+  Future<String> getOrCreateKeyHex() async {
     try {
       final existente = await _storage.read(key: _kClave);
       if (existente != null && existente.length == 64) return existente;

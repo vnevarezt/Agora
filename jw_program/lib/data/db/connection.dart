@@ -16,7 +16,7 @@ QueryExecutor abrirEjecutorCifrado(DbKeyManager keys) {
     await dir.create(recursive: true);
     final file =
         File('${dir.path}${Platform.pathSeparator}participants.db');
-    final claveHex = await keys.obtenerOCrearClaveHex();
+    final keyHex = await keys.getOrCreateKeyHex();
 
     return NativeDatabase.createInBackground(
       file,
@@ -29,7 +29,7 @@ QueryExecutor abrirEjecutorCifrado(DbKeyManager keys) {
               'sqlite3 sin soporte de cifrado: revisa el bloque hooks '
               'del pubspec (source: sqlite3mc).');
         }
-        raw.execute("PRAGMA key = '$claveHex';");
+        raw.execute("PRAGMA key = '$keyHex';");
         // Canario 2: con clave errónea esta consulta lanza (archivo ilegible).
         raw.select('SELECT count(*) FROM sqlite_master;');
       },

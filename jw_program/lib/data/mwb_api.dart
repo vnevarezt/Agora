@@ -30,8 +30,8 @@ class MwbApi {
     try {
       final url = (((data['files'] as Map)[lang] as Map)['EPUB'] as List)[0]
           ['file']['url'] as String;
-      final fecha = (data['formattedDate'] as String?) ?? '';
-      return (url: url, date: fecha);
+      final date = (data['formattedDate'] as String?) ?? '';
+      return (url: url, date: date);
     } catch (_) {
       throw Exception('No se encontró el EPUB para issue=$issue lang=$lang.');
     }

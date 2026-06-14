@@ -27,7 +27,7 @@ class ChairmanSlot extends SlotRef {
   String get key => 'presidente';
 }
 
-/// Posición [index] dentro de la list de nombres de una fila
+/// Posición [index] dentro de la list de names de una fila
 /// (auditorio principal o sala auxiliar según [aux]).
 class RowSlot extends SlotRef {
   const RowSlot(this.row, this.index, {this.aux = false});
@@ -52,12 +52,12 @@ List<String> listWithName(
   ];
 }
 
-/// Cuántas de las primeras [slots] entradas de [nombres] están llenas.
-int filledNames(List<String>? nombres, int slots) {
-  if (nombres == null) return 0;
+/// Cuántas de las primeras [slots] entradas de [names] están llenas.
+int filledNames(List<String>? names, int slots) {
+  if (names == null) return 0;
   var n = 0;
-  for (var i = 0; i < slots && i < nombres.length; i++) {
-    if (nombres[i].trim().isNotEmpty) n++;
+  for (var i = 0; i < slots && i < names.length; i++) {
+    if (names[i].trim().isNotEmpty) n++;
   }
   return n;
 }

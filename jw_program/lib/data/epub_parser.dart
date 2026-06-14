@@ -8,7 +8,7 @@ import '../models/week.dart';
 
 /// Parseo del EPUB del notebook mwb -> list de semanas.
 ///
-/// Port 1:1 de `parsear_epub` / `parsear_semana` / `_texto` / `_duracion`
+/// Port 1:1 de `parsear_epub` / `parsear_semana` / `_text` / `_duration`
 /// de generar_programa.py:54-124. Conserva las MISMAS expresiones regulares.
 
 // color del encabezado en el EPUB -> sección (SECCION_POR_COLOR, py:24-28)
@@ -29,22 +29,22 @@ final _reEncabezados =
     RegExp(r'<(h[123])\b([^>]*)>(.*?)</\1>', dotAll: true);
 final _reColor = RegExp(r'du-color--(teal|gold|maroon)');
 final _reClase = RegExp(r'class="([^"]*)"');
-final _reCancion = RegExp('Canci[óo]n\\s+(\\d+)');
-final _reCancionSola = RegExp(r'^Canci[óo]n\s+\d+$');
-final _reParteNum = RegExp(r'^(\d+)\.\s+(.*)$', dotAll: true);
+final _reSong = RegExp('Canci[óo]n\\s+(\\d+)');
+final _reSongOnly = RegExp(r'^Canci[óo]n\s+\d+$');
+final _rePartNum = RegExp(r'^(\d+)\.\s+(.*)$', dotAll: true);
 final _reArchivoSemana = RegExp(r'^OEBPS/\d+\.xhtml$');
 
-/// HTML -> texto clean (sin etiquetas, sin nº de página ni superíndices).
-String _texto(String frag) {
+/// HTML -> text clean (sin etiquetas, sin nº de página ni superíndices).
+String _text(String frag) {
   frag = frag.replaceAll(_rePageNum, '');
   frag = frag.replaceAll(_reSup, ''); // marcas de nota
-  frag = frag.replaceAll(_reTags, ''); // conserva el texto
+  frag = frag.replaceAll(_reTags, ''); // conserva el text
   // html.unescape equivalente: decodifica entidades (&amp;, &#160;, …)
   final unescaped = html_parser.parseFragment(frag).text ?? '';
   return unescaped.replaceAll(_reEspacios, ' ').trim();
 }
 
-int? _duracion(String segmento) {
+int? _duration(String segmento) {
   final m = _reDuracion.firstMatch(segmento);
   return m != null ? int.parse(m.group(1)!) : null;
 }
@@ -52,7 +52,7 @@ int? _duracion(String segmento) {
 Week parseWeek(String xhtml) {
   // Posiciones de all los encabezados h1/h2/h3 en orden de aparición.
   final enc = _reEncabezados.allMatches(xhtml).toList();
-  final semana = Week();
+  final week = Week();
   Section? seccionActual;
 
   for (var i = 0; i < enc.length; i++) {
@@ -60,9 +60,9 @@ Week parseWeek(String xhtml) {
     final tag = m.group(1)!;
     final attrs = m.group(2)!;
     final inner = m.group(3)!;
-    final fin = (i + 1 < enc.length) ? enc[i + 1].start : xhtml.length;
-    final cuerpo = xhtml.substring(m.end, fin);
-    final texto = _texto(inner);
+    final end = (i + 1 < enc.length) ? enc[i + 1].start : xhtml.length;
+    final body = xhtml.substring(m.end, end);
+    final text = _text(inner);
     final claseMatch = _reClase.firstMatch(attrs);
     final clase = claseMatch != null ? claseMatch.group(1)! : '';
 
@@ -73,49 +73,49 @@ Week parseWeek(String xhtml) {
       continue;
     }
     // ----- canciones / palabras de introducción y conclusión -----
-    final low = texto.toLowerCase();
-    final mcan = _reCancion.firstMatch(texto);
+    final low = text.toLowerCase();
+    final songMatch = _reSong.firstMatch(text);
     if (low.contains('palabras de introducci')) {
-      if (mcan != null) semana.openingSong = mcan.group(1);
-      semana.introMinutes = _duracion(texto) ?? 1;
+      if (songMatch != null) week.openingSong = songMatch.group(1);
+      week.introMinutes = _duration(text) ?? 1;
       continue;
     }
     if (low.contains('palabras de conclusi')) {
-      if (mcan != null) semana.closingSong = mcan.group(1);
-      semana.conclusionMinutes = _duracion(texto) ?? 3;
+      if (songMatch != null) week.closingSong = songMatch.group(1);
+      week.conclusionMinutes = _duration(text) ?? 3;
       continue;
     }
-    if (mcan != null &&
+    if (songMatch != null &&
         (clase.contains('dc-icon--music') ||
-            _reCancionSola.hasMatch(texto))) {
-      semana.middleSong = mcan.group(1);
+            _reSongOnly.hasMatch(text))) {
+      week.middleSong = songMatch.group(1);
       continue;
     }
     // ----- parte numerada (h3 'N. Título') -----
-    final mnum = _reParteNum.firstMatch(texto);
-    if (tag == 'h3' && mnum != null && seccionActual != null) {
-      final num = int.parse(mnum.group(1)!);
-      final titulo = mnum.group(2)!.trim();
-      final dur = _duracion(cuerpo) ?? _duracion(texto);
-      semana.parts.add(Part(
+    final partMatch = _rePartNum.firstMatch(text);
+    if (tag == 'h3' && partMatch != null && seccionActual != null) {
+      final num = int.parse(partMatch.group(1)!);
+      final title = partMatch.group(2)!.trim();
+      final dur = _duration(body) ?? _duration(text);
+      week.parts.add(Part(
         section: seccionActual,
         number: num,
-        title: titulo,
+        title: title,
         minutes: dur,
       ));
       continue;
     }
     // ----- fecha (primer h1) y lectura (h2 antes de TESOROS) -----
-    if (tag == 'h1' && semana.date.isEmpty) {
-      semana.date = texto.toUpperCase();
+    if (tag == 'h1' && week.date.isEmpty) {
+      week.date = text.toUpperCase();
     } else if (tag == 'h2' &&
         seccionActual == null &&
-        semana.reading.isEmpty &&
-        texto.isNotEmpty) {
-      semana.reading = texto;
+        week.reading.isEmpty &&
+        text.isNotEmpty) {
+      week.reading = text;
     }
   }
-  return semana;
+  return week;
 }
 
 /// Parsea el EPUB completo (bytes) y devuelve las semanas con partes.
