@@ -36,21 +36,21 @@ class PersonPickerPanel extends ConsumerStatefulWidget {
 class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   String _query = '';
 
-  void _devolver(PickResult resultado) =>
+  void _pop(PickResult resultado) =>
       Navigator.of(context).pop(resultado);
 
-  String get _busqueda => _query.trim();
+  String get _search => _query.trim();
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final activos = ref.watch(activeParticipantsProvider);
+    final active = ref.watch(activeParticipantsProvider);
 
-    final clave = normalizeName(_busqueda);
-    final filtrados = activos
+    final clave = normalizeName(_search);
+    final filtered = active
         .where((h) => normalizeName(h.name).contains(clave))
         .toList();
-    final recientes = _busqueda.isEmpty
+    final recent = _search.isEmpty
         ? ref.watch(recentParticipantsProvider).take(4).toList()
         : const <Participant>[];
 
@@ -70,7 +70,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
               ),
             ),
           ),
-        _cabecera(t),
+        _header(t),
         Flexible(
           child: ListView(
             shrinkWrap: true,
@@ -82,20 +82,20 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                   avatarVacio: true,
                   muted: true,
                   selected: true,
-                  onTap: () => _devolver(const PickQuitar()),
+                  onTap: () => _pop(const PickQuitar()),
                 ),
-              if (recientes.isNotEmpty) ...[
-                _grupo(t, 'Recientes'),
-                for (final h in recientes) _fila(h),
-                _grupo(t, 'Todos'),
+              if (recent.isNotEmpty) ...[
+                _group(t, 'Recientes'),
+                for (final h in recent) _row(h),
+                _group(t, 'Todos'),
               ],
-              for (final h in filtrados) _fila(h),
-              if (filtrados.isEmpty && _busqueda.isNotEmpty)
+              for (final h in filtered) _row(h),
+              if (filtered.isEmpty && _search.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 18),
                   child: Text(
-                    'Sin resultados para “$_busqueda”.',
+                    'Sin resultados para “$_search”.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
@@ -107,22 +107,22 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             ],
           ),
         ),
-        _pie(t),
+        _footer(t),
       ],
     );
   }
 
-  /// Fila de un participant: privilegio como etiqueta (solo anciano/siervo).
-  Widget _fila(Participant h) {
+  /// Fila de un participant: privilegio como label (solo anciano/siervo).
+  Widget _row(Participant h) {
     return _PersonRow(
       name: h.name,
-      tag: h.role == Role.publisher ? null : h.role.etiqueta,
+      tag: h.role == Role.publisher ? null : h.role.label,
       selected: h.name == widget.actual,
-      onTap: () => _devolver(PickNombre(h.name)),
+      onTap: () => _pop(PickNombre(h.name)),
     );
   }
 
-  Widget _cabecera(AppTokens t) {
+  Widget _header(AppTokens t) {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
       decoration: BoxDecoration(
@@ -155,7 +155,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  Widget _grupo(AppTokens t, String titulo) {
+  Widget _group(AppTokens t, String titulo) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
       child: Text(titulo.toUpperCase(),
@@ -165,29 +165,29 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
 
   /// Pie "Añadir": asigna el name tecleado y lo suma al directorio en
   /// memoria (la gestión de personas llegará en otra fase).
-  Widget _pie(AppTokens t) {
-    final habilitado = _busqueda.isNotEmpty;
-    final etiqueta =
-        habilitado ? 'Añadir “$_busqueda”' : 'Añadir participante';
+  Widget _footer(AppTokens t) {
+    final enabled = _search.isNotEmpty;
+    final label =
+        enabled ? 'Añadir “$_search”' : 'Añadir participante';
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: t.border2)),
       ),
       child: Pressable(
-        onTap: habilitado
-            ? () => _devolver(PickNombre(
-                _busqueda.length > widget.maxLength
-                    ? _busqueda.substring(0, widget.maxLength)
-                    : _busqueda))
+        onTap: enabled
+            ? () => _pop(PickNombre(
+                _search.length > widget.maxLength
+                    ? _search.substring(0, widget.maxLength)
+                    : _search))
             : null,
         builder: (context, hovered, _) {
-          final color = habilitado ? t.accentStrong : t.textMute;
+          final color = enabled ? t.accentStrong : t.textMute;
           return AnimatedContainer(
             duration: Dimens.dFast,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
             decoration: BoxDecoration(
-              color: hovered && habilitado
+              color: hovered && enabled
                   ? t.accentSoft
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -196,7 +196,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
               children: [
                 Icon(Icons.add, size: 17, color: color),
                 const SizedBox(width: 9),
-                Text(etiqueta,
+                Text(label,
                     style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,

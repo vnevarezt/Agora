@@ -46,7 +46,7 @@ class S140 {
   /// de rol (Estudiante/Ayudante).
   static const double anchoBanda = anchoContenido + colGap + anchoRol;
 
-  /// Piso del título cuando la columna de nombres crece de forma adaptativa.
+  /// Piso del título when la columna de nombres crece de forma adaptativa.
   static const double minContenido = 0.40 * contentWidth;
 
   /// Piso del título en modo Sala Auxiliar (4 columnas).

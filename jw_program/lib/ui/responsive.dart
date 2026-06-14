@@ -8,7 +8,7 @@ enum ScreenSize { mobile, tablet, desktop }
 
 extension ResponsiveX on BuildContext {
   /// Tamaño de pantalla según el ancho de la ventana. Usa
-  /// [MediaQuery.sizeOf] para reconstruir solo cuando cambia el tamaño.
+  /// [MediaQuery.sizeOf] para reconstruir solo when cambia el tamaño.
   ScreenSize get screenSize {
     final w = MediaQuery.sizeOf(this).width;
     if (w <= kMobileBreakpoint) return ScreenSize.mobile;

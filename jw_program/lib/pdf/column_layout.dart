@@ -8,7 +8,7 @@ import 'pdf_theme.dart';
 class ColumnWidths {
   final double role;
   final double nomPrin;
-  final double aux; // 0 cuando el modo Sala Auxiliar está apagado
+  final double aux; // 0 when el modo Sala Auxiliar está apagado
   final double banda;
   const ColumnWidths({
     required this.role,

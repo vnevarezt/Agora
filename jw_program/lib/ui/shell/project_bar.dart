@@ -105,14 +105,14 @@ class _ProjId extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final congs = ref.watch(congregationsProvider);
-    final nSemanas = ref.watch(weeksProvider).asData?.value.length ?? 0;
+    final congregations = ref.watch(congregationsProvider);
+    final weekCount = ref.watch(weeksProvider).asData?.value.length ?? 0;
 
     final Congregation? cong = proyecto == null
         ? null
-        : congs.where((c) => c.id == proyecto!.congregationId).firstOrNull;
+        : congregations.where((c) => c.id == proyecto!.congregationId).firstOrNull;
     final nombre = proyecto?.name ?? 'Programa';
-    final congNombre =
+    final congName =
         cong?.name ?? (proyecto == null ? ref.watch(formProvider).congregationId : '');
     final congColor = cong == null ? t.accent : Color(cong.color);
 
@@ -149,7 +149,7 @@ class _ProjId extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      congNombre,
+                      congName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -162,7 +162,7 @@ class _ProjId extends ConsumerWidget {
                 ],
               ),
             ),
-            if (nSemanas > 0) ...[
+            if (weekCount > 0) ...[
               const SizedBox(width: 9),
               Container(
                 padding: const EdgeInsets.only(left: 9),
@@ -175,7 +175,7 @@ class _ProjId extends ConsumerWidget {
                     Icon(Icons.layers_outlined, size: 13, color: t.textMute),
                     const SizedBox(width: 4),
                     Text(
-                      '$nSemanas ${nSemanas == 1 ? 'semana' : 'semanas'}',
+                      '$weekCount ${weekCount == 1 ? 'semana' : 'semanas'}',
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
@@ -346,7 +346,7 @@ class _Arrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final habilitado = onTap != null;
+    final enabled = onTap != null;
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) => Container(
@@ -354,13 +354,13 @@ class _Arrow extends StatelessWidget {
         height: 34,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: hovered && habilitado ? t.surface2 : Colors.transparent,
+          color: hovered && enabled ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(Dimens.rControl),
         ),
         child: Icon(
           icon,
           size: 20,
-          color: habilitado ? t.textDim : t.textMute.withValues(alpha: 0.4),
+          color: enabled ? t.textDim : t.textMute.withValues(alpha: 0.4),
         ),
       ),
     );
@@ -412,7 +412,7 @@ class _WeekMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final aux = ref.watch(formProvider.select((f) => f.auxRoom));
-    final progresos = ref.watch(progressPerWeekProvider);
+    final progressList = ref.watch(progressPerWeekProvider);
 
     return Container(
       width: 280,
@@ -445,8 +445,8 @@ class _WeekMenu extends ConsumerWidget {
           ),
           for (var i = 0; i < weeks.length; i++)
             Builder(builder: (context) {
-              final pr = i < progresos.length
-                  ? progresos[i]
+              final pr = i < progressList.length
+                  ? progressList[i]
                   : (done: 0, total: 0);
               final completo = pr.total > 0 && pr.done == pr.total;
               return Pressable(
@@ -597,7 +597,7 @@ class _ExportMenu extends ConsumerWidget {
 
   final bool compact;
 
-  Future<void> _exportarSemana(BuildContext context, WidgetRef ref) async {
+  Future<void> _exportWeek(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     ref.read(exportBusyProvider.notifier).set(true);
     try {
@@ -631,7 +631,7 @@ class _ExportMenu extends ConsumerWidget {
           haySemana: haySemana,
           onSemana: () {
             menu.close();
-            _exportarSemana(context, ref);
+            _exportWeek(context, ref);
           },
         ),
       ],
@@ -720,15 +720,15 @@ class _ExportItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final habilitado = onTap != null;
+    final enabled = onTap != null;
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) => Opacity(
-        opacity: habilitado ? 1 : 0.45,
+        opacity: enabled ? 1 : 0.45,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
           decoration: BoxDecoration(
-            color: hovered && habilitado ? t.surface2 : Colors.transparent,
+            color: hovered && enabled ? t.surface2 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(

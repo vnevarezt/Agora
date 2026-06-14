@@ -45,7 +45,7 @@ bool isAuxEligible(Section seccion, String titulo) {
   return false;
 }
 
-ProgramRow _fila(String id, Section seccion, int t, Part p) {
+ProgramRow _row(String id, Section seccion, int t, Part p) {
   final rn = roleAndNames(seccion, p.title);
   final mins = p.minutes ?? 0;
   final cont = mins > 0 ? '${p.title} ($mins mins.)' : p.title;
@@ -117,7 +117,7 @@ ProgramSchedule buildSchedule(Week semana, int inicioMin, int duracion) {
 
   // --- Tesoros de la Biblia (consejo tras la Lectura) ---
   for (final p in tesoros) {
-    outTesoros.add(_fila('te${outTesoros.length}', Section.treasures, t, p));
+    outTesoros.add(_row('te${outTesoros.length}', Section.treasures, t, p));
     t += (p.minutes ?? 0);
     if (p.title.toLowerCase().contains('lectura de la biblia')) {
       t += consejoMin;
@@ -127,7 +127,7 @@ ProgramSchedule buildSchedule(Week semana, int inicioMin, int duracion) {
   // --- Seamos mejores maestros: bloque de 15 min, +1 de consejo por parte ---
   final seamosIni = t;
   for (final p in seamos) {
-    outSeamos.add(_fila('se${outSeamos.length}', Section.ministry, t, p));
+    outSeamos.add(_row('se${outSeamos.length}', Section.ministry, t, p));
     t += (p.minutes ?? 0) + consejoMin;
   }
   t = seamosIni + seamosMin; // fija la sección a 15 min
@@ -144,11 +144,11 @@ ProgramSchedule buildSchedule(Week semana, int inicioMin, int duracion) {
     t += sMid;
   }
   for (final p in nvPre) {
-    outVida.add(_fila('vi${outVida.length}', Section.christianLife, t, p));
+    outVida.add(_row('vi${outVida.length}', Section.christianLife, t, p));
     t += (p.minutes ?? 0);
   }
   if (cbs != null) {
-    outVida.add(_fila('vi${outVida.length}', Section.christianLife, t, cbs));
+    outVida.add(_row('vi${outVida.length}', Section.christianLife, t, cbs));
     t += cbsMin;
   }
 

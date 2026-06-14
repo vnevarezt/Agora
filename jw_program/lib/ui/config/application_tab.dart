@@ -15,7 +15,7 @@ const _pdfNameFormats = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre']
 const _notifications = [
   (
     title: 'Partes sin asignar',
-    desc: 'Avisar cuando falten asignaciones a 3 días de la reunión',
+    desc: 'Avisar when falten asignaciones a 3 días de la reunión',
     inicial: true,
   ),
   (
@@ -25,7 +25,7 @@ const _notifications = [
   ),
   (
     title: 'Nuevos cuadernos',
-    desc: 'Avisar cuando haya un nuevo cuaderno disponible',
+    desc: 'Avisar when haya un nuevo cuaderno disponible',
     inicial: true,
   ),
   (
@@ -45,21 +45,21 @@ class AplicacionTab extends ConsumerStatefulWidget {
 }
 
 class _AplicacionTabState extends ConsumerState<AplicacionTab> {
-  String _idioma = _appLanguages.first;
-  String _formato = _timeFormats.first;
-  String _inicio = _weekStarts.first;
-  String _nombrePdf = _pdfNameFormats.first;
+  String _language = _appLanguages.first;
+  String _format = _timeFormats.first;
+  String _weekStart = _weekStarts.first;
+  String _pdfNameFormat = _pdfNameFormats.first;
   late final List<bool> _notif = [for (final n in _notifications) n.inicial];
 
   @override
   Widget build(BuildContext context) {
     return SettingsColumns(
-      left: [_apariencia(), _general(), _notificacionesCard()],
-      right: [_datos(), _sesion()],
+      left: [_appearance(), _general(), _notificationsCard()],
+      right: [_datos(), _sessionSection()],
     );
   }
 
-  Widget _apariencia() {
+  Widget _appearance() {
     final modo = ref.watch(themeModeProvider);
     final idx = switch (modo) {
       ThemeMode.light => 0,
@@ -75,7 +75,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
         SettingRow(
           first: true,
           title: 'Tema',
-          subtitle: 'Claro, oscuro o según el sistema',
+          subtitle: 'Claro, dark o según el sistema',
           trailing: SegmentedTabs(
             segments: const [
               (icon: null, label: 'Claro'),
@@ -101,37 +101,37 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
             LabeledField(
               label: 'Idioma de la app',
               child: AppDropdown<String>(
-                value: _idioma,
+                value: _language,
                 items: _appLanguages,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _idioma = v),
+                onChanged: (v) => setState(() => _language = v),
               ),
             ),
             LabeledField(
               label: 'Formato de hora',
               child: AppDropdown<String>(
-                value: _formato,
+                value: _format,
                 items: _timeFormats,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _formato = v),
+                onChanged: (v) => setState(() => _format = v),
               ),
             ),
             LabeledField(
               label: 'Inicio de semana',
               child: AppDropdown<String>(
-                value: _inicio,
+                value: _weekStart,
                 items: _weekStarts,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _inicio = v),
+                onChanged: (v) => setState(() => _weekStart = v),
               ),
             ),
             LabeledField(
               label: 'Nombre en los PDF',
               child: AppDropdown<String>(
-                value: _nombrePdf,
+                value: _pdfNameFormat,
                 items: _pdfNameFormats,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _nombrePdf = v),
+                onChanged: (v) => setState(() => _pdfNameFormat = v),
               ),
             ),
           ],
@@ -140,7 +140,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
     );
   }
 
-  Widget _notificacionesCard() {
+  Widget _notificationsCard() {
     return SettingsCard(
       title: 'Notificaciones',
       desc: 'Recordatorios que genera la app.',
@@ -197,7 +197,7 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
     );
   }
 
-  Widget _sesion() {
+  Widget _sessionSection() {
     return SettingsCard(
       title: 'Sesión',
       desc: 'Estás usando la app en modo local en este dispositivo.',

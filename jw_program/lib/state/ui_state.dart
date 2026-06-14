@@ -18,7 +18,7 @@ class AppSectionController extends Notifier<AppSection> {
   void seleccionar(AppSection seccion) => state = seccion;
 }
 
-/// Modo claro/oscuro, alternado desde la barra de contexto. Solo en memoria.
+/// Modo claro/dark, alternado desde la barra de contexto. Solo en memoria.
 final themeModeProvider =
     NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
 

@@ -26,14 +26,14 @@ class ParticipantsController extends Notifier<List<Participant>> {
         : [for (final x in state) x.id == h.id ? h : x];
   }
 
-  void markUsed(String id, DateTime cuando) => state = [
+  void markUsed(String id, DateTime when) => state = [
         for (final x in state)
-          x.id == id ? x.copyWith(lastUsed: cuando) : x,
+          x.id == id ? x.copyWith(lastUsed: when) : x,
       ];
 
-  void setActive(String id, bool v, DateTime cuando) => state = [
+  void setActive(String id, bool v, DateTime when) => state = [
         for (final x in state)
-          x.id == id ? x.copyWith(active: v, updatedAt: cuando) : x,
+          x.id == id ? x.copyWith(active: v, updatedAt: when) : x,
       ];
 
   void eliminar(String id) =>
@@ -44,7 +44,7 @@ class ParticipantsController extends Notifier<List<Participant>> {
 final participantsProvider =
     NotifierProvider<ParticipantsController, List<Participant>>(ParticipantsController.new);
 
-/// Activos ordenados por nombre normalizado (lista del picker).
+/// Activos ordenados por nombre normalizado (list del picker).
 final activeParticipantsProvider = Provider<List<Participant>>((ref) {
   final todos = ref.watch(participantsProvider);
   return todos.where((h) => h.active).toList()
@@ -54,13 +54,13 @@ final activeParticipantsProvider = Provider<List<Participant>>((ref) {
 
 /// Recientes (por `ultimoUso` desc), máx. 6.
 final recentParticipantsProvider = Provider<List<Participant>>((ref) {
-  final activos = ref.watch(activeParticipantsProvider);
-  final conUso = activos.where((h) => h.lastUsed != null).toList()
+  final active = ref.watch(activeParticipantsProvider);
+  final conUso = active.where((h) => h.lastUsed != null).toList()
     ..sort((a, b) => b.lastUsed!.compareTo(a.lastUsed!));
   return conUso.take(6).toList();
 });
 
-/// Congregaciones distintas (sugerencias del formulario de personas).
+/// Congregaciones distintas (suggestions del formulario de personas).
 final participantCongregationsProvider = Provider<List<String>>((ref) {
   final todos = ref.watch(participantsProvider);
   final distintas = <String>{
@@ -76,12 +76,12 @@ List<Participant> filterParticipants(
   String query = '',
   Role? role,
   String? congregation,
-  bool incluirInactivos = false,
+  bool includeInactive = false,
 }) {
   final q = normalizeName(query);
   return [
     for (final h in todos)
-      if ((incluirInactivos || h.active) &&
+      if ((includeInactive || h.active) &&
           (role == null || h.role == role) &&
           (congregation == null || h.congregation == congregation) &&
           (q.isEmpty || normalizeName(h.name).contains(q)))
@@ -106,10 +106,10 @@ class ParticipantActions {
   /// solo marca uso; si no, alta mínima que queda como 'Incompleto' en la
   /// pantalla de gestión (sexo sin especificar).
   Future<void> recordUsage(String nombre) async {
-    final limpio = nombre.trim();
-    if (limpio.isEmpty) return;
+    final clean = nombre.trim();
+    if (clean.isEmpty) return;
     final ahora = DateTime.now().toUtc();
-    final clave = normalizeName(limpio);
+    final clave = normalizeName(clean);
     for (final h in _ref.read(participantsProvider)) {
       if (normalizeName(h.name) == clave) {
         _dir.markUsed(h.id, ahora);
@@ -118,7 +118,7 @@ class ParticipantActions {
     }
     _dir.upsert(Participant(
       id: _uuid.v4(),
-      name: limpio,
+      name: clean,
       gender: Gender.unspecified,
       role: Role.publisher,
       congregation: _ref.read(formProvider).congregationId,

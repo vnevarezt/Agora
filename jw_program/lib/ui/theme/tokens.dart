@@ -91,7 +91,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
 }
 
 /// Paleta con sus dos modos. La app usa [pizarra]; las demás del mock se
-/// agregan aquí cuando se necesiten.
+/// agregan aquí when se necesiten.
 class AppPalette {
   final String id;
   final AppTokens light;

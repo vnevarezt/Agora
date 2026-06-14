@@ -10,7 +10,7 @@ import '../models/reminder.dart';
 /// la sesión (sin persistencia). Cuando exista backend, solo cambian las
 /// fuentes de estos providers; la UI no se entera.
 
-/// Usuario en sesión (saludo y tarjeta lateral). Sin identidad real todavía:
+/// Usuario en sesión (greeting y tarjeta lateral). Sin identidad real todavía:
 /// neutro hasta que haya autenticación.
 final sessionUserProvider = Provider<({String name, String role})>(
     (ref) => (name: '', role: ''));
@@ -52,7 +52,7 @@ final congregationsProvider =
 /// descarga real del editor).
 final notebooksProvider = Provider<List<Notebook>>((ref) => const []);
 
-/// Recordatorios/alertas. Vacío sin backend (son alertas derivadas).
+/// Recordatorios/alerts. Vacío sin backend (son alerts derivadas).
 final remindersProvider = Provider<List<Reminder>>((ref) => const []);
 
 /// Lista de proyectos editable en memoria. El modal de proyectos crea, edita y
@@ -111,7 +111,7 @@ final projectsProvider =
     NotifierProvider<ProjectsController, List<Project>>(
         ProjectsController.new);
 
-/// Filtros activos: congregación (`'all'` = todas) y estado (`null` = todos).
+/// Filtros active: congregación (`'all'` = todas) y estado (`null` = todos).
 class DashboardFilters {
   /// `'all'` o el id de una congregación.
   final String congregationId;
@@ -137,7 +137,7 @@ final dashboardFiltersProvider =
     NotifierProvider<DashboardFiltersController, DashboardFilters>(
         DashboardFiltersController.new);
 
-/// Proyectos visibles tras aplicar los filtros activos.
+/// Proyectos visibles tras apply los filters active.
 final filteredProjectsProvider = Provider<List<Project>>((ref) {
   final proyectos = ref.watch(projectsProvider);
   final f = ref.watch(dashboardFiltersProvider);

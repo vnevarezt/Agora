@@ -6,7 +6,7 @@ import 'package:html/parser.dart' as html_parser;
 
 import '../models/week.dart';
 
-/// Parseo del EPUB del cuaderno mwb -> lista de semanas.
+/// Parseo del EPUB del cuaderno mwb -> list de semanas.
 ///
 /// Port 1:1 de `parsear_epub` / `parsear_semana` / `_texto` / `_duracion`
 /// de generar_programa.py:54-124. Conserva las MISMAS expresiones regulares.
@@ -34,7 +34,7 @@ final _reCancionSola = RegExp(r'^Canci[óo]n\s+\d+$');
 final _reParteNum = RegExp(r'^(\d+)\.\s+(.*)$', dotAll: true);
 final _reArchivoSemana = RegExp(r'^OEBPS/\d+\.xhtml$');
 
-/// HTML -> texto limpio (sin etiquetas, sin nº de página ni superíndices).
+/// HTML -> texto clean (sin etiquetas, sin nº de página ni superíndices).
 String _texto(String frag) {
   frag = frag.replaceAll(_rePageNum, '');
   frag = frag.replaceAll(_reSup, ''); // marcas de nota

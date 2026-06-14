@@ -15,7 +15,7 @@ import 'part_card.dart';
 import 'part_presentation.dart';
 
 /// Columna de asignaciones: tarjeta del presidente + las cuatro secciones
-/// del programa. Estado vacío con CTA de descarga cuando no hay cuaderno.
+/// del programa. Estado vacío con CTA de descarga when no hay cuaderno.
 class WorkspacePanel extends ConsumerWidget {
   const WorkspacePanel({super.key});
 

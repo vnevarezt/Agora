@@ -52,7 +52,7 @@ Future<PickResult?> showPersonPicker(
       builder: (context) {
         final alto = MediaQuery.sizeOf(context).height;
         return Padding(
-          // Deja el buscador visible cuando aparece el teclado.
+          // Deja el buscador visible when aparece el teclado.
           padding: EdgeInsets.only(
               bottom: MediaQuery.viewInsetsOf(context).bottom),
           child: ConstrainedBox(

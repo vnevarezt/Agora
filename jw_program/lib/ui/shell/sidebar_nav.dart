@@ -22,7 +22,7 @@ const _items = <({AppSection section, IconData icon, String label})>[
 ];
 
 /// Nº de recordatorios urgentes; se muestra como badge en "Inicio".
-final _alertasProvider = Provider<int>((ref) => ref
+final _alertsProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
     .where((r) => r.type == ReminderType.alert)
     .length);
@@ -39,7 +39,7 @@ class Sidebar extends ConsumerWidget {
     final t = context.tokens;
     final section = ref.watch(appSectionProvider);
     final usuario = ref.watch(sessionUserProvider);
-    final alertas = ref.watch(_alertasProvider);
+    final alerts = ref.watch(_alertsProvider);
 
     return Container(
       width: compact ? 64 : 232,
@@ -60,7 +60,7 @@ class Sidebar extends ConsumerWidget {
               label: it.label,
               compact: compact,
               active: section == it.section,
-              badge: it.section == AppSection.home ? alertas : 0,
+              badge: it.section == AppSection.home ? alerts : 0,
             ),
             const SizedBox(height: 2),
           ],
@@ -291,7 +291,7 @@ class BottomNav extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final section = ref.watch(appSectionProvider);
-    final alertas = ref.watch(_alertasProvider);
+    final alerts = ref.watch(_alertsProvider);
 
     return Container(
       decoration: BoxDecoration(
@@ -311,7 +311,7 @@ class BottomNav extends ConsumerWidget {
                     icon: it.icon,
                     label: it.label,
                     active: section == it.section,
-                    badge: it.section == AppSection.home ? alertas : 0,
+                    badge: it.section == AppSection.home ? alerts : 0,
                   ),
                 ),
             ],

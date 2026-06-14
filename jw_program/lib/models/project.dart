@@ -3,7 +3,7 @@ enum ProjectStatus { draft, complete, exported }
 
 extension ProjectStatusX on ProjectStatus {
   /// Etiqueta singular para la insignia ("Borrador").
-  String get etiqueta => switch (this) {
+  String get label => switch (this) {
         ProjectStatus.draft => 'Borrador',
         ProjectStatus.complete => 'Completo',
         ProjectStatus.exported => 'Exportado',

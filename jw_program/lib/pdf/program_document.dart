@@ -196,7 +196,7 @@ pw.Widget _tabla(List<ProgramRow> filas, Assignments asg, ColumnWidths cols,
     double Function(String) medir, bool aux) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [for (final f in filas) _fila(f, asg, cols, medir, aux)],
+    children: [for (final f in filas) _row(f, asg, cols, medir, aux)],
   );
 }
 
@@ -228,7 +228,7 @@ pw.Widget _tabla(List<ProgramRow> filas, Assignments asg, ColumnWidths cols,
   );
 }
 
-pw.Widget _fila(ProgramRow r, Assignments asg, ColumnWidths cols,
+pw.Widget _row(ProgramRow r, Assignments asg, ColumnWidths cols,
     double Function(String) medir, bool aux) {
   final horaStyle = pw.TextStyle(
       fontSize: S140.small,

@@ -5,7 +5,7 @@ import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 
 /// Insignia de privilegio: anciano (accent), siervo (ámbar) y publicador
-/// (neutro). El ámbar lleva variante para modo oscuro.
+/// (neutro). El ámbar lleva variante para modo dark.
 class PrivBadge extends StatelessWidget {
   const PrivBadge({super.key, required this.role});
 
@@ -24,6 +24,6 @@ class PrivBadge extends StatelessWidget {
       Role.publisher => (t.surface2, t.textDim, t.border2),
     };
 
-    return Pill(label: role.etiqueta, background: bg, foreground: fg, border: border);
+    return Pill(label: role.label, background: bg, foreground: fg, border: border);
   }
 }

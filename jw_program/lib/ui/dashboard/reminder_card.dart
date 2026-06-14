@@ -14,12 +14,12 @@ class ReminderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final oscuro = Theme.of(context).brightness == Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final r = recordatorio;
 
     final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
         switch (r.type) {
-      ReminderType.alert => oscuro
+      ReminderType.alert => dark
           ? (
               Icons.warning_amber_rounded,
               const Color(0xFF40231C),

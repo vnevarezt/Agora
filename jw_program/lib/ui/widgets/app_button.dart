@@ -75,11 +75,11 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final habilitado = onPressed != null && !busy;
+    final enabled = onPressed != null && !busy;
     final esPrimary = variant == AppButtonVariant.primary;
 
     return Pressable(
-      onTap: habilitado ? onPressed : null,
+      onTap: enabled ? onPressed : null,
       builder: (context, hovered, pressed) {
         final bg = esPrimary
             ? (hovered ? t.accentStrong : t.accent)
@@ -98,10 +98,10 @@ class AppButton extends StatelessWidget {
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
               : Matrix4.identity(),
           decoration: BoxDecoration(
-            color: habilitado ? bg : bg.withValues(alpha: esPrimary ? 0.55 : 0),
+            color: enabled ? bg : bg.withValues(alpha: esPrimary ? 0.55 : 0),
             borderRadius: BorderRadius.circular(Dimens.rControl),
             border: esPrimary ? null : Border.all(color: t.border),
-            boxShadow: esPrimary && habilitado
+            boxShadow: esPrimary && enabled
                 ? const [
                     BoxShadow(
                         color: Color(0x14000000),

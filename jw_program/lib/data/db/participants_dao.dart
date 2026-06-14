@@ -27,20 +27,20 @@ class ParticipantsDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Inserta o actualiza por id. El caller es responsable de fijar
-  /// `updatedAt` cuando el cambio es una edición de usuario.
+  /// `updatedAt` when el cambio es una edición de usuario.
   Future<void> upsert(Participant h) =>
       into(participants).insertOnConflictUpdate(h.toInsertable());
 
   /// Marca uso desde el picker. SOLO toca `ultimoUso`: si tocara
   /// `updatedAt`, cada asignación pisaría ediciones reales al fusionar.
-  Future<void> markUsed(String id, DateTime cuando) {
+  Future<void> markUsed(String id, DateTime when) {
     return (update(participants)..where((t) => t.id.equals(id)))
-        .write(ParticipantsCompanion(lastUsed: Value(cuando)));
+        .write(ParticipantsCompanion(lastUsed: Value(when)));
   }
 
-  Future<void> setActive(String id, bool v, DateTime cuando) {
+  Future<void> setActive(String id, bool v, DateTime when) {
     return (update(participants)..where((t) => t.id.equals(id))).write(
-      ParticipantsCompanion(active: Value(v), updatedAt: Value(cuando)),
+      ParticipantsCompanion(active: Value(v), updatedAt: Value(when)),
     );
   }
 

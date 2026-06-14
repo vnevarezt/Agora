@@ -37,7 +37,7 @@ class ProjectModal extends ConsumerStatefulWidget {
   final Project? original;
   final VoidCallback onClose;
 
-  /// true cuando se presenta como bottom sheet (móvil).
+  /// true when se presenta como bottom sheet (móvil).
   final bool sheet;
 
   @override
@@ -45,34 +45,34 @@ class ProjectModal extends ConsumerStatefulWidget {
 }
 
 class _ProjectModalState extends ConsumerState<ProjectModal> {
-  late String _nombre = widget.original?.name ?? '';
-  late String _congId;
-  late String _cuadernoId;
-  late List<String> _semanas = List.of(widget.original?.weeks ?? const []);
+  late String _name = widget.original?.name ?? '';
+  late String _congregationId;
+  late String _notebookId;
+  late List<String> _weeks = List.of(widget.original?.weeks ?? const []);
 
   bool get _isNew => widget.original == null;
 
   @override
   void initState() {
     super.initState();
-    final congs = ref.read(congregationsProvider);
+    final congregations = ref.read(congregationsProvider);
     final cuadernos = ref.read(notebooksProvider);
-    _congId = widget.original?.congregationId ??
-        (congs.isNotEmpty ? congs.first.id : '');
-    _cuadernoId = cuadernos.isNotEmpty ? cuadernos.first.id : '';
+    _congregationId = widget.original?.congregationId ??
+        (congregations.isNotEmpty ? congregations.first.id : '');
+    _notebookId = cuadernos.isNotEmpty ? cuadernos.first.id : '';
   }
 
   /// Alterna una semana del cuaderno, manteniendo el orden del cuaderno y las
   /// semanas "extra" (de otros cuadernos) al final. Réplica de `toggleWeek`.
   void _toggle(String w, Notebook cuaderno) {
     setState(() {
-      if (_semanas.contains(w)) {
-        _semanas = _semanas.where((x) => x != w).toList();
+      if (_weeks.contains(w)) {
+        _weeks = _weeks.where((x) => x != w).toList();
       } else {
         final extra =
-            _semanas.where((x) => !cuaderno.weeks.contains(x)).toList();
-        _semanas = [
-          ...cuaderno.weeks.where((x) => _semanas.contains(x) || x == w),
+            _weeks.where((x) => !cuaderno.weeks.contains(x)).toList();
+        _weeks = [
+          ...cuaderno.weeks.where((x) => _weeks.contains(x) || x == w),
           ...extra,
         ];
       }
@@ -80,14 +80,14 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   }
 
   void _remove(String w) =>
-      setState(() => _semanas = _semanas.where((x) => x != w).toList());
+      setState(() => _weeks = _weeks.where((x) => x != w).toList());
 
-  /// Nombre por defecto cuando el campo está vacío.
+  /// Nombre por defecto when el campo está vacío.
   String _autoName(Notebook cuaderno) {
-    if (_nombre.trim().isNotEmpty) return _nombre.trim();
-    if (_semanas.isEmpty) return '';
+    if (_name.trim().isNotEmpty) return _name.trim();
+    if (_weeks.isEmpty) return '';
     final base = cuaderno.label.split('–').first.trim();
-    final n = _semanas.length;
+    final n = _weeks.length;
     return '$base · $n ${n == 1 ? 'semana' : 'semanas'}';
   }
 
@@ -96,16 +96,16 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final notifier = ref.read(projectsProvider.notifier);
     if (_isNew) {
       notifier.create(
-          name: nombre, congregationId: _congId, weeks: _semanas);
+          name: nombre, congregationId: _congregationId, weeks: _weeks);
     } else {
       notifier.update(widget.original!.id,
-          name: nombre, congregationId: _congId, weeks: _semanas);
+          name: nombre, congregationId: _congregationId, weeks: _weeks);
     }
     widget.onClose();
   }
 
   Future<void> _delete() async {
-    final confirmado = await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar proyecto?'),
@@ -126,7 +126,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         ],
       ),
     );
-    if (confirmado != true || !mounted) return;
+    if (confirmed != true || !mounted) return;
     ref.read(projectsProvider.notifier).delete(widget.original!.id);
     widget.onClose();
   }
@@ -135,7 +135,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final isMobile = context.isMobile;
-    final congs = ref.watch(congregationsProvider);
+    final congregations = ref.watch(congregationsProvider);
     final cuadernos = ref.watch(notebooksProvider);
 
     final Widget card;
@@ -154,10 +154,10 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         ],
       );
     } else {
-      final cuaderno = cuadernos.firstWhere((c) => c.id == _cuadernoId,
+      final cuaderno = cuadernos.firstWhere((c) => c.id == _notebookId,
           orElse: () => cuadernos.first);
       final extra =
-          _semanas.where((x) => !cuaderno.weeks.contains(x)).toList();
+          _weeks.where((x) => !cuaderno.weeks.contains(x)).toList();
       final autoName = _autoName(cuaderno);
       card = Column(
         mainAxisSize: MainAxisSize.min,
@@ -169,7 +169,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
               child: _body(
-                  t, isMobile, congs, cuadernos, cuaderno, extra, autoName),
+                  t, isMobile, congregations, cuadernos, cuaderno, extra, autoName),
             ),
           ),
           _footer(t, isMobile, cuaderno),
@@ -269,7 +269,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   Widget _body(
     AppTokens t,
     bool isMobile,
-    List<Congregation> congs,
+    List<Congregation> congregations,
     List<Notebook> cuadernos,
     Notebook cuaderno,
     List<String> extra,
@@ -278,19 +278,19 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final congField = LabeledField(
       label: 'Congregación',
       child: AppDropdown<String>(
-        value: _congId,
-        items: [for (final c in congs) c.id],
-        itemLabel: (id) => congs.firstWhere((c) => c.id == id).name,
-        onChanged: (v) => setState(() => _congId = v),
+        value: _congregationId,
+        items: [for (final c in congregations) c.id],
+        itemLabel: (id) => congregations.firstWhere((c) => c.id == id).name,
+        onChanged: (v) => setState(() => _congregationId = v),
       ),
     );
     final cuadernoField = LabeledField(
       label: 'Cuaderno',
       child: AppDropdown<String>(
-        value: _cuadernoId,
+        value: _notebookId,
         items: [for (final c in cuadernos) c.id],
         itemLabel: (id) => cuadernos.firstWhere((c) => c.id == id).label,
-        onChanged: (v) => setState(() => _cuadernoId = v),
+        onChanged: (v) => setState(() => _notebookId = v),
       ),
     );
 
@@ -312,8 +312,8 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           ),
         const SizedBox(height: 14),
         LabeledField(
-          label: 'Semanas a incluir · ${_semanas.length} '
-              '${_semanas.length == 1 ? 'seleccionada' : 'seleccionadas'}',
+          label: 'Semanas a incluir · ${_weeks.length} '
+              '${_weeks.length == 1 ? 'seleccionada' : 'seleccionadas'}',
           child: Wrap(
             spacing: 6,
             runSpacing: 6,
@@ -321,7 +321,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
               for (final w in cuaderno.weeks)
                 _WeekToggle(
                   label: w,
-                  active: _semanas.contains(w),
+                  active: _weeks.contains(w),
                   onTap: () => _toggle(w, cuaderno),
                 ),
               for (final w in extra)
@@ -338,9 +338,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         LabeledField(
           label: 'Nombre del proyecto',
           child: BoundTextField(
-            initial: _nombre,
+            initial: _name,
             hint: autoName.isNotEmpty ? autoName : 'Ej. Mayo 2026',
-            onChanged: (v) => setState(() => _nombre = v),
+            onChanged: (v) => setState(() => _name = v),
           ),
         ),
       ],
@@ -348,7 +348,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   }
 
   Widget _footer(AppTokens t, bool isMobile, Notebook cuaderno) {
-    final puedeGuardar = _semanas.isNotEmpty;
+    final puedeGuardar = _weeks.isNotEmpty;
     final etiquetaPrimary = _isNew ? 'Crear proyecto' : 'Guardar cambios';
 
     final children = isMobile

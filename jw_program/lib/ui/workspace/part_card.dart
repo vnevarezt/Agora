@@ -43,7 +43,7 @@ class PartCard extends ConsumerWidget {
 }
 
 /// Canción media / palabras de introducción y conclusión: una sola línea
-/// con hora, título y etiqueta a la derecha.
+/// con hora, título y label a la derecha.
 class _FixedLineBody extends StatelessWidget {
   const _FixedLineBody({required this.view});
 

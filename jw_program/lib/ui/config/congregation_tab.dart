@@ -27,66 +27,66 @@ class CongregacionTab extends ConsumerStatefulWidget {
 }
 
 class _CongregacionTabState extends ConsumerState<CongregacionTab> {
-  String? _congId;
-  String _nombre = '';
-  String _numero = '';
-  String _idioma = meetingLanguages.first;
-  String _diaEntre = 'Martes';
-  String _horaEntre = '19:00';
-  String _diaFin = 'Domingo';
-  String _horaFin = '10:00';
-  bool _aux = false;
+  String? _congregationId;
+  String _name = '';
+  String _number = '';
+  String _language = meetingLanguages.first;
+  String _weekdayDay = 'Martes';
+  String _weekdayTime = '19:00';
+  String _weekendDay = 'Domingo';
+  String _weekendTime = '10:00';
+  bool _auxRoom = false;
 
   /// Selecciona una congregación y siembra los campos. Los horarios aún no se
   /// persisten (sin backend): se muestran con valores por defecto.
-  void _select(Congregation cong, {bool notificar = true}) {
-    void aplicar() {
-      _congId = cong.id;
-      _nombre = cong.name;
-      _numero = cong.number;
-      _idioma = meetingLanguages.first;
-      _diaEntre = 'Martes';
-      _horaEntre = '19:00';
-      _diaFin = 'Domingo';
-      _horaFin = '10:00';
-      _aux = false;
+  void _select(Congregation cong, {bool notify = true}) {
+    void apply() {
+      _congregationId = cong.id;
+      _name = cong.name;
+      _number = cong.number;
+      _language = meetingLanguages.first;
+      _weekdayDay = 'Martes';
+      _weekdayTime = '19:00';
+      _weekendDay = 'Domingo';
+      _weekendTime = '10:00';
+      _auxRoom = false;
     }
 
-    if (notificar) {
-      setState(aplicar);
+    if (notify) {
+      setState(apply);
     } else {
-      aplicar();
+      apply();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final congs = ref.watch(congregationsProvider);
+    final congregations = ref.watch(congregationsProvider);
 
-    // Mantener una selección válida (la lista cambia en memoria).
-    if (congs.isEmpty) {
-      _congId = null;
-    } else if (_congId == null || !congs.any((c) => c.id == _congId)) {
-      _select(congs.first, notificar: false);
+    // Mantener una selección válida (la list cambia en memoria).
+    if (congregations.isEmpty) {
+      _congregationId = null;
+    } else if (_congregationId == null || !congregations.any((c) => c.id == _congregationId)) {
+      _select(congregations.first, notify: false);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _selectorCongregaciones(congs),
+        _congregationSelector(congregations),
         const SizedBox(height: 16),
-        if (congs.isEmpty)
-          _vacio(context)
+        if (congregations.isEmpty)
+          _empty(context)
         else
           SettingsColumns(
-            left: [_datosCard(), _horariosCard()],
-            right: [_usuariosCard()],
+            left: [_dataCard(), _scheduleCard()],
+            right: [_usersCard()],
           ),
       ],
     );
   }
 
-  Widget _vacio(BuildContext context) {
+  Widget _empty(BuildContext context) {
     return const EmptyState(
       icon: Icons.apartment_outlined,
       message: 'Aún no hay congregaciones.\n'
@@ -94,17 +94,17 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
     );
   }
 
-  Widget _selectorCongregaciones(List<Congregation> congs) {
+  Widget _congregationSelector(List<Congregation> congregations) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        for (final c in congs)
+        for (final c in congregations)
           _CongChip(
             congregation: c,
             acceso: '',
-            active: _congId == c.id,
+            active: _congregationId == c.id,
             onTap: () => _select(c),
           ),
         _AddChip(onTap: () => showNewCongregation(context)),
@@ -112,7 +112,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
     );
   }
 
-  Widget _datosCard() {
+  Widget _dataCard() {
     final t = context.tokens;
     return SettingsCard(
       title: 'Datos de la congregación',
@@ -123,27 +123,27 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
             LabeledField(
               label: 'Nombre',
               child: BoundTextField(
-                key: ValueKey('$_congId-nombre'),
-                initial: _nombre,
-                onChanged: (v) => _nombre = v,
+                key: ValueKey('$_congregationId-nombre'),
+                initial: _name,
+                onChanged: (v) => _name = v,
               ),
             ),
             LabeledField(
               label: 'Número',
               child: BoundTextField(
-                key: ValueKey('$_congId-numero'),
-                initial: _numero,
+                key: ValueKey('$_congregationId-numero'),
+                initial: _number,
                 style: AppText.mono(size: 13.5, color: t.text),
-                onChanged: (v) => _numero = v,
+                onChanged: (v) => _number = v,
               ),
             ),
             LabeledField(
               label: 'Idioma de la reunión',
               child: AppDropdown<String>(
-                value: _idioma,
+                value: _language,
                 items: meetingLanguages,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _idioma = v),
+                onChanged: (v) => setState(() => _language = v),
               ),
             ),
           ],
@@ -152,7 +152,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
     );
   }
 
-  Widget _horariosCard() {
+  Widget _scheduleCard() {
     final t = context.tokens;
     final mono = AppText.mono(size: 13.5, color: t.text);
     return SettingsCard(
@@ -164,37 +164,37 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
             LabeledField(
               label: 'Entre semana · día',
               child: AppDropdown<String>(
-                value: _diaEntre,
+                value: _weekdayDay,
                 items: daysOfWeek,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _diaEntre = v),
+                onChanged: (v) => setState(() => _weekdayDay = v),
               ),
             ),
             LabeledField(
               label: 'Entre semana · hora',
               child: BoundTextField(
-                key: ValueKey('$_congId-he'),
-                initial: _horaEntre,
+                key: ValueKey('$_congregationId-he'),
+                initial: _weekdayTime,
                 style: mono,
-                onChanged: (v) => _horaEntre = v,
+                onChanged: (v) => _weekdayTime = v,
               ),
             ),
             LabeledField(
               label: 'Fin de semana · día',
               child: AppDropdown<String>(
-                value: _diaFin,
+                value: _weekendDay,
                 items: daysOfWeek,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _diaFin = v),
+                onChanged: (v) => setState(() => _weekendDay = v),
               ),
             ),
             LabeledField(
               label: 'Fin de semana · hora',
               child: BoundTextField(
-                key: ValueKey('$_congId-hf'),
-                initial: _horaFin,
+                key: ValueKey('$_congregationId-hf'),
+                initial: _weekendTime,
                 style: mono,
-                onChanged: (v) => _horaFin = v,
+                onChanged: (v) => _weekendTime = v,
               ),
             ),
           ],
@@ -205,8 +205,8 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
           trailing: Transform.scale(
             scale: 0.85,
             child: Switch(
-              value: _aux,
-              onChanged: (v) => setState(() => _aux = v),
+              value: _auxRoom,
+              onChanged: (v) => setState(() => _auxRoom = v),
             ),
           ),
         ),
@@ -214,7 +214,7 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
     );
   }
 
-  Widget _usuariosCard() {
+  Widget _usersCard() {
     final t = context.tokens;
     return SettingsCard(
       title: 'Usuarios con acceso',

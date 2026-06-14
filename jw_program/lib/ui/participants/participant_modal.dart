@@ -53,13 +53,13 @@ class PersonModal extends ConsumerStatefulWidget {
 }
 
 class _PersonModalState extends ConsumerState<PersonModal> {
-  late String _nombre = widget.original?.name ?? '';
-  late Gender _sexo = widget.original?.gender ?? Gender.male;
-  late Role _privilegio =
+  late String _name = widget.original?.name ?? '';
+  late Gender _gender = widget.original?.gender ?? Gender.male;
+  late Role _role =
       widget.original?.role ?? Role.publisher;
-  late String _congregacion;
-  late bool _activo = widget.original?.active ?? true;
-  bool _guardando = false;
+  late String _congregation;
+  late bool _active = widget.original?.active ?? true;
+  bool _saving = false;
 
   /// Bump para re-sembrar el campo de congregación al tocar un chip.
   int _congVersion = 0;
@@ -69,47 +69,47 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   @override
   void initState() {
     super.initState();
-    _congregacion = widget.original?.congregation ?? ref.read(formProvider).congregationId;
+    _congregation = widget.original?.congregation ?? ref.read(formProvider).congregationId;
   }
 
   void _setGender(Gender s) => setState(() {
-        _sexo = s;
+        _gender = s;
         // Las hermanas solo participan como publicadoras.
-        if (s == Gender.female) _privilegio = Role.publisher;
+        if (s == Gender.female) _role = Role.publisher;
       });
 
   Future<void> _save() async {
-    setState(() => _guardando = true);
+    setState(() => _saving = true);
     try {
       final ahora = DateTime.now().toUtc();
       final h = _isCreating
           ? Participant(
               id: const Uuid().v4(),
-              name: _nombre.trim(),
-              gender: _sexo,
-              role: _privilegio,
-              congregation: _congregacion.trim(),
-              active: _activo,
+              name: _name.trim(),
+              gender: _gender,
+              role: _role,
+              congregation: _congregation.trim(),
+              active: _active,
               notes: '',
               createdAt: ahora,
               updatedAt: ahora,
             )
           : widget.original!.copyWith(
-              name: _nombre.trim(),
-              gender: _sexo,
-              role: _privilegio,
-              congregation: _congregacion.trim(),
-              active: _activo,
+              name: _name.trim(),
+              gender: _gender,
+              role: _role,
+              congregation: _congregation.trim(),
+              active: _active,
             );
       await ref.read(participantActionsProvider).guardar(h);
       widget.onClose();
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   Future<void> _delete() async {
-    final confirmado = await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar definitivamente?'),
@@ -131,7 +131,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         ],
       ),
     );
-    if (confirmado != true || !mounted) return;
+    if (confirmed != true || !mounted) return;
     await ref.read(participantActionsProvider).eliminar(widget.original!.id);
     widget.onClose();
   }
@@ -234,14 +234,14 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       );
 
   Widget _body(AppTokens t) {
-    final sugerencias = ref
+    final suggestions = ref
         .watch(participantCongregationsProvider)
-        .where((c) => c != _congregacion.trim())
+        .where((c) => c != _congregation.trim())
         .take(3)
         .toList();
-    final sexoIdx =
-        switch (_sexo) { Gender.male => 0, Gender.female => 1, _ => -1 };
-    final privsDisponibles = _sexo == Gender.female
+    final genderIndex =
+        switch (_gender) { Gender.male => 0, Gender.female => 1, _ => -1 };
+    final availableRoles = _gender == Gender.female
         ? const [Role.publisher]
         : Role.values;
 
@@ -251,10 +251,10 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         LabeledField(
           label: 'Nombre completo',
           child: BoundTextField(
-            initial: _nombre,
+            initial: _name,
             maxLength: Limites.name,
             hint: 'Ej. Martín Salas',
-            onChanged: (v) => setState(() => _nombre = v),
+            onChanged: (v) => setState(() => _name = v),
           ),
         ),
         const SizedBox(height: 14),
@@ -262,22 +262,22 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           label: 'Congregación',
           child: BoundTextField(
             key: ValueKey('cong-$_congVersion'),
-            initial: _congregacion,
+            initial: _congregation,
             maxLength: Limites.congregationId,
-            onChanged: (v) => setState(() => _congregacion = v),
+            onChanged: (v) => setState(() => _congregation = v),
           ),
         ),
-        if (sugerencias.isNotEmpty)
+        if (suggestions.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Wrap(
               spacing: 6,
               runSpacing: 6,
               children: [
-                for (final c in sugerencias)
+                for (final c in suggestions)
                   Pressable(
                     onTap: () => setState(() {
-                      _congregacion = c;
+                      _congregation = c;
                       _congVersion++;
                     }),
                     builder: (context, _, _) => MiniChip.tag(c),
@@ -293,7 +293,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               (icon: null, label: 'Hombre'),
               (icon: null, label: 'Mujer'),
             ],
-            index: sexoIdx,
+            index: genderIndex,
             expand: true,
             onChanged: (i) => _setGender(i == 0 ? Gender.male : Gender.female),
           ),
@@ -303,12 +303,12 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           label: 'Privilegio',
           child: Column(
             children: [
-              for (final p in privsDisponibles) ...[
-                if (p != privsDisponibles.first) const SizedBox(height: 8),
+              for (final p in availableRoles) ...[
+                if (p != availableRoles.first) const SizedBox(height: 8),
                 _RoleOption(
                   role: p,
-                  selected: _privilegio == p,
-                  onTap: () => setState(() => _privilegio = p),
+                  selected: _role == p,
+                  onTap: () => setState(() => _role = p),
                 ),
               ],
             ],
@@ -316,15 +316,15 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         ),
         const SizedBox(height: 16),
         _AvailableRow(
-          active: _activo,
-          onChanged: (v) => setState(() => _activo = v),
+          active: _active,
+          onChanged: (v) => setState(() => _active = v),
         ),
       ],
     );
   }
 
   Widget _footer(AppTokens t) {
-    final puedeGuardar = _nombre.trim().isNotEmpty && !_guardando;
+    final puedeGuardar = _name.trim().isNotEmpty && !_saving;
     final primary = _isCreating ? 'Añadir participante' : 'Guardar cambios';
 
     final children = widget.sheet
@@ -332,7 +332,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             AppButton(
               label: primary,
               expand: true,
-              busy: _guardando,
+              busy: _saving,
               height: Dimens.hExportMobile,
               onPressed: puedeGuardar ? _save : null,
             ),
@@ -367,7 +367,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 const SizedBox(width: 8),
                 AppButton(
                   label: primary,
-                  busy: _guardando,
+                  busy: _saving,
                   onPressed: puedeGuardar ? _save : null,
                 ),
               ],
@@ -455,7 +455,7 @@ class _RoleOption extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      role.etiqueta,
+                      role.label,
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,

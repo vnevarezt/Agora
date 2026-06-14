@@ -7,7 +7,7 @@
 enum Gender { male, female, unspecified }
 
 extension GenderX on Gender {
-  String get etiqueta => switch (this) {
+  String get label => switch (this) {
         Gender.male => 'Hombre',
         Gender.female => 'Mujer',
         Gender.unspecified => 'No especificado',
@@ -17,7 +17,7 @@ extension GenderX on Gender {
 enum Role { elder, ministerialServant, publisher }
 
 extension RoleX on Role {
-  String get etiqueta => switch (this) {
+  String get label => switch (this) {
         Role.elder => 'Anciano',
         Role.ministerialServant => 'Siervo ministerial',
         Role.publisher => 'Publicador',
@@ -45,7 +45,7 @@ class Participant {
   /// fusionar imports (NO se toca al registrar uso).
   final DateTime updatedAt;
 
-  /// Última vez asignado desde el picker (recientes persistentes).
+  /// Última vez asignado desde el picker (recent persistentes).
   final DateTime? lastUsed;
 
   const Participant({

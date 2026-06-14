@@ -29,7 +29,7 @@ class _ConfiguracionViewState extends State<ConfiguracionView> {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
-          child: _topbar(context, isMobile),
+          child: _topBar(context, isMobile),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -58,7 +58,7 @@ class _ConfiguracionViewState extends State<ConfiguracionView> {
     );
   }
 
-  Widget _topbar(BuildContext context, bool isMobile) {
+  Widget _topBar(BuildContext context, bool isMobile) {
     final t = context.tokens;
     return Row(
       children: [

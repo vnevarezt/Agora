@@ -59,7 +59,7 @@ class FormModel {
   }
 
   /// [chairman]/[main]/[auxiliary] sobrescriben la **semana resultante**
-  /// (la activa tras aplicar [weekIndex]); el resto de semanas se conserva.
+  /// (la activa tras apply [weekIndex]); el resto de semanas se conserva.
   FormModel copyWith({
     String? issue,
     String? congregationId,

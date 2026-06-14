@@ -9,7 +9,7 @@ import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'program_form.dart';
 
-/// Vista previa en vivo: rasteriza la página (pdfium) cuando cambian los datos,
+/// Vista previa en vivo: rasteriza la página (pdfium) when cambian los datos,
 /// con debounce para que escribir se sienta en tiempo real.
 final previewProvider =
     NotifierProvider<PreviewController, AsyncValue<ui.Image>>(
@@ -27,7 +27,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       _debounce?.cancel();
       _actual?.dispose();
     });
-    // Re-render cuando cambian estructura, nombres o congregación/presidente/aux.
+    // Re-render when cambian estructura, nombres o congregación/presidente/aux.
     ref.listen(scheduleProvider, (_, _) => _programar());
     ref.listen(assignmentsProvider, (_, _) => _programar());
     ref.listen(

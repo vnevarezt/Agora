@@ -27,7 +27,7 @@ class ChairmanSlot extends SlotRef {
   String get key => 'presidente';
 }
 
-/// Posición [index] dentro de la lista de nombres de una fila
+/// Posición [index] dentro de la list de nombres de una fila
 /// (auditorio principal o sala auxiliar según [aux]).
 class RowSlot extends SlotRef {
   const RowSlot(this.row, this.index, {this.aux = false});
@@ -67,8 +67,8 @@ String slotName(FormModel f, SlotRef slot) {
   return switch (slot) {
     ChairmanSlot() => f.chairman,
     RowSlot(:final row, :final index, :final aux) => () {
-        final lista = aux ? f.auxiliary[row.id] : f.main[row.id];
-        return (lista != null && index < lista.length) ? lista[index] : '';
+        final list = aux ? f.auxiliary[row.id] : f.main[row.id];
+        return (list != null && index < list.length) ? list[index] : '';
       }(),
   };
 }
@@ -82,14 +82,14 @@ void writeAssignment(WidgetRef ref, SlotRef slot, String nombre) {
       notifier.setChairman(nombre);
     case RowSlot(:final row, :final index, :final aux):
       final f = ref.read(formProvider);
-      final lista = listWithName(
+      final list = listWithName(
         aux ? f.auxiliary[row.id] : f.main[row.id],
         aux ? row.auxSlots : row.slots,
         index,
         nombre,
       );
       aux
-          ? notifier.setAuxNames(row.id, lista)
-          : notifier.setMainNames(row.id, lista);
+          ? notifier.setAuxNames(row.id, list)
+          : notifier.setMainNames(row.id, list);
   }
 }

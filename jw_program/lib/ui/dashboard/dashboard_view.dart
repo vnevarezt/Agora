@@ -14,7 +14,7 @@ import 'project_card.dart';
 import 'project_modal.dart';
 import 'reminder_card.dart';
 
-/// Vista de Inicio (`HomeView` del mock): saludo, filtros, cuadrícula de
+/// Vista de Inicio (`HomeView` del mock): greeting, filters, cuadrícula de
 /// proyectos y panel de recordatorios. Los datos son de ejemplo (solo UI).
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
@@ -66,7 +66,7 @@ class _TopBar extends ConsumerWidget {
     final t = context.tokens;
     final isMobile = context.isMobile;
     final usuario = ref.watch(sessionUserProvider);
-    final saludo = usuario.name.isEmpty
+    final greeting = usuario.name.isEmpty
         ? _greeting()
         : '${_greeting()}, ${usuario.name}';
 
@@ -77,7 +77,7 @@ class _TopBar extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                saludo,
+                greeting,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -123,9 +123,9 @@ class _Filters extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final congs = ref.watch(congregationsProvider);
+    final congregations = ref.watch(congregationsProvider);
     final proyectos = ref.watch(projectsProvider);
-    final filtros = ref.watch(dashboardFiltersProvider);
+    final filters = ref.watch(dashboardFiltersProvider);
     final notifier = ref.read(dashboardFiltersProvider.notifier);
 
     return Wrap(
@@ -136,27 +136,27 @@ class _Filters extends ConsumerWidget {
         FilterPill(
           label: 'Todas',
           count: proyectos.length,
-          active: filtros.congregationId == 'all',
+          active: filters.congregationId == 'all',
           onTap: () => notifier.setCongregation('all'),
         ),
-        for (final c in congs)
+        for (final c in congregations)
           FilterPill(
             label: c.name,
             dotColor: Color(c.color),
             count: proyectos.where((p) => p.congregationId == c.id).length,
-            active: filtros.congregationId == c.id,
+            active: filters.congregationId == c.id,
             onTap: () => notifier.setCongregation(c.id),
           ),
         Container(width: 1, height: 22, color: t.border),
         FilterPill(
           label: 'Todo estado',
-          active: filtros.status == null,
+          active: filters.status == null,
           onTap: () => notifier.setStatus(null),
         ),
         for (final e in ProjectStatus.values)
           FilterPill(
             label: e.plural,
-            active: filtros.status == e,
+            active: filters.status == e,
             onTap: () => notifier.setStatus(e),
           ),
       ],
@@ -201,9 +201,9 @@ class _ProjectsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final congs = ref.watch(congregationsProvider);
+    final congregations = ref.watch(congregationsProvider);
     final proyectos = ref.watch(filteredProjectsProvider);
-    final porId = {for (final c in congs) c.id: c};
+    final porId = {for (final c in congregations) c.id: c};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

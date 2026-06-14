@@ -12,7 +12,7 @@ import '../widgets/filter_pill.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
 
-/// Vista de Participants (`PeopleView` del mock): topbar, filtros y cuadrícula de
+/// Vista de Participants (`PeopleView` del mock): topbar, filters y cuadrícula de
 /// tarjetas alimentada por la BD (`participantsProvider`). Vive dentro del
 /// shell; al abrirse desde el editor muestra botón de volver.
 class ParticipantsView extends ConsumerStatefulWidget {
@@ -24,8 +24,8 @@ class ParticipantsView extends ConsumerStatefulWidget {
 
 class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   String _query = '';
-  Role? _privilegio;
-  String? _congregacion;
+  Role? _role;
+  String? _congregation;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
-          child: _topbar(context, isMobile),
+          child: _topBar(context, isMobile),
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -45,9 +45,9 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _filtros(context),
+                _filters(context),
                 const SizedBox(height: 18),
-                _resultado(context),
+                _result(context),
               ],
             ),
           ),
@@ -56,7 +56,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  Widget _topbar(BuildContext context, bool isMobile) {
+  Widget _topBar(BuildContext context, bool isMobile) {
     final t = context.tokens;
     return Row(
       children: [
@@ -113,7 +113,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  Widget _filtros(BuildContext context) {
+  Widget _filters(BuildContext context) {
     final t = context.tokens;
     final congregaciones = ref.watch(participantCongregationsProvider);
 
@@ -122,36 +122,36 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        SizedBox(width: 280, child: _buscador(t)),
-        _separador(t),
+        SizedBox(width: 280, child: _searchBox(t)),
+        _separator(t),
         FilterPill(
           label: 'Todas',
-          active: _congregacion == null,
-          onTap: () => setState(() => _congregacion = null),
+          active: _congregation == null,
+          onTap: () => setState(() => _congregation = null),
         ),
         for (final c in congregaciones)
           FilterPill(
             label: c,
-            active: _congregacion == c,
-            onTap: () => setState(() => _congregacion = c),
+            active: _congregation == c,
+            onTap: () => setState(() => _congregation = c),
           ),
-        _separador(t),
+        _separator(t),
         FilterPill(
           label: 'Todos',
-          active: _privilegio == null,
-          onTap: () => setState(() => _privilegio = null),
+          active: _role == null,
+          onTap: () => setState(() => _role = null),
         ),
         for (final p in Role.values)
           FilterPill(
             label: p.plural,
-            active: _privilegio == p,
-            onTap: () => setState(() => _privilegio = p),
+            active: _role == p,
+            onTap: () => setState(() => _role = p),
           ),
       ],
     );
   }
 
-  Widget _buscador(AppTokens t) => TextField(
+  Widget _searchBox(AppTokens t) => TextField(
         onChanged: (v) => setState(() => _query = v),
         style: TextStyle(
             fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
@@ -163,28 +163,28 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
         ),
       );
 
-  Widget _separador(AppTokens t) =>
+  Widget _separator(AppTokens t) =>
       Container(width: 1, height: 22, color: t.border);
 
-  Widget _resultado(BuildContext context) {
+  Widget _result(BuildContext context) {
     final t = context.tokens;
     final todos = ref.watch(participantsProvider);
-    final filtrados = filterParticipants(
+    final filtered = filterParticipants(
       todos,
       query: _query,
-      role: _privilegio,
-      congregation: _congregacion,
-      incluirInactivos: true,
+      role: _role,
+      congregation: _congregation,
+      includeInactive: true,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: 'Participantes', count: filtrados.length),
-        if (filtrados.isEmpty)
-          _vacio(t, todos.isEmpty)
+        BlockTitle(title: 'Participantes', count: filtered.length),
+        if (filtered.isEmpty)
+          _empty(t, todos.isEmpty)
         else
-          _grid(filtrados),
+          _grid(filtered),
       ],
     );
   }
@@ -213,12 +213,12 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  Widget _vacio(AppTokens t, bool sinDatos) {
+  Widget _empty(AppTokens t, bool noData) {
     return EmptyState(
       icon: Icons.people_outline,
-      message: sinDatos
+      message: noData
           ? 'Aún no hay participantes.\nAñade el primero con "Añadir participante".'
-          : 'Sin resultados con esos filtros.',
+          : 'Sin resultados con esos filters.',
     );
   }
 

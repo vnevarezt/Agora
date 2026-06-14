@@ -36,20 +36,20 @@ class NuevaCongregacionModal extends ConsumerStatefulWidget {
 
 class _NuevaCongregacionModalState
     extends ConsumerState<NuevaCongregacionModal> {
-  String _nombre = '';
-  String _numero = '';
-  String _idioma = meetingLanguages.first;
-  String _diaEntre = 'Martes';
-  String _horaEntre = '19:00';
-  String _diaFin = 'Domingo';
-  String _horaFin = '10:00';
+  String _name = '';
+  String _number = '';
+  String _language = meetingLanguages.first;
+  String _weekdayDay = 'Martes';
+  String _weekdayTime = '19:00';
+  String _weekendDay = 'Domingo';
+  String _weekendTime = '10:00';
 
   /// Añade la congregación al estado en memoria y cierra. Los horarios/idioma
   /// aún no se persisten (sin backend); solo se guarda nombre y número.
   void _crear() {
     ref.read(congregationsProvider.notifier).add(
-          name: _nombre.trim(),
-          number: _numero.trim(),
+          name: _name.trim(),
+          number: _number.trim(),
         );
     widget.onClose();
   }
@@ -62,7 +62,7 @@ class _NuevaCongregacionModalState
       title: 'Nueva congregación',
       desc: 'Serás su administrador. Después podrás invitar usuarios.',
       primaryLabel: 'Crear congregación',
-      onPrimary: _nombre.trim().isEmpty ? null : _crear,
+      onPrimary: _name.trim().isEmpty ? null : _crear,
       body: _body(context),
     );
   }
@@ -86,9 +86,9 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Nombre',
                 child: BoundTextField(
-                  initial: _nombre,
+                  initial: _name,
                   hint: 'Ej. Jardines del Norte',
-                  onChanged: (v) => setState(() => _nombre = v),
+                  onChanged: (v) => setState(() => _name = v),
                 ),
               ),
             ),
@@ -97,10 +97,10 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Número',
                 child: BoundTextField(
-                  initial: _numero,
+                  initial: _number,
                   hint: 'Ej. 152423',
                   style: mono,
-                  onChanged: (v) => _numero = v,
+                  onChanged: (v) => _number = v,
                 ),
               ),
             ),
@@ -109,10 +109,10 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Idioma de la reunión',
                 child: AppDropdown<String>(
-                  value: _idioma,
+                  value: _language,
                   items: meetingLanguages,
                   itemLabel: (s) => s,
-                  onChanged: (v) => setState(() => _idioma = v),
+                  onChanged: (v) => setState(() => _language = v),
                 ),
               ),
             ),
@@ -121,10 +121,10 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Entre semana · día',
                 child: AppDropdown<String>(
-                  value: _diaEntre,
+                  value: _weekdayDay,
                   items: daysOfWeek,
                   itemLabel: (s) => s,
-                  onChanged: (v) => setState(() => _diaEntre = v),
+                  onChanged: (v) => setState(() => _weekdayDay = v),
                 ),
               ),
             ),
@@ -133,9 +133,9 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Entre semana · hora',
                 child: BoundTextField(
-                  initial: _horaEntre,
+                  initial: _weekdayTime,
                   style: mono,
-                  onChanged: (v) => _horaEntre = v,
+                  onChanged: (v) => _weekdayTime = v,
                 ),
               ),
             ),
@@ -144,10 +144,10 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Fin de semana · día',
                 child: AppDropdown<String>(
-                  value: _diaFin,
+                  value: _weekendDay,
                   items: daysOfWeek,
                   itemLabel: (s) => s,
-                  onChanged: (v) => setState(() => _diaFin = v),
+                  onChanged: (v) => setState(() => _weekendDay = v),
                 ),
               ),
             ),
@@ -156,9 +156,9 @@ class _NuevaCongregacionModalState
               LabeledField(
                 label: 'Fin de semana · hora',
                 child: BoundTextField(
-                  initial: _horaFin,
+                  initial: _weekendTime,
                   style: mono,
-                  onChanged: (v) => _horaFin = v,
+                  onChanged: (v) => _weekendTime = v,
                 ),
               ),
             ),
