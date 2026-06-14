@@ -28,6 +28,9 @@ class ThemeModeController extends Notifier<ThemeMode> {
 
   void alternar() =>
       state = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+
+  /// Fija el modo explícitamente (Claro / Oscuro / Sistema en Configuración).
+  void set(ThemeMode modo) => state = modo;
 }
 
 /// Pestaña activa en el layout móvil.
