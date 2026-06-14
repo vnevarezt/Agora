@@ -24,8 +24,8 @@ Participant _h(String id, String nombre) {
   return Participant(
     id: id,
     nombre: nombre,
-    sexo: Gender.hombre,
-    privilegio: Role.publicador,
+    sexo: Gender.male,
+    privilegio: Role.publisher,
     congregacion: 'TEST',
     activo: true,
     notas: '',

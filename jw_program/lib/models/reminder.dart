@@ -1,5 +1,5 @@
 /// Tipo de recordatorio: define el icono y los colores de la tarjeta.
-enum ReminderType { alerta, tarea, info }
+enum ReminderType { alert, task, info }
 
 /// Reminder del dashboard. Puramente visual en esta fase: el [cta] no
 /// dispara ninguna acción todavía.

@@ -12,10 +12,10 @@ import '../widgets/avatar.dart';
 /// Ítems de navegación del shell (mismo orden en barra lateral y barra
 /// inferior).
 const _items = <({AppSection seccion, IconData icon, String label})>[
-  (seccion: AppSection.inicio, icon: Icons.home_outlined, label: 'Inicio'),
-  (seccion: AppSection.hermanos, icon: Icons.people_outline, label: 'Participants'),
+  (seccion: AppSection.home, icon: Icons.home_outlined, label: 'Inicio'),
+  (seccion: AppSection.participants, icon: Icons.people_outline, label: 'Participants'),
   (
-    seccion: AppSection.config,
+    seccion: AppSection.settings,
     icon: Icons.settings_outlined,
     label: 'Configuración'
   ),
@@ -24,7 +24,7 @@ const _items = <({AppSection seccion, IconData icon, String label})>[
 /// Nº de recordatorios urgentes; se muestra como badge en "Inicio".
 final _alertasProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
-    .where((r) => r.tipo == ReminderType.alerta)
+    .where((r) => r.tipo == ReminderType.alert)
     .length);
 
 /// Barra lateral (`.sidebar`): marca, navegación y tarjeta de usuario.
@@ -60,7 +60,7 @@ class Sidebar extends ConsumerWidget {
               label: it.label,
               compact: compact,
               active: seccion == it.seccion,
-              badge: it.seccion == AppSection.inicio ? alertas : 0,
+              badge: it.seccion == AppSection.home ? alertas : 0,
             ),
             const SizedBox(height: 2),
           ],
@@ -311,7 +311,7 @@ class BottomNav extends ConsumerWidget {
                     icon: it.icon,
                     label: it.label,
                     active: seccion == it.seccion,
-                    badge: it.seccion == AppSection.inicio ? alertas : 0,
+                    badge: it.seccion == AppSection.home ? alertas : 0,
                   ),
                 ),
             ],

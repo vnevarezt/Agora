@@ -17,9 +17,9 @@ class PersonaCard extends StatelessWidget {
   final VoidCallback onTap;
 
   String get _sexoLabel => switch (hermano.sexo) {
-        Gender.hombre => 'Participant',
-        Gender.mujer => 'Hermana',
-        Gender.noEspecificado => 'Sin definir',
+        Gender.male => 'Participant',
+        Gender.female => 'Hermana',
+        Gender.unspecified => 'Sin definir',
       };
 
   @override

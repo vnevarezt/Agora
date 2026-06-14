@@ -19,7 +19,7 @@ class ReminderCard extends StatelessWidget {
 
     final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
         switch (r.tipo) {
-      ReminderType.alerta => oscuro
+      ReminderType.alert => oscuro
           ? (
               Icons.warning_amber_rounded,
               const Color(0xFF40231C),
@@ -32,7 +32,7 @@ class ReminderCard extends StatelessWidget {
               const Color(0xFFB5562F),
               null
             ),
-      ReminderType.tarea =>
+      ReminderType.task =>
         (Icons.schedule, t.accentSoft, t.accentStrong, null),
       ReminderType.info =>
         (Icons.auto_awesome_outlined, t.surface2, t.textDim, t.border2),

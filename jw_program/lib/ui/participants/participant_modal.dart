@@ -18,11 +18,11 @@ import '../widgets/segmented_control.dart';
 
 /// Descripción de cada privilegio en las radio-cards del modal.
 const _roleDesc = {
-  Role.publicador:
+  Role.publisher:
       'Participa en "Seamos mejores maestros" (hermanos y hermanas)',
-  Role.siervoMinisterial:
+  Role.ministerialServant:
       'Publicador + lectura, oración y algunas partes asignables',
-  Role.anciano: 'Puede recibir cualquier asignación del programa',
+  Role.elder: 'Puede recibir cualquier asignación del programa',
 };
 
 /// Abre el modal de alta/edición de hermano. [original] null = alta nueva.
@@ -54,9 +54,9 @@ class PersonModal extends ConsumerStatefulWidget {
 
 class _PersonModalState extends ConsumerState<PersonModal> {
   late String _nombre = widget.original?.nombre ?? '';
-  late Gender _sexo = widget.original?.sexo ?? Gender.hombre;
+  late Gender _sexo = widget.original?.sexo ?? Gender.male;
   late Role _privilegio =
-      widget.original?.privilegio ?? Role.publicador;
+      widget.original?.privilegio ?? Role.publisher;
   late String _congregacion;
   late bool _activo = widget.original?.activo ?? true;
   bool _guardando = false;
@@ -75,7 +75,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   void _setGender(Gender s) => setState(() {
         _sexo = s;
         // Las hermanas solo participan como publicadoras.
-        if (s == Gender.mujer) _privilegio = Role.publicador;
+        if (s == Gender.female) _privilegio = Role.publisher;
       });
 
   Future<void> _save() async {
@@ -240,9 +240,9 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         .take(3)
         .toList();
     final sexoIdx =
-        switch (_sexo) { Gender.hombre => 0, Gender.mujer => 1, _ => -1 };
-    final privsDisponibles = _sexo == Gender.mujer
-        ? const [Role.publicador]
+        switch (_sexo) { Gender.male => 0, Gender.female => 1, _ => -1 };
+    final privsDisponibles = _sexo == Gender.female
+        ? const [Role.publisher]
         : Role.values;
 
     return Column(
@@ -295,7 +295,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             ],
             index: sexoIdx,
             expand: true,
-            onChanged: (i) => _setGender(i == 0 ? Gender.hombre : Gender.mujer),
+            onChanged: (i) => _setGender(i == 0 ? Gender.male : Gender.female),
           ),
         ),
         const SizedBox(height: 14),

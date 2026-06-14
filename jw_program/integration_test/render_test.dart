@@ -24,38 +24,38 @@ Week _semana() => Week(
       cancionFinal: '151',
       partes: const [
         Part(
-            seccion: Section.tesoros,
+            seccion: Section.treasures,
             num: 1,
             titulo: 'Disfrute al máximo de la bendición de Jehová',
             min: 10),
         Part(
-            seccion: Section.tesoros,
+            seccion: Section.treasures,
             num: 2,
             titulo: 'Busquemos perlas escondidas',
             min: 10),
         Part(
-            seccion: Section.tesoros,
+            seccion: Section.treasures,
             num: 3,
             titulo: 'Lectura de la Biblia',
             min: 4),
         Part(
-            seccion: Section.seamos,
+            seccion: Section.ministry,
             num: 4,
             titulo: 'Empiece conversaciones',
             min: 3),
         Part(
-            seccion: Section.seamos,
+            seccion: Section.ministry,
             num: 5,
             titulo: 'Empiece conversaciones',
             min: 4),
-        Part(seccion: Section.seamos, num: 6, titulo: 'Discurso', min: 5),
+        Part(seccion: Section.ministry, num: 6, titulo: 'Discurso', min: 5),
         Part(
-            seccion: Section.vida,
+            seccion: Section.christianLife,
             num: 7,
             titulo: 'Sean siempre hospitalarios',
             min: 15),
         Part(
-            seccion: Section.vida,
+            seccion: Section.christianLife,
             num: 8,
             titulo: 'Estudio bíblico de la congregación',
             min: 30),

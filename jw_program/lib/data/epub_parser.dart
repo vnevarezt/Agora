@@ -13,9 +13,9 @@ import '../models/week.dart';
 
 // color del encabezado en el EPUB -> sección (SECCION_POR_COLOR, py:24-28)
 const Map<String, Section> _seccionPorColor = {
-  'teal': Section.tesoros,
-  'gold': Section.seamos,
-  'maroon': Section.vida,
+  'teal': Section.treasures,
+  'gold': Section.ministry,
+  'maroon': Section.christianLife,
 };
 
 final _rePageNum = RegExp(

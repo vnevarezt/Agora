@@ -6,14 +6,14 @@ import 'assignment_ops.dart';
 /// Estado efímero de la UI (no afecta al PDF ni al formulario).
 
 /// Sección activa del shell (barra lateral): dashboard, hermanos o config.
-enum AppSection { inicio, hermanos, config }
+enum AppSection { home, participants, settings }
 
 final appSectionProvider =
     NotifierProvider<AppSectionController, AppSection>(AppSectionController.new);
 
 class AppSectionController extends Notifier<AppSection> {
   @override
-  AppSection build() => AppSection.inicio;
+  AppSection build() => AppSection.home;
 
   void seleccionar(AppSection seccion) => state = seccion;
 }

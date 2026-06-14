@@ -36,19 +36,19 @@ class WorkspacePanel extends ConsumerWidget {
         _SectionBlock(title: 'Apertura', rows: sched.apertura, aux: aux),
         _SectionBlock(
           title: 'Tesoros de la Biblia',
-          dotColor: kSectionColors[Section.tesoros],
+          dotColor: kSectionColors[Section.treasures],
           rows: sched.tesoros,
           aux: aux,
         ),
         _SectionBlock(
           title: 'Seamos mejores maestros',
-          dotColor: kSectionColors[Section.seamos],
+          dotColor: kSectionColors[Section.ministry],
           rows: sched.seamos,
           aux: aux,
         ),
         _SectionBlock(
           title: 'Nuestra vida cristiana',
-          dotColor: kSectionColors[Section.vida],
+          dotColor: kSectionColors[Section.christianLife],
           rows: sched.vida,
           aux: aux,
         ),

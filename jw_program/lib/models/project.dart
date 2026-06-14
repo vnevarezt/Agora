@@ -1,19 +1,19 @@
 /// Estado de un proyecto en el tablero (espejo de `status` del mock).
-enum ProjectStatus { borrador, completo, exportado }
+enum ProjectStatus { draft, complete, exported }
 
 extension ProjectStatusX on ProjectStatus {
   /// Etiqueta singular para la insignia ("Borrador").
   String get etiqueta => switch (this) {
-        ProjectStatus.borrador => 'Borrador',
-        ProjectStatus.completo => 'Completo',
-        ProjectStatus.exportado => 'Exportado',
+        ProjectStatus.draft => 'Borrador',
+        ProjectStatus.complete => 'Completo',
+        ProjectStatus.exported => 'Exportado',
       };
 
   /// Etiqueta plural para los chips de filtro ("Borradores").
   String get plural => switch (this) {
-        ProjectStatus.borrador => 'Borradores',
-        ProjectStatus.completo => 'Completos',
-        ProjectStatus.exportado => 'Exportados',
+        ProjectStatus.draft => 'Borradores',
+        ProjectStatus.complete => 'Completos',
+        ProjectStatus.exported => 'Exportados',
       };
 }
 

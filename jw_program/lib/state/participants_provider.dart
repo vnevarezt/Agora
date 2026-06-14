@@ -119,8 +119,8 @@ class ParticipantActions {
     _dir.upsert(Participant(
       id: _uuid.v4(),
       nombre: limpio,
-      sexo: Gender.noEspecificado,
-      privilegio: Role.publicador,
+      sexo: Gender.unspecified,
+      privilegio: Role.publisher,
       congregacion: _ref.read(formProvider).cong,
       activo: true,
       notas: '',

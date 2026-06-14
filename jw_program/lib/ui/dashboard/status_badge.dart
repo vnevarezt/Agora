@@ -17,11 +17,11 @@ class StatusBadge extends StatelessWidget {
     final oscuro = Theme.of(context).brightness == Brightness.dark;
 
     final (Color bg, Color fg, Color? borde) = switch (estado) {
-      ProjectStatus.borrador => (t.accentSoft, t.accentStrong, null),
-      ProjectStatus.completo => oscuro
+      ProjectStatus.draft => (t.accentSoft, t.accentStrong, null),
+      ProjectStatus.complete => oscuro
           ? (const Color(0xFF1E3A2A), const Color(0xFFA9D8B8), null)
           : (const Color(0xFFDCF0E0), const Color(0xFF2E6A3E), null),
-      ProjectStatus.exportado => (t.surface2, t.textMute, t.border2),
+      ProjectStatus.exported => (t.surface2, t.textMute, t.border2),
     };
 
     return Container(

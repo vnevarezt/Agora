@@ -4,30 +4,30 @@
 // IMPORTANTE: las asignaciones del programa siguen siendo strings planos en
 // el formulario (FormModel.principal) — este directorio NO es una FK.
 
-enum Gender { hombre, mujer, noEspecificado }
+enum Gender { male, female, unspecified }
 
 extension GenderX on Gender {
   String get etiqueta => switch (this) {
-        Gender.hombre => 'Hombre',
-        Gender.mujer => 'Mujer',
-        Gender.noEspecificado => 'No especificado',
+        Gender.male => 'Hombre',
+        Gender.female => 'Mujer',
+        Gender.unspecified => 'No especificado',
       };
 }
 
-enum Role { anciano, siervoMinisterial, publicador }
+enum Role { elder, ministerialServant, publisher }
 
 extension RoleX on Role {
   String get etiqueta => switch (this) {
-        Role.anciano => 'Anciano',
-        Role.siervoMinisterial => 'Siervo ministerial',
-        Role.publicador => 'Publicador',
+        Role.elder => 'Anciano',
+        Role.ministerialServant => 'Siervo ministerial',
+        Role.publisher => 'Publicador',
       };
 
   /// Plural para los chips de filtro de la pantalla de hermanos.
   String get plural => switch (this) {
-        Role.anciano => 'Ancianos',
-        Role.siervoMinisterial => 'Siervos ministeriales',
-        Role.publicador => 'Publicadores',
+        Role.elder => 'Ancianos',
+        Role.ministerialServant => 'Siervos ministeriales',
+        Role.publisher => 'Publicadores',
       };
 }
 
@@ -62,7 +62,7 @@ class Participant {
   });
 
   /// Alta mínima desde el picker: queda marcado como incompleto.
-  bool get incompleto => sexo == Gender.noEspecificado;
+  bool get incompleto => sexo == Gender.unspecified;
 
   Participant copyWith({
     String? nombre,

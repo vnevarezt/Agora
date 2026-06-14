@@ -20,9 +20,9 @@ class AppShell extends ConsumerWidget {
     final seccion = ref.watch(appSectionProvider);
 
     final body = switch (seccion) {
-      AppSection.inicio => const DashboardView(),
-      AppSection.hermanos => const HermanosView(),
-      AppSection.config => const ConfiguracionView(),
+      AppSection.home => const DashboardView(),
+      AppSection.participants => const HermanosView(),
+      AppSection.settings => const ConfiguracionView(),
     };
 
     if (size == ScreenSize.mobile) {

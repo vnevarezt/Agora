@@ -76,7 +76,7 @@ class ProjectsController extends Notifier<List<Project>> {
       semanas: semanas,
       done: 0,
       total: _total(semanas.length),
-      estado: ProjectStatus.borrador,
+      estado: ProjectStatus.draft,
       editado: 'ahora mismo',
     );
     state = [nuevo, ...state];

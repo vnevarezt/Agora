@@ -116,7 +116,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   Widget _fila(Participant h) {
     return _PersonRow(
       nombre: h.nombre,
-      tag: h.privilegio == Role.publicador ? null : h.privilegio.etiqueta,
+      tag: h.privilegio == Role.publisher ? null : h.privilegio.etiqueta,
       selected: h.nombre == widget.actual,
       onTap: () => _devolver(PickNombre(h.nombre)),
     );

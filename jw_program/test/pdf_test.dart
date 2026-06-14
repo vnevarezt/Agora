@@ -16,19 +16,19 @@ void main() {
       lectura: 'ISAÍAS 62-64',
       cancionInicial: '44',
       partes: const [
-        Part(seccion: Section.tesoros, num: 1, titulo: 'El Alfarero', min: 10),
+        Part(seccion: Section.treasures, num: 1, titulo: 'El Alfarero', min: 10),
         Part(
-            seccion: Section.tesoros,
+            seccion: Section.treasures,
             num: 3,
             titulo: 'Lectura de la Biblia',
             min: 4),
         Part(
-            seccion: Section.seamos,
+            seccion: Section.ministry,
             num: 4,
             titulo: 'Empiece conversaciones',
             min: 3),
         Part(
-            seccion: Section.vida,
+            seccion: Section.christianLife,
             num: 7,
             titulo: 'Estudio bíblico de la congregación',
             min: 30),
