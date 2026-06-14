@@ -6,8 +6,8 @@ import 'app_button.dart';
 
 typedef Segment = ({IconData? icon, String label});
 
-/// Control segmentado (`.seg`): pestañas Asignar/Vista previa en móvil y el
-/// chip estático de la barra de la vista previa ([onChanged] nulo).
+/// Segmented control (`.seg`): Assign/Preview tabs on mobile and the
+/// static chip on the preview bar ([onChanged] null).
 class SegmentedTabs extends StatelessWidget {
   const SegmentedTabs({
     super.key,
@@ -21,7 +21,7 @@ class SegmentedTabs extends StatelessWidget {
   final int index;
   final ValueChanged<int>? onChanged;
 
-  /// En móvil los botones reparten el ancho disponible.
+  /// On mobile the buttons share the available width.
   final bool expand;
 
   @override

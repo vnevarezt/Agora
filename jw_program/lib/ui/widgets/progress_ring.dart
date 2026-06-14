@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Anillo de progress de asignaciones (`.ring` + `.progress__txt`): arco
-/// accent sobre base de color borde, número al centro y, opcionalmente, el
-/// texto "N/M asignados" al costado.
+/// Assignment progress ring (`.ring` + `.progress__txt`): accent arc over
+/// a border-colored base, number in the center and, optionally, the
+/// "N/M asignados" text alongside.
 class ProgressRing extends StatelessWidget {
   const ProgressRing({
     super.key,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Borde discontinuo sobre un rectángulo redondeado (círculo = radio máximo).
-/// Flutter no trae bordes dashed; lo usan el avatar vacío y el botón
-/// "Asignar…" para replicar el `border: dashed` del mock.
+/// Dashed border on a rounded rectangle (circle = max radius).
+/// Flutter has no dashed borders; used by the empty avatar and the
+/// "Asignar…" button to mirror the mock dashed border.
 class DashedBorder extends StatelessWidget {
   const DashedBorder({
     super.key,

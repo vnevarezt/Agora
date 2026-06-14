@@ -6,9 +6,9 @@ import '../theme/tokens.dart';
 
 const _scrim = Color(0x52000000);
 
-/// Presenta un modal de la app: diálogo centrado en escritorio/tablet y bottom
-/// sheet en móvil. [builder] recibe si se muestra como hoja (`sheet`) y un
-/// callback para cerrarlo. Lo usan los modales de project y de participant.
+/// Presents an app modal: centered dialog on desktop/tablet and a bottom
+/// sheet on mobile. [builder] receives whether it shows as a sheet (`sheet`)
+/// and a close callback. Used by the project and participant modals.
 Future<T?> showAppModal<T>(
   BuildContext context, {
   required Widget Function(BuildContext context, bool sheet, VoidCallback close)

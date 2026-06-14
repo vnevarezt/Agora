@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/dimens.dart';
 import 'app_button.dart';
 
-/// Botón de acción destructiva en color de error (no hay variante danger en
-/// [AppButton]). Lo usan los pies de los modales de project y de participant.
+/// Destructive-action button in the error color (no danger variant in
+/// [AppButton]). Used by the project and participant modal footers.
 class DangerButton extends StatelessWidget {
   const DangerButton({super.key, required this.onTap, this.label = 'Eliminar'});
 

@@ -5,9 +5,9 @@ import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'danger_button.dart';
 
-/// Estructura común de los modales de la app: asa (en hoja), cabecera
-/// (título + descripción + cerrar), cuerpo scrolleable y pie con botones.
-/// Se usa con [showAppModal], que decide diálogo vs bottom sheet.
+/// Shared structure for the app modals: handle (on sheet), header
+/// (title + description + close), scrollable body and a button footer.
+/// Used with [showAppModal], which chooses dialog vs bottom sheet.
 class ModalShell extends StatelessWidget {
   const ModalShell({
     super.key,
@@ -31,7 +31,7 @@ class ModalShell extends StatelessWidget {
 
   final String primaryLabel;
 
-  /// null = botón primario deshabilitado.
+  /// null = primary button disabled.
   final VoidCallback? onPrimary;
   final bool primaryBusy;
 

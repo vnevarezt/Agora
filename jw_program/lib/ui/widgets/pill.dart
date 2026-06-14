@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
 
-/// Píldora/insignia con label en mayúsculas y colores de fondo/texto.
-/// Base compartida por StatusBadge, PrivBadge y la insignia "Incompleto".
+/// Label pill/badge: uppercase text with background/foreground colors.
+/// Shared base for StatusBadge, PrivBadge and the "Incompleto" badge.
 class Pill extends StatelessWidget {
   const Pill({
     super.key,

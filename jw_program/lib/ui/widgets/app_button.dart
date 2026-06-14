@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Detección de hover/pressed compartida por los botones del catálogo.
+/// Shared hover/pressed detection for the catalog buttons.
 class Pressable extends StatefulWidget {
   const Pressable({
     super.key,
@@ -50,8 +50,8 @@ class _PressableState extends State<Pressable> {
 
 enum AppButtonVariant { primary, ghost }
 
-/// Botón del rediseño (`.btn--primary` / `.btn--ghost`). Con [label] nulo se
-/// vuelve cuadrado (solo icono, como el Exportar compacto del móvil).
+/// Button (`.btn--primary` / `.btn--ghost`). With a null [label] it
+/// becomes square (icon only, like the compact mobile Export).
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -86,9 +86,9 @@ class AppButton extends StatelessWidget {
             : (hovered ? t.surface2 : Colors.transparent);
         final fg = esPrimary ? t.accentInk : (hovered ? t.text : t.textDim);
 
-        // El ancho siempre es intrínseco: pasar de width fijo a null rompe
-        // la interpolación de AnimatedContainer (finito ↔ infinito). El
-        // botón solo-icono se hace cuadrado con padding simétrico.
+        // The width is always intrinsic: going from fixed width to null
+        // breaks the AnimatedContainer interpolation (finite <-> infinite). The
+        // icon-only button is made square with symmetric padding.
         return AnimatedContainer(
           duration: Dimens.dFast,
           height: height,
@@ -141,8 +141,8 @@ class AppButton extends StatelessWidget {
   }
 }
 
-/// Botón de icono 38×38 (`.icon-btn`). [bordered] añade el borde sutil;
-/// [elevated] lo convierte en FAB pequeño (zoom de la vista previa).
+/// 38x38 icon button (`.icon-btn`). [bordered] adds the subtle border;
+/// [elevated] turns it into a small FAB (preview zoom).
 class AppIconButton extends StatelessWidget {
   const AppIconButton({
     super.key,

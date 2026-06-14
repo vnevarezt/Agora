@@ -6,28 +6,28 @@ import '../theme/tokens.dart';
 
 enum _ChipKind { time, allMeeting, duration, tag, aux, week }
 
-/// Chip pequeño del rediseño. Un único widget con presets que replican
+/// Small chip. A single widget with presets that mirror
 /// `.time-badge`, `.time-badge--all`, `.dur-chip`, `.fixed-line__tag` y
-/// `.aux-flag` del mock.
+/// `.aux-flag` from the mock.
 class MiniChip extends StatelessWidget {
-  /// Hora de la parte (mono, fondo accent-soft).
+  /// Part time (mono, accent-soft background).
   const MiniChip.time(this.texto, {super.key}) : _kind = _ChipKind.time;
 
   /// Insignia neutra uppercase ("TODA LA REUNIÓN").
   const MiniChip.allMeeting(this.texto, {super.key})
       : _kind = _ChipKind.allMeeting;
 
-  /// Duración ("10 min").
+  /// Duration ("10 min").
   const MiniChip.duration(this.texto, {super.key})
       : _kind = _ChipKind.duration;
 
-  /// Etiqueta de línea fija ("Cántico", "A cargo del presidente").
+  /// Fixed-line tag ("Cántico", "A cargo del presidente").
   const MiniChip.tag(this.texto, {super.key}) : _kind = _ChipKind.tag;
 
-  /// Indicador de sala auxiliar (pill accent con icono de edificio).
+  /// Auxiliary-room indicator (accent pill with a building icon).
   const MiniChip.aux(this.texto, {super.key}) : _kind = _ChipKind.aux;
 
-  /// Pill de semana del dashboard ("4–10 MAY"): neutra, con cifras tabulares.
+  /// Dashboard week pill ("4–10 MAY"): neutral, with tabular figures.
   const MiniChip.week(this.texto, {super.key}) : _kind = _ChipKind.week;
 
   final String texto;

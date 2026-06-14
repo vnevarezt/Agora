@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Campo de texto ligado al status: se siembra una vez con [initial] y
-/// notifica cambios con [onChanged] (la fuente de la verdad es el provider).
+/// Text field bound to state: seeded once with [initial] and
+/// reports changes via [onChanged] (the provider is the source of truth).
 class BoundTextField extends StatefulWidget {
   const BoundTextField({
     super.key,
@@ -20,8 +20,8 @@ class BoundTextField extends StatefulWidget {
   final String initial;
   final ValueChanged<String> onChanged;
 
-  /// Etiqueta flotante de Material; vacía para campos con label externo
-  /// (LabeledField del panel de configuración).
+  /// Material floating label; empty for fields with an external label
+  /// (LabeledField in the settings panel).
   final String label;
   final String? hint;
   final TextStyle? style;

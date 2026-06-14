@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// Estado vacío reutilizable: icono + (título opcional) + mensaje + (acción
-/// opcional) + (texto de error opcional). Centra su contenido.
+/// Reusable empty state: icon + (optional title) + message + (optional
+/// action) + (optional error text). Centers its content.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,

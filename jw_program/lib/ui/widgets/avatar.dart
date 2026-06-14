@@ -4,7 +4,7 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'dashed_border.dart';
 
-/// Iniciales de un name ("Raúl Espinoza" → "RE").
+/// Initials of a name ("Raúl Espinoza" -> "RE").
 String inicialesDe(String name) {
   final partes = name.trim().split(RegExp(r'\s+'));
   final a = partes.isNotEmpty && partes[0].isNotEmpty ? partes[0][0] : '';
@@ -13,7 +13,7 @@ String inicialesDe(String name) {
 }
 
 /// Avatar circular (`.avatar`): iniciales sobre fondo accent-soft, o el
-/// estado vacío con borde discontinuo e icono de persona.
+/// empty state with a dashed border and a person icon.
 class PersonAvatar extends StatelessWidget {
   const PersonAvatar({super.key, this.name, this.size = Dimens.avatar});
 

@@ -4,8 +4,8 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Campo del panel de configuración (`.field`): label uppercase pequeña
-/// sobre cualquier control ([child]: input, dropdown, switch, readonly…).
+/// Settings-panel field (`.field`): small uppercase label above any
+/// control ([child]: input, dropdown, switch, readonly…).
 class LabeledField extends StatelessWidget {
   const LabeledField({super.key, required this.label, required this.child});
 
@@ -74,15 +74,15 @@ class AppDropdown<T> extends StatelessWidget {
               child: Text(itemLabel(item), overflow: TextOverflow.ellipsis),
             ),
         ],
-        // Pasa el valor tal cual: con T nullable, null es una opción válida
-        // (p. ej. el filtro "Todos" de la pantalla de personas).
+        // Pass the value as-is: with nullable T, null is a valid option
+        // (e.g. the "Todos" filter on the participants screen).
         onChanged: onChanged == null ? null : (v) => onChanged!(v as T),
       ),
     );
   }
 }
 
-/// Valor calculado de solo lectura con apariencia de input (duración total).
+/// Read-only computed value styled like an input (total duration).
 class ReadonlyField extends StatelessWidget {
   const ReadonlyField({super.key, required this.texto});
 

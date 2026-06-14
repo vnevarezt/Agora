@@ -8,18 +8,18 @@ import '../theme/dimens.dart';
 import 'app_button.dart';
 
 enum ExportVariant {
-  /// Barra de contexto en escritorio: icono + texto, 38px.
+  /// Desktop project bar: icon + text, 38px.
   bar,
 
-  /// Barra de contexto en móvil: solo icono.
+  /// Mobile project bar: icon only.
   compact,
 
-  /// Bottom bar móvil: ancho completo, 48px.
+  /// Mobile bottom bar: full width, 48px.
   full,
 }
 
-/// Único punto de exportación del PDF. El estado ocupado se comparte vía
-/// [exportBusyProvider] para que todas las instancias se deshabiliten juntas.
+/// Single PDF export entry point. The busy state is shared via
+/// [exportBusyProvider] so all instances disable together.
 class ExportButton extends ConsumerWidget {
   const ExportButton({super.key, this.variant = ExportVariant.bar});
 

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 
-/// Título de bloque del dashboard (`.block-title`): título uppercase, contador
-/// "· N" y un enlace opcional alineado a la derecha ("Ver todo").
+/// Dashboard block title (`.block-title`): uppercase title, "· N" counter
+/// and an optional right-aligned link ("Ver todo").
 class BlockTitle extends StatelessWidget {
   const BlockTitle({
     super.key,
