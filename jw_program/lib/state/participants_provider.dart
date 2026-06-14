@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/hermano.dart';
+import '../models/participant.dart';
 import 'program_form.dart';
 
 // INVARIANTE: las asignaciones del programa siguen siendo strings planos

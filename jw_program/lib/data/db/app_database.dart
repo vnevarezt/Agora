@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import '../../models/hermano.dart';
+import '../../models/participant.dart';
 import 'hermanos_dao.dart';
 import 'tablas.dart';
 

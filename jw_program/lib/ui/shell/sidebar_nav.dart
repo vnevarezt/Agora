@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/recordatorio.dart';
+import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/ui_state.dart';
 import '../theme/dimens.dart';

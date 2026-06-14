@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/assignment_ops.dart';
-import '../../state/hermanos_provider.dart';
+import '../../state/participants_provider.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
 import '../responsive.dart';

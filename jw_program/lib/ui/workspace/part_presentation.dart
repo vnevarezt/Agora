@@ -1,6 +1,6 @@
 import '../../models/program_row.dart';
 import '../../state/assignment_ops.dart';
-import '../limites.dart';
+import '../limits.dart';
 
 /// Mapper puro fila → vista de tarjeta. Único lugar donde vive la lógica de
 /// presentación de las partes (tipo de tarjeta, chips, labels de slots).

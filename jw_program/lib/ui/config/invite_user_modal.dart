@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/config_sample.dart';
+import '../../data/config_options.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';

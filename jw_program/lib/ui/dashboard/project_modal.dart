@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/congregacion.dart';
-import '../../models/cuaderno.dart';
-import '../../models/proyecto.dart';
+import '../../models/congregation.dart';
+import '../../models/notebook.dart';
+import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';

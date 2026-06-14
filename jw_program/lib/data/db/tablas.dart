@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import '../../models/hermano.dart';
+import '../../models/participant.dart';
 
 /// Tabla del directorio de hermanos. Mapea al modelo puro [Hermano];
 /// los enums se guardan como TEXTO (legible en exports/debug y estable

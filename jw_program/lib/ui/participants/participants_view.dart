@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/hermano.dart';
-import '../../state/hermanos_provider.dart';
+import '../../models/participant.dart';
+import '../../state/participants_provider.dart';
 import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
-import 'persona_card.dart';
-import 'persona_modal.dart';
+import 'participant_card.dart';
+import 'participant_modal.dart';
 
 /// Vista de Hermanos (`PeopleView` del mock): topbar, filtros y cuadrícula de
 /// tarjetas alimentada por la BD (`hermanosTodosProvider`). Vive dentro del

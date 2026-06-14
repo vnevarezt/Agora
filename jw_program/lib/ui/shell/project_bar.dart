@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/congregacion.dart';
-import '../../models/proyecto.dart';
+import '../../models/congregation.dart';
+import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
@@ -114,7 +114,7 @@ class _ProjId extends ConsumerWidget {
     final nombre = proyecto?.nombre ?? 'Programa';
     final congNombre =
         cong?.nombre ?? (proyecto == null ? ref.watch(formProvider).cong : '');
-    final congColor = cong?.color ?? t.accent;
+    final congColor = cong == null ? t.accent : Color(cong.color);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

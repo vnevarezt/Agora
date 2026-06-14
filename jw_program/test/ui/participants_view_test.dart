@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jw_program/models/hermano.dart';
-import 'package:jw_program/state/hermanos_provider.dart';
-import 'package:jw_program/ui/personas/hermanos_view.dart';
+import 'package:jw_program/models/participant.dart';
+import 'package:jw_program/state/participants_provider.dart';
+import 'package:jw_program/ui/participants/participants_view.dart';
 import 'package:jw_program/ui/theme/app_theme.dart';
 import 'package:jw_program/ui/theme/tokens.dart';
 

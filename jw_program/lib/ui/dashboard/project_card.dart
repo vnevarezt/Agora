@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../models/congregacion.dart';
-import '../../models/proyecto.dart';
+import '../../models/congregation.dart';
+import '../../models/project.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -87,7 +87,7 @@ class ProjectCard extends StatelessWidget {
                                     width: 7,
                                     height: 7,
                                     decoration: BoxDecoration(
-                                      color: congregacion!.color,
+                                      color: Color(congregacion!.color),
                                       shape: BoxShape.circle,
                                     ),
                                   ),

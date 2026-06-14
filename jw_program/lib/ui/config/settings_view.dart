@@ -4,8 +4,8 @@ import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/segmented_control.dart';
-import 'aplicacion_tab.dart';
-import 'congregacion_tab.dart';
+import 'application_tab.dart';
+import 'congregation_tab.dart';
 
 /// Vista de Configuración (`SettingsView` del mock): topbar + pestañas
 /// Aplicación / Congregación. Vive dentro del shell.

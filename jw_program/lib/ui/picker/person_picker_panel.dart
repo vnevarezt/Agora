@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/hermano.dart';
-import '../../state/hermanos_provider.dart';
+import '../../models/participant.dart';
+import '../../state/participants_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/hermano.dart';
+import '../../models/participant.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';

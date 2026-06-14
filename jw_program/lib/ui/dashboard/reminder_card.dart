@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/recordatorio.dart';
+import '../../models/reminder.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 

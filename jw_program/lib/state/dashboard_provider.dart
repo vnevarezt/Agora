@@ -1,11 +1,10 @@
-import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/congregacion.dart';
-import '../models/cuaderno.dart';
-import '../models/proyecto.dart';
-import '../models/recordatorio.dart';
+import '../models/congregation.dart';
+import '../models/notebook.dart';
+import '../models/project.dart';
+import '../models/reminder.dart';
 
 /// Estado del dashboard. SOLO UI: arranca vacío y se llena en memoria durante
 /// la sesión (sin persistencia). Cuando exista backend, solo cambian las
@@ -17,12 +16,12 @@ final usuarioProvider = Provider<({String nombre, String rol})>(
     (ref) => (nombre: '', rol: ''));
 
 /// Paleta para el punto de color de cada congregación nueva (se cicla).
-const _coloresCong = <Color>[
-  Color(0xFF7A2230),
-  Color(0xFF3E6651),
-  Color(0xFF3F6193),
-  Color(0xFF6B4E8A),
-  Color(0xFF9A6A2E),
+const _coloresCong = <int>[
+  0xFF7A2230,
+  0xFF3E6651,
+  0xFF3F6193,
+  0xFF6B4E8A,
+  0xFF9A6A2E,
 ];
 
 /// Congregaciones en memoria. Vacío al inicio; el modal "Nueva congregación"

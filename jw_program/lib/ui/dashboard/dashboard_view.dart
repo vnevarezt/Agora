@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/proyecto.dart';
+import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
@@ -142,7 +142,7 @@ class _Filtros extends ConsumerWidget {
         for (final c in congs)
           FilterPill(
             label: c.nombre,
-            dotColor: c.color,
+            dotColor: Color(c.color),
             count: proyectos.where((p) => p.congregacionId == c.id).length,
             active: filtros.congId == c.id,
             onTap: () => notifier.setCong(c.id),

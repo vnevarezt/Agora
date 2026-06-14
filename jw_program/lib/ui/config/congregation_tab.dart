@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/config_sample.dart';
-import '../../models/congregacion.dart';
+import '../../data/config_options.dart';
+import '../../models/congregation.dart';
 import '../../state/dashboard_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
@@ -11,8 +11,8 @@ import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/labeled_field.dart';
-import 'invitar_usuario_modal.dart';
-import 'nueva_congregacion_modal.dart';
+import 'invite_user_modal.dart';
+import 'new_congregation_modal.dart';
 import 'settings_card.dart';
 import 'user_row.dart';
 
@@ -302,7 +302,7 @@ class _CongChip extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: congregacion.color,
+                  color: Color(congregacion.color),
                   shape: BoxShape.circle,
                 ),
               ),

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../models/hermano.dart';
-import '../../state/hermanos_provider.dart';
+import '../../models/participant.dart';
+import '../../state/participants_provider.dart';
 import '../../state/program_form.dart';
-import '../limites.dart';
+import '../limits.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';

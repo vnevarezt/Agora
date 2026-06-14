@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/ui_state.dart';
-import '../config/configuracion_view.dart';
+import '../config/settings_view.dart';
 import '../dashboard/dashboard_view.dart';
-import '../personas/hermanos_view.dart';
+import '../participants/participants_view.dart';
 import '../responsive.dart';
 import 'sidebar_nav.dart';
 

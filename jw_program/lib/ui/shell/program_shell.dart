@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/proyecto.dart';
+import '../../models/project.dart';
 import '../../state/ui_state.dart';
 import '../preview/preview_pane.dart';
 import '../responsive.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/proyecto.dart';
+import '../../models/project.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
