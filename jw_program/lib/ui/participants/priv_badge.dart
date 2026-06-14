@@ -4,8 +4,8 @@ import '../../models/participant.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 
-/// Insignia de privilegio: anciano (accent), siervo (ámbar) y publicador
-/// (neutro). El ámbar lleva variante para modo dark.
+/// Privilege badge: elder (accent), servant (amber) and publisher
+/// (neutral). The amber has a dark-mode variant.
 class PrivBadge extends StatelessWidget {
   const PrivBadge({super.key, required this.role});
 
