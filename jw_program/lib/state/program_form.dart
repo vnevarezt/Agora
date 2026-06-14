@@ -5,8 +5,10 @@ import '../models/program_row.dart';
 import '../models/week.dart';
 import 'weeks_provider.dart';
 
-/// Estado editable del formulario (inmutable). Los nombres se guardan por
-/// `ProgramRow.id` en [principal] / [auxiliar].
+/// Estado editable del formulario (inmutable). Las asignaciones se guardan
+/// **por semana** (índice → mapa por `ProgramRow.id`); los getters [presidente]
+/// / [principal] / [auxiliar] exponen las de la semana activa, así que todo lo
+/// que consume el formulario (PDF, progreso, slots) no cambia de contrato.
 class FormModel {
   final String issue;
   final String cong;
@@ -14,9 +16,10 @@ class FormModel {
   final int duracion; // minutos
   final bool aux;
   final int semanaIdx;
-  final String presidente;
-  final Map<String, List<String>> principal;
-  final Map<String, List<String>> auxiliar;
+
+  final Map<int, String> presidentePorSemana;
+  final Map<int, Map<String, List<String>>> principalPorSemana;
+  final Map<int, Map<String, List<String>>> auxiliarPorSemana;
 
   const FormModel({
     required this.issue,
@@ -25,9 +28,9 @@ class FormModel {
     required this.duracion,
     required this.aux,
     required this.semanaIdx,
-    required this.presidente,
-    required this.principal,
-    required this.auxiliar,
+    this.presidentePorSemana = const {},
+    this.principalPorSemana = const {},
+    this.auxiliarPorSemana = const {},
   });
 
   static const inicial = FormModel(
@@ -37,10 +40,14 @@ class FormModel {
     duracion: 105,
     aux: false,
     semanaIdx: 0,
-    presidente: '',
-    principal: {},
-    auxiliar: {},
   );
+
+  // Asignaciones de la semana activa (contrato estable para el resto de la app).
+  String get presidente => presidentePorSemana[semanaIdx] ?? '';
+  Map<String, List<String>> get principal =>
+      principalPorSemana[semanaIdx] ?? const {};
+  Map<String, List<String>> get auxiliar =>
+      auxiliarPorSemana[semanaIdx] ?? const {};
 
   /// Minutos desde medianoche del inicio (fallback 18:00 si el texto no es válido).
   int get inicioMin {
@@ -53,6 +60,8 @@ class FormModel {
     return 18 * 60;
   }
 
+  /// [presidente]/[principal]/[auxiliar] sobrescriben la **semana resultante**
+  /// (la activa tras aplicar [semanaIdx]); el resto de semanas se conserva.
   FormModel copyWith({
     String? issue,
     String? cong,
@@ -64,16 +73,23 @@ class FormModel {
     Map<String, List<String>>? principal,
     Map<String, List<String>>? auxiliar,
   }) {
+    final idx = semanaIdx ?? this.semanaIdx;
     return FormModel(
       issue: issue ?? this.issue,
       cong: cong ?? this.cong,
       inicio: inicio ?? this.inicio,
       duracion: duracion ?? this.duracion,
       aux: aux ?? this.aux,
-      semanaIdx: semanaIdx ?? this.semanaIdx,
-      presidente: presidente ?? this.presidente,
-      principal: principal ?? this.principal,
-      auxiliar: auxiliar ?? this.auxiliar,
+      semanaIdx: idx,
+      presidentePorSemana: presidente == null
+          ? presidentePorSemana
+          : {...presidentePorSemana, idx: presidente},
+      principalPorSemana: principal == null
+          ? principalPorSemana
+          : {...principalPorSemana, idx: principal},
+      auxiliarPorSemana: auxiliar == null
+          ? auxiliarPorSemana
+          : {...auxiliarPorSemana, idx: auxiliar},
     );
   }
 }
@@ -92,9 +108,8 @@ class FormController extends Notifier<FormModel> {
   void setPresidente(String v) => state = state.copyWith(presidente: v);
   void setAux(bool v) => state = state.copyWith(aux: v);
 
-  /// Cambia de semana y limpia los nombres (no aplican a otra semana).
-  void seleccionarSemana(int idx) =>
-      state = state.copyWith(semanaIdx: idx, principal: {}, auxiliar: {});
+  /// Cambia de semana conservando las asignaciones de cada una.
+  void seleccionarSemana(int idx) => state = state.copyWith(semanaIdx: idx);
 
   void setNombresPrincipal(String rowId, List<String> nombres) {
     state = state.copyWith(principal: {...state.principal, rowId: nombres});

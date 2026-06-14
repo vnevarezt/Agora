@@ -14,6 +14,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
 /// Barra del editor (`.projbar`): identidad del proyecto, progreso, selector
@@ -42,7 +43,7 @@ class ProjectBar extends ConsumerWidget {
   }
 
   Widget _desktop(BuildContext context, WidgetRef ref, AppTokens t) {
-    final progreso = ref.watch(progressProvider);
+    final progreso = ref.watch(progresoProyectoProvider);
     return Row(
       children: [
         _back(context),
@@ -411,6 +412,7 @@ class _WeekMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final aux = ref.watch(formProvider.select((f) => f.aux));
+    final progresos = ref.watch(progresoPorSemanaProvider);
 
     return Container(
       width: 280,
@@ -442,41 +444,87 @@ class _WeekMenu extends ConsumerWidget {
             ),
           ),
           for (var i = 0; i < weeks.length; i++)
-            Pressable(
-              onTap: () => onPick(i),
-              builder: (context, hovered, _) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-                decoration: BoxDecoration(
-                  color: i == activo
-                      ? t.accentTint
-                      : (hovered ? t.surface2 : Colors.transparent),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      child: Text(
-                        'SEM ${i + 1}',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                          color: i == activo ? t.accentStrong : t.textMute,
+            Builder(builder: (context) {
+              final pr = i < progresos.length
+                  ? progresos[i]
+                  : (done: 0, total: 0);
+              final completo = pr.total > 0 && pr.done == pr.total;
+              return Pressable(
+                onTap: () => onPick(i),
+                builder: (context, hovered, _) => Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: i == activo
+                        ? t.accentTint
+                        : (hovered ? t.surface2 : Colors.transparent),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 38,
+                        child: Text(
+                          'SEM ${i + 1}',
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                            color: i == activo ? t.accentStrong : t.textMute,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        weeks[i].fecha as String,
-                        style: AppText.mono(
-                            size: 13, weight: FontWeight.w700, color: t.text),
+                      SizedBox(
+                        width: 76,
+                        child: Text(
+                          weeks[i].fecha as String,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.mono(
+                              size: 12.5,
+                              weight: FontWeight.w700,
+                              color: t.text),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ProgressMeter(
+                          value: pr.total == 0 ? 0 : pr.done / pr.total,
+                          height: 4,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 30,
+                        child: completo
+                            ? Align(
+                                alignment: Alignment.centerRight,
+                                child: Container(
+                                  width: 18,
+                                  height: 18,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: t.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.check,
+                                      size: 12, color: t.accentInk),
+                                ),
+                              )
+                            : Text(
+                                '${pr.done}/${pr.total}',
+                                textAlign: TextAlign.right,
+                                style: AppText.mono(
+                                    size: 11,
+                                    weight: FontWeight.w700,
+                                    color: t.textMute),
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            }),
           Container(
             height: 1,
             margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
