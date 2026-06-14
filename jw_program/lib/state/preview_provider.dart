@@ -9,16 +9,16 @@ import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'program_form.dart';
 
-/// Vista previa en vivo: rasteriza la página (pdfium) when cambian los datos,
-/// con debounce para que escribir se sienta en tiempo real.
+/// Live preview: rasterizes the page (pdfium) when the data changes, with a
+/// debounce so typing feels real-time.
 final previewProvider =
     NotifierProvider<PreviewController, AsyncValue<ui.Image>>(
         PreviewController.new);
 
 class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   Timer? _debounce;
-  int _seq = 0; // descarta renders obsoletos
-  double _scale = 3.0; // resolución del raster; sube con el zoom
+  int _seq = 0; // discards stale renders
+  double _scale = 3.0; // raster resolution; grows with zoom
   ui.Image? _current;
 
   @override
@@ -27,7 +27,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       _debounce?.cancel();
       _current?.dispose();
     });
-    // Re-render when cambian estructura, nombres o congregación/presidente/auxRoom.
+    // Re-render when the structure, names or congregation/chairman/auxRoom change.
     ref.listen(scheduleProvider, (_, _) => _scheduleRender());
     ref.listen(assignmentsProvider, (_, _) => _scheduleRender());
     ref.listen(
@@ -58,7 +58,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
         chairman: f.chairman,
         auxRoom: f.auxRoom,
       );
-      final img = await rasterizarPagina(pdf, scale: _scale);
+      final img = await rasterizePage(pdf, scale: _scale);
       if (seq != _seq) {
         img.dispose();
         return;
@@ -71,7 +71,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     }
   }
 
-  /// Re-rasteriza a mayor resolución según el nivel de zoom (nitidez).
+  /// Re-rasterizes at higher resolution based on the zoom level (sharpness).
   void adjustZoomQuality(double zoom) {
     final target = (zoom * 2.0).clamp(3.0, 6.0);
     if ((target - _scale).abs() >= 0.5) {
@@ -80,8 +80,8 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     }
   }
 
-  /// Construye el PDF con los datos actuales y lo guarda en Descargas.
-  /// Devuelve la path del archivo.
+  /// Builds the PDF with the current data and saves it to Downloads.
+  /// Returns the file path.
   Future<String> export() async {
     final schedule = ref.read(scheduleProvider);
     final week = ref.read(currentWeekProvider);

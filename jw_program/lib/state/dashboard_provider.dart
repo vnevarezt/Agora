@@ -6,16 +6,16 @@ import '../models/notebook.dart';
 import '../models/project.dart';
 import '../models/reminder.dart';
 
-/// Estado del dashboard. SOLO UI: arranca vacío y se llena en memoria durante
-/// la sesión (sin persistencia). Cuando exista backend, solo cambian las
-/// fuentes de estos providers; la UI no se entera.
+/// Dashboard state. UI-ONLY: starts empty and fills in memory during the
+/// session (no persistence). When a backend exists, only the sources of these
+/// providers change; the UI doesn't notice.
 
-/// Usuario en sesión (greeting y tarjeta lateral). Sin identidad real todavía:
-/// neutro hasta que haya autenticación.
+/// Session user (greeting and sidebar card). No real identity yet: neutral
+/// until there is authentication.
 final sessionUserProvider = Provider<({String name, String role})>(
     (ref) => (name: '', role: ''));
 
-/// Paleta para el punto de color de cada congregación nueva (se cicla).
+/// Palette for each new congregation's color dot (cycled).
 const _congColors = <int>[
   0xFF7A2230,
   0xFF3E6651,
@@ -24,8 +24,8 @@ const _congColors = <int>[
   0xFF9A6A2E,
 ];
 
-/// Congregaciones en memoria. Vacío al inicio; el modal "Nueva congregación"
-/// las añade durante la sesión.
+/// In-memory congregations. Empty at first; the "Nueva congregación" modal
+/// adds them during the session.
 class CongregationsController extends Notifier<List<Congregation>> {
   @override
   List<Congregation> build() => const [];
@@ -48,20 +48,20 @@ final congregationsProvider =
     NotifierProvider<CongregationsController, List<Congregation>>(
         CongregationsController.new);
 
-/// Catálogo de notebooks disponibles. Vacío sin backend (se poblará con la
-/// descarga real del editor).
+/// Catalog of available notebooks. Empty without a backend (will be filled by
+/// the editor's real download).
 final notebooksProvider = Provider<List<Notebook>>((ref) => const []);
 
-/// Recordatorios/alerts. Vacío sin backend (son alerts derivadas).
+/// Reminders/alerts. Empty without a backend (they are derived alerts).
 final remindersProvider = Provider<List<Reminder>>((ref) => const []);
 
-/// Lista de projects editable en memoria. El modal de projects crea, edita y
-/// elimina aquí; la persistencia llega en una fase posterior.
+/// In-memory editable project list. The project modal creates, edits and
+/// deletes here; persistence comes in a later phase.
 class ProjectsController extends Notifier<List<Project>> {
   @override
   List<Project> build() => const [];
 
-  /// 14 partes asignables por semana.
+  /// 14 assignable parts per week.
   static int _total(int weeks) => weeks * 14;
 
   void create({
@@ -111,12 +111,12 @@ final projectsProvider =
     NotifierProvider<ProjectsController, List<Project>>(
         ProjectsController.new);
 
-/// Filtros active: congregación (`'all'` = todas) y status (`null` = all).
+/// Active filters: congregation (`'all'` = all) and status (`null` = any).
 class DashboardFilters {
-  /// `'all'` o el id de una congregación.
+  /// `'all'` or a congregation id.
   final String congregationId;
 
-  /// `null` = todo status.
+  /// `null` = any status.
   final ProjectStatus? status;
 
   const DashboardFilters({this.congregationId = 'all', this.status});
@@ -137,7 +137,7 @@ final dashboardFiltersProvider =
     NotifierProvider<DashboardFiltersController, DashboardFilters>(
         DashboardFiltersController.new);
 
-/// Proyectos visibles tras apply los filters active.
+/// Projects visible after applying the active filters.
 final filteredProjectsProvider = Provider<List<Project>>((ref) {
   final projects = ref.watch(projectsProvider);
   final f = ref.watch(dashboardFiltersProvider);

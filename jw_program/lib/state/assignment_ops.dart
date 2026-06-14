@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/program_row.dart';
 import 'program_form.dart';
 
-/// Referencia a un hueco de asignación concreto de la UI. Mapea sobre el
-/// almacenamiento existente del formulario ([FormModel.main] /
-/// [FormModel.auxiliary], listas por `ProgramRow.id`) sin cambiar su contrato.
+/// Reference to a concrete UI assignment slot. Maps onto the form's existing
+/// storage ([FormModel.main] / [FormModel.auxiliary], lists keyed by
+/// `ProgramRow.id`) without changing its contract.
 sealed class SlotRef {
   const SlotRef();
 
-  /// Clave estable (p. ej. "presidente", "te0:0", "se1:aux:1").
+  /// Stable key (e.g. "chairman", "te0:0", "se1:aux:1").
   String get key;
 
   @override
@@ -19,7 +19,7 @@ sealed class SlotRef {
   int get hashCode => key.hashCode;
 }
 
-/// Presidente de la reunión ([FormModel.chairman]).
+/// Meeting chairman ([FormModel.chairman]).
 class ChairmanSlot extends SlotRef {
   const ChairmanSlot();
 
@@ -27,8 +27,8 @@ class ChairmanSlot extends SlotRef {
   String get key => 'chairman';
 }
 
-/// Posición [index] dentro de la list de names de una fila
-/// (auditorio principal o sala auxiliar según [aux]).
+/// Position [index] within a row's name list (main hall or auxiliary room,
+/// depending on [aux]).
 class RowSlot extends SlotRef {
   const RowSlot(this.row, this.index, {this.aux = false});
 
@@ -40,8 +40,8 @@ class RowSlot extends SlotRef {
   String get key => aux ? '${row.id}:aux:$index' : '${row.id}:$index';
 }
 
-/// Lista de [slots] entradas con [name] colocado en [index], conservando
-/// los demás valores de [current] (función pura, testeable).
+/// List of [slots] entries with [name] placed at [index], keeping the other
+/// values of [current] (pure, testable function).
 List<String> listWithName(
     List<String>? current, int slots, int index, String name) {
   return [
@@ -52,7 +52,7 @@ List<String> listWithName(
   ];
 }
 
-/// Cuántas de las primeras [slots] entradas de [names] están llenas.
+/// How many of the first [slots] entries of [names] are filled.
 int filledNames(List<String>? names, int slots) {
   if (names == null) return 0;
   var n = 0;
@@ -62,7 +62,7 @@ int filledNames(List<String>? names, int slots) {
   return n;
 }
 
-/// Nombre actualmente asignado a [slot] ('' si está vacío).
+/// Name currently assigned to [slot] ('' if empty).
 String slotName(FormModel f, SlotRef slot) {
   return switch (slot) {
     ChairmanSlot() => f.chairman,
@@ -73,8 +73,7 @@ String slotName(FormModel f, SlotRef slot) {
   };
 }
 
-/// Escribe [name] en [slot] usando los setters existentes del formulario.
-/// Limpiar = escribir ''.
+/// Writes [name] into [slot] using the form's existing setters. Clearing = "".
 void writeAssignment(WidgetRef ref, SlotRef slot, String name) {
   final notifier = ref.read(formProvider.notifier);
   switch (slot) {

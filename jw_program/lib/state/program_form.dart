@@ -5,15 +5,15 @@ import '../models/program_row.dart';
 import '../models/week.dart';
 import 'weeks_provider.dart';
 
-/// Estado editable del formulario (inmutable). Las asignaciones se guardan
-/// **por semana** (índice → mapa por `ProgramRow.id`); los getters [chairman]
-/// / [main] / [auxiliary] exponen las de la semana activa, así que todo lo
-/// que consume el formulario (PDF, progreso, slots) no cambia de contrato.
+/// Editable form state (immutable). Assignments are stored **per week** (index
+/// → map keyed by `ProgramRow.id`); the [chairman] / [main] / [auxiliary]
+/// getters expose the active week, so everything that consumes the form (PDF,
+/// progress, slots) keeps the same contract.
 class FormModel {
   final String issue;
   final String congregationId;
   final String startTime; // "HH:MM"
-  final int duration; // minutos
+  final int duration; // minutes
   final bool auxRoom;
   final int weekIndex;
 
@@ -42,12 +42,12 @@ class FormModel {
     weekIndex: 0,
   );
 
-  // Asignaciones de la semana activa (contrato estable para el resto de la app).
+  // Active week's assignments (stable contract for the rest of the app).
   String get chairman => chairmanByWeek[weekIndex] ?? '';
   Map<String, List<String>> get main => mainByWeek[weekIndex] ?? const {};
   Map<String, List<String>> get auxiliary => auxByWeek[weekIndex] ?? const {};
 
-  /// Minutos desde medianoche del inicio (fallback 18:00 si el texto no es válido).
+  /// Start time in minutes from midnight (falls back to 18:00 if invalid).
   int get startMinutes {
     final p = startTime.split(':');
     if (p.length == 2) {
@@ -58,8 +58,8 @@ class FormModel {
     return 18 * 60;
   }
 
-  /// [chairman]/[main]/[auxiliary] sobrescriben la **semana resultante**
-  /// (la activa tras apply [weekIndex]); el resto de semanas se conserva.
+  /// [chairman]/[main]/[auxiliary] overwrite the **resulting week** (the active
+  /// one after applying [weekIndex]); the other weeks are preserved.
   FormModel copyWith({
     String? issue,
     String? congregationId,
@@ -103,7 +103,7 @@ class FormController extends Notifier<FormModel> {
   void setChairman(String v) => state = state.copyWith(chairman: v);
   void setAuxRoom(bool v) => state = state.copyWith(auxRoom: v);
 
-  /// Cambia de semana conservando las asignaciones de cada una.
+  /// Switches week while preserving each week's assignments.
   void selectWeek(int idx) => state = state.copyWith(weekIndex: idx);
 
   void setMainNames(String rowId, List<String> names) {
@@ -115,7 +115,7 @@ class FormController extends Notifier<FormModel> {
   }
 }
 
-/// Semana seleccionada (o null si aún no se ha descargado el notebook).
+/// Selected week (or null if the notebook hasn't been downloaded yet).
 final currentWeekProvider = Provider<Week?>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return null;
@@ -123,8 +123,8 @@ final currentWeekProvider = Provider<Week?>((ref) {
   return weeks[idx.clamp(0, weeks.length - 1)];
 });
 
-/// Horario calculado de la semana seleccionada (se recalcula solo si cambian
-/// semana, inicio o duración).
+/// Schedule computed for the selected week (recomputed only when the week,
+/// start time or duration change).
 final scheduleProvider = Provider<ProgramSchedule?>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return null;
@@ -134,7 +134,7 @@ final scheduleProvider = Provider<ProgramSchedule?>((ref) {
   return buildSchedule(week, sel.$2, sel.$3);
 });
 
-/// Nombres como los consume el PDF (derivados del formulario).
+/// Names as the PDF consumes them (derived from the form).
 final assignmentsProvider = Provider<Assignments>((ref) {
   final maps = ref.watch(formProvider.select((f) => (f.main, f.auxiliary)));
   return Assignments(maps.$1, maps.$2);

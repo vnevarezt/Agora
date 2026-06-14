@@ -8,19 +8,19 @@ import 'weeks_provider.dart';
 
 typedef Progress = ({int done, int total});
 
-/// Cuenta huecos asignados/totales de un horario dado contra unas asignaciones
-/// (presidente + listas por fila). Slots, no filas: parejas y sala auxiliar
-/// pesan cada una lo suyo.
+/// Counts assigned/total slots of a given schedule against the assignments
+/// (chairman + per-row lists). Slots, not rows: pairs and the auxiliary room
+/// each count for what they're worth.
 Progress _progressOf(
-  ProgramSchedule sched, {
+  ProgramSchedule schedule, {
   required String chairman,
   required Map<String, List<String>> main,
   required Map<String, List<String>> auxiliary,
   required bool auxRoom,
 }) {
-  var total = 1; // presidente
+  var total = 1; // chairman
   var done = chairman.trim().isEmpty ? 0 : 1;
-  for (final ProgramRow row in sched.rows) {
+  for (final ProgramRow row in schedule.rows) {
     total += row.slots;
     done += filledNames(main[row.id], row.slots);
     if (auxRoom && row.auxSlots > 0) {
@@ -31,20 +31,20 @@ Progress _progressOf(
   return (done: done, total: total);
 }
 
-/// Progreso de la semana activa. Alimenta el anillo del selector y la bottom
-/// bar móvil.
+/// Progress of the active week. Feeds the selector ring and the mobile bottom
+/// bar.
 final progressProvider = Provider<Progress>((ref) {
-  final sched = ref.watch(scheduleProvider);
-  if (sched == null) return (done: 0, total: 0);
+  final schedule = ref.watch(scheduleProvider);
+  if (schedule == null) return (done: 0, total: 0);
   final f = ref.watch(formProvider);
-  return _progressOf(sched,
+  return _progressOf(schedule,
       chairman: f.chairman,
       main: f.main,
       auxiliary: f.auxiliary,
       auxRoom: f.auxRoom);
 });
 
-/// Progreso de cada semana del notebook (para los meters de "Ir a la semana").
+/// Progress of each notebook week (for the "Go to week" meters).
 final progressPerWeekProvider = Provider<List<Progress>>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return const [];
@@ -61,7 +61,7 @@ final progressPerWeekProvider = Provider<List<Progress>>((ref) {
   ];
 });
 
-/// Progreso agregado de todo el proyecto (suma de todas las semanas).
+/// Aggregated progress of the whole project (sum of all weeks).
 final projectProgressProvider = Provider<Progress>((ref) {
   final list = ref.watch(progressPerWeekProvider);
   var done = 0, total = 0;
