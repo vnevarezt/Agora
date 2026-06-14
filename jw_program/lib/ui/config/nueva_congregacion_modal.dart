@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_sample.dart';
+import '../../state/dashboard_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_modal.dart';
@@ -17,7 +19,7 @@ Future<void> mostrarNuevaCongregacion(BuildContext context) {
   );
 }
 
-class NuevaCongregacionModal extends StatefulWidget {
+class NuevaCongregacionModal extends ConsumerStatefulWidget {
   const NuevaCongregacionModal({
     super.key,
     required this.sheet,
@@ -28,10 +30,12 @@ class NuevaCongregacionModal extends StatefulWidget {
   final VoidCallback onClose;
 
   @override
-  State<NuevaCongregacionModal> createState() => _NuevaCongregacionModalState();
+  ConsumerState<NuevaCongregacionModal> createState() =>
+      _NuevaCongregacionModalState();
 }
 
-class _NuevaCongregacionModalState extends State<NuevaCongregacionModal> {
+class _NuevaCongregacionModalState
+    extends ConsumerState<NuevaCongregacionModal> {
   String _nombre = '';
   String _numero = '';
   String _idioma = idiomasReunion.first;
@@ -39,6 +43,16 @@ class _NuevaCongregacionModalState extends State<NuevaCongregacionModal> {
   String _horaEntre = '19:00';
   String _diaFin = 'Domingo';
   String _horaFin = '10:00';
+
+  /// Añade la congregación al estado en memoria y cierra. Los horarios/idioma
+  /// aún no se persisten (sin backend); solo se guarda nombre y número.
+  void _crear() {
+    ref.read(congregacionesDashProvider.notifier).agregar(
+          nombre: _nombre.trim(),
+          numero: _numero.trim(),
+        );
+    widget.onClose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +62,7 @@ class _NuevaCongregacionModalState extends State<NuevaCongregacionModal> {
       title: 'Nueva congregación',
       desc: 'Serás su administrador. Después podrás invitar usuarios.',
       primaryLabel: 'Crear congregación',
-      onPrimary: widget.onClose, // UI-only: solo cierra
+      onPrimary: _nombre.trim().isEmpty ? null : _crear,
       body: _body(context),
     );
   }
@@ -74,7 +88,7 @@ class _NuevaCongregacionModalState extends State<NuevaCongregacionModal> {
                 child: BoundTextField(
                   initial: _nombre,
                   hint: 'Ej. Jardines del Norte',
-                  onChanged: (v) => _nombre = v,
+                  onChanged: (v) => setState(() => _nombre = v),
                 ),
               ),
             ),

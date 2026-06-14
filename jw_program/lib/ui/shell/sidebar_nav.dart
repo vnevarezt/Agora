@@ -232,6 +232,8 @@ class _UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    // Sin usuario en sesión (sin backend) no se muestra la tarjeta.
+    if (nombre.isEmpty) return const SizedBox.shrink();
     if (compact) {
       return Center(child: PersonAvatar(nombre: nombre, size: 32));
     }

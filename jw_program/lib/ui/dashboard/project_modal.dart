@@ -136,27 +136,45 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final isMobile = context.isMobile;
     final congs = ref.watch(congregacionesDashProvider);
     final cuadernos = ref.watch(cuadernosProvider);
-    final cuaderno =
-        cuadernos.firstWhere((c) => c.id == _cuadernoId, orElse: () => cuadernos.first);
-    final extra =
-        _semanas.where((x) => !cuaderno.semanas.contains(x)).toList();
-    final autoName = _autoName(cuaderno);
 
-    final card = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (widget.sheet) _handle(t),
-        _header(t),
-        Flexible(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-            child: _cuerpo(t, isMobile, congs, cuadernos, cuaderno, extra, autoName),
+    final Widget card;
+    if (cuadernos.isEmpty) {
+      // Sin catálogo de cuadernos no se pueden elegir semanas todavía.
+      card = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.sheet) _handle(t),
+          _header(t),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
+            child: _sinCuadernos(t),
           ),
-        ),
-        _footer(t, isMobile, cuaderno),
-      ],
-    );
+        ],
+      );
+    } else {
+      final cuaderno = cuadernos.firstWhere((c) => c.id == _cuadernoId,
+          orElse: () => cuadernos.first);
+      final extra =
+          _semanas.where((x) => !cuaderno.semanas.contains(x)).toList();
+      final autoName = _autoName(cuaderno);
+      card = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.sheet) _handle(t),
+          _header(t),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
+              child: _cuerpo(
+                  t, isMobile, congs, cuadernos, cuaderno, extra, autoName),
+            ),
+          ),
+          _footer(t, isMobile, cuaderno),
+        ],
+      );
+    }
 
     if (widget.sheet) return card;
 
@@ -233,6 +251,33 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           ],
         ),
       );
+
+  Widget _sinCuadernos(AppTokens t) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.menu_book_outlined, size: 40, color: t.textMute),
+        const SizedBox(height: 12),
+        Text(
+          'Aún no hay cuadernos disponibles.\n'
+          'Descárgalos desde el editor para crear proyectos.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+            height: 1.4,
+            color: t.textMute,
+          ),
+        ),
+        const SizedBox(height: 18),
+        AppButton(
+          variant: AppButtonVariant.ghost,
+          label: 'Entendido',
+          onPressed: widget.onClose,
+        ),
+      ],
+    );
+  }
 
   Widget _cuerpo(
     AppTokens t,

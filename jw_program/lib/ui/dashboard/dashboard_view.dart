@@ -66,6 +66,9 @@ class _Topbar extends ConsumerWidget {
     final t = context.tokens;
     final isMobile = context.isMobile;
     final usuario = ref.watch(usuarioProvider);
+    final saludo = usuario.nombre.isEmpty
+        ? _saludo()
+        : '${_saludo()}, ${usuario.nombre}';
 
     return Row(
       children: [
@@ -74,7 +77,7 @@ class _Topbar extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${_saludo()}, ${usuario.nombre}',
+                saludo,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

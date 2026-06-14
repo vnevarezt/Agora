@@ -167,33 +167,24 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
 
   Widget _resultado(BuildContext context) {
     final t = context.tokens;
-    final asyncTodos = ref.watch(hermanosTodosProvider);
+    final todos = ref.watch(hermanosTodosProvider);
+    final filtrados = filtrarHermanos(
+      todos,
+      query: _query,
+      privilegio: _privilegio,
+      congregacion: _congregacion,
+      incluirInactivos: true,
+    );
 
-    return asyncTodos.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.only(top: 60),
-        child: Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, _) => _error(t, e),
-      data: (todos) {
-        final filtrados = filtrarHermanos(
-          todos,
-          query: _query,
-          privilegio: _privilegio,
-          congregacion: _congregacion,
-          incluirInactivos: true,
-        );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BlockTitle(title: 'Hermanos', count: filtrados.length),
-            if (filtrados.isEmpty)
-              _vacio(t, todos.isEmpty)
-            else
-              _grid(filtrados),
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlockTitle(title: 'Hermanos', count: filtrados.length),
+        if (filtrados.isEmpty)
+          _vacio(t, todos.isEmpty)
+        else
+          _grid(filtrados),
+      ],
     );
   }
 
@@ -247,20 +238,4 @@ class _HermanosViewState extends ConsumerState<HermanosView> {
     );
   }
 
-  Widget _error(AppTokens t, Object e) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: Center(
-        child: Text(
-          'No se pudo abrir la base de datos local.\n$e',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-      ),
-    );
-  }
 }

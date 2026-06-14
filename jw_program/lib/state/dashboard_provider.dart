@@ -1,34 +1,68 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../data/dashboard_sample.dart';
 import '../models/congregacion.dart';
 import '../models/cuaderno.dart';
 import '../models/proyecto.dart';
 import '../models/recordatorio.dart';
 
-/// Estado del dashboard. Por ahora expone los datos de ejemplo y el estado de
-/// los filtros (UI pura). Cuando exista persistencia, solo cambian las fuentes
-/// de estos providers; la UI no se entera.
+/// Estado del dashboard. SOLO UI: arranca vacío y se llena en memoria durante
+/// la sesión (sin persistencia). Cuando exista backend, solo cambian las
+/// fuentes de estos providers; la UI no se entera.
 
-final usuarioProvider = Provider((ref) => usuarioEjemplo);
+/// Usuario en sesión (saludo y tarjeta lateral). Sin identidad real todavía:
+/// neutro hasta que haya autenticación.
+final usuarioProvider = Provider<({String nombre, String rol})>(
+    (ref) => (nombre: '', rol: ''));
+
+/// Paleta para el punto de color de cada congregación nueva (se cicla).
+const _coloresCong = <Color>[
+  Color(0xFF7A2230),
+  Color(0xFF3E6651),
+  Color(0xFF3F6193),
+  Color(0xFF6B4E8A),
+  Color(0xFF9A6A2E),
+];
+
+/// Congregaciones en memoria. Vacío al inicio; el modal "Nueva congregación"
+/// las añade durante la sesión.
+class CongregacionesController extends Notifier<List<Congregacion>> {
+  @override
+  List<Congregacion> build() => const [];
+
+  void agregar({required String nombre, required String numero}) {
+    final color = _coloresCong[state.length % _coloresCong.length];
+    state = [
+      ...state,
+      Congregacion(
+        id: const Uuid().v4(),
+        nombre: nombre,
+        numero: numero,
+        color: color,
+      ),
+    ];
+  }
+}
 
 final congregacionesDashProvider =
-    Provider<List<Congregacion>>((ref) => congregacionesEjemplo);
+    NotifierProvider<CongregacionesController, List<Congregacion>>(
+        CongregacionesController.new);
 
-final cuadernosProvider =
-    Provider<List<Cuaderno>>((ref) => cuadernosEjemplo);
+/// Catálogo de cuadernos disponibles. Vacío sin backend (se poblará con la
+/// descarga real del editor).
+final cuadernosProvider = Provider<List<Cuaderno>>((ref) => const []);
 
-final recordatoriosProvider =
-    Provider<List<Recordatorio>>((ref) => recordatoriosEjemplo);
+/// Recordatorios/alertas. Vacío sin backend (son alertas derivadas).
+final recordatoriosProvider = Provider<List<Recordatorio>>((ref) => const []);
 
 /// Lista de proyectos editable en memoria. El modal de proyectos crea, edita y
 /// elimina aquí; la persistencia llega en una fase posterior.
 class ProyectosController extends Notifier<List<Proyecto>> {
   @override
-  List<Proyecto> build() => proyectosEjemplo;
+  List<Proyecto> build() => const [];
 
-  /// 14 partes asignables por semana (réplica del cálculo del mock).
+  /// 14 partes asignables por semana.
   static int _total(int semanas) => semanas * 14;
 
   void crear({

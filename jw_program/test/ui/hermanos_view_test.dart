@@ -8,9 +8,17 @@ import 'package:jw_program/ui/personas/hermanos_view.dart';
 import 'package:jw_program/ui/theme/app_theme.dart';
 import 'package:jw_program/ui/theme/tokens.dart';
 
-// El test de la BD vive en test/db/. Aquí probamos solo la UI de HermanosView,
-// alimentando el directorio con un stream estático (sin Drift) para que sea
-// determinista y rápido.
+// Probamos solo la UI de HermanosView, alimentando el directorio en memoria
+// con una lista fija para que sea determinista y rápido.
+class _FakeHermanos extends HermanosController {
+  _FakeHermanos(this._lista);
+
+  final List<Hermano> _lista;
+
+  @override
+  List<Hermano> build() => _lista;
+}
+
 Hermano _h(String id, String nombre) {
   final t = DateTime.utc(2026, 6, 1);
   return Hermano(
@@ -33,14 +41,14 @@ Future<void> _pump(WidgetTester tester, List<Hermano> lista) async {
 
   await tester.pumpWidget(ProviderScope(
     overrides: [
-      hermanosTodosProvider.overrideWith((ref) => Stream.value(lista)),
+      hermanosTodosProvider.overrideWith(() => _FakeHermanos(lista)),
     ],
     child: MaterialApp(
       theme: buildAppTheme(pizarra.light, Brightness.light),
       home: const Scaffold(body: SafeArea(child: HermanosView())),
     ),
   ));
-  await tester.pump(); // emite el stream
+  await tester.pump();
 }
 
 void main() {

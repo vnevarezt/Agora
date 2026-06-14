@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/config_sample.dart';
-import '../../state/dashboard_provider.dart';
 import '../../state/ui_state.dart';
 import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
 import 'settings_card.dart';
-import 'user_row.dart';
 
 const _idiomasApp = ['Español', 'English', 'Português'];
 const _formatosHora = ['24 horas (18:00)', '12 horas (6:00 p. m.)'];
@@ -194,27 +191,21 @@ class _AplicacionTabState extends ConsumerState<AplicacionTab> {
         ),
         const SettingRow(
           title: 'Última copia',
-          subtitle: 'hace 12 días · 3 congregaciones, 6 proyectos, 14 hermanos',
+          subtitle: 'Sin copias todavía',
         ),
       ],
     );
   }
 
   Widget _sesion() {
-    final usuario = ref.watch(usuarioProvider);
     return SettingsCard(
       title: 'Sesión',
-      desc: 'Estás usando la app con una cuenta en la nube.',
-      children: [
-        UserRow(
+      desc: 'Estás usando la app en modo local en este dispositivo.',
+      children: const [
+        SettingRow(
           first: true,
-          nombre: usuario.nombre,
-          email: '${usuariosEjemplo.first.email} · Modo nube',
-          trailing: AppButton(
-            variant: AppButtonVariant.ghost,
-            label: 'Cerrar sesión',
-            onPressed: () {},
-          ),
+          title: 'Modo local',
+          subtitle: 'Los datos viven solo en este dispositivo',
         ),
       ],
     );

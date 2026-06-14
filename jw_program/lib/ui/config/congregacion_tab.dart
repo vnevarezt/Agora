@@ -26,40 +26,29 @@ class CongregacionTab extends ConsumerStatefulWidget {
 }
 
 class _CongregacionTabState extends ConsumerState<CongregacionTab> {
-  late String _congId;
-  late String _nombre;
-  late String _numero;
-  late String _idioma;
-  late String _diaEntre;
-  late String _horaEntre;
-  late String _diaFin;
-  late String _horaFin;
-  late bool _aux;
-  final Map<String, String> _roles = {
-    for (final u in usuariosEjemplo) u.id: u.rol,
-  };
+  String? _congId;
+  String _nombre = '';
+  String _numero = '';
+  String _idioma = idiomasReunion.first;
+  String _diaEntre = 'Martes';
+  String _horaEntre = '19:00';
+  String _diaFin = 'Domingo';
+  String _horaFin = '10:00';
+  bool _aux = false;
 
-  @override
-  void initState() {
-    super.initState();
-    final congs = ref.read(congregacionesDashProvider);
-    _seleccionar(congs.first.id, congs, notificar: false);
-  }
-
-  void _seleccionar(String id, List<Congregacion> congs,
-      {bool notificar = true}) {
-    final cong = congs.firstWhere((c) => c.id == id);
-    final cfg = congConfigEjemplo[id]!;
+  /// Selecciona una congregación y siembra los campos. Los horarios aún no se
+  /// persisten (sin backend): se muestran con valores por defecto.
+  void _seleccionar(Congregacion cong, {bool notificar = true}) {
     void aplicar() {
-      _congId = id;
+      _congId = cong.id;
       _nombre = cong.nombre;
       _numero = cong.numero;
-      _idioma = cfg.idioma;
-      _diaEntre = cfg.diaEntreSemana;
-      _horaEntre = cfg.horaEntreSemana;
-      _diaFin = cfg.diaFinSemana;
-      _horaFin = cfg.horaFinSemana;
-      _aux = cfg.salaAuxiliar;
+      _idioma = idiomasReunion.first;
+      _diaEntre = 'Martes';
+      _horaEntre = '19:00';
+      _diaFin = 'Domingo';
+      _horaFin = '10:00';
+      _aux = false;
     }
 
     if (notificar) {
@@ -73,16 +62,52 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
   Widget build(BuildContext context) {
     final congs = ref.watch(congregacionesDashProvider);
 
+    // Mantener una selección válida (la lista cambia en memoria).
+    if (congs.isEmpty) {
+      _congId = null;
+    } else if (_congId == null || !congs.any((c) => c.id == _congId)) {
+      _seleccionar(congs.first, notificar: false);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _selectorCongregaciones(congs),
         const SizedBox(height: 16),
-        SettingsColumns(
-          left: [_datosCard(), _horariosCard()],
-          right: [_usuariosCard()],
-        ),
+        if (congs.isEmpty)
+          _vacio(context)
+        else
+          SettingsColumns(
+            left: [_datosCard(), _horariosCard()],
+            right: [_usuariosCard()],
+          ),
       ],
+    );
+  }
+
+  Widget _vacio(BuildContext context) {
+    final t = context.tokens;
+    return Padding(
+      padding: const EdgeInsets.only(top: 40),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.apartment_outlined, size: 40, color: t.textMute),
+            const SizedBox(height: 12),
+            Text(
+              'Aún no hay congregaciones.\n'
+              'Crea la primera con "Nueva congregación".',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: t.textMute,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -95,9 +120,9 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
         for (final c in congs)
           _CongChip(
             congregacion: c,
-            acceso: accesoEjemplo[c.id] ?? '',
+            acceso: '',
             active: _congId == c.id,
-            onTap: () => _seleccionar(c.id, congs),
+            onTap: () => _seleccionar(c),
           ),
         _AddChip(onTap: () => mostrarNuevaCongregacion(context)),
       ],
@@ -207,30 +232,22 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
   }
 
   Widget _usuariosCard() {
-    final usuarios =
-        usuariosEjemplo.where((u) => u.congIds.contains(_congId)).toList();
+    final t = context.tokens;
     return SettingsCard(
       title: 'Usuarios con acceso',
       desc: 'Quién puede ver o editar los proyectos de esta congregación.',
       children: [
-        for (var i = 0; i < usuarios.length; i++)
-          UserRow(
-            first: i == 0,
-            nombre: usuarios[i].nombre,
-            email: usuarios[i].email,
-            trailing: _roles[usuarios[i].id] == 'Administrador'
-                ? const RolePill(rol: 'Administrador')
-                : SizedBox(
-                    width: 130,
-                    child: AppDropdown<String>(
-                      value: _roles[usuarios[i].id],
-                      items: rolesAcceso,
-                      itemLabel: (s) => s,
-                      onChanged: (v) =>
-                          setState(() => _roles[usuarios[i].id] = v),
-                    ),
-                  ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Text(
+            'Aún no hay usuarios invitados.',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: t.textMute,
+            ),
           ),
+        ),
         const SizedBox(height: 12),
         Align(
           alignment: Alignment.centerLeft,
