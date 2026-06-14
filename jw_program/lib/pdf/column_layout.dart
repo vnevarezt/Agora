@@ -3,82 +3,82 @@ import 'package:pdf/pdf.dart';
 import '../models/program_row.dart';
 import 'pdf_theme.dart';
 
-/// Anchos de columna calculados por documento. La celda de contenido (X) es
-/// implícita (Expanded), así que solo guardamos role, auxRoom, name y banda.
+/// Column widths computed per document. The content cell (X) is implicit
+/// (Expanded), so we only store role, auxRoom, names and band widths.
 class ColumnWidths {
   final double role;
-  final double nomPrin;
-  final double auxRoom; // 0 when el modo Sala Auxiliar está apagado
-  final double banda;
+  final double mainNames;
+  final double auxRoom; // 0 when Auxiliary Room mode is off
+  final double band;
   const ColumnWidths({
     required this.role,
-    required this.nomPrin,
+    required this.mainNames,
     required this.auxRoom,
-    required this.banda,
+    required this.band,
   });
 }
 
-/// Ancho que necesita la columna de nombres de una fila. Para Estudiante/Ayudante
-/// se usa el name individual más largo (se apila), para el resto el texto unido.
-double anchoNombres(
-    String role, List<String> nombres, double Function(String) medir) {
-  if (nombres.isEmpty) return 0;
-  if (role == 'Estudiante/Ayudante:' && nombres.length == 2) {
-    final a = medir(nombres[0]);
-    final b = medir(nombres[1]);
+/// Width a row's names column needs. For Estudiante/Ayudante it uses the
+/// longest individual name (they stack); for the rest, the joined text.
+double namesWidth(
+    String role, List<String> names, double Function(String) measure) {
+  if (names.isEmpty) return 0;
+  if (role == 'Estudiante/Ayudante:' && names.length == 2) {
+    final a = measure(names[0]);
+    final b = measure(names[1]);
     return a > b ? a : b;
   }
-  return medir(joinedNames(nombres));
+  return measure(joinedNames(names));
 }
 
-/// Calcula los anchos de forma adaptativa: si los nombres traen mucho texto,
-/// ensancha la(s) columna(s) de nombres tomando espacio del título (con un piso).
-/// En modo auxRoom reparte entre dos columnas de nombres. Mide con Carlito.
-ColumnWidths calcularColumnas(
+/// Computes the widths adaptively: if the names carry a lot of text, it widens
+/// the names column(s) taking space from the title (with a floor). In auxRoom
+/// mode it splits between two names columns. Measured with Carlito.
+ColumnWidths computeColumns(
   ProgramSchedule sched,
-  Assignments asg,
+  Assignments assignments,
   PdfFont regular,
   bool auxRoom,
 ) {
-  double medir(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
-  double maxPrin = 0, maxAux = 0;
+  double measure(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
+  double maxMain = 0, maxAuxWidth = 0;
   for (final f in sched.rows) {
-    final wp = anchoNombres(f.role, asg.main(f), medir);
-    if (wp > maxPrin) maxPrin = wp;
+    final wp = namesWidth(f.role, assignments.main(f), measure);
+    if (wp > maxMain) maxMain = wp;
     if (auxRoom) {
-      final wa = anchoNombres(f.role, asg.auxiliary(f), medir);
-      if (wa > maxAux) maxAux = wa;
+      final wa = namesWidth(f.role, assignments.auxiliary(f), measure);
+      if (wa > maxAuxWidth) maxAuxWidth = wa;
     }
   }
-  const role = S140.anchoRol; // fijo (etiquetas de role, no entrada del user)
+  const role = S140.roleWidth; // fixed (role labels, not user input)
 
   if (!auxRoom) {
-    final maxNomOK =
-        S140.contentWidth - 2 * S140.colGap - role - S140.minContenido;
-    final nomPrin =
-        (maxPrin + S140.nomPad).clamp(S140.anchoNomPrin, maxNomOK).toDouble();
-    final contenido = S140.contentWidth - 2 * S140.colGap - role - nomPrin;
+    final maxNamesOk =
+        S140.contentWidth - 2 * S140.colGap - role - S140.minContent;
+    final mainNames =
+        (maxMain + S140.namePad).clamp(S140.mainNameWidth, maxNamesOk).toDouble();
+    final content = S140.contentWidth - 2 * S140.colGap - role - mainNames;
     return ColumnWidths(
-        role: role, nomPrin: nomPrin, auxRoom: 0, banda: contenido + S140.colGap + role);
+        role: role, mainNames: mainNames, auxRoom: 0, band: content + S140.colGap + role);
   }
 
-  // --- Modo Sala Auxiliar: 4 columnas (X R A P), 3 huecos ---
-  final dispo =
-      S140.contentWidth - 3 * S140.colGap - role - S140.minContenidoAux;
-  var nomPrin = maxPrin + S140.nomPad;
-  var nomAux = maxAux + S140.nomPad;
-  if (nomPrin < S140.minColAux) nomPrin = S140.minColAux;
-  if (nomAux < S140.minColAux) nomAux = S140.minColAux;
-  if (nomPrin + nomAux > dispo) {
-    final factor = dispo / (nomPrin + nomAux);
-    nomPrin = (nomPrin * factor).clamp(S140.minColAux, dispo).toDouble();
-    nomAux = (nomAux * factor).clamp(S140.minColAux, dispo).toDouble();
+  // --- Auxiliary Room mode: 4 columns (X R A P), 3 gaps ---
+  final available =
+      S140.contentWidth - 3 * S140.colGap - role - S140.minContentAux;
+  var mainNames = maxMain + S140.namePad;
+  var auxNames = maxAuxWidth + S140.namePad;
+  if (mainNames < S140.minAuxCol) mainNames = S140.minAuxCol;
+  if (auxNames < S140.minAuxCol) auxNames = S140.minAuxCol;
+  if (mainNames + auxNames > available) {
+    final factor = available / (mainNames + auxNames);
+    mainNames = (mainNames * factor).clamp(S140.minAuxCol, available).toDouble();
+    auxNames = (auxNames * factor).clamp(S140.minAuxCol, available).toDouble();
   }
-  final contenido =
-      S140.contentWidth - 3 * S140.colGap - role - nomPrin - nomAux;
+  final content =
+      S140.contentWidth - 3 * S140.colGap - role - mainNames - auxNames;
   return ColumnWidths(
       role: role,
-      nomPrin: nomPrin,
-      auxRoom: nomAux,
-      banda: contenido + S140.colGap + role);
+      mainNames: mainNames,
+      auxRoom: auxNames,
+      band: content + S140.colGap + role);
 }

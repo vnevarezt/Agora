@@ -8,8 +8,8 @@ import '../models/week.dart';
 import 'column_layout.dart';
 import 'pdf_theme.dart';
 
-/// Genera el PDF del programa reproduciendo programa-vmc.tex (formato S-140-S).
-/// Los nombres se leen de [assignments] (separados de la estructura).
+/// Generates the program PDF reproducing programa-vmc.tex (S-140-S format).
+/// Names are read from [assignments] (kept apart from the structure).
 Future<Uint8List> buildProgramPdf({
   required String congregation,
   required Week week,
@@ -33,36 +33,37 @@ Future<Uint8List> buildProgramPdf({
           marginRight: S140.marginRight,
         ),
       ),
-      // Pie de página en todas las páginas: "S-140-S   11/23" (tex:40).
+      // Footer on every page: "S-140-S   11/23" (tex:40).
       footer: (ctx) => pw.Container(
         alignment: pw.Alignment.centerLeft,
         child: pw.Text('S-140-S    11/23',
             style: pw.TextStyle(fontSize: S140.footnote)),
       ),
       build: (ctx) {
-        // Anchos adaptativos según el contenido real (getFont necesita el ctx).
-        final reg = carlito.regular.getFont(ctx);
-        final cols = calcularColumnas(schedule, assignments, reg, auxRoom);
-        double medir(String s) => reg.stringMetrics(s).advanceWidth * S140.base;
+        // Adaptive widths based on the real content (getFont needs the ctx).
+        final regularFont = carlito.regular.getFont(ctx);
+        final cols = computeColumns(schedule, assignments, regularFont, auxRoom);
+        double measure(String s) =>
+            regularFont.stringMetrics(s).advanceWidth * S140.base;
         return [
-          _encabezado(congregation),
+          _header(congregation),
           pw.SizedBox(height: 4),
-          _reglafg(),
+          _thinThickRule(),
           pw.SizedBox(height: 3), // \par\smallskip
           _weekLine(week, chairman),
           pw.SizedBox(height: 8), // \addvspace{8pt}
-          if (auxRoom) ...[_encabezadoSalas(cols), pw.SizedBox(height: 2)],
-          _table(schedule.opening, assignments, cols, medir, auxRoom),
+          if (auxRoom) ...[_roomsHeader(cols), pw.SizedBox(height: 2)],
+          _table(schedule.opening, assignments, cols, measure, auxRoom),
           _band(S140.treasures, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
               cols, auxRoom),
-          _table(schedule.treasures, assignments, cols, medir, auxRoom),
-          _band(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
+          _table(schedule.treasures, assignments, cols, measure, auxRoom),
+          _band(S140.ministryColor, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
               cols, auxRoom),
-          _table(schedule.ministry, assignments, cols, medir, auxRoom),
+          _table(schedule.ministry, assignments, cols, measure, auxRoom),
           _band(S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, auxRoom),
-          _table(schedule.christianLife, assignments, cols, medir, auxRoom),
+          _table(schedule.christianLife, assignments, cols, measure, auxRoom),
           pw.SizedBox(height: 4), // \addvspace{4pt}
-          _reglafg(),
+          _thinThickRule(),
         ];
       },
     ),
@@ -70,8 +71,8 @@ Future<Uint8List> buildProgramPdf({
   return doc.save();
 }
 
-// ---- Encabezado: congregación (izq.) y título (der.) (tex:171-178) ----
-pw.Widget _encabezado(String congregation) {
+// ---- Header: congregation (left) and title (right) (tex:171-178) ----
+pw.Widget _header(String congregation) {
   return pw.Row(
     crossAxisAlignment: pw.CrossAxisAlignment.end, // minipages [b]
     children: [
@@ -95,26 +96,26 @@ pw.Widget _encabezado(String congregation) {
   );
 }
 
-// ---- Regla fina + gruesa (tex:161-163) ----
-pw.Widget _reglafg() {
+// ---- Thin + thick rule (tex:161-163) ----
+pw.Widget _thinThickRule() {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      pw.Container(width: S140.contentWidth, height: 0.4, color: S140.linea),
+      pw.Container(width: S140.contentWidth, height: 0.4, color: S140.lineColor),
       pw.SizedBox(height: 1.2),
-      pw.Container(width: S140.contentWidth, height: 1.6, color: S140.linea),
+      pw.Container(width: S140.contentWidth, height: 1.6, color: S140.lineColor),
     ],
   );
 }
 
-// ---- Línea de week + chairman + lectura (tex:183-187) ----
-pw.Widget _weekLine(Week s, String chairman) {
-  final semanaStyle =
+// ---- Week line + chairman + reading (tex:183-187) ----
+pw.Widget _weekLine(Week week, String chairman) {
+  final weekStyle =
       pw.TextStyle(fontSize: S140.week, fontWeight: pw.FontWeight.bold);
-  final rol = pw.TextStyle(
+  final roleStyle = pw.TextStyle(
       fontSize: S140.footnote,
       fontWeight: pw.FontWeight.bold,
-      color: S140.rotulo);
+      color: S140.labelColor);
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -122,37 +123,37 @@ pw.Widget _weekLine(Week s, String chairman) {
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Expanded(
-            child: pw.Text('${s.date}   |   LECTURA SEMANAL DE LA BIBLIA',
-                style: semanaStyle),
+            child: pw.Text('${week.date}   |   LECTURA SEMANAL DE LA BIBLIA',
+                style: weekStyle),
           ),
-          pw.Text('Presidente: ', style: rol),
+          pw.Text('Presidente: ', style: roleStyle),
           pw.Text(chairman, style: pw.TextStyle(fontSize: S140.week)),
         ],
       ),
-      pw.Text(s.reading, style: semanaStyle),
+      pw.Text(week.reading, style: weekStyle),
     ],
   );
 }
 
-// ---- Encabezado único de salas (tex:150-155, solo modo auxRoom) ----
-pw.Widget _encabezadoSalas(ColumnWidths cols) {
+// ---- Single rooms header (tex:150-155, auxRoom mode only) ----
+pw.Widget _roomsHeader(ColumnWidths cols) {
   final st = pw.TextStyle(
       fontSize: S140.footnote,
       fontWeight: pw.FontWeight.bold,
-      color: S140.rotulo);
+      color: S140.labelColor);
   return pw.Row(
     children: [
-      pw.Expanded(child: pw.SizedBox()), // zona título + rol
+      pw.Expanded(child: pw.SizedBox()), // title + role area
       pw.SizedBox(width: S140.colGap),
       pw.SizedBox(width: cols.auxRoom, child: pw.Text('Sala Auxiliar', style: st)),
       pw.SizedBox(width: S140.colGap),
       pw.SizedBox(
-          width: cols.nomPrin, child: pw.Text('Auditorio principal', style: st)),
+          width: cols.mainNames, child: pw.Text('Auditorio principal', style: st)),
     ],
   );
 }
 
-// ---- Banda de sección (tex:135-145) ----
+// ---- Section band (tex:135-145) ----
 pw.Widget _band(PdfColor color, String title, String labelText,
     ColumnWidths cols, bool auxRoom) {
   return pw.Column(
@@ -163,18 +164,18 @@ pw.Widget _band(PdfColor color, String title, String labelText,
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Container(
-            // Llega hasta el borde derecho de las etiquetas de rol.
-            width: cols.banda,
+            // Reaches the right edge of the role labels.
+            width: cols.band,
             color: color,
             padding: const pw.EdgeInsets.all(S140.fboxsep),
             child: pw.Text(title,
                 style: pw.TextStyle(
                     fontSize: S140.base,
                     fontWeight: pw.FontWeight.bold,
-                    color: S140.blanco)),
+                    color: S140.white)),
           ),
           pw.Spacer(), // \hfill
-          // En modo auxRoom el rótulo va una sola vez en el header de salas.
+          // In auxRoom mode the label goes once in the rooms header.
           if (!auxRoom && labelText.isNotEmpty)
             pw.Padding(
               padding: const pw.EdgeInsets.only(bottom: 2), // \raisebox{2pt}
@@ -182,7 +183,7 @@ pw.Widget _band(PdfColor color, String title, String labelText,
                   style: pw.TextStyle(
                       fontSize: S140.footnote,
                       fontWeight: pw.FontWeight.bold,
-                      color: S140.rotulo)),
+                      color: S140.labelColor)),
             ),
         ],
       ),
@@ -191,88 +192,88 @@ pw.Widget _band(PdfColor color, String title, String labelText,
   );
 }
 
-// ---- Tabla de rows (tabularx @{}X R P@{} o @{}X R A P@{} en auxRoom) ----
-pw.Widget _table(List<ProgramRow> rows, Assignments asg, ColumnWidths cols,
-    double Function(String) medir, bool auxRoom) {
+// ---- Rows table (tabularx @{}X R P@{} or @{}X R A P@{} in auxRoom) ----
+pw.Widget _table(List<ProgramRow> rows, Assignments assignments, ColumnWidths cols,
+    double Function(String) measure, bool auxRoom) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [for (final f in rows) _row(f, asg, cols, medir, auxRoom)],
+    children: [for (final f in rows) _row(f, assignments, cols, measure, auxRoom)],
   );
 }
 
-// Celda de nombres (Principal o Sala Auxiliar). Regla Seamos: si la pareja
-// Estudiante/Ayudante no cabe en una línea, se apila SIEMPRE: línea 1 Ayudante,
-// línea 2 Estudiante. Devuelve el widget y si quedó apilada (2 líneas).
-({pw.Widget widget, bool apilado}) _celdaNombres(String rol,
-    List<String> nombres, double ancho, double Function(String) medir,
+// Names cell (Main Hall or Auxiliary Room). Ministry rule: if the
+// Estudiante/Ayudante pair doesn't fit on one line, it ALWAYS stacks: line 1
+// Assistant, line 2 Student. Returns the widget and whether it stacked.
+({pw.Widget widget, bool stacked}) _namesCell(String role,
+    List<String> names, double width, double Function(String) measure,
     pw.TextStyle style) {
-  final joined = joinedNames(nombres);
-  final esEstAyud = rol == 'Estudiante/Ayudante:' && nombres.length == 2;
-  if (esEstAyud && medir(joined) > ancho) {
+  final joined = joinedNames(names);
+  final isStudentAssistant = role == 'Estudiante/Ayudante:' && names.length == 2;
+  if (isStudentAssistant && measure(joined) > width) {
     return (
       widget: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
-          pw.Text(nombres[1],
-              textAlign: pw.TextAlign.right, style: style), // Ayudante
-          pw.Text(nombres[0],
-              textAlign: pw.TextAlign.right, style: style), // Estudiante
+          pw.Text(names[1],
+              textAlign: pw.TextAlign.right, style: style), // Assistant
+          pw.Text(names[0],
+              textAlign: pw.TextAlign.right, style: style), // Student
         ],
       ),
-      apilado: true,
+      stacked: true,
     );
   }
   return (
     widget: pw.Text(joined, textAlign: pw.TextAlign.right, style: style),
-    apilado: false,
+    stacked: false,
   );
 }
 
-pw.Widget _row(ProgramRow r, Assignments asg, ColumnWidths cols,
-    double Function(String) medir, bool auxRoom) {
-  final horaStyle = pw.TextStyle(
+pw.Widget _row(ProgramRow r, Assignments assignments, ColumnWidths cols,
+    double Function(String) measure, bool auxRoom) {
+  final timeStyle = pw.TextStyle(
       fontSize: S140.small,
       fontWeight: pw.FontWeight.bold,
-      color: S140.rotulo);
-  final rolStyle = pw.TextStyle(
+      color: S140.labelColor);
+  final roleStyle = pw.TextStyle(
       fontSize: S140.footnote,
       fontWeight: pw.FontWeight.bold,
-      color: S140.rotulo);
-  final nombreStyle = pw.TextStyle(fontSize: S140.base);
+      color: S140.labelColor);
+  final nameStyle = pw.TextStyle(fontSize: S140.base);
 
-  final prin =
-      _celdaNombres(r.role, asg.main(r), cols.nomPrin, medir, nombreStyle);
+  final main =
+      _namesCell(r.role, assignments.main(r), cols.mainNames, measure, nameStyle);
   final auxCell = auxRoom
-      ? _celdaNombres(r.role, asg.auxiliary(r), cols.auxRoom, medir, nombreStyle)
+      ? _namesCell(r.role, assignments.auxiliary(r), cols.auxRoom, measure, nameStyle)
       : null;
-  // El título se centra verticalmente si cualquiera de las columnas se apila.
-  final apilado = prin.apilado || (auxCell?.apilado ?? false);
+  // The title is centered vertically if any of the columns stacked.
+  final stacked = main.stacked || (auxCell?.stacked ?? false);
 
-  // Celda X: hora en caja fija + título con sangría francesa (Expanded).
-  final celdaX = pw.Row(
+  // X cell: time in a fixed box + title with a hanging indent (Expanded).
+  final xCell = pw.Row(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
       pw.SizedBox(
-        width: S140.anchoHora,
+        width: S140.hourWidth,
         child: r.bullet
             ? pw.Row(
                 children: [
-                  pw.Text(r.time, style: horaStyle),
+                  pw.Text(r.time, style: timeStyle),
                   pw.Expanded(
                     child: pw.Align(
                       alignment: pw.Alignment.centerRight,
-                      // \vineta = viñeta + 3pt; \llap mantiene el título alineado.
+                      // \vineta = bullet + 3pt; \llap keeps the title aligned.
                       child: pw.Padding(
                         padding: const pw.EdgeInsets.only(right: 3),
                         child: pw.Text('•',
                             style: pw.TextStyle(
-                                fontSize: S140.small, color: S140.rotulo)),
+                                fontSize: S140.small, color: S140.labelColor)),
                       ),
                     ),
                   ),
                 ],
               )
-            : pw.Text(r.time, style: horaStyle),
+            : pw.Text(r.time, style: timeStyle),
       ),
       pw.Expanded(
         child: pw.Text(r.content, style: pw.TextStyle(fontSize: S140.base)),
@@ -281,25 +282,25 @@ pw.Widget _row(ProgramRow r, Assignments asg, ColumnWidths cols,
   );
 
   return pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: S140.filaSep),
+    padding: const pw.EdgeInsets.only(bottom: S140.rowSep),
     child: pw.Row(
-      // Si el participante quedó en dos líneas, el título (y el rol) se centran
-      // verticalmente respecto al bloque de nombres; si no, alineados arriba.
+      // If the participant wrapped to two lines, the title (and role) center
+      // vertically against the names block; otherwise they align to the top.
       crossAxisAlignment:
-          apilado ? pw.CrossAxisAlignment.center : pw.CrossAxisAlignment.start,
+          stacked ? pw.CrossAxisAlignment.center : pw.CrossAxisAlignment.start,
       children: [
-        pw.Expanded(child: celdaX),
+        pw.Expanded(child: xCell),
         pw.SizedBox(width: S140.colGap),
         pw.SizedBox(
           width: cols.role,
-          child: pw.Text(r.role, textAlign: pw.TextAlign.right, style: rolStyle),
+          child: pw.Text(r.role, textAlign: pw.TextAlign.right, style: roleStyle),
         ),
         if (auxRoom) ...[
           pw.SizedBox(width: S140.colGap),
           pw.SizedBox(width: cols.auxRoom, child: auxCell!.widget),
         ],
         pw.SizedBox(width: S140.colGap),
-        pw.SizedBox(width: cols.nomPrin, child: prin.widget),
+        pw.SizedBox(width: cols.mainNames, child: main.widget),
       ],
     ),
   );

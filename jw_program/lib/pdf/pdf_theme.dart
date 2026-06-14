@@ -2,12 +2,12 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-/// Constantes de maquetación tomadas EXACTAMENTE de programa-vmc.tex.
-/// (Formato oficial S-140-S.) 1 cm = 28.3465 pt; 1 in = 72 pt.
+/// Layout constants taken EXACTLY from programa-vmc.tex.
+/// (Official S-140-S format.) 1 cm = 28.3465 pt; 1 in = 72 pt.
 class S140 {
   S140._();
 
-  // ---- Página: Carta, márgenes del Word original (tex:13) ----
+  // ---- Page: Letter, margins from the original Word doc (tex:13) ----
   static const double pageWidth = 612; // 8.5 in
   static const double pageHeight = 792; // 11 in
   static const double marginTop = 0.7 * 72; // 50.4
@@ -15,66 +15,66 @@ class S140 {
   static const double marginLeft = 0.8 * 72; // 57.6
   static const double marginRight = 0.8 * 72; // 57.6
 
-  /// Ancho útil = \textwidth.
+  /// Usable width = \textwidth.
   static const double contentWidth = pageWidth - marginLeft - marginRight; // 496.8
 
-  // ---- Tamaños de fuente (clase article 10pt) ----
+  // ---- Font sizes (article class 10pt) ----
   static const double base = 10;
   static const double small = 9; // \small
   static const double footnote = 8; // \footnotesize
   static const double large = 12; // \large
-  static const double title = 16.5; // título de cabecera
-  static const double week = 12; // línea de week / lectura
+  static const double title = 16.5; // header title
+  static const double week = 12; // week line / reading
 
-  // ---- Anchos de columna (tex:57-61) ----
+  // ---- Column widths (tex:57-61) ----
   static const double cm = 28.3465;
-  static const double anchoHora = 1.3 * cm; // 36.85
-  static const double anchoRol = 2.6 * cm; // 73.70
-  static const double anchoNomPrin = 5.0 * cm; // 141.73
+  static const double hourWidth = 1.3 * cm; // 36.85
+  static const double roleWidth = 2.6 * cm; // 73.70
+  static const double mainNameWidth = 5.0 * cm; // 141.73
   static const double tabcolsep = 3;
 
-  /// Hueco entre columnas en tabularx (= 2·tabcolsep, ver array/@{}).
+  /// Gap between columns in tabularx (= 2·tabcolsep, see array/@{}).
   static const double colGap = 2 * tabcolsep; // 6
-  static const double filaSep = 10; // \filasep (tex:61)
-  static const double fboxsep = 3; // padding por defecto de \colorbox
+  static const double rowSep = 10; // \filasep (tex:61)
+  static const double fboxsep = 3; // default \colorbox padding
 
-  /// Ancho de la columna de contenido (celda X = hora + título).
-  static const double anchoContenido =
-      contentWidth - 2 * colGap - anchoRol - anchoNomPrin;
+  /// Width of the content column (X cell = time + title).
+  static const double contentColWidth =
+      contentWidth - 2 * colGap - roleWidth - mainNameWidth;
 
-  /// Ancho de la banda de color: llega hasta el BORDE DERECHO de las etiquetas
-  /// de rol (Estudiante/Ayudante).
-  static const double anchoBanda = anchoContenido + colGap + anchoRol;
+  /// Width of the color band: reaches the RIGHT EDGE of the role labels
+  /// (Estudiante/Ayudante).
+  static const double bandWidth = contentColWidth + colGap + roleWidth;
 
-  /// Piso del título when la columna de nombres crece de forma adaptativa.
-  static const double minContenido = 0.40 * contentWidth;
+  /// Title floor when the names column grows adaptively.
+  static const double minContent = 0.40 * contentWidth;
 
-  /// Piso del título en modo Sala Auxiliar (4 columnas).
-  static const double minContenidoAux = 0.34 * contentWidth;
+  /// Title floor in Auxiliary Room mode (4 columns).
+  static const double minContentAux = 0.34 * contentWidth;
 
-  /// Ancho mínimo de cada columna de nombres en modo Sala Auxiliar.
-  static const double minColAux = 60;
+  /// Minimum width of each names column in Auxiliary Room mode.
+  static const double minAuxCol = 60;
 
-  /// Holgura que se suma al ancho medido del name más largo.
-  static const double nomPad = 6;
+  /// Slack added to the measured width of the longest name.
+  static const double namePad = 6;
 
-  // ---- Colores oficiales (tex:31-35) ----
-  static final PdfColor treasures = PdfColor.fromHex('575A5D'); // gris
-  static final PdfColor maestros = PdfColor.fromHex('BE8900'); // dorado
-  static final PdfColor christianLife = PdfColor.fromHex('7E0024'); // granate
-  static final PdfColor rotulo = PdfColor.fromHex('575A5D'); // gris (rótulos)
-  static final PdfColor linea = PdfColor.fromHex('A6A6A6'); // gris claro
-  static final PdfColor blanco = PdfColor.fromHex('FFFFFF');
+  // ---- Official colors (tex:31-35) ----
+  static final PdfColor treasures = PdfColor.fromHex('575A5D'); // gray
+  static final PdfColor ministryColor = PdfColor.fromHex('BE8900'); // gold
+  static final PdfColor christianLife = PdfColor.fromHex('7E0024'); // maroon
+  static final PdfColor labelColor = PdfColor.fromHex('575A5D'); // gray (labels)
+  static final PdfColor lineColor = PdfColor.fromHex('A6A6A6'); // light gray
+  static final PdfColor white = PdfColor.fromHex('FFFFFF');
 }
 
-/// Tema + fuentes Carlito del documento. `regular` se usa además para MEDIR el
-/// ancho de los nombres (anchos adaptativos).
+/// Document theme + Carlito fonts. `regular` is also used to MEASURE the names
+/// width (adaptive column widths).
 typedef Carlito = ({pw.ThemeData theme, pw.Font regular, pw.Font bold});
 
 Carlito? _cache;
 
-/// Carga (una sola vez) Carlito — clon libre de Calibri (tex:17-22). Cachear es
-/// imprescindible: recargar ~2.7 MB en cada pulsación rompería el live preview.
+/// Loads (once) Carlito — a free Calibri clone (tex:17-22). Caching is
+/// essential: reloading ~2.7 MB on each keystroke would break the live preview.
 Future<Carlito> carlitoFonts() async {
   if (_cache != null) return _cache!;
   final regular =
