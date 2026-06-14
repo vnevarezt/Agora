@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/ui_state.dart';
-import '../dashboard/config_placeholder_view.dart';
+import '../config/configuracion_view.dart';
 import '../dashboard/dashboard_view.dart';
 import '../personas/hermanos_view.dart';
 import '../responsive.dart';
@@ -22,7 +22,7 @@ class AppShell extends ConsumerWidget {
     final body = switch (seccion) {
       AppSeccion.inicio => const DashboardView(),
       AppSeccion.hermanos => const HermanosView(),
-      AppSeccion.config => const ConfigPlaceholderView(),
+      AppSeccion.config => const ConfiguracionView(),
     };
 
     if (size == ScreenSize.mobile) {
