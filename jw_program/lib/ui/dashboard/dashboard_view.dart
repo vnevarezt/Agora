@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
+import '../../state/mwb_sync.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
+import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/block_title.dart';
@@ -100,6 +102,11 @@ class _TopBar extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 12),
+        _SyncIndicator(
+          state: _catalogState(ref.watch(mwbSyncProvider)),
+          compact: isMobile,
+        ),
+        const SizedBox(width: 8),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
@@ -113,6 +120,93 @@ class _TopBar extends ConsumerWidget {
           onPressed: () => showProjectModal(context),
         ),
       ],
+    );
+  }
+}
+
+/// Persistent state of the notebook catalog, shown in the header.
+enum _CatalogState { busy, ok, incomplete }
+
+_CatalogState _catalogState(AsyncValue<SyncReport> sync) {
+  if (sync.isLoading) return _CatalogState.busy;
+  final report = sync.asData?.value;
+  if (report == null) return _CatalogState.incomplete; // sync error
+  return report.complete ? _CatalogState.ok : _CatalogState.incomplete;
+}
+
+/// Persistent card next to the notifications button: spinner while syncing,
+/// a check when everything is up to date, a warning when a cuaderno is missing.
+/// On mobile it collapses to an icon-only square to save space.
+class _SyncIndicator extends StatelessWidget {
+  const _SyncIndicator({required this.state, this.compact = false});
+
+  final _CatalogState state;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    const amber = Color(0xFFB9890F);
+
+    final (IconData? icon, String label, Color color, String tip) =
+        switch (state) {
+      _CatalogState.busy => (
+          null,
+          'Actualizando catálogos',
+          t.accent,
+          'Descargando los cuadernos más recientes…',
+        ),
+      _CatalogState.ok => (
+          Icons.check_circle_rounded,
+          'Catálogos al día',
+          t.accent,
+          'Tienes los cuadernos al día.',
+        ),
+      _CatalogState.incomplete => (
+          Icons.error_outline_rounded,
+          'Falta un cuaderno',
+          amber,
+          'El próximo cuaderno aún no está disponible; se reintentará.',
+        ),
+    };
+
+    final leading = icon == null
+        ? SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
+          )
+        : Icon(icon, size: 17, color: color);
+
+    return Tooltip(
+      message: tip,
+      child: Container(
+        height: Dimens.hControl,
+        width: compact ? Dimens.hControl : null,
+        padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 12),
+        decoration: BoxDecoration(
+          color: t.surface,
+          borderRadius: BorderRadius.circular(Dimens.rControl),
+          border: Border.all(color: t.border),
+        ),
+        child: compact
+            ? Center(child: leading)
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  leading,
+                  const SizedBox(width: 10),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: t.textDim,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

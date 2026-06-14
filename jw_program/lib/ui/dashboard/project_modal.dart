@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/mwb_calendar.dart';
 import '../../models/congregation.dart';
 import '../../models/notebook.dart';
 import '../../models/project.dart';
@@ -13,6 +14,7 @@ import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/danger_button.dart';
+import '../widgets/filter_pill.dart';
 import '../widgets/labeled_field.dart';
 
 /// Abre el modal de creación/edición de proyecto. [proyecto] null = alta nueva.
@@ -59,7 +61,12 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final notebooks = ref.read(notebooksProvider);
     _congregationId = widget.original?.congregationId ??
         (congregations.isNotEmpty ? congregations.first.id : '');
-    _notebookId = notebooks.isNotEmpty ? notebooks.first.id : '';
+    // New project: arranca en el cuaderno actual (el que contiene hoy), no en
+    // el más antiguo en caché. En edición se mantiene el primero del catálogo.
+    final current = issueForDate(DateTime.now());
+    _notebookId = _isNew && notebooks.any((n) => n.id == current)
+        ? current
+        : (notebooks.isNotEmpty ? notebooks.first.id : '');
   }
 
   /// Alterna una semana del notebook, manteniendo el orden del notebook y las
@@ -284,53 +291,55 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         onChanged: (v) => setState(() => _congregationId = v),
       ),
     );
-    final cuadernoField = LabeledField(
-      label: 'Cuaderno',
-      child: AppDropdown<String>(
-        value: _notebookId,
-        items: [for (final c in notebooks) c.id],
-        itemLabel: (id) => notebooks.firstWhere((c) => c.id == id).label,
-        onChanged: (v) => setState(() => _notebookId = v),
-      ),
-    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (isMobile) ...[
-          congField,
-          const SizedBox(height: 14),
-          cuadernoField,
-        ] else
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: congField),
-              const SizedBox(width: 16),
-              Expanded(child: cuadernoField),
-            ],
-          ),
+        congField,
         const SizedBox(height: 14),
         LabeledField(
           label: 'Semanas a incluir · ${_weeks.length} '
               '${_weeks.length == 1 ? 'seleccionada' : 'seleccionadas'}',
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final w in notebook.weeks)
-                _WeekToggle(
-                  label: w,
-                  active: _weeks.contains(w),
-                  onTap: () => _toggle(w, notebook),
+              // Cuaderno como pestañas: al elegir uno, cambian las semanas de
+              // abajo. Las semanas ya elegidas de OTROS cuadernos siguen como
+              // "extra" (chips marcados al final).
+              if (notebooks.length > 1) ...[
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final c in notebooks)
+                      FilterPill(
+                        label: c.label,
+                        active: c.id == _notebookId,
+                        onTap: () => setState(() => _notebookId = c.id),
+                      ),
+                  ],
                 ),
-              for (final w in extra)
-                _WeekToggle(
-                  label: w,
-                  active: true,
-                  extra: true,
-                  onTap: () => _remove(w),
-                ),
+                const SizedBox(height: 10),
+              ],
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final w in notebook.weeks)
+                    _WeekToggle(
+                      label: w,
+                      active: _weeks.contains(w),
+                      onTap: () => _toggle(w, notebook),
+                    ),
+                  for (final w in extra)
+                    _WeekToggle(
+                      label: w,
+                      active: true,
+                      extra: true,
+                      onTap: () => _remove(w),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
