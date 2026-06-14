@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_options.dart';
@@ -86,28 +87,10 @@ class _CongregacionTabState extends ConsumerState<CongregacionTab> {
   }
 
   Widget _vacio(BuildContext context) {
-    final t = context.tokens;
-    return Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.apartment_outlined, size: 40, color: t.textMute),
-            const SizedBox(height: 12),
-            Text(
-              'Aún no hay congregaciones.\n'
-              'Crea la primera con "Nueva congregación".',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: t.textMute,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return const EmptyState(
+      icon: Icons.apartment_outlined,
+      message: 'Aún no hay congregaciones.\n'
+          'Crea la primera con "Nueva congregación".',
     );
   }
 

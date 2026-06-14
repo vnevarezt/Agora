@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/participant.dart';
@@ -213,28 +214,11 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   }
 
   Widget _vacio(AppTokens t, bool sinDatos) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.people_outline, size: 40, color: t.textMute),
-            const SizedBox(height: 12),
-            Text(
-              sinDatos
-                  ? 'Aún no hay participantes.\nAñade el primero con "Añadir participante".'
-                  : 'Sin resultados con esos filtros.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: t.textMute,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.people_outline,
+      message: sinDatos
+          ? 'Aún no hay participantes.\nAñade el primero con "Añadir participante".'
+          : 'Sin resultados con esos filtros.',
     );
   }
 

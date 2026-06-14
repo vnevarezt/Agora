@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/congregation.dart';
@@ -253,29 +254,15 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       );
 
   Widget _noNotebooks(AppTokens t) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.menu_book_outlined, size: 40, color: t.textMute),
-        const SizedBox(height: 12),
-        Text(
-          'Aún no hay cuadernos disponibles.\n'
+    return EmptyState(
+      icon: Icons.menu_book_outlined,
+      message: 'Aún no hay cuadernos disponibles.\n'
           'Descárgalos desde el editor para crear proyectos.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w600,
-            height: 1.4,
-            color: t.textMute,
-          ),
-        ),
-        const SizedBox(height: 18),
-        AppButton(
-          variant: AppButtonVariant.ghost,
-          label: 'Entendido',
-          onPressed: widget.onClose,
-        ),
-      ],
+      action: AppButton(
+        variant: AppButtonVariant.ghost,
+        label: 'Entendido',
+        onPressed: widget.onClose,
+      ),
     );
   }
 

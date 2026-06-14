@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/program_row.dart';
@@ -8,7 +9,6 @@ import '../../state/program_form.dart';
 import '../../state/weeks_provider.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
-import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/section_header.dart';
 import 'part_card.dart';
@@ -107,59 +107,24 @@ class _EmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
     final weeks = ref.watch(weeksProvider);
     final issue = ref.watch(formProvider.select((f) => f.issue));
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.description_outlined, size: 40, color: t.textMute),
-            const SizedBox(height: 14),
-            Text(
-              'Descarga un cuaderno para empezar.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.w700, color: t.text),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'El programa de la semana se generará automáticamente.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: t.textMute),
-            ),
-            const SizedBox(height: 18),
-            AppButton(
-              icon: Icons.file_download_outlined,
-              label: 'Descargar cuaderno $issue',
-              busy: weeks.isLoading,
-              onPressed: weeks.isLoading
-                  ? null
-                  : () => ref
-                      .read(weeksProvider.notifier)
-                      .load(ref.read(formProvider).issue),
-            ),
-            if (weeks.hasError) ...[
-              const SizedBox(height: 14),
-              Text(
-                '${weeks.error}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            ],
-          ],
-        ),
+    return EmptyState(
+      icon: Icons.description_outlined,
+      title: 'Descarga un cuaderno para empezar.',
+      message: 'El programa de la semana se generará automáticamente.',
+      action: AppButton(
+        icon: Icons.file_download_outlined,
+        label: 'Descargar cuaderno $issue',
+        busy: weeks.isLoading,
+        onPressed: weeks.isLoading
+            ? null
+            : () => ref
+                .read(weeksProvider.notifier)
+                .load(ref.read(formProvider).issue),
       ),
+      error: weeks.hasError ? '${weeks.error}' : null,
     );
   }
 }
