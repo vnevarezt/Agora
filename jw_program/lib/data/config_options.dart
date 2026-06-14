@@ -1,6 +1,6 @@
-// Opciones estáticas de los selectores de Configuración (solo UI).
-// Los datos reales de congregaciones/usuarios/ajustes viven en estado (en
-// memoria por ahora); aquí solo quedan las listas de opciones de los dropdowns.
+// Static options for the Settings dropdowns (UI-only). The real
+// congregation/user/settings data lives in state (in memory for now); only the
+// dropdown option lists remain here.
 
 const daysOfWeek = [
   'Lunes',

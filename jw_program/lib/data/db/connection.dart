@@ -6,10 +6,10 @@ import 'package:path_provider/path_provider.dart';
 
 import 'db_key_manager.dart';
 
-/// Abre la BD cifrada (SQLite3MultipleCiphers, seleccionado por el bloque
-/// `hooks` del pubspec). La clave se lee del llavero ANTES de crear el
-/// ejecutor: el callback `setup` corre en un isolate de fondo donde los
-/// platform channels (flutter_secure_storage) no funcionan.
+/// Opens the encrypted DB (SQLite3MultipleCiphers, selected by the pubspec
+/// `hooks` block). The key is read from the keychain BEFORE creating the
+/// executor: the `setup` callback runs on a background isolate where platform
+/// channels (flutter_secure_storage) don't work.
 QueryExecutor openEncryptedExecutor(DbKeyManager keys) {
   return LazyDatabase(() async {
     final dir = await getApplicationSupportDirectory();
@@ -21,8 +21,8 @@ QueryExecutor openEncryptedExecutor(DbKeyManager keys) {
     return NativeDatabase.createInBackground(
       file,
       setup: (raw) {
-        // Canario 1: el binario debe traer cifrado (sqlite3mc). Un sqlite3
-        // normal devolvería vacío y la BD quedaría EN CLARO sin avisar.
+        // Canary 1: the binary must ship with encryption (sqlite3mc). A plain
+        // sqlite3 would return empty and the DB would stay IN CLEAR silently.
         final cipher = raw.select('PRAGMA cipher;');
         if (cipher.isEmpty) {
           throw StateError(
@@ -30,7 +30,7 @@ QueryExecutor openEncryptedExecutor(DbKeyManager keys) {
               'del pubspec (source: sqlite3mc).');
         }
         raw.execute("PRAGMA key = '$keyHex';");
-        // Canario 2: con clave errónea esta consulta lanza (archivo ilegible).
+        // Canary 2: with a wrong key this query throws (unreadable file).
         raw.select('SELECT count(*) FROM sqlite_master;');
       },
     );

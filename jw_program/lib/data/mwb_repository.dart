@@ -2,12 +2,12 @@ import '../models/week.dart';
 import 'epub_parser.dart';
 import 'mwb_api.dart';
 
-/// Fachada de datos: descarga el notebook mwb de jw.org y lo parsea a semanas.
+/// Data facade: downloads the mwb notebook from jw.org and parses it to weeks.
 class MwbRepository {
   const MwbRepository();
 
-  /// Devuelve las semanas del notebook [issue] (YYYYMM). Lanza [Exception] con
-  /// mensaje legible si la descarga o el parseo fallan / no hay semanas.
+  /// Returns the weeks of notebook [issue] (YYYYMM). Throws an [Exception] with
+  /// a readable message if the download or parsing fails / there are no weeks.
   Future<List<Week>> weeks(String issue, {String lang = 'S'}) async {
     final bytes = await MwbApi.downloadEpub(issue, lang: lang);
     final weeks = parseEpub(bytes);

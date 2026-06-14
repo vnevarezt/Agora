@@ -6,9 +6,9 @@ import 'tables.dart';
 
 part 'app_database.g.dart';
 
-/// Base de datos local (SQLite cifrado con SQLite3MultipleCiphers en
-/// producción — ver `connection.dart`). El ejecutor se INYECTA para que los
-/// tests usen `NativeDatabase.memory()` sin llavero ni cifrado.
+/// Local database (SQLite encrypted with SQLite3MultipleCiphers in production —
+/// see `connection.dart`). The executor is INJECTED so tests can use
+/// `NativeDatabase.memory()` without keychain or encryption.
 @DriftDatabase(tables: [Participants], daos: [ParticipantsDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);

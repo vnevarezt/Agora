@@ -3,15 +3,15 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-/// Acceso a la API pública de medios de jw.org para obtener el EPUB del
-/// notebook "Guía de actividades para la reunión Vida y Ministerio Cristianos".
+/// Access to jw.org's public media API to fetch the EPUB of the "Christian
+/// Life and Ministry Meeting Workbook".
 ///
-/// Port de `url_epub` / `descargar_epub` de generar_programa.py:33-49.
+/// Port of `url_epub` / `descargar_epub` from generar_programa.py:33-49.
 class MwbApi {
   static const String _api =
       'https://app.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS';
 
-  /// Devuelve (url, fechaFormateada) del EPUB para el [issue] dado (YYYYMM).
+  /// Returns (url, formattedDate) of the EPUB for the given [issue] (YYYYMM).
   static Future<({String url, String date})> epubUrl(
     String issue, {
     String lang = 'S',
@@ -37,7 +37,7 @@ class MwbApi {
     }
   }
 
-  /// Descarga el EPUB completo en memoria (bytes).
+  /// Downloads the whole EPUB into memory (bytes).
   static Future<Uint8List> downloadEpub(String issue, {String lang = 'S'}) async {
     final info = await epubUrl(issue, lang: lang);
     final resp = await http.get(Uri.parse(info.url));
