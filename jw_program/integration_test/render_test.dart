@@ -63,13 +63,13 @@ Week _week() => Week(
     );
 
 Future<void> _dump(String nombreArchivo, List<String> nombres,
-    {bool aux = false}) async {
+    {bool auxRoom = false}) async {
   final s = _week();
-  final sched = buildSchedule(s, 18 * 60, 105);
+  final schedule = buildSchedule(s, 18 * 60, 105);
   final principal = <String, List<String>>{};
   final auxiliar = <String, List<String>>{};
   var k = 0;
-  for (final f in sched.rows) {
+  for (final f in schedule.rows) {
     if (f.slots == 0) continue;
     if (f.role == 'Estudiante/Ayudante:' && f.slots == 2) {
       principal[f.id] = ['Maximiliano Vargas H', 'Concepción Navarro'];
@@ -77,19 +77,19 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
       continue;
     }
     principal[f.id] = [for (var i = 0; i < f.slots; i++) nombres[k++ % nombres.length]];
-    if (aux && f.auxSlots > 0) {
+    if (auxRoom && f.auxSlots > 0) {
       auxiliar[f.id] = [
         for (var i = 0; i < f.auxSlots; i++) 'Aux ${nombres[k++ % nombres.length]}'
       ];
     }
   }
   final pdf = await buildProgramPdf(
-    cong: 'CONSTITUCIÓN J.A CASTRO',
+    congregation: 'CONSTITUCIÓN J.A CASTRO',
     week: s,
-    sched: sched,
-    asignaciones: Assignments(principal, auxiliar),
+    schedule: schedule,
+    assignments: Assignments(principal, auxiliar),
     chairman: 'Rafael G',
-    aux: aux,
+    auxRoom: auxRoom,
   );
   final img = await rasterizarPagina(pdf, scale: 2);
   final png = await img.toByteData(format: ui.ImageByteFormat.png);
@@ -110,6 +110,6 @@ void main() {
     await _dump('jw_corto.png', ['Rafael G', 'Luis V', 'Jose M']);
     await _dump('jw_largo.png', ['Rafael González', 'Luis Vargas', 'José M']);
     await _dump('jw_aux.png', ['Rafael González', 'Luis Vargas', 'José M'],
-        aux: true);
+        auxRoom: true);
   });
 }

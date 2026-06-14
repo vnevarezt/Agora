@@ -69,7 +69,7 @@ class ProjectsController extends Notifier<List<Project>> {
     required String congregationId,
     required List<String> weeks,
   }) {
-    final nuevo = Project(
+    final newProject = Project(
       id: const Uuid().v4(),
       name: name,
       congregationId: congregationId,
@@ -79,7 +79,7 @@ class ProjectsController extends Notifier<List<Project>> {
       status: ProjectStatus.draft,
       editedLabel: 'ahora mismo',
     );
-    state = [nuevo, ...state];
+    state = [newProject, ...state];
   }
 
   void update(
@@ -111,12 +111,12 @@ final projectsProvider =
     NotifierProvider<ProjectsController, List<Project>>(
         ProjectsController.new);
 
-/// Filtros active: congregación (`'all'` = todas) y estado (`null` = all).
+/// Filtros active: congregación (`'all'` = todas) y status (`null` = all).
 class DashboardFilters {
   /// `'all'` o el id de una congregación.
   final String congregationId;
 
-  /// `null` = todo estado.
+  /// `null` = todo status.
   final ProjectStatus? status;
 
   const DashboardFilters({this.congregationId = 'all', this.status});
@@ -126,11 +126,11 @@ class DashboardFiltersController extends Notifier<DashboardFilters> {
   @override
   DashboardFilters build() => const DashboardFilters();
 
-  void setCongregation(String congId) =>
-      state = DashboardFilters(congregationId: congId, status: state.status);
+  void setCongregation(String congregationId) =>
+      state = DashboardFilters(congregationId: congregationId, status: state.status);
 
-  void setStatus(ProjectStatus? estado) =>
-      state = DashboardFilters(congregationId: state.congregationId, status: estado);
+  void setStatus(ProjectStatus? status) =>
+      state = DashboardFilters(congregationId: state.congregationId, status: status);
 }
 
 final dashboardFiltersProvider =

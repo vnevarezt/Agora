@@ -19,7 +19,7 @@ import '../widgets/segmented_control.dart';
 /// Descripción de cada role en las radio-cards del modal.
 const _roleDesc = {
   Role.publisher:
-      'Participa en "Seamos mejores maestros" (all)',
+      'Participa en "Seamos mejores maestros" (todos)',
   Role.ministerialServant:
       'Publicador + lectura, oración y algunas partes asignables',
   Role.elder: 'Puede recibir cualquier asignación del programa',
@@ -114,7 +114,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar definitivamente?'),
         content: Text(
-          'Se deleteá a ${widget.original!.name} del directorio. '
+          'Se eliminará a ${widget.original!.name} del directorio. '
           'Esta acción no se puede deshacer. Las asignaciones ya escritas '
           'en programas no se ven afectadas.',
         ),

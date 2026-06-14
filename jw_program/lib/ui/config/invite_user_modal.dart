@@ -50,7 +50,7 @@ class _InviteUserModalState extends State<InviteUserModal> {
             label: 'Correo electrónico',
             child: BoundTextField(
               initial: _email,
-              hint: 'name@correo.com',
+              hint: 'nombre@correo.com',
               keyboardType: TextInputType.emailAddress,
               onChanged: (v) => setState(() => _email = v),
             ),

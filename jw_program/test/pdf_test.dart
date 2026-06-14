@@ -34,14 +34,14 @@ void main() {
             minutes: 30),
       ],
     );
-    final sched = buildSchedule(week, 18 * 60, 105);
+    final schedule = buildSchedule(week, 18 * 60, 105);
     // Nombres por id de fila (la primera de Tesoros lleva uno de ejemplo).
-    final asg = Assignments({sched.treasures.first.id: const ['Rafael G']}, {});
+    final asg = Assignments({schedule.treasures.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
-      cong: 'CONSTITUCIÓN J.A CASTRO',
+      congregation: 'CONSTITUCIÓN J.A CASTRO',
       week: week,
-      sched: sched,
-      asignaciones: asg,
+      schedule: schedule,
+      assignments: asg,
       chairman: 'Rafael G',
     );
 

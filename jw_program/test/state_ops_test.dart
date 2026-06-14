@@ -26,7 +26,7 @@ void main() {
         id: 'se1', time: '18:31', content: 'Demostración', slots: 2);
 
     test('claves estables para principal y auxiliar', () {
-      expect(const ChairmanSlot().key, 'presidente');
+      expect(const ChairmanSlot().key, 'chairman');
       expect(const RowSlot(fila, 0).key, 'se1:0');
       expect(const RowSlot(fila, 1, aux: true).key, 'se1:aux:1');
     });

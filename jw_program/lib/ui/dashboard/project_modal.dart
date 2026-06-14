@@ -110,7 +110,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar proyecto?'),
         content: Text(
-          'Se deleteá "${widget.original!.name}". '
+          'Se eliminará "${widget.original!.name}". '
           'Esta acción no se puede deshacer.',
         ),
         actions: [

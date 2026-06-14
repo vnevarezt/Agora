@@ -10,12 +10,12 @@ import 'settings_card.dart';
 const _appLanguages = ['Español', 'English', 'Português'];
 const _timeFormats = ['24 horas (18:00)', '12 horas (6:00 p. m.)'];
 const _weekStarts = ['Lunes', 'Domingo'];
-const _pdfNameFormats = ['Nombre y apellido', 'Apellido, name', 'Solo name'];
+const _pdfNameFormats = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre'];
 
 const _notifications = [
   (
     title: 'Partes sin asignar',
-    desc: 'Avisar when falten asignaciones a 3 días de la reunión',
+    desc: 'Avisar cuando falten asignaciones a 3 días de la reunión',
     inicial: true,
   ),
   (
@@ -24,8 +24,8 @@ const _notifications = [
     inicial: true,
   ),
   (
-    title: 'Nuevos notebooks',
-    desc: 'Avisar when haya un nuevo notebook disponible',
+    title: 'Nuevos cuadernos',
+    desc: 'Avisar cuando haya un nuevo cuaderno disponible',
     inicial: true,
   ),
   (
@@ -75,7 +75,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
         SettingRow(
           first: true,
           title: 'Tema',
-          subtitle: 'Claro, dark o según el sistema',
+          subtitle: 'Claro, oscuro o según el sistema',
           trailing: SegmentedTabs(
             segments: const [
               (icon: null, label: 'Claro'),

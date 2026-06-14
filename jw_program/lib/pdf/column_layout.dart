@@ -4,16 +4,16 @@ import '../models/program_row.dart';
 import 'pdf_theme.dart';
 
 /// Anchos de columna calculados por documento. La celda de contenido (X) es
-/// implícita (Expanded), así que solo guardamos role, aux, name y banda.
+/// implícita (Expanded), así que solo guardamos role, auxRoom, name y banda.
 class ColumnWidths {
   final double role;
   final double nomPrin;
-  final double aux; // 0 when el modo Sala Auxiliar está apagado
+  final double auxRoom; // 0 when el modo Sala Auxiliar está apagado
   final double banda;
   const ColumnWidths({
     required this.role,
     required this.nomPrin,
-    required this.aux,
+    required this.auxRoom,
     required this.banda,
   });
 }
@@ -33,33 +33,33 @@ double anchoNombres(
 
 /// Calcula los anchos de forma adaptativa: si los nombres traen mucho texto,
 /// ensancha la(s) columna(s) de nombres tomando espacio del título (con un piso).
-/// En modo aux reparte entre dos columnas de nombres. Mide con Carlito.
+/// En modo auxRoom reparte entre dos columnas de nombres. Mide con Carlito.
 ColumnWidths calcularColumnas(
   ProgramSchedule sched,
   Assignments asg,
   PdfFont regular,
-  bool aux,
+  bool auxRoom,
 ) {
   double medir(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
   double maxPrin = 0, maxAux = 0;
   for (final f in sched.rows) {
     final wp = anchoNombres(f.role, asg.main(f), medir);
     if (wp > maxPrin) maxPrin = wp;
-    if (aux) {
+    if (auxRoom) {
       final wa = anchoNombres(f.role, asg.auxiliary(f), medir);
       if (wa > maxAux) maxAux = wa;
     }
   }
   const role = S140.anchoRol; // fijo (etiquetas de role, no entrada del user)
 
-  if (!aux) {
+  if (!auxRoom) {
     final maxNomOK =
         S140.contentWidth - 2 * S140.colGap - role - S140.minContenido;
     final nomPrin =
         (maxPrin + S140.nomPad).clamp(S140.anchoNomPrin, maxNomOK).toDouble();
     final contenido = S140.contentWidth - 2 * S140.colGap - role - nomPrin;
     return ColumnWidths(
-        role: role, nomPrin: nomPrin, aux: 0, banda: contenido + S140.colGap + role);
+        role: role, nomPrin: nomPrin, auxRoom: 0, banda: contenido + S140.colGap + role);
   }
 
   // --- Modo Sala Auxiliar: 4 columnas (X R A P), 3 huecos ---
@@ -79,6 +79,6 @@ ColumnWidths calcularColumnas(
   return ColumnWidths(
       role: role,
       nomPrin: nomPrin,
-      aux: nomAux,
+      auxRoom: nomAux,
       banda: contenido + S140.colGap + role);
 }

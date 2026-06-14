@@ -9,14 +9,14 @@ import 'column_layout.dart';
 import 'pdf_theme.dart';
 
 /// Genera el PDF del programa reproduciendo programa-vmc.tex (formato S-140-S).
-/// Los nombres se leen de [asignaciones] (separados de la estructura).
+/// Los nombres se leen de [assignments] (separados de la estructura).
 Future<Uint8List> buildProgramPdf({
-  required String cong,
+  required String congregation,
   required Week week,
-  required ProgramSchedule sched,
-  Assignments asignaciones = Assignments.empty,
+  required ProgramSchedule schedule,
+  Assignments assignments = Assignments.empty,
   String chairman = '',
-  bool aux = false,
+  bool auxRoom = false,
 }) async {
   final carlito = await carlitoFonts();
   final doc = pw.Document();
@@ -42,25 +42,25 @@ Future<Uint8List> buildProgramPdf({
       build: (ctx) {
         // Anchos adaptativos según el contenido real (getFont necesita el ctx).
         final reg = carlito.regular.getFont(ctx);
-        final cols = calcularColumnas(sched, asignaciones, reg, aux);
+        final cols = calcularColumnas(schedule, assignments, reg, auxRoom);
         double medir(String s) => reg.stringMetrics(s).advanceWidth * S140.base;
         return [
-          _encabezado(cong),
+          _encabezado(congregation),
           pw.SizedBox(height: 4),
           _reglafg(),
           pw.SizedBox(height: 3), // \par\smallskip
           _weekLine(week, chairman),
           pw.SizedBox(height: 8), // \addvspace{8pt}
-          if (aux) ...[_encabezadoSalas(cols), pw.SizedBox(height: 2)],
-          _table(sched.opening, asignaciones, cols, medir, aux),
+          if (auxRoom) ...[_encabezadoSalas(cols), pw.SizedBox(height: 2)],
+          _table(schedule.opening, assignments, cols, medir, auxRoom),
           _band(S140.treasures, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
-              cols, aux),
-          _table(sched.treasures, asignaciones, cols, medir, aux),
+              cols, auxRoom),
+          _table(schedule.treasures, assignments, cols, medir, auxRoom),
           _band(S140.maestros, 'SEAMOS MEJORES MAESTROS', 'Auditorio principal',
-              cols, aux),
-          _table(sched.ministry, asignaciones, cols, medir, aux),
-          _band(S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, aux),
-          _table(sched.christianLife, asignaciones, cols, medir, aux),
+              cols, auxRoom),
+          _table(schedule.ministry, assignments, cols, medir, auxRoom),
+          _band(S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, auxRoom),
+          _table(schedule.christianLife, assignments, cols, medir, auxRoom),
           pw.SizedBox(height: 4), // \addvspace{4pt}
           _reglafg(),
         ];
@@ -71,13 +71,13 @@ Future<Uint8List> buildProgramPdf({
 }
 
 // ---- Encabezado: congregación (izq.) y título (der.) (tex:171-178) ----
-pw.Widget _encabezado(String cong) {
+pw.Widget _encabezado(String congregation) {
   return pw.Row(
     crossAxisAlignment: pw.CrossAxisAlignment.end, // minipages [b]
     children: [
       pw.SizedBox(
         width: 0.34 * S140.contentWidth,
-        child: pw.Text(cong,
+        child: pw.Text(congregation,
             style: pw.TextStyle(
                 fontSize: S140.large, fontWeight: pw.FontWeight.bold)),
       ),
@@ -85,7 +85,7 @@ pw.Widget _encabezado(String cong) {
       pw.SizedBox(
         width: 0.64 * S140.contentWidth,
         child: pw.Text(
-          'Programa para la reunión de entre week',
+          'Programa para la reunión de entre semana',
           textAlign: pw.TextAlign.right,
           style:
               pw.TextStyle(fontSize: S140.title, fontWeight: pw.FontWeight.bold),
@@ -134,7 +134,7 @@ pw.Widget _weekLine(Week s, String chairman) {
   );
 }
 
-// ---- Encabezado único de salas (tex:150-155, solo modo aux) ----
+// ---- Encabezado único de salas (tex:150-155, solo modo auxRoom) ----
 pw.Widget _encabezadoSalas(ColumnWidths cols) {
   final st = pw.TextStyle(
       fontSize: S140.footnote,
@@ -144,7 +144,7 @@ pw.Widget _encabezadoSalas(ColumnWidths cols) {
     children: [
       pw.Expanded(child: pw.SizedBox()), // zona título + rol
       pw.SizedBox(width: S140.colGap),
-      pw.SizedBox(width: cols.aux, child: pw.Text('Sala Auxiliar', style: st)),
+      pw.SizedBox(width: cols.auxRoom, child: pw.Text('Sala Auxiliar', style: st)),
       pw.SizedBox(width: S140.colGap),
       pw.SizedBox(
           width: cols.nomPrin, child: pw.Text('Auditorio principal', style: st)),
@@ -154,7 +154,7 @@ pw.Widget _encabezadoSalas(ColumnWidths cols) {
 
 // ---- Banda de sección (tex:135-145) ----
 pw.Widget _band(PdfColor color, String title, String labelText,
-    ColumnWidths cols, bool aux) {
+    ColumnWidths cols, bool auxRoom) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -174,8 +174,8 @@ pw.Widget _band(PdfColor color, String title, String labelText,
                     color: S140.blanco)),
           ),
           pw.Spacer(), // \hfill
-          // En modo aux el rótulo va una sola vez en el header de salas.
-          if (!aux && labelText.isNotEmpty)
+          // En modo auxRoom el rótulo va una sola vez en el header de salas.
+          if (!auxRoom && labelText.isNotEmpty)
             pw.Padding(
               padding: const pw.EdgeInsets.only(bottom: 2), // \raisebox{2pt}
               child: pw.Text(labelText,
@@ -191,12 +191,12 @@ pw.Widget _band(PdfColor color, String title, String labelText,
   );
 }
 
-// ---- Tabla de rows (tabularx @{}X R P@{} o @{}X R A P@{} en aux) ----
+// ---- Tabla de rows (tabularx @{}X R P@{} o @{}X R A P@{} en auxRoom) ----
 pw.Widget _table(List<ProgramRow> rows, Assignments asg, ColumnWidths cols,
-    double Function(String) medir, bool aux) {
+    double Function(String) medir, bool auxRoom) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [for (final f in rows) _row(f, asg, cols, medir, aux)],
+    children: [for (final f in rows) _row(f, asg, cols, medir, auxRoom)],
   );
 }
 
@@ -229,7 +229,7 @@ pw.Widget _table(List<ProgramRow> rows, Assignments asg, ColumnWidths cols,
 }
 
 pw.Widget _row(ProgramRow r, Assignments asg, ColumnWidths cols,
-    double Function(String) medir, bool aux) {
+    double Function(String) medir, bool auxRoom) {
   final horaStyle = pw.TextStyle(
       fontSize: S140.small,
       fontWeight: pw.FontWeight.bold,
@@ -242,8 +242,8 @@ pw.Widget _row(ProgramRow r, Assignments asg, ColumnWidths cols,
 
   final prin =
       _celdaNombres(r.role, asg.main(r), cols.nomPrin, medir, nombreStyle);
-  final auxCell = aux
-      ? _celdaNombres(r.role, asg.auxiliary(r), cols.aux, medir, nombreStyle)
+  final auxCell = auxRoom
+      ? _celdaNombres(r.role, asg.auxiliary(r), cols.auxRoom, medir, nombreStyle)
       : null;
   // El título se centra verticalmente si cualquiera de las columnas se apila.
   final apilado = prin.apilado || (auxCell?.apilado ?? false);
@@ -294,9 +294,9 @@ pw.Widget _row(ProgramRow r, Assignments asg, ColumnWidths cols,
           width: cols.role,
           child: pw.Text(r.role, textAlign: pw.TextAlign.right, style: rolStyle),
         ),
-        if (aux) ...[
+        if (auxRoom) ...[
           pw.SizedBox(width: S140.colGap),
-          pw.SizedBox(width: cols.aux, child: auxCell!.widget),
+          pw.SizedBox(width: cols.auxRoom, child: auxCell!.widget),
         ],
         pw.SizedBox(width: S140.colGap),
         pw.SizedBox(width: cols.nomPrin, child: prin.widget),

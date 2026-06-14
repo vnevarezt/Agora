@@ -19,52 +19,52 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   Timer? _debounce;
   int _seq = 0; // descarta renders obsoletos
   double _scale = 3.0; // resolución del raster; sube con el zoom
-  ui.Image? _actual;
+  ui.Image? _current;
 
   @override
   AsyncValue<ui.Image> build() {
     ref.onDispose(() {
       _debounce?.cancel();
-      _actual?.dispose();
+      _current?.dispose();
     });
-    // Re-render when cambian estructura, nombres o congregación/presidente/aux.
-    ref.listen(scheduleProvider, (_, _) => _programar());
-    ref.listen(assignmentsProvider, (_, _) => _programar());
+    // Re-render when cambian estructura, nombres o congregación/presidente/auxRoom.
+    ref.listen(scheduleProvider, (_, _) => _scheduleRender());
+    ref.listen(assignmentsProvider, (_, _) => _scheduleRender());
     ref.listen(
       formProvider.select((f) => (f.congregationId, f.chairman, f.auxRoom)),
-      (_, _) => _programar(),
+      (_, _) => _scheduleRender(),
     );
-    _programar();
+    _scheduleRender();
     return const AsyncValue.loading();
   }
 
-  void _programar() {
+  void _scheduleRender() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 150), _render);
   }
 
   Future<void> _render() async {
-    final sched = ref.read(scheduleProvider);
+    final schedule = ref.read(scheduleProvider);
     final week = ref.read(currentWeekProvider);
-    if (sched == null || week == null) return;
+    if (schedule == null || week == null) return;
     final seq = ++_seq;
     final f = ref.read(formProvider);
     try {
       final pdf = await buildProgramPdf(
-        cong: f.congregationId,
+        congregation: f.congregationId,
         week: week,
-        sched: sched,
-        asignaciones: ref.read(assignmentsProvider),
+        schedule: schedule,
+        assignments: ref.read(assignmentsProvider),
         chairman: f.chairman,
-        aux: f.auxRoom,
+        auxRoom: f.auxRoom,
       );
       final img = await rasterizarPagina(pdf, scale: _scale);
       if (seq != _seq) {
         img.dispose();
         return;
       }
-      _actual?.dispose();
-      _actual = img;
+      _current?.dispose();
+      _current = img;
       state = AsyncValue.data(img);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -72,7 +72,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   }
 
   /// Re-rasteriza a mayor resolución según el nivel de zoom (nitidez).
-  void ajustarCalidadZoom(double zoom) {
+  void adjustZoomQuality(double zoom) {
     final target = (zoom * 2.0).clamp(3.0, 6.0);
     if ((target - _scale).abs() >= 0.5) {
       _scale = target;
@@ -83,19 +83,19 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   /// Construye el PDF con los datos actuales y lo guarda en Descargas.
   /// Devuelve la path del archivo.
   Future<String> export() async {
-    final sched = ref.read(scheduleProvider);
+    final schedule = ref.read(scheduleProvider);
     final week = ref.read(currentWeekProvider);
-    if (sched == null || week == null) {
-      throw Exception('Descarga un notebook y elige una week primero.');
+    if (schedule == null || week == null) {
+      throw Exception('Descarga un cuaderno y elige una semana primero.');
     }
     final f = ref.read(formProvider);
     final pdf = await buildProgramPdf(
-      cong: f.congregationId,
+      congregation: f.congregationId,
       week: week,
-      sched: sched,
-      asignaciones: ref.read(assignmentsProvider),
+      schedule: schedule,
+      assignments: ref.read(assignmentsProvider),
       chairman: f.chairman,
-      aux: f.auxRoom,
+      auxRoom: f.auxRoom,
     );
     final dir =
         (await getDownloadsDirectory()) ?? await getApplicationDocumentsDirectory();

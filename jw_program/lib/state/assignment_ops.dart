@@ -24,7 +24,7 @@ class ChairmanSlot extends SlotRef {
   const ChairmanSlot();
 
   @override
-  String get key => 'presidente';
+  String get key => 'chairman';
 }
 
 /// Posición [index] dentro de la list de names de una fila
@@ -41,14 +41,14 @@ class RowSlot extends SlotRef {
 }
 
 /// Lista de [slots] entradas con [name] colocado en [index], conservando
-/// los demás valores de [actual] (función pura, testeable).
+/// los demás valores de [current] (función pura, testeable).
 List<String> listWithName(
-    List<String>? actual, int slots, int index, String name) {
+    List<String>? current, int slots, int index, String name) {
   return [
     for (var i = 0; i < slots; i++)
       i == index
           ? name
-          : (actual != null && i < actual.length ? actual[i] : ''),
+          : (current != null && i < current.length ? current[i] : ''),
   ];
 }
 

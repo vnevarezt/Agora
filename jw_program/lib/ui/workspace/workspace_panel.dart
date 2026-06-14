@@ -112,7 +112,7 @@ class _EmptyState extends ConsumerWidget {
 
     return EmptyState(
       icon: Icons.description_outlined,
-      title: 'Descarga un notebook para empezar.',
+      title: 'Descarga un cuaderno para empezar.',
       message: 'El programa de la semana se generará automáticamente.',
       action: AppButton(
         icon: Icons.file_download_outlined,

@@ -218,7 +218,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       icon: Icons.people_outline,
       message: noData
           ? 'Aún no hay participantes.\nAñade el primero con "Añadir participante".'
-          : 'Sin resultados con esos filters.',
+          : 'Sin resultados con esos filtros.',
     );
   }
 

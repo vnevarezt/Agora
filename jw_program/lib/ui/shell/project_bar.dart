@@ -683,7 +683,7 @@ class _ExportCard extends StatelessWidget {
           ),
           _ExportItem(
             icon: Icons.layers_outlined,
-            title: 'Project completo',
+            title: 'Proyecto completo',
             sub: 'Todas las semanas en un PDF',
             onTap: null, // próximamente
           ),

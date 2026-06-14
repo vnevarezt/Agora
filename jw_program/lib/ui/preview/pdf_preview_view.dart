@@ -87,7 +87,7 @@ class _Vista extends ConsumerWidget {
             ..translateByDouble((c.maxWidth - childW * s) / 2,
                 (c.maxHeight - childH * s) / 2, 0, 1)
             ..scaleByDouble(s, s, s, 1);
-          ref.read(previewProvider.notifier).ajustarCalidadZoom(s);
+          ref.read(previewProvider.notifier).adjustZoomQuality(s);
         }
 
         void zoom(double factor) {
@@ -100,7 +100,7 @@ class _Vista extends ConsumerWidget {
           controller.value = Matrix4.identity()
             ..translateByDouble(cx - ns * spx, cy - ns * spy, 0, 1)
             ..scaleByDouble(ns, ns, ns, 1);
-          ref.read(previewProvider.notifier).ajustarCalidadZoom(ns);
+          ref.read(previewProvider.notifier).adjustZoomQuality(ns);
         }
 
         final fitPage = (c.maxHeight / childH).clamp(0.2, 1.0).toDouble();
@@ -115,7 +115,7 @@ class _Vista extends ConsumerWidget {
               transformationController: controller,
               onInteractionEnd: (_) => ref
                   .read(previewProvider.notifier)
-                  .ajustarCalidadZoom(controller.value.getMaxScaleOnAxis()),
+                  .adjustZoomQuality(controller.value.getMaxScaleOnAxis()),
               child: Padding(
                 padding: const EdgeInsets.all(margen),
                 child: Container(
