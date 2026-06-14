@@ -91,7 +91,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
     chairman: 'Rafael G',
     auxRoom: auxRoom,
   );
-  final img = await rasterizarPagina(pdf, scale: 2);
+  final img = await rasterizePage(pdf, scale: 2);
   final png = await img.toByteData(format: ui.ImageByteFormat.png);
   final dir = await getApplicationDocumentsDirectory();
   await dir.create(recursive: true);
