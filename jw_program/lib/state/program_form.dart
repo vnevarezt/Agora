@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/mwb_calendar.dart';
 import '../domain/schedule_rules.dart';
 import '../models/program_row.dart';
 import '../models/week.dart';
@@ -94,7 +95,8 @@ final formProvider =
 
 class FormController extends Notifier<FormModel> {
   @override
-  FormModel build() => FormModel.initial;
+  FormModel build() =>
+      FormModel.initial.copyWith(issue: issueForDate(DateTime.now()));
 
   void setIssue(String v) => state = state.copyWith(issue: v);
   void setCongregation(String v) => state = state.copyWith(congregationId: v);

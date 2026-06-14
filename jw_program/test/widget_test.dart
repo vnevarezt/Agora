@@ -5,6 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:jw_program/app.dart';
+import 'package:jw_program/state/mwb_sync.dart';
+
+/// Sync de arranque sin red ni disco: evita que el smoke test toque
+/// path_provider/jw.org y que el I/O real cuelgue en la zona fake-async.
+class _NoopSyncController extends MwbSyncController {
+  @override
+  Future<SyncReport> build() async => const SyncReport();
+}
 
 void main() {
   testWidgets('La app arranca en el dashboard (Inicio)',
@@ -15,7 +23,10 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const ProviderScope(child: JwProgramApp()));
+    await tester.pumpWidget(ProviderScope(
+      overrides: [mwbSyncProvider.overrideWith(_NoopSyncController.new)],
+      child: const JwProgramApp(),
+    ));
     await tester.pump();
 
     expect(find.text('Programa'), findsOneWidget); // marca de la barra lateral

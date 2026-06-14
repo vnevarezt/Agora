@@ -48,9 +48,19 @@ final congregationsProvider =
     NotifierProvider<CongregationsController, List<Congregation>>(
         CongregationsController.new);
 
-/// Catalog of available notebooks. Empty without a backend (will be filled by
-/// the editor's real download).
-final notebooksProvider = Provider<List<Notebook>>((ref) => const []);
+/// Catalog of cached notebooks. Starts empty and is filled by the background
+/// sync ([mwbSyncProvider]) from the on-disk cache. Kept synchronous so the
+/// project modal keeps reading it directly.
+class NotebooksController extends Notifier<List<Notebook>> {
+  @override
+  List<Notebook> build() => const [];
+
+  void setFrom(List<Notebook> notebooks) => state = notebooks;
+}
+
+final notebooksProvider =
+    NotifierProvider<NotebooksController, List<Notebook>>(
+        NotebooksController.new);
 
 /// Reminders/alerts. Empty without a backend (they are derived alerts).
 final remindersProvider = Provider<List<Reminder>>((ref) => const []);

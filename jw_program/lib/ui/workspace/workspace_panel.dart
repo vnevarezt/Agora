@@ -112,11 +112,12 @@ class _EmptyState extends ConsumerWidget {
 
     return EmptyState(
       icon: Icons.description_outlined,
-      title: 'Descarga un cuaderno para empezar.',
-      message: 'El programa de la semana se generará automáticamente.',
+      title: 'El cuaderno se descarga solo.',
+      message: 'Normalmente está listo automáticamente. Si aún no aparece, '
+          'búscalo manualmente.',
       action: AppButton(
         icon: Icons.file_download_outlined,
-        label: 'Descargar cuaderno $issue',
+        label: 'Buscar cuaderno $issue',
         busy: weeks.isLoading,
         onPressed: weeks.isLoading
             ? null
