@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "home": "Início",
+    "participants": "Participantes",
+    "settings": "Configurações"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "close": "Fechar",
+    "back": "Voltar",
+    "saveChanges": "Salvar alterações"
+  },
+  "dashboard": {
+    "greetingMorning": "Bom dia",
+    "greetingAfternoon": "Boa tarde",
+    "greetingEvening": "Boa noite",
+    "subtitle": "Seus projetos e pendências",
+    "newProject": "Novo projeto"
+  }
+}

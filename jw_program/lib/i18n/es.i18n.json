@@ -1,0 +1,294 @@
+{
+  "app": {
+    "brand": "Programa",
+    "defaultProjectName": "Programa"
+  },
+  "nav": {
+    "home": "Inicio",
+    "participants": "Participantes",
+    "settings": "Configuración"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "backToPanel": "Volver al panel",
+    "reminders": "Recordatorios",
+    "understood": "Entendido",
+    "saveChanges": "Guardar cambios",
+    "searchParticipant": "Buscar participante…",
+    "removeAssignment": "Quitar asignación",
+    "allFeminine": "Todas",
+    "allMasculine": "Todos"
+  },
+  "sync": {
+    "updating": "Actualizando catálogos",
+    "updatingTip": "Descargando los cuadernos más recientes…",
+    "upToDate": "Catálogos al día",
+    "upToDateTip": "Tienes los cuadernos al día.",
+    "missing": "Falta un cuaderno",
+    "missingTip": "El próximo cuaderno aún no está disponible; se reintentará."
+  },
+  "dashboard": {
+    "greetingMorning": "Buenos días",
+    "greetingAfternoon": "Buenas tardes",
+    "greetingEvening": "Buenas noches",
+    "greetingNamed": "{greeting}, {name}",
+    "subtitle": "Tus proyectos y pendientes",
+    "newProject": "Nuevo proyecto",
+    "allStatus": "Todo estado",
+    "projects": "Proyectos",
+    "reminders": "Recordatorios",
+    "seeAll": "Ver todo"
+  },
+  "projectCard": {
+    "edited": "Editado {label}",
+    "editProject": "Editar proyecto"
+  },
+  "projectModal": {
+    "newTitle": "Nuevo proyecto",
+    "editTitle": "Editar proyecto",
+    "desc": "Un proyecto agrupa las semanas que quieras: un mes completo o una sola semana.",
+    "noNotebooks": "Aún no hay cuadernos disponibles.\nDescárgalos desde el editor para crear proyectos.",
+    "congregation": "Congregación",
+    "weeksToInclude(plural)": {
+      "one": "Semanas a incluir · {n} seleccionada",
+      "other": "Semanas a incluir · {n} seleccionadas"
+    },
+    "projectName": "Nombre del proyecto",
+    "nameHint": "Ej. Mayo 2026",
+    "fromOtherNotebook": "De otro cuaderno · toca para quitar",
+    "create": "Crear proyecto",
+    "deleteTitle": "¿Eliminar proyecto?",
+    "deleteConfirm": "Se eliminará \"{name}\". Esta acción no se puede deshacer.",
+    "autoName(plural)": {
+      "one": "{base} · {n} semana",
+      "other": "{base} · {n} semanas"
+    }
+  },
+  "participants": {
+    "title": "Participantes",
+    "subtitle": "Participantes de las asignaciones",
+    "add": "Añadir participante",
+    "emptyNoData": "Aún no hay participantes.\nAñade el primero con \"Añadir participante\".",
+    "emptyNoResults": "Sin resultados con esos filtros."
+  },
+  "participantModal": {
+    "addTitle": "Añadir participante",
+    "editTitle": "Editar participante",
+    "desc": "El privilegio define qué partes se le pueden asignar.",
+    "fullName": "Nombre completo",
+    "nameHint": "Ej. Martín Salas",
+    "congregation": "Congregación",
+    "isLabel": "Es",
+    "male": "Hombre",
+    "female": "Mujer",
+    "privilege": "Privilegio",
+    "available": "Disponible",
+    "availableDesc": "Puede recibir asignaciones ahora mismo",
+    "deleteTitle": "¿Eliminar definitivamente?",
+    "deleteConfirm": "Se eliminará a {name} del directorio. Esta acción no se puede deshacer. Las asignaciones ya escritas en programas no se ven afectadas.",
+    "roleDescPublisher": "Participa en \"Seamos mejores maestros\" (todos)",
+    "roleDescServant": "Publicador + lectura, oración y algunas partes asignables",
+    "roleDescElder": "Puede recibir cualquier asignación del programa"
+  },
+  "participantCard": {
+    "incomplete": "Incompleto",
+    "genderUnspecified": "Sin definir"
+  },
+  "gender": {
+    "male": "Hombre",
+    "female": "Mujer",
+    "unspecified": "No especificado"
+  },
+  "roles": {
+    "elder": "Anciano",
+    "ministerialServant": "Siervo ministerial",
+    "publisher": "Publicador",
+    "elderPlural": "Ancianos",
+    "ministerialServantPlural": "Siervos ministeriales",
+    "publisherPlural": "Publicadores"
+  },
+  "status": {
+    "draft": "Borrador",
+    "complete": "Completo",
+    "exported": "Exportado",
+    "draftPlural": "Borradores",
+    "completePlural": "Completos",
+    "exportedPlural": "Exportados"
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Aplicación y congregaciones",
+    "tabApp": "Aplicación",
+    "tabCongregation": "Congregación",
+    "appearance": "Apariencia",
+    "appearanceDesc": "Cómo se ve la aplicación en este dispositivo.",
+    "theme": "Tema",
+    "themeDesc": "Claro, oscuro o según el sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeSystem": "Sistema",
+    "general": "General",
+    "generalDesc": "Idioma y formato.",
+    "appLanguage": "Idioma de la app",
+    "timeFormat": "Formato de hora",
+    "weekStart": "Inicio de semana",
+    "pdfName": "Nombre en los PDF",
+    "notificationsTitle": "Notificaciones",
+    "notificationsDesc": "Recordatorios que genera la app.",
+    "notif": {
+      "unassignedTitle": "Partes sin asignar",
+      "unassignedDesc": "Avisar cuando falten asignaciones a 3 días de la reunión",
+      "loadTitle": "Carga de asignaciones",
+      "loadDesc": "Avisar si un participante acumula muchas asignaciones",
+      "newNotebooksTitle": "Nuevos cuadernos",
+      "newNotebooksDesc": "Avisar cuando haya un nuevo cuaderno disponible",
+      "exportsTitle": "Exportaciones pendientes",
+      "exportsDesc": "Recordar exportar el programa antes del fin de semana"
+    },
+    "data": "Datos",
+    "dataDesc": "Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.",
+    "exportData": "Exportar datos",
+    "exportDataDesc": "Genera un archivo .jwbackup con todo",
+    "export": "Exportar",
+    "importData": "Importar datos",
+    "importDataDesc": "Restaura desde un archivo .jwbackup",
+    "import": "Importar",
+    "lastBackup": "Última copia",
+    "noBackupsYet": "Sin copias todavía",
+    "session": "Sesión",
+    "sessionDesc": "Estás usando la app en modo local en este dispositivo.",
+    "localMode": "Modo local",
+    "localModeDesc": "Los datos viven solo en este dispositivo"
+  },
+  "options": {
+    "timeFormat24": "24 horas (18:00)",
+    "timeFormat12": "12 horas (6:00 p. m.)",
+    "pdfNameFull": "Nombre y apellido",
+    "pdfNameLastFirst": "Apellido, nombre",
+    "pdfNameFirstOnly": "Solo nombre",
+    "meetingLangSpanish": "Español",
+    "meetingLangSign": "Lengua de señas",
+    "meetingLangEnglish": "English",
+    "accessAdmin": "Administrador",
+    "accessEditor": "Editor",
+    "accessReader": "Lector"
+  },
+  "days": {
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado",
+    "sunday": "Domingo"
+  },
+  "congregation": {
+    "dataTitle": "Datos de la congregación",
+    "dataDesc": "Se usan en el encabezado de los programas.",
+    "name": "Nombre",
+    "number": "Número",
+    "meetingLanguage": "Idioma de la reunión",
+    "scheduleTitle": "Horarios de reunión",
+    "scheduleDesc": "Las horas de cada parte se calculan a partir de aquí.",
+    "weekdayDay": "Entre semana · día",
+    "weekdayTime": "Entre semana · hora",
+    "weekendDay": "Fin de semana · día",
+    "weekendTime": "Fin de semana · hora",
+    "auxRoom": "Sala auxiliar",
+    "auxRoomDesc": "Activa una segunda sala para estudiantes por defecto",
+    "usersTitle": "Usuarios con acceso",
+    "usersDesc": "Quién puede ver o editar los proyectos de esta congregación.",
+    "noUsers": "Aún no hay usuarios invitados.",
+    "inviteUser": "Invitar usuario",
+    "empty": "Aún no hay congregaciones.\nCrea la primera con \"Nueva congregación\".",
+    "newCongregation": "Nueva congregación"
+  },
+  "newCongregation": {
+    "title": "Nueva congregación",
+    "desc": "Serás su administrador. Después podrás invitar usuarios.",
+    "create": "Crear congregación",
+    "name": "Nombre",
+    "nameHint": "Ej. Jardines del Norte",
+    "number": "Número",
+    "numberHint": "Ej. 152423"
+  },
+  "invite": {
+    "title": "Invitar usuario",
+    "desc": "Le llegará una invitación por correo para acceder a esta congregación.",
+    "send": "Enviar invitación",
+    "email": "Correo electrónico",
+    "emailHint": "nombre@correo.com",
+    "role": "Rol"
+  },
+  "picker": {
+    "assign": "Asignar",
+    "recent": "Recientes",
+    "all": "Todos",
+    "noResults": "Sin resultados para “{query}”.",
+    "addNamed": "Añadir “{query}”",
+    "addParticipant": "Añadir participante",
+    "closeSelector": "Cerrar selector"
+  },
+  "preview": {
+    "previewTab": "Vista previa",
+    "assignTab": "Asignar",
+    "emptyHint": "La vista previa aparecerá aquí.",
+    "error": "Error al generar la vista previa:\n{error}",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "fitPage": "Ver hoja completa",
+    "fitWidth": "Ajustar al ancho"
+  },
+  "export": {
+    "export": "Exportar",
+    "exportPdf": "Exportar PDF",
+    "success": "PDF exportado: {path}",
+    "error": "Error al exportar: {error}",
+    "currentWeek": "Semana actual",
+    "currentWeekSub": "Una hoja PDF",
+    "fullProject": "Proyecto completo",
+    "fullProjectSub": "Todas las semanas en un PDF",
+    "sheets": "Hojas de participación",
+    "sheetsSub": "Una por participante asignado"
+  },
+  "projectBar": {
+    "weeks(plural)": {
+      "one": "{n} semana",
+      "other": "{n} semanas"
+    },
+    "weekN": "Semana {n}",
+    "goToWeek": "Ir a la semana",
+    "weekShort": "Sem {n}",
+    "auxRoom": "Sala auxiliar",
+    "auxRoomDesc": "Segunda sala para estudiantes"
+  },
+  "workspace": {
+    "sectionOpening": "Apertura",
+    "sectionTreasures": "Tesoros de la Biblia",
+    "sectionMinistry": "Seamos mejores maestros",
+    "sectionChristianLife": "Nuestra vida cristiana",
+    "chairmanTitle": "Presidente de la reunión",
+    "chairman": "Presidente",
+    "allMeeting": "Toda la reunión",
+    "auxRoom": "Sala auxiliar",
+    "emptyTitle": "El cuaderno se descarga solo.",
+    "emptyMessage": "Normalmente está listo automáticamente. Si aún no aparece, búscalo manualmente.",
+    "searchNotebook": "Buscar cuaderno {issue}",
+    "assignee": "Asignar…",
+    "duration": "{n} min",
+    "songTag": "Cántico",
+    "chairmanTag": "A cargo del presidente",
+    "slotConductor": "Conductor",
+    "slotReader": "Lector",
+    "slotStudent": "Estudiante",
+    "slotAssistant": "Ayudante",
+    "slotInCharge": "Encargado",
+    "slotAux": "{label} · Aux."
+  },
+  "relativeTime": {
+    "now": "ahora mismo"
+  }
+}
