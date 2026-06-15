@@ -1,19 +1,21 @@
+import '../i18n/strings.g.dart';
+
 /// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
 
 extension ProjectStatusX on ProjectStatus {
   /// Singular label for the badge ("Borrador").
   String get label => switch (this) {
-        ProjectStatus.draft => 'Borrador',
-        ProjectStatus.complete => 'Completo',
-        ProjectStatus.exported => 'Exportado',
+        ProjectStatus.draft => t.status.draft,
+        ProjectStatus.complete => t.status.complete,
+        ProjectStatus.exported => t.status.exported,
       };
 
   /// Plural label for the filter chips ("Borradores").
   String get plural => switch (this) {
-        ProjectStatus.draft => 'Borradores',
-        ProjectStatus.complete => 'Completos',
-        ProjectStatus.exported => 'Exportados',
+        ProjectStatus.draft => t.status.draftPlural,
+        ProjectStatus.complete => t.status.completePlural,
+        ProjectStatus.exported => t.status.exportedPlural,
       };
 }
 

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
 import '../responsive.dart';
@@ -29,7 +30,7 @@ class PdfPreviewView extends ConsumerWidget {
             Icon(Icons.description_outlined, size: 40, color: t.textMute),
             const SizedBox(height: 12),
             Text(
-              'La vista previa aparecerá aquí.',
+              context.t.preview.emptyHint,
               style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
@@ -48,7 +49,7 @@ class PdfPreviewView extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Error al generar la vista previa:\n$e',
+            context.t.preview.error(error: e),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12.5,
@@ -152,25 +153,25 @@ class _Vista extends ConsumerWidget {
                   AppIconButton(
                       icon: Icons.add,
                       elevated: true,
-                      tooltip: 'Acercar',
+                      tooltip: context.t.preview.zoomIn,
                       onPressed: () => zoom(1.3)),
                   const SizedBox(height: 6),
                   AppIconButton(
                       icon: Icons.remove,
                       elevated: true,
-                      tooltip: 'Alejar',
+                      tooltip: context.t.preview.zoomOut,
                       onPressed: () => zoom(1 / 1.3)),
                   const SizedBox(height: 6),
                   AppIconButton(
                       icon: Icons.fit_screen_outlined,
                       elevated: true,
-                      tooltip: 'Ver hoja completa',
+                      tooltip: context.t.preview.fitPage,
                       onPressed: () => escalaCentrada(fitPage)),
                   const SizedBox(height: 6),
                   AppIconButton(
                       icon: Icons.width_normal_outlined,
                       elevated: true,
-                      tooltip: 'Ajustar al ancho',
+                      tooltip: context.t.preview.fitWidth,
                       onPressed: () =>
                           controller.value = Matrix4.identity()),
                 ],

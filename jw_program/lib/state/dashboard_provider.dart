@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../i18n/strings.g.dart';
 import '../models/congregation.dart';
 import '../models/notebook.dart';
 import '../models/project.dart';
@@ -87,7 +88,7 @@ class ProjectsController extends Notifier<List<Project>> {
       done: 0,
       total: _total(weeks.length),
       status: ProjectStatus.draft,
-      editedLabel: 'ahora mismo',
+      editedLabel: t.relativeTime.now,
     );
     state = [newProject, ...state];
   }
@@ -106,7 +107,7 @@ class ProjectsController extends Notifier<List<Project>> {
             congregationId: congregationId,
             weeks: weeks,
             total: _total(weeks.length),
-            editedLabel: 'ahora mismo',
+            editedLabel: t.relativeTime.now,
           )
         else
           p,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -91,7 +92,7 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => 'Cerrar selector';
+  String get barrierLabel => t.picker.closeSelector;
 
   @override
   Duration get transitionDuration => Dimens.dPop;

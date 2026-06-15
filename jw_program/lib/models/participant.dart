@@ -4,13 +4,15 @@
 // IMPORTANT: program assignments are still plain strings in the form
 // (FormModel.main) — this directory is NOT a foreign key.
 
+import '../i18n/strings.g.dart';
+
 enum Gender { male, female, unspecified }
 
 extension GenderX on Gender {
   String get label => switch (this) {
-        Gender.male => 'Hombre',
-        Gender.female => 'Mujer',
-        Gender.unspecified => 'No especificado',
+        Gender.male => t.gender.male,
+        Gender.female => t.gender.female,
+        Gender.unspecified => t.gender.unspecified,
       };
 }
 
@@ -18,16 +20,16 @@ enum Role { elder, ministerialServant, publisher }
 
 extension RoleX on Role {
   String get label => switch (this) {
-        Role.elder => 'Anciano',
-        Role.ministerialServant => 'Siervo ministerial',
-        Role.publisher => 'Publicador',
+        Role.elder => t.roles.elder,
+        Role.ministerialServant => t.roles.ministerialServant,
+        Role.publisher => t.roles.publisher,
       };
 
   /// Plural form used by the filter chips on the participants screen.
   String get plural => switch (this) {
-        Role.elder => 'Ancianos',
-        Role.ministerialServant => 'Siervos ministeriales',
-        Role.publisher => 'Publicadores',
+        Role.elder => t.roles.elderPlural,
+        Role.ministerialServant => t.roles.ministerialServantPlural,
+        Role.publisher => t.roles.publisherPlural,
       };
 }
 

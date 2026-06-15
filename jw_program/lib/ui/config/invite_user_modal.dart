@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/config_options.dart';
+import '../../i18n/strings.g.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
@@ -31,35 +32,35 @@ class InviteUserModal extends StatefulWidget {
 
 class _InviteUserModalState extends State<InviteUserModal> {
   String _email = '';
-  String _rol = 'Editor';
+  String _rol = accessRoles[1]; // Editor
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.t;
     return ModalShell(
       sheet: widget.sheet,
       onClose: widget.onClose,
-      title: 'Invitar usuario',
-      desc: 'Le llegará una invitación por correo para acceder a esta '
-          'congregación.',
-      primaryLabel: 'Enviar invitación',
+      title: tr.invite.title,
+      desc: tr.invite.desc,
+      primaryLabel: tr.invite.send,
       onPrimary: _email.trim().isEmpty ? null : widget.onClose,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           LabeledField(
-            label: 'Correo electrónico',
+            label: tr.invite.email,
             child: BoundTextField(
               initial: _email,
-              hint: 'nombre@correo.com',
+              hint: tr.invite.emailHint,
               keyboardType: TextInputType.emailAddress,
               onChanged: (v) => setState(() => _email = v),
             ),
           ),
           const SizedBox(height: 14),
           LabeledField(
-            label: 'Rol',
+            label: tr.invite.role,
             child: AppDropdown<String>(
-              value: _rol,
+              value: accessRoles.contains(_rol) ? _rol : accessRoles.first,
               items: accessRoles,
               itemLabel: (s) => s,
               onChanged: (v) => setState(() => _rol = v),

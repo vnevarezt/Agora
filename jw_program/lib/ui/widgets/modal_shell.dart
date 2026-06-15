@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
@@ -47,7 +48,7 @@ class ModalShell extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (sheet) _handle(t),
-        _header(t),
+        _header(context, t),
         Flexible(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
@@ -91,7 +92,7 @@ class ModalShell extends StatelessWidget {
         ),
       );
 
-  Widget _header(AppTokens t) => Padding(
+  Widget _header(BuildContext context, AppTokens t) => Padding(
         padding: EdgeInsets.fromLTRB(18, sheet ? 12 : 18, 12, 4),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +130,7 @@ class ModalShell extends StatelessWidget {
             AppIconButton(
               icon: Icons.close,
               bordered: true,
-              tooltip: 'Cerrar',
+              tooltip: context.t.common.close,
               size: 32,
               onPressed: onClose,
             ),
@@ -153,7 +154,7 @@ class ModalShell extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     variant: AppButtonVariant.ghost,
-                    label: 'Cancelar',
+                    label: context.t.common.cancel,
                     expand: true,
                     onPressed: onClose,
                   ),
@@ -161,7 +162,8 @@ class ModalShell extends StatelessWidget {
                 if (onDanger != null) ...[
                   const SizedBox(width: 8),
                   DangerButton(
-                      onTap: onDanger!, label: dangerLabel ?? 'Eliminar'),
+                      onTap: onDanger!,
+                      label: dangerLabel ?? context.t.common.delete),
                 ],
               ],
             ),
@@ -171,11 +173,12 @@ class ModalShell extends StatelessWidget {
               children: [
                 if (onDanger != null)
                   DangerButton(
-                      onTap: onDanger!, label: dangerLabel ?? 'Eliminar'),
+                      onTap: onDanger!,
+                      label: dangerLabel ?? context.t.common.delete),
                 const Spacer(),
                 AppButton(
                   variant: AppButtonVariant.ghost,
-                  label: 'Cancelar',
+                  label: context.t.common.cancel,
                   onPressed: onClose,
                 ),
                 const SizedBox(width: 8),

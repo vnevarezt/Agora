@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../state/progress_provider.dart';
 import '../../state/ui_state.dart';
 import '../theme/tokens.dart';
@@ -28,9 +29,9 @@ class MobileTabs extends ConsumerWidget {
       child: SegmentedTabs(
         expand: true,
         index: tab.index,
-        segments: const [
-          (icon: Icons.edit_outlined, label: 'Asignar'),
-          (icon: Icons.description_outlined, label: 'Vista previa'),
+        segments: [
+          (icon: Icons.edit_outlined, label: context.t.preview.assignTab),
+          (icon: Icons.description_outlined, label: context.t.preview.previewTab),
         ],
         onChanged: (i) => ref
             .read(mobileTabProvider.notifier)

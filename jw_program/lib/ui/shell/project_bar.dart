@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
@@ -91,7 +92,7 @@ class ProjectBar extends ConsumerWidget {
   Widget _back(BuildContext context) => AppIconButton(
         icon: Icons.arrow_back,
         bordered: true,
-        tooltip: 'Volver al panel',
+        tooltip: context.t.common.backToPanel,
         onPressed: () => Navigator.of(context).maybePop(),
       );
 }
@@ -111,7 +112,7 @@ class _ProjectId extends ConsumerWidget {
     final Congregation? cong = project == null
         ? null
         : congregations.where((c) => c.id == project!.congregationId).firstOrNull;
-    final name = project?.name ?? 'Programa';
+    final name = project?.name ?? context.t.app.defaultProjectName;
     final congName =
         cong?.name ?? (project == null ? ref.watch(formProvider).congregationId : '');
     final congColor = cong == null ? t.accent : Color(cong.color);
@@ -175,7 +176,7 @@ class _ProjectId extends ConsumerWidget {
                     Icon(Icons.layers_outlined, size: 13, color: t.textMute),
                     const SizedBox(width: 4),
                     Text(
-                      '$weekCount ${weekCount == 1 ? 'semana' : 'semanas'}',
+                      context.t.projectBar.weeks(n: weekCount),
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
@@ -280,7 +281,8 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                       children: [
                         Text.rich(
                           TextSpan(
-                            text: 'Semana ${n == 0 ? '—' : active + 1}',
+                            text: context.t.projectBar
+                                .weekN(n: n == 0 ? '—' : active + 1),
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w700,
@@ -434,7 +436,7 @@ class _WeekMenu extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 5, 8, 8),
             child: Text(
-              'IR A LA SEMANA',
+              context.t.projectBar.goToWeek.toUpperCase(),
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
@@ -465,7 +467,7 @@ class _WeekMenu extends ConsumerWidget {
                       SizedBox(
                         width: 38,
                         child: Text(
-                          'SEM ${i + 1}',
+                          context.t.projectBar.weekShort(n: i + 1).toUpperCase(),
                           style: TextStyle(
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
@@ -566,12 +568,12 @@ class _AuxToggle extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Sala auxiliar',
+                  Text(context.t.projectBar.auxRoom,
                       style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: t.text)),
-                  Text('Segunda sala para estudiantes',
+                  Text(context.t.projectBar.auxRoomDesc,
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -599,12 +601,15 @@ class _ExportMenu extends ConsumerWidget {
 
   Future<void> _exportWeek(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final tr = context.t;
     ref.read(exportBusyProvider.notifier).set(true);
     try {
       final path = await ref.read(previewProvider.notifier).export();
-      messenger.showSnackBar(SnackBar(content: Text('PDF exportado: $path')));
+      messenger
+          .showSnackBar(SnackBar(content: Text(tr.export.success(path: path))));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Error al exportar: $e')));
+      messenger.showSnackBar(
+          SnackBar(content: Text(tr.export.error(error: e))));
     } finally {
       ref.read(exportBusyProvider.notifier).set(false);
     }
@@ -638,7 +643,7 @@ class _ExportMenu extends ConsumerWidget {
       builder: (context, controller, _) {
         return AppButton(
           icon: Icons.ios_share,
-          label: compact ? null : 'Exportar',
+          label: compact ? null : context.t.export.export,
           busy: busy,
           onPressed: busy
               ? null
@@ -677,14 +682,14 @@ class _ExportCard extends StatelessWidget {
         children: [
           _ExportItem(
             icon: Icons.description_outlined,
-            title: 'Semana actual',
-            sub: 'Una hoja PDF',
+            title: context.t.export.currentWeek,
+            sub: context.t.export.currentWeekSub,
             onTap: haySemana ? onSemana : null,
           ),
           _ExportItem(
             icon: Icons.layers_outlined,
-            title: 'Proyecto completo',
-            sub: 'Todas las semanas en un PDF',
+            title: context.t.export.fullProject,
+            sub: context.t.export.fullProjectSub,
             onTap: null, // próximamente
           ),
           Container(
@@ -694,8 +699,8 @@ class _ExportCard extends StatelessWidget {
           ),
           _ExportItem(
             icon: Icons.list_alt_outlined,
-            title: 'Hojas de participación',
-            sub: 'Una por participante asignado',
+            title: context.t.export.sheets,
+            sub: context.t.export.sheetsSub,
             onTap: null, // próximamente
           ),
         ],

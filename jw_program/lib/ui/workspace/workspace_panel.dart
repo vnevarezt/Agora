@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/program_row.dart';
 import '../../models/week.dart';
 import '../../state/assignment_ops.dart';
@@ -27,27 +28,29 @@ class WorkspacePanel extends ConsumerWidget {
     final aux = ref.watch(formProvider.select((f) => f.auxRoom));
     final isMobile = context.isMobile;
     final side = isMobile ? 14.0 : 18.0;
+    final tr = context.t;
 
     return ListView(
       padding: EdgeInsets.fromLTRB(side, side, side, isMobile ? 150 : 120),
       children: [
         PartCard(view: chairmanView()),
         const SizedBox(height: 22),
-        _SectionBlock(title: 'Apertura', rows: sched.opening, aux: aux),
         _SectionBlock(
-          title: 'Tesoros de la Biblia',
+            title: tr.workspace.sectionOpening, rows: sched.opening, aux: aux),
+        _SectionBlock(
+          title: tr.workspace.sectionTreasures,
           dotColor: kSectionColors[Section.treasures],
           rows: sched.treasures,
           aux: aux,
         ),
         _SectionBlock(
-          title: 'Seamos mejores maestros',
+          title: tr.workspace.sectionMinistry,
           dotColor: kSectionColors[Section.ministry],
           rows: sched.ministry,
           aux: aux,
         ),
         _SectionBlock(
-          title: 'Nuestra vida cristiana',
+          title: tr.workspace.sectionChristianLife,
           dotColor: kSectionColors[Section.christianLife],
           rows: sched.christianLife,
           aux: aux,
@@ -112,12 +115,11 @@ class _EmptyState extends ConsumerWidget {
 
     return EmptyState(
       icon: Icons.description_outlined,
-      title: 'El cuaderno se descarga solo.',
-      message: 'Normalmente está listo automáticamente. Si aún no aparece, '
-          'búscalo manualmente.',
+      title: context.t.workspace.emptyTitle,
+      message: context.t.workspace.emptyMessage,
       action: AppButton(
         icon: Icons.file_download_outlined,
-        label: 'Buscar cuaderno $issue',
+        label: context.t.workspace.searchNotebook(issue: issue),
         busy: weeks.isLoading,
         onPressed: weeks.isLoading
             ? null

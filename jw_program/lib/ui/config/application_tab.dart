@@ -1,42 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../state/ui_state.dart';
 import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
 import 'settings_card.dart';
 
-const _appLanguages = ['Español', 'English', 'Português'];
-const _timeFormats = ['24 horas (18:00)', '12 horas (6:00 p. m.)'];
-const _weekStarts = ['Lunes', 'Domingo'];
-const _pdfNameFormats = ['Nombre y apellido', 'Apellido, nombre', 'Solo nombre'];
+// Decorative dropdown options (UI-only, not persisted). Getters so the labels
+// follow the active app language.
+List<String> get _timeFormats =>
+    [t.options.timeFormat24, t.options.timeFormat12];
+List<String> get _weekStarts => [t.days.monday, t.days.sunday];
+List<String> get _pdfNameFormats => [
+      t.options.pdfNameFull,
+      t.options.pdfNameLastFirst,
+      t.options.pdfNameFirstOnly,
+    ];
 
-const _notifications = [
-  (
-    title: 'Partes sin asignar',
-    desc: 'Avisar cuando falten asignaciones a 3 días de la reunión',
-    inicial: true,
-  ),
-  (
-    title: 'Carga de asignaciones',
-    desc: 'Avisar si un participante acumula muchas asignaciones',
-    inicial: true,
-  ),
-  (
-    title: 'Nuevos cuadernos',
-    desc: 'Avisar cuando haya un nuevo cuaderno disponible',
-    inicial: true,
-  ),
-  (
-    title: 'Exportaciones pendientes',
-    desc: 'Recordar exportar el programa antes del fin de semana',
-    inicial: false,
-  ),
-];
+// Default on/off state per notification row.
+const _notifInitial = [true, true, true, false];
+List<({String title, String desc})> _notifItems(Translations tr) => [
+      (title: tr.settings.notif.unassignedTitle, desc: tr.settings.notif.unassignedDesc),
+      (title: tr.settings.notif.loadTitle, desc: tr.settings.notif.loadDesc),
+      (
+        title: tr.settings.notif.newNotebooksTitle,
+        desc: tr.settings.notif.newNotebooksDesc
+      ),
+      (title: tr.settings.notif.exportsTitle, desc: tr.settings.notif.exportsDesc),
+    ];
 
-/// Settings "Aplicación" tab. Only the theme is functional; the rest are
-/// UI controls with local state (no persistence).
+/// Native language names for the app-language selector. New languages added as
+/// a `<locale>.i18n.json` file appear automatically; add an entry here to show
+/// their native name (otherwise the uppercased language code is shown).
+const _localeNames = {'es': 'Español', 'en': 'English', 'pt': 'Português'};
+String _localeName(AppLocale l) =>
+    _localeNames[l.languageCode] ?? l.languageCode.toUpperCase();
+
+/// Settings "Aplicación" tab. The theme and language are functional; the rest
+/// are UI controls with local state (no persistence yet).
 class ApplicationTab extends ConsumerStatefulWidget {
   const ApplicationTab({super.key});
 
@@ -45,11 +48,10 @@ class ApplicationTab extends ConsumerStatefulWidget {
 }
 
 class _ApplicationTabState extends ConsumerState<ApplicationTab> {
-  String _language = _appLanguages.first;
   String _format = _timeFormats.first;
   String _weekStart = _weekStarts.first;
   String _pdfNameFormat = _pdfNameFormats.first;
-  late final List<bool> _notif = [for (final n in _notifications) n.inicial];
+  late final List<bool> _notif = [..._notifInitial];
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +62,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   }
 
   Widget _appearance() {
+    final tr = context.t;
     final modo = ref.watch(themeModeProvider);
     final idx = switch (modo) {
       ThemeMode.light => 0,
@@ -69,18 +72,18 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     const modos = [ThemeMode.light, ThemeMode.dark, ThemeMode.system];
 
     return SettingsCard(
-      title: 'Apariencia',
-      desc: 'Cómo se ve la aplicación en este dispositivo.',
+      title: tr.settings.appearance,
+      desc: tr.settings.appearanceDesc,
       children: [
         SettingRow(
           first: true,
-          title: 'Tema',
-          subtitle: 'Claro, oscuro o según el sistema',
+          title: tr.settings.theme,
+          subtitle: tr.settings.themeDesc,
           trailing: SegmentedTabs(
-            segments: const [
-              (icon: null, label: 'Claro'),
-              (icon: null, label: 'Oscuro'),
-              (icon: null, label: 'Sistema'),
+            segments: [
+              (icon: null, label: tr.settings.themeLight),
+              (icon: null, label: tr.settings.themeDark),
+              (icon: null, label: tr.settings.themeSystem),
             ],
             index: idx,
             onChanged: (i) =>
@@ -92,43 +95,48 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   }
 
   Widget _general() {
+    final tr = context.t;
     return SettingsCard(
-      title: 'General',
-      desc: 'Idioma y formato.',
+      title: tr.settings.general,
+      desc: tr.settings.generalDesc,
       children: [
         SettingsGrid(
           children: [
             LabeledField(
-              label: 'Idioma de la app',
-              child: AppDropdown<String>(
-                value: _language,
-                items: _appLanguages,
-                itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _language = v),
+              label: tr.settings.appLanguage,
+              child: AppDropdown<AppLocale>(
+                value: ref.watch(localeProvider),
+                items: AppLocale.values,
+                itemLabel: _localeName,
+                onChanged: (v) => ref.read(localeProvider.notifier).set(v),
               ),
             ),
             LabeledField(
-              label: 'Formato de hora',
+              label: tr.settings.timeFormat,
               child: AppDropdown<String>(
-                value: _format,
+                value: _timeFormats.contains(_format) ? _format : _timeFormats.first,
                 items: _timeFormats,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _format = v),
               ),
             ),
             LabeledField(
-              label: 'Inicio de semana',
+              label: tr.settings.weekStart,
               child: AppDropdown<String>(
-                value: _weekStart,
+                value: _weekStarts.contains(_weekStart)
+                    ? _weekStart
+                    : _weekStarts.first,
                 items: _weekStarts,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _weekStart = v),
               ),
             ),
             LabeledField(
-              label: 'Nombre en los PDF',
+              label: tr.settings.pdfName,
               child: AppDropdown<String>(
-                value: _pdfNameFormat,
+                value: _pdfNameFormats.contains(_pdfNameFormat)
+                    ? _pdfNameFormat
+                    : _pdfNameFormats.first,
                 items: _pdfNameFormats,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _pdfNameFormat = v),
@@ -141,15 +149,17 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   }
 
   Widget _notificationsCard() {
+    final tr = context.t;
+    final items = _notifItems(tr);
     return SettingsCard(
-      title: 'Notificaciones',
-      desc: 'Recordatorios que genera la app.',
+      title: tr.settings.notificationsTitle,
+      desc: tr.settings.notificationsDesc,
       children: [
-        for (var i = 0; i < _notifications.length; i++)
+        for (var i = 0; i < items.length; i++)
           SettingRow(
             first: i == 0,
-            title: _notifications[i].title,
-            subtitle: _notifications[i].desc,
+            title: items[i].title,
+            subtitle: items[i].desc,
             trailing: Transform.scale(
               scale: 0.85,
               child: Switch(
@@ -163,49 +173,50 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   }
 
   Widget _datos() {
+    final tr = context.t;
     return SettingsCard(
-      title: 'Datos',
-      desc: 'Copia de seguridad de tus proyectos, participantes y congregaciones. '
-          'Útil también para mover datos entre el modo local y la nube.',
+      title: tr.settings.data,
+      desc: tr.settings.dataDesc,
       children: [
         SettingRow(
           first: true,
-          title: 'Exportar datos',
-          subtitle: 'Genera un archivo .jwbackup con todo',
+          title: tr.settings.exportData,
+          subtitle: tr.settings.exportDataDesc,
           trailing: AppButton(
             variant: AppButtonVariant.ghost,
             icon: Icons.file_upload_outlined,
-            label: 'Exportar',
+            label: tr.settings.export,
             onPressed: () {},
           ),
         ),
         SettingRow(
-          title: 'Importar datos',
-          subtitle: 'Restaura desde un archivo .jwbackup',
+          title: tr.settings.importData,
+          subtitle: tr.settings.importDataDesc,
           trailing: AppButton(
             variant: AppButtonVariant.ghost,
             icon: Icons.file_open_outlined,
-            label: 'Importar',
+            label: tr.settings.import,
             onPressed: () {},
           ),
         ),
-        const SettingRow(
-          title: 'Última copia',
-          subtitle: 'Sin copias todavía',
+        SettingRow(
+          title: tr.settings.lastBackup,
+          subtitle: tr.settings.noBackupsYet,
         ),
       ],
     );
   }
 
   Widget _sessionSection() {
+    final tr = context.t;
     return SettingsCard(
-      title: 'Sesión',
-      desc: 'Estás usando la app en modo local en este dispositivo.',
-      children: const [
+      title: tr.settings.session,
+      desc: tr.settings.sessionDesc,
+      children: [
         SettingRow(
           first: true,
-          title: 'Modo local',
-          subtitle: 'Los datos viven solo en este dispositivo',
+          title: tr.settings.localMode,
+          subtitle: tr.settings.localModeDesc,
         ),
       ],
     );

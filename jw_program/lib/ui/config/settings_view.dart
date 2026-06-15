@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -40,9 +41,9 @@ class _SettingsViewState extends State<SettingsView> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: SegmentedTabs(
-                    segments: const [
-                      (icon: null, label: 'Aplicación'),
-                      (icon: null, label: 'Congregación'),
+                    segments: [
+                      (icon: null, label: context.t.settings.tabApp),
+                      (icon: null, label: context.t.settings.tabCongregation),
                     ],
                     index: _tab,
                     onChanged: (i) => setState(() => _tab = i),
@@ -66,7 +67,7 @@ class _SettingsViewState extends State<SettingsView> {
           AppIconButton(
             icon: Icons.arrow_back,
             bordered: true,
-            tooltip: 'Volver',
+            tooltip: context.t.common.back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(width: 12),
@@ -76,7 +77,7 @@ class _SettingsViewState extends State<SettingsView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Configuración',
+                context.t.settings.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -88,7 +89,7 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               const SizedBox(height: 2),
               Text(
-                'Aplicación y congregaciones',
+                context.t.settings.subtitle,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -102,7 +103,7 @@ class _SettingsViewState extends State<SettingsView> {
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
-          tooltip: 'Recordatorios',
+          tooltip: context.t.common.reminders,
           onPressed: () {},
         ),
       ],

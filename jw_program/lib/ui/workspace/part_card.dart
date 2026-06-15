@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
@@ -122,13 +123,13 @@ class _RoleBody extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (view.allMeetingBadge)
-                const MiniChip.allMeeting('Toda la reunión')
+                MiniChip.allMeeting(context.t.workspace.allMeeting)
               else
                 MiniChip.time(view.time),
               if (view.durationLabel != null)
                 MiniChip.duration(view.durationLabel!),
               if (view.fixedTag != null) MiniChip.tag(view.fixedTag!),
-              if (view.auxFlag) const MiniChip.aux('Sala auxiliar'),
+              if (view.auxFlag) MiniChip.aux(context.t.workspace.auxRoom),
             ],
           ),
           const SizedBox(height: 9),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/participant.dart';
 import '../../state/participants_provider.dart';
 import '../theme/app_theme.dart';
@@ -70,7 +71,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
               ),
             ),
           ),
-        _header(t),
+        _header(context),
         Flexible(
           child: ListView(
             shrinkWrap: true,
@@ -78,16 +79,16 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             children: [
               if (widget.current.isNotEmpty)
                 _PersonRow(
-                  name: 'Quitar asignación',
+                  name: context.t.common.removeAssignment,
                   avatarVacio: true,
                   muted: true,
                   selected: true,
                   onTap: () => _pop(const PickRemove()),
                 ),
               if (recent.isNotEmpty) ...[
-                _group(t, 'Recientes'),
+                _group(t, context.t.picker.recent),
                 for (final h in recent) _row(h),
-                _group(t, 'Todos'),
+                _group(t, context.t.picker.all),
               ],
               for (final h in filtered) _row(h),
               if (filtered.isEmpty && _search.isNotEmpty)
@@ -95,7 +96,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 18),
                   child: Text(
-                    'Sin resultados para “$_search”.',
+                    context.t.picker.noResults(query: _search),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
@@ -107,7 +108,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             ],
           ),
         ),
-        _footer(t),
+        _footer(context),
       ],
     );
   }
@@ -122,7 +123,8 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  Widget _header(AppTokens t) {
+  Widget _header(BuildContext context) {
+    final t = context.tokens;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
       decoration: BoxDecoration(
@@ -132,7 +134,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ASIGNAR · ${widget.roleLabel.toUpperCase()}',
+            '${context.t.picker.assign.toUpperCase()} · ${widget.roleLabel.toUpperCase()}',
             style: AppText.label(size: 11, color: t.textMute),
           ),
           const SizedBox(height: 10),
@@ -144,7 +146,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                 fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
             decoration: InputDecoration(
               counterText: '',
-              hintText: 'Buscar participante…',
+              hintText: context.t.common.searchParticipant,
               prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 36, minHeight: 16),
@@ -165,10 +167,12 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
 
   /// "Añadir" footer: assigns the typed name and adds it to the in-memory
   /// directory (full management comes in another phase).
-  Widget _footer(AppTokens t) {
+  Widget _footer(BuildContext context) {
+    final t = context.tokens;
     final enabled = _search.isNotEmpty;
-    final label =
-        enabled ? 'Añadir “$_search”' : 'Añadir participante';
+    final label = enabled
+        ? context.t.picker.addNamed(query: _search)
+        : context.t.picker.addParticipant;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(

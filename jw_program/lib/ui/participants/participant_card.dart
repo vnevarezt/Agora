@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/pill.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/participant.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -17,10 +18,10 @@ class ParticipantCard extends StatelessWidget {
   final Participant participant;
   final VoidCallback onTap;
 
-  String get _genderLabel => switch (participant.gender) {
-        Gender.male => 'Hombre',
-        Gender.female => 'Mujer',
-        Gender.unspecified => 'Sin definir',
+  String _genderLabel(BuildContext context) => switch (participant.gender) {
+        Gender.male => context.t.participantModal.male,
+        Gender.female => context.t.participantModal.female,
+        Gender.unspecified => context.t.participantCard.genderUnspecified,
       };
 
   @override
@@ -28,7 +29,8 @@ class ParticipantCard extends StatelessWidget {
     final t = context.tokens;
     final h = participant;
     final congregation = h.congregation.trim();
-    final sub = congregation.isEmpty ? _genderLabel : '$_genderLabel · $congregation';
+    final g = _genderLabel(context);
+    final sub = congregation.isEmpty ? g : '$g · $congregation';
 
     return Pressable(
       onTap: onTap,
@@ -123,7 +125,7 @@ class _IncompleteBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Pill(
-      label: 'Incompleto',
+      label: context.t.participantCard.incomplete,
       background: dark ? const Color(0xFF3A3115) : const Color(0xFFF3ECD2),
       foreground: dark ? const Color(0xFFD9C27A) : const Color(0xFF7A6512),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -47,9 +48,12 @@ class _PreviewPaneState extends State<PreviewPane> {
             ),
             child: Row(
               children: [
-                const SegmentedTabs(
+                SegmentedTabs(
                   segments: [
-                    (icon: Icons.description_outlined, label: 'Vista previa'),
+                    (
+                      icon: Icons.description_outlined,
+                      label: context.t.preview.previewTab
+                    ),
                   ],
                 ),
                 const Spacer(),

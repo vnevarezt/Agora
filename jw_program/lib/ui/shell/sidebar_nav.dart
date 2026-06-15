@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/ui_state.dart';
@@ -10,16 +11,22 @@ import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 
 /// Shell navigation items (same order in the side bar and the bottom
-/// bar).
-const _items = <({AppSection section, IconData icon, String label})>[
-  (section: AppSection.home, icon: Icons.home_outlined, label: 'Inicio'),
-  (section: AppSection.participants, icon: Icons.people_outline, label: 'Participantes'),
-  (
-    section: AppSection.settings,
-    icon: Icons.settings_outlined,
-    label: 'Configuración'
-  ),
-];
+/// bar). Labels follow the active language.
+List<({AppSection section, IconData icon, String label})> _items(
+        Translations tr) =>
+    [
+      (section: AppSection.home, icon: Icons.home_outlined, label: tr.nav.home),
+      (
+        section: AppSection.participants,
+        icon: Icons.people_outline,
+        label: tr.nav.participants
+      ),
+      (
+        section: AppSection.settings,
+        icon: Icons.settings_outlined,
+        label: tr.nav.settings
+      ),
+    ];
 
 /// Number of urgent reminders; shown as a badge on "Inicio".
 final _alertsProvider = Provider<int>((ref) => ref
@@ -40,6 +47,7 @@ class Sidebar extends ConsumerWidget {
     final section = ref.watch(appSectionProvider);
     final user = ref.watch(sessionUserProvider);
     final alerts = ref.watch(_alertsProvider);
+    final items = _items(context.t);
 
     return Container(
       width: compact ? 64 : 232,
@@ -53,7 +61,7 @@ class Sidebar extends ConsumerWidget {
         children: [
           _Brand(compact: compact),
           const SizedBox(height: 6),
-          for (final it in _items) ...[
+          for (final it in items) ...[
             _NavItem(
               section: it.section,
               icon: it.icon,
@@ -112,7 +120,7 @@ class _Brand extends StatelessWidget {
           if (!compact) ...[
             const SizedBox(width: 10),
             Text(
-              'Programa',
+              context.t.app.brand,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
@@ -292,6 +300,7 @@ class BottomNav extends ConsumerWidget {
     final t = context.tokens;
     final section = ref.watch(appSectionProvider);
     final alerts = ref.watch(_alertsProvider);
+    final items = _items(context.t);
 
     return Container(
       decoration: BoxDecoration(
@@ -304,7 +313,7 @@ class BottomNav extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
           child: Row(
             children: [
-              for (final it in _items)
+              for (final it in items)
                 Expanded(
                   child: _BottomItem(
                     section: it.section,

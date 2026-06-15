@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/dimens.dart';
 import 'app_button.dart';
 
 /// Destructive-action button in the error color (no danger variant in
 /// [AppButton]). Used by the project and participant modal footers.
 class DangerButton extends StatelessWidget {
-  const DangerButton({super.key, required this.onTap, this.label = 'Eliminar'});
+  const DangerButton({super.key, required this.onTap, this.label});
 
   final VoidCallback onTap;
-  final String label;
+
+  /// Defaults to the localized "Delete" when null.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     final err = Theme.of(context).colorScheme.error;
+    final label = this.label ?? context.t.common.delete;
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) => AnimatedContainer(

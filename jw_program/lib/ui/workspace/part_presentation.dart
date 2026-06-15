@@ -1,3 +1,4 @@
+import '../../i18n/strings.g.dart';
 import '../../models/program_row.dart';
 import '../../state/assignment_ops.dart';
 import '../limits.dart';
@@ -67,14 +68,18 @@ class PartView {
 
 final _durationSuffix = RegExp(r'\s*\((\d+)\s*mins?\.\)$');
 
-/// Slot labels based on the row's role (same rule as the old editor).
+/// Slot labels based on the row's role (same rule as the old editor). The
+/// `contains('Conductor')` check matches the raw workbook data (kept in the
+/// meeting language); only the displayed labels are translated.
 List<String> _labelsForRole(ProgramRow row) {
   if (row.slots == 2) {
     return row.role.contains('Conductor')
-        ? const ['Conductor', 'Lector']
-        : const ['Estudiante', 'Ayudante'];
+        ? [t.workspace.slotConductor, t.workspace.slotReader]
+        : [t.workspace.slotStudent, t.workspace.slotAssistant];
   }
-  return [row.role.isNotEmpty ? row.role.replaceAll(':', '') : 'Encargado'];
+  return [
+    row.role.isNotEmpty ? row.role.replaceAll(':', '') : t.workspace.slotInCharge
+  ];
 }
 
 int _maxLengthForRole(ProgramRow row) =>
@@ -84,15 +89,15 @@ int _maxLengthForRole(ProgramRow row) =>
 
 /// Synthetic card for the meeting chairman.
 PartView chairmanView() {
-  return const PartView(
+  return PartView(
     id: 'presidente',
     kind: PartKind.role,
-    title: 'Presidente de la reunión',
+    title: t.workspace.chairmanTitle,
     allMeetingBadge: true,
     slots: [
       SlotSpec(
-        label: 'Presidente',
-        ref: ChairmanSlot(),
+        label: t.workspace.chairman,
+        ref: const ChairmanSlot(),
         maxLength: Limits.name,
       ),
     ],
@@ -104,7 +109,9 @@ PartView chairmanView() {
 PartView mapRow(ProgramRow row, {required bool auxActive}) {
   final match = _durationSuffix.firstMatch(row.content);
   final title = row.content.replaceAll(_durationSuffix, '');
-  final duration = match != null ? '${match.group(1)} min' : null;
+  final duration =
+      match != null ? t.workspace.duration(n: match.group(1)!) : null;
+  // `startsWith('Canción')` checks the raw workbook data (meeting language).
   final isSong = row.content.startsWith('Canción');
 
   if (row.slots == 0) {
@@ -114,7 +121,7 @@ PartView mapRow(ProgramRow row, {required bool auxActive}) {
       time: row.time,
       title: title,
       durationLabel: duration,
-      fixedTag: isSong ? 'Cántico' : 'A cargo del presidente',
+      fixedTag: isSong ? t.workspace.songTag : t.workspace.chairmanTag,
     );
   }
 
@@ -130,7 +137,7 @@ PartView mapRow(ProgramRow row, {required bool auxActive}) {
     durationLabel: duration,
     // The opening/closing song carries the prayer slot in the model: it shows
     // as a role card with the "Cántico" chip.
-    fixedTag: isSong ? 'Cántico' : null,
+    fixedTag: isSong ? t.workspace.songTag : null,
     auxFlag: withAux,
     slots: [
       for (var i = 0; i < row.slots; i++)
@@ -142,7 +149,7 @@ PartView mapRow(ProgramRow row, {required bool auxActive}) {
       if (withAux)
         for (var i = 0; i < row.auxSlots; i++)
           SlotSpec(
-            label: '${labels[i]} · Aux.',
+            label: t.workspace.slotAux(label: labels[i]),
             ref: RowSlot(row, i, aux: true),
             maxLength: maxLength,
             accent: true,

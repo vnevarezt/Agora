@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
 import '../responsive.dart';
@@ -139,7 +140,7 @@ class ProjectCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 9),
                   Text(
-                    'Editado ${p.editedLabel}',
+                    context.t.projectCard.edited(label: p.editedLabel),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -156,7 +157,7 @@ class ProjectCard extends StatelessWidget {
                 child: AppIconButton(
                   icon: Icons.more_vert,
                   size: 30,
-                  tooltip: 'Editar proyecto',
+                  tooltip: context.t.projectCard.editProject,
                   onPressed: onEdit,
                 ),
               ),

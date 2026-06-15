@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
@@ -27,12 +28,15 @@ class ExportButton extends ConsumerWidget {
 
   Future<void> _exportar(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final tr = context.t;
     ref.read(exportBusyProvider.notifier).set(true);
     try {
       final ruta = await ref.read(previewProvider.notifier).export();
-      messenger.showSnackBar(SnackBar(content: Text('PDF exportado: $ruta')));
+      messenger
+          .showSnackBar(SnackBar(content: Text(tr.export.success(path: ruta))));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Error al exportar: $e')));
+      messenger
+          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
     } finally {
       ref.read(exportBusyProvider.notifier).set(false);
     }
@@ -47,7 +51,7 @@ class ExportButton extends ConsumerWidget {
       onPressed:
           haySemana && !busy ? () => _exportar(context, ref) : null,
       icon: Icons.ios_share,
-      label: variant == ExportVariant.compact ? null : 'Exportar PDF',
+      label: variant == ExportVariant.compact ? null : context.t.export.exportPdf,
       height: variant == ExportVariant.full
           ? Dimens.hExportMobile
           : Dimens.hControl,

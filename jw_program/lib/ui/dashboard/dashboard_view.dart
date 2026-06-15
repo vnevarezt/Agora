@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
@@ -53,11 +54,11 @@ class DashboardView extends ConsumerWidget {
 }
 
 /// Greeting based on the time of day.
-String _greeting() {
+String _greeting(Translations tr) {
   final h = DateTime.now().hour;
-  if (h < 12) return 'Buenos días';
-  if (h < 19) return 'Buenas tardes';
-  return 'Buenas noches';
+  if (h < 12) return tr.dashboard.greetingMorning;
+  if (h < 19) return tr.dashboard.greetingAfternoon;
+  return tr.dashboard.greetingEvening;
 }
 
 class _TopBar extends ConsumerWidget {
@@ -66,11 +67,12 @@ class _TopBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
+    final tr = context.t;
     final isMobile = context.isMobile;
     final user = ref.watch(sessionUserProvider);
     final greeting = user.name.isEmpty
-        ? _greeting()
-        : '${_greeting()}, ${user.name}';
+        ? _greeting(tr)
+        : tr.dashboard.greetingNamed(greeting: _greeting(tr), name: user.name);
 
     return Row(
       children: [
@@ -91,7 +93,7 @@ class _TopBar extends ConsumerWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Tus proyectos y pendientes',
+                tr.dashboard.subtitle,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -110,13 +112,13 @@ class _TopBar extends ConsumerWidget {
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
-          tooltip: 'Recordatorios',
+          tooltip: tr.common.reminders,
           onPressed: () {},
         ),
         const SizedBox(width: 8),
         AppButton(
           icon: Icons.add,
-          label: isMobile ? null : 'Nuevo proyecto',
+          label: isMobile ? null : tr.dashboard.newProject,
           onPressed: () => showProjectModal(context),
         ),
       ],
@@ -146,27 +148,28 @@ class _SyncIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final tr = context.t;
     const amber = Color(0xFFB9890F);
 
     final (IconData? icon, String label, Color color, String tip) =
         switch (state) {
       _CatalogState.busy => (
           null,
-          'Actualizando catálogos',
+          tr.sync.updating,
           t.accent,
-          'Descargando los cuadernos más recientes…',
+          tr.sync.updatingTip,
         ),
       _CatalogState.ok => (
           Icons.check_circle_rounded,
-          'Catálogos al día',
+          tr.sync.upToDate,
           t.accent,
-          'Tienes los cuadernos al día.',
+          tr.sync.upToDateTip,
         ),
       _CatalogState.incomplete => (
           Icons.error_outline_rounded,
-          'Falta un cuaderno',
+          tr.sync.missing,
           amber,
-          'El próximo cuaderno aún no está disponible; se reintentará.',
+          tr.sync.missingTip,
         ),
     };
 
@@ -228,7 +231,7 @@ class _Filters extends ConsumerWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         FilterPill(
-          label: 'Todas',
+          label: context.t.common.allFeminine,
           count: projects.length,
           active: filters.congregationId == 'all',
           onTap: () => notifier.setCongregation('all'),
@@ -243,7 +246,7 @@ class _Filters extends ConsumerWidget {
           ),
         Container(width: 1, height: 22, color: t.border),
         FilterPill(
-          label: 'Todo estado',
+          label: context.t.dashboard.allStatus,
           active: filters.status == null,
           onTap: () => notifier.setStatus(null),
         ),
@@ -302,7 +305,7 @@ class _ProjectsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: 'Proyectos', count: projects.length),
+        BlockTitle(title: context.t.dashboard.projects, count: projects.length),
         LayoutBuilder(
           builder: (context, c) {
             const gap = 14.0;
@@ -351,9 +354,9 @@ class _RemindersSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BlockTitle(
-          title: 'Recordatorios',
+          title: context.t.dashboard.reminders,
           count: reminders.length,
-          linkLabel: 'Ver todo',
+          linkLabel: context.t.dashboard.seeAll,
           onLink: () {},
         ),
         for (var i = 0; i < reminders.length; i++) ...[

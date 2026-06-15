@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../domain/mwb_calendar.dart';
 import '../../models/congregation.dart';
 import '../../models/notebook.dart';
@@ -94,8 +95,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     if (_name.trim().isNotEmpty) return _name.trim();
     if (_weeks.isEmpty) return '';
     final base = notebook.label.split('–').first.trim();
-    final n = _weeks.length;
-    return '$base · $n ${n == 1 ? 'semana' : 'semanas'}';
+    return t.projectModal.autoName(n: _weeks.length, base: base);
   }
 
   void _save(Notebook notebook) {
@@ -115,19 +115,18 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Eliminar proyecto?'),
+        title: Text(context.t.projectModal.deleteTitle),
         content: Text(
-          'Se eliminará "${widget.original!.name}". '
-          'Esta acción no se puede deshacer.',
+          context.t.projectModal.deleteConfirm(name: widget.original!.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(context.t.common.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Eliminar',
+            child: Text(context.t.common.delete,
                 style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
@@ -141,12 +140,12 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   @override
   Widget build(BuildContext context) {
     final isMobile = context.isMobile;
+    final tr = context.t;
     final congregations = ref.watch(congregationsProvider);
     final notebooks = ref.watch(notebooksProvider);
 
-    const desc = 'Un proyecto agrupa las semanas que quieras: un mes completo '
-        'o una sola semana.';
-    final title = _isNew ? 'Nuevo proyecto' : 'Editar proyecto';
+    final desc = tr.projectModal.desc;
+    final title = _isNew ? tr.projectModal.newTitle : tr.projectModal.editTitle;
 
     if (notebooks.isEmpty) {
       return ModalShell(
@@ -154,12 +153,11 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         onClose: widget.onClose,
         title: title,
         desc: desc,
-        body: const EmptyState(
+        body: EmptyState(
           icon: Icons.menu_book_outlined,
-          message: 'Aún no hay cuadernos disponibles.\n'
-              'Descárgalos desde el editor para crear proyectos.',
+          message: tr.projectModal.noNotebooks,
         ),
-        primaryLabel: 'Entendido',
+        primaryLabel: tr.common.understood,
         onPrimary: widget.onClose,
       );
     }
@@ -174,9 +172,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       onClose: widget.onClose,
       title: title,
       desc: desc,
-      body: _body(context.tokens, isMobile, congregations, notebooks, notebook,
-          extra, autoName),
-      primaryLabel: _isNew ? 'Crear proyecto' : 'Guardar cambios',
+      body: _body(context.tokens, tr, isMobile, congregations, notebooks,
+          notebook, extra, autoName),
+      primaryLabel: _isNew ? tr.projectModal.create : tr.common.saveChanges,
       onPrimary: _weeks.isNotEmpty ? () => _save(notebook) : null,
       onDanger: _isNew ? null : _delete,
     );
@@ -184,6 +182,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
 
   Widget _body(
     AppTokens t,
+    Translations tr,
     bool isMobile,
     List<Congregation> congregations,
     List<Notebook> notebooks,
@@ -192,7 +191,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     String autoName,
   ) {
     final congField = LabeledField(
-      label: 'Congregación',
+      label: tr.projectModal.congregation,
       child: AppDropdown<String>(
         value: _congregationId,
         items: [for (final c in congregations) c.id],
@@ -207,8 +206,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         congField,
         const SizedBox(height: 14),
         LabeledField(
-          label: 'Semanas a incluir · ${_weeks.length} '
-              '${_weeks.length == 1 ? 'seleccionada' : 'seleccionadas'}',
+          label: tr.projectModal.weeksToInclude(n: _weeks.length),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -254,10 +252,10 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         ),
         const SizedBox(height: 14),
         LabeledField(
-          label: 'Nombre del proyecto',
+          label: tr.projectModal.projectName,
           child: BoundTextField(
             initial: _name,
-            hint: autoName.isNotEmpty ? autoName : 'Ej. Mayo 2026',
+            hint: autoName.isNotEmpty ? autoName : tr.projectModal.nameHint,
             onChanged: (v) => setState(() => _name = v),
           ),
         ),
@@ -288,7 +286,7 @@ class _WeekToggle extends StatelessWidget {
     final t = context.tokens;
     return Pressable(
       onTap: onTap,
-      tooltip: extra ? 'De otro cuaderno · toca para quitar' : null,
+      tooltip: extra ? context.t.projectModal.fromOtherNotebook : null,
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(

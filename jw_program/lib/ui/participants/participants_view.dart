@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/participant.dart';
 import '../../state/participants_provider.dart';
 import '../responsive.dart';
@@ -64,7 +65,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           AppIconButton(
             icon: Icons.arrow_back,
             bordered: true,
-            tooltip: 'Volver',
+            tooltip: context.t.common.back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(width: 12),
@@ -74,7 +75,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Participantes',
+                context.t.participants.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -86,7 +87,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
               ),
               const SizedBox(height: 2),
               Text(
-                'Participantes de las asignaciones',
+                context.t.participants.subtitle,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -100,13 +101,13 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
-          tooltip: 'Recordatorios',
+          tooltip: context.t.common.reminders,
           onPressed: () {},
         ),
         const SizedBox(width: 8),
         AppButton(
           icon: Icons.person_add_alt,
-          label: isMobile ? null : 'Añadir participante',
+          label: isMobile ? null : context.t.participants.add,
           onPressed: () => showParticipantModal(context),
         ),
       ],
@@ -122,10 +123,10 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        SizedBox(width: 280, child: _searchBox(t)),
+        SizedBox(width: 280, child: _searchBox(context)),
         _separator(t),
         FilterPill(
-          label: 'Todas',
+          label: context.t.common.allFeminine,
           active: _congregation == null,
           onTap: () => setState(() => _congregation = null),
         ),
@@ -137,7 +138,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           ),
         _separator(t),
         FilterPill(
-          label: 'Todos',
+          label: context.t.common.allMasculine,
           active: _role == null,
           onTap: () => setState(() => _role = null),
         ),
@@ -151,23 +152,25 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  Widget _searchBox(AppTokens t) => TextField(
+  Widget _searchBox(BuildContext context) {
+    final t = context.tokens;
+    return TextField(
         onChanged: (v) => setState(() => _query = v),
         style: TextStyle(
             fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
         decoration: InputDecoration(
-          hintText: 'Buscar participante…',
+          hintText: context.t.common.searchParticipant,
           prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
           prefixIconConstraints:
               const BoxConstraints(minWidth: 36, minHeight: 16),
         ),
       );
+  }
 
   Widget _separator(AppTokens t) =>
       Container(width: 1, height: 22, color: t.border);
 
   Widget _result(BuildContext context) {
-    final t = context.tokens;
     final all = ref.watch(participantsProvider);
     final filtered = filterParticipants(
       all,
@@ -180,9 +183,10 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: 'Participantes', count: filtered.length),
+        BlockTitle(
+            title: context.t.participants.title, count: filtered.length),
         if (filtered.isEmpty)
-          _empty(t, all.isEmpty)
+          _empty(context, all.isEmpty)
         else
           _grid(filtered),
       ],
@@ -213,12 +217,12 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  Widget _empty(AppTokens t, bool noData) {
+  Widget _empty(BuildContext context, bool noData) {
     return EmptyState(
       icon: Icons.people_outline,
       message: noData
-          ? 'Aún no hay participantes.\nAñade el primero con "Añadir participante".'
-          : 'Sin resultados con esos filtros.',
+          ? context.t.participants.emptyNoData
+          : context.t.participants.emptyNoResults,
     );
   }
 

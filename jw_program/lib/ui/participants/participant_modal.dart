@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/participant.dart';
 import '../../state/participants_provider.dart';
 import '../../state/program_form.dart';
@@ -17,13 +18,11 @@ import '../widgets/mini_chip.dart';
 import '../widgets/segmented_control.dart';
 
 /// Description of each role in the modal radio cards.
-const _roleDesc = {
-  Role.publisher:
-      'Participa en "Seamos mejores maestros" (todos)',
-  Role.ministerialServant:
-      'Publicador + lectura, oración y algunas partes asignables',
-  Role.elder: 'Puede recibir cualquier asignación del programa',
-};
+String _roleDesc(Role role) => switch (role) {
+      Role.publisher => t.participantModal.roleDescPublisher,
+      Role.ministerialServant => t.participantModal.roleDescServant,
+      Role.elder => t.participantModal.roleDescElder,
+    };
 
 /// Opens the create/edit participant modal. [original] null = new.
 Future<void> showParticipantModal(BuildContext context, {Participant? original}) {
@@ -112,20 +111,19 @@ class _PersonModalState extends ConsumerState<PersonModal> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Eliminar definitivamente?'),
+        title: Text(context.t.participantModal.deleteTitle),
         content: Text(
-          'Se eliminará a ${widget.original!.name} del directorio. '
-          'Esta acción no se puede deshacer. Las asignaciones ya escritas '
-          'en programas no se ven afectadas.',
+          context.t.participantModal
+              .deleteConfirm(name: widget.original!.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(context.t.common.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Eliminar',
+            child: Text(context.t.common.delete,
                 style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
@@ -138,20 +136,24 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.t;
     return ModalShell(
       sheet: widget.sheet,
       onClose: widget.onClose,
-      title: _isCreating ? 'Añadir participante' : 'Editar participante',
-      desc: 'El privilegio define qué partes se le pueden asignar.',
-      body: _body(context.tokens),
-      primaryLabel: _isCreating ? 'Añadir participante' : 'Guardar cambios',
+      title: _isCreating
+          ? tr.participantModal.addTitle
+          : tr.participantModal.editTitle,
+      desc: tr.participantModal.desc,
+      body: _body(context.tokens, tr),
+      primaryLabel:
+          _isCreating ? tr.participantModal.addTitle : tr.common.saveChanges,
       primaryBusy: _saving,
       onPrimary: (_name.trim().isNotEmpty && !_saving) ? _save : null,
       onDanger: _isCreating ? null : _delete,
     );
   }
 
-  Widget _body(AppTokens t) {
+  Widget _body(AppTokens t, Translations tr) {
     final suggestions = ref
         .watch(participantCongregationsProvider)
         .where((c) => c != _congregation.trim())
@@ -167,17 +169,17 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         LabeledField(
-          label: 'Nombre completo',
+          label: tr.participantModal.fullName,
           child: BoundTextField(
             initial: _name,
             maxLength: Limits.name,
-            hint: 'Ej. Martín Salas',
+            hint: tr.participantModal.nameHint,
             onChanged: (v) => setState(() => _name = v),
           ),
         ),
         const SizedBox(height: 14),
         LabeledField(
-          label: 'Congregación',
+          label: tr.participantModal.congregation,
           child: BoundTextField(
             key: ValueKey('cong-$_congVersion'),
             initial: _congregation,
@@ -205,11 +207,11 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           ),
         const SizedBox(height: 14),
         LabeledField(
-          label: 'Es',
+          label: tr.participantModal.isLabel,
           child: SegmentedTabs(
-            segments: const [
-              (icon: null, label: 'Hombre'),
-              (icon: null, label: 'Mujer'),
+            segments: [
+              (icon: null, label: tr.participantModal.male),
+              (icon: null, label: tr.participantModal.female),
             ],
             index: genderIndex,
             expand: true,
@@ -218,7 +220,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         ),
         const SizedBox(height: 14),
         LabeledField(
-          label: 'Privilegio',
+          label: tr.participantModal.privilege,
           child: Column(
             children: [
               for (final p in availableRoles) ...[
@@ -313,7 +315,7 @@ class _RoleOption extends StatelessWidget {
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      _roleDesc[role]!,
+                      _roleDesc(role),
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
@@ -349,7 +351,7 @@ class _AvailableRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Disponible',
+                context.t.participantModal.available,
                 style: TextStyle(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,
@@ -357,7 +359,7 @@ class _AvailableRow extends StatelessWidget {
                 ),
               ),
               Text(
-                'Puede recibir asignaciones ahora mismo',
+                context.t.participantModal.availableDesc,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

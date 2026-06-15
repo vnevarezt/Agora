@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -60,7 +61,7 @@ class AssigneeButton extends StatelessWidget {
                         ),
                       )
                     : Text(
-                        'Asignar…',
+                        context.t.workspace.assignee,
                         style: TextStyle(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
@@ -100,7 +101,7 @@ class _ClearButton extends StatelessWidget {
     final t = context.tokens;
     return Pressable(
       onTap: onClear,
-      tooltip: 'Quitar asignación',
+      tooltip: context.t.common.removeAssignment,
       builder: (context, hovered, _) {
         return Container(
           width: 22,

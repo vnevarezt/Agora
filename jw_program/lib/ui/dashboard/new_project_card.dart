@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -53,7 +54,7 @@ class NewProjectCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 9),
                 Text(
-                  'Nuevo proyecto',
+                  context.t.dashboard.newProject,
                   style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,

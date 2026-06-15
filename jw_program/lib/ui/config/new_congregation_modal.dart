@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_options.dart';
+import '../../i18n/strings.g.dart';
 import '../../state/dashboard_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -39,9 +40,9 @@ class _NewCongregationModalState
   String _name = '';
   String _number = '';
   String _language = meetingLanguages.first;
-  String _weekdayDay = 'Martes';
+  String _weekdayDay = daysOfWeek[1]; // Tuesday
   String _weekdayTime = '19:00';
-  String _weekendDay = 'Domingo';
+  String _weekendDay = daysOfWeek[6]; // Sunday
   String _weekendTime = '10:00';
 
   /// Adds the congregation to in-memory state and closes. Schedule/language
@@ -56,12 +57,13 @@ class _NewCongregationModalState
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.t;
     return ModalShell(
       sheet: widget.sheet,
       onClose: widget.onClose,
-      title: 'Nueva congregación',
-      desc: 'Serás su administrador. Después podrás invitar usuarios.',
-      primaryLabel: 'Crear congregación',
+      title: tr.newCongregation.title,
+      desc: tr.newCongregation.desc,
+      primaryLabel: tr.newCongregation.create,
       onPrimary: _name.trim().isEmpty ? null : _crear,
       body: _body(context),
     );
@@ -69,6 +71,7 @@ class _NewCongregationModalState
 
   Widget _body(BuildContext context) {
     final t = context.tokens;
+    final tr = context.t;
     final mono = AppText.mono(size: 13.5, color: t.text);
 
     return LayoutBuilder(
@@ -84,10 +87,10 @@ class _NewCongregationModalState
             box(
               c.maxWidth,
               LabeledField(
-                label: 'Nombre',
+                label: tr.newCongregation.name,
                 child: BoundTextField(
                   initial: _name,
-                  hint: 'Ej. Jardines del Norte',
+                  hint: tr.newCongregation.nameHint,
                   onChanged: (v) => setState(() => _name = v),
                 ),
               ),
@@ -95,10 +98,10 @@ class _NewCongregationModalState
             box(
               colW,
               LabeledField(
-                label: 'Número',
+                label: tr.newCongregation.number,
                 child: BoundTextField(
                   initial: _number,
-                  hint: 'Ej. 152423',
+                  hint: tr.newCongregation.numberHint,
                   style: mono,
                   onChanged: (v) => _number = v,
                 ),
@@ -107,9 +110,11 @@ class _NewCongregationModalState
             box(
               colW,
               LabeledField(
-                label: 'Idioma de la reunión',
+                label: tr.congregation.meetingLanguage,
                 child: AppDropdown<String>(
-                  value: _language,
+                  value: meetingLanguages.contains(_language)
+                      ? _language
+                      : meetingLanguages.first,
                   items: meetingLanguages,
                   itemLabel: (s) => s,
                   onChanged: (v) => setState(() => _language = v),
@@ -119,9 +124,11 @@ class _NewCongregationModalState
             box(
               colW,
               LabeledField(
-                label: 'Entre semana · día',
+                label: tr.congregation.weekdayDay,
                 child: AppDropdown<String>(
-                  value: _weekdayDay,
+                  value: daysOfWeek.contains(_weekdayDay)
+                      ? _weekdayDay
+                      : daysOfWeek[1],
                   items: daysOfWeek,
                   itemLabel: (s) => s,
                   onChanged: (v) => setState(() => _weekdayDay = v),
@@ -131,7 +138,7 @@ class _NewCongregationModalState
             box(
               colW,
               LabeledField(
-                label: 'Entre semana · hora',
+                label: tr.congregation.weekdayTime,
                 child: BoundTextField(
                   initial: _weekdayTime,
                   style: mono,
@@ -142,9 +149,11 @@ class _NewCongregationModalState
             box(
               colW,
               LabeledField(
-                label: 'Fin de semana · día',
+                label: tr.congregation.weekendDay,
                 child: AppDropdown<String>(
-                  value: _weekendDay,
+                  value: daysOfWeek.contains(_weekendDay)
+                      ? _weekendDay
+                      : daysOfWeek[6],
                   items: daysOfWeek,
                   itemLabel: (s) => s,
                   onChanged: (v) => setState(() => _weekendDay = v),
@@ -154,7 +163,7 @@ class _NewCongregationModalState
             box(
               colW,
               LabeledField(
-                label: 'Fin de semana · hora',
+                label: tr.congregation.weekendTime,
                 child: BoundTextField(
                   initial: _weekendTime,
                   style: mono,

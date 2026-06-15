@@ -3,6 +3,7 @@ import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_options.dart';
+import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../state/dashboard_provider.dart';
 import '../theme/app_theme.dart';
@@ -31,9 +32,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   String _name = '';
   String _number = '';
   String _language = meetingLanguages.first;
-  String _weekdayDay = 'Martes';
+  String _weekdayDay = daysOfWeek[1]; // Tuesday
   String _weekdayTime = '19:00';
-  String _weekendDay = 'Domingo';
+  String _weekendDay = daysOfWeek[6]; // Sunday
   String _weekendTime = '10:00';
   bool _auxRoom = false;
 
@@ -45,9 +46,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
       _name = congregation.name;
       _number = congregation.number;
       _language = meetingLanguages.first;
-      _weekdayDay = 'Martes';
+      _weekdayDay = daysOfWeek[1]; // Tuesday
       _weekdayTime = '19:00';
-      _weekendDay = 'Domingo';
+      _weekendDay = daysOfWeek[6]; // Sunday
       _weekendTime = '10:00';
       _auxRoom = false;
     }
@@ -87,10 +88,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   }
 
   Widget _empty(BuildContext context) {
-    return const EmptyState(
+    return EmptyState(
       icon: Icons.apartment_outlined,
-      message: 'Aún no hay congregaciones.\n'
-          'Crea la primera con "Nueva congregación".',
+      message: context.t.congregation.empty,
     );
   }
 
@@ -114,14 +114,15 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
   Widget _dataCard() {
     final t = context.tokens;
+    final tr = context.t;
     return SettingsCard(
-      title: 'Datos de la congregación',
-      desc: 'Se usan en el encabezado de los programas.',
+      title: tr.congregation.dataTitle,
+      desc: tr.congregation.dataDesc,
       children: [
         SettingsGrid(
           children: [
             LabeledField(
-              label: 'Nombre',
+              label: tr.congregation.name,
               child: BoundTextField(
                 key: ValueKey('$_congregationId-name'),
                 initial: _name,
@@ -129,7 +130,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
               ),
             ),
             LabeledField(
-              label: 'Número',
+              label: tr.congregation.number,
               child: BoundTextField(
                 key: ValueKey('$_congregationId-number'),
                 initial: _number,
@@ -138,9 +139,11 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
               ),
             ),
             LabeledField(
-              label: 'Idioma de la reunión',
+              label: tr.congregation.meetingLanguage,
               child: AppDropdown<String>(
-                value: _language,
+                value: meetingLanguages.contains(_language)
+                    ? _language
+                    : meetingLanguages.first,
                 items: meetingLanguages,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _language = v),
@@ -154,24 +157,26 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
   Widget _scheduleCard() {
     final t = context.tokens;
+    final tr = context.t;
     final mono = AppText.mono(size: 13.5, color: t.text);
     return SettingsCard(
-      title: 'Horarios de reunión',
-      desc: 'Las horas de cada parte se calculan a partir de aquí.',
+      title: tr.congregation.scheduleTitle,
+      desc: tr.congregation.scheduleDesc,
       children: [
         SettingsGrid(
           children: [
             LabeledField(
-              label: 'Entre semana · día',
+              label: tr.congregation.weekdayDay,
               child: AppDropdown<String>(
-                value: _weekdayDay,
+                value:
+                    daysOfWeek.contains(_weekdayDay) ? _weekdayDay : daysOfWeek[1],
                 items: daysOfWeek,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _weekdayDay = v),
               ),
             ),
             LabeledField(
-              label: 'Entre semana · hora',
+              label: tr.congregation.weekdayTime,
               child: BoundTextField(
                 key: ValueKey('$_congregationId-he'),
                 initial: _weekdayTime,
@@ -180,16 +185,17 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
               ),
             ),
             LabeledField(
-              label: 'Fin de semana · día',
+              label: tr.congregation.weekendDay,
               child: AppDropdown<String>(
-                value: _weekendDay,
+                value:
+                    daysOfWeek.contains(_weekendDay) ? _weekendDay : daysOfWeek[6],
                 items: daysOfWeek,
                 itemLabel: (s) => s,
                 onChanged: (v) => setState(() => _weekendDay = v),
               ),
             ),
             LabeledField(
-              label: 'Fin de semana · hora',
+              label: tr.congregation.weekendTime,
               child: BoundTextField(
                 key: ValueKey('$_congregationId-hf'),
                 initial: _weekendTime,
@@ -200,8 +206,8 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           ],
         ),
         SettingRow(
-          title: 'Sala auxiliar',
-          subtitle: 'Activa una segunda sala para estudiantes por defecto',
+          title: tr.congregation.auxRoom,
+          subtitle: tr.congregation.auxRoomDesc,
           trailing: Transform.scale(
             scale: 0.85,
             child: Switch(
@@ -216,14 +222,15 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
   Widget _usersCard() {
     final t = context.tokens;
+    final tr = context.t;
     return SettingsCard(
-      title: 'Usuarios con acceso',
-      desc: 'Quién puede ver o editar los proyectos de esta congregación.',
+      title: tr.congregation.usersTitle,
+      desc: tr.congregation.usersDesc,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Text(
-            'Aún no hay usuarios invitados.',
+            tr.congregation.noUsers,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -237,7 +244,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           child: AppButton(
             variant: AppButtonVariant.ghost,
             icon: Icons.person_add_alt,
-            label: 'Invitar usuario',
+            label: tr.congregation.inviteUser,
             onPressed: () => showInviteUser(context),
           ),
         ),
@@ -340,7 +347,7 @@ class _AddChip extends StatelessWidget {
                 Icon(Icons.add, size: 15, color: fg),
                 const SizedBox(width: 6),
                 Text(
-                  'Nueva congregación',
+                  context.t.congregation.newCongregation,
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
