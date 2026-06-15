@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'i18n/strings.g.dart';
 import 'state/mwb_sync.dart';
 import 'state/ui_state.dart';
 import 'ui/shell/app_shell.dart';
@@ -15,6 +17,9 @@ class JwProgramApp extends ConsumerWidget {
     return MaterialApp(
       title: 'JW Program',
       debugShowCheckedModeBanner: false,
+      locale: TranslationProvider.of(context).flutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: buildAppTheme(pizarra.light, Brightness.light),
       darkTheme: buildAppTheme(pizarra.dark, Brightness.dark),
       themeMode: ref.watch(themeModeProvider),

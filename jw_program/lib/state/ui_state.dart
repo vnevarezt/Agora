@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../i18n/strings.g.dart';
 import 'assignment_ops.dart';
+import 'locale_boot.dart';
 
 /// Ephemeral UI state (doesn't affect the PDF or the form).
+
+/// Active app language. Mirrors slang's [LocaleSettings] so the Settings
+/// dropdown can read/set it like any other provider; the actual translation
+/// switch + rebuild is driven by [TranslationProvider]. Persisted across
+/// restarts (see [persistLocale]).
+final localeProvider =
+    NotifierProvider<LocaleController, AppLocale>(LocaleController.new);
+
+class LocaleController extends Notifier<AppLocale> {
+  @override
+  AppLocale build() => LocaleSettings.currentLocale;
+
+  void set(AppLocale locale) {
+    LocaleSettings.setLocaleSync(locale);
+    state = locale;
+    persistLocale(locale);
+  }
+}
 
 /// Active shell section (sidebar): dashboard, participants or settings.
 enum AppSection { home, participants, settings }
