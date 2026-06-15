@@ -1,0 +1,13 @@
+# slang i18n config. Base locale = es; missing keys in other locales fall back
+# to Spanish so incomplete community translations still render.
+base_locale: es
+fallback_strategy: base_locale
+input_directory: lib/i18n
+input_file_pattern: .i18n.json
+output_directory: lib/i18n
+output_file_name: strings.g.dart
+# Use {arg} interpolation (cleaner inside JSON than the default $arg).
+string_interpolation: braces
+# Load every locale eagerly (no deferred imports): simpler synchronous locale
+# switching, fine for a desktop/mobile app with a handful of languages.
+lazy: false
