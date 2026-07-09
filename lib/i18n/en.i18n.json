@@ -3,6 +3,42 @@
     "brand": "Agora",
     "defaultProjectName": "Program"
   },
+  "auth": {
+    "unlock": {
+      "title": "Unlock",
+      "subtitle": "Enter your local password to open your encrypted data.",
+      "password": "Password",
+      "button": "Unlock",
+      "working": "Decrypting…",
+      "wrongPassword": "Wrong password.",
+      "forgot": "Forgot your password?"
+    },
+    "create": {
+      "title": "Create your local account",
+      "subtitle": "Your data is stored encrypted on this device. This password protects the encryption key.",
+      "migrateTitle": "Protect your data",
+      "migrateSubtitle": "This version adds a local account: create a password to protect the data already on this device.",
+      "password": "Password",
+      "confirm": "Confirm password",
+      "tooShort": "The password must be at least 8 characters long.",
+      "mismatch": "The passwords don't match.",
+      "noRecoveryWarning": "If you forget your password there will be no way to recover your data. Keep it somewhere safe.",
+      "button": "Create account",
+      "migrateButton": "Protect data",
+      "working": "Protecting…"
+    },
+    "reset": {
+      "title": "Delete all data",
+      "warning": "Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.",
+      "confirmPhrase": "DELETE",
+      "confirmHint": "Type {phrase} to confirm",
+      "button": "Delete everything"
+    },
+    "keyError": {
+      "title": "Could not access the system keychain",
+      "retry": "Retry"
+    }
+  },
   "nav": {
     "home": "Home",
     "participants": "Participants",

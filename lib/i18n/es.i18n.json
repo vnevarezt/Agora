@@ -3,6 +3,42 @@
     "brand": "Agora",
     "defaultProjectName": "Programa"
   },
+  "auth": {
+    "unlock": {
+      "title": "Desbloquear",
+      "subtitle": "Introduce tu contraseña local para abrir tus datos cifrados.",
+      "password": "Contraseña",
+      "button": "Desbloquear",
+      "working": "Descifrando…",
+      "wrongPassword": "Contraseña incorrecta.",
+      "forgot": "¿Olvidaste tu contraseña?"
+    },
+    "create": {
+      "title": "Crea tu cuenta local",
+      "subtitle": "Tus datos se guardan cifrados en este dispositivo. Esta contraseña protege la llave de cifrado.",
+      "migrateTitle": "Protege tus datos",
+      "migrateSubtitle": "Esta versión añade una cuenta local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.",
+      "password": "Contraseña",
+      "confirm": "Confirmar contraseña",
+      "tooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "mismatch": "Las contraseñas no coinciden.",
+      "noRecoveryWarning": "Si olvidas tu contraseña no habrá forma de recuperar tus datos. Guárdala en un lugar seguro.",
+      "button": "Crear cuenta",
+      "migrateButton": "Proteger datos",
+      "working": "Protegiendo…"
+    },
+    "reset": {
+      "title": "Borrar todos los datos",
+      "warning": "Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.",
+      "confirmPhrase": "BORRAR",
+      "confirmHint": "Escribe {phrase} para confirmar",
+      "button": "Borrar todo"
+    },
+    "keyError": {
+      "title": "No se pudo acceder al llavero del sistema",
+      "retry": "Reintentar"
+    }
+  },
   "nav": {
     "home": "Inicio",
     "participants": "Participantes",

@@ -40,6 +40,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
+	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$sync$en sync = _Translations$sync$en._(_root);
@@ -75,6 +76,19 @@ class _Translations$app$en extends Translations$app$es {
 	// Translations
 	@override String get brand => 'Agora';
 	@override String get defaultProjectName => 'Program';
+}
+
+// Path: auth
+class _Translations$auth$en extends Translations$auth$es {
+	_Translations$auth$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$auth$unlock$en unlock = _Translations$auth$unlock$en._(_root);
+	@override late final _Translations$auth$create$en create = _Translations$auth$create$en._(_root);
+	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
+	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
 }
 
 // Path: nav
@@ -530,6 +544,68 @@ class _Translations$relativeTime$en extends Translations$relativeTime$es {
 	@override String get now => 'just now';
 }
 
+// Path: auth.unlock
+class _Translations$auth$unlock$en extends Translations$auth$unlock$es {
+	_Translations$auth$unlock$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Unlock';
+	@override String get subtitle => 'Enter your local password to open your encrypted data.';
+	@override String get password => 'Password';
+	@override String get button => 'Unlock';
+	@override String get working => 'Decrypting…';
+	@override String get wrongPassword => 'Wrong password.';
+	@override String get forgot => 'Forgot your password?';
+}
+
+// Path: auth.create
+class _Translations$auth$create$en extends Translations$auth$create$es {
+	_Translations$auth$create$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Create your local account';
+	@override String get subtitle => 'Your data is stored encrypted on this device. This password protects the encryption key.';
+	@override String get migrateTitle => 'Protect your data';
+	@override String get migrateSubtitle => 'This version adds a local account: create a password to protect the data already on this device.';
+	@override String get password => 'Password';
+	@override String get confirm => 'Confirm password';
+	@override String get tooShort => 'The password must be at least 8 characters long.';
+	@override String get mismatch => 'The passwords don\'t match.';
+	@override String get noRecoveryWarning => 'If you forget your password there will be no way to recover your data. Keep it somewhere safe.';
+	@override String get button => 'Create account';
+	@override String get migrateButton => 'Protect data';
+	@override String get working => 'Protecting…';
+}
+
+// Path: auth.reset
+class _Translations$auth$reset$en extends Translations$auth$reset$es {
+	_Translations$auth$reset$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Delete all data';
+	@override String get warning => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.';
+	@override String get confirmPhrase => 'DELETE';
+	@override String confirmHint({required Object phrase}) => 'Type ${phrase} to confirm';
+	@override String get button => 'Delete everything';
+}
+
+// Path: auth.keyError
+class _Translations$auth$keyError$en extends Translations$auth$keyError$es {
+	_Translations$auth$keyError$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Could not access the system keychain';
+	@override String get retry => 'Retry';
+}
+
 // Path: settings.notif
 class _Translations$settings$notif$en extends Translations$settings$notif$es {
 	_Translations$settings$notif$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -557,6 +633,32 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Program',
+			'auth.unlock.title' => 'Unlock',
+			'auth.unlock.subtitle' => 'Enter your local password to open your encrypted data.',
+			'auth.unlock.password' => 'Password',
+			'auth.unlock.button' => 'Unlock',
+			'auth.unlock.working' => 'Decrypting…',
+			'auth.unlock.wrongPassword' => 'Wrong password.',
+			'auth.unlock.forgot' => 'Forgot your password?',
+			'auth.create.title' => 'Create your local account',
+			'auth.create.subtitle' => 'Your data is stored encrypted on this device. This password protects the encryption key.',
+			'auth.create.migrateTitle' => 'Protect your data',
+			'auth.create.migrateSubtitle' => 'This version adds a local account: create a password to protect the data already on this device.',
+			'auth.create.password' => 'Password',
+			'auth.create.confirm' => 'Confirm password',
+			'auth.create.tooShort' => 'The password must be at least 8 characters long.',
+			'auth.create.mismatch' => 'The passwords don\'t match.',
+			'auth.create.noRecoveryWarning' => 'If you forget your password there will be no way to recover your data. Keep it somewhere safe.',
+			'auth.create.button' => 'Create account',
+			'auth.create.migrateButton' => 'Protect data',
+			'auth.create.working' => 'Protecting…',
+			'auth.reset.title' => 'Delete all data',
+			'auth.reset.warning' => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.',
+			'auth.reset.confirmPhrase' => 'DELETE',
+			'auth.reset.confirmHint' => ({required Object phrase}) => 'Type ${phrase} to confirm',
+			'auth.reset.button' => 'Delete everything',
+			'auth.keyError.title' => 'Could not access the system keychain',
+			'auth.keyError.retry' => 'Retry',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',

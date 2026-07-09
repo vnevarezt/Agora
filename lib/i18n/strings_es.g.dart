@@ -41,6 +41,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	// Translations
 	late final Translations$app$es app = Translations$app$es.internal(_root);
+	late final Translations$auth$es auth = Translations$auth$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
 	late final Translations$sync$es sync = Translations$sync$es.internal(_root);
@@ -80,6 +81,19 @@ class Translations$app$es {
 
 	/// es: 'Programa'
 	String get defaultProjectName => 'Programa';
+}
+
+// Path: auth
+class Translations$auth$es {
+	Translations$auth$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$auth$unlock$es unlock = Translations$auth$unlock$es.internal(_root);
+	late final Translations$auth$create$es create = Translations$auth$create$es.internal(_root);
+	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
+	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
 }
 
 // Path: nav
@@ -990,6 +1004,120 @@ class Translations$relativeTime$es {
 	String get now => 'ahora mismo';
 }
 
+// Path: auth.unlock
+class Translations$auth$unlock$es {
+	Translations$auth$unlock$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Desbloquear'
+	String get title => 'Desbloquear';
+
+	/// es: 'Introduce tu contraseña local para abrir tus datos cifrados.'
+	String get subtitle => 'Introduce tu contraseña local para abrir tus datos cifrados.';
+
+	/// es: 'Contraseña'
+	String get password => 'Contraseña';
+
+	/// es: 'Desbloquear'
+	String get button => 'Desbloquear';
+
+	/// es: 'Descifrando…'
+	String get working => 'Descifrando…';
+
+	/// es: 'Contraseña incorrecta.'
+	String get wrongPassword => 'Contraseña incorrecta.';
+
+	/// es: '¿Olvidaste tu contraseña?'
+	String get forgot => '¿Olvidaste tu contraseña?';
+}
+
+// Path: auth.create
+class Translations$auth$create$es {
+	Translations$auth$create$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Crea tu cuenta local'
+	String get title => 'Crea tu cuenta local';
+
+	/// es: 'Tus datos se guardan cifrados en este dispositivo. Esta contraseña protege la llave de cifrado.'
+	String get subtitle => 'Tus datos se guardan cifrados en este dispositivo. Esta contraseña protege la llave de cifrado.';
+
+	/// es: 'Protege tus datos'
+	String get migrateTitle => 'Protege tus datos';
+
+	/// es: 'Esta versión añade una cuenta local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.'
+	String get migrateSubtitle => 'Esta versión añade una cuenta local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.';
+
+	/// es: 'Contraseña'
+	String get password => 'Contraseña';
+
+	/// es: 'Confirmar contraseña'
+	String get confirm => 'Confirmar contraseña';
+
+	/// es: 'La contraseña debe tener al menos 8 caracteres.'
+	String get tooShort => 'La contraseña debe tener al menos 8 caracteres.';
+
+	/// es: 'Las contraseñas no coinciden.'
+	String get mismatch => 'Las contraseñas no coinciden.';
+
+	/// es: 'Si olvidas tu contraseña no habrá forma de recuperar tus datos. Guárdala en un lugar seguro.'
+	String get noRecoveryWarning => 'Si olvidas tu contraseña no habrá forma de recuperar tus datos. Guárdala en un lugar seguro.';
+
+	/// es: 'Crear cuenta'
+	String get button => 'Crear cuenta';
+
+	/// es: 'Proteger datos'
+	String get migrateButton => 'Proteger datos';
+
+	/// es: 'Protegiendo…'
+	String get working => 'Protegiendo…';
+}
+
+// Path: auth.reset
+class Translations$auth$reset$es {
+	Translations$auth$reset$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Borrar todos los datos'
+	String get title => 'Borrar todos los datos';
+
+	/// es: 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.'
+	String get warning => 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.';
+
+	/// es: 'BORRAR'
+	String get confirmPhrase => 'BORRAR';
+
+	/// es: 'Escribe {phrase} para confirmar'
+	String confirmHint({required Object phrase}) => 'Escribe ${phrase} para confirmar';
+
+	/// es: 'Borrar todo'
+	String get button => 'Borrar todo';
+}
+
+// Path: auth.keyError
+class Translations$auth$keyError$es {
+	Translations$auth$keyError$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'No se pudo acceder al llavero del sistema'
+	String get title => 'No se pudo acceder al llavero del sistema';
+
+	/// es: 'Reintentar'
+	String get retry => 'Reintentar';
+}
+
 // Path: settings.notif
 class Translations$settings$notif$es {
 	Translations$settings$notif$es.internal(this._root);
@@ -1033,6 +1161,32 @@ extension on Translations {
 		return switch (path) {
 			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Programa',
+			'auth.unlock.title' => 'Desbloquear',
+			'auth.unlock.subtitle' => 'Introduce tu contraseña local para abrir tus datos cifrados.',
+			'auth.unlock.password' => 'Contraseña',
+			'auth.unlock.button' => 'Desbloquear',
+			'auth.unlock.working' => 'Descifrando…',
+			'auth.unlock.wrongPassword' => 'Contraseña incorrecta.',
+			'auth.unlock.forgot' => '¿Olvidaste tu contraseña?',
+			'auth.create.title' => 'Crea tu cuenta local',
+			'auth.create.subtitle' => 'Tus datos se guardan cifrados en este dispositivo. Esta contraseña protege la llave de cifrado.',
+			'auth.create.migrateTitle' => 'Protege tus datos',
+			'auth.create.migrateSubtitle' => 'Esta versión añade una cuenta local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.',
+			'auth.create.password' => 'Contraseña',
+			'auth.create.confirm' => 'Confirmar contraseña',
+			'auth.create.tooShort' => 'La contraseña debe tener al menos 8 caracteres.',
+			'auth.create.mismatch' => 'Las contraseñas no coinciden.',
+			'auth.create.noRecoveryWarning' => 'Si olvidas tu contraseña no habrá forma de recuperar tus datos. Guárdala en un lugar seguro.',
+			'auth.create.button' => 'Crear cuenta',
+			'auth.create.migrateButton' => 'Proteger datos',
+			'auth.create.working' => 'Protegiendo…',
+			'auth.reset.title' => 'Borrar todos los datos',
+			'auth.reset.warning' => 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.',
+			'auth.reset.confirmPhrase' => 'BORRAR',
+			'auth.reset.confirmHint' => ({required Object phrase}) => 'Escribe ${phrase} para confirmar',
+			'auth.reset.button' => 'Borrar todo',
+			'auth.keyError.title' => 'No se pudo acceder al llavero del sistema',
+			'auth.keyError.retry' => 'Reintentar',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',

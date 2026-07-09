@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'i18n/strings.g.dart';
 import 'state/mwb_sync.dart';
 import 'state/ui_state.dart';
+import 'ui/auth/auth_gate.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/tokens.dart';
@@ -23,7 +24,9 @@ class JwProgramApp extends ConsumerWidget {
       theme: buildAppTheme(pizarra.light, Brightness.light),
       darkTheme: buildAppTheme(pizarra.dark, Brightness.dark),
       themeMode: ref.watch(themeModeProvider),
-      home: const _SyncBootstrap(child: AppShell()),
+      // Nothing DB-related builds until AuthGate unlocks (see dbProvider's
+      // invariant); the background sync also waits behind it.
+      home: const AuthGate(child: _SyncBootstrap(child: AppShell())),
     );
   }
 }
