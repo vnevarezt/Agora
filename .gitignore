@@ -1,3 +1,7 @@
 .DS_Store
 *.png
 ~
+
+# Claude Code
+.claude/
+CLAUDE.md
