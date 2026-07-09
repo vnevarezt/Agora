@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_modal.dart';
+import '../widgets/bound_text_field.dart';
+import '../widgets/modal_shell.dart';
 import '../widgets/mini_chip.dart';
 import 'part_presentation.dart';
 import 'slot_field.dart';
@@ -104,14 +109,16 @@ class _FixedLineBody extends StatelessWidget {
 }
 
 /// Card with a chip header, title and assignment slots.
-class _RoleBody extends StatelessWidget {
+class _RoleBody extends ConsumerWidget {
   const _RoleBody({required this.view});
 
   final PartView view;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
+    // The chairman card has no real row id, so its title isn't editable.
+    final editable = view.id != 'presidente';
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
       child: Column(
@@ -133,14 +140,27 @@ class _RoleBody extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 9),
-          Text(
-            view.title,
-            style: TextStyle(
-              fontSize: 14.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.15,
-              color: t.text,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  view.title,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.15,
+                    color: t.text,
+                  ),
+                ),
+              ),
+              if (editable) ...[
+                const SizedBox(width: 8),
+                _EditTitleButton(
+                  onTap: () => _showEditTitleDialog(context, ref, view),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 11),
           _Slots(slots: view.slots),
@@ -148,6 +168,75 @@ class _RoleBody extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Small pencil button to rename an assignment's title.
+class _EditTitleButton extends StatelessWidget {
+  const _EditTitleButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Pressable(
+      onTap: onTap,
+      builder: (context, hovered, _) => Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: hovered ? t.surface2 : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Tooltip(
+          message: context.t.workspace.editTitle,
+          child: Icon(Icons.edit_outlined,
+              size: 15, color: hovered ? t.accentStrong : t.textMute),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opens a compact dialog to edit (or restore) the assignment's title.
+void _showEditTitleDialog(BuildContext context, WidgetRef ref, PartView view) {
+  var text = view.title;
+  final hasOverride =
+      ref.read(formProvider).titleOverrides.containsKey(view.id);
+  showAppModal<void>(
+    context,
+    maxWidth: 420,
+    builder: (ctx, sheet, close) => ModalShell(
+      sheet: sheet,
+      onClose: close,
+      title: ctx.t.workspace.editTitle,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: BoundTextField(
+          initial: view.title,
+          label: ctx.t.workspace.editTitleHint,
+          maxLines: 2,
+          maxLength: 140,
+          onChanged: (v) => text = v,
+          onSubmitted: (v) {
+            ref.read(formProvider.notifier).setTitleOverride(view.id, v);
+            close();
+          },
+        ),
+      ),
+      primaryLabel: ctx.t.common.saveChanges,
+      onPrimary: () {
+        ref.read(formProvider.notifier).setTitleOverride(view.id, text);
+        close();
+      },
+      dangerLabel: ctx.t.workspace.restoreTitle,
+      onDanger: hasOverride
+          ? () {
+              ref.read(formProvider.notifier).setTitleOverride(view.id, null);
+              close();
+            }
+          : null,
+    ),
+  );
 }
 
 /// Slots in a row (sharing the width); on very narrow widths (≤460 in the

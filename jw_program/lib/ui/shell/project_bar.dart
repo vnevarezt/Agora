@@ -414,6 +414,8 @@ class _WeekMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final auxRoom = ref.watch(formProvider.select((f) => f.auxRoom));
+    final coByWeek =
+        ref.watch(formProvider.select((f) => f.circuitOverseerByWeek));
     final progressList = ref.watch(progressPerWeekProvider);
 
     return Container(
@@ -536,6 +538,11 @@ class _WeekMenu extends ConsumerWidget {
             auxRoom: auxRoom,
             onChanged: (v) => ref.read(formProvider.notifier).setAuxRoom(v),
           ),
+          _CircuitOverseerToggle(
+            active: coByWeek[active] ?? false,
+            onChanged: (v) =>
+                ref.read(formProvider.notifier).setCircuitOverseer(active, v),
+          ),
         ],
       ),
     );
@@ -584,6 +591,59 @@ class _AuxToggle extends StatelessWidget {
             Transform.scale(
               scale: 0.8,
               child: Switch(value: auxRoom, onChanged: onChanged),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Circuit overseer visit" toggle for the active week (footer of the week
+/// menu, below [_AuxToggle]). When on, the Congregation Bible Study is replaced
+/// by the overseer's talk. Mirrors [_AuxToggle].
+class _CircuitOverseerToggle extends StatelessWidget {
+  const _CircuitOverseerToggle({required this.active, required this.onChanged});
+
+  final bool active;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Pressable(
+      onTap: () => onChanged(!active),
+      builder: (context, hovered, _) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: hovered ? t.surface2 : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.record_voice_over_outlined,
+                size: 16, color: active ? t.accentStrong : t.textMute),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(context.t.projectBar.circuitOverseer,
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: t.text)),
+                  Text(context.t.projectBar.circuitOverseerDesc,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: t.textMute)),
+                ],
+              ),
+            ),
+            Transform.scale(
+              scale: 0.8,
+              child: Switch(value: active, onChanged: onChanged),
             ),
           ],
         ),

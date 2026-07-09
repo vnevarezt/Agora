@@ -62,9 +62,19 @@ ProgramRow _row(String id, Section section, int t, Part p) {
   );
 }
 
+/// Default title for the talk that replaces the Congregation Bible Study on a
+/// circuit overseer's visit. Stays in the meeting language, like the other
+/// fixed titles built here ("Palabras de introducción", "Canción N").
+const String circuitOverseerTalkTitle =
+    'Discurso del superintendente de circuito';
+
 /// Builds the schedule honoring the total duration, the fixed 15 min of the
 /// ministry section and the one-minute counsel after each student assignment.
-ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
+///
+/// When [circuitOverseer] is true, the Congregation Bible Study is replaced by
+/// the overseer's talk: a single speaker ("Orador:") keeping the same slot.
+ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
+    {bool circuitOverseer = false}) {
   final parts = week.parts;
   final treasures = parts.where((p) => p.section == Section.treasures).toList();
   final ministry = parts.where((p) => p.section == Section.ministry).toList();
@@ -84,8 +94,15 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
       treasures.fold<int>(0, (s, p) => s + (p.minutes ?? 0)) + adviceMinutes;
   final lifeNoCbsSum = lifeNoCbs.fold<int>(0, (s, p) => s + (p.minutes ?? 0));
   final cbsMinutes = (cbs?.minutes ?? 30);
-  final fixed =
-      intro + treasuresBlock + ministryMinutes + lifeNoCbsSum + cbsMinutes + concl;
+  // On a circuit overseer visit the meeting ends with the overseer's talk, so
+  // there are no concluding comments: that time is freed back into the slack.
+  final conclBlock = circuitOverseer ? 0 : concl;
+  final fixed = intro +
+      treasuresBlock +
+      ministryMinutes +
+      lifeNoCbsSum +
+      cbsMinutes +
+      conclBlock;
   final slack = (duration - fixed) > 9 ? (duration - fixed) : 9;
   final sOpen = slack ~/ 3;
   final sMid = slack ~/ 3;
@@ -150,19 +167,33 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
     t += (p.minutes ?? 0);
   }
   if (cbs != null) {
-    lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, cbs));
+    if (circuitOverseer) {
+      // Circuit overseer visit: the CBS becomes the overseer's talk (1 speaker).
+      lifeRows.add(ProgramRow(
+        id: 'vi${lifeRows.length}',
+        time: hhmm(t),
+        content: '$circuitOverseerTalkTitle ($cbsMinutes mins.)',
+        role: 'Orador:',
+        slots: 1,
+      ));
+    } else {
+      lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, cbs));
+    }
     t += cbsMinutes;
   }
 
   // --- Conclusion and closing song ---
-  lifeRows.add(ProgramRow(
-    id: 'vi${lifeRows.length}',
-    time: hhmm(t),
-    content: 'Palabras de conclusión ($concl min.)',
-    bullet: true,
-    slots: 0,
-  ));
-  t += concl;
+  // Skipped on a circuit overseer visit (the meeting closes with his talk).
+  if (!circuitOverseer) {
+    lifeRows.add(ProgramRow(
+      id: 'vi${lifeRows.length}',
+      time: hhmm(t),
+      content: 'Palabras de conclusión ($concl min.)',
+      bullet: true,
+      slots: 0,
+    ));
+    t += concl;
+  }
   if (week.closingSong != null) {
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
@@ -180,5 +211,32 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration) {
     ministry: ministryRows,
     christianLife: lifeRows,
     actualMinutes: t - startMinutes,
+  );
+}
+
+final _titleDurationSuffix = RegExp(r'\s*\(\d+\s*mins?\.\)$');
+
+/// Replaces a row's title with the user override (keyed by `ProgramRow.id`)
+/// while keeping its "(N mins.)" suffix, so the duration chip and the PDF stay
+/// in sync. Returns [schedule] unchanged when there are no overrides.
+ProgramSchedule applyTitleOverrides(
+    ProgramSchedule schedule, Map<String, String> overrides) {
+  if (overrides.isEmpty) return schedule;
+  List<ProgramRow> mapped(List<ProgramRow> rows) => [
+        for (final r in rows)
+          if (overrides.containsKey(r.id))
+            r.copyWith(
+              content: overrides[r.id]! +
+                  (_titleDurationSuffix.firstMatch(r.content)?.group(0) ?? ''),
+            )
+          else
+            r,
+      ];
+  return ProgramSchedule(
+    opening: mapped(schedule.opening),
+    treasures: mapped(schedule.treasures),
+    ministry: mapped(schedule.ministry),
+    christianLife: mapped(schedule.christianLife),
+    actualMinutes: schedule.actualMinutes,
   );
 }

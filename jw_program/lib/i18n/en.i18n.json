@@ -263,7 +263,9 @@
     "goToWeek": "Go to week",
     "weekShort": "Wk {n}",
     "auxRoom": "Auxiliary classroom",
-    "auxRoomDesc": "Second classroom for students"
+    "auxRoomDesc": "Second classroom for students",
+    "circuitOverseer": "Circuit overseer visit",
+    "circuitOverseerDesc": "Replaces the Bible study with a talk"
   },
   "workspace": {
     "sectionOpening": "Opening",
@@ -286,7 +288,11 @@
     "slotStudent": "Student",
     "slotAssistant": "Assistant",
     "slotInCharge": "In charge",
-    "slotAux": "{label} · Aux."
+    "slotSpeaker": "Speaker",
+    "slotAux": "{label} · Aux.",
+    "editTitle": "Edit title",
+    "editTitleHint": "Assignment title",
+    "restoreTitle": "Reset"
   },
   "relativeTime": {
     "now": "just now"

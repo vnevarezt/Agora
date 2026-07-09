@@ -482,6 +482,8 @@ class _Translations$projectBar$en extends Translations$projectBar$es {
 	@override String weekShort({required Object n}) => 'Wk ${n}';
 	@override String get auxRoom => 'Auxiliary classroom';
 	@override String get auxRoomDesc => 'Second classroom for students';
+	@override String get circuitOverseer => 'Circuit overseer visit';
+	@override String get circuitOverseerDesc => 'Replaces the Bible study with a talk';
 }
 
 // Path: workspace
@@ -511,7 +513,11 @@ class _Translations$workspace$en extends Translations$workspace$es {
 	@override String get slotStudent => 'Student';
 	@override String get slotAssistant => 'Assistant';
 	@override String get slotInCharge => 'In charge';
+	@override String get slotSpeaker => 'Speaker';
 	@override String slotAux({required Object label}) => '${label} · Aux.';
+	@override String get editTitle => 'Edit title';
+	@override String get editTitleHint => 'Assignment title';
+	@override String get restoreTitle => 'Reset';
 }
 
 // Path: relativeTime
@@ -758,6 +764,8 @@ extension on TranslationsEn {
 			'projectBar.weekShort' => ({required Object n}) => 'Wk ${n}',
 			'projectBar.auxRoom' => 'Auxiliary classroom',
 			'projectBar.auxRoomDesc' => 'Second classroom for students',
+			'projectBar.circuitOverseer' => 'Circuit overseer visit',
+			'projectBar.circuitOverseerDesc' => 'Replaces the Bible study with a talk',
 			'workspace.sectionOpening' => 'Opening',
 			'workspace.sectionTreasures' => 'Treasures From God\'s Word',
 			'workspace.sectionMinistry' => 'Apply Yourself to the Field Ministry',
@@ -778,7 +786,11 @@ extension on TranslationsEn {
 			'workspace.slotStudent' => 'Student',
 			'workspace.slotAssistant' => 'Assistant',
 			'workspace.slotInCharge' => 'In charge',
+			'workspace.slotSpeaker' => 'Speaker',
 			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
+			'workspace.editTitle' => 'Edit title',
+			'workspace.editTitleHint' => 'Assignment title',
+			'workspace.restoreTitle' => 'Reset',
 			'relativeTime.now' => 'just now',
 			_ => null,
 		};

@@ -22,6 +22,14 @@ class FormModel {
   final Map<int, Map<String, List<String>>> mainByWeek;
   final Map<int, Map<String, List<String>>> auxByWeek;
 
+  /// Per-week "circuit overseer visit" flag: replaces the Congregation Bible
+  /// Study with the overseer's talk.
+  final Map<int, bool> circuitOverseerByWeek;
+
+  /// Per-week title overrides, keyed by `ProgramRow.id`. Lets the user rename
+  /// any assignment's title (e.g. the overseer's talk, unknown in advance).
+  final Map<int, Map<String, String>> titleOverridesByWeek;
+
   const FormModel({
     required this.issue,
     required this.congregationId,
@@ -32,6 +40,8 @@ class FormModel {
     this.chairmanByWeek = const {},
     this.mainByWeek = const {},
     this.auxByWeek = const {},
+    this.circuitOverseerByWeek = const {},
+    this.titleOverridesByWeek = const {},
   });
 
   static const initial = FormModel(
@@ -47,6 +57,9 @@ class FormModel {
   String get chairman => chairmanByWeek[weekIndex] ?? '';
   Map<String, List<String>> get main => mainByWeek[weekIndex] ?? const {};
   Map<String, List<String>> get auxiliary => auxByWeek[weekIndex] ?? const {};
+  bool get circuitOverseer => circuitOverseerByWeek[weekIndex] ?? false;
+  Map<String, String> get titleOverrides =>
+      titleOverridesByWeek[weekIndex] ?? const {};
 
   /// Start time in minutes from midnight (falls back to 18:00 if invalid).
   int get startMinutes {
@@ -71,6 +84,8 @@ class FormModel {
     String? chairman,
     Map<String, List<String>>? main,
     Map<String, List<String>>? auxiliary,
+    Map<int, bool>? circuitOverseerByWeek,
+    Map<String, String>? titleOverrides,
   }) {
     final idx = weekIndex ?? this.weekIndex;
     return FormModel(
@@ -86,6 +101,11 @@ class FormModel {
       mainByWeek: main == null ? mainByWeek : {...mainByWeek, idx: main},
       auxByWeek:
           auxiliary == null ? auxByWeek : {...auxByWeek, idx: auxiliary},
+      circuitOverseerByWeek:
+          circuitOverseerByWeek ?? this.circuitOverseerByWeek,
+      titleOverridesByWeek: titleOverrides == null
+          ? titleOverridesByWeek
+          : {...titleOverridesByWeek, idx: titleOverrides},
     );
   }
 }
@@ -104,6 +124,24 @@ class FormController extends Notifier<FormModel> {
   void setDuration(int v) => state = state.copyWith(duration: v);
   void setChairman(String v) => state = state.copyWith(chairman: v);
   void setAuxRoom(bool v) => state = state.copyWith(auxRoom: v);
+  /// Marks (or clears) the circuit overseer visit for the given [week] index.
+  void setCircuitOverseer(int week, bool v) {
+    state = state.copyWith(
+      circuitOverseerByWeek: {...state.circuitOverseerByWeek, week: v},
+    );
+  }
+
+  /// Sets or clears the title override for [rowId] in the active week. An empty
+  /// or null title removes the override (back to the default title).
+  void setTitleOverride(String rowId, String? title) {
+    final next = {...state.titleOverrides};
+    if (title == null || title.trim().isEmpty) {
+      next.remove(rowId);
+    } else {
+      next[rowId] = title.trim();
+    }
+    state = state.copyWith(titleOverrides: next);
+  }
 
   /// Switches week while preserving each week's assignments.
   void selectWeek(int idx) => state = state.copyWith(weekIndex: idx);
@@ -130,10 +168,13 @@ final currentWeekProvider = Provider<Week?>((ref) {
 final scheduleProvider = Provider<ProgramSchedule?>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return null;
-  final sel = ref.watch(
-      formProvider.select((f) => (f.weekIndex, f.startMinutes, f.duration)));
+  final sel = ref.watch(formProvider.select((f) =>
+      (f.weekIndex, f.startMinutes, f.duration, f.circuitOverseer)));
+  final overrides = ref.watch(formProvider.select((f) => f.titleOverrides));
   final week = weeks[sel.$1.clamp(0, weeks.length - 1)];
-  return buildSchedule(week, sel.$2, sel.$3);
+  final schedule =
+      buildSchedule(week, sel.$2, sel.$3, circuitOverseer: sel.$4);
+  return applyTitleOverrides(schedule, overrides);
 });
 
 /// Names as the PDF consumes them (derived from the form).

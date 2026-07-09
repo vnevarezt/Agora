@@ -886,6 +886,12 @@ class Translations$projectBar$es {
 
 	/// es: 'Segunda sala para estudiantes'
 	String get auxRoomDesc => 'Segunda sala para estudiantes';
+
+	/// es: 'Visita del superintendente'
+	String get circuitOverseer => 'Visita del superintendente';
+
+	/// es: 'Reemplaza el estudio bíblico por un discurso'
+	String get circuitOverseerDesc => 'Reemplaza el estudio bíblico por un discurso';
 }
 
 // Path: workspace
@@ -956,8 +962,20 @@ class Translations$workspace$es {
 	/// es: 'Encargado'
 	String get slotInCharge => 'Encargado';
 
+	/// es: 'Orador'
+	String get slotSpeaker => 'Orador';
+
 	/// es: '{label} · Aux.'
 	String slotAux({required Object label}) => '${label} · Aux.';
+
+	/// es: 'Editar título'
+	String get editTitle => 'Editar título';
+
+	/// es: 'Título de la asignación'
+	String get editTitleHint => 'Título de la asignación';
+
+	/// es: 'Restablecer'
+	String get restoreTitle => 'Restablecer';
 }
 
 // Path: relativeTime
@@ -1222,6 +1240,8 @@ extension on Translations {
 			'projectBar.weekShort' => ({required Object n}) => 'Sem ${n}',
 			'projectBar.auxRoom' => 'Sala auxiliar',
 			'projectBar.auxRoomDesc' => 'Segunda sala para estudiantes',
+			'projectBar.circuitOverseer' => 'Visita del superintendente',
+			'projectBar.circuitOverseerDesc' => 'Reemplaza el estudio bíblico por un discurso',
 			'workspace.sectionOpening' => 'Apertura',
 			'workspace.sectionTreasures' => 'Tesoros de la Biblia',
 			'workspace.sectionMinistry' => 'Seamos mejores maestros',
@@ -1242,7 +1262,11 @@ extension on Translations {
 			'workspace.slotStudent' => 'Estudiante',
 			'workspace.slotAssistant' => 'Ayudante',
 			'workspace.slotInCharge' => 'Encargado',
+			'workspace.slotSpeaker' => 'Orador',
 			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
+			'workspace.editTitle' => 'Editar título',
+			'workspace.editTitleHint' => 'Título de la asignación',
+			'workspace.restoreTitle' => 'Restablecer',
 			'relativeTime.now' => 'ahora mismo',
 			_ => null,
 		};

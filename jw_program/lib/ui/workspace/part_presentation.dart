@@ -77,6 +77,7 @@ List<String> _labelsForRole(ProgramRow row) {
         ? [t.workspace.slotConductor, t.workspace.slotReader]
         : [t.workspace.slotStudent, t.workspace.slotAssistant];
   }
+  if (row.role == 'Orador:') return [t.workspace.slotSpeaker];
   return [
     row.role.isNotEmpty ? row.role.replaceAll(':', '') : t.workspace.slotInCharge
   ];

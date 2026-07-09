@@ -38,6 +38,28 @@ class ProgramRow {
     this.bullet = false,
     this.auxEligible = false,
   });
+
+  ProgramRow copyWith({
+    String? id,
+    String? time,
+    String? content,
+    String? role,
+    int? slots,
+    int? auxSlots,
+    bool? bullet,
+    bool? auxEligible,
+  }) {
+    return ProgramRow(
+      id: id ?? this.id,
+      time: time ?? this.time,
+      content: content ?? this.content,
+      role: role ?? this.role,
+      slots: slots ?? this.slots,
+      auxSlots: auxSlots ?? this.auxSlots,
+      bullet: bullet ?? this.bullet,
+      auxEligible: auxEligible ?? this.auxEligible,
+    );
+  }
 }
 
 /// Rows computed per block + the meeting's actual duration.

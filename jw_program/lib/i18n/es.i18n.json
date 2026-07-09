@@ -263,7 +263,9 @@
     "goToWeek": "Ir a la semana",
     "weekShort": "Sem {n}",
     "auxRoom": "Sala auxiliar",
-    "auxRoomDesc": "Segunda sala para estudiantes"
+    "auxRoomDesc": "Segunda sala para estudiantes",
+    "circuitOverseer": "Visita del superintendente",
+    "circuitOverseerDesc": "Reemplaza el estudio bíblico por un discurso"
   },
   "workspace": {
     "sectionOpening": "Apertura",
@@ -286,7 +288,11 @@
     "slotStudent": "Estudiante",
     "slotAssistant": "Ayudante",
     "slotInCharge": "Encargado",
-    "slotAux": "{label} · Aux."
+    "slotSpeaker": "Orador",
+    "slotAux": "{label} · Aux.",
+    "editTitle": "Editar título",
+    "editTitleHint": "Título de la asignación",
+    "restoreTitle": "Restablecer"
   },
   "relativeTime": {
     "now": "ahora mismo"
