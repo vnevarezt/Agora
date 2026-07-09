@@ -8,7 +8,7 @@
 PRODUCT_NAME = jw_program
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.vicentcodes.jwProgram
+PRODUCT_BUNDLE_IDENTIFIER = com.vnevarezt.agora
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.vicentcodes. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.vnevarezt. All rights reserved.

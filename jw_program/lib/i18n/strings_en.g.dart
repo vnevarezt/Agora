@@ -73,7 +73,7 @@ class _Translations$app$en extends Translations$app$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get brand => 'Program';
+	@override String get brand => 'Agora';
 	@override String get defaultProjectName => 'Program';
 }
 
@@ -555,7 +555,7 @@ class _Translations$settings$notif$en extends Translations$settings$notif$es {
 extension on TranslationsEn {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.brand' => 'Program',
+			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Program',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',

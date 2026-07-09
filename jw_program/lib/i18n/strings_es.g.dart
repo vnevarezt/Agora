@@ -75,8 +75,8 @@ class Translations$app$es {
 
 	// Translations
 
-	/// es: 'Programa'
-	String get brand => 'Programa';
+	/// es: 'Agora'
+	String get brand => 'Agora';
 
 	/// es: 'Programa'
 	String get defaultProjectName => 'Programa';
@@ -1031,7 +1031,7 @@ class Translations$settings$notif$es {
 extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.brand' => 'Programa',
+			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Programa',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',

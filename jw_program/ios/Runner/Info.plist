@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Jw Program</string>
+	<string>Agora</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -70,7 +70,7 @@
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.vicentcodes.jwprogram.jwpp</string>
+			<string>com.vnevarezt.agora.jwpp</string>
 			<key>UTTypeDescription</key>
 			<string>JW Program Participantes</string>
 			<key>UTTypeConformsTo</key>

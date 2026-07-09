@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.vicentcodes" "\0"
-            VALUE "FileDescription", "jw_program" "\0"
+            VALUE "CompanyName", "com.vnevarezt" "\0"
+            VALUE "FileDescription", "Agora" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "jw_program" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.vicentcodes. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.vnevarezt. All rights reserved." "\0"
             VALUE "OriginalFilename", "jw_program.exe" "\0"
-            VALUE "ProductName", "jw_program" "\0"
+            VALUE "ProductName", "Agora" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

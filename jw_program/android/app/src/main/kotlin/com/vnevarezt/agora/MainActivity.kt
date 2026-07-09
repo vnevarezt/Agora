@@ -1,4 +1,4 @@
-package com.vicentcodes.jw_program
+package com.vnevarezt.agora
 
 import io.flutter.embedding.android.FlutterActivity
 
