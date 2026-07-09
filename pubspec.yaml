@@ -55,6 +55,9 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_localizations:
     sdk: flutter
+  firebase_core: ^4.11.0
+  firebase_auth: ^6.5.4
+  google_sign_in: ^7.2.0
 
 # Selecciona la variante cifrada de sqlite3 (SQLite3MultipleCiphers) que
 # compila el hook nativo de package:sqlite3. PRAGMA key como en SQLCipher.
