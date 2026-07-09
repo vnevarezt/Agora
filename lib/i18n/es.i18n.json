@@ -39,6 +39,21 @@
       "retry": "Reintentar"
     }
   },
+  "security": {
+    "title": "Seguridad",
+    "desc": "Cuenta local que protege tus datos cifrados en este dispositivo.",
+    "changePassword": "Cambiar contraseña",
+    "changePasswordDesc": "Vuelve a proteger la llave de cifrado con una contraseña nueva.",
+    "change": "Cambiar",
+    "current": "Contraseña actual",
+    "newPassword": "Contraseña nueva",
+    "confirmNew": "Confirmar contraseña nueva",
+    "wrongCurrent": "La contraseña actual no es correcta.",
+    "changed": "Contraseña actualizada.",
+    "lockNow": "Bloquear ahora",
+    "lockNowDesc": "Cierra la sesión local; pedirá la contraseña al volver.",
+    "lock": "Bloquear"
+  },
   "nav": {
     "home": "Inicio",
     "participants": "Participantes",

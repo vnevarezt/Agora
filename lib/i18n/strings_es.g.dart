@@ -42,6 +42,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	// Translations
 	late final Translations$app$es app = Translations$app$es.internal(_root);
 	late final Translations$auth$es auth = Translations$auth$es.internal(_root);
+	late final Translations$security$es security = Translations$security$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
 	late final Translations$sync$es sync = Translations$sync$es.internal(_root);
@@ -94,6 +95,54 @@ class Translations$auth$es {
 	late final Translations$auth$create$es create = Translations$auth$create$es.internal(_root);
 	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
 	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
+}
+
+// Path: security
+class Translations$security$es {
+	Translations$security$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Seguridad'
+	String get title => 'Seguridad';
+
+	/// es: 'Cuenta local que protege tus datos cifrados en este dispositivo.'
+	String get desc => 'Cuenta local que protege tus datos cifrados en este dispositivo.';
+
+	/// es: 'Cambiar contraseña'
+	String get changePassword => 'Cambiar contraseña';
+
+	/// es: 'Vuelve a proteger la llave de cifrado con una contraseña nueva.'
+	String get changePasswordDesc => 'Vuelve a proteger la llave de cifrado con una contraseña nueva.';
+
+	/// es: 'Cambiar'
+	String get change => 'Cambiar';
+
+	/// es: 'Contraseña actual'
+	String get current => 'Contraseña actual';
+
+	/// es: 'Contraseña nueva'
+	String get newPassword => 'Contraseña nueva';
+
+	/// es: 'Confirmar contraseña nueva'
+	String get confirmNew => 'Confirmar contraseña nueva';
+
+	/// es: 'La contraseña actual no es correcta.'
+	String get wrongCurrent => 'La contraseña actual no es correcta.';
+
+	/// es: 'Contraseña actualizada.'
+	String get changed => 'Contraseña actualizada.';
+
+	/// es: 'Bloquear ahora'
+	String get lockNow => 'Bloquear ahora';
+
+	/// es: 'Cierra la sesión local; pedirá la contraseña al volver.'
+	String get lockNowDesc => 'Cierra la sesión local; pedirá la contraseña al volver.';
+
+	/// es: 'Bloquear'
+	String get lock => 'Bloquear';
 }
 
 // Path: nav
@@ -1187,6 +1236,19 @@ extension on Translations {
 			'auth.reset.button' => 'Borrar todo',
 			'auth.keyError.title' => 'No se pudo acceder al llavero del sistema',
 			'auth.keyError.retry' => 'Reintentar',
+			'security.title' => 'Seguridad',
+			'security.desc' => 'Cuenta local que protege tus datos cifrados en este dispositivo.',
+			'security.changePassword' => 'Cambiar contraseña',
+			'security.changePasswordDesc' => 'Vuelve a proteger la llave de cifrado con una contraseña nueva.',
+			'security.change' => 'Cambiar',
+			'security.current' => 'Contraseña actual',
+			'security.newPassword' => 'Contraseña nueva',
+			'security.confirmNew' => 'Confirmar contraseña nueva',
+			'security.wrongCurrent' => 'La contraseña actual no es correcta.',
+			'security.changed' => 'Contraseña actualizada.',
+			'security.lockNow' => 'Bloquear ahora',
+			'security.lockNowDesc' => 'Cierra la sesión local; pedirá la contraseña al volver.',
+			'security.lock' => 'Bloquear',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',

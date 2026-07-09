@@ -39,6 +39,21 @@
       "retry": "Retry"
     }
   },
+  "security": {
+    "title": "Security",
+    "desc": "Local account protecting your encrypted data on this device.",
+    "changePassword": "Change password",
+    "changePasswordDesc": "Re-protect the encryption key with a new password.",
+    "change": "Change",
+    "current": "Current password",
+    "newPassword": "New password",
+    "confirmNew": "Confirm new password",
+    "wrongCurrent": "The current password is not correct.",
+    "changed": "Password updated.",
+    "lockNow": "Lock now",
+    "lockNowDesc": "Closes the local session; the password will be required again.",
+    "lock": "Lock"
+  },
   "nav": {
     "home": "Home",
     "participants": "Participants",

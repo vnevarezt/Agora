@@ -41,6 +41,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	// Translations
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
+	@override late final _Translations$security$en security = _Translations$security$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$sync$en sync = _Translations$sync$en._(_root);
@@ -89,6 +90,28 @@ class _Translations$auth$en extends Translations$auth$es {
 	@override late final _Translations$auth$create$en create = _Translations$auth$create$en._(_root);
 	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
 	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
+}
+
+// Path: security
+class _Translations$security$en extends Translations$security$es {
+	_Translations$security$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Security';
+	@override String get desc => 'Local account protecting your encrypted data on this device.';
+	@override String get changePassword => 'Change password';
+	@override String get changePasswordDesc => 'Re-protect the encryption key with a new password.';
+	@override String get change => 'Change';
+	@override String get current => 'Current password';
+	@override String get newPassword => 'New password';
+	@override String get confirmNew => 'Confirm new password';
+	@override String get wrongCurrent => 'The current password is not correct.';
+	@override String get changed => 'Password updated.';
+	@override String get lockNow => 'Lock now';
+	@override String get lockNowDesc => 'Closes the local session; the password will be required again.';
+	@override String get lock => 'Lock';
 }
 
 // Path: nav
@@ -659,6 +682,19 @@ extension on TranslationsEn {
 			'auth.reset.button' => 'Delete everything',
 			'auth.keyError.title' => 'Could not access the system keychain',
 			'auth.keyError.retry' => 'Retry',
+			'security.title' => 'Security',
+			'security.desc' => 'Local account protecting your encrypted data on this device.',
+			'security.changePassword' => 'Change password',
+			'security.changePasswordDesc' => 'Re-protect the encryption key with a new password.',
+			'security.change' => 'Change',
+			'security.current' => 'Current password',
+			'security.newPassword' => 'New password',
+			'security.confirmNew' => 'Confirm new password',
+			'security.wrongCurrent' => 'The current password is not correct.',
+			'security.changed' => 'Password updated.',
+			'security.lockNow' => 'Lock now',
+			'security.lockNowDesc' => 'Closes the local session; the password will be required again.',
+			'security.lock' => 'Lock',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',

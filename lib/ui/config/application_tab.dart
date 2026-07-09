@@ -6,6 +6,7 @@ import '../../state/ui_state.dart';
 import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
+import 'security_card.dart';
 import 'settings_card.dart';
 
 // Decorative dropdown options (UI-only, not persisted). Getters so the labels
@@ -57,7 +58,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   Widget build(BuildContext context) {
     return SettingsColumns(
       left: [_appearance(), _general(), _notificationsCard()],
-      right: [_datos(), _sessionSection()],
+      right: [_datos(), const SecurityCard(), _sessionSection()],
     );
   }
 
