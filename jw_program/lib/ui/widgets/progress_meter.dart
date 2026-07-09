@@ -21,13 +21,19 @@ class ProgressMeter extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(child: ColoredBox(color: t.border2)),
-            FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: value.clamp(0, 1).toDouble(),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: t.accent,
-                  borderRadius: BorderRadius.circular(99),
+            // Positioned so the meter has a finite intrinsic width: a 0% bar
+            // (widthFactor 0) makes FractionallySizedBox report a non-finite
+            // intrinsic width, which crashes inside an IntrinsicWidth (e.g. the
+            // MenuAnchor overlay). Positioned children are skipped there.
+            Positioned.fill(
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: value.clamp(0, 1).toDouble(),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: t.accent,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
                 ),
               ),
             ),
