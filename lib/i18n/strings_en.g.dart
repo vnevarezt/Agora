@@ -42,6 +42,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$security$en security = _Translations$security$en._(_root);
+	@override late final _Translations$account$en account = _Translations$account$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$sync$en sync = _Translations$sync$en._(_root);
@@ -112,6 +113,31 @@ class _Translations$security$en extends Translations$security$es {
 	@override String get lockNow => 'Lock now';
 	@override String get lockNowDesc => 'Closes the local session; the password will be required again.';
 	@override String get lock => 'Lock';
+}
+
+// Path: account
+class _Translations$account$en extends Translations$account$es {
+	_Translations$account$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Cloud account';
+	@override String get desc => 'Optional identity for future sync. It does not replace the local password.';
+	@override String get notConfigured => 'Cloud not configured';
+	@override String get notConfiguredDesc => 'This install has no Firebase project: the app runs 100% locally.';
+	@override String get signIn => 'Sign in';
+	@override String get register => 'Create account';
+	@override String get google => 'Continue with Google';
+	@override String get or => 'or';
+	@override String get email => 'Email';
+	@override String get password => 'Password';
+	@override String get forgotPassword => 'Forgot your password?';
+	@override String get resetSent => 'We sent you a password reset email.';
+	@override String get signedInAs => 'Signed in';
+	@override String get signOut => 'Sign out';
+	@override String get localGateNote => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.';
+	@override late final _Translations$account$errors$en errors = _Translations$account$errors$en._(_root);
 }
 
 // Path: nav
@@ -629,6 +655,22 @@ class _Translations$auth$keyError$en extends Translations$auth$keyError$es {
 	@override String get retry => 'Retry';
 }
 
+// Path: account.errors
+class _Translations$account$errors$en extends Translations$account$errors$es {
+	_Translations$account$errors$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get invalidEmail => 'The email is not valid.';
+	@override String get userNotFound => 'No account exists for that email.';
+	@override String get wrongPassword => 'Wrong email or password.';
+	@override String get emailInUse => 'An account already exists for that email.';
+	@override String get weakPassword => 'The password is too weak (minimum 6 characters).';
+	@override String get network => 'No connection. Try again.';
+	@override String get unknown => 'The operation could not be completed. Try again.';
+}
+
 // Path: settings.notif
 class _Translations$settings$notif$en extends Translations$settings$notif$es {
 	_Translations$settings$notif$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -695,6 +737,28 @@ extension on TranslationsEn {
 			'security.lockNow' => 'Lock now',
 			'security.lockNowDesc' => 'Closes the local session; the password will be required again.',
 			'security.lock' => 'Lock',
+			'account.title' => 'Cloud account',
+			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
+			'account.notConfigured' => 'Cloud not configured',
+			'account.notConfiguredDesc' => 'This install has no Firebase project: the app runs 100% locally.',
+			'account.signIn' => 'Sign in',
+			'account.register' => 'Create account',
+			'account.google' => 'Continue with Google',
+			'account.or' => 'or',
+			'account.email' => 'Email',
+			'account.password' => 'Password',
+			'account.forgotPassword' => 'Forgot your password?',
+			'account.resetSent' => 'We sent you a password reset email.',
+			'account.signedInAs' => 'Signed in',
+			'account.signOut' => 'Sign out',
+			'account.localGateNote' => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.',
+			'account.errors.invalidEmail' => 'The email is not valid.',
+			'account.errors.userNotFound' => 'No account exists for that email.',
+			'account.errors.wrongPassword' => 'Wrong email or password.',
+			'account.errors.emailInUse' => 'An account already exists for that email.',
+			'account.errors.weakPassword' => 'The password is too weak (minimum 6 characters).',
+			'account.errors.network' => 'No connection. Try again.',
+			'account.errors.unknown' => 'The operation could not be completed. Try again.',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',

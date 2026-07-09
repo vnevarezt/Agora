@@ -54,6 +54,32 @@
     "lockNowDesc": "Closes the local session; the password will be required again.",
     "lock": "Lock"
   },
+  "account": {
+    "title": "Cloud account",
+    "desc": "Optional identity for future sync. It does not replace the local password.",
+    "notConfigured": "Cloud not configured",
+    "notConfiguredDesc": "This install has no Firebase project: the app runs 100% locally.",
+    "signIn": "Sign in",
+    "register": "Create account",
+    "google": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "resetSent": "We sent you a password reset email.",
+    "signedInAs": "Signed in",
+    "signOut": "Sign out",
+    "localGateNote": "Signing out of the cloud does not lock your local data; use Security → Lock now for that.",
+    "errors": {
+      "invalidEmail": "The email is not valid.",
+      "userNotFound": "No account exists for that email.",
+      "wrongPassword": "Wrong email or password.",
+      "emailInUse": "An account already exists for that email.",
+      "weakPassword": "The password is too weak (minimum 6 characters).",
+      "network": "No connection. Try again.",
+      "unknown": "The operation could not be completed. Try again."
+    }
+  },
   "nav": {
     "home": "Home",
     "participants": "Participants",

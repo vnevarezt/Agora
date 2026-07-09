@@ -43,6 +43,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$app$es app = Translations$app$es.internal(_root);
 	late final Translations$auth$es auth = Translations$auth$es.internal(_root);
 	late final Translations$security$es security = Translations$security$es.internal(_root);
+	late final Translations$account$es account = Translations$account$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
 	late final Translations$sync$es sync = Translations$sync$es.internal(_root);
@@ -143,6 +144,62 @@ class Translations$security$es {
 
 	/// es: 'Bloquear'
 	String get lock => 'Bloquear';
+}
+
+// Path: account
+class Translations$account$es {
+	Translations$account$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Cuenta en la nube'
+	String get title => 'Cuenta en la nube';
+
+	/// es: 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.'
+	String get desc => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.';
+
+	/// es: 'Nube no configurada'
+	String get notConfigured => 'Nube no configurada';
+
+	/// es: 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.'
+	String get notConfiguredDesc => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.';
+
+	/// es: 'Iniciar sesión'
+	String get signIn => 'Iniciar sesión';
+
+	/// es: 'Crear cuenta'
+	String get register => 'Crear cuenta';
+
+	/// es: 'Continuar con Google'
+	String get google => 'Continuar con Google';
+
+	/// es: 'o'
+	String get or => 'o';
+
+	/// es: 'Correo electrónico'
+	String get email => 'Correo electrónico';
+
+	/// es: 'Contraseña'
+	String get password => 'Contraseña';
+
+	/// es: '¿Olvidaste tu contraseña?'
+	String get forgotPassword => '¿Olvidaste tu contraseña?';
+
+	/// es: 'Te enviamos un correo para restablecer la contraseña.'
+	String get resetSent => 'Te enviamos un correo para restablecer la contraseña.';
+
+	/// es: 'Sesión iniciada'
+	String get signedInAs => 'Sesión iniciada';
+
+	/// es: 'Cerrar sesión'
+	String get signOut => 'Cerrar sesión';
+
+	/// es: 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.'
+	String get localGateNote => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.';
+
+	late final Translations$account$errors$es errors = Translations$account$errors$es.internal(_root);
 }
 
 // Path: nav
@@ -1167,6 +1224,36 @@ class Translations$auth$keyError$es {
 	String get retry => 'Reintentar';
 }
 
+// Path: account.errors
+class Translations$account$errors$es {
+	Translations$account$errors$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'El correo no es válido.'
+	String get invalidEmail => 'El correo no es válido.';
+
+	/// es: 'No existe una cuenta con ese correo.'
+	String get userNotFound => 'No existe una cuenta con ese correo.';
+
+	/// es: 'Correo o contraseña incorrectos.'
+	String get wrongPassword => 'Correo o contraseña incorrectos.';
+
+	/// es: 'Ya existe una cuenta con ese correo.'
+	String get emailInUse => 'Ya existe una cuenta con ese correo.';
+
+	/// es: 'La contraseña es demasiado débil (mínimo 6 caracteres).'
+	String get weakPassword => 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+
+	/// es: 'Sin conexión. Inténtalo de nuevo.'
+	String get network => 'Sin conexión. Inténtalo de nuevo.';
+
+	/// es: 'No se pudo completar la operación. Inténtalo de nuevo.'
+	String get unknown => 'No se pudo completar la operación. Inténtalo de nuevo.';
+}
+
 // Path: settings.notif
 class Translations$settings$notif$es {
 	Translations$settings$notif$es.internal(this._root);
@@ -1249,6 +1336,28 @@ extension on Translations {
 			'security.lockNow' => 'Bloquear ahora',
 			'security.lockNowDesc' => 'Cierra la sesión local; pedirá la contraseña al volver.',
 			'security.lock' => 'Bloquear',
+			'account.title' => 'Cuenta en la nube',
+			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
+			'account.notConfigured' => 'Nube no configurada',
+			'account.notConfiguredDesc' => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.',
+			'account.signIn' => 'Iniciar sesión',
+			'account.register' => 'Crear cuenta',
+			'account.google' => 'Continuar con Google',
+			'account.or' => 'o',
+			'account.email' => 'Correo electrónico',
+			'account.password' => 'Contraseña',
+			'account.forgotPassword' => '¿Olvidaste tu contraseña?',
+			'account.resetSent' => 'Te enviamos un correo para restablecer la contraseña.',
+			'account.signedInAs' => 'Sesión iniciada',
+			'account.signOut' => 'Cerrar sesión',
+			'account.localGateNote' => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.',
+			'account.errors.invalidEmail' => 'El correo no es válido.',
+			'account.errors.userNotFound' => 'No existe una cuenta con ese correo.',
+			'account.errors.wrongPassword' => 'Correo o contraseña incorrectos.',
+			'account.errors.emailInUse' => 'Ya existe una cuenta con ese correo.',
+			'account.errors.weakPassword' => 'La contraseña es demasiado débil (mínimo 6 caracteres).',
+			'account.errors.network' => 'Sin conexión. Inténtalo de nuevo.',
+			'account.errors.unknown' => 'No se pudo completar la operación. Inténtalo de nuevo.',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',

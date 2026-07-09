@@ -54,6 +54,32 @@
     "lockNowDesc": "Cierra la sesión local; pedirá la contraseña al volver.",
     "lock": "Bloquear"
   },
+  "account": {
+    "title": "Cuenta en la nube",
+    "desc": "Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.",
+    "notConfigured": "Nube no configurada",
+    "notConfiguredDesc": "Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.",
+    "signIn": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "google": "Continuar con Google",
+    "or": "o",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetSent": "Te enviamos un correo para restablecer la contraseña.",
+    "signedInAs": "Sesión iniciada",
+    "signOut": "Cerrar sesión",
+    "localGateNote": "Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.",
+    "errors": {
+      "invalidEmail": "El correo no es válido.",
+      "userNotFound": "No existe una cuenta con ese correo.",
+      "wrongPassword": "Correo o contraseña incorrectos.",
+      "emailInUse": "Ya existe una cuenta con ese correo.",
+      "weakPassword": "La contraseña es demasiado débil (mínimo 6 caracteres).",
+      "network": "Sin conexión. Inténtalo de nuevo.",
+      "unknown": "No se pudo completar la operación. Inténtalo de nuevo."
+    }
+  },
   "nav": {
     "home": "Inicio",
     "participants": "Participantes",

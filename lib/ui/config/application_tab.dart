@@ -6,6 +6,7 @@ import '../../state/ui_state.dart';
 import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
+import 'account_card.dart';
 import 'security_card.dart';
 import 'settings_card.dart';
 
@@ -58,7 +59,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   Widget build(BuildContext context) {
     return SettingsColumns(
       left: [_appearance(), _general(), _notificationsCard()],
-      right: [_datos(), const SecurityCard(), _sessionSection()],
+      right: [_datos(), const SecurityCard(), const AccountCard()],
     );
   }
 
@@ -208,18 +209,4 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     );
   }
 
-  Widget _sessionSection() {
-    final tr = context.t;
-    return SettingsCard(
-      title: tr.settings.session,
-      desc: tr.settings.sessionDesc,
-      children: [
-        SettingRow(
-          first: true,
-          title: tr.settings.localMode,
-          subtitle: tr.settings.localModeDesc,
-        ),
-      ],
-    );
-  }
 }
