@@ -4,19 +4,21 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'db_key_manager.dart';
+/// The encrypted database file. Exposed so the "forgot password" reset can
+/// delete it together with the key material.
+Future<File> databaseFile() async {
+  final dir = await getApplicationSupportDirectory();
+  await dir.create(recursive: true);
+  return File('${dir.path}${Platform.pathSeparator}participants.db');
+}
 
 /// Opens the encrypted DB (SQLite3MultipleCiphers, selected by the pubspec
-/// `hooks` block). The key is read from the keychain BEFORE creating the
-/// executor: the `setup` callback runs on a background isolate where platform
-/// channels (flutter_secure_storage) don't work.
-QueryExecutor openEncryptedExecutor(DbKeyManager keys) {
+/// `hooks` block). [keyHex] is the already-unwrapped DEK: the key must be
+/// obtained BEFORE creating the executor because the `setup` callback runs on
+/// a background isolate where platform channels don't work.
+QueryExecutor openEncryptedExecutor(String keyHex) {
   return LazyDatabase(() async {
-    final dir = await getApplicationSupportDirectory();
-    await dir.create(recursive: true);
-    final file =
-        File('${dir.path}${Platform.pathSeparator}participants.db');
-    final keyHex = await keys.getOrCreateKeyHex();
+    final file = await databaseFile();
 
     return NativeDatabase.createInBackground(
       file,
