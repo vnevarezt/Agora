@@ -5,3 +5,11 @@
 # Claude Code
 .claude/
 CLAUDE.md
+
+# Non-Flutter files — kept only locally (LaTeX/Python generator and source docs)
+/generador/
+/*.tex
+/*.pdf
+/*.docx
+/*.rtf
+/*.epub
