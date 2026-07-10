@@ -86,9 +86,9 @@ Pick your project; the CLI registers one app per platform and **overwrites
 
 - `flutter run -d macos` → Settings → *Cloud account* now offers sign-in;
   create an account and check it appears in Firebase console → Authentication.
-- Quit and relaunch: the session persists (macOS needs the
-  `keychain-access-groups` entitlement already present; signing with your
-  team must be active).
+- Quit and relaunch: the session persists (`keychain-access-groups` is
+  present in both entitlement files; the app itself uses the classic
+  file-based keychain, which works under plain development signing).
 - The **local password is always the gate to your data**. Cloud sign-in
   never unlocks the local database, and signing out of the cloud never locks
   it.

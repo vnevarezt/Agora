@@ -38,9 +38,14 @@ class KeychainKeyStore implements SecureKeyStore {
 
   // macOS: classic keychain — the data-protection keychain requires a
   // provisioning profile (keychain-access-groups entitlement), unavailable
-  // when signing with a development certificate only.
+  // when signing with a development certificate only. accessibility must be
+  // null: modern macOS rejects kSecAttrAccessible on the file-based keychain
+  // with errSecMissingEntitlement (-34018) on every write.
   static const _storage = FlutterSecureStorage(
-    mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+    mOptions: MacOsOptions(
+      accessibility: null,
+      usesDataProtectionKeychain: false,
+    ),
   );
 
   @override
