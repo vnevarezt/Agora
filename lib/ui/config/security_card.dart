@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/db_key_manager.dart';
 import '../../i18n/strings.g.dart';
-import '../../state/local_auth.dart';
-import '../auth/auth_scaffold.dart';
+import '../../state/auth_session.dart';
+import '../auth/widgets/auth_error_text.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
@@ -46,7 +46,7 @@ class SecurityCard extends ConsumerWidget {
             variant: AppButtonVariant.ghost,
             icon: Icons.lock_outline,
             label: tr.security.lock,
-            onPressed: () => ref.read(localAuthProvider.notifier).lock(),
+            onPressed: () => ref.read(authSessionProvider.notifier).lock(),
           ),
         ),
       ],
@@ -78,11 +78,11 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
     final tr = context.t;
     final messenger = ScaffoldMessenger.of(context);
     if (_next.length < _minLength) {
-      setState(() => _error = tr.auth.create.tooShort);
+      setState(() => _error = tr.auth.local.tooShort);
       return;
     }
     if (_next != _confirm) {
-      setState(() => _error = tr.auth.create.mismatch);
+      setState(() => _error = tr.auth.local.mismatch);
       return;
     }
     setState(() {
@@ -91,7 +91,7 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
     });
     try {
       await ref
-          .read(localAuthProvider.notifier)
+          .read(authSessionProvider.notifier)
           .changePassword(_current, _next);
       if (!mounted) return;
       widget.onClose();
@@ -123,7 +123,7 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
       sheet: widget.sheet,
       onClose: widget.onClose,
       title: tr.security.changePassword,
-      desc: tr.auth.create.noRecoveryWarning,
+      desc: tr.auth.local.note1 + tr.auth.local.noteBold + tr.auth.local.note2,
       primaryLabel: tr.security.change,
       primaryBusy: _busy,
       onPrimary: canSubmit ? _submit : null,

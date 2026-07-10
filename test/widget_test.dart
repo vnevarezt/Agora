@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:jw_program/app.dart';
 import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/state/local_auth.dart';
+import 'package:jw_program/state/auth_session.dart';
 import 'package:jw_program/state/mwb_sync.dart';
 
 /// Sync de arranque sin red ni disco: evita que el smoke test toque
@@ -17,9 +17,9 @@ class _NoopSyncController extends MwbSyncController {
 }
 
 /// Sesión ya desbloqueada: salta el AuthGate sin tocar el llavero real.
-class _UnlockedAuthController extends LocalAuthController {
+class _UnlockedSessionController extends SessionController {
   @override
-  LocalAuthState build() => LocalAuthUnlocked('00' * 32);
+  SessionState build() => SessionUnlocked('00' * 32, AccountMode.local);
 }
 
 void main() {
@@ -36,7 +36,7 @@ void main() {
       child: ProviderScope(
         overrides: [
           mwbSyncProvider.overrideWith(_NoopSyncController.new),
-          localAuthProvider.overrideWith(_UnlockedAuthController.new),
+          authSessionProvider.overrideWith(_UnlockedSessionController.new),
         ],
         child: const JwProgramApp(),
       ),

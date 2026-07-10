@@ -3,17 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/db_key_manager.dart';
 import '../../i18n/strings.g.dart';
-import '../../state/local_auth.dart';
+import '../../state/auth_session.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
+import '../widgets/avatar.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
-import 'auth_scaffold.dart';
+import 'auth_card_layout.dart';
+import 'widgets/auth_error_text.dart';
+import 'widgets/auth_switch_line.dart';
 
+/// Local-mode unlock: existing profile header + password.
 class UnlockScreen extends ConsumerStatefulWidget {
-  const UnlockScreen({super.key});
+  const UnlockScreen({super.key, required this.profileName});
+
+  final String? profileName;
 
   @override
   ConsumerState<UnlockScreen> createState() => _UnlockScreenState();
@@ -24,6 +30,8 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
   bool _busy = false;
   String? _error;
 
+  bool get _canSubmit => _password.isNotEmpty && !_busy;
+
   Future<void> _unlock() async {
     final tr = context.t;
     setState(() {
@@ -31,13 +39,13 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
       _error = null;
     });
     try {
-      await ref.read(localAuthProvider.notifier).unlock(_password);
+      await ref.read(authSessionProvider.notifier).unlock(_password);
       // Success: AuthGate swaps this screen out.
     } on WrongPasswordException {
       if (mounted) {
         setState(() {
           _busy = false;
-          _error = tr.auth.unlock.wrongPassword;
+          _error = tr.auth.local.wrongPassword;
         });
       }
     } on DbKeyException catch (e) {
@@ -54,47 +62,66 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
   Widget build(BuildContext context) {
     final tr = context.t;
     final t = context.tokens;
-    final canSubmit = _password.isNotEmpty && !_busy;
+    final name = widget.profileName?.trim();
 
-    return AuthScaffold(
-      icon: Icons.lock_outline,
-      title: tr.auth.unlock.title,
-      subtitle: tr.auth.unlock.subtitle,
-      children: [
-        LabeledField(
-          label: tr.auth.unlock.password,
-          child: BoundTextField(
-            initial: '',
-            onChanged: (v) => setState(() => _password = v),
-            obscureText: true,
-            autofocus: true,
-            onSubmitted: (_) => canSubmit ? _unlock() : null,
-          ),
-        ),
-        if (_error != null) AuthErrorText(_error!),
-        const SizedBox(height: 18),
-        AppButton(
-          label: _busy ? tr.auth.unlock.working : tr.auth.unlock.button,
-          expand: true,
-          busy: _busy,
-          onPressed: canSubmit ? _unlock : null,
-        ),
-        const SizedBox(height: 10),
-        Center(
-          child: Pressable(
-            onTap: _busy ? null : () => _showResetModal(context),
-            builder: (context, hovered, _) => Text(
-              tr.auth.unlock.forgot,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-                color: hovered ? t.text : t.textMute,
-                decoration: hovered ? TextDecoration.underline : null,
+    return AuthCardLayout(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Column(
+            children: [
+              PersonAvatar(name: name, size: 62),
+              const SizedBox(height: 10),
+              if (name != null && name.isNotEmpty)
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: t.text,
+                  ),
+                ),
+              const SizedBox(height: 2),
+              Text(
+                tr.auth.local.profileCaption,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: t.textMute,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          LabeledField(
+            label: tr.auth.local.password,
+            child: BoundTextField(
+              initial: '',
+              onChanged: (v) => setState(() => _password = v),
+              hint: tr.auth.cloud.passwordHintLogin,
+              obscureText: true,
+              autofocus: true,
+              onSubmitted: (_) => _canSubmit ? _unlock() : null,
             ),
           ),
-        ),
-      ],
+          if (_error != null) AuthErrorText(_error!),
+          const SizedBox(height: 13),
+          AppButton(
+            label:
+                _busy ? tr.auth.local.unlocking : tr.auth.local.unlockButton,
+            height: 46,
+            expand: true,
+            busy: _busy,
+            onPressed: _canSubmit ? _unlock : null,
+          ),
+          const SizedBox(height: 16),
+          AuthSwitchLine(
+            text: tr.auth.local.startOver,
+            actionLabel: tr.auth.local.createAnother,
+            onTap: _busy ? () {} : () => _showResetModal(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -107,8 +134,8 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
   }
 }
 
-/// "Forgot password" — the data is unrecoverable by design. Deleting
-/// everything is the only way forward, gated by typing a confirm phrase.
+/// "Start over" — the data is unrecoverable by design. Deleting everything is
+/// the only way forward, gated by typing a confirm phrase.
 class _ResetDataModal extends ConsumerStatefulWidget {
   const _ResetDataModal({required this.sheet, required this.onClose});
 
@@ -125,7 +152,7 @@ class _ResetDataModalState extends ConsumerState<_ResetDataModal> {
 
   Future<void> _reset() async {
     setState(() => _busy = true);
-    await ref.read(localAuthProvider.notifier).resetAllData();
+    await ref.read(authSessionProvider.notifier).resetAllData();
     if (mounted) widget.onClose();
   }
 

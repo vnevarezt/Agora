@@ -40,6 +40,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
+	@override late final _Translations$portada$en portada = _Translations$portada$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$security$en security = _Translations$security$en._(_root);
 	@override late final _Translations$account$en account = _Translations$account$en._(_root);
@@ -80,6 +81,22 @@ class _Translations$app$en extends Translations$app$es {
 	@override String get defaultProjectName => 'Program';
 }
 
+// Path: portada
+class _Translations$portada$en extends Translations$portada$es {
+	_Translations$portada$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get tagline => 'Your congregation\'s programs, assignments and brothers, organized with clarity.';
+	@override String get createAccount => 'Create account';
+	@override String get signIn => 'Sign in';
+	@override String get noAccountTitle => 'Continue without an account';
+	@override String get noAccountCaption => 'Only on this device';
+	@override String get legal => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.';
+	@override String get cloudUnavailable => 'The cloud is not configured on this install; you can use local mode.';
+}
+
 // Path: auth
 class _Translations$auth$en extends Translations$auth$es {
 	_Translations$auth$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -87,8 +104,9 @@ class _Translations$auth$en extends Translations$auth$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override late final _Translations$auth$unlock$en unlock = _Translations$auth$unlock$en._(_root);
-	@override late final _Translations$auth$create$en create = _Translations$auth$create$en._(_root);
+	@override String get chooseOther => 'Choose another mode';
+	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
+	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
 	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
 	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
 }
@@ -593,41 +611,71 @@ class _Translations$relativeTime$en extends Translations$relativeTime$es {
 	@override String get now => 'just now';
 }
 
-// Path: auth.unlock
-class _Translations$auth$unlock$en extends Translations$auth$unlock$es {
-	_Translations$auth$unlock$en._(TranslationsEn root) : this._root = root, super.internal(root);
+// Path: auth.local
+class _Translations$auth$local$en extends Translations$auth$local$es {
+	_Translations$auth$local$en._(TranslationsEn root) : this._root = root, super.internal(root);
 
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Unlock';
-	@override String get subtitle => 'Enter your local password to open your encrypted data.';
-	@override String get password => 'Password';
-	@override String get button => 'Unlock';
-	@override String get working => 'Decrypting…';
-	@override String get wrongPassword => 'Wrong password.';
-	@override String get forgot => 'Forgot your password?';
-}
-
-// Path: auth.create
-class _Translations$auth$create$en extends Translations$auth$create$es {
-	_Translations$auth$create$en._(TranslationsEn root) : this._root = root, super.internal(root);
-
-	final TranslationsEn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => 'Create your local account';
-	@override String get subtitle => 'Your data is stored encrypted on this device. This password protects the encryption key.';
+	@override String get pill => 'Local mode';
+	@override String get createTitle => 'Create your local profile';
+	@override String get createSub => 'Stored only on this device.';
 	@override String get migrateTitle => 'Protect your data';
-	@override String get migrateSubtitle => 'This version adds a local account: create a password to protect the data already on this device.';
+	@override String get migrateSub => 'This version adds a local profile: create a password to protect the data already on this device.';
+	@override String get name => 'Your name';
+	@override String get nameHint => 'E.g. Andrew Bell';
 	@override String get password => 'Password';
+	@override String get passwordHint => 'Minimum 8 characters';
 	@override String get confirm => 'Confirm password';
+	@override String get confirmHint => 'Repeat the password';
+	@override String get note1 => 'Your name, password and all your data live only here. If you forget the password ';
+	@override String get noteBold => 'we cannot recover it';
+	@override String get note2 => ' — we recommend exporting backups from Settings.';
+	@override String get createButton => 'Create profile and start';
+	@override String get working => 'Protecting…';
 	@override String get tooShort => 'The password must be at least 8 characters long.';
 	@override String get mismatch => 'The passwords don\'t match.';
-	@override String get noRecoveryWarning => 'If you forget your password there will be no way to recover your data. Keep it somewhere safe.';
-	@override String get button => 'Create account';
-	@override String get migrateButton => 'Protect data';
-	@override String get working => 'Protecting…';
+	@override String get profileCaption => 'Local profile · this device';
+	@override String get unlockButton => 'Unlock';
+	@override String get unlocking => 'Decrypting…';
+	@override String get wrongPassword => 'Wrong password.';
+	@override String get startOver => 'Starting over?';
+	@override String get createAnother => 'Create another profile';
+}
+
+// Path: auth.cloud
+class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
+	_Translations$auth$cloud$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get pill => 'Cloud mode';
+	@override String get loginTitle => 'Sign in';
+	@override String get loginSub => 'Your congregations and projects are waiting.';
+	@override String get registerTitle => 'Create your account';
+	@override String get registerSub => 'Sync and share with your congregation.';
+	@override String get google => 'Continue with Google';
+	@override String get orEmail => 'or with your email';
+	@override String get name => 'Your name';
+	@override String get nameHint => 'E.g. Andrew Bell';
+	@override String get email => 'Email';
+	@override String get emailHint => 'you@email.com';
+	@override String get password => 'Password';
+	@override String get passwordHintLogin => 'Your password';
+	@override String get passwordHintRegister => 'Minimum 8 characters';
+	@override String get confirm => 'Confirm password';
+	@override String get confirmHint => 'Repeat the password';
+	@override String get forgot => 'Forgot your password?';
+	@override String get loginButton => 'Sign in';
+	@override String get registerButton => 'Create account';
+	@override String get noAccount => 'No account yet?';
+	@override String get register => 'Register';
+	@override String get hasAccount => 'Already have an account?';
+	@override String get login => 'Sign in';
+	@override String get unavailableTitle => 'Cloud not configured';
+	@override String get unavailableDesc => 'This install has no Firebase project; cloud mode is unavailable.';
 }
 
 // Path: auth.reset
@@ -698,25 +746,63 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Program',
-			'auth.unlock.title' => 'Unlock',
-			'auth.unlock.subtitle' => 'Enter your local password to open your encrypted data.',
-			'auth.unlock.password' => 'Password',
-			'auth.unlock.button' => 'Unlock',
-			'auth.unlock.working' => 'Decrypting…',
-			'auth.unlock.wrongPassword' => 'Wrong password.',
-			'auth.unlock.forgot' => 'Forgot your password?',
-			'auth.create.title' => 'Create your local account',
-			'auth.create.subtitle' => 'Your data is stored encrypted on this device. This password protects the encryption key.',
-			'auth.create.migrateTitle' => 'Protect your data',
-			'auth.create.migrateSubtitle' => 'This version adds a local account: create a password to protect the data already on this device.',
-			'auth.create.password' => 'Password',
-			'auth.create.confirm' => 'Confirm password',
-			'auth.create.tooShort' => 'The password must be at least 8 characters long.',
-			'auth.create.mismatch' => 'The passwords don\'t match.',
-			'auth.create.noRecoveryWarning' => 'If you forget your password there will be no way to recover your data. Keep it somewhere safe.',
-			'auth.create.button' => 'Create account',
-			'auth.create.migrateButton' => 'Protect data',
-			'auth.create.working' => 'Protecting…',
+			'portada.tagline' => 'Your congregation\'s programs, assignments and brothers, organized with clarity.',
+			'portada.createAccount' => 'Create account',
+			'portada.signIn' => 'Sign in',
+			'portada.noAccountTitle' => 'Continue without an account',
+			'portada.noAccountCaption' => 'Only on this device',
+			'portada.legal' => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.',
+			'portada.cloudUnavailable' => 'The cloud is not configured on this install; you can use local mode.',
+			'auth.chooseOther' => 'Choose another mode',
+			'auth.local.pill' => 'Local mode',
+			'auth.local.createTitle' => 'Create your local profile',
+			'auth.local.createSub' => 'Stored only on this device.',
+			'auth.local.migrateTitle' => 'Protect your data',
+			'auth.local.migrateSub' => 'This version adds a local profile: create a password to protect the data already on this device.',
+			'auth.local.name' => 'Your name',
+			'auth.local.nameHint' => 'E.g. Andrew Bell',
+			'auth.local.password' => 'Password',
+			'auth.local.passwordHint' => 'Minimum 8 characters',
+			'auth.local.confirm' => 'Confirm password',
+			'auth.local.confirmHint' => 'Repeat the password',
+			'auth.local.note1' => 'Your name, password and all your data live only here. If you forget the password ',
+			'auth.local.noteBold' => 'we cannot recover it',
+			'auth.local.note2' => ' — we recommend exporting backups from Settings.',
+			'auth.local.createButton' => 'Create profile and start',
+			'auth.local.working' => 'Protecting…',
+			'auth.local.tooShort' => 'The password must be at least 8 characters long.',
+			'auth.local.mismatch' => 'The passwords don\'t match.',
+			'auth.local.profileCaption' => 'Local profile · this device',
+			'auth.local.unlockButton' => 'Unlock',
+			'auth.local.unlocking' => 'Decrypting…',
+			'auth.local.wrongPassword' => 'Wrong password.',
+			'auth.local.startOver' => 'Starting over?',
+			'auth.local.createAnother' => 'Create another profile',
+			'auth.cloud.pill' => 'Cloud mode',
+			'auth.cloud.loginTitle' => 'Sign in',
+			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',
+			'auth.cloud.registerTitle' => 'Create your account',
+			'auth.cloud.registerSub' => 'Sync and share with your congregation.',
+			'auth.cloud.google' => 'Continue with Google',
+			'auth.cloud.orEmail' => 'or with your email',
+			'auth.cloud.name' => 'Your name',
+			'auth.cloud.nameHint' => 'E.g. Andrew Bell',
+			'auth.cloud.email' => 'Email',
+			'auth.cloud.emailHint' => 'you@email.com',
+			'auth.cloud.password' => 'Password',
+			'auth.cloud.passwordHintLogin' => 'Your password',
+			'auth.cloud.passwordHintRegister' => 'Minimum 8 characters',
+			'auth.cloud.confirm' => 'Confirm password',
+			'auth.cloud.confirmHint' => 'Repeat the password',
+			'auth.cloud.forgot' => 'Forgot your password?',
+			'auth.cloud.loginButton' => 'Sign in',
+			'auth.cloud.registerButton' => 'Create account',
+			'auth.cloud.noAccount' => 'No account yet?',
+			'auth.cloud.register' => 'Register',
+			'auth.cloud.hasAccount' => 'Already have an account?',
+			'auth.cloud.login' => 'Sign in',
+			'auth.cloud.unavailableTitle' => 'Cloud not configured',
+			'auth.cloud.unavailableDesc' => 'This install has no Firebase project; cloud mode is unavailable.',
 			'auth.reset.title' => 'Delete all data',
 			'auth.reset.warning' => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.',
 			'auth.reset.confirmPhrase' => 'DELETE',

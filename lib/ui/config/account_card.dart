@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../state/auth_session.dart';
 import '../../state/cloud_auth.dart';
 import '../auth/cloud_sign_in_modal.dart';
 import '../widgets/app_button.dart';
@@ -19,10 +20,15 @@ class AccountCard extends ConsumerWidget {
     final tr = context.t;
     final available = ref.watch(firebaseAvailableProvider);
     final user = ref.watch(cloudUserProvider).value;
+    final session = ref.watch(authSessionProvider);
+    // In cloud mode signing out DOES close the session (it is the gate); the
+    // "your local data stays open" note only applies to local-mode users.
+    final localMode =
+        session is SessionUnlocked && session.mode == AccountMode.local;
 
     return SettingsCard(
       title: tr.account.title,
-      desc: available && user != null
+      desc: available && user != null && localMode
           ? tr.account.localGateNote
           : tr.account.desc,
       children: [
