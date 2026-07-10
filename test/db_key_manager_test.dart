@@ -127,10 +127,26 @@ void main() {
     expect(await manager(store).unlock('pw'), dek);
   });
 
+  test('getOrCreateCloudKeyHex is stable across calls', () async {
+    final store = MapKeyStore();
+    final m = manager(store);
+    final first = await m.getOrCreateCloudKeyHex();
+    expect(first.length, 64);
+    expect(await m.getOrCreateCloudKeyHex(), first);
+  });
+
+  test('cloud key does not affect local status', () async {
+    final store = MapKeyStore();
+    final m = manager(store);
+    await m.getOrCreateCloudKeyHex();
+    expect(await m.status(), LocalKeyStatus.none);
+  });
+
   test('destroyAll removes every key', () async {
     final store = MapKeyStore();
     final m = manager(store);
     await m.createAccount('pw');
+    await m.getOrCreateCloudKeyHex();
     store.data[DbKeyManager.legacyKeyName] = 'ef' * 32;
     await m.destroyAll();
     expect(store.data, isEmpty);

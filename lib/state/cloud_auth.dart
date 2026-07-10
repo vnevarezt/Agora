@@ -89,9 +89,15 @@ class CloudAuthService {
   /// google_sign_in v7 requires a single initialize() per process.
   static bool _googleInitialized = false;
 
-  Future<void> registerWithEmail(String email, String password) =>
-      _mapAuthErrors(() => _auth.createUserWithEmailAndPassword(
-          email: email, password: password));
+  Future<void> registerWithEmail(String email, String password,
+          {String? displayName}) =>
+      _mapAuthErrors(() async {
+        final cred = await _auth.createUserWithEmailAndPassword(
+            email: email, password: password);
+        if (displayName != null && displayName.isNotEmpty) {
+          await cred.user?.updateDisplayName(displayName);
+        }
+      });
 
   Future<void> signInWithEmail(String email, String password) =>
       _mapAuthErrors(() =>

@@ -82,8 +82,11 @@ class KdfParams {
     required this.parallelism,
   });
 
-  static const owasp =
-      KdfParams(memoryKib: 19456, iterations: 2, parallelism: 1);
+  static const owasp = KdfParams(
+    memoryKib: 19456,
+    iterations: 2,
+    parallelism: 1,
+  );
 
   final int memoryKib;
   final int iterations;
@@ -99,7 +102,7 @@ class KdfParams {
 /// the data: there is deliberately no recovery path.
 class DbKeyManager {
   DbKeyManager({SecureKeyStore? store, this.params = KdfParams.owasp})
-      : _store = store ?? const KeychainKeyStore();
+    : _store = store ?? const KeychainKeyStore();
 
   final SecureKeyStore _store;
 
@@ -111,6 +114,10 @@ class DbKeyManager {
 
   /// JSON blob `{v, kdf, m, t, p, salt, nonce, ct, mac}` (base64 fields).
   static const wrappedKeyName = 'jw_program.db_key.v2';
+
+  /// Cloud-mode device key: plaintext DEK hex. In cloud mode the Firebase
+  /// session is the gate, so the key is only protected by the OS keychain.
+  static const cloudKeyName = 'jw_program.db_key.cloud.v1';
 
   Future<LocalKeyStatus> status() async {
     try {
@@ -151,7 +158,8 @@ class DbKeyManager {
     }
     if (blob == null) {
       throw const DbKeyException(
-          'No local account key found in the system keychain.');
+        'No local account key found in the system keychain.',
+      );
     }
     return _unwrap(blob, password);
   }
@@ -167,8 +175,7 @@ class DbKeyManager {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }
     if (dekHex == null || dekHex.length != 64) {
-      throw const DbKeyException(
-          'No legacy database key found to migrate.');
+      throw const DbKeyException('No legacy database key found to migrate.');
     }
     await _writeWrapped(dekHex, password);
     try {
@@ -187,12 +194,37 @@ class DbKeyManager {
     await _writeWrapped(dekHex, next);
   }
 
+  /// Cloud mode: DEK generated once per device, kept plaintext in the
+  /// keychain. Reuses the verify-read-back defense against silent writes.
+  Future<String> getOrCreateCloudKeyHex() async {
+    try {
+      final existing = await _store.read(cloudKeyName);
+      if (existing != null && existing.length == 64) return existing;
+
+      final hex = _randomHex(32);
+      await _store.write(cloudKeyName, hex);
+      final verified = await _store.read(cloudKeyName);
+      if (verified != hex) {
+        throw const DbKeyException(
+          'The system keychain did not persist the database key. '
+          'The local database cannot be protected.',
+        );
+      }
+      return hex;
+    } on DbKeyException {
+      rethrow;
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
   /// Delete all key material. The encrypted DB file becomes unreadable
   /// forever; callers must also delete the DB file ("forgot password" reset).
   Future<void> destroyAll() async {
     try {
       await _store.delete(wrappedKeyName);
       await _store.delete(legacyKeyName);
+      await _store.delete(cloudKeyName);
     } catch (e) {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }
@@ -212,13 +244,15 @@ class DbKeyManager {
     }
     if (verified != blob) {
       throw const DbKeyException(
-          'The system keychain did not persist the database key. '
-          'The local database cannot be protected.');
+        'The system keychain did not persist the database key. '
+        'The local database cannot be protected.',
+      );
     }
     final roundTrip = await _unwrap(blob, password);
     if (roundTrip != dekHex) {
       throw const DbKeyException(
-          'Key wrap verification failed; refusing to continue.');
+        'Key wrap verification failed; refusing to continue.',
+      );
     }
   }
 
@@ -276,7 +310,10 @@ class DbKeyManager {
   /// Argon2id in this package is pure Dart and takes on the order of a
   /// second at OWASP cost: run it off the UI isolate.
   static Future<List<int>> _deriveKek(
-      String password, List<int> salt, KdfParams params) {
+    String password,
+    List<int> salt,
+    KdfParams params,
+  ) {
     final m = params.memoryKib;
     final t = params.iterations;
     final p = params.parallelism;
@@ -288,7 +325,9 @@ class DbKeyManager {
         hashLength: 32,
       );
       final key = await algorithm.deriveKeyFromPassword(
-          password: password, nonce: salt);
+        password: password,
+        nonce: salt,
+      );
       return key.extractBytes();
     });
   }
@@ -305,5 +344,7 @@ class DbKeyManager {
       bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
 
   static List<int> _hexToBytes(String hex) => List<int>.generate(
-      hex.length ~/ 2, (i) => int.parse(hex.substring(i * 2, i * 2 + 2), radix: 16));
+    hex.length ~/ 2,
+    (i) => int.parse(hex.substring(i * 2, i * 2 + 2), radix: 16),
+  );
 }
