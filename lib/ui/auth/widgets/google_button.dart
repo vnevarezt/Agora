@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../theme/dimens.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_spinner.dart';
 
 /// `.btn-google`: surface button with the four-color Google mark.
 class GoogleButton extends StatelessWidget {
@@ -37,15 +38,12 @@ class GoogleButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (busy)
-              SizedBox(
-                width: 16,
-                height: 16,
-                child:
-                    CircularProgressIndicator(strokeWidth: 2, color: t.textDim),
-              )
+              AppSpinner(size: 16, color: t.textDim)
             else
               const CustomPaint(
-                  size: Size(18, 18), painter: _GoogleLogoPainter()),
+                size: Size(18, 18),
+                painter: _GoogleLogoPainter(),
+              ),
             const SizedBox(width: 10),
             Text(
               label,
@@ -75,7 +73,10 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.width / 24;
-    final ring = Rect.fromCircle(center: Offset(12 * s, 12 * s), radius: 9.6 * s);
+    final ring = Rect.fromCircle(
+      center: Offset(12 * s, 12 * s),
+      radius: 9.6 * s,
+    );
     final stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.8 * s;

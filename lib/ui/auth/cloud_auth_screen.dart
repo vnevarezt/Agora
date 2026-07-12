@@ -9,7 +9,9 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
+import '../widgets/motion.dart';
 import 'auth_card_layout.dart';
+import 'auth_validation.dart';
 import 'widgets/auth_error_text.dart';
 import 'widgets/auth_switch_line.dart';
 import 'widgets/back_link.dart';
@@ -53,10 +55,24 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
           ],
           ModePill(icon: Icons.cloud_outlined, label: tr.auth.cloud.pill),
           const SizedBox(height: 14),
-          AuthTitle(
-              login ? tr.auth.cloud.loginTitle : tr.auth.cloud.registerTitle),
-          const SizedBox(height: 6),
-          AuthSub(login ? tr.auth.cloud.loginSub : tr.auth.cloud.registerSub),
+          FadeThroughSwitcher(
+            duration: Motion.fast,
+            child: Column(
+              key: ValueKey(_mode),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AuthTitle(
+                  login
+                      ? tr.auth.cloud.loginTitle
+                      : tr.auth.cloud.registerTitle,
+                ),
+                const SizedBox(height: 6),
+                AuthSub(
+                  login ? tr.auth.cloud.loginSub : tr.auth.cloud.registerSub,
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 22),
           CloudAuthForm(
             mode: _mode,
@@ -67,8 +83,10 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
           AuthSwitchLine(
             text: login ? tr.auth.cloud.noAccount : tr.auth.cloud.hasAccount,
             actionLabel: login ? tr.auth.cloud.register : tr.auth.cloud.login,
-            onTap: () => setState(() =>
-                _mode = login ? CloudFormMode.register : CloudFormMode.login),
+            onTap: () => setState(
+              () =>
+                  _mode = login ? CloudFormMode.register : CloudFormMode.login,
+            ),
           ),
         ],
       ),
@@ -139,14 +157,19 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
       setState(() {
         _busy = false;
         // A canceled Google flow is not an error the user needs explained.
-        _error =
-            e.code == CloudAuthErrorCode.canceled ? null : _errorText(e.code);
+        _error = e.code == CloudAuthErrorCode.canceled
+            ? null
+            : _errorText(e.code);
       });
     }
   }
 
   Future<void> _submit() async {
     final tr = context.t;
+    if (!isValidEmail(_email)) {
+      setState(() => _error = tr.account.errors.invalidEmail);
+      return;
+    }
     if (!_login) {
       if (_password.length < _minLength) {
         setState(() => _error = tr.auth.cloud.passwordHintRegister);
@@ -157,10 +180,15 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
         return;
       }
     }
-    await _run((auth) => _login
-        ? auth.signInWithEmail(_email.trim(), _password)
-        : auth.registerWithEmail(_email.trim(), _password,
-            displayName: _name.trim()));
+    await _run(
+      (auth) => _login
+          ? auth.signInWithEmail(_email.trim(), _password)
+          : auth.registerWithEmail(
+              _email.trim(),
+              _password,
+              displayName: _name.trim(),
+            ),
+    );
   }
 
   Future<void> _sendReset() async {
@@ -171,7 +199,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
       setState(() => _error = tr.auth.cloud.unavailableDesc);
       return;
     }
-    if (_email.trim().isEmpty) {
+    if (!isValidEmail(_email)) {
       setState(() => _error = tr.account.errors.invalidEmail);
       return;
     }
@@ -199,118 +227,136 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
     final t = context.tokens;
     // The button renders wherever the platform has a google_sign_in
     // implementation; a missing Firebase config surfaces on tap instead.
-    final googleAvailable =
-        defaultTargetPlatform != TargetPlatform.windows;
+    final googleAvailable = defaultTargetPlatform != TargetPlatform.windows;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (googleAvailable) ...[
-          GoogleButton(
-            label: tr.auth.cloud.google,
-            busy: false,
-            onPressed:
-                _busy ? null : () => _run((auth) => auth.signInWithGoogle()),
-          ),
-          const SizedBox(height: 13),
-          Row(
-            children: [
-              Expanded(child: Divider(color: t.border)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  tr.auth.cloud.orEmail.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.58,
-                    color: t.textMute,
+    return AnimatedSize(
+      duration: Motion.med,
+      curve: Motion.curve,
+      alignment: Alignment.topCenter,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (googleAvailable) ...[
+            GoogleButton(
+              label: tr.auth.cloud.google,
+              busy: false,
+              onPressed: _busy
+                  ? null
+                  : () => _run((auth) => auth.signInWithGoogle()),
+            ),
+            const SizedBox(height: 13),
+            Row(
+              children: [
+                Expanded(child: Divider(color: t.border)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    tr.auth.cloud.orEmail.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.58,
+                      color: t.textMute,
+                    ),
                   ),
                 ),
+                Expanded(child: Divider(color: t.border)),
+              ],
+            ),
+            const SizedBox(height: 13),
+          ],
+          if (!_login) ...[
+            LabeledField(
+              label: tr.auth.cloud.name,
+              child: BoundTextField(
+                initial: '',
+                onChanged: (v) => setState(() {
+                  _name = v;
+                  _error = null;
+                }),
+                hint: tr.auth.cloud.nameHint,
               ),
-              Expanded(child: Divider(color: t.border)),
-            ],
-          ),
-          const SizedBox(height: 13),
-        ],
-        if (!_login) ...[
+            ),
+            const SizedBox(height: 13),
+          ],
           LabeledField(
-            label: tr.auth.cloud.name,
+            label: tr.auth.cloud.email,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _name = v),
-              hint: tr.auth.cloud.nameHint,
+              onChanged: (v) => setState(() {
+                _email = v;
+                _error = null;
+              }),
+              hint: tr.auth.cloud.emailHint,
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
             ),
           ),
           const SizedBox(height: 13),
-        ],
-        LabeledField(
-          label: tr.auth.cloud.email,
-          child: BoundTextField(
-            initial: '',
-            onChanged: (v) => setState(() => _email = v),
-            hint: tr.auth.cloud.emailHint,
-            keyboardType: TextInputType.emailAddress,
-            autofocus: true,
-          ),
-        ),
-        const SizedBox(height: 13),
-        LabeledField(
-          label: tr.auth.cloud.password,
-          child: BoundTextField(
-            initial: '',
-            onChanged: (v) => setState(() => _password = v),
-            hint: _login
-                ? tr.auth.cloud.passwordHintLogin
-                : tr.auth.cloud.passwordHintRegister,
-            obscureText: true,
-            onSubmitted: (_) => _canSubmit ? _submit() : null,
-          ),
-        ),
-        if (_login)
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Pressable(
-                onTap: _busy ? null : _sendReset,
-                builder: (context, hovered, _) => Text(
-                  tr.auth.cloud.forgot,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: t.accentStrong,
-                    decoration: hovered ? TextDecoration.underline : null,
-                    decorationColor: t.accentStrong,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (!_login) ...[
-          const SizedBox(height: 13),
           LabeledField(
-            label: tr.auth.cloud.confirm,
+            label: tr.auth.cloud.password,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _confirm = v),
-              hint: tr.auth.cloud.confirmHint,
+              onChanged: (v) => setState(() {
+                _password = v;
+                _error = null;
+              }),
+              hint: _login
+                  ? tr.auth.cloud.passwordHintLogin
+                  : tr.auth.cloud.passwordHintRegister,
               obscureText: true,
               onSubmitted: (_) => _canSubmit ? _submit() : null,
             ),
           ),
+          if (_login)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Pressable(
+                  onTap: _busy ? null : _sendReset,
+                  builder: (context, hovered, _) => Text(
+                    tr.auth.cloud.forgot,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: t.accentStrong,
+                      decoration: hovered ? TextDecoration.underline : null,
+                      decorationColor: t.accentStrong,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (!_login) ...[
+            const SizedBox(height: 13),
+            LabeledField(
+              label: tr.auth.cloud.confirm,
+              child: BoundTextField(
+                initial: '',
+                onChanged: (v) => setState(() {
+                  _confirm = v;
+                  _error = null;
+                }),
+                hint: tr.auth.cloud.confirmHint,
+                obscureText: true,
+                onSubmitted: (_) => _canSubmit ? _submit() : null,
+              ),
+            ),
+          ],
+          AuthErrorText(_error),
+          const SizedBox(height: 13),
+          AppButton(
+            label: _login
+                ? tr.auth.cloud.loginButton
+                : tr.auth.cloud.registerButton,
+            height: 46,
+            expand: true,
+            busy: _busy,
+            onPressed: _canSubmit ? _submit : null,
+          ),
         ],
-        if (_error != null) AuthErrorText(_error!),
-        const SizedBox(height: 13),
-        AppButton(
-          label:
-              _login ? tr.auth.cloud.loginButton : tr.auth.cloud.registerButton,
-          height: 46,
-          expand: true,
-          busy: _busy,
-          onPressed: _canSubmit ? _submit : null,
-        ),
-      ],
+      ),
     );
   }
 }

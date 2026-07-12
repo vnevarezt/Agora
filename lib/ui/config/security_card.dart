@@ -117,7 +117,10 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
   Widget build(BuildContext context) {
     final tr = context.t;
     final canSubmit =
-        _current.isNotEmpty && _next.isNotEmpty && _confirm.isNotEmpty && !_busy;
+        _current.isNotEmpty &&
+        _next.isNotEmpty &&
+        _confirm.isNotEmpty &&
+        !_busy;
 
     return ModalShell(
       sheet: widget.sheet,
@@ -134,7 +137,10 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
             label: tr.security.current,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _current = v),
+              onChanged: (v) => setState(() {
+                _current = v;
+                _error = null;
+              }),
               obscureText: true,
               autofocus: true,
             ),
@@ -144,7 +150,10 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
             label: tr.security.newPassword,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _next = v),
+              onChanged: (v) => setState(() {
+                _next = v;
+                _error = null;
+              }),
               obscureText: true,
             ),
           ),
@@ -153,12 +162,15 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
             label: tr.security.confirmNew,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _confirm = v),
+              onChanged: (v) => setState(() {
+                _confirm = v;
+                _error = null;
+              }),
               obscureText: true,
               onSubmitted: (_) => canSubmit ? _submit() : null,
             ),
           ),
-          if (_error != null) AuthErrorText(_error!),
+          AuthErrorText(_error),
         ],
       ),
     );

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/auth_session.dart';
 import '../theme/tokens.dart';
+import '../widgets/app_spinner.dart';
+import '../widgets/motion.dart';
 import 'cloud_auth_screen.dart';
 import 'key_error_screen.dart';
 import 'local_create_screen.dart';
@@ -19,17 +21,24 @@ class AuthGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(authSessionProvider);
-    return switch (state) {
-      SessionLoading() => const _AuthSplash(),
-      SessionFreshChoose() => const _AuthFlow(),
-      SessionLocalCreate(:final migration) =>
-        LocalCreateScreen(migration: migration),
-      SessionLocalLocked(:final profileName) =>
-        UnlockScreen(profileName: profileName),
-      SessionCloudSignedOut() => const CloudAuthScreen(),
-      SessionKeyError(:final message) => KeyErrorScreen(message: message),
-      SessionUnlocked() => child,
-    };
+    return FadeThroughSwitcher(
+      child: KeyedSubtree(
+        key: ValueKey(state.runtimeType),
+        child: switch (state) {
+          SessionLoading() => const _AuthSplash(),
+          SessionFreshChoose() => const _AuthFlow(),
+          SessionLocalCreate(:final migration) => LocalCreateScreen(
+            migration: migration,
+          ),
+          SessionLocalLocked(:final profileName) => UnlockScreen(
+            profileName: profileName,
+          ),
+          SessionCloudSignedOut() => const CloudAuthScreen(),
+          SessionKeyError(:final message) => KeyErrorScreen(message: message),
+          SessionUnlocked() => child,
+        },
+      ),
+    );
   }
 }
 
@@ -47,9 +56,11 @@ class _AuthFlow extends StatefulWidget {
 class _AuthFlowState extends State<_AuthFlow> {
   _FlowStep _step = _FlowStep.choose;
   CloudFormMode _cloudMode = CloudFormMode.login;
+  bool _popping = false;
 
   void _go(_FlowStep step, [CloudFormMode? cloudMode]) {
     setState(() {
+      _popping = step == _FlowStep.choose;
       _step = step;
       if (cloudMode != null) _cloudMode = cloudMode;
     });
@@ -57,26 +68,25 @@ class _AuthFlowState extends State<_AuthFlow> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
+    return SlideSwitcher(
+      reverse: _popping,
       child: switch (_step) {
         _FlowStep.choose => PortadaScreen(
-            key: const ValueKey('choose'),
-            onCreateAccount: () =>
-                _go(_FlowStep.cloud, CloudFormMode.register),
-            onSignIn: () => _go(_FlowStep.cloud, CloudFormMode.login),
-            onLocal: () => _go(_FlowStep.local),
-          ),
+          key: const ValueKey('choose'),
+          onCreateAccount: () => _go(_FlowStep.cloud, CloudFormMode.register),
+          onSignIn: () => _go(_FlowStep.cloud, CloudFormMode.login),
+          onLocal: () => _go(_FlowStep.local),
+        ),
         _FlowStep.local => LocalCreateScreen(
-            key: const ValueKey('local'),
-            migration: false,
-            onBack: () => _go(_FlowStep.choose),
-          ),
+          key: const ValueKey('local'),
+          migration: false,
+          onBack: () => _go(_FlowStep.choose),
+        ),
         _FlowStep.cloud => CloudAuthScreen(
-            key: ValueKey('cloud-${_cloudMode.name}'),
-            initialMode: _cloudMode,
-            onBack: () => _go(_FlowStep.choose),
-          ),
+          key: ValueKey('cloud-${_cloudMode.name}'),
+          initialMode: _cloudMode,
+          onBack: () => _go(_FlowStep.choose),
+        ),
       },
     );
   }
@@ -90,13 +100,7 @@ class _AuthSplash extends StatelessWidget {
     final t = context.tokens;
     return Scaffold(
       backgroundColor: t.bg,
-      body: Center(
-        child: SizedBox(
-          width: 26,
-          height: 26,
-          child: CircularProgressIndicator(strokeWidth: 2.5, color: t.accent),
-        ),
-      ),
+      body: const Center(child: AppSpinner(size: 26)),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../../i18n/strings.g.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/motion.dart';
 
 /// `.portada--a`: immersive welcome screen — brand mark, tagline and the
 /// three entry actions (cloud register / cloud sign-in / local only), with
@@ -38,7 +39,7 @@ class PortadaScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _EnterUp(
+                  EnterUp(
                     delay: Duration.zero,
                     child: Container(
                       width: 52,
@@ -68,7 +69,7 @@ class PortadaScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  _EnterUp(
+                  EnterUp(
                     delay: const Duration(milliseconds: 50),
                     child: Text(
                       tr.app.brand,
@@ -82,7 +83,7 @@ class PortadaScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 9),
-                  _EnterUp(
+                  EnterUp(
                     delay: const Duration(milliseconds: 100),
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 320),
@@ -99,7 +100,7 @@ class PortadaScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 26),
-                  _EnterUp(
+                  EnterUp(
                     delay: const Duration(milliseconds: 180),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -119,7 +120,7 @@ class PortadaScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  _EnterUp(
+                  EnterUp(
                     delay: const Duration(milliseconds: 280),
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 400),
@@ -147,10 +148,10 @@ class PortadaScreen extends StatelessWidget {
 
 class _PortadaButton extends StatelessWidget {
   const _PortadaButton.primary({required this.label, required this.onTap})
-      : primary = true;
+    : primary = true;
 
   const _PortadaButton.ghost({required this.label, required this.onTap})
-      : primary = false;
+    : primary = false;
 
   final String label;
   final VoidCallback onTap;
@@ -181,9 +182,10 @@ class _PortadaButton extends StatelessWidget {
             boxShadow: primary
                 ? const [
                     BoxShadow(
-                        color: Color(0x14000000),
-                        blurRadius: 2,
-                        offset: Offset(0, 1)),
+                      color: Color(0x14000000),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
                   ]
                 : null,
           ),
@@ -264,55 +266,6 @@ class _LocalEntryCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Fade + slide-up entrance, played once on mount (mirrors the mock's
-/// `portUp` keyframes with per-element delays).
-class _EnterUp extends StatefulWidget {
-  const _EnterUp({required this.delay, required this.child});
-
-  final Duration delay;
-  final Widget child;
-
-  @override
-  State<_EnterUp> createState() => _EnterUpState();
-}
-
-class _EnterUpState extends State<_EnterUp>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 500));
-  late final CurvedAnimation _anim =
-      CurvedAnimation(parent: _controller, curve: const Cubic(.2, .8, .3, 1));
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(widget.delay, () {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _anim,
-      builder: (context, child) => Opacity(
-        opacity: _anim.value,
-        child: Transform.translate(
-          offset: Offset(0, 14 * (1 - _anim.value)),
-          child: child,
-        ),
-      ),
-      child: widget.child,
     );
   }
 }

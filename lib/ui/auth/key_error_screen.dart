@@ -20,8 +20,11 @@ class KeyErrorScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.error_outline,
-              size: 34, color: Theme.of(context).colorScheme.error),
+          Icon(
+            Icons.error_outline,
+            size: 34,
+            color: Theme.of(context).colorScheme.error,
+          ),
           const SizedBox(height: 14),
           Center(child: AuthTitle(tr.auth.keyError.title)),
           const SizedBox(height: 6),
@@ -31,8 +34,7 @@ class KeyErrorScreen extends ConsumerWidget {
             label: tr.auth.keyError.retry,
             height: 46,
             expand: true,
-            onPressed: () =>
-                ref.read(authSessionProvider.notifier).retryInit(),
+            onPressed: () => ref.read(authSessionProvider.notifier).retryInit(),
           ),
         ],
       ),

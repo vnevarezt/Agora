@@ -97,18 +97,20 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
             label: tr.auth.local.password,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _password = v),
+              onChanged: (v) => setState(() {
+                _password = v;
+                _error = null;
+              }),
               hint: tr.auth.cloud.passwordHintLogin,
               obscureText: true,
               autofocus: true,
               onSubmitted: (_) => _canSubmit ? _unlock() : null,
             ),
           ),
-          if (_error != null) AuthErrorText(_error!),
+          AuthErrorText(_error),
           const SizedBox(height: 13),
           AppButton(
-            label:
-                _busy ? tr.auth.local.unlocking : tr.auth.local.unlockButton,
+            label: _busy ? tr.auth.local.unlocking : tr.auth.local.unlockButton,
             height: 46,
             expand: true,
             busy: _busy,

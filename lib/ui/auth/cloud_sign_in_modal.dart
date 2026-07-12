@@ -9,8 +9,11 @@ import 'cloud_auth_screen.dart';
 /// the shared [CloudAuthForm] in a modal. Signing in here never changes the
 /// session gate.
 class CloudSignInModal extends StatefulWidget {
-  const CloudSignInModal(
-      {super.key, required this.sheet, required this.onClose});
+  const CloudSignInModal({
+    super.key,
+    required this.sheet,
+    required this.onClose,
+  });
 
   final bool sheet;
   final VoidCallback onClose;
@@ -41,15 +44,13 @@ class _CloudSignInModalState extends State<CloudSignInModal> {
               (icon: null, label: tr.auth.cloud.registerTitle),
             ],
             index: _mode == CloudFormMode.login ? 0 : 1,
-            onChanged: (i) => setState(() =>
-                _mode = i == 0 ? CloudFormMode.login : CloudFormMode.register),
+            onChanged: (i) => setState(
+              () =>
+                  _mode = i == 0 ? CloudFormMode.login : CloudFormMode.register,
+            ),
           ),
           const SizedBox(height: 16),
-          CloudAuthForm(
-            key: ValueKey(_mode),
-            mode: _mode,
-            onSuccess: widget.onClose,
-          ),
+          CloudAuthForm(mode: _mode, onSuccess: widget.onClose),
         ],
       ),
     );

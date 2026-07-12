@@ -6,6 +6,7 @@ import '../config/settings_view.dart';
 import '../dashboard/dashboard_view.dart';
 import '../participants/participants_view.dart';
 import '../responsive.dart';
+import '../widgets/motion.dart';
 import 'sidebar_nav.dart';
 
 /// App root shell: side navigation + content area that switches between
@@ -19,11 +20,16 @@ class AppShell extends ConsumerWidget {
     final size = context.screenSize;
     final section = ref.watch(appSectionProvider);
 
-    final body = switch (section) {
-      AppSection.home => const DashboardView(),
-      AppSection.participants => const ParticipantsView(),
-      AppSection.settings => const SettingsView(),
-    };
+    final body = FadeThroughSwitcher(
+      child: KeyedSubtree(
+        key: ValueKey(section),
+        child: switch (section) {
+          AppSection.home => const DashboardView(),
+          AppSection.participants => const ParticipantsView(),
+          AppSection.settings => const SettingsView(),
+        },
+      ),
+    );
 
     if (size == ScreenSize.mobile) {
       return Scaffold(

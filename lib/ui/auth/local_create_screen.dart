@@ -87,19 +87,26 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
           ],
           ModePill(icon: Icons.smartphone, label: tr.auth.local.pill),
           const SizedBox(height: 14),
-          AuthTitle(widget.migration
-              ? tr.auth.local.migrateTitle
-              : tr.auth.local.createTitle),
+          AuthTitle(
+            widget.migration
+                ? tr.auth.local.migrateTitle
+                : tr.auth.local.createTitle,
+          ),
           const SizedBox(height: 6),
-          AuthSub(widget.migration
-              ? tr.auth.local.migrateSub
-              : tr.auth.local.createSub),
+          AuthSub(
+            widget.migration
+                ? tr.auth.local.migrateSub
+                : tr.auth.local.createSub,
+          ),
           const SizedBox(height: 22),
           LabeledField(
             label: tr.auth.local.name,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _name = v),
+              onChanged: (v) => setState(() {
+                _name = v;
+                _error = null;
+              }),
               hint: tr.auth.local.nameHint,
               autofocus: true,
             ),
@@ -109,7 +116,10 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
             label: tr.auth.local.password,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _password = v),
+              onChanged: (v) => setState(() {
+                _password = v;
+                _error = null;
+              }),
               hint: tr.auth.local.passwordHint,
               obscureText: true,
             ),
@@ -119,13 +129,16 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
             label: tr.auth.local.confirm,
             child: BoundTextField(
               initial: '',
-              onChanged: (v) => setState(() => _confirm = v),
+              onChanged: (v) => setState(() {
+                _confirm = v;
+                _error = null;
+              }),
               hint: tr.auth.local.confirmHint,
               obscureText: true,
               onSubmitted: (_) => _canSubmit ? _submit() : null,
             ),
           ),
-          if (_error != null) AuthErrorText(_error!),
+          AuthErrorText(_error),
           const SizedBox(height: 13),
           AuthNote(
             icon: Icons.shield_outlined,
