@@ -138,17 +138,21 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
   }
 
   Future<void> _run(Future<void> Function(CloudAuthService auth) action) async {
-    final auth = ref.read(cloudAuthProvider);
-    if (auth == null) {
-      // UI is always shown; without a Firebase config the attempt explains
-      // itself instead of hiding the whole cloud mode.
-      setState(() => _error = context.t.auth.cloud.unavailableDesc);
-      return;
-    }
     setState(() {
       _busy = true;
       _error = null;
     });
+    final auth = await ref.read(cloudAuthProvider.future);
+    if (!mounted) return;
+    if (auth == null) {
+      // UI is always shown; without a Firebase config the attempt explains
+      // itself instead of hiding the whole cloud mode.
+      setState(() {
+        _busy = false;
+        _error = context.t.auth.cloud.unavailableDesc;
+      });
+      return;
+    }
     try {
       await action(auth);
       if (mounted) widget.onSuccess();
@@ -194,11 +198,6 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
   Future<void> _sendReset() async {
     final tr = context.t;
     final messenger = ScaffoldMessenger.of(context);
-    final auth = ref.read(cloudAuthProvider);
-    if (auth == null) {
-      setState(() => _error = tr.auth.cloud.unavailableDesc);
-      return;
-    }
     if (!isValidEmail(_email)) {
       setState(() => _error = tr.account.errors.invalidEmail);
       return;
@@ -207,6 +206,15 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
       _busy = true;
       _error = null;
     });
+    final auth = await ref.read(cloudAuthProvider.future);
+    if (!mounted) return;
+    if (auth == null) {
+      setState(() {
+        _busy = false;
+        _error = tr.auth.cloud.unavailableDesc;
+      });
+      return;
+    }
     try {
       await auth.sendPasswordReset(_email.trim());
       if (!mounted) return;

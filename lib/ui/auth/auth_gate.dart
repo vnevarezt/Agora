@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/auth_session.dart';
+import '../../state/cloud_auth.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_spinner.dart';
 import '../widgets/motion.dart';
@@ -20,6 +21,9 @@ class AuthGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Warm Firebase up front: init is lazy, and a button tapped mid-init
+    // would otherwise read null and report the cloud as unconfigured.
+    ref.watch(firebaseAppProvider);
     final state = ref.watch(authSessionProvider);
     return FadeThroughSwitcher(
       child: KeyedSubtree(

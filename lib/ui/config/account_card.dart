@@ -63,7 +63,7 @@ class AccountCard extends ConsumerWidget {
               icon: Icons.logout,
               label: tr.account.signOut,
               onPressed: () async {
-                await ref.read(cloudAuthProvider)?.signOut();
+                await (await ref.read(cloudAuthProvider.future))?.signOut();
               },
             ),
           ),

@@ -74,9 +74,11 @@ final googleSignInAvailableProvider = Provider<bool>((ref) {
   };
 });
 
-/// null while the cloud is disabled.
-final cloudAuthProvider = Provider<CloudAuthService?>((ref) {
-  final app = ref.watch(firebaseAppProvider).value;
+/// null once init settles with the cloud disabled. Await `.future` before
+/// acting so a tap during initialization waits instead of concluding the
+/// cloud is missing.
+final cloudAuthProvider = FutureProvider<CloudAuthService?>((ref) async {
+  final app = await ref.watch(firebaseAppProvider.future);
   if (app == null) return null;
   return CloudAuthService(FirebaseAuth.instanceFor(app: app));
 });
