@@ -62,14 +62,15 @@ final cloudUserProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instanceFor(app: app).authStateChanges();
 });
 
-/// Google button visibility: needs the cloud, a supported platform
-/// (google_sign_in has no Windows implementation) and, on Android, the OAuth
-/// web client ID from cloud_secrets.dart.
+/// Google button availability: needs the cloud, a supported platform
+/// (no Windows implementation; macOS needs provisioned signing the app
+/// doesn't have yet) and, on Android, the OAuth web client ID from
+/// cloud_secrets.dart.
 final googleSignInAvailableProvider = Provider<bool>((ref) {
   if (!ref.watch(firebaseAvailableProvider)) return false;
   return switch (defaultTargetPlatform) {
     TargetPlatform.android => googleServerClientId.isNotEmpty,
-    TargetPlatform.iOS || TargetPlatform.macOS => true,
+    TargetPlatform.iOS => true,
     _ => false,
   };
 });
@@ -129,6 +130,8 @@ class CloudAuthService {
     try {
       account = await gsi.authenticate();
     } on GoogleSignInException catch (e) {
+      debugPrint('GoogleSignIn failed: code=${e.code} '
+          'description=${e.description} details=${e.details}');
       throw switch (e.code) {
         GoogleSignInExceptionCode.canceled ||
         GoogleSignInExceptionCode.interrupted =>
@@ -138,6 +141,7 @@ class CloudAuthService {
     }
     final idToken = account.authentication.idToken;
     if (idToken == null) {
+      debugPrint('GoogleSignIn: authenticated but no idToken returned');
       throw const CloudAuthException(
           CloudAuthErrorCode.unknown, 'Google returned no idToken');
     }
@@ -158,6 +162,7 @@ class CloudAuthService {
     try {
       return await action();
     } on FirebaseAuthException catch (e) {
+      debugPrint('FirebaseAuth error: code=${e.code} message=${e.message}');
       throw CloudAuthException(_mapCode(e.code), e.message);
     }
   }

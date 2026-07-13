@@ -233,9 +233,12 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
   Widget build(BuildContext context) {
     final tr = context.t;
     final t = context.tokens;
-    // The button renders wherever the platform has a google_sign_in
-    // implementation; a missing Firebase config surfaces on tap instead.
-    final googleAvailable = defaultTargetPlatform != TargetPlatform.windows;
+    // Windows has no google_sign_in implementation. On macOS the Google SDK
+    // stores its session in the data-protection keychain, which requires a
+    // provisioning profile — unavailable on free Apple accounts; hidden until
+    // the app is signed with a paid team profile.
+    final googleAvailable = defaultTargetPlatform != TargetPlatform.windows &&
+        defaultTargetPlatform != TargetPlatform.macOS;
 
     return AnimatedSize(
       duration: Motion.med,
