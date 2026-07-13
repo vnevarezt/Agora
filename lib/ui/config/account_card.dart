@@ -19,6 +19,7 @@ class AccountCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tr = context.t;
     final available = ref.watch(firebaseAvailableProvider);
+    final cloudOk = ref.watch(cloudAuthSupportedProvider).value ?? true;
     final user = ref.watch(cloudUserProvider).value;
     final session = ref.watch(authSessionProvider);
     // In cloud mode signing out DOES close the session (it is the gate); the
@@ -32,11 +33,13 @@ class AccountCard extends ConsumerWidget {
           ? tr.account.localGateNote
           : tr.account.desc,
       children: [
-        if (!available)
+        if (!available || !cloudOk)
           SettingRow(
             first: true,
             title: tr.account.notConfigured,
-            subtitle: tr.account.notConfiguredDesc,
+            subtitle: available
+                ? tr.portada.cloudUnsupported
+                : tr.account.notConfiguredDesc,
           )
         else if (user == null)
           SettingRow(

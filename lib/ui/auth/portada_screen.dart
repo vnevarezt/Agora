@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../state/cloud_auth.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -9,7 +11,7 @@ import '../widgets/motion.dart';
 /// `.portada--a`: immersive welcome screen — brand mark, tagline and the
 /// three entry actions (cloud register / cloud sign-in / local only), with
 /// the mock's staggered entrance animation.
-class PortadaScreen extends StatelessWidget {
+class PortadaScreen extends ConsumerWidget {
   const PortadaScreen({
     super.key,
     required this.onCreateAccount,
@@ -22,10 +24,14 @@ class PortadaScreen extends StatelessWidget {
   final VoidCallback onLocal;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final tr = context.t;
     final wide = MediaQuery.sizeOf(context).width >= 1100;
+    // Optimistic while the probe resolves (milliseconds, masked by the
+    // entrance animation); flips to the local-only layout when this install
+    // can't hold a cloud session (macOS without provisioned signing).
+    final cloudOk = ref.watch(cloudAuthSupportedProvider).value ?? true;
 
     return Scaffold(
       backgroundColor: t.bg,
@@ -105,15 +111,27 @@ class PortadaScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _PortadaButton.primary(
-                          label: tr.portada.createAccount,
-                          onTap: onCreateAccount,
-                        ),
-                        const SizedBox(height: 10),
-                        _PortadaButton.ghost(
-                          label: tr.portada.signIn,
-                          onTap: onSignIn,
-                        ),
+                        if (cloudOk) ...[
+                          _PortadaButton.primary(
+                            label: tr.portada.createAccount,
+                            onTap: onCreateAccount,
+                          ),
+                          const SizedBox(height: 10),
+                          _PortadaButton.ghost(
+                            label: tr.portada.signIn,
+                            onTap: onSignIn,
+                          ),
+                        ] else
+                          Text(
+                            tr.portada.cloudUnsupported,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              height: 1.5,
+                              color: t.textMute,
+                            ),
+                          ),
                         const SizedBox(height: 14),
                         _LocalEntryCard(onTap: onLocal),
                       ],

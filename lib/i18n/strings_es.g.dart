@@ -114,6 +114,9 @@ class Translations$portada$es {
 
 	/// es: 'La nube no está configurada en esta instalación; puedes usar el modo local.'
 	String get cloudUnavailable => 'La nube no está configurada en esta instalación; puedes usar el modo local.';
+
+	/// es: 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.'
+	String get cloudUnsupported => 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.';
 }
 
 // Path: auth
@@ -1429,6 +1432,7 @@ extension on Translations {
 			'portada.noAccountCaption' => 'Solo en este dispositivo',
 			'portada.legal' => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.',
 			'portada.cloudUnavailable' => 'La nube no está configurada en esta instalación; puedes usar el modo local.',
+			'portada.cloudUnsupported' => 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.',
 			'auth.chooseOther' => 'Elegir otro modo',
 			'auth.local.pill' => 'Modo local',
 			'auth.local.createTitle' => 'Crea tu perfil local',

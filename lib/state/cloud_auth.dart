@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../cloud_secrets.dart';
@@ -54,6 +55,26 @@ final firebaseAppProvider = FutureProvider<FirebaseApp?>((ref) async {
 
 final firebaseAvailableProvider = Provider<bool>(
     (ref) => ref.watch(firebaseAppProvider).value != null);
+
+/// Whether cloud sign-in can actually work on this install. FirebaseAuth and
+/// GoogleSignIn persist sessions in the data-protection keychain, which on
+/// macOS needs a provisioning profile (paid Apple team); dev builds signed
+/// without one fail every sign-in with keychain errors, so cloud mode hides
+/// itself. The probe passes automatically once the app is signed properly.
+final cloudAuthSupportedProvider = FutureProvider<bool>((ref) async {
+  if (await ref.watch(firebaseAppProvider.future) == null) return false;
+  if (defaultTargetPlatform != TargetPlatform.macOS) return true;
+  const probe = FlutterSecureStorage(
+    mOptions: MacOsOptions(usesDataProtectionKeychain: true),
+  );
+  try {
+    await probe.write(key: 'jw_program.dpk_probe', value: '1');
+    await probe.delete(key: 'jw_program.dpk_probe');
+    return true;
+  } catch (_) {
+    return false;
+  }
+});
 
 /// Signed-in Firebase user (null while signed out or when cloud is disabled).
 final cloudUserProvider = StreamProvider<User?>((ref) {

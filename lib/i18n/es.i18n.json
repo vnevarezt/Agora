@@ -10,7 +10,8 @@
     "noAccountTitle": "Continuar sin cuenta",
     "noAccountCaption": "Solo en este dispositivo",
     "legal": "Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.",
-    "cloudUnavailable": "La nube no está configurada en esta instalación; puedes usar el modo local."
+    "cloudUnavailable": "La nube no está configurada en esta instalación; puedes usar el modo local.",
+    "cloudUnsupported": "El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local."
   },
   "auth": {
     "chooseOther": "Elegir otro modo",

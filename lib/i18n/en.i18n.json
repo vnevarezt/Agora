@@ -10,7 +10,8 @@
     "noAccountTitle": "Continue without an account",
     "noAccountCaption": "Only on this device",
     "legal": "Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.",
-    "cloudUnavailable": "The cloud is not configured on this install; you can use local mode."
+    "cloudUnavailable": "The cloud is not configured on this install; you can use local mode.",
+    "cloudUnsupported": "Cloud mode isn't available on this Mac (requires Apple developer signing); you can use local mode."
   },
   "auth": {
     "chooseOther": "Choose another mode",

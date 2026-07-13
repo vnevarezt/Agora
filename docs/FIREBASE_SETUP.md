@@ -81,11 +81,12 @@ Pick your project; the CLI registers one app per platform and **overwrites
 - **Windows** — `google_sign_in` has no Windows implementation; the button is
   hidden automatically. `firebase_auth` support on Windows is beta: if
   initialization fails the app just runs local.
-- **macOS** — the Google SDK stores its session in the data-protection
-  keychain, which requires a provisioning profile; free Apple accounts can't
-  issue macOS profiles, so the button is hidden there (email/password works).
-  With a paid Apple Developer team, sign the app with its managed profile and
-  remove the macOS exclusion in `cloud_auth_screen.dart`.
+- **macOS** — FirebaseAuth AND the Google SDK persist sessions in the
+  data-protection keychain, which requires a provisioning profile; free Apple
+  accounts can't issue macOS profiles, so **cloud mode hides itself on such
+  installs** (a runtime keychain probe in `cloudAuthSupportedProvider`; local
+  mode always works). Signing with a paid Apple Developer team's managed
+  profile makes the probe pass and cloud mode appear — no code changes.
 
 ## 4. Verify
 

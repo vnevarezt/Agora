@@ -95,6 +95,7 @@ class _Translations$portada$en extends Translations$portada$es {
 	@override String get noAccountCaption => 'Only on this device';
 	@override String get legal => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.';
 	@override String get cloudUnavailable => 'The cloud is not configured on this install; you can use local mode.';
+	@override String get cloudUnsupported => 'Cloud mode isn\'t available on this Mac (requires Apple developer signing); you can use local mode.';
 }
 
 // Path: auth
@@ -753,6 +754,7 @@ extension on TranslationsEn {
 			'portada.noAccountCaption' => 'Only on this device',
 			'portada.legal' => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.',
 			'portada.cloudUnavailable' => 'The cloud is not configured on this install; you can use local mode.',
+			'portada.cloudUnsupported' => 'Cloud mode isn\'t available on this Mac (requires Apple developer signing); you can use local mode.',
 			'auth.chooseOther' => 'Choose another mode',
 			'auth.local.pill' => 'Local mode',
 			'auth.local.createTitle' => 'Create your local profile',
