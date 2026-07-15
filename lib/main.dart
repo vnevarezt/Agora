@@ -10,5 +10,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   pdfrxFlutterInitialize(); // pdfium para rasterizar el preview en escritorio
   await initLocale(); // restaura el idioma guardado o sigue el del dispositivo
-  runApp(TranslationProvider(child: const ProviderScope(child: JwProgramApp())));
+  runApp(
+    TranslationProvider(child: const ProviderScope(child: JwProgramApp())),
+  );
 }
