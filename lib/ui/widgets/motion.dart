@@ -28,6 +28,8 @@ class FadeThroughSwitcher extends StatelessWidget {
       duration: duration,
       switchInCurve: Motion.curve,
       switchOutCurve: Motion.curve,
+      // RepaintBoundary: both surfaces paint into their own cached layer
+      // while they cross-fade, instead of re-painting whole trees per frame.
       transitionBuilder: (child, animation) => FadeTransition(
         opacity: animation,
         child: SlideTransition(
@@ -35,7 +37,7 @@ class FadeThroughSwitcher extends StatelessWidget {
             begin: const Offset(0, .015),
             end: Offset.zero,
           ).animate(animation),
-          child: child,
+          child: RepaintBoundary(child: child),
         ),
       ),
       child: child,
@@ -75,7 +77,7 @@ class SlideSwitcher extends StatelessWidget {
           opacity: animation,
           child: SlideTransition(
             position: Tween(begin: begin, end: Offset.zero).animate(animation),
-            child: candidate,
+            child: RepaintBoundary(child: candidate),
           ),
         );
       },
@@ -128,16 +130,18 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _anim,
-      builder: (context, child) => Opacity(
-        opacity: _anim.value,
-        child: Transform.translate(
+    // FadeTransition animates the layer's opacity (no per-frame rebuild nor
+    // widget-level saveLayer, unlike an Opacity built inside a builder).
+    return FadeTransition(
+      opacity: _anim,
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (context, child) => Transform.translate(
           offset: Offset(0, 14 * (1 - _anim.value)),
           child: child,
         ),
+        child: widget.child,
       ),
-      child: widget.child,
     );
   }
 }
