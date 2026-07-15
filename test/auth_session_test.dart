@@ -1,11 +1,25 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/data/db/db_key_manager.dart';
 import 'package:jw_program/state/auth_session.dart';
 import 'package:jw_program/state/cloud_auth.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/map_key_store.dart';
+
+/// resetAllData deletes the DB file via path_provider, whose platform channel
+/// doesn't exist in unit tests: point it at a temp directory instead.
+class _FakePathProvider extends PathProviderPlatform {
+  _FakePathProvider(this.root);
+
+  final String root;
+
+  @override
+  Future<String?> getApplicationSupportPath() async => root;
+}
 
 ProviderContainer containerWith(MapKeyStore store) {
   final container = ProviderContainer(overrides: [
@@ -31,7 +45,11 @@ Future<SessionState> settled(ProviderContainer container) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    PathProviderPlatform.instance = _FakePathProvider(
+        Directory.systemTemp.createTempSync('agora_test').path);
+  });
 
   test('fresh install (no mode, no keys) routes to FreshChoose', () async {
     final container = containerWith(MapKeyStore());

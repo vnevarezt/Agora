@@ -54,7 +54,9 @@ void main() {
     await pumpApp(tester, MapKeyStore());
 
     await tester.tap(find.text('Iniciar sesión'));
-    await tester.pump(const Duration(milliseconds: 300));
+    // pumpAndSettle: un pump fijo deja la pantalla saliente del
+    // AnimatedSwitcher a mitad de transición (y duplicaría los finders).
+    await tester.pumpAndSettle();
 
     expect(find.text('Modo nube'.toUpperCase()), findsOneWidget);
     expect(find.text('Inicia sesión'), findsOneWidget);
@@ -78,7 +80,7 @@ void main() {
         findsOneWidget);
 
     await tester.tap(find.text('Elegir otro modo'));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
     expect(find.text('Continuar sin cuenta'), findsOneWidget);
   });
 
@@ -87,7 +89,7 @@ void main() {
     await pumpApp(tester, MapKeyStore());
 
     await tester.tap(find.text('Continuar sin cuenta'));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
 
     expect(find.text('Crea tu perfil local'), findsOneWidget);
     expect(find.text('Modo local'.toUpperCase()), findsOneWidget);
@@ -96,6 +98,9 @@ void main() {
     await tester.enterText(fields.at(0), 'Ana Pérez');
     await tester.enterText(fields.at(1), 'corta');
     await tester.enterText(fields.at(2), 'corta');
+    // Sin este pump el botón sigue construido como deshabilitado (el
+    // setState de onChanged aún no re-construyó) y el tap no hace nada.
+    await tester.pump();
     await tester.tap(find.text('Crear perfil y empezar'));
     await tester.pump();
     expect(find.text('La contraseña debe tener al menos 8 caracteres.'),
@@ -103,13 +108,14 @@ void main() {
 
     await tester.enterText(fields.at(1), 'contraseña-larga');
     await tester.enterText(fields.at(2), 'otra-distinta');
+    await tester.pump();
     await tester.tap(find.text('Crear perfil y empezar'));
     await tester.pump();
     expect(find.text('Las contraseñas no coinciden.'), findsOneWidget);
 
     // Volver a la portada.
     await tester.tap(find.text('Elegir otro modo'));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
     expect(find.text('Continuar sin cuenta'), findsOneWidget);
   });
 
@@ -118,8 +124,11 @@ void main() {
     SharedPreferences.setMockInitialValues(
         {'account_mode': 'local', 'local_profile_name': 'Ana Pérez'});
     final store = MapKeyStore();
-    await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('pw-123456');
+    // runAsync: createAccount deriva la KEK con Argon2 en un Isolate.run,
+    // que nunca completa dentro de la zona fake-async de testWidgets.
+    await tester.runAsync(() =>
+        DbKeyManager(store: store, params: testKdfParams)
+            .createAccount('pw-123456'));
 
     await pumpApp(tester, store);
 
