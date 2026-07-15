@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
@@ -10,6 +11,11 @@ import 'pdf_theme.dart';
 
 /// Generates the program PDF reproducing programa-vmc.tex (S-140-S format).
 /// Names are read from [assignments] (kept apart from the structure).
+///
+/// Layout, font subsetting and compression are ~100–300 ms of pure CPU on a
+/// phone, so the document is built in a background isolate: only the font
+/// bytes are loaded here (rootBundle needs the main isolate) and the models
+/// are plain data, safe to send across.
 Future<Uint8List> buildProgramPdf({
   required String congregation,
   required Week week,
@@ -18,7 +24,28 @@ Future<Uint8List> buildProgramPdf({
   String chairman = '',
   bool auxRoom = false,
 }) async {
-  final carlito = await carlitoFonts();
+  final fontBytes = await carlitoFontBytes();
+  return Isolate.run(() => _buildPdf(
+        fontBytes: fontBytes,
+        congregation: congregation,
+        week: week,
+        schedule: schedule,
+        assignments: assignments,
+        chairman: chairman,
+        auxRoom: auxRoom,
+      ));
+}
+
+Future<Uint8List> _buildPdf({
+  required CarlitoBytes fontBytes,
+  required String congregation,
+  required Week week,
+  required ProgramSchedule schedule,
+  required Assignments assignments,
+  required String chairman,
+  required bool auxRoom,
+}) async {
+  final carlito = carlitoFromBytes(fontBytes);
   final doc = pw.Document();
   doc.addPage(
     pw.MultiPage(

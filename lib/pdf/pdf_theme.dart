@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -71,25 +73,39 @@ class S140 {
 /// width (adaptive column widths).
 typedef Carlito = ({pw.ThemeData theme, pw.Font regular, pw.Font bold});
 
-Carlito? _cache;
+/// Raw TTF bytes, loadable only on the main isolate (rootBundle uses platform
+/// channels) but freely sendable to the background isolate that builds the PDF.
+typedef CarlitoBytes = ({
+  ByteData regular,
+  ByteData bold,
+  ByteData italic,
+  ByteData boldItalic,
+});
 
-/// Loads (once) Carlito — a free Calibri clone (tex:17-22). Caching is
-/// essential: reloading ~2.7 MB on each keystroke would break the live preview.
-Future<Carlito> carlitoFonts() async {
-  if (_cache != null) return _cache!;
-  final regular =
-      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Regular.ttf'));
-  final bold =
-      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Bold.ttf'));
-  final italic =
-      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-Italic.ttf'));
-  final boldItalic =
-      pw.Font.ttf(await rootBundle.load('assets/fonts/Carlito-BoldItalic.ttf'));
+CarlitoBytes? _bytesCache;
+
+/// Loads (once) the Carlito TTFs — a free Calibri clone (tex:17-22). Caching
+/// is essential: reloading ~2.7 MB on each keystroke would break the live
+/// preview.
+Future<CarlitoBytes> carlitoFontBytes() async {
+  return _bytesCache ??= (
+    regular: await rootBundle.load('assets/fonts/Carlito-Regular.ttf'),
+    bold: await rootBundle.load('assets/fonts/Carlito-Bold.ttf'),
+    italic: await rootBundle.load('assets/fonts/Carlito-Italic.ttf'),
+    boldItalic: await rootBundle.load('assets/fonts/Carlito-BoldItalic.ttf'),
+  );
+}
+
+/// Parses the fonts and builds the theme. Pure Dart: safe inside the
+/// background isolate that renders the PDF.
+Carlito carlitoFromBytes(CarlitoBytes bytes) {
+  final regular = pw.Font.ttf(bytes.regular);
+  final bold = pw.Font.ttf(bytes.bold);
   final theme = pw.ThemeData.withFont(
     base: regular,
     bold: bold,
-    italic: italic,
-    boldItalic: boldItalic,
+    italic: pw.Font.ttf(bytes.italic),
+    boldItalic: pw.Font.ttf(bytes.boldItalic),
   );
-  return _cache = (theme: theme, regular: regular, bold: bold);
+  return (theme: theme, regular: regular, bold: bold);
 }
