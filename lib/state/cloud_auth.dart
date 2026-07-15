@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../cloud_secrets.dart';
 import '../firebase_options.dart';
+import '../i18n/strings.g.dart';
 
 /// Optional cloud identity (Firebase Auth). The app is local-first by
 /// construction: nothing here runs in main(), a placeholder or missing config
@@ -62,7 +63,9 @@ final firebaseAvailableProvider = Provider<bool>(
 /// without one fail every sign-in with keychain errors, so cloud mode hides
 /// itself. The probe passes automatically once the app is signed properly.
 final cloudAuthSupportedProvider = FutureProvider<bool>((ref) async {
-  if (await ref.watch(firebaseAppProvider.future) == null) return false;
+  // Only the keychain probe hides cloud mode. A missing/placeholder Firebase
+  // config does NOT: the UI is always shown and the attempt explains itself
+  // (see CloudAuthForm), which also keeps dev installs honest.
   if (defaultTargetPlatform != TargetPlatform.macOS) return true;
   const probe = FlutterSecureStorage(
     mOptions: MacOsOptions(usesDataProtectionKeychain: true),
@@ -113,22 +116,38 @@ class CloudAuthService {
   /// google_sign_in v7 requires a single initialize() per process.
   static bool _googleInitialized = false;
 
+  /// Firebase-sent emails (reset, verification) follow the app language.
+  /// Best-effort: a failure must never block the auth action itself.
+  Future<void> _syncEmailLanguage() async {
+    try {
+      await _auth.setLanguageCode(LocaleSettings.currentLocale.languageCode);
+    } catch (_) {}
+  }
+
   Future<void> registerWithEmail(String email, String password,
           {String? displayName}) =>
       _mapAuthErrors(() async {
+        await _syncEmailLanguage();
         final cred = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
         if (displayName != null && displayName.isNotEmpty) {
           await cred.user?.updateDisplayName(displayName);
         }
+        // Informative only (access is never gated on it), so a failure to
+        // send must not fail the registration.
+        try {
+          await cred.user?.sendEmailVerification();
+        } catch (_) {}
       });
 
   Future<void> signInWithEmail(String email, String password) =>
       _mapAuthErrors(() =>
           _auth.signInWithEmailAndPassword(email: email, password: password));
 
-  Future<void> sendPasswordReset(String email) =>
-      _mapAuthErrors(() => _auth.sendPasswordResetEmail(email: email));
+  Future<void> sendPasswordReset(String email) => _mapAuthErrors(() async {
+        await _syncEmailLanguage();
+        await _auth.sendPasswordResetEmail(email: email);
+      });
 
   Future<void> signInWithGoogle() async {
     final gsi = GoogleSignIn.instance;
