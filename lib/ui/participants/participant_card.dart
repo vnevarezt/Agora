@@ -3,10 +3,9 @@ import '../widgets/pill.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/participant.dart';
-import '../theme/dimens.dart';
 import '../theme/tokens.dart';
-import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
+import '../widgets/ink_surface.dart';
 import 'priv_badge.dart';
 
 /// Participant card (`.person-card`): avatar, name with an availability
@@ -32,65 +31,59 @@ class ParticipantCard extends StatelessWidget {
     final g = _genderLabel(context);
     final sub = congregation.isEmpty ? g : '$g · $congregation';
 
-    return Pressable(
+    return InkSurface(
       onTap: onTap,
-      builder: (context, hovered, _) {
-        return AnimatedContainer(
-          duration: Dimens.dFast,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: t.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: hovered ? t.accent : t.border),
-          ),
-          child: Row(
-            children: [
-              PersonAvatar(name: h.name, size: 38),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            h.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: t.text,
-                            ),
+      borderRadius: 14,
+      hoverElevation: 4,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      builder: (context, hovered) {
+        return Row(
+          children: [
+            PersonAvatar(name: h.name, size: 38),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          h.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: t.text,
                           ),
                         ),
-                        const SizedBox(width: 7),
-                        _AvailabilityDot(active: h.active),
-                      ],
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      sub,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: t.textMute,
                       ),
+                      const SizedBox(width: 7),
+                      _AvailabilityDot(active: h.active),
+                    ],
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    sub,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: t.textMute,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              if (h.isIncomplete)
-                const _IncompleteBadge()
-              else
-                PrivBadge(role: h.role),
-            ],
-          ),
+            ),
+            const SizedBox(width: 10),
+            if (h.isIncomplete)
+              const _IncompleteBadge()
+            else
+              PrivBadge(role: h.role),
+          ],
         );
       },
     );

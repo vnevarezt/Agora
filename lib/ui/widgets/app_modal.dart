@@ -36,10 +36,17 @@ Future<T?> showAppModal<T>(
       ),
     );
   }
-  return showDialog<T>(
+  // Material 3 dialog motion: the scrim fades while the surface fades in and
+  // scales up from 92% (emphasized-decelerate feel), instead of the default
+  // opacity-only pop. showGeneralDialog gives us the transitionBuilder that
+  // showDialog hides.
+  return showGeneralDialog<T>(
     context: context,
     barrierColor: _scrim,
-    builder: (ctx) => Dialog(
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    transitionDuration: const Duration(milliseconds: 240),
+    pageBuilder: (ctx, _, _) => Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
       insetPadding: const EdgeInsets.all(24),
@@ -51,5 +58,19 @@ Future<T?> showAppModal<T>(
         child: builder(ctx, false, () => Navigator.of(ctx).pop()),
       ),
     ),
+    transitionBuilder: (ctx, anim, _, child) {
+      final curved = CurvedAnimation(
+        parent: anim,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.92, end: 1.0).animate(curved),
+          child: child,
+        ),
+      );
+    },
   );
 }
