@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 /// Shared motion language: one ease-out curve (the mock's cubic-bezier) and
@@ -9,36 +10,35 @@ abstract final class Motion {
   static const Duration slow = Duration(milliseconds: 500);
 }
 
-/// Cross-fade with a subtle upward settle between children — the default
-/// transition for swapping whole surfaces (gate states, shell sections).
-/// Give each child a distinct key.
+/// Material Design 3 "fade through": the outgoing surface fades out over the
+/// first ~30% while the incoming one fades in and scales up from 92% over the
+/// rest — the two never sit at full opacity at once, so it stays smooth on
+/// low-end GPUs and Windows (unlike a plain cross-dissolve). Backed by the
+/// official `animations` package. Give each child a distinct key.
 class FadeThroughSwitcher extends StatelessWidget {
   const FadeThroughSwitcher({
     super.key,
     required this.child,
     this.duration = Motion.med,
+    this.reverse = false,
   });
 
   final Widget child;
   final Duration duration;
+  final bool reverse;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
+    return PageTransitionSwitcher(
       duration: duration,
-      switchInCurve: Motion.curve,
-      switchOutCurve: Motion.curve,
-      // RepaintBoundary: both surfaces paint into their own cached layer
-      // while they cross-fade, instead of re-painting whole trees per frame.
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
-        child: SlideTransition(
-          position: Tween(
-            begin: const Offset(0, .015),
-            end: Offset.zero,
-          ).animate(animation),
-          child: RepaintBoundary(child: child),
-        ),
+      reverse: reverse,
+      transitionBuilder: (child, primary, secondary) => FadeThroughTransition(
+        animation: primary,
+        secondaryAnimation: secondary,
+        // Transparent: fade through to whatever is behind (the Scaffold bg)
+        // instead of flashing an opaque theme color mid-transition.
+        fillColor: Colors.transparent,
+        child: RepaintBoundary(child: child),
       ),
       child: child,
     );

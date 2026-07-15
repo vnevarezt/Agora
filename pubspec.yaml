@@ -34,6 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # Official Material motion package (Flutter team): MD3 fade-through /
+  # shared-axis transitions, tested smooth across desktop + mobile.
+  animations: ^2.0.11
   pdfrx: ^2.4.3
   pdf: ^3.12.0
   http: ^1.6.0

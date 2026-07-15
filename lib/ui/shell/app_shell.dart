@@ -20,10 +20,9 @@ class AppShell extends ConsumerWidget {
     final size = context.screenSize;
     final section = ref.watch(appSectionProvider);
 
-    // Motion.fast: the 300 ms default cross-fade made every nav tap feel
-    // sluggish — the old section stays on screen for the whole fade.
+    // MD3 fade-through: the old section fades out fast (no lingering overlap),
+    // so 300 ms reads crisp rather than sluggish.
     final body = FadeThroughSwitcher(
-      duration: Motion.fast,
       child: KeyedSubtree(
         key: ValueKey(section),
         child: switch (section) {
