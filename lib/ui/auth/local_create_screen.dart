@@ -71,6 +71,13 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
           _error = e.message;
         });
       }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = tr.account.errors.unknown;
+        });
+      }
     }
   }
 

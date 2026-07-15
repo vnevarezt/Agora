@@ -110,6 +110,10 @@ class SessionController extends Notifier<SessionState> {
       }
     } on DbKeyException catch (e) {
       state = SessionKeyError(e.message);
+    } catch (e) {
+      // Anything else (prefs/platform) would leave the splash spinning
+      // forever; surface it with the retry screen instead.
+      state = SessionKeyError('$e');
     }
   }
 
@@ -158,6 +162,8 @@ class SessionController extends Notifier<SessionState> {
       await _startCloudWatch();
     } on DbKeyException catch (e) {
       state = SessionKeyError(e.message);
+    } catch (e) {
+      state = SessionKeyError('$e');
     }
   }
 
@@ -166,6 +172,11 @@ class SessionController extends Notifier<SessionState> {
   Future<void> resetAllData() async {
     await _cloudSub?.cancel();
     _cloudSub = null;
+    // Best-effort: don't leave a ghost Firebase session behind the fresh
+    // Portada (also covers local-mode users signed in from Settings).
+    try {
+      await (await ref.read(cloudAuthProvider.future))?.signOut();
+    } catch (_) {}
     final file = await databaseFile();
     if (await file.exists()) await file.delete();
     await _keys.destroyAll();

@@ -114,6 +114,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
   String _password = '';
   String _confirm = '';
   bool _busy = false;
+  bool _googleBusy = false; // which control shows the spinner
   String? _error;
 
   bool get _login => widget.mode == CloudFormMode.login;
@@ -137,9 +138,13 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
     };
   }
 
-  Future<void> _run(Future<void> Function(CloudAuthService auth) action) async {
+  Future<void> _run(
+    Future<void> Function(CloudAuthService auth) action, {
+    bool google = false,
+  }) async {
     setState(() {
       _busy = true;
+      _googleBusy = google;
       _error = null;
     });
     final auth = await ref.read(cloudAuthProvider.future);
@@ -149,6 +154,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
       // itself instead of hiding the whole cloud mode.
       setState(() {
         _busy = false;
+        _googleBusy = false;
         _error = context.t.auth.cloud.unavailableDesc;
       });
       return;
@@ -160,10 +166,20 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
       if (!mounted) return;
       setState(() {
         _busy = false;
+        _googleBusy = false;
         // A canceled Google flow is not an error the user needs explained.
         _error = e.code == CloudAuthErrorCode.canceled
             ? null
             : _errorText(e.code);
+      });
+    } catch (e) {
+      // Never strand the form busy on an unexpected (non-Firebase) failure.
+      debugPrint('Cloud auth unexpected error: $e');
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _googleBusy = false;
+        _error = context.t.account.errors.unknown;
       });
     }
   }
@@ -226,6 +242,13 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
         _busy = false;
         _error = _errorText(e.code);
       });
+    } catch (e) {
+      debugPrint('Password reset unexpected error: $e');
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = tr.account.errors.unknown;
+      });
     }
   }
 
@@ -250,10 +273,11 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
           if (googleAvailable) ...[
             GoogleButton(
               label: tr.auth.cloud.google,
-              busy: false,
+              busy: _googleBusy,
               onPressed: _busy
                   ? null
-                  : () => _run((auth) => auth.signInWithGoogle()),
+                  : () =>
+                      _run((auth) => auth.signInWithGoogle(), google: true),
             ),
             const SizedBox(height: 13),
             Row(
@@ -363,7 +387,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                 : tr.auth.cloud.registerButton,
             height: 46,
             expand: true,
-            busy: _busy,
+            busy: _busy && !_googleBusy,
             onPressed: _canSubmit ? _submit : null,
           ),
         ],
