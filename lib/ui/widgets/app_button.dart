@@ -30,6 +30,10 @@ class _PressableState extends State<Pressable> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
+        // opaque: with the default deferToChild only PAINTED pixels react,
+        // so controls without a background (bottom-nav items, text links)
+        // had dead zones everywhere except the icon/label glyphs.
+        behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),

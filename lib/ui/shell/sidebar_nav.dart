@@ -353,40 +353,45 @@ class _BottomItem extends ConsumerWidget {
 
     return Pressable(
       onTap: () => ref.read(appSectionProvider.notifier).select(section),
-      builder: (context, hovered, _) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(icon, size: 21, color: fg),
-                if (badge > 0)
-                  Positioned(
-                    top: -5,
-                    right: -8,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: t.accent,
-                        shape: BoxShape.circle,
+      // Instant dim on touch-down: the only immediate cue on mobile that
+      // the tap registered (the color only flips on rebuild, after tap-up).
+      builder: (context, hovered, pressed) => Opacity(
+        opacity: pressed ? 0.55 : 1,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(icon, size: 21, color: fg),
+                  if (badge > 0)
+                    Positioned(
+                      top: -5,
+                      right: -8,
+                      child: Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: t.accent,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: fg,
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  color: fg,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
