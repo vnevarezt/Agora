@@ -5,26 +5,32 @@ import '../../i18n/strings.g.dart';
 import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/ui_state.dart';
-import '../theme/dimens.dart';
 import '../theme/tokens.dart';
-import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
+import '../widgets/motion.dart';
 
 /// Shell navigation items (same order in the side bar and the bottom
-/// bar). Labels follow the active language.
-List<({AppSection section, IconData icon, String label})> _items(
-        Translations tr) =>
-    [
-      (section: AppSection.home, icon: Icons.home_outlined, label: tr.nav.home),
+/// bar). Labels follow the active language. Each item pairs an outline icon
+/// (inactive) with a filled variant (active) for the MD3 selection change.
+List<({AppSection section, IconData icon, IconData activeIcon, String label})>
+    _items(Translations tr) => [
+      (
+        section: AppSection.home,
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home_rounded,
+        label: tr.nav.home,
+      ),
       (
         section: AppSection.participants,
         icon: Icons.people_outline,
-        label: tr.nav.participants
+        activeIcon: Icons.people_rounded,
+        label: tr.nav.participants,
       ),
       (
         section: AppSection.settings,
         icon: Icons.settings_outlined,
-        label: tr.nav.settings
+        activeIcon: Icons.settings_rounded,
+        label: tr.nav.settings,
       ),
     ];
 
@@ -33,6 +39,43 @@ final _alertsProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
     .where((r) => r.type == ReminderType.alert)
     .length);
+
+/// Icon that cross-fades (with a small scale pop) between its outline and
+/// filled variants when the item selection changes — the MD3 destination cue.
+class _NavIcon extends StatelessWidget {
+  const _NavIcon({
+    required this.icon,
+    required this.activeIcon,
+    required this.active,
+    required this.color,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final bool active;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: Motion.fast,
+      switchInCurve: Motion.curve,
+      transitionBuilder: (child, anim) => FadeTransition(
+        opacity: anim,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.82, end: 1.0).animate(anim),
+          child: child,
+        ),
+      ),
+      child: Icon(
+        active ? activeIcon : icon,
+        key: ValueKey(active),
+        size: 21,
+        color: color,
+      ),
+    );
+  }
+}
 
 /// Side bar (`.sidebar`): brand, navigation and user card.
 /// With [compact] it goes icon-only (64px) for tablet.
@@ -65,6 +108,7 @@ class Sidebar extends ConsumerWidget {
             _NavItem(
               section: it.section,
               icon: it.icon,
+              activeIcon: it.activeIcon,
               label: it.label,
               compact: compact,
               active: section == it.section,
@@ -135,10 +179,14 @@ class _Brand extends StatelessWidget {
   }
 }
 
+/// Navigation rail item (MD3): a rounded active-indicator surface that fades
+/// in behind the selected destination, real ink ripple + state layers, and
+/// the outline→filled icon transition.
 class _NavItem extends ConsumerWidget {
   const _NavItem({
     required this.section,
     required this.icon,
+    required this.activeIcon,
     required this.label,
     required this.compact,
     required this.active,
@@ -147,6 +195,7 @@ class _NavItem extends ConsumerWidget {
 
   final AppSection section;
   final IconData icon;
+  final IconData activeIcon;
   final String label;
   final bool compact;
   final bool active;
@@ -155,55 +204,71 @@ class _NavItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    return Pressable(
-      onTap: () => ref.read(appSectionProvider.notifier).select(section),
-      tooltip: compact ? label : null,
-      builder: (context, hovered, _) {
-        final fg = active ? t.accentStrong : (hovered ? t.text : t.textDim);
-        final bg = active
-            ? t.accentSoft
-            : (hovered ? t.surface2 : Colors.transparent);
-        final ic = Icon(icon, size: 18, color: fg);
+    final fg = active ? t.accentStrong : t.textDim;
+    final radius = BorderRadius.circular(12);
 
-        return AnimatedContainer(
-          duration: Dimens.dFast,
-          padding: EdgeInsets.symmetric(
-              horizontal: compact ? 0 : 12, vertical: compact ? 11 : 10),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: compact
-              ? (badge > 0
-                  ? Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-                        ic,
-                        Positioned(top: -7, right: -9, child: _badge(t)),
-                      ],
-                    )
-                  : Center(child: ic))
-              : Row(
-                  children: [
-                    ic,
-                    const SizedBox(width: 11),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
-                      ),
-                    ),
-                    if (badge > 0) _badge(t),
-                  ],
+    final navIcon =
+        _NavIcon(icon: icon, activeIcon: activeIcon, active: active, color: fg);
+
+    final content = compact
+        ? Center(
+            child: badge > 0
+                ? Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [navIcon, Positioned(top: -7, right: -9, child: _badge(t))],
+                  )
+                : navIcon,
+          )
+        : Row(
+            children: [
+              navIcon,
+              const SizedBox(width: 11),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: fg,
+                  ),
                 ),
-        );
-      },
+              ),
+              if (badge > 0) _badge(t),
+            ],
+          );
+
+    // Material animates its color (indicator fade in/out) and hosts the ink;
+    // the InkWell overlay is a proper MD3 state layer tinted with the accent.
+    Widget item = Material(
+      color: active ? t.accentSoft : Colors.transparent,
+      animationDuration: Motion.med,
+      borderRadius: radius,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => ref.read(appSectionProvider.notifier).select(section),
+        borderRadius: radius,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
+            return t.accent.withValues(alpha: 0.13);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return t.accent.withValues(alpha: 0.07);
+          }
+          return null;
+        }),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 0 : 12,
+            vertical: compact ? 11 : 10,
+          ),
+          child: content,
+        ),
+      ),
     );
+
+    if (compact) item = Tooltip(message: label, child: item);
+    return item;
   }
 
   Widget _badge(AppTokens t) => Container(
@@ -291,7 +356,10 @@ class _UserCard extends StatelessWidget {
   }
 }
 
-/// Mobile bottom navigation bar (`.bottom-nav`).
+/// Mobile bottom navigation (`.bottom-nav`): the Material 3 [NavigationBar],
+/// themed to the app tokens. It brings the sliding pill indicator, the ink
+/// ripple and the outline→filled icon change for free — and animates the same
+/// way on every platform (the hand-rolled version stuttered on Windows).
 class BottomNav extends ConsumerWidget {
   const BottomNav({super.key});
 
@@ -301,94 +369,59 @@ class BottomNav extends ConsumerWidget {
     final section = ref.watch(appSectionProvider);
     final alerts = ref.watch(_alertsProvider);
     final items = _items(context.t);
+    final selected = items.indexWhere((e) => e.section == section);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: t.surface,
         border: Border(top: BorderSide(color: t.border)),
       ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-          child: Row(
-            children: [
-              for (final it in items)
-                Expanded(
-                  child: _BottomItem(
-                    section: it.section,
-                    icon: it.icon,
-                    label: it.label,
-                    active: section == it.section,
-                    badge: it.section == AppSection.home ? alerts : 0,
-                  ),
-                ),
-            ],
+      child: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: t.surface,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          indicatorColor: t.accentSoft,
+          indicatorShape: const StadiumBorder(),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          iconTheme: WidgetStateProperty.resolveWith(
+            (states) => IconThemeData(
+              size: 24,
+              color: states.contains(WidgetState.selected)
+                  ? t.accentStrong
+                  : t.textMute,
+            ),
+          ),
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) => TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: states.contains(WidgetState.selected)
+                  ? t.accentStrong
+                  : t.textMute,
+            ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BottomItem extends ConsumerWidget {
-  const _BottomItem({
-    required this.section,
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.badge,
-  });
-
-  final AppSection section;
-  final IconData icon;
-  final String label;
-  final bool active;
-  final int badge;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
-    final fg = active ? t.accentStrong : t.textMute;
-
-    return Pressable(
-      onTap: () => ref.read(appSectionProvider.notifier).select(section),
-      builder: (context, hovered, _) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(icon, size: 21, color: fg),
-                if (badge > 0)
-                  Positioned(
-                    top: -5,
-                    right: -8,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: t.accent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: fg,
+        child: NavigationBar(
+          height: 72,
+          selectedIndex: selected < 0 ? 0 : selected,
+          onDestinationSelected: (i) =>
+              ref.read(appSectionProvider.notifier).select(items[i].section),
+          destinations: [
+            for (final it in items)
+              NavigationDestination(
+                icon: _navBadge(t, it.section, alerts, Icon(it.icon)),
+                selectedIcon:
+                    _navBadge(t, it.section, alerts, Icon(it.activeIcon)),
+                label: it.label,
               ),
-            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _navBadge(AppTokens t, AppSection section, int alerts, Widget icon) =>
+      (section == AppSection.home && alerts > 0)
+          ? Badge(backgroundColor: t.accent, child: icon)
+          : icon;
 }

@@ -66,6 +66,8 @@ Agora es una aplicación nativa de Flutter.
 
 No. Agora funciona en modo local: todo se guarda en el dispositivo y la app es completamente funcional sin conexión. El único uso de red es la descarga de los cuadernos de la reunión cuando se publican nuevos. La copia de seguridad portátil permite proteger los datos y moverlos entre dispositivos.
 
+Una **cuenta local** protege tus datos: la llave de cifrado de la base de datos se envuelve con tu contraseña, así que abrir la app siempre la requiere. No hay recuperación a propósito — **si olvidas la contraseña local, los datos de ese dispositivo se pierden** (mantén copias portátiles). Opcionalmente puedes iniciar sesión con una **cuenta de nube** (Firebase, correo/contraseña o Google) como identidad para la sincronización futura; nunca sustituye a la contraseña local. Cada desarrollador conecta su propio proyecto de Firebase — en este repositorio no vive ninguna configuración de nube. Ver [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
+
 ## Tecnologías
 
 - [Flutter](https://flutter.dev) + [Riverpod](https://riverpod.dev) — UI y gestión de estado
@@ -78,9 +80,12 @@ No. Agora funciona en modo local: todo se guarda en el dispositivo y la app es c
 ```bash
 git clone https://github.com/vnevarezt/Agora.git
 cd Agora
+sh tool/bootstrap.sh # crea los placeholders de config ignorados por git (funciona 100 % local)
 flutter pub get
 flutter run          # elige tu dispositivo: macOS, Windows, Android, iOS
 ```
+
+Para habilitar el inicio de sesión de nube opcional con tu propio proyecto de Firebase, sigue [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
 
 Comandos útiles:
 

@@ -4,9 +4,9 @@ import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
 import '../responsive.dart';
-import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/ink_surface.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
@@ -32,34 +32,18 @@ class ProjectCard extends StatelessWidget {
     final t = context.tokens;
     final p = project;
 
-    return Pressable(
+    return InkSurface(
       onTap: onTap,
-      builder: (context, hovered, _) {
+      borderRadius: 16,
+      hoverElevation: 6,
+      builder: (context, hovered) {
         // On desktop the kebab appears on hover; on mobile always.
         final mostrarKebab = hovered || context.isMobile;
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            AnimatedContainer(
-              duration: Dimens.dFast,
-              transform: hovered
-                  ? (Matrix4.identity()..translateByDouble(0, -1, 0, 1))
-                  : Matrix4.identity(),
+            Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-              decoration: BoxDecoration(
-                color: t.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: hovered ? t.accent : t.border),
-                boxShadow: hovered
-                    ? const [
-                        BoxShadow(
-                          color: Color(0x1F000000),
-                          blurRadius: 18,
-                          offset: Offset(0, 4),
-                        ),
-                      ]
-                    : null,
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

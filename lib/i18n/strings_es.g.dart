@@ -41,6 +41,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	// Translations
 	late final Translations$app$es app = Translations$app$es.internal(_root);
+	late final Translations$portada$es portada = Translations$portada$es.internal(_root);
+	late final Translations$auth$es auth = Translations$auth$es.internal(_root);
+	late final Translations$security$es security = Translations$security$es.internal(_root);
+	late final Translations$account$es account = Translations$account$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
 	late final Translations$sync$es sync = Translations$sync$es.internal(_root);
@@ -80,6 +84,160 @@ class Translations$app$es {
 
 	/// es: 'Programa'
 	String get defaultProjectName => 'Programa';
+}
+
+// Path: portada
+class Translations$portada$es {
+	Translations$portada$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Programas, asignaciones y hermanos de tu congregación, organizados con claridad.'
+	String get tagline => 'Programas, asignaciones y hermanos de tu congregación, organizados con claridad.';
+
+	/// es: 'Crear cuenta'
+	String get createAccount => 'Crear cuenta';
+
+	/// es: 'Iniciar sesión'
+	String get signIn => 'Iniciar sesión';
+
+	/// es: 'Continuar sin cuenta'
+	String get noAccountTitle => 'Continuar sin cuenta';
+
+	/// es: 'Solo en este dispositivo'
+	String get noAccountCaption => 'Solo en este dispositivo';
+
+	/// es: 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.'
+	String get legal => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.';
+
+	/// es: 'La nube no está configurada en esta instalación; puedes usar el modo local.'
+	String get cloudUnavailable => 'La nube no está configurada en esta instalación; puedes usar el modo local.';
+
+	/// es: 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.'
+	String get cloudUnsupported => 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.';
+}
+
+// Path: auth
+class Translations$auth$es {
+	Translations$auth$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Elegir otro modo'
+	String get chooseOther => 'Elegir otro modo';
+
+	late final Translations$auth$local$es local = Translations$auth$local$es.internal(_root);
+	late final Translations$auth$cloud$es cloud = Translations$auth$cloud$es.internal(_root);
+	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
+	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
+}
+
+// Path: security
+class Translations$security$es {
+	Translations$security$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Seguridad'
+	String get title => 'Seguridad';
+
+	/// es: 'Cuenta local que protege tus datos cifrados en este dispositivo.'
+	String get desc => 'Cuenta local que protege tus datos cifrados en este dispositivo.';
+
+	/// es: 'Cambiar contraseña'
+	String get changePassword => 'Cambiar contraseña';
+
+	/// es: 'Vuelve a proteger la llave de cifrado con una contraseña nueva.'
+	String get changePasswordDesc => 'Vuelve a proteger la llave de cifrado con una contraseña nueva.';
+
+	/// es: 'Cambiar'
+	String get change => 'Cambiar';
+
+	/// es: 'Contraseña actual'
+	String get current => 'Contraseña actual';
+
+	/// es: 'Contraseña nueva'
+	String get newPassword => 'Contraseña nueva';
+
+	/// es: 'Confirmar contraseña nueva'
+	String get confirmNew => 'Confirmar contraseña nueva';
+
+	/// es: 'La contraseña actual no es correcta.'
+	String get wrongCurrent => 'La contraseña actual no es correcta.';
+
+	/// es: 'Contraseña actualizada.'
+	String get changed => 'Contraseña actualizada.';
+
+	/// es: 'Bloquear ahora'
+	String get lockNow => 'Bloquear ahora';
+
+	/// es: 'Cierra la sesión local; pedirá la contraseña al volver.'
+	String get lockNowDesc => 'Cierra la sesión local; pedirá la contraseña al volver.';
+
+	/// es: 'Bloquear'
+	String get lock => 'Bloquear';
+}
+
+// Path: account
+class Translations$account$es {
+	Translations$account$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Cuenta en la nube'
+	String get title => 'Cuenta en la nube';
+
+	/// es: 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.'
+	String get desc => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.';
+
+	/// es: 'Nube no configurada'
+	String get notConfigured => 'Nube no configurada';
+
+	/// es: 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.'
+	String get notConfiguredDesc => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.';
+
+	/// es: 'Iniciar sesión'
+	String get signIn => 'Iniciar sesión';
+
+	/// es: 'Crear cuenta'
+	String get register => 'Crear cuenta';
+
+	/// es: 'Continuar con Google'
+	String get google => 'Continuar con Google';
+
+	/// es: 'o'
+	String get or => 'o';
+
+	/// es: 'Correo electrónico'
+	String get email => 'Correo electrónico';
+
+	/// es: 'Contraseña'
+	String get password => 'Contraseña';
+
+	/// es: '¿Olvidaste tu contraseña?'
+	String get forgotPassword => '¿Olvidaste tu contraseña?';
+
+	/// es: 'Te enviamos un correo para restablecer la contraseña.'
+	String get resetSent => 'Te enviamos un correo para restablecer la contraseña.';
+
+	/// es: 'Sesión iniciada'
+	String get signedInAs => 'Sesión iniciada';
+
+	/// es: 'Cerrar sesión'
+	String get signOut => 'Cerrar sesión';
+
+	/// es: 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.'
+	String get localGateNote => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.';
+
+	late final Translations$account$errors$es errors = Translations$account$errors$es.internal(_root);
 }
 
 // Path: nav
@@ -990,6 +1148,240 @@ class Translations$relativeTime$es {
 	String get now => 'ahora mismo';
 }
 
+// Path: auth.local
+class Translations$auth$local$es {
+	Translations$auth$local$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Modo local'
+	String get pill => 'Modo local';
+
+	/// es: 'Crea tu perfil local'
+	String get createTitle => 'Crea tu perfil local';
+
+	/// es: 'Se guarda únicamente en este dispositivo.'
+	String get createSub => 'Se guarda únicamente en este dispositivo.';
+
+	/// es: 'Protege tus datos'
+	String get migrateTitle => 'Protege tus datos';
+
+	/// es: 'Esta versión añade un perfil local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.'
+	String get migrateSub => 'Esta versión añade un perfil local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.';
+
+	/// es: 'Tu nombre'
+	String get name => 'Tu nombre';
+
+	/// es: 'Ej. Andrés Beltrán'
+	String get nameHint => 'Ej. Andrés Beltrán';
+
+	/// es: 'Contraseña'
+	String get password => 'Contraseña';
+
+	/// es: 'Mínimo 8 caracteres'
+	String get passwordHint => 'Mínimo 8 caracteres';
+
+	/// es: 'Confirmar contraseña'
+	String get confirm => 'Confirmar contraseña';
+
+	/// es: 'Repite la contraseña'
+	String get confirmHint => 'Repite la contraseña';
+
+	/// es: 'Tu nombre, contraseña y todos tus datos viven solo aquí. Si olvidas la contraseña '
+	String get note1 => 'Tu nombre, contraseña y todos tus datos viven solo aquí. Si olvidas la contraseña ';
+
+	/// es: 'no podremos recuperarla'
+	String get noteBold => 'no podremos recuperarla';
+
+	/// es: ' — te recomendamos exportar copias de seguridad desde Configuración.'
+	String get note2 => ' — te recomendamos exportar copias de seguridad desde Configuración.';
+
+	/// es: 'Crear perfil y empezar'
+	String get createButton => 'Crear perfil y empezar';
+
+	/// es: 'Protegiendo…'
+	String get working => 'Protegiendo…';
+
+	/// es: 'La contraseña debe tener al menos 8 caracteres.'
+	String get tooShort => 'La contraseña debe tener al menos 8 caracteres.';
+
+	/// es: 'Las contraseñas no coinciden.'
+	String get mismatch => 'Las contraseñas no coinciden.';
+
+	/// es: 'Perfil local · este dispositivo'
+	String get profileCaption => 'Perfil local · este dispositivo';
+
+	/// es: 'Desbloquear'
+	String get unlockButton => 'Desbloquear';
+
+	/// es: 'Descifrando…'
+	String get unlocking => 'Descifrando…';
+
+	/// es: 'Contraseña incorrecta.'
+	String get wrongPassword => 'Contraseña incorrecta.';
+
+	/// es: '¿Empezar de cero?'
+	String get startOver => '¿Empezar de cero?';
+
+	/// es: 'Crear otro perfil'
+	String get createAnother => 'Crear otro perfil';
+}
+
+// Path: auth.cloud
+class Translations$auth$cloud$es {
+	Translations$auth$cloud$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Modo nube'
+	String get pill => 'Modo nube';
+
+	/// es: 'Inicia sesión'
+	String get loginTitle => 'Inicia sesión';
+
+	/// es: 'Tus congregaciones y proyectos te esperan.'
+	String get loginSub => 'Tus congregaciones y proyectos te esperan.';
+
+	/// es: 'Crea tu cuenta'
+	String get registerTitle => 'Crea tu cuenta';
+
+	/// es: 'Sincroniza y comparte con tu congregación.'
+	String get registerSub => 'Sincroniza y comparte con tu congregación.';
+
+	/// es: 'Continuar con Google'
+	String get google => 'Continuar con Google';
+
+	/// es: 'o con tu correo'
+	String get orEmail => 'o con tu correo';
+
+	/// es: 'Tu nombre'
+	String get name => 'Tu nombre';
+
+	/// es: 'Ej. Andrés Beltrán'
+	String get nameHint => 'Ej. Andrés Beltrán';
+
+	/// es: 'Correo'
+	String get email => 'Correo';
+
+	/// es: 'tu@correo.com'
+	String get emailHint => 'tu@correo.com';
+
+	/// es: 'Contraseña'
+	String get password => 'Contraseña';
+
+	/// es: 'Tu contraseña'
+	String get passwordHintLogin => 'Tu contraseña';
+
+	/// es: 'Mínimo 8 caracteres'
+	String get passwordHintRegister => 'Mínimo 8 caracteres';
+
+	/// es: 'Confirmar contraseña'
+	String get confirm => 'Confirmar contraseña';
+
+	/// es: 'Repite la contraseña'
+	String get confirmHint => 'Repite la contraseña';
+
+	/// es: '¿Olvidaste tu contraseña?'
+	String get forgot => '¿Olvidaste tu contraseña?';
+
+	/// es: 'Iniciar sesión'
+	String get loginButton => 'Iniciar sesión';
+
+	/// es: 'Crear cuenta'
+	String get registerButton => 'Crear cuenta';
+
+	/// es: '¿No tienes cuenta?'
+	String get noAccount => '¿No tienes cuenta?';
+
+	/// es: 'Regístrate'
+	String get register => 'Regístrate';
+
+	/// es: '¿Ya tienes cuenta?'
+	String get hasAccount => '¿Ya tienes cuenta?';
+
+	/// es: 'Inicia sesión'
+	String get login => 'Inicia sesión';
+
+	/// es: 'Nube no configurada'
+	String get unavailableTitle => 'Nube no configurada';
+
+	/// es: 'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.'
+	String get unavailableDesc => 'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.';
+}
+
+// Path: auth.reset
+class Translations$auth$reset$es {
+	Translations$auth$reset$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Borrar todos los datos'
+	String get title => 'Borrar todos los datos';
+
+	/// es: 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.'
+	String get warning => 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.';
+
+	/// es: 'BORRAR'
+	String get confirmPhrase => 'BORRAR';
+
+	/// es: 'Escribe {phrase} para confirmar'
+	String confirmHint({required Object phrase}) => 'Escribe ${phrase} para confirmar';
+
+	/// es: 'Borrar todo'
+	String get button => 'Borrar todo';
+}
+
+// Path: auth.keyError
+class Translations$auth$keyError$es {
+	Translations$auth$keyError$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'No se pudo acceder al llavero del sistema'
+	String get title => 'No se pudo acceder al llavero del sistema';
+
+	/// es: 'Reintentar'
+	String get retry => 'Reintentar';
+}
+
+// Path: account.errors
+class Translations$account$errors$es {
+	Translations$account$errors$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'El correo no es válido.'
+	String get invalidEmail => 'El correo no es válido.';
+
+	/// es: 'No existe una cuenta con ese correo.'
+	String get userNotFound => 'No existe una cuenta con ese correo.';
+
+	/// es: 'Correo o contraseña incorrectos.'
+	String get wrongPassword => 'Correo o contraseña incorrectos.';
+
+	/// es: 'Ya existe una cuenta con ese correo.'
+	String get emailInUse => 'Ya existe una cuenta con ese correo.';
+
+	/// es: 'La contraseña es demasiado débil (mínimo 6 caracteres).'
+	String get weakPassword => 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+
+	/// es: 'Sin conexión. Inténtalo de nuevo.'
+	String get network => 'Sin conexión. Inténtalo de nuevo.';
+
+	/// es: 'No se pudo completar la operación. Inténtalo de nuevo.'
+	String get unknown => 'No se pudo completar la operación. Inténtalo de nuevo.';
+}
+
 // Path: settings.notif
 class Translations$settings$notif$es {
 	Translations$settings$notif$es.internal(this._root);
@@ -1033,6 +1425,106 @@ extension on Translations {
 		return switch (path) {
 			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Programa',
+			'portada.tagline' => 'Programas, asignaciones y hermanos de tu congregación, organizados con claridad.',
+			'portada.createAccount' => 'Crear cuenta',
+			'portada.signIn' => 'Iniciar sesión',
+			'portada.noAccountTitle' => 'Continuar sin cuenta',
+			'portada.noAccountCaption' => 'Solo en este dispositivo',
+			'portada.legal' => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.',
+			'portada.cloudUnavailable' => 'La nube no está configurada en esta instalación; puedes usar el modo local.',
+			'portada.cloudUnsupported' => 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.',
+			'auth.chooseOther' => 'Elegir otro modo',
+			'auth.local.pill' => 'Modo local',
+			'auth.local.createTitle' => 'Crea tu perfil local',
+			'auth.local.createSub' => 'Se guarda únicamente en este dispositivo.',
+			'auth.local.migrateTitle' => 'Protege tus datos',
+			'auth.local.migrateSub' => 'Esta versión añade un perfil local: crea una contraseña para proteger los datos que ya tienes en este dispositivo.',
+			'auth.local.name' => 'Tu nombre',
+			'auth.local.nameHint' => 'Ej. Andrés Beltrán',
+			'auth.local.password' => 'Contraseña',
+			'auth.local.passwordHint' => 'Mínimo 8 caracteres',
+			'auth.local.confirm' => 'Confirmar contraseña',
+			'auth.local.confirmHint' => 'Repite la contraseña',
+			'auth.local.note1' => 'Tu nombre, contraseña y todos tus datos viven solo aquí. Si olvidas la contraseña ',
+			'auth.local.noteBold' => 'no podremos recuperarla',
+			'auth.local.note2' => ' — te recomendamos exportar copias de seguridad desde Configuración.',
+			'auth.local.createButton' => 'Crear perfil y empezar',
+			'auth.local.working' => 'Protegiendo…',
+			'auth.local.tooShort' => 'La contraseña debe tener al menos 8 caracteres.',
+			'auth.local.mismatch' => 'Las contraseñas no coinciden.',
+			'auth.local.profileCaption' => 'Perfil local · este dispositivo',
+			'auth.local.unlockButton' => 'Desbloquear',
+			'auth.local.unlocking' => 'Descifrando…',
+			'auth.local.wrongPassword' => 'Contraseña incorrecta.',
+			'auth.local.startOver' => '¿Empezar de cero?',
+			'auth.local.createAnother' => 'Crear otro perfil',
+			'auth.cloud.pill' => 'Modo nube',
+			'auth.cloud.loginTitle' => 'Inicia sesión',
+			'auth.cloud.loginSub' => 'Tus congregaciones y proyectos te esperan.',
+			'auth.cloud.registerTitle' => 'Crea tu cuenta',
+			'auth.cloud.registerSub' => 'Sincroniza y comparte con tu congregación.',
+			'auth.cloud.google' => 'Continuar con Google',
+			'auth.cloud.orEmail' => 'o con tu correo',
+			'auth.cloud.name' => 'Tu nombre',
+			'auth.cloud.nameHint' => 'Ej. Andrés Beltrán',
+			'auth.cloud.email' => 'Correo',
+			'auth.cloud.emailHint' => 'tu@correo.com',
+			'auth.cloud.password' => 'Contraseña',
+			'auth.cloud.passwordHintLogin' => 'Tu contraseña',
+			'auth.cloud.passwordHintRegister' => 'Mínimo 8 caracteres',
+			'auth.cloud.confirm' => 'Confirmar contraseña',
+			'auth.cloud.confirmHint' => 'Repite la contraseña',
+			'auth.cloud.forgot' => '¿Olvidaste tu contraseña?',
+			'auth.cloud.loginButton' => 'Iniciar sesión',
+			'auth.cloud.registerButton' => 'Crear cuenta',
+			'auth.cloud.noAccount' => '¿No tienes cuenta?',
+			'auth.cloud.register' => 'Regístrate',
+			'auth.cloud.hasAccount' => '¿Ya tienes cuenta?',
+			'auth.cloud.login' => 'Inicia sesión',
+			'auth.cloud.unavailableTitle' => 'Nube no configurada',
+			'auth.cloud.unavailableDesc' => 'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.',
+			'auth.reset.title' => 'Borrar todos los datos',
+			'auth.reset.warning' => 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.',
+			'auth.reset.confirmPhrase' => 'BORRAR',
+			'auth.reset.confirmHint' => ({required Object phrase}) => 'Escribe ${phrase} para confirmar',
+			'auth.reset.button' => 'Borrar todo',
+			'auth.keyError.title' => 'No se pudo acceder al llavero del sistema',
+			'auth.keyError.retry' => 'Reintentar',
+			'security.title' => 'Seguridad',
+			'security.desc' => 'Cuenta local que protege tus datos cifrados en este dispositivo.',
+			'security.changePassword' => 'Cambiar contraseña',
+			'security.changePasswordDesc' => 'Vuelve a proteger la llave de cifrado con una contraseña nueva.',
+			'security.change' => 'Cambiar',
+			'security.current' => 'Contraseña actual',
+			'security.newPassword' => 'Contraseña nueva',
+			'security.confirmNew' => 'Confirmar contraseña nueva',
+			'security.wrongCurrent' => 'La contraseña actual no es correcta.',
+			'security.changed' => 'Contraseña actualizada.',
+			'security.lockNow' => 'Bloquear ahora',
+			'security.lockNowDesc' => 'Cierra la sesión local; pedirá la contraseña al volver.',
+			'security.lock' => 'Bloquear',
+			'account.title' => 'Cuenta en la nube',
+			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
+			'account.notConfigured' => 'Nube no configurada',
+			'account.notConfiguredDesc' => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.',
+			'account.signIn' => 'Iniciar sesión',
+			'account.register' => 'Crear cuenta',
+			'account.google' => 'Continuar con Google',
+			'account.or' => 'o',
+			'account.email' => 'Correo electrónico',
+			'account.password' => 'Contraseña',
+			'account.forgotPassword' => '¿Olvidaste tu contraseña?',
+			'account.resetSent' => 'Te enviamos un correo para restablecer la contraseña.',
+			'account.signedInAs' => 'Sesión iniciada',
+			'account.signOut' => 'Cerrar sesión',
+			'account.localGateNote' => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.',
+			'account.errors.invalidEmail' => 'El correo no es válido.',
+			'account.errors.userNotFound' => 'No existe una cuenta con ese correo.',
+			'account.errors.wrongPassword' => 'Correo o contraseña incorrectos.',
+			'account.errors.emailInUse' => 'Ya existe una cuenta con ese correo.',
+			'account.errors.weakPassword' => 'La contraseña es demasiado débil (mínimo 6 caracteres).',
+			'account.errors.network' => 'Sin conexión. Inténtalo de nuevo.',
+			'account.errors.unknown' => 'No se pudo completar la operación. Inténtalo de nuevo.',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',

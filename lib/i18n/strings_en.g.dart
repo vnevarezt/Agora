@@ -40,6 +40,10 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 
 	// Translations
 	@override late final _Translations$app$en app = _Translations$app$en._(_root);
+	@override late final _Translations$portada$en portada = _Translations$portada$en._(_root);
+	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
+	@override late final _Translations$security$en security = _Translations$security$en._(_root);
+	@override late final _Translations$account$en account = _Translations$account$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$sync$en sync = _Translations$sync$en._(_root);
@@ -75,6 +79,84 @@ class _Translations$app$en extends Translations$app$es {
 	// Translations
 	@override String get brand => 'Agora';
 	@override String get defaultProjectName => 'Program';
+}
+
+// Path: portada
+class _Translations$portada$en extends Translations$portada$es {
+	_Translations$portada$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get tagline => 'Your congregation\'s programs, assignments and brothers, organized with clarity.';
+	@override String get createAccount => 'Create account';
+	@override String get signIn => 'Sign in';
+	@override String get noAccountTitle => 'Continue without an account';
+	@override String get noAccountCaption => 'Only on this device';
+	@override String get legal => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.';
+	@override String get cloudUnavailable => 'The cloud is not configured on this install; you can use local mode.';
+	@override String get cloudUnsupported => 'Cloud mode isn\'t available on this Mac (requires Apple developer signing); you can use local mode.';
+}
+
+// Path: auth
+class _Translations$auth$en extends Translations$auth$es {
+	_Translations$auth$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get chooseOther => 'Choose another mode';
+	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
+	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
+	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
+	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
+}
+
+// Path: security
+class _Translations$security$en extends Translations$security$es {
+	_Translations$security$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Security';
+	@override String get desc => 'Local account protecting your encrypted data on this device.';
+	@override String get changePassword => 'Change password';
+	@override String get changePasswordDesc => 'Re-protect the encryption key with a new password.';
+	@override String get change => 'Change';
+	@override String get current => 'Current password';
+	@override String get newPassword => 'New password';
+	@override String get confirmNew => 'Confirm new password';
+	@override String get wrongCurrent => 'The current password is not correct.';
+	@override String get changed => 'Password updated.';
+	@override String get lockNow => 'Lock now';
+	@override String get lockNowDesc => 'Closes the local session; the password will be required again.';
+	@override String get lock => 'Lock';
+}
+
+// Path: account
+class _Translations$account$en extends Translations$account$es {
+	_Translations$account$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Cloud account';
+	@override String get desc => 'Optional identity for future sync. It does not replace the local password.';
+	@override String get notConfigured => 'Cloud not configured';
+	@override String get notConfiguredDesc => 'This install has no Firebase project: the app runs 100% locally.';
+	@override String get signIn => 'Sign in';
+	@override String get register => 'Create account';
+	@override String get google => 'Continue with Google';
+	@override String get or => 'or';
+	@override String get email => 'Email';
+	@override String get password => 'Password';
+	@override String get forgotPassword => 'Forgot your password?';
+	@override String get resetSent => 'We sent you a password reset email.';
+	@override String get signedInAs => 'Signed in';
+	@override String get signOut => 'Sign out';
+	@override String get localGateNote => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.';
+	@override late final _Translations$account$errors$en errors = _Translations$account$errors$en._(_root);
 }
 
 // Path: nav
@@ -530,6 +612,114 @@ class _Translations$relativeTime$en extends Translations$relativeTime$es {
 	@override String get now => 'just now';
 }
 
+// Path: auth.local
+class _Translations$auth$local$en extends Translations$auth$local$es {
+	_Translations$auth$local$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get pill => 'Local mode';
+	@override String get createTitle => 'Create your local profile';
+	@override String get createSub => 'Stored only on this device.';
+	@override String get migrateTitle => 'Protect your data';
+	@override String get migrateSub => 'This version adds a local profile: create a password to protect the data already on this device.';
+	@override String get name => 'Your name';
+	@override String get nameHint => 'E.g. Andrew Bell';
+	@override String get password => 'Password';
+	@override String get passwordHint => 'Minimum 8 characters';
+	@override String get confirm => 'Confirm password';
+	@override String get confirmHint => 'Repeat the password';
+	@override String get note1 => 'Your name, password and all your data live only here. If you forget the password ';
+	@override String get noteBold => 'we cannot recover it';
+	@override String get note2 => ' — we recommend exporting backups from Settings.';
+	@override String get createButton => 'Create profile and start';
+	@override String get working => 'Protecting…';
+	@override String get tooShort => 'The password must be at least 8 characters long.';
+	@override String get mismatch => 'The passwords don\'t match.';
+	@override String get profileCaption => 'Local profile · this device';
+	@override String get unlockButton => 'Unlock';
+	@override String get unlocking => 'Decrypting…';
+	@override String get wrongPassword => 'Wrong password.';
+	@override String get startOver => 'Starting over?';
+	@override String get createAnother => 'Create another profile';
+}
+
+// Path: auth.cloud
+class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
+	_Translations$auth$cloud$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get pill => 'Cloud mode';
+	@override String get loginTitle => 'Sign in';
+	@override String get loginSub => 'Your congregations and projects are waiting.';
+	@override String get registerTitle => 'Create your account';
+	@override String get registerSub => 'Sync and share with your congregation.';
+	@override String get google => 'Continue with Google';
+	@override String get orEmail => 'or with your email';
+	@override String get name => 'Your name';
+	@override String get nameHint => 'E.g. Andrew Bell';
+	@override String get email => 'Email';
+	@override String get emailHint => 'you@email.com';
+	@override String get password => 'Password';
+	@override String get passwordHintLogin => 'Your password';
+	@override String get passwordHintRegister => 'Minimum 8 characters';
+	@override String get confirm => 'Confirm password';
+	@override String get confirmHint => 'Repeat the password';
+	@override String get forgot => 'Forgot your password?';
+	@override String get loginButton => 'Sign in';
+	@override String get registerButton => 'Create account';
+	@override String get noAccount => 'No account yet?';
+	@override String get register => 'Register';
+	@override String get hasAccount => 'Already have an account?';
+	@override String get login => 'Sign in';
+	@override String get unavailableTitle => 'Cloud not configured';
+	@override String get unavailableDesc => 'This install has no Firebase project; cloud mode is unavailable.';
+}
+
+// Path: auth.reset
+class _Translations$auth$reset$en extends Translations$auth$reset$es {
+	_Translations$auth$reset$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Delete all data';
+	@override String get warning => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.';
+	@override String get confirmPhrase => 'DELETE';
+	@override String confirmHint({required Object phrase}) => 'Type ${phrase} to confirm';
+	@override String get button => 'Delete everything';
+}
+
+// Path: auth.keyError
+class _Translations$auth$keyError$en extends Translations$auth$keyError$es {
+	_Translations$auth$keyError$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Could not access the system keychain';
+	@override String get retry => 'Retry';
+}
+
+// Path: account.errors
+class _Translations$account$errors$en extends Translations$account$errors$es {
+	_Translations$account$errors$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get invalidEmail => 'The email is not valid.';
+	@override String get userNotFound => 'No account exists for that email.';
+	@override String get wrongPassword => 'Wrong email or password.';
+	@override String get emailInUse => 'An account already exists for that email.';
+	@override String get weakPassword => 'The password is too weak (minimum 6 characters).';
+	@override String get network => 'No connection. Try again.';
+	@override String get unknown => 'The operation could not be completed. Try again.';
+}
+
 // Path: settings.notif
 class _Translations$settings$notif$en extends Translations$settings$notif$es {
 	_Translations$settings$notif$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -557,6 +747,106 @@ extension on TranslationsEn {
 		return switch (path) {
 			'app.brand' => 'Agora',
 			'app.defaultProjectName' => 'Program',
+			'portada.tagline' => 'Your congregation\'s programs, assignments and brothers, organized with clarity.',
+			'portada.createAccount' => 'Create account',
+			'portada.signIn' => 'Sign in',
+			'portada.noAccountTitle' => 'Continue without an account',
+			'portada.noAccountCaption' => 'Only on this device',
+			'portada.legal' => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.',
+			'portada.cloudUnavailable' => 'The cloud is not configured on this install; you can use local mode.',
+			'portada.cloudUnsupported' => 'Cloud mode isn\'t available on this Mac (requires Apple developer signing); you can use local mode.',
+			'auth.chooseOther' => 'Choose another mode',
+			'auth.local.pill' => 'Local mode',
+			'auth.local.createTitle' => 'Create your local profile',
+			'auth.local.createSub' => 'Stored only on this device.',
+			'auth.local.migrateTitle' => 'Protect your data',
+			'auth.local.migrateSub' => 'This version adds a local profile: create a password to protect the data already on this device.',
+			'auth.local.name' => 'Your name',
+			'auth.local.nameHint' => 'E.g. Andrew Bell',
+			'auth.local.password' => 'Password',
+			'auth.local.passwordHint' => 'Minimum 8 characters',
+			'auth.local.confirm' => 'Confirm password',
+			'auth.local.confirmHint' => 'Repeat the password',
+			'auth.local.note1' => 'Your name, password and all your data live only here. If you forget the password ',
+			'auth.local.noteBold' => 'we cannot recover it',
+			'auth.local.note2' => ' — we recommend exporting backups from Settings.',
+			'auth.local.createButton' => 'Create profile and start',
+			'auth.local.working' => 'Protecting…',
+			'auth.local.tooShort' => 'The password must be at least 8 characters long.',
+			'auth.local.mismatch' => 'The passwords don\'t match.',
+			'auth.local.profileCaption' => 'Local profile · this device',
+			'auth.local.unlockButton' => 'Unlock',
+			'auth.local.unlocking' => 'Decrypting…',
+			'auth.local.wrongPassword' => 'Wrong password.',
+			'auth.local.startOver' => 'Starting over?',
+			'auth.local.createAnother' => 'Create another profile',
+			'auth.cloud.pill' => 'Cloud mode',
+			'auth.cloud.loginTitle' => 'Sign in',
+			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',
+			'auth.cloud.registerTitle' => 'Create your account',
+			'auth.cloud.registerSub' => 'Sync and share with your congregation.',
+			'auth.cloud.google' => 'Continue with Google',
+			'auth.cloud.orEmail' => 'or with your email',
+			'auth.cloud.name' => 'Your name',
+			'auth.cloud.nameHint' => 'E.g. Andrew Bell',
+			'auth.cloud.email' => 'Email',
+			'auth.cloud.emailHint' => 'you@email.com',
+			'auth.cloud.password' => 'Password',
+			'auth.cloud.passwordHintLogin' => 'Your password',
+			'auth.cloud.passwordHintRegister' => 'Minimum 8 characters',
+			'auth.cloud.confirm' => 'Confirm password',
+			'auth.cloud.confirmHint' => 'Repeat the password',
+			'auth.cloud.forgot' => 'Forgot your password?',
+			'auth.cloud.loginButton' => 'Sign in',
+			'auth.cloud.registerButton' => 'Create account',
+			'auth.cloud.noAccount' => 'No account yet?',
+			'auth.cloud.register' => 'Register',
+			'auth.cloud.hasAccount' => 'Already have an account?',
+			'auth.cloud.login' => 'Sign in',
+			'auth.cloud.unavailableTitle' => 'Cloud not configured',
+			'auth.cloud.unavailableDesc' => 'This install has no Firebase project; cloud mode is unavailable.',
+			'auth.reset.title' => 'Delete all data',
+			'auth.reset.warning' => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.',
+			'auth.reset.confirmPhrase' => 'DELETE',
+			'auth.reset.confirmHint' => ({required Object phrase}) => 'Type ${phrase} to confirm',
+			'auth.reset.button' => 'Delete everything',
+			'auth.keyError.title' => 'Could not access the system keychain',
+			'auth.keyError.retry' => 'Retry',
+			'security.title' => 'Security',
+			'security.desc' => 'Local account protecting your encrypted data on this device.',
+			'security.changePassword' => 'Change password',
+			'security.changePasswordDesc' => 'Re-protect the encryption key with a new password.',
+			'security.change' => 'Change',
+			'security.current' => 'Current password',
+			'security.newPassword' => 'New password',
+			'security.confirmNew' => 'Confirm new password',
+			'security.wrongCurrent' => 'The current password is not correct.',
+			'security.changed' => 'Password updated.',
+			'security.lockNow' => 'Lock now',
+			'security.lockNowDesc' => 'Closes the local session; the password will be required again.',
+			'security.lock' => 'Lock',
+			'account.title' => 'Cloud account',
+			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
+			'account.notConfigured' => 'Cloud not configured',
+			'account.notConfiguredDesc' => 'This install has no Firebase project: the app runs 100% locally.',
+			'account.signIn' => 'Sign in',
+			'account.register' => 'Create account',
+			'account.google' => 'Continue with Google',
+			'account.or' => 'or',
+			'account.email' => 'Email',
+			'account.password' => 'Password',
+			'account.forgotPassword' => 'Forgot your password?',
+			'account.resetSent' => 'We sent you a password reset email.',
+			'account.signedInAs' => 'Signed in',
+			'account.signOut' => 'Sign out',
+			'account.localGateNote' => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.',
+			'account.errors.invalidEmail' => 'The email is not valid.',
+			'account.errors.userNotFound' => 'No account exists for that email.',
+			'account.errors.wrongPassword' => 'Wrong email or password.',
+			'account.errors.emailInUse' => 'An account already exists for that email.',
+			'account.errors.weakPassword' => 'The password is too weak (minimum 6 characters).',
+			'account.errors.network' => 'No connection. Try again.',
+			'account.errors.unknown' => 'The operation could not be completed. Try again.',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',

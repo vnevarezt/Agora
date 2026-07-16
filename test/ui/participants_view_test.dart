@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:jw_program/i18n/strings.g.dart';
 import 'package:jw_program/models/participant.dart';
 import 'package:jw_program/state/participants_provider.dart';
 import 'package:jw_program/ui/participants/participants_view.dart';
@@ -39,13 +40,17 @@ Future<void> _pump(WidgetTester tester, List<Participant> lista) async {
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  await tester.pumpWidget(ProviderScope(
-    overrides: [
-      participantsProvider.overrideWith(() => _FakeHermanos(lista)),
-    ],
-    child: MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: const Scaffold(body: SafeArea(child: ParticipantsView())),
+  // TranslationProvider igual que en main.dart: slang_flutter lo exige en el
+  // árbol para resolver context.t.
+  await tester.pumpWidget(TranslationProvider(
+    child: ProviderScope(
+      overrides: [
+        participantsProvider.overrideWith(() => _FakeHermanos(lista)),
+      ],
+      child: MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: const Scaffold(body: SafeArea(child: ParticipantsView())),
+      ),
     ),
   ));
   await tester.pump();

@@ -15,6 +15,8 @@ class BoundTextField extends StatefulWidget {
     this.keyboardType,
     this.onSubmitted,
     this.dense = false,
+    this.obscureText = false,
+    this.autofocus = false,
   });
 
   final String initial;
@@ -30,6 +32,8 @@ class BoundTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final ValueChanged<String>? onSubmitted;
   final bool dense;
+  final bool obscureText;
+  final bool autofocus;
 
   @override
   State<BoundTextField> createState() => _BoundTextFieldState();
@@ -54,6 +58,8 @@ class _BoundTextFieldState extends State<BoundTextField> {
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       style: widget.style,
+      obscureText: widget.obscureText,
+      autofocus: widget.autofocus,
       decoration: InputDecoration(
         labelText: widget.label.isEmpty ? null : widget.label,
         hintText: widget.hint,

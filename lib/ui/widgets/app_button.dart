@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
+import 'app_spinner.dart';
 import '../theme/tokens.dart';
 
 /// Shared hover/pressed detection for the catalog buttons.
 class Pressable extends StatefulWidget {
-  const Pressable({
-    super.key,
-    required this.builder,
-    this.onTap,
-    this.tooltip,
-  });
+  const Pressable({super.key, required this.builder, this.onTap, this.tooltip});
 
   final Widget Function(BuildContext context, bool hovered, bool pressed)
-      builder;
+  builder;
   final VoidCallback? onTap;
   final String? tooltip;
 
@@ -34,6 +30,10 @@ class _PressableState extends State<Pressable> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
+        // opaque: with the default deferToChild only PAINTED pixels react,
+        // so controls without a background (bottom-nav items, text links)
+        // had dead zones everywhere except the icon/label glyphs.
+        behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
@@ -93,7 +93,8 @@ class AppButton extends StatelessWidget {
           duration: Dimens.dFast,
           height: height,
           padding: EdgeInsets.symmetric(
-              horizontal: label != null ? 16 : (height - 17) / 2),
+            horizontal: label != null ? 16 : (height - 17) / 2,
+          ),
           transform: pressed
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
               : Matrix4.identity(),
@@ -104,9 +105,10 @@ class AppButton extends StatelessWidget {
             boxShadow: esPrimary && enabled
                 ? const [
                     BoxShadow(
-                        color: Color(0x14000000),
-                        blurRadius: 2,
-                        offset: Offset(0, 1)),
+                      color: Color(0x14000000),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
                   ]
                 : null,
           ),
@@ -115,11 +117,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (busy)
-                SizedBox(
-                  width: 15,
-                  height: 15,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: fg),
-                )
+                AppSpinner(size: 15, color: fg)
               else if (icon != null)
                 Icon(icon, size: 17, color: fg),
               if (label != null) ...[
@@ -181,9 +179,10 @@ class AppIconButton extends StatelessWidget {
             boxShadow: elevated
                 ? const [
                     BoxShadow(
-                        color: Color(0x1A000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 2)),
+                      color: Color(0x1A000000),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
                   ]
                 : null,
           ),

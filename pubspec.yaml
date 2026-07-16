@@ -34,6 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # Official Material motion package (Flutter team): MD3 fade-through /
+  # shared-axis transitions, tested smooth across desktop + mobile.
+  animations: ^2.0.11
   pdfrx: ^2.4.3
   pdf: ^3.12.0
   http: ^1.6.0
@@ -55,6 +58,9 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_localizations:
     sdk: flutter
+  firebase_core: ^4.11.0
+  firebase_auth: ^6.5.4
+  google_sign_in: ^7.2.0
 
 # Selecciona la variante cifrada de sqlite3 (SQLite3MultipleCiphers) que
 # compila el hook nativo de package:sqlite3. PRAGMA key como en SQLCipher.
@@ -68,6 +74,8 @@ dev_dependencies:
     sdk: flutter
   drift_dev: ^2.34.0
   build_runner: ^2.6.0
+  # Fake de path_provider para tests unitarios (resetAllData borra el .db).
+  path_provider_platform_interface: ^2.1.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

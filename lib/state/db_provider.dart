@@ -2,15 +2,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/db/app_database.dart';
 import '../data/db/connection.dart';
-import '../data/db/db_key_manager.dart';
 import '../data/db/participants_dao.dart';
+import 'auth_session.dart';
 
-final dbKeyManagerProvider = Provider<DbKeyManager>((ref) => DbKeyManager());
-
-/// Encrypted local database. Tests override it with
-/// `AppDatabase(NativeDatabase.memory())` (no keychain, no encryption).
+/// Encrypted local database. Only exists while the local session is unlocked:
+/// INVARIANT — every widget/provider that watches [dbProvider] must live
+/// below `AuthGate`, which unmounts them before `lock()` flips the state.
+/// Locking disposes the provider (closing the DB); a read while locked is a
+/// programming error and throws.
+///
+/// Tests override it with `AppDatabase(NativeDatabase.memory())` (no
+/// keychain, no encryption).
 final dbProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase(openEncryptedExecutor(ref.watch(dbKeyManagerProvider)));
+  final dek = ref.watch(authSessionProvider
+      .select((s) => s is SessionUnlocked ? s.dekHex : null));
+  if (dek == null) {
+    throw StateError(
+        'dbProvider read while the local session is locked; every DB '
+        'consumer must live below AuthGate.');
+  }
+  final db = AppDatabase(openEncryptedExecutor(dek));
   ref.onDispose(db.close);
   return db;
 });

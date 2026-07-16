@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../i18n/strings.g.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
-import '../widgets/app_button.dart';
 import '../widgets/dashed_border.dart';
+import '../widgets/ink_surface.dart';
 
 /// "Nuevo proyecto" card (`.project--new`): dashed border and a "+" ring.
 /// The creation modal comes in a later phase; for now [onTap] stays
@@ -17,9 +17,14 @@ class NewProjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Pressable(
+    return InkSurface(
       onTap: onTap,
-      builder: (context, hovered, _) {
+      borderRadius: 16,
+      color: Colors.transparent,
+      borderColor: Colors.transparent,
+      hoverBorderColor: Colors.transparent,
+      hoverElevation: 0,
+      builder: (context, hovered) {
         final fg = hovered ? t.accentStrong : t.textMute;
         return DashedBorder(
           color: hovered ? t.accent : t.border,
