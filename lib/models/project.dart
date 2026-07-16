@@ -19,7 +19,9 @@ extension ProjectStatusX on ProjectStatus {
       };
 }
 
-/// Dashboard project: the program for a month/period of a congregation.
+/// Dashboard project CARD: view model computed from the DB rows by
+/// `projectsProvider` (status/progress/edited label are derived, never
+/// stored — docs/PHASE1_LOCAL_PERSISTENCE.md).
 class Project {
   final String id;
   final String name;
@@ -45,25 +47,4 @@ class Project {
 
   /// Progress fraction 0..1 for the progress bar.
   double get progress => total == 0 ? 0 : done / total;
-
-  Project copyWith({
-    String? name,
-    String? congregationId,
-    List<String>? weeks,
-    int? done,
-    int? total,
-    ProjectStatus? status,
-    String? editedLabel,
-  }) {
-    return Project(
-      id: id,
-      name: name ?? this.name,
-      congregationId: congregationId ?? this.congregationId,
-      weeks: weeks ?? this.weeks,
-      done: done ?? this.done,
-      total: total ?? this.total,
-      status: status ?? this.status,
-      editedLabel: editedLabel ?? this.editedLabel,
-    );
-  }
 }

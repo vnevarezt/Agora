@@ -1,8 +1,10 @@
 # Phase 1 — Local Persistence: Implementation Plan
 
 Executes phase 1 of [DATA_ARCHITECTURE.md](./DATA_ARCHITECTURE.md) §8.
-Status: **milestone 1 (schema + migration) implemented** — 2026-07-15.
-Milestones 2–4 pending.
+Status: **milestones 1–3 implemented** — 2026-07-15 (schema+migration
+`0cb1ee5`, people `d274577`, congregations+projects `aad1b70`). Milestone 4
+(acceptance) in progress; the `.jwpp` item was dropped from milestone 2 —
+export/import turned out not to exist yet, so it belongs to a later phase.
 
 ## Goal
 
