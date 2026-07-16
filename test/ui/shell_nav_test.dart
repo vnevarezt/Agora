@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/app.dart';
 import 'package:jw_program/i18n/strings.g.dart';
+import 'package:jw_program/models/person.dart';
 import 'package:jw_program/state/auth_session.dart';
 import 'package:jw_program/state/mwb_sync.dart';
+import 'package:jw_program/state/people_provider.dart';
 
-/// Startup sync stubbed out (no network/disk) and the session forced unlocked,
-/// so the shell renders straight into the dashboard — same pattern as
-/// widget_test.
+/// Startup sync stubbed out (no network/disk), the session forced unlocked
+/// and the people directory overridden (so no drift stream touches the real
+/// encrypted DB), so the shell renders straight into the dashboard — same
+/// pattern as widget_test.
 class _NoopSyncController extends MwbSyncController {
   @override
   Future<SyncReport> build() async => const SyncReport();
@@ -28,6 +31,7 @@ Future<void> _pumpShell(WidgetTester tester, Size size) async {
       overrides: [
         mwbSyncProvider.overrideWith(_NoopSyncController.new),
         authSessionProvider.overrideWith(_UnlockedSessionController.new),
+        peopleProvider.overrideWithValue(const <Person>[]),
       ],
       child: const JwProgramApp(),
     ),

@@ -3,10 +3,37 @@
 // the flat `Participant` (phase 1, docs/PHASE1_LOCAL_PERSISTENCE.md):
 // the congregation is now a real FK and the name is split.
 //
-// Gender/Role enums still live in models/participant.dart until the
-// in-memory participants provider is rewired in milestone 2.
+// IMPORTANT: program assignments are still plain strings in the form
+// (FormModel.main) — this directory is NOT a foreign key until phase 2.
 
-import 'participant.dart';
+import '../i18n/strings.g.dart';
+
+enum Gender { male, female, unspecified }
+
+extension GenderX on Gender {
+  String get label => switch (this) {
+        Gender.male => t.gender.male,
+        Gender.female => t.gender.female,
+        Gender.unspecified => t.gender.unspecified,
+      };
+}
+
+enum Role { elder, ministerialServant, publisher }
+
+extension RoleX on Role {
+  String get label => switch (this) {
+        Role.elder => t.roles.elder,
+        Role.ministerialServant => t.roles.ministerialServant,
+        Role.publisher => t.roles.publisher,
+      };
+
+  /// Plural form used by the filter chips on the participants screen.
+  String get plural => switch (this) {
+        Role.elder => t.roles.elderPlural,
+        Role.ministerialServant => t.roles.ministerialServantPlural,
+        Role.publisher => t.roles.publisherPlural,
+      };
+}
 
 class Person {
   final String id; // uuid v4, stable: merge key for imports and sync
@@ -108,4 +135,18 @@ class Person {
 
   @override
   int get hashCode => Object.hash(id, updatedAt);
+}
+
+const _diacritics = 'áàäâéèëêíìïîóòöôúùüûñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑ';
+const _plain = 'aaaaeeeeiiiioooouuuunAAAAEEEEIIIIOOOOUUUUN';
+
+/// Normalizes for accent-insensitive search and duplicate detection:
+/// trim, collapse whitespace, lowercase and strip accents (ñ→n).
+String normalizeName(String s) {
+  final sb = StringBuffer();
+  for (final ch in s.trim().replaceAll(RegExp(r'\s+'), ' ').split('')) {
+    final i = _diacritics.indexOf(ch);
+    sb.write(i >= 0 ? _plain[i] : ch);
+  }
+  return sb.toString().toLowerCase();
 }

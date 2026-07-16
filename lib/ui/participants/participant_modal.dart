@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../i18n/strings.g.dart';
-import '../../models/participant.dart';
-import '../../state/participants_provider.dart';
-import '../../state/program_form.dart';
+import '../../models/person.dart';
+import '../../state/people_provider.dart';
 import '../limits.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -17,15 +16,15 @@ import '../widgets/modal_shell.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/segmented_control.dart';
 
-/// Description of each role in the modal radio cards.
+/// Description of each privilege in the modal radio cards.
 String _roleDesc(Role role) => switch (role) {
       Role.publisher => t.participantModal.roleDescPublisher,
       Role.ministerialServant => t.participantModal.roleDescServant,
       Role.elder => t.participantModal.roleDescElder,
     };
 
-/// Opens the create/edit participant modal. [original] null = new.
-Future<void> showParticipantModal(BuildContext context, {Participant? original}) {
+/// Opens the create/edit person modal. [original] null = new.
+Future<void> showParticipantModal(BuildContext context, {Person? original}) {
   return showAppModal<void>(
     context,
     builder: (ctx, sheet, close) =>
@@ -33,7 +32,7 @@ Future<void> showParticipantModal(BuildContext context, {Participant? original})
   );
 }
 
-/// Participant modal content. Reads/writes via Riverpod.
+/// Person modal content. Reads/writes via Riverpod.
 class PersonModal extends ConsumerStatefulWidget {
   const PersonModal({
     super.key,
@@ -43,7 +42,7 @@ class PersonModal extends ConsumerStatefulWidget {
   });
 
   /// null = new.
-  final Participant? original;
+  final Person? original;
   final VoidCallback onClose;
   final bool sheet;
 
@@ -52,11 +51,14 @@ class PersonModal extends ConsumerStatefulWidget {
 }
 
 class _PersonModalState extends ConsumerState<PersonModal> {
-  late String _name = widget.original?.name ?? '';
+  late String _displayName = widget.original?.displayName ?? '';
+  late String _firstName = widget.original?.firstName ?? '';
+  late String _lastName = widget.original?.lastName ?? '';
   late Gender _gender = widget.original?.gender ?? Gender.male;
-  late Role _role =
-      widget.original?.role ?? Role.publisher;
-  late String _congregation;
+  late Role _privilege = widget.original?.privilege ?? Role.publisher;
+
+  /// Origin congregation: only for visitors, '' = local member.
+  late String _origin = widget.original?.originCongregation ?? '';
   late bool _active = widget.original?.active ?? true;
   bool _saving = false;
 
@@ -65,16 +67,10 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
   bool get _isCreating => widget.original == null;
 
-  @override
-  void initState() {
-    super.initState();
-    _congregation = widget.original?.congregation ?? ref.read(formProvider).congregationId;
-  }
-
   void _setGender(Gender s) => setState(() {
         _gender = s;
         // Women only participate as publishers.
-        if (s == Gender.female) _role = Role.publisher;
+        if (s == Gender.female) _privilege = Role.publisher;
       });
 
   Future<void> _save() async {
@@ -82,25 +78,32 @@ class _PersonModalState extends ConsumerState<PersonModal> {
     try {
       final now = DateTime.now().toUtc();
       final h = _isCreating
-          ? Participant(
+          ? Person(
               id: const Uuid().v4(),
-              name: _name.trim(),
+              // Resolved to the default congregation by the repository.
+              congregationId: '',
+              firstName: _firstName.trim(),
+              lastName: _lastName.trim(),
+              displayName: _displayName.trim(),
               gender: _gender,
-              role: _role,
-              congregation: _congregation.trim(),
+              privilege: _privilege,
+              qualifications: const [],
+              originCongregation: _origin.trim(),
               active: _active,
               notes: '',
               createdAt: now,
               updatedAt: now,
             )
           : widget.original!.copyWith(
-              name: _name.trim(),
+              firstName: _firstName.trim(),
+              lastName: _lastName.trim(),
+              displayName: _displayName.trim(),
               gender: _gender,
-              role: _role,
-              congregation: _congregation.trim(),
+              privilege: _privilege,
+              originCongregation: _origin.trim(),
               active: _active,
             );
-      await ref.read(participantActionsProvider).save(h);
+      await ref.read(personActionsProvider).save(h);
       widget.onClose();
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -114,7 +117,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         title: Text(context.t.participantModal.deleteTitle),
         content: Text(
           context.t.participantModal
-              .deleteConfirm(name: widget.original!.name),
+              .deleteConfirm(name: widget.original!.displayName),
         ),
         actions: [
           TextButton(
@@ -130,7 +133,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    await ref.read(participantActionsProvider).delete(widget.original!.id);
+    await ref.read(personActionsProvider).delete(widget.original!.id);
     widget.onClose();
   }
 
@@ -148,15 +151,15 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       primaryLabel:
           _isCreating ? tr.participantModal.addTitle : tr.common.saveChanges,
       primaryBusy: _saving,
-      onPrimary: (_name.trim().isNotEmpty && !_saving) ? _save : null,
+      onPrimary: (_displayName.trim().isNotEmpty && !_saving) ? _save : null,
       onDanger: _isCreating ? null : _delete,
     );
   }
 
   Widget _body(AppTokens t, Translations tr) {
     final suggestions = ref
-        .watch(participantCongregationsProvider)
-        .where((c) => c != _congregation.trim())
+        .watch(originCongregationsProvider)
+        .where((c) => c != _origin.trim())
         .take(3)
         .toList();
     final genderIndex =
@@ -171,20 +174,48 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         LabeledField(
           label: tr.participantModal.fullName,
           child: BoundTextField(
-            initial: _name,
+            initial: _displayName,
             maxLength: Limits.name,
             hint: tr.participantModal.nameHint,
-            onChanged: (v) => setState(() => _name = v),
+            onChanged: (v) => setState(() => _displayName = v),
           ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: LabeledField(
+                label: tr.participantModal.firstName,
+                child: BoundTextField(
+                  initial: _firstName,
+                  maxLength: Limits.name,
+                  onChanged: (v) => setState(() => _firstName = v),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: LabeledField(
+                label: tr.participantModal.lastName,
+                child: BoundTextField(
+                  initial: _lastName,
+                  maxLength: Limits.name,
+                  onChanged: (v) => setState(() => _lastName = v),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 14),
         LabeledField(
           label: tr.participantModal.congregation,
           child: BoundTextField(
             key: ValueKey('cong-$_congVersion'),
-            initial: _congregation,
+            initial: _origin,
             maxLength: Limits.congregation,
-            onChanged: (v) => setState(() => _congregation = v),
+            hint: tr.participantModal.originHint,
+            onChanged: (v) => setState(() => _origin = v),
           ),
         ),
         if (suggestions.isNotEmpty)
@@ -197,7 +228,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 for (final c in suggestions)
                   Pressable(
                     onTap: () => setState(() {
-                      _congregation = c;
+                      _origin = c;
                       _congVersion++;
                     }),
                     builder: (context, _, _) => MiniChip.tag(c),
@@ -227,8 +258,8 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 if (p != availableRoles.first) const SizedBox(height: 8),
                 _RoleOption(
                   role: p,
-                  selected: _role == p,
-                  onTap: () => setState(() => _role = p),
+                  selected: _privilege == p,
+                  onTap: () => setState(() => _privilege = p),
                 ),
               ],
             ],
@@ -245,7 +276,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
 }
 
-/// Role radio card (`.priv-option`): circle + title + description.
+/// Privilege radio card (`.priv-option`): circle + title + description.
 class _RoleOption extends StatelessWidget {
   const _RoleOption({
     required this.role,

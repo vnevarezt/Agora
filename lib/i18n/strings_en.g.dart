@@ -289,9 +289,12 @@ class _Translations$participantModal$en extends Translations$participantModal$es
 	@override String get addTitle => 'Add participant';
 	@override String get editTitle => 'Edit participant';
 	@override String get desc => 'The privilege defines which parts can be assigned to them.';
-	@override String get fullName => 'Full name';
+	@override String get fullName => 'Name on the program';
 	@override String get nameHint => 'e.g. Martin Salas';
-	@override String get congregation => 'Congregation';
+	@override String get firstName => 'First name';
+	@override String get lastName => 'Last name';
+	@override String get congregation => 'Home congregation';
+	@override String get originHint => 'Visitors only; empty = your congregation';
 	@override String get isLabel => 'Is';
 	@override String get male => 'Male';
 	@override String get female => 'Female';
@@ -902,9 +905,12 @@ extension on TranslationsEn {
 			'participantModal.addTitle' => 'Add participant',
 			'participantModal.editTitle' => 'Edit participant',
 			'participantModal.desc' => 'The privilege defines which parts can be assigned to them.',
-			'participantModal.fullName' => 'Full name',
+			'participantModal.fullName' => 'Name on the program',
 			'participantModal.nameHint' => 'e.g. Martin Salas',
-			'participantModal.congregation' => 'Congregation',
+			'participantModal.firstName' => 'First name',
+			'participantModal.lastName' => 'Last name',
+			'participantModal.congregation' => 'Home congregation',
+			'participantModal.originHint' => 'Visitors only; empty = your congregation',
 			'participantModal.isLabel' => 'Is',
 			'participantModal.male' => 'Male',
 			'participantModal.female' => 'Female',

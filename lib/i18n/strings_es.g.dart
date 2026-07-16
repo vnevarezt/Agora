@@ -479,14 +479,23 @@ class Translations$participantModal$es {
 	/// es: 'El privilegio define qué partes se le pueden asignar.'
 	String get desc => 'El privilegio define qué partes se le pueden asignar.';
 
-	/// es: 'Nombre completo'
-	String get fullName => 'Nombre completo';
+	/// es: 'Nombre para el programa'
+	String get fullName => 'Nombre para el programa';
 
 	/// es: 'Ej. Martín Salas'
 	String get nameHint => 'Ej. Martín Salas';
 
-	/// es: 'Congregación'
-	String get congregation => 'Congregación';
+	/// es: 'Nombre'
+	String get firstName => 'Nombre';
+
+	/// es: 'Apellidos'
+	String get lastName => 'Apellidos';
+
+	/// es: 'Congregación de origen'
+	String get congregation => 'Congregación de origen';
+
+	/// es: 'Solo para visitantes; vacío = tu congregación'
+	String get originHint => 'Solo para visitantes; vacío = tu congregación';
 
 	/// es: 'Es'
 	String get isLabel => 'Es';
@@ -1582,9 +1591,12 @@ extension on Translations {
 			'participantModal.addTitle' => 'Añadir participante',
 			'participantModal.editTitle' => 'Editar participante',
 			'participantModal.desc' => 'El privilegio define qué partes se le pueden asignar.',
-			'participantModal.fullName' => 'Nombre completo',
+			'participantModal.fullName' => 'Nombre para el programa',
 			'participantModal.nameHint' => 'Ej. Martín Salas',
-			'participantModal.congregation' => 'Congregación',
+			'participantModal.firstName' => 'Nombre',
+			'participantModal.lastName' => 'Apellidos',
+			'participantModal.congregation' => 'Congregación de origen',
+			'participantModal.originHint' => 'Solo para visitantes; vacío = tu congregación',
 			'participantModal.isLabel' => 'Es',
 			'participantModal.male' => 'Hombre',
 			'participantModal.female' => 'Mujer',

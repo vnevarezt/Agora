@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../../../models/participant.dart';
 import '../../../models/person.dart';
 import '../converters.dart';
 import 'congregations.dart';

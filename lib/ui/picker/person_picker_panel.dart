@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
-import '../../models/participant.dart';
-import '../../state/participants_provider.dart';
+import '../../models/person.dart';
+import '../../state/people_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -45,15 +45,15 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final active = ref.watch(activeParticipantsProvider);
+    final active = ref.watch(activePeopleProvider);
 
     final key = normalizeName(_search);
     final filtered = active
-        .where((h) => normalizeName(h.name).contains(key))
+        .where((h) => normalizeName(h.displayName).contains(key))
         .toList();
     final recent = _search.isEmpty
-        ? ref.watch(recentParticipantsProvider).take(4).toList()
-        : const <Participant>[];
+        ? ref.watch(recentPeopleProvider).take(4).toList()
+        : const <Person>[];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -113,13 +113,13 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// A participant row: privilege as a label (only elder/servant).
-  Widget _row(Participant h) {
+  /// A person row: privilege as a label (only elder/servant).
+  Widget _row(Person h) {
     return _PersonRow(
-      name: h.name,
-      tag: h.role == Role.publisher ? null : h.role.label,
-      selected: h.name == widget.current,
-      onTap: () => _pop(PickName(h.name)),
+      name: h.displayName,
+      tag: h.privilege == Role.publisher ? null : h.privilege.label,
+      selected: h.displayName == widget.current,
+      onTap: () => _pop(PickName(h.displayName)),
     );
   }
 

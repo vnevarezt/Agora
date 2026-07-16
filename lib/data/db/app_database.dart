@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../models/participant.dart';
 import '../../models/person.dart';
 import '../../models/week_type.dart';
 import 'converters.dart';

@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import '../widgets/pill.dart';
 
 import '../../i18n/strings.g.dart';
-import '../../models/participant.dart';
+import '../../models/person.dart';
 import '../theme/tokens.dart';
 import '../widgets/avatar.dart';
 import '../widgets/ink_surface.dart';
 import 'priv_badge.dart';
 
-/// Participant card (`.person-card`): avatar, name with an availability
-/// dot, subtitle (gender · congregation) and a privilege badge.
-/// Tapping it opens the edit modal.
+/// Person card (`.person-card`): avatar, name with an availability dot,
+/// subtitle (gender · origin congregation for visitors) and a privilege
+/// badge. Tapping it opens the edit modal.
 class ParticipantCard extends StatelessWidget {
   const ParticipantCard({super.key, required this.participant, required this.onTap});
 
-  final Participant participant;
+  final Person participant;
   final VoidCallback onTap;
 
   String _genderLabel(BuildContext context) => switch (participant.gender) {
@@ -27,7 +27,7 @@ class ParticipantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final h = participant;
-    final congregation = h.congregation.trim();
+    final congregation = h.originCongregation.trim();
     final g = _genderLabel(context);
     final sub = congregation.isEmpty ? g : '$g · $congregation';
 
@@ -39,7 +39,7 @@ class ParticipantCard extends StatelessWidget {
       builder: (context, hovered) {
         return Row(
           children: [
-            PersonAvatar(name: h.name, size: 38),
+            PersonAvatar(name: h.displayName, size: 38),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -50,7 +50,7 @@ class ParticipantCard extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          h.name,
+                          h.displayName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -82,7 +82,7 @@ class ParticipantCard extends StatelessWidget {
             if (h.isIncomplete)
               const _IncompleteBadge()
             else
-              PrivBadge(role: h.role),
+              PrivBadge(role: h.privilege),
           ],
         );
       },
