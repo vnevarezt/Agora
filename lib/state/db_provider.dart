@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/db/app_database.dart';
 import '../data/db/connection.dart';
 import '../data/db/people_dao.dart';
+import '../data/sync/hlc.dart';
+import '../data/sync/sync_scribe.dart';
 import '../i18n/strings.g.dart';
+import 'app_settings.dart';
 import 'auth_session.dart';
 
 /// Encrypted local database. Only exists while the local session is unlocked:
@@ -33,3 +36,7 @@ final dbProvider = Provider<AppDatabase>((ref) {
 
 final peopleDaoProvider =
     Provider<PeopleDao>((ref) => ref.watch(dbProvider).peopleDao);
+
+/// Stamps every repository mutation with an HLC + outbox entry (phase 3).
+final syncScribeProvider = Provider<SyncScribe>(
+    (ref) => SyncScribe(ref.watch(dbProvider), HlcClock(deviceId())));

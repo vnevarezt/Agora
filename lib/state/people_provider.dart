@@ -11,8 +11,9 @@ import 'db_provider.dart';
 // locked is a programming error (see dbProvider).
 
 final peopleRepositoryProvider = Provider<PeopleRepository>((ref) =>
-    PeopleRepository(
-        ref.watch(dbProvider), ref.watch(congregationsRepositoryProvider)));
+    PeopleRepository(ref.watch(dbProvider),
+        ref.watch(congregationsRepositoryProvider),
+        ref.watch(syncScribeProvider)));
 
 /// Reactive directory straight from drift.
 final peopleStreamProvider = StreamProvider<List<Person>>(

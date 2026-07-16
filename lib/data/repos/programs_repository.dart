@@ -7,14 +7,16 @@ import '../../models/hall.dart';
 import '../../models/week.dart';
 import '../../models/week_type.dart';
 import '../db/app_database.dart';
+import '../sync/sync_scribe.dart';
 
 /// Domain API over a project's programs and their assignments (phase 2,
-/// docs/PHASE2_PROGRAMS_IN_DB.md). THE write path phase 3 instruments with
-/// HLC + outbox.
+/// docs/PHASE2_PROGRAMS_IN_DB.md). THE write path, stamped with HLC +
+/// outbox (docs/PHASE3_SYNC_SCAFFOLDING.md).
 class ProgramsRepository {
-  ProgramsRepository(this._db);
+  ProgramsRepository(this._db, this._scribe);
 
   final AppDatabase _db;
+  final SyncScribe _scribe;
 
   SimpleSelectStatement<$ProgramsTable, ProgramRecord> _aliveByProject(
           String projectId) =>
@@ -30,28 +32,45 @@ class ProgramsRepository {
 
   /// Snapshot bookkeeping, NOT a user edit: `updatedAt` stays untouched so
   /// merely opening a project never moves the dashboard "edited" label.
-  Future<void> setContent(String programId, Week week) {
-    return (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-        .write(ProgramsCompanion(
-      contentJson: Value(jsonEncode(week.toJson())),
-    ));
+  /// Still stamped + enqueued: the content must replicate (self-contained
+  /// programs, DATA_ARCHITECTURE.md §2).
+  Future<void> setContent(String programId, Week week) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
+          .write(ProgramsCompanion(
+        contentJson: Value(jsonEncode(week.toJson())),
+        hlc: Value(hlc),
+      ));
+      await _scribe.enqueue(SyncEntity.program, programId, hlc);
+    });
   }
 
-  Future<void> setWeekType(String programId, WeekType weekType) {
-    return (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-        .write(ProgramsCompanion(
-      weekType: Value(weekType),
-      updatedAt: Value(DateTime.now().toUtc()),
-    ));
+  Future<void> setWeekType(String programId, WeekType weekType) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
+          .write(ProgramsCompanion(
+        weekType: Value(weekType),
+        updatedAt: Value(DateTime.now().toUtc()),
+        hlc: Value(hlc),
+      ));
+      await _scribe.enqueue(SyncEntity.program, programId, hlc);
+    });
   }
 
   Future<void> setTitleOverrides(
-      String programId, Map<String, String> overrides) {
-    return (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-        .write(ProgramsCompanion(
-      titleOverridesJson: Value(jsonEncode(overrides)),
-      updatedAt: Value(DateTime.now().toUtc()),
-    ));
+      String programId, Map<String, String> overrides) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
+          .write(ProgramsCompanion(
+        titleOverridesJson: Value(jsonEncode(overrides)),
+        updatedAt: Value(DateTime.now().toUtc()),
+        hlc: Value(hlc),
+      ));
+      await _scribe.enqueue(SyncEntity.program, programId, hlc);
+    });
   }
 
   /// Meeting config. The editor exposes ONE toggle/values for the whole
@@ -62,18 +81,29 @@ class ProgramsRepository {
     String? startTime,
     int? durationMinutes,
     bool? auxRoom,
-  }) {
-    return (_db.update(_db.programs)
-          ..where(
-              (t) => t.projectId.equals(projectId) & t.deletedAt.isNull()))
-        .write(ProgramsCompanion(
-      startTime: startTime == null ? const Value.absent() : Value(startTime),
-      durationMinutes: durationMinutes == null
-          ? const Value.absent()
-          : Value(durationMinutes),
-      auxRoom: auxRoom == null ? const Value.absent() : Value(auxRoom),
-      updatedAt: Value(DateTime.now().toUtc()),
-    ));
+  }) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      final programIds = [
+        for (final p in await byProject(projectId)) p.id,
+      ];
+      await (_db.update(_db.programs)
+            ..where(
+                (t) => t.projectId.equals(projectId) & t.deletedAt.isNull()))
+          .write(ProgramsCompanion(
+        startTime:
+            startTime == null ? const Value.absent() : Value(startTime),
+        durationMinutes: durationMinutes == null
+            ? const Value.absent()
+            : Value(durationMinutes),
+        auxRoom: auxRoom == null ? const Value.absent() : Value(auxRoom),
+        updatedAt: Value(DateTime.now().toUtc()),
+        hlc: Value(hlc),
+      ));
+      for (final programId in programIds) {
+        await _scribe.enqueue(SyncEntity.program, programId, hlc);
+      }
+    });
   }
 
   Future<List<AssignmentRecord>> assignmentsByPrograms(
@@ -94,6 +124,7 @@ class ProgramsRepository {
     required List<String> names,
   }) async {
     final now = DateTime.now().toUtc();
+    final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
       final existing = await (_db.select(_db.assignmentRows)
             ..where((t) =>
@@ -104,12 +135,15 @@ class ProgramsRepository {
           .get();
       final byPosition = {for (final a in existing) a.position: a};
 
-      Future<void> tombstone(String id) =>
-          (_db.update(_db.assignmentRows)..where((t) => t.id.equals(id)))
-              .write(AssignmentRowsCompanion(
-            deletedAt: Value(now),
-            updatedAt: Value(now),
-          ));
+      Future<void> tombstone(String id) async {
+        await (_db.update(_db.assignmentRows)..where((t) => t.id.equals(id)))
+            .write(AssignmentRowsCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+          hlc: Value(hlc),
+        ));
+        await _scribe.enqueue(SyncEntity.assignment, id, hlc);
+      }
 
       for (var i = 0; i < names.length; i++) {
         final name = names[i].trim();
@@ -117,9 +151,10 @@ class ProgramsRepository {
         if (name.isEmpty) {
           if (current != null) await tombstone(current.id);
         } else if (current == null) {
+          final id = const Uuid().v4();
           await _db.into(_db.assignmentRows).insert(
                 AssignmentRowsCompanion.insert(
-                  id: const Uuid().v4(),
+                  id: id,
                   programId: programId,
                   slotKey: slotKey,
                   hall: hall,
@@ -127,15 +162,19 @@ class ProgramsRepository {
                   displayName: name,
                   createdAt: now,
                   updatedAt: now,
+                  hlc: Value(hlc),
                 ),
               );
+          await _scribe.enqueue(SyncEntity.assignment, id, hlc);
         } else if (current.displayName != name) {
           await (_db.update(_db.assignmentRows)
                 ..where((t) => t.id.equals(current.id)))
               .write(AssignmentRowsCompanion(
             displayName: Value(name),
             updatedAt: Value(now),
+            hlc: Value(hlc),
           ));
+          await _scribe.enqueue(SyncEntity.assignment, current.id, hlc);
         }
       }
 

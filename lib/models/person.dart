@@ -108,6 +108,7 @@ class Person {
     String? notes,
     DateTime? updatedAt,
     DateTime? lastUsed,
+    String? hlc,
   }) {
     return Person(
       id: id,
@@ -125,7 +126,7 @@ class Person {
       updatedAt: updatedAt ?? this.updatedAt,
       lastUsed: lastUsed ?? this.lastUsed,
       deletedAt: deletedAt,
-      hlc: hlc,
+      hlc: hlc ?? this.hlc,
     );
   }
 

@@ -21,10 +21,10 @@ void main() {
     verifier = SchemaVerifier(GeneratedHelper());
   });
 
-  test('empty v1 migrates to a valid v3 schema', () async {
+  test('empty v1 migrates to a valid current schema', () async {
     final connection = await verifier.startAt(1);
     final db = AppDatabase(connection);
-    await verifier.migrateAndValidate(db, 3);
+    await verifier.migrateAndValidate(db, 4);
 
     // No participants → no auto-created congregation.
     expect(await db.select(db.congregations).get(), isEmpty);
@@ -32,7 +32,8 @@ void main() {
     await db.close();
   });
 
-  test('v2 with skeleton programs migrates to v3 keeping rows', () async {
+  test('v2 with skeleton programs migrates to current keeping rows',
+      () async {
     final schema = await verifier.schemaAt(2);
     schema.rawDatabase.execute('''
       INSERT INTO congregations (id, name, number, color, settings_json,
@@ -50,7 +51,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 3);
+    await verifier.migrateAndValidate(db, 4);
 
     // The skeleton program survives with NULL content (the snapshot
     // service fills it on first open) and the defaults in place.
@@ -60,8 +61,10 @@ void main() {
     expect(program.titleOverridesJson, '{}');
     expect(program.auxRoom, isNull);
 
-    // The new assignments table is queryable and empty.
+    // The new assignments/outbox/sync_state tables are queryable and empty.
     expect(await db.select(db.assignmentRows).get(), isEmpty);
+    expect(await db.select(db.outbox).get(), isEmpty);
+    expect(await db.select(db.syncState).get(), isEmpty);
     await db.close();
   });
 
@@ -91,7 +94,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 3);
+    await verifier.migrateAndValidate(db, 4);
 
     // One congregation, named after the dominant spelling of the top group.
     final congs = await db.select(db.congregations).get();
@@ -153,7 +156,7 @@ void main() {
       schema.newConnection(),
       defaultCongregationName: 'Mi congregación',
     );
-    await verifier.migrateAndValidate(db, 3);
+    await verifier.migrateAndValidate(db, 4);
 
     final congs = await db.select(db.congregations).get();
     expect(congs.single.name, 'Mi congregación');

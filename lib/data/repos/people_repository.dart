@@ -1,15 +1,17 @@
 import '../../models/person.dart';
 import '../db/app_database.dart';
+import '../sync/sync_scribe.dart';
 import 'congregations_repository.dart';
 
-/// Domain API over the person directory. THE write path for people: later
-/// phases stamp HLC + outbox here (docs/DATA_ARCHITECTURE.md §3), so
-/// providers/UI must never talk to the DAO directly.
+/// Domain API over the person directory. THE write path for people: it
+/// stamps HLC + outbox (docs/PHASE3_SYNC_SCAFFOLDING.md), so providers/UI
+/// must never talk to the DAO directly.
 class PeopleRepository {
-  PeopleRepository(this._db, this._congregations);
+  PeopleRepository(this._db, this._congregations, this._scribe);
 
   final AppDatabase _db;
   final CongregationsRepository _congregations;
+  final SyncScribe _scribe;
 
   Stream<List<Person>> watchAll() => _db.peopleDao.watchAll();
 
@@ -21,19 +23,35 @@ class PeopleRepository {
     final congregationId = p.congregationId.isEmpty
         ? await _congregations.ensureDefault()
         : p.congregationId;
-    await _db.peopleDao.upsert(p.copyWith(
-      congregationId: congregationId,
-      updatedAt: DateTime.now().toUtc(),
-    ));
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await _db.peopleDao.upsert(p.copyWith(
+        congregationId: congregationId,
+        updatedAt: DateTime.now().toUtc(),
+        hlc: hlc,
+      ));
+      await _scribe.enqueue(SyncEntity.person, p.id, hlc);
+    });
   }
 
-  /// Bookkeeping, NOT an edit: only `lastUsed` moves (see PeopleDao).
+  /// Bookkeeping, NOT an edit: only `lastUsed` moves (see PeopleDao) and
+  /// no outbox entry — it travels with the row's next real edit.
   Future<void> markUsed(String id) =>
       _db.peopleDao.markUsed(id, DateTime.now().toUtc());
 
-  Future<void> setActive(String id, bool v) =>
-      _db.peopleDao.setActive(id, v, DateTime.now().toUtc());
+  Future<void> setActive(String id, bool v) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await _db.peopleDao.setActive(id, v, DateTime.now().toUtc(), hlc: hlc);
+      await _scribe.enqueue(SyncEntity.person, id, hlc);
+    });
+  }
 
-  Future<void> delete(String id) =>
-      _db.peopleDao.softDelete(id, DateTime.now().toUtc());
+  Future<void> delete(String id) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await _db.peopleDao.softDelete(id, DateTime.now().toUtc(), hlc: hlc);
+      await _scribe.enqueue(SyncEntity.person, id, hlc);
+    });
+  }
 }

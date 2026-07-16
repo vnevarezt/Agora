@@ -39,16 +39,24 @@ class PeopleDao extends DatabaseAccessor<AppDatabase> with _$PeopleDaoMixin {
         .write(PeopleCompanion(lastUsed: Value(when)));
   }
 
-  Future<void> setActive(String id, bool v, DateTime when) {
+  Future<void> setActive(String id, bool v, DateTime when, {String? hlc}) {
     return (update(people)..where((t) => t.id.equals(id))).write(
-      PeopleCompanion(active: Value(v), updatedAt: Value(when)),
+      PeopleCompanion(
+        active: Value(v),
+        updatedAt: Value(when),
+        hlc: hlc == null ? const Value.absent() : Value(hlc),
+      ),
     );
   }
 
   /// Soft delete: tombstone, kept for FK integrity and future sync.
-  Future<void> softDelete(String id, DateTime when) {
+  Future<void> softDelete(String id, DateTime when, {String? hlc}) {
     return (update(people)..where((t) => t.id.equals(id))).write(
-      PeopleCompanion(deletedAt: Value(when), updatedAt: Value(when)),
+      PeopleCompanion(
+        deletedAt: Value(when),
+        updatedAt: Value(when),
+        hlc: hlc == null ? const Value.absent() : Value(hlc),
+      ),
     );
   }
 

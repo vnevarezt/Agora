@@ -28,7 +28,8 @@ final sessionUserProvider = Provider<({String name, String role})>(
     (ref) => (name: '', role: ''));
 
 final congregationsRepositoryProvider = Provider<CongregationsRepository>(
-    (ref) => CongregationsRepository(ref.watch(dbProvider),
+    (ref) => CongregationsRepository(
+        ref.watch(dbProvider), ref.watch(syncScribeProvider),
         defaultName: t.congregation.defaultName));
 
 final congregationsStreamProvider = StreamProvider<List<Congregation>>(
@@ -83,8 +84,9 @@ final notebooksProvider =
 final remindersProvider = Provider<List<Reminder>>((ref) => const []);
 
 final projectsRepositoryProvider = Provider<ProjectsRepository>((ref) =>
-    ProjectsRepository(
-        ref.watch(dbProvider), ref.watch(congregationsRepositoryProvider)));
+    ProjectsRepository(ref.watch(dbProvider),
+        ref.watch(congregationsRepositoryProvider),
+        ref.watch(syncScribeProvider)));
 
 final projectsStreamProvider = StreamProvider<List<ProjectData>>(
     (ref) => ref.watch(projectsRepositoryProvider).watchAll());

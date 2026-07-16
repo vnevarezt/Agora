@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 /// Device-local UI preferences persisted in SharedPreferences (same pattern
 /// as locale_boot.dart). NOT synced data: this never goes to the DB or,
@@ -19,6 +20,22 @@ SharedPreferences? _prefs;
 
 Future<void> initAppSettings() async {
   _prefs = await SharedPreferences.getInstance();
+}
+
+const _deviceIdKey = 'device_id';
+String? _deviceId;
+
+/// Stable 8-char id of THIS device, created on first use: identifies the
+/// device inside HLC stamps (phase 3) and later `srcDevice` on sync docs.
+/// Not secret. In-memory fallback when prefs are absent (unit tests).
+String deviceId() {
+  var id = _deviceId ??= _prefs?.getString(_deviceIdKey);
+  if (id == null) {
+    id = const Uuid().v4().replaceAll('-', '').substring(0, 8);
+    _deviceId = id;
+    _prefs?.setString(_deviceIdKey, id);
+  }
+  return id;
 }
 
 /// How participant names are printed on the PDF (consumed in phase 2 when

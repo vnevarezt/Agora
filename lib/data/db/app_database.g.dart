@@ -4019,6 +4019,692 @@ class AssignmentRowsCompanion extends UpdateCompanion<AssignmentRecord> {
   }
 }
 
+class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OutboxTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _queuedAtMeta = const VerificationMeta(
+    'queuedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> queuedAt = GeneratedColumn<DateTime>(
+    'queued_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, entity, entityId, hlc, queuedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'outbox';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OutboxEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hlcMeta);
+    }
+    if (data.containsKey('queued_at')) {
+      context.handle(
+        _queuedAtMeta,
+        queuedAt.isAcceptableOrUnknown(data['queued_at']!, _queuedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_queuedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OutboxEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OutboxEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      )!,
+      queuedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}queued_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OutboxTable createAlias(String alias) {
+    return $OutboxTable(attachedDatabase, alias);
+  }
+}
+
+class OutboxEntry extends DataClass implements Insertable<OutboxEntry> {
+  final int id;
+
+  /// Entity kind, the table it points into ('person', 'program'…).
+  final String entity;
+  final String entityId;
+
+  /// Stamp given to the row by this mutation (mirrors the row's hlc).
+  final String hlc;
+  final DateTime queuedAt;
+  const OutboxEntry({
+    required this.id,
+    required this.entity,
+    required this.entityId,
+    required this.hlc,
+    required this.queuedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['entity'] = Variable<String>(entity);
+    map['entity_id'] = Variable<String>(entityId);
+    map['hlc'] = Variable<String>(hlc);
+    map['queued_at'] = Variable<DateTime>(queuedAt);
+    return map;
+  }
+
+  OutboxCompanion toCompanion(bool nullToAbsent) {
+    return OutboxCompanion(
+      id: Value(id),
+      entity: Value(entity),
+      entityId: Value(entityId),
+      hlc: Value(hlc),
+      queuedAt: Value(queuedAt),
+    );
+  }
+
+  factory OutboxEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OutboxEntry(
+      id: serializer.fromJson<int>(json['id']),
+      entity: serializer.fromJson<String>(json['entity']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      hlc: serializer.fromJson<String>(json['hlc']),
+      queuedAt: serializer.fromJson<DateTime>(json['queuedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'entity': serializer.toJson<String>(entity),
+      'entityId': serializer.toJson<String>(entityId),
+      'hlc': serializer.toJson<String>(hlc),
+      'queuedAt': serializer.toJson<DateTime>(queuedAt),
+    };
+  }
+
+  OutboxEntry copyWith({
+    int? id,
+    String? entity,
+    String? entityId,
+    String? hlc,
+    DateTime? queuedAt,
+  }) => OutboxEntry(
+    id: id ?? this.id,
+    entity: entity ?? this.entity,
+    entityId: entityId ?? this.entityId,
+    hlc: hlc ?? this.hlc,
+    queuedAt: queuedAt ?? this.queuedAt,
+  );
+  OutboxEntry copyWithCompanion(OutboxCompanion data) {
+    return OutboxEntry(
+      id: data.id.present ? data.id.value : this.id,
+      entity: data.entity.present ? data.entity.value : this.entity,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      queuedAt: data.queuedAt.present ? data.queuedAt.value : this.queuedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OutboxEntry(')
+          ..write('id: $id, ')
+          ..write('entity: $entity, ')
+          ..write('entityId: $entityId, ')
+          ..write('hlc: $hlc, ')
+          ..write('queuedAt: $queuedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, entity, entityId, hlc, queuedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OutboxEntry &&
+          other.id == this.id &&
+          other.entity == this.entity &&
+          other.entityId == this.entityId &&
+          other.hlc == this.hlc &&
+          other.queuedAt == this.queuedAt);
+}
+
+class OutboxCompanion extends UpdateCompanion<OutboxEntry> {
+  final Value<int> id;
+  final Value<String> entity;
+  final Value<String> entityId;
+  final Value<String> hlc;
+  final Value<DateTime> queuedAt;
+  const OutboxCompanion({
+    this.id = const Value.absent(),
+    this.entity = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.queuedAt = const Value.absent(),
+  });
+  OutboxCompanion.insert({
+    this.id = const Value.absent(),
+    required String entity,
+    required String entityId,
+    required String hlc,
+    required DateTime queuedAt,
+  }) : entity = Value(entity),
+       entityId = Value(entityId),
+       hlc = Value(hlc),
+       queuedAt = Value(queuedAt);
+  static Insertable<OutboxEntry> custom({
+    Expression<int>? id,
+    Expression<String>? entity,
+    Expression<String>? entityId,
+    Expression<String>? hlc,
+    Expression<DateTime>? queuedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (entity != null) 'entity': entity,
+      if (entityId != null) 'entity_id': entityId,
+      if (hlc != null) 'hlc': hlc,
+      if (queuedAt != null) 'queued_at': queuedAt,
+    });
+  }
+
+  OutboxCompanion copyWith({
+    Value<int>? id,
+    Value<String>? entity,
+    Value<String>? entityId,
+    Value<String>? hlc,
+    Value<DateTime>? queuedAt,
+  }) {
+    return OutboxCompanion(
+      id: id ?? this.id,
+      entity: entity ?? this.entity,
+      entityId: entityId ?? this.entityId,
+      hlc: hlc ?? this.hlc,
+      queuedAt: queuedAt ?? this.queuedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (queuedAt.present) {
+      map['queued_at'] = Variable<DateTime>(queuedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OutboxCompanion(')
+          ..write('id: $id, ')
+          ..write('entity: $entity, ')
+          ..write('entityId: $entityId, ')
+          ..write('hlc: $hlc, ')
+          ..write('queuedAt: $queuedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncStateTable extends SyncState
+    with TableInfo<$SyncStateTable, SyncStateRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _congregationIdMeta = const VerificationMeta(
+    'congregationId',
+  );
+  @override
+  late final GeneratedColumn<String> congregationId = GeneratedColumn<String>(
+    'congregation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pullCursorMeta = const VerificationMeta(
+    'pullCursor',
+  );
+  @override
+  late final GeneratedColumn<String> pullCursor = GeneratedColumn<String>(
+    'pull_cursor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pushedThroughMeta = const VerificationMeta(
+    'pushedThrough',
+  );
+  @override
+  late final GeneratedColumn<int> pushedThrough = GeneratedColumn<int>(
+    'pushed_through',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    congregationId,
+    pullCursor,
+    pushedThrough,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncStateRecord> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('congregation_id')) {
+      context.handle(
+        _congregationIdMeta,
+        congregationId.isAcceptableOrUnknown(
+          data['congregation_id']!,
+          _congregationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_congregationIdMeta);
+    }
+    if (data.containsKey('pull_cursor')) {
+      context.handle(
+        _pullCursorMeta,
+        pullCursor.isAcceptableOrUnknown(data['pull_cursor']!, _pullCursorMeta),
+      );
+    }
+    if (data.containsKey('pushed_through')) {
+      context.handle(
+        _pushedThroughMeta,
+        pushedThrough.isAcceptableOrUnknown(
+          data['pushed_through']!,
+          _pushedThroughMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {congregationId};
+  @override
+  SyncStateRecord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncStateRecord(
+      congregationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}congregation_id'],
+      )!,
+      pullCursor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pull_cursor'],
+      ),
+      pushedThrough: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pushed_through'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncStateTable createAlias(String alias) {
+    return $SyncStateTable(attachedDatabase, alias);
+  }
+}
+
+class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
+  final String congregationId;
+
+  /// Server timestamp watermark of the last completed pull.
+  final String? pullCursor;
+
+  /// Outbox id this congregation's pusher has completed through.
+  final int? pushedThrough;
+  final DateTime updatedAt;
+  const SyncStateRecord({
+    required this.congregationId,
+    this.pullCursor,
+    this.pushedThrough,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['congregation_id'] = Variable<String>(congregationId);
+    if (!nullToAbsent || pullCursor != null) {
+      map['pull_cursor'] = Variable<String>(pullCursor);
+    }
+    if (!nullToAbsent || pushedThrough != null) {
+      map['pushed_through'] = Variable<int>(pushedThrough);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SyncStateCompanion toCompanion(bool nullToAbsent) {
+    return SyncStateCompanion(
+      congregationId: Value(congregationId),
+      pullCursor: pullCursor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pullCursor),
+      pushedThrough: pushedThrough == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pushedThrough),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SyncStateRecord.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncStateRecord(
+      congregationId: serializer.fromJson<String>(json['congregationId']),
+      pullCursor: serializer.fromJson<String?>(json['pullCursor']),
+      pushedThrough: serializer.fromJson<int?>(json['pushedThrough']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'congregationId': serializer.toJson<String>(congregationId),
+      'pullCursor': serializer.toJson<String?>(pullCursor),
+      'pushedThrough': serializer.toJson<int?>(pushedThrough),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SyncStateRecord copyWith({
+    String? congregationId,
+    Value<String?> pullCursor = const Value.absent(),
+    Value<int?> pushedThrough = const Value.absent(),
+    DateTime? updatedAt,
+  }) => SyncStateRecord(
+    congregationId: congregationId ?? this.congregationId,
+    pullCursor: pullCursor.present ? pullCursor.value : this.pullCursor,
+    pushedThrough: pushedThrough.present
+        ? pushedThrough.value
+        : this.pushedThrough,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SyncStateRecord copyWithCompanion(SyncStateCompanion data) {
+    return SyncStateRecord(
+      congregationId: data.congregationId.present
+          ? data.congregationId.value
+          : this.congregationId,
+      pullCursor: data.pullCursor.present
+          ? data.pullCursor.value
+          : this.pullCursor,
+      pushedThrough: data.pushedThrough.present
+          ? data.pushedThrough.value
+          : this.pushedThrough,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateRecord(')
+          ..write('congregationId: $congregationId, ')
+          ..write('pullCursor: $pullCursor, ')
+          ..write('pushedThrough: $pushedThrough, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(congregationId, pullCursor, pushedThrough, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncStateRecord &&
+          other.congregationId == this.congregationId &&
+          other.pullCursor == this.pullCursor &&
+          other.pushedThrough == this.pushedThrough &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
+  final Value<String> congregationId;
+  final Value<String?> pullCursor;
+  final Value<int?> pushedThrough;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SyncStateCompanion({
+    this.congregationId = const Value.absent(),
+    this.pullCursor = const Value.absent(),
+    this.pushedThrough = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncStateCompanion.insert({
+    required String congregationId,
+    this.pullCursor = const Value.absent(),
+    this.pushedThrough = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : congregationId = Value(congregationId),
+       updatedAt = Value(updatedAt);
+  static Insertable<SyncStateRecord> custom({
+    Expression<String>? congregationId,
+    Expression<String>? pullCursor,
+    Expression<int>? pushedThrough,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (congregationId != null) 'congregation_id': congregationId,
+      if (pullCursor != null) 'pull_cursor': pullCursor,
+      if (pushedThrough != null) 'pushed_through': pushedThrough,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncStateCompanion copyWith({
+    Value<String>? congregationId,
+    Value<String?>? pullCursor,
+    Value<int?>? pushedThrough,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SyncStateCompanion(
+      congregationId: congregationId ?? this.congregationId,
+      pullCursor: pullCursor ?? this.pullCursor,
+      pushedThrough: pushedThrough ?? this.pushedThrough,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (congregationId.present) {
+      map['congregation_id'] = Variable<String>(congregationId.value);
+    }
+    if (pullCursor.present) {
+      map['pull_cursor'] = Variable<String>(pullCursor.value);
+    }
+    if (pushedThrough.present) {
+      map['pushed_through'] = Variable<int>(pushedThrough.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateCompanion(')
+          ..write('congregationId: $congregationId, ')
+          ..write('pullCursor: $pullCursor, ')
+          ..write('pushedThrough: $pushedThrough, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4028,6 +4714,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProjectsTable projects = $ProjectsTable(this);
   late final $ProgramsTable programs = $ProgramsTable(this);
   late final $AssignmentRowsTable assignmentRows = $AssignmentRowsTable(this);
+  late final $OutboxTable outbox = $OutboxTable(this);
+  late final $SyncStateTable syncState = $SyncStateTable(this);
   late final Index peopleCongregationIdx = Index(
     'people_congregation_idx',
     'CREATE INDEX people_congregation_idx ON people (congregation_id)',
@@ -4060,6 +4748,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     projects,
     programs,
     assignmentRows,
+    outbox,
+    syncState,
     peopleCongregationIdx,
     personAbsencesPersonIdx,
     projectsCongregationIdx,
@@ -7329,6 +8019,384 @@ typedef $$AssignmentRowsTableProcessedTableManager =
       AssignmentRecord,
       PrefetchHooks Function({bool programId, bool personId})
     >;
+typedef $$OutboxTableCreateCompanionBuilder =
+    OutboxCompanion Function({
+      Value<int> id,
+      required String entity,
+      required String entityId,
+      required String hlc,
+      required DateTime queuedAt,
+    });
+typedef $$OutboxTableUpdateCompanionBuilder =
+    OutboxCompanion Function({
+      Value<int> id,
+      Value<String> entity,
+      Value<String> entityId,
+      Value<String> hlc,
+      Value<DateTime> queuedAt,
+    });
+
+class $$OutboxTableFilterComposer
+    extends Composer<_$AppDatabase, $OutboxTable> {
+  $$OutboxTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get queuedAt => $composableBuilder(
+    column: $table.queuedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OutboxTableOrderingComposer
+    extends Composer<_$AppDatabase, $OutboxTable> {
+  $$OutboxTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get queuedAt => $composableBuilder(
+    column: $table.queuedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OutboxTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OutboxTable> {
+  $$OutboxTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get queuedAt =>
+      $composableBuilder(column: $table.queuedAt, builder: (column) => column);
+}
+
+class $$OutboxTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OutboxTable,
+          OutboxEntry,
+          $$OutboxTableFilterComposer,
+          $$OutboxTableOrderingComposer,
+          $$OutboxTableAnnotationComposer,
+          $$OutboxTableCreateCompanionBuilder,
+          $$OutboxTableUpdateCompanionBuilder,
+          (
+            OutboxEntry,
+            BaseReferences<_$AppDatabase, $OutboxTable, OutboxEntry>,
+          ),
+          OutboxEntry,
+          PrefetchHooks Function()
+        > {
+  $$OutboxTableTableManager(_$AppDatabase db, $OutboxTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OutboxTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OutboxTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OutboxTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> entity = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> hlc = const Value.absent(),
+                Value<DateTime> queuedAt = const Value.absent(),
+              }) => OutboxCompanion(
+                id: id,
+                entity: entity,
+                entityId: entityId,
+                hlc: hlc,
+                queuedAt: queuedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String entity,
+                required String entityId,
+                required String hlc,
+                required DateTime queuedAt,
+              }) => OutboxCompanion.insert(
+                id: id,
+                entity: entity,
+                entityId: entityId,
+                hlc: hlc,
+                queuedAt: queuedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OutboxTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OutboxTable,
+      OutboxEntry,
+      $$OutboxTableFilterComposer,
+      $$OutboxTableOrderingComposer,
+      $$OutboxTableAnnotationComposer,
+      $$OutboxTableCreateCompanionBuilder,
+      $$OutboxTableUpdateCompanionBuilder,
+      (OutboxEntry, BaseReferences<_$AppDatabase, $OutboxTable, OutboxEntry>),
+      OutboxEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncStateTableCreateCompanionBuilder =
+    SyncStateCompanion Function({
+      required String congregationId,
+      Value<String?> pullCursor,
+      Value<int?> pushedThrough,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SyncStateTableUpdateCompanionBuilder =
+    SyncStateCompanion Function({
+      Value<String> congregationId,
+      Value<String?> pullCursor,
+      Value<int?> pushedThrough,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SyncStateTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get congregationId => $composableBuilder(
+    column: $table.congregationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pullCursor => $composableBuilder(
+    column: $table.pullCursor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pushedThrough => $composableBuilder(
+    column: $table.pushedThrough,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncStateTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get congregationId => $composableBuilder(
+    column: $table.congregationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pullCursor => $composableBuilder(
+    column: $table.pullCursor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pushedThrough => $composableBuilder(
+    column: $table.pushedThrough,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncStateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get congregationId => $composableBuilder(
+    column: $table.congregationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pullCursor => $composableBuilder(
+    column: $table.pullCursor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get pushedThrough => $composableBuilder(
+    column: $table.pushedThrough,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SyncStateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncStateTable,
+          SyncStateRecord,
+          $$SyncStateTableFilterComposer,
+          $$SyncStateTableOrderingComposer,
+          $$SyncStateTableAnnotationComposer,
+          $$SyncStateTableCreateCompanionBuilder,
+          $$SyncStateTableUpdateCompanionBuilder,
+          (
+            SyncStateRecord,
+            BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRecord>,
+          ),
+          SyncStateRecord,
+          PrefetchHooks Function()
+        > {
+  $$SyncStateTableTableManager(_$AppDatabase db, $SyncStateTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> congregationId = const Value.absent(),
+                Value<String?> pullCursor = const Value.absent(),
+                Value<int?> pushedThrough = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion(
+                congregationId: congregationId,
+                pullCursor: pullCursor,
+                pushedThrough: pushedThrough,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String congregationId,
+                Value<String?> pullCursor = const Value.absent(),
+                Value<int?> pushedThrough = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion.insert(
+                congregationId: congregationId,
+                pullCursor: pullCursor,
+                pushedThrough: pushedThrough,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncStateTable,
+      SyncStateRecord,
+      $$SyncStateTableFilterComposer,
+      $$SyncStateTableOrderingComposer,
+      $$SyncStateTableAnnotationComposer,
+      $$SyncStateTableCreateCompanionBuilder,
+      $$SyncStateTableUpdateCompanionBuilder,
+      (
+        SyncStateRecord,
+        BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRecord>,
+      ),
+      SyncStateRecord,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7345,4 +8413,8 @@ class $AppDatabaseManager {
       $$ProgramsTableTableManager(_db, _db.programs);
   $$AssignmentRowsTableTableManager get assignmentRows =>
       $$AssignmentRowsTableTableManager(_db, _db.assignmentRows);
+  $$OutboxTableTableManager get outbox =>
+      $$OutboxTableTableManager(_db, _db.outbox);
+  $$SyncStateTableTableManager get syncState =>
+      $$SyncStateTableTableManager(_db, _db.syncState);
 }

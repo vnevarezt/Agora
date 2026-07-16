@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/congregation.dart';
 import '../../models/congregation_settings.dart';
 import '../db/app_database.dart';
+import '../sync/sync_scribe.dart';
 
 /// Dot colors cycled over new congregations (moved from the old in-memory
 /// dashboard controller).
@@ -18,9 +19,10 @@ const congregationPalette = <int>[
 /// Domain API over congregations. THE write path for them: later phases
 /// stamp HLC + outbox here (docs/DATA_ARCHITECTURE.md §3).
 class CongregationsRepository {
-  CongregationsRepository(this._db, {required this.defaultName});
+  CongregationsRepository(this._db, this._scribe, {required this.defaultName});
 
   final AppDatabase _db;
+  final SyncScribe _scribe;
 
   /// Localized fallback used by [ensureDefault] on fresh installs (the
   /// v1→v2 migration covers upgrades).
@@ -42,6 +44,7 @@ class CongregationsRepository {
   }) async {
     final count = (await _alive().get()).length;
     final now = DateTime.now().toUtc();
+    final hlc = await _scribe.nextHlc();
     final record = CongregationRecord(
       id: const Uuid().v4(),
       name: name,
@@ -51,9 +54,12 @@ class CongregationsRepository {
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
-      hlc: null,
+      hlc: hlc,
     );
-    await _db.into(_db.congregations).insert(record);
+    await _db.transaction(() async {
+      await _db.into(_db.congregations).insert(record);
+      await _scribe.enqueue(SyncEntity.congregation, record.id, hlc);
+    });
     return _toModel(record);
   }
 
@@ -64,14 +70,20 @@ class CongregationsRepository {
     required String number,
     required CongregationSettings settings,
   }) async {
-    await (_db.update(_db.congregations)..where((t) => t.id.equals(id))).write(
-      CongregationsCompanion(
-        name: Value(name),
-        number: Value(number),
-        settingsJson: Value(settings.toJson()),
-        updatedAt: Value(DateTime.now().toUtc()),
-      ),
-    );
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await (_db.update(_db.congregations)..where((t) => t.id.equals(id)))
+          .write(
+        CongregationsCompanion(
+          name: Value(name),
+          number: Value(number),
+          settingsJson: Value(settings.toJson()),
+          updatedAt: Value(DateTime.now().toUtc()),
+          hlc: Value(hlc),
+        ),
+      );
+      await _scribe.enqueue(SyncEntity.congregation, id, hlc);
+    });
   }
 
   /// First alive congregation, created on demand: resolves the FK for

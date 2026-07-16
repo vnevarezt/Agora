@@ -8,6 +8,7 @@ import 'converters.dart';
 import 'people_dao.dart';
 import 'tables/assignments.dart';
 import 'tables/congregations.dart';
+import 'tables/outbox.dart';
 import 'tables/people.dart';
 import 'tables/person_absences.dart';
 import 'tables/programs.dart';
@@ -27,6 +28,8 @@ part 'app_database.g.dart';
 ///   v3: phase-2 schema (docs/PHASE2_PROGRAMS_IN_DB.md) — programs gain the
 ///       content snapshot + per-program config columns; new `assignments`
 ///       table (one row per filled slot position).
+///   v4: phase-3 sync scaffolding (docs/PHASE3_SYNC_SCAFFOLDING.md) —
+///       `outbox` dirty-set + `sync_state` cursors (both local-only).
 @DriftDatabase(
   tables: [
     Congregations,
@@ -35,6 +38,8 @@ part 'app_database.g.dart';
     Projects,
     Programs,
     AssignmentRows,
+    Outbox,
+    SyncState,
   ],
   daos: [PeopleDao],
 )
@@ -47,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
   final String defaultCongregationName;
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -61,6 +66,7 @@ class AppDatabase extends _$AppDatabase {
             return;
           }
           if (from < 3) await _migrateV2ToV3(m);
+          if (from < 4) await _migrateV3ToV4(m);
         },
         beforeOpen: (details) async {
           // Runs after migrations: soft deletes make FK violations rare, but
@@ -84,6 +90,8 @@ class AppDatabase extends _$AppDatabase {
     await m.createTable(projects);
     await m.createTable(programs);
     await m.createTable(assignmentRows);
+    await m.createTable(outbox);
+    await m.createTable(syncState);
     await m.createIndex(peopleCongregationIdx);
     await m.createIndex(personAbsencesPersonIdx);
     await m.createIndex(projectsCongregationIdx);
@@ -171,5 +179,11 @@ class AppDatabase extends _$AppDatabase {
     await m.addColumn(programs, programs.auxRoom);
     await m.createTable(assignmentRows);
     await m.createIndex(assignmentsProgramIdx);
+  }
+
+  /// v3 → v4 (docs/PHASE3_SYNC_SCAFFOLDING.md): local-only sync bookkeeping.
+  Future<void> _migrateV3ToV4(Migrator m) async {
+    await m.createTable(outbox);
+    await m.createTable(syncState);
   }
 }

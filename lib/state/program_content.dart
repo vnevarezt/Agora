@@ -7,8 +7,8 @@ import 'dashboard_provider.dart';
 import 'db_provider.dart';
 import 'weeks_provider.dart';
 
-final programsRepositoryProvider = Provider<ProgramsRepository>(
-    (ref) => ProgramsRepository(ref.watch(dbProvider)));
+final programsRepositoryProvider = Provider<ProgramsRepository>((ref) =>
+    ProgramsRepository(ref.watch(dbProvider), ref.watch(syncScribeProvider)));
 
 final programContentServiceProvider =
     Provider<ProgramContentService>(ProgramContentService.new);

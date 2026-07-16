@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/hall.dart';
 import '../../models/program_type_ids.dart';
 import '../db/app_database.dart';
+import '../sync/sync_scribe.dart';
 import 'congregations_repository.dart';
 
 /// A project with its alive skeleton programs (phase 1: one row per picked
@@ -11,12 +12,13 @@ import 'congregations_repository.dart';
 typedef ProjectData = ({ProjectRecord project, List<ProgramRecord> programs});
 
 /// Domain API over projects + their programs. THE write path for both:
-/// later phases stamp HLC + outbox here (docs/DATA_ARCHITECTURE.md §3).
+/// it stamps HLC + outbox (docs/PHASE3_SYNC_SCAFFOLDING.md).
 class ProjectsRepository {
-  ProjectsRepository(this._db, this._congregations);
+  ProjectsRepository(this._db, this._congregations, this._scribe);
 
   final AppDatabase _db;
   final CongregationsRepository _congregations;
+  final SyncScribe _scribe;
 
   /// Newest project first (the old controller prepended new ones).
   Stream<List<ProjectData>> watchAll() {
@@ -59,6 +61,7 @@ class ProjectsRepository {
         ? await _congregations.ensureDefault()
         : congregationId;
     final now = DateTime.now().toUtc();
+    final hlc = await _scribe.nextHlc();
     final projectId = const Uuid().v4();
     await _db.transaction(() async {
       await _db.into(_db.projects).insert(ProjectsCompanion.insert(
@@ -67,8 +70,10 @@ class ProjectsRepository {
             name: name,
             createdAt: now,
             updatedAt: now,
+            hlc: Value(hlc),
           ));
-      await _insertPrograms(projectId, weeks, now);
+      await _scribe.enqueue(SyncEntity.project, projectId, hlc);
+      await _insertPrograms(projectId, weeks, now, hlc);
     });
     return projectId;
   }
@@ -86,14 +91,17 @@ class ProjectsRepository {
         ? await _congregations.ensureDefault()
         : congregationId;
     final now = DateTime.now().toUtc();
+    final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
       await (_db.update(_db.projects)..where((t) => t.id.equals(id))).write(
         ProjectsCompanion(
           name: Value(name),
           congregationId: Value(congId),
           updatedAt: Value(now),
+          hlc: Value(hlc),
         ),
       );
+      await _scribe.enqueue(SyncEntity.project, id, hlc);
 
       final existing = await (_db.select(_db.programs)
             ..where((t) => t.projectId.equals(id) & t.deletedAt.isNull()))
@@ -105,7 +113,11 @@ class ProjectsRepository {
             .write(ProgramsCompanion(
           deletedAt: Value(now),
           updatedAt: Value(now),
+          hlc: Value(hlc),
         ));
+        for (final programId in removed) {
+          await _scribe.enqueue(SyncEntity.program, programId, hlc);
+        }
       }
       // Survivors keep their id (phase 2 hangs assignments off it) but get
       // their position reassigned; new weeks are inserted at theirs.
@@ -113,11 +125,12 @@ class ProjectsRepository {
       for (var i = 0; i < weeks.length; i++) {
         final current = byDate[weeks[i]];
         if (current == null) {
-          await _insertProgram(id, weeks[i], i, now);
+          await _insertProgram(id, weeks[i], i, now, hlc);
         } else if (current.sortIndex != i) {
           await (_db.update(_db.programs)
                 ..where((t) => t.id.equals(current.id)))
-              .write(ProgramsCompanion(sortIndex: Value(i)));
+              .write(ProgramsCompanion(sortIndex: Value(i), hlc: Value(hlc)));
+          await _scribe.enqueue(SyncEntity.program, current.id, hlc);
         }
       }
     });
@@ -126,16 +139,30 @@ class ProjectsRepository {
   /// Soft delete, cascading to the project's alive programs.
   Future<void> delete(String id) async {
     final now = DateTime.now().toUtc();
+    final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
+      final rows = await (_db.selectOnly(_db.programs)
+            ..addColumns([_db.programs.id])
+            ..where(_db.programs.projectId.equals(id) &
+                _db.programs.deletedAt.isNull()))
+          .get();
+      final programIds = [for (final r in rows) r.read(_db.programs.id)!];
+
       await (_db.update(_db.projects)..where((t) => t.id.equals(id))).write(
-        ProjectsCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+        ProjectsCompanion(
+            deletedAt: Value(now), updatedAt: Value(now), hlc: Value(hlc)),
       );
+      await _scribe.enqueue(SyncEntity.project, id, hlc);
       await (_db.update(_db.programs)
             ..where((t) => t.projectId.equals(id) & t.deletedAt.isNull()))
           .write(ProgramsCompanion(
         deletedAt: Value(now),
         updatedAt: Value(now),
+        hlc: Value(hlc),
       ));
+      for (final programId in programIds) {
+        await _scribe.enqueue(SyncEntity.program, programId, hlc);
+      }
     });
   }
 
@@ -160,28 +187,36 @@ class ProjectsRepository {
   /// Stamps the export (drives the derived `exported` status).
   Future<void> markExported(String id) async {
     final now = DateTime.now().toUtc();
-    await (_db.update(_db.projects)..where((t) => t.id.equals(id))).write(
-      ProjectsCompanion(exportedAt: Value(now), updatedAt: Value(now)),
-    );
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await (_db.update(_db.projects)..where((t) => t.id.equals(id))).write(
+        ProjectsCompanion(
+            exportedAt: Value(now), updatedAt: Value(now), hlc: Value(hlc)),
+      );
+      await _scribe.enqueue(SyncEntity.project, id, hlc);
+    });
   }
 
   Future<void> _insertPrograms(
-      String projectId, List<String> weeks, DateTime now) async {
+      String projectId, List<String> weeks, DateTime now, String hlc) async {
     for (var i = 0; i < weeks.length; i++) {
-      await _insertProgram(projectId, weeks[i], i, now);
+      await _insertProgram(projectId, weeks[i], i, now, hlc);
     }
   }
 
-  Future<void> _insertProgram(
-      String projectId, String week, int sortIndex, DateTime now) {
-    return _db.into(_db.programs).insert(ProgramsCompanion.insert(
-          id: const Uuid().v4(),
+  Future<void> _insertProgram(String projectId, String week, int sortIndex,
+      DateTime now, String hlc) async {
+    final programId = const Uuid().v4();
+    await _db.into(_db.programs).insert(ProgramsCompanion.insert(
+          id: programId,
           projectId: projectId,
           programTypeId: ProgramTypeIds.mwbS140,
           date: week,
           sortIndex: Value(sortIndex),
           createdAt: now,
           updatedAt: now,
+          hlc: Value(hlc),
         ));
+    await _scribe.enqueue(SyncEntity.program, programId, hlc);
   }
 }
