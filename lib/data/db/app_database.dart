@@ -163,6 +163,7 @@ class AppDatabase extends _$AppDatabase {
   /// own table. Existing skeleton programs keep NULL content — the snapshot
   /// service fills it the first time their project opens.
   Future<void> _migrateV2ToV3(Migrator m) async {
+    await m.addColumn(programs, programs.sortIndex);
     await m.addColumn(programs, programs.contentJson);
     await m.addColumn(programs, programs.titleOverridesJson);
     await m.addColumn(programs, programs.startTime);

@@ -133,7 +133,8 @@ class ProjectActions {
 
   ProjectsRepository get _repo => _ref.read(projectsRepositoryProvider);
 
-  Future<void> create({
+  /// Returns the new project id (callers chain the content snapshot).
+  Future<String> create({
     required String name,
     required String congregationId,
     required List<String> weeks,

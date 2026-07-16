@@ -19,9 +19,13 @@ class Programs extends Table with SyncColumns {
   TextColumn get weekType =>
       textEnum<WeekType>().withDefault(Constant(WeekType.normal.name))();
 
-  /// Week identifier as the notebook catalog exposes it (ISO `yyyy-MM-dd`
-  /// week start). TEXT: a calendar week, not an instant.
+  /// Week identifier as the notebook catalog exposes it (the parsed week
+  /// heading, e.g. "7-13 DE JULIO"). TEXT label, NOT sortable — display
+  /// order lives in [sortIndex].
   TextColumn get date => text()();
+
+  /// Position within the project (notebook order picked in the modal).
+  IntColumn get sortIndex => integer().withDefault(const Constant(0))();
 
   /// Optional user-facing override ("Visita del superintendente").
   TextColumn get label => text().withDefault(const Constant(''))();

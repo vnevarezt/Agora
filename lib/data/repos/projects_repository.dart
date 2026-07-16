@@ -27,7 +27,10 @@ class ProjectsRepository {
       ),
     ])
       ..where(_db.projects.deletedAt.isNull())
-      ..orderBy([OrderingTerm.desc(_db.projects.createdAt)]);
+      ..orderBy([
+        OrderingTerm.desc(_db.projects.createdAt),
+        OrderingTerm.asc(_db.programs.sortIndex),
+      ]);
 
     return query.watch().map((rows) {
       // Group join rows by project, preserving the query order.
@@ -45,7 +48,8 @@ class ProjectsRepository {
     });
   }
 
-  Future<void> create({
+  /// Returns the new project id (callers chain the content snapshot).
+  Future<String> create({
     required String name,
     required String congregationId,
     required List<String> weeks,
@@ -65,6 +69,7 @@ class ProjectsRepository {
           ));
       await _insertPrograms(projectId, weeks, now);
     });
+    return projectId;
   }
 
   /// Week diffing keeps the surviving programs' ids stable — phase 2 hangs
@@ -101,9 +106,19 @@ class ProjectsRepository {
           updatedAt: Value(now),
         ));
       }
-      final have = {for (final p in existing) p.date};
-      await _insertPrograms(
-          id, [for (final w in weeks) if (!have.contains(w)) w], now);
+      // Survivors keep their id (phase 2 hangs assignments off it) but get
+      // their position reassigned; new weeks are inserted at theirs.
+      final byDate = {for (final p in existing) p.date: p};
+      for (var i = 0; i < weeks.length; i++) {
+        final current = byDate[weeks[i]];
+        if (current == null) {
+          await _insertProgram(id, weeks[i], i, now);
+        } else if (current.sortIndex != i) {
+          await (_db.update(_db.programs)
+                ..where((t) => t.id.equals(current.id)))
+              .write(ProgramsCompanion(sortIndex: Value(i)));
+        }
+      }
     });
   }
 
@@ -133,20 +148,21 @@ class ProjectsRepository {
 
   Future<void> _insertPrograms(
       String projectId, List<String> weeks, DateTime now) async {
-    await _db.batch((b) {
-      for (final week in weeks) {
-        b.insert(
-          _db.programs,
-          ProgramsCompanion.insert(
-            id: const Uuid().v4(),
-            projectId: projectId,
-            programTypeId: ProgramTypeIds.mwbS140,
-            date: week,
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-      }
-    });
+    for (var i = 0; i < weeks.length; i++) {
+      await _insertProgram(projectId, weeks[i], i, now);
+    }
+  }
+
+  Future<void> _insertProgram(
+      String projectId, String week, int sortIndex, DateTime now) {
+    return _db.into(_db.programs).insert(ProgramsCompanion.insert(
+          id: const Uuid().v4(),
+          projectId: projectId,
+          programTypeId: ProgramTypeIds.mwbS140,
+          date: week,
+          sortIndex: Value(sortIndex),
+          createdAt: now,
+          updatedAt: now,
+        ));
   }
 }

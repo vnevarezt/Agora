@@ -2485,6 +2485,18 @@ class $ProgramsTable extends Programs
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sortIndexMeta = const VerificationMeta(
+    'sortIndex',
+  );
+  @override
+  late final GeneratedColumn<int> sortIndex = GeneratedColumn<int>(
+    'sort_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _labelMeta = const VerificationMeta('label');
   @override
   late final GeneratedColumn<String> label = GeneratedColumn<String>(
@@ -2565,6 +2577,7 @@ class $ProgramsTable extends Programs
     programTypeId,
     weekType,
     date,
+    sortIndex,
     label,
     contentJson,
     titleOverridesJson,
@@ -2643,6 +2656,12 @@ class $ProgramsTable extends Programs
       );
     } else if (isInserting) {
       context.missing(_dateMeta);
+    }
+    if (data.containsKey('sort_index')) {
+      context.handle(
+        _sortIndexMeta,
+        sortIndex.isAcceptableOrUnknown(data['sort_index']!, _sortIndexMeta),
+      );
     }
     if (data.containsKey('label')) {
       context.handle(
@@ -2736,6 +2755,10 @@ class $ProgramsTable extends Programs
         DriftSqlType.string,
         data['${effectivePrefix}date'],
       )!,
+      sortIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_index'],
+      )!,
       label: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}label'],
@@ -2793,9 +2816,13 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
   final String programTypeId;
   final WeekType weekType;
 
-  /// Week identifier as the notebook catalog exposes it (ISO `yyyy-MM-dd`
-  /// week start). TEXT: a calendar week, not an instant.
+  /// Week identifier as the notebook catalog exposes it (the parsed week
+  /// heading, e.g. "7-13 DE JULIO"). TEXT label, NOT sortable — display
+  /// order lives in [sortIndex].
   final String date;
+
+  /// Position within the project (notebook order picked in the modal).
+  final int sortIndex;
 
   /// Optional user-facing override ("Visita del superintendente").
   final String label;
@@ -2823,6 +2850,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     required this.programTypeId,
     required this.weekType,
     required this.date,
+    required this.sortIndex,
     required this.label,
     this.contentJson,
     required this.titleOverridesJson,
@@ -2850,6 +2878,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
       );
     }
     map['date'] = Variable<String>(date);
+    map['sort_index'] = Variable<int>(sortIndex);
     map['label'] = Variable<String>(label);
     if (!nullToAbsent || contentJson != null) {
       map['content_json'] = Variable<String>(contentJson);
@@ -2880,6 +2909,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
       programTypeId: Value(programTypeId),
       weekType: Value(weekType),
       date: Value(date),
+      sortIndex: Value(sortIndex),
       label: Value(label),
       contentJson: contentJson == null && nullToAbsent
           ? const Value.absent()
@@ -2914,6 +2944,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
         serializer.fromJson<String>(json['weekType']),
       ),
       date: serializer.fromJson<String>(json['date']),
+      sortIndex: serializer.fromJson<int>(json['sortIndex']),
       label: serializer.fromJson<String>(json['label']),
       contentJson: serializer.fromJson<String?>(json['contentJson']),
       titleOverridesJson: serializer.fromJson<String>(
@@ -2939,6 +2970,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
         $ProgramsTable.$converterweekType.toJson(weekType),
       ),
       'date': serializer.toJson<String>(date),
+      'sortIndex': serializer.toJson<int>(sortIndex),
       'label': serializer.toJson<String>(label),
       'contentJson': serializer.toJson<String?>(contentJson),
       'titleOverridesJson': serializer.toJson<String>(titleOverridesJson),
@@ -2958,6 +2990,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     String? programTypeId,
     WeekType? weekType,
     String? date,
+    int? sortIndex,
     String? label,
     Value<String?> contentJson = const Value.absent(),
     String? titleOverridesJson,
@@ -2974,6 +3007,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     programTypeId: programTypeId ?? this.programTypeId,
     weekType: weekType ?? this.weekType,
     date: date ?? this.date,
+    sortIndex: sortIndex ?? this.sortIndex,
     label: label ?? this.label,
     contentJson: contentJson.present ? contentJson.value : this.contentJson,
     titleOverridesJson: titleOverridesJson ?? this.titleOverridesJson,
@@ -2996,6 +3030,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
           : this.programTypeId,
       weekType: data.weekType.present ? data.weekType.value : this.weekType,
       date: data.date.present ? data.date.value : this.date,
+      sortIndex: data.sortIndex.present ? data.sortIndex.value : this.sortIndex,
       label: data.label.present ? data.label.value : this.label,
       contentJson: data.contentJson.present
           ? data.contentJson.value
@@ -3023,6 +3058,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
           ..write('programTypeId: $programTypeId, ')
           ..write('weekType: $weekType, ')
           ..write('date: $date, ')
+          ..write('sortIndex: $sortIndex, ')
           ..write('label: $label, ')
           ..write('contentJson: $contentJson, ')
           ..write('titleOverridesJson: $titleOverridesJson, ')
@@ -3044,6 +3080,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     programTypeId,
     weekType,
     date,
+    sortIndex,
     label,
     contentJson,
     titleOverridesJson,
@@ -3064,6 +3101,7 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
           other.programTypeId == this.programTypeId &&
           other.weekType == this.weekType &&
           other.date == this.date &&
+          other.sortIndex == this.sortIndex &&
           other.label == this.label &&
           other.contentJson == this.contentJson &&
           other.titleOverridesJson == this.titleOverridesJson &&
@@ -3082,6 +3120,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
   final Value<String> programTypeId;
   final Value<WeekType> weekType;
   final Value<String> date;
+  final Value<int> sortIndex;
   final Value<String> label;
   final Value<String?> contentJson;
   final Value<String> titleOverridesJson;
@@ -3099,6 +3138,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     this.programTypeId = const Value.absent(),
     this.weekType = const Value.absent(),
     this.date = const Value.absent(),
+    this.sortIndex = const Value.absent(),
     this.label = const Value.absent(),
     this.contentJson = const Value.absent(),
     this.titleOverridesJson = const Value.absent(),
@@ -3117,6 +3157,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     required String programTypeId,
     this.weekType = const Value.absent(),
     required String date,
+    this.sortIndex = const Value.absent(),
     this.label = const Value.absent(),
     this.contentJson = const Value.absent(),
     this.titleOverridesJson = const Value.absent(),
@@ -3140,6 +3181,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     Expression<String>? programTypeId,
     Expression<String>? weekType,
     Expression<String>? date,
+    Expression<int>? sortIndex,
     Expression<String>? label,
     Expression<String>? contentJson,
     Expression<String>? titleOverridesJson,
@@ -3158,6 +3200,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
       if (programTypeId != null) 'program_type_id': programTypeId,
       if (weekType != null) 'week_type': weekType,
       if (date != null) 'date': date,
+      if (sortIndex != null) 'sort_index': sortIndex,
       if (label != null) 'label': label,
       if (contentJson != null) 'content_json': contentJson,
       if (titleOverridesJson != null)
@@ -3179,6 +3222,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     Value<String>? programTypeId,
     Value<WeekType>? weekType,
     Value<String>? date,
+    Value<int>? sortIndex,
     Value<String>? label,
     Value<String?>? contentJson,
     Value<String>? titleOverridesJson,
@@ -3197,6 +3241,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
       programTypeId: programTypeId ?? this.programTypeId,
       weekType: weekType ?? this.weekType,
       date: date ?? this.date,
+      sortIndex: sortIndex ?? this.sortIndex,
       label: label ?? this.label,
       contentJson: contentJson ?? this.contentJson,
       titleOverridesJson: titleOverridesJson ?? this.titleOverridesJson,
@@ -3239,6 +3284,9 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     if (date.present) {
       map['date'] = Variable<String>(date.value);
     }
+    if (sortIndex.present) {
+      map['sort_index'] = Variable<int>(sortIndex.value);
+    }
     if (label.present) {
       map['label'] = Variable<String>(label.value);
     }
@@ -3275,6 +3323,7 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
           ..write('programTypeId: $programTypeId, ')
           ..write('weekType: $weekType, ')
           ..write('date: $date, ')
+          ..write('sortIndex: $sortIndex, ')
           ..write('label: $label, ')
           ..write('contentJson: $contentJson, ')
           ..write('titleOverridesJson: $titleOverridesJson, ')
@@ -6134,6 +6183,7 @@ typedef $$ProgramsTableCreateCompanionBuilder =
       required String programTypeId,
       Value<WeekType> weekType,
       required String date,
+      Value<int> sortIndex,
       Value<String> label,
       Value<String?> contentJson,
       Value<String> titleOverridesJson,
@@ -6153,6 +6203,7 @@ typedef $$ProgramsTableUpdateCompanionBuilder =
       Value<String> programTypeId,
       Value<WeekType> weekType,
       Value<String> date,
+      Value<int> sortIndex,
       Value<String> label,
       Value<String?> contentJson,
       Value<String> titleOverridesJson,
@@ -6249,6 +6300,11 @@ class $$ProgramsTableFilterComposer
 
   ColumnFilters<String> get date => $composableBuilder(
     column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6380,6 +6436,11 @@ class $$ProgramsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortIndex => $composableBuilder(
+    column: $table.sortIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get label => $composableBuilder(
     column: $table.label,
     builder: (column) => ColumnOrderings(column),
@@ -6468,6 +6529,9 @@ class $$ProgramsTableAnnotationComposer
 
   GeneratedColumn<String> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get sortIndex =>
+      $composableBuilder(column: $table.sortIndex, builder: (column) => column);
 
   GeneratedColumn<String> get label =>
       $composableBuilder(column: $table.label, builder: (column) => column);
@@ -6579,6 +6643,7 @@ class $$ProgramsTableTableManager
                 Value<String> programTypeId = const Value.absent(),
                 Value<WeekType> weekType = const Value.absent(),
                 Value<String> date = const Value.absent(),
+                Value<int> sortIndex = const Value.absent(),
                 Value<String> label = const Value.absent(),
                 Value<String?> contentJson = const Value.absent(),
                 Value<String> titleOverridesJson = const Value.absent(),
@@ -6596,6 +6661,7 @@ class $$ProgramsTableTableManager
                 programTypeId: programTypeId,
                 weekType: weekType,
                 date: date,
+                sortIndex: sortIndex,
                 label: label,
                 contentJson: contentJson,
                 titleOverridesJson: titleOverridesJson,
@@ -6615,6 +6681,7 @@ class $$ProgramsTableTableManager
                 required String programTypeId,
                 Value<WeekType> weekType = const Value.absent(),
                 required String date,
+                Value<int> sortIndex = const Value.absent(),
                 Value<String> label = const Value.absent(),
                 Value<String?> contentJson = const Value.absent(),
                 Value<String> titleOverridesJson = const Value.absent(),
@@ -6632,6 +6699,7 @@ class $$ProgramsTableTableManager
                 programTypeId: programTypeId,
                 weekType: weekType,
                 date: date,
+                sortIndex: sortIndex,
                 label: label,
                 contentJson: contentJson,
                 titleOverridesJson: titleOverridesJson,

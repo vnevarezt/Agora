@@ -717,6 +717,16 @@
             "dsl_features": []
           },
           {
+            "name": "sort_index",
+            "getter_name": "sortIndex",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
             "name": "label",
             "getter_name": "label",
             "moor_type": "string",
@@ -1093,7 +1103,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"programs\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"hlc\" TEXT NULL, \"project_id\" TEXT NOT NULL REFERENCES projects (id), \"program_type_id\" TEXT NOT NULL, \"week_type\" TEXT NOT NULL DEFAULT 'normal', \"date\" TEXT NOT NULL, \"label\" TEXT NOT NULL DEFAULT '', \"content_json\" TEXT NULL, \"title_overrides_json\" TEXT NOT NULL DEFAULT '{}', \"start_time\" TEXT NULL, \"duration_minutes\" INTEGER NULL, \"aux_room\" INTEGER NULL CHECK (\"aux_room\" IN (0, 1)), PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"programs\" (\"id\" TEXT NOT NULL, \"created_at\" TEXT NOT NULL, \"updated_at\" TEXT NOT NULL, \"deleted_at\" TEXT NULL, \"hlc\" TEXT NULL, \"project_id\" TEXT NOT NULL REFERENCES projects (id), \"program_type_id\" TEXT NOT NULL, \"week_type\" TEXT NOT NULL DEFAULT 'normal', \"date\" TEXT NOT NULL, \"sort_index\" INTEGER NOT NULL DEFAULT 0, \"label\" TEXT NOT NULL DEFAULT '', \"content_json\" TEXT NULL, \"title_overrides_json\" TEXT NOT NULL DEFAULT '{}', \"start_time\" TEXT NULL, \"duration_minutes\" INTEGER NULL, \"aux_room\" INTEGER NULL CHECK (\"aux_room\" IN (0, 1)), PRIMARY KEY (\"id\"));"
         }
       ]
     },

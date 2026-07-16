@@ -604,6 +604,15 @@ class Programs extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<int> sortIndex = GeneratedColumn<int>(
+    'sort_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
+  );
   late final GeneratedColumn<String> label = GeneratedColumn<String>(
     'label',
     aliasedName,
@@ -666,6 +675,7 @@ class Programs extends Table with TableInfo {
     programTypeId,
     weekType,
     date,
+    sortIndex,
     label,
     contentJson,
     titleOverridesJson,
