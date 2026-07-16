@@ -685,36 +685,6 @@ class Translations$settings$es {
 
 	late final Translations$settings$notif$es notif = Translations$settings$notif$es.internal(_root);
 
-	/// es: 'Datos'
-	String get data => 'Datos';
-
-	/// es: 'Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.'
-	String get dataDesc => 'Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.';
-
-	/// es: 'Exportar datos'
-	String get exportData => 'Exportar datos';
-
-	/// es: 'Genera un archivo .jwbackup con todo'
-	String get exportDataDesc => 'Genera un archivo .jwbackup con todo';
-
-	/// es: 'Exportar'
-	String get export => 'Exportar';
-
-	/// es: 'Importar datos'
-	String get importData => 'Importar datos';
-
-	/// es: 'Restaura desde un archivo .jwbackup'
-	String get importDataDesc => 'Restaura desde un archivo .jwbackup';
-
-	/// es: 'Importar'
-	String get import => 'Importar';
-
-	/// es: 'Última copia'
-	String get lastBackup => 'Última copia';
-
-	/// es: 'Sin copias todavía'
-	String get noBackupsYet => 'Sin copias todavía';
-
 	/// es: 'Sesión'
 	String get session => 'Sesión';
 
@@ -1005,6 +975,9 @@ class Translations$export$es {
 
 	/// es: 'PDF exportado: {path}'
 	String success({required Object path}) => 'PDF exportado: ${path}';
+
+	/// es: 'PDF compartido'
+	String get shared => 'PDF compartido';
 
 	/// es: 'Error al exportar: {error}'
 	String error({required Object error}) => 'Error al exportar: ${error}';
@@ -1661,16 +1634,6 @@ extension on Translations {
 			'settings.notif.newNotebooksDesc' => 'Avisar cuando haya un nuevo cuaderno disponible',
 			'settings.notif.exportsTitle' => 'Exportaciones pendientes',
 			'settings.notif.exportsDesc' => 'Recordar exportar el programa antes del fin de semana',
-			'settings.data' => 'Datos',
-			'settings.dataDesc' => 'Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.',
-			'settings.exportData' => 'Exportar datos',
-			'settings.exportDataDesc' => 'Genera un archivo .jwbackup con todo',
-			'settings.export' => 'Exportar',
-			'settings.importData' => 'Importar datos',
-			'settings.importDataDesc' => 'Restaura desde un archivo .jwbackup',
-			'settings.import' => 'Importar',
-			'settings.lastBackup' => 'Última copia',
-			'settings.noBackupsYet' => 'Sin copias todavía',
 			'settings.session' => 'Sesión',
 			'settings.sessionDesc' => 'Estás usando la app en modo local en este dispositivo.',
 			'settings.localMode' => 'Modo local',
@@ -1744,6 +1707,7 @@ extension on Translations {
 			'export.export' => 'Exportar',
 			'export.exportPdf' => 'Exportar PDF',
 			'export.success' => ({required Object path}) => 'PDF exportado: ${path}',
+			'export.shared' => 'PDF compartido',
 			'export.error' => ({required Object error}) => 'Error al exportar: ${error}',
 			'export.currentWeek' => 'Semana actual',
 			'export.currentWeekSub' => 'Una hoja PDF',
