@@ -1,10 +1,31 @@
 # Phase 1 — Local Persistence: Implementation Plan
 
 Executes phase 1 of [DATA_ARCHITECTURE.md](./DATA_ARCHITECTURE.md) §8.
-Status: **milestones 1–3 implemented** — 2026-07-15 (schema+migration
-`0cb1ee5`, people `d274577`, congregations+projects `aad1b70`). Milestone 4
-(acceptance) in progress; the `.jwpp` item was dropped from milestone 2 —
-export/import turned out not to exist yet, so it belongs to a later phase.
+Status: **milestones 1–4 implemented** — 2026-07-15 (schema+migration
+`0cb1ee5`, people `d274577`, congregations+projects `aad1b70`, cleanup
+`12d41f7`). The `.jwpp` item was dropped from milestone 2 — export/import
+turned out not to exist yet, so it belongs to a later phase.
+
+## Phase 1-B (2026-07-15): everything the config UI promises now persists
+
+Follow-up scoped after user testing found config gaps:
+
+- **Congregation settings persist** (`b0b48c9`): `CongregationSettings`
+  (typed, tolerant JSON in `settingsJson`) + repository `update()`; the
+  congregation tab seeds from the row and autosaves (debounced).
+- **App preferences persist** (`2d007a2`): theme, time format, week start,
+  PDF name format, notification toggles → SharedPreferences
+  (`state/app_settings.dart`, loaded before `runApp`). The dead ".jwbackup"
+  Datos card was removed until a real backup exists.
+- **Native save mechanism** (`b64f69a`): `data/files/file_saver.dart` is
+  THE standardized way to save/export a file on every platform — native
+  save dialog on macOS/Windows/Linux (file_selector), native share sheet on
+  Android/iOS (share_plus). PDF export now asks where to save. Future
+  backups/exports must reuse it.
+
+Still device-local only by design: nothing syncs to Firestore until phase 4
+(see DATA_ARCHITECTURE.md §8) — on Android/iOS data goes to the same
+encrypted local DB.
 
 ## Goal
 

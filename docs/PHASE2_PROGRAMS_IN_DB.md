@@ -1,7 +1,8 @@
 # Phase 2 — Programs in the DB: Implementation Plan
 
 Executes phase 2 of [DATA_ARCHITECTURE.md](./DATA_ARCHITECTURE.md) §8.
-Status: **in progress** — 2026-07-15.
+Status: **implemented** — 2026-07-16 (schema v3 `57f869b`, snapshots
+`1abb723`, editor write-through `90c2b20`, real progress `202b3bc`).
 
 ## Goal
 
