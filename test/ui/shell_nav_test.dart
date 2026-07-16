@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/app.dart';
 import 'package:jw_program/i18n/strings.g.dart';
+import 'package:jw_program/models/congregation.dart';
 import 'package:jw_program/models/person.dart';
+import 'package:jw_program/models/project.dart';
 import 'package:jw_program/state/auth_session.dart';
+import 'package:jw_program/state/dashboard_provider.dart';
 import 'package:jw_program/state/mwb_sync.dart';
 import 'package:jw_program/state/people_provider.dart';
 
@@ -32,6 +35,8 @@ Future<void> _pumpShell(WidgetTester tester, Size size) async {
         mwbSyncProvider.overrideWith(_NoopSyncController.new),
         authSessionProvider.overrideWith(_UnlockedSessionController.new),
         peopleProvider.overrideWithValue(const <Person>[]),
+        congregationsProvider.overrideWithValue(const <Congregation>[]),
+        projectsProvider.overrideWithValue(const <Project>[]),
       ],
       child: const JwProgramApp(),
     ),

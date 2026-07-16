@@ -44,9 +44,11 @@ class FormModel {
     this.titleOverridesByWeek = const {},
   });
 
+  // congregationId is the printed congregation NAME; it starts empty and is
+  // seeded from the opened project (dashboard) — no more hardcoded hall.
   static const initial = FormModel(
     issue: '202605',
-    congregationId: 'CONSTITUCIÓN J.A CASTRO',
+    congregationId: '',
     startTime: '18:00',
     duration: 105,
     auxRoom: false,

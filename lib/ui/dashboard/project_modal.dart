@@ -98,14 +98,14 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     return t.projectModal.autoName(n: _weeks.length, base: base);
   }
 
-  void _save(Notebook notebook) {
+  Future<void> _save(Notebook notebook) async {
     final name = _autoName(notebook);
-    final notifier = ref.read(projectsProvider.notifier);
+    final actions = ref.read(projectActionsProvider);
     if (_isNew) {
-      notifier.create(
+      await actions.create(
           name: name, congregationId: _congregationId, weeks: _weeks);
     } else {
-      notifier.update(widget.original!.id,
+      await actions.update(widget.original!.id,
           name: name, congregationId: _congregationId, weeks: _weeks);
     }
     widget.onClose();
@@ -133,7 +133,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    ref.read(projectsProvider.notifier).delete(widget.original!.id);
+    await ref.read(projectActionsProvider).delete(widget.original!.id);
     widget.onClose();
   }
 

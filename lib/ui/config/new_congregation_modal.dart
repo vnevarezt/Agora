@@ -45,13 +45,31 @@ class _NewCongregationModalState
   String _weekendDay = daysOfWeek[6]; // Sunday
   String _weekendTime = '10:00';
 
-  /// Adds the congregation to in-memory state and closes. Schedule/language
-  /// are not persisted yet (no backend); only name and number are saved.
-  void _crear() {
-    ref.read(congregationsProvider.notifier).add(
-          name: _name.trim(),
-          number: _number.trim(),
-        );
+  /// Language codes stored in settingsJson, index-aligned with the
+  /// localized [meetingLanguages] display list.
+  static const _languageCodes = ['spanish', 'sign', 'english'];
+
+  /// Persists the congregation. The schedule/language go into settingsJson
+  /// (weekday = index in the Monday-first list, stable across locales);
+  /// the program templates read them in phase 2.
+  Future<void> _crear() async {
+    final languageIndex = meetingLanguages.indexOf(_language);
+    await ref.read(congregationActionsProvider).add(
+      name: _name.trim(),
+      number: _number.trim(),
+      settings: {
+        'meetingLanguage':
+            _languageCodes[languageIndex < 0 ? 0 : languageIndex],
+        'midweek': {
+          'weekday': daysOfWeek.indexOf(_weekdayDay),
+          'time': _weekdayTime,
+        },
+        'weekend': {
+          'weekday': daysOfWeek.indexOf(_weekendDay),
+          'time': _weekendTime,
+        },
+      },
+    );
     widget.onClose();
   }
 

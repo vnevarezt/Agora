@@ -614,6 +614,9 @@ class _Translations$relativeTime$en extends Translations$relativeTime$es {
 
 	// Translations
 	@override String get now => 'just now';
+	@override String minutes({required Object n}) => '${n} min ago';
+	@override String hours({required Object n}) => '${n} h ago';
+	@override String days({required Object n}) => '${n} d ago';
 }
 
 // Path: auth.local
@@ -1090,6 +1093,9 @@ extension on TranslationsEn {
 			'workspace.editTitleHint' => 'Assignment title',
 			'workspace.restoreTitle' => 'Reset',
 			'relativeTime.now' => 'just now',
+			'relativeTime.minutes' => ({required Object n}) => '${n} min ago',
+			'relativeTime.hours' => ({required Object n}) => '${n} h ago',
+			'relativeTime.days' => ({required Object n}) => '${n} d ago',
 			_ => null,
 		};
 	}

@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/repos/people_repository.dart';
-import '../i18n/strings.g.dart';
 import '../models/person.dart';
+import 'dashboard_provider.dart';
 import 'db_provider.dart';
 
 // DB-backed person directory (milestone 2 of the phase-1 plan). Everything
@@ -11,8 +11,8 @@ import 'db_provider.dart';
 // locked is a programming error (see dbProvider).
 
 final peopleRepositoryProvider = Provider<PeopleRepository>((ref) =>
-    PeopleRepository(ref.watch(dbProvider),
-        defaultCongregationName: t.congregation.defaultName));
+    PeopleRepository(
+        ref.watch(dbProvider), ref.watch(congregationsRepositoryProvider)));
 
 /// Reactive directory straight from drift.
 final peopleStreamProvider = StreamProvider<List<Person>>(

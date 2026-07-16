@@ -417,6 +417,9 @@
     "restoreTitle": "Restablecer"
   },
   "relativeTime": {
-    "now": "ahora mismo"
+    "now": "ahora mismo",
+    "minutes": "hace {n} min",
+    "hours": "hace {n} h",
+    "days": "hace {n} d"
   }
 }

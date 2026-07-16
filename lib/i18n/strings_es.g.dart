@@ -1158,6 +1158,15 @@ class Translations$relativeTime$es {
 
 	/// es: 'ahora mismo'
 	String get now => 'ahora mismo';
+
+	/// es: 'hace {n} min'
+	String minutes({required Object n}) => 'hace ${n} min';
+
+	/// es: 'hace {n} h'
+	String hours({required Object n}) => 'hace ${n} h';
+
+	/// es: 'hace {n} d'
+	String days({required Object n}) => 'hace ${n} d';
 }
 
 // Path: auth.local
@@ -1776,6 +1785,9 @@ extension on Translations {
 			'workspace.editTitleHint' => 'Título de la asignación',
 			'workspace.restoreTitle' => 'Restablecer',
 			'relativeTime.now' => 'ahora mismo',
+			'relativeTime.minutes' => ({required Object n}) => 'hace ${n} min',
+			'relativeTime.hours' => ({required Object n}) => 'hace ${n} h',
+			'relativeTime.days' => ({required Object n}) => 'hace ${n} d',
 			_ => null,
 		};
 	}

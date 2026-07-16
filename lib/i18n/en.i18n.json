@@ -417,6 +417,9 @@
     "restoreTitle": "Reset"
   },
   "relativeTime": {
-    "now": "just now"
+    "now": "just now",
+    "minutes": "{n} min ago",
+    "hours": "{n} h ago",
+    "days": "{n} d ago"
   }
 }

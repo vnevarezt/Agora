@@ -5,6 +5,7 @@ import '../../i18n/strings.g.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
+import '../../state/program_form.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
 import '../theme/dimens.dart';
@@ -327,10 +328,16 @@ class _ProjectsSection extends ConsumerWidget {
                     child: ProjectCard(
                       project: p,
                       congregation: porId[p.congregationId],
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                            builder: (_) => ProgramShell(project: p)),
-                      ),
+                      onTap: () {
+                        // The PDF header prints the congregation NAME via
+                        // the form; seed it from the opened project.
+                        ref.read(formProvider.notifier).setCongregation(
+                            porId[p.congregationId]?.name ?? '');
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                              builder: (_) => ProgramShell(project: p)),
+                        );
+                      },
                       onEdit: () => showProjectModal(context, project: p),
                     ),
                   ),
