@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/congregation.dart';
+import '../../models/congregation_settings.dart';
 import '../db/app_database.dart';
 
 /// Dot colors cycled over new congregations (moved from the old in-memory
@@ -39,7 +38,7 @@ class CongregationsRepository {
   Future<Congregation> create({
     required String name,
     required String number,
-    Map<String, Object?> settings = const {},
+    CongregationSettings settings = const CongregationSettings(),
   }) async {
     final count = (await _alive().get()).length;
     final now = DateTime.now().toUtc();
@@ -48,7 +47,7 @@ class CongregationsRepository {
       name: name,
       number: number,
       color: congregationPalette[count % congregationPalette.length],
-      settingsJson: jsonEncode(settings),
+      settingsJson: settings.toJson(),
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -56,6 +55,23 @@ class CongregationsRepository {
     );
     await _db.into(_db.congregations).insert(record);
     return _toModel(record);
+  }
+
+  /// User edit from the settings screen: name/number/schedule in one write.
+  Future<void> update(
+    String id, {
+    required String name,
+    required String number,
+    required CongregationSettings settings,
+  }) async {
+    await (_db.update(_db.congregations)..where((t) => t.id.equals(id))).write(
+      CongregationsCompanion(
+        name: Value(name),
+        number: Value(number),
+        settingsJson: Value(settings.toJson()),
+        updatedAt: Value(DateTime.now().toUtc()),
+      ),
+    );
   }
 
   /// First alive congregation, created on demand: resolves the FK for
@@ -66,6 +82,11 @@ class CongregationsRepository {
     return (await create(name: defaultName, number: '')).id;
   }
 
-  Congregation _toModel(CongregationRecord r) =>
-      Congregation(id: r.id, name: r.name, number: r.number, color: r.color);
+  Congregation _toModel(CongregationRecord r) => Congregation(
+        id: r.id,
+        name: r.name,
+        number: r.number,
+        color: r.color,
+        settings: CongregationSettings.fromJson(r.settingsJson),
+      );
 }

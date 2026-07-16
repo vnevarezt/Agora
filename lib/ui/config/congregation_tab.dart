@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/config_options.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
+import '../../models/congregation_settings.dart';
 import '../../state/dashboard_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
@@ -18,8 +21,8 @@ import 'new_congregation_modal.dart';
 import 'settings_card.dart';
 import 'user_row.dart';
 
-/// Settings "Congregación" tab. Congregation selector + details,
-/// schedule and users. UI-only: local state seeded with example data.
+/// Settings "Congregación" tab. Congregation selector + details and
+/// schedule, seeded from the DB row and persisted on edit (debounced).
 class CongregationTab extends ConsumerStatefulWidget {
   const CongregationTab({super.key});
 
@@ -38,19 +41,40 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   String _weekendTime = '10:00';
   bool _auxRoom = false;
 
-  /// Selects a congregation and seeds the fields. The schedule is not
-  /// persisted yet (no backend): shown with default values.
+  Timer? _saveDebounce;
+
+  @override
+  void dispose() {
+    // Flush a pending save so the last keystroke is never lost.
+    if (_saveDebounce?.isActive ?? false) {
+      _saveDebounce!.cancel();
+      _persist();
+    }
+    super.dispose();
+  }
+
+  /// Selects a congregation and seeds the fields from its stored row
+  /// (schedule/language live in settingsJson).
   void _select(Congregation congregation, {bool notify = true}) {
+    // Switching away flushes edits of the previous congregation.
+    if (_saveDebounce?.isActive ?? false) {
+      _saveDebounce!.cancel();
+      _persist();
+    }
+
     void apply() {
+      final s = congregation.settings;
+      final languageIndex =
+          congregationLanguageCodes.indexOf(s.meetingLanguage);
       _congregationId = congregation.id;
       _name = congregation.name;
       _number = congregation.number;
-      _language = meetingLanguages.first;
-      _weekdayDay = daysOfWeek[1]; // Tuesday
-      _weekdayTime = '19:00';
-      _weekendDay = daysOfWeek[6]; // Sunday
-      _weekendTime = '10:00';
-      _auxRoom = false;
+      _language = meetingLanguages[languageIndex < 0 ? 0 : languageIndex];
+      _weekdayDay = daysOfWeek[s.midweekDay];
+      _weekdayTime = s.midweekTime;
+      _weekendDay = daysOfWeek[s.weekendDay];
+      _weekendTime = s.weekendTime;
+      _auxRoom = s.auxRoom;
     }
 
     if (notify) {
@@ -58,6 +82,37 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     } else {
       apply();
     }
+  }
+
+  /// Persists the current fields (debounced: text fields fire per
+  /// keystroke). Captured id guards against saving onto a new selection.
+  void _scheduleSave() {
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 400), _persist);
+  }
+
+  void _persist() {
+    final id = _congregationId;
+    if (id == null || _name.trim().isEmpty) return;
+    final languageIndex = meetingLanguages.indexOf(_language);
+    // indexOf is -1 if the app locale changed under us (localized labels):
+    // fall back to the schema defaults rather than storing garbage.
+    final midweekDay = daysOfWeek.indexOf(_weekdayDay);
+    final weekendDay = daysOfWeek.indexOf(_weekendDay);
+    ref.read(congregationActionsProvider).update(
+          id,
+          name: _name.trim(),
+          number: _number.trim(),
+          settings: CongregationSettings(
+            meetingLanguage: congregationLanguageCodes[
+                languageIndex < 0 ? 0 : languageIndex],
+            midweekDay: midweekDay < 0 ? 1 : midweekDay,
+            midweekTime: _weekdayTime.trim(),
+            weekendDay: weekendDay < 0 ? 6 : weekendDay,
+            weekendTime: _weekendTime.trim(),
+            auxRoom: _auxRoom,
+          ),
+        );
   }
 
   @override
@@ -126,7 +181,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
               child: BoundTextField(
                 key: ValueKey('$_congregationId-name'),
                 initial: _name,
-                onChanged: (v) => _name = v,
+                onChanged: (v) {
+                  _name = v;
+                  _scheduleSave();
+                },
               ),
             ),
             LabeledField(
@@ -135,7 +193,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                 key: ValueKey('$_congregationId-number'),
                 initial: _number,
                 style: AppText.mono(size: 13.5, color: t.text),
-                onChanged: (v) => _number = v,
+                onChanged: (v) {
+                  _number = v;
+                  _scheduleSave();
+                },
               ),
             ),
             LabeledField(
@@ -146,7 +207,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                     : meetingLanguages.first,
                 items: meetingLanguages,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _language = v),
+                onChanged: (v) {
+                  setState(() => _language = v);
+                  _scheduleSave();
+                },
               ),
             ),
           ],
@@ -172,7 +236,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                     daysOfWeek.contains(_weekdayDay) ? _weekdayDay : daysOfWeek[1],
                 items: daysOfWeek,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _weekdayDay = v),
+                onChanged: (v) {
+                  setState(() => _weekdayDay = v);
+                  _scheduleSave();
+                },
               ),
             ),
             LabeledField(
@@ -181,7 +248,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                 key: ValueKey('$_congregationId-he'),
                 initial: _weekdayTime,
                 style: mono,
-                onChanged: (v) => _weekdayTime = v,
+                onChanged: (v) {
+                  _weekdayTime = v;
+                  _scheduleSave();
+                },
               ),
             ),
             LabeledField(
@@ -191,7 +261,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                     daysOfWeek.contains(_weekendDay) ? _weekendDay : daysOfWeek[6],
                 items: daysOfWeek,
                 itemLabel: (s) => s,
-                onChanged: (v) => setState(() => _weekendDay = v),
+                onChanged: (v) {
+                  setState(() => _weekendDay = v);
+                  _scheduleSave();
+                },
               ),
             ),
             LabeledField(
@@ -200,7 +273,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                 key: ValueKey('$_congregationId-hf'),
                 initial: _weekendTime,
                 style: mono,
-                onChanged: (v) => _weekendTime = v,
+                onChanged: (v) {
+                  _weekendTime = v;
+                  _scheduleSave();
+                },
               ),
             ),
           ],
@@ -212,7 +288,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             scale: 0.85,
             child: Switch(
               value: _auxRoom,
-              onChanged: (v) => setState(() => _auxRoom = v),
+              onChanged: (v) {
+                setState(() => _auxRoom = v);
+                _scheduleSave();
+              },
             ),
           ),
         ),

@@ -4,6 +4,7 @@ import '../data/repos/congregations_repository.dart';
 import '../data/repos/projects_repository.dart';
 import '../i18n/strings.g.dart';
 import '../models/congregation.dart';
+import '../models/congregation_settings.dart';
 import '../models/notebook.dart';
 import '../models/project.dart';
 import '../models/reminder.dart';
@@ -38,14 +39,23 @@ class CongregationActions {
 
   final Ref _ref;
 
+  CongregationsRepository get _repo =>
+      _ref.read(congregationsRepositoryProvider);
+
   Future<void> add({
     required String name,
     required String number,
-    Map<String, Object?> settings = const {},
+    CongregationSettings settings = const CongregationSettings(),
   }) =>
-      _ref
-          .read(congregationsRepositoryProvider)
-          .create(name: name, number: number, settings: settings);
+      _repo.create(name: name, number: number, settings: settings);
+
+  Future<void> update(
+    String id, {
+    required String name,
+    required String number,
+    required CongregationSettings settings,
+  }) =>
+      _repo.update(id, name: name, number: number, settings: settings);
 }
 
 /// Catalog of cached notebooks. Starts empty and is filled by the background

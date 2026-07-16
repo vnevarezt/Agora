@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/data/db/app_database.dart';
 import 'package:jw_program/data/repos/congregations_repository.dart';
 import 'package:jw_program/data/repos/projects_repository.dart';
+import 'package:jw_program/models/congregation_settings.dart';
 import 'package:jw_program/models/program_type_ids.dart';
 import 'package:jw_program/models/week_type.dart';
 import 'package:jw_program/state/dashboard_provider.dart';
@@ -115,5 +116,22 @@ void main() {
     final b = await congs().create(name: 'B', number: '');
     expect(a.color, congregationPalette[0]);
     expect(b.color, congregationPalette[1]);
+  });
+
+  test('congregation update persists name, number and settings', () async {
+    final cong = await congs().create(name: 'Norte', number: '1');
+    await congs().update(
+      cong.id,
+      name: 'Sur',
+      number: '2',
+      settings: const CongregationSettings(auxRoom: true, midweekDay: 0),
+    );
+
+    final stored = (await congs().watchAll().first).single;
+    expect(stored.name, 'Sur');
+    expect(stored.number, '2');
+    expect(stored.settings.auxRoom, true);
+    expect(stored.settings.midweekDay, 0);
+    expect(stored.settings.midweekTime, '19:00'); // untouched default
   });
 }
