@@ -811,6 +811,9 @@ class Translations$congregation$es {
 	/// es: 'Número'
 	String get number => 'Número';
 
+	/// es: 'Mi congregación'
+	String get defaultName => 'Mi congregación';
+
 	/// es: 'Idioma de la reunión'
 	String get meetingLanguage => 'Idioma de la reunión';
 
@@ -1673,6 +1676,7 @@ extension on Translations {
 			'congregation.dataDesc' => 'Se usan en el encabezado de los programas.',
 			'congregation.name' => 'Nombre',
 			'congregation.number' => 'Número',
+			'congregation.defaultName' => 'Mi congregación',
 			'congregation.meetingLanguage' => 'Idioma de la reunión',
 			'congregation.scheduleTitle' => 'Horarios de reunión',
 			'congregation.scheduleDesc' => 'Las horas de cada parte se calculan a partir de aquí.',

@@ -308,6 +308,7 @@
     "dataDesc": "Used in the header of the programs.",
     "name": "Name",
     "number": "Number",
+    "defaultName": "My congregation",
     "meetingLanguage": "Meeting language",
     "scheduleTitle": "Meeting schedule",
     "scheduleDesc": "Each part's time is calculated from here.",

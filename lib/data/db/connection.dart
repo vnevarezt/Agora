@@ -6,10 +6,26 @@ import 'package:path_provider/path_provider.dart';
 
 /// The encrypted database file. Exposed so the "forgot password" reset can
 /// delete it together with the key material.
+///
+/// Renames the pre-phase-1 `participants.db` (and its sqlite sidecars) to
+/// `agora.db` on first touch: same file, same key material, new name that
+/// no longer describes a single table.
 Future<File> databaseFile() async {
   final dir = await getApplicationSupportDirectory();
   await dir.create(recursive: true);
-  return File('${dir.path}${Platform.pathSeparator}participants.db');
+  final sep = Platform.pathSeparator;
+  final file = File('${dir.path}${sep}agora.db');
+  final legacy = File('${dir.path}${sep}participants.db');
+  if (!await file.exists() && await legacy.exists()) {
+    for (final suffix in const ['-journal', '-wal', '-shm']) {
+      final sidecar = File('${legacy.path}$suffix');
+      if (await sidecar.exists()) {
+        await sidecar.rename('${file.path}$suffix');
+      }
+    }
+    await legacy.rename(file.path);
+  }
+  return file;
 }
 
 /// Opens the encrypted DB (SQLite3MultipleCiphers, selected by the pubspec

@@ -448,6 +448,7 @@ class _Translations$congregation$en extends Translations$congregation$es {
 	@override String get dataDesc => 'Used in the header of the programs.';
 	@override String get name => 'Name';
 	@override String get number => 'Number';
+	@override String get defaultName => 'My congregation';
 	@override String get meetingLanguage => 'Meeting language';
 	@override String get scheduleTitle => 'Meeting schedule';
 	@override String get scheduleDesc => 'Each part\'s time is calculated from here.';
@@ -995,6 +996,7 @@ extension on TranslationsEn {
 			'congregation.dataDesc' => 'Used in the header of the programs.',
 			'congregation.name' => 'Name',
 			'congregation.number' => 'Number',
+			'congregation.defaultName' => 'My congregation',
 			'congregation.meetingLanguage' => 'Meeting language',
 			'congregation.scheduleTitle' => 'Meeting schedule',
 			'congregation.scheduleDesc' => 'Each part\'s time is calculated from here.',

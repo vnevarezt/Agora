@@ -308,6 +308,7 @@
     "dataDesc": "Se usan en el encabezado de los programas.",
     "name": "Nombre",
     "number": "Número",
+    "defaultName": "Mi congregación",
     "meetingLanguage": "Idioma de la reunión",
     "scheduleTitle": "Horarios de reunión",
     "scheduleDesc": "Las horas de cada parte se calculan a partir de aquí.",
