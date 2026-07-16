@@ -1,13 +1,20 @@
+import 'dart:convert';
+import 'dart:math' show min;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repos/congregations_repository.dart';
 import '../data/repos/projects_repository.dart';
+import '../domain/schedule_rules.dart';
 import '../i18n/strings.g.dart';
 import '../models/congregation.dart';
 import '../models/congregation_settings.dart';
+import '../models/hall.dart';
 import '../models/notebook.dart';
 import '../models/project.dart';
 import '../models/reminder.dart';
+import '../models/week.dart';
+import '../models/week_type.dart';
 import 'db_provider.dart';
 
 /// Dashboard state. Congregations and projects are DB-backed (milestone 3
@@ -82,21 +89,64 @@ final projectsRepositoryProvider = Provider<ProjectsRepository>((ref) =>
 final projectsStreamProvider = StreamProvider<List<ProjectData>>(
     (ref) => ref.watch(projectsRepositoryProvider).watchAll());
 
+/// Alive assignment counts per (programId, hall), reactive.
+final _assignmentCountsProvider = StreamProvider<Map<(String, Hall), int>>(
+    (ref) => ref.watch(projectsRepositoryProvider).watchAssignmentCounts());
+
 /// Synchronous project cards derived from the DB rows: progress/status/
 /// edited label are computed, never stored (docs/PHASE1_LOCAL_PERSISTENCE.md).
 final projectsProvider = Provider<List<Project>>((ref) {
   final data = ref.watch(projectsStreamProvider).asData?.value ?? const [];
-  return [for (final d in data) _toCard(d)];
+  final counts =
+      ref.watch(_assignmentCountsProvider).asData?.value ?? const {};
+  final congregations = ref.watch(congregationsProvider);
+  final settingsById = {for (final c in congregations) c.id: c.settings};
+  return [
+    for (final d in data)
+      _toCard(d, counts, settingsById[d.project.congregationId])
+  ];
 });
 
-/// 14 assignable parts per week (until phase 2 counts real assignments).
+/// Fallback when a program has no content snapshot yet.
 const _partsPerWeek = 14;
 
-Project _toCard(ProjectData d) {
-  final weeks = [for (final p in d.programs) p.date]..sort();
-  final total = weeks.length * _partsPerWeek;
-  // Real assignment counting arrives with phase 2 (slots in the DB).
-  const done = 0;
+/// Real progress (phase 2): slot totals come from each program's content
+/// snapshot through the same schedule rules the editor uses (slot counts
+/// don't depend on start time/duration); done comes from the alive
+/// assignment rows, clamped per program so stale aux rows never overflow.
+Project _toCard(
+  ProjectData d,
+  Map<(String, Hall), int> counts,
+  CongregationSettings? congregationSettings,
+) {
+  final weeks = [for (final p in d.programs) p.date];
+  var done = 0;
+  var total = 0;
+  for (final program in d.programs) {
+    final auxRoom =
+        program.auxRoom ?? congregationSettings?.auxRoom ?? false;
+    final mainCount = counts[(program.id, Hall.main)] ?? 0;
+    final auxCount = auxRoom ? (counts[(program.id, Hall.aux)] ?? 0) : 0;
+
+    int programTotal;
+    if (program.contentJson == null) {
+      programTotal = _partsPerWeek;
+    } else {
+      final week = Week.fromJson(
+          jsonDecode(program.contentJson!) as Map<String, dynamic>);
+      final schedule = buildSchedule(week, 18 * 60, 105,
+          circuitOverseer:
+              program.weekType == WeekType.circuitOverseerVisit);
+      programTotal = 1; // chairman
+      for (final row in schedule.rows) {
+        programTotal += row.slots;
+        if (auxRoom) programTotal += row.auxSlots;
+      }
+    }
+    total += programTotal;
+    done += min(mainCount + auxCount, programTotal);
+  }
+
   final status = d.project.exportedAt != null
       ? ProjectStatus.exported
       : (total > 0 && done >= total)

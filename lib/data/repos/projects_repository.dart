@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../models/hall.dart';
 import '../../models/program_type_ids.dart';
 import '../db/app_database.dart';
 import 'congregations_repository.dart';
@@ -135,6 +136,24 @@ class ProjectsRepository {
         deletedAt: Value(now),
         updatedAt: Value(now),
       ));
+    });
+  }
+
+  /// Alive assignment counts per (programId, hall) — feeds the dashboard
+  /// cards' real progress. Grouped in Dart over a plain table watch: the
+  /// row volume is tiny and `selectOnly(..groupBy).watch()` proved to
+  /// starve the event loop with endless re-emissions (2026-07: timers
+  /// stopped firing in tests once the stream became active).
+  Stream<Map<(String, Hall), int>> watchAssignmentCounts() {
+    final query = _db.select(_db.assignmentRows)
+      ..where((t) => t.deletedAt.isNull());
+    return query.watch().map((rows) {
+      final counts = <(String, Hall), int>{};
+      for (final row in rows) {
+        final key = (row.programId, row.hall);
+        counts[key] = (counts[key] ?? 0) + 1;
+      }
+      return counts;
     });
   }
 

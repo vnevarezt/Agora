@@ -65,8 +65,8 @@ All synced tables share: `id` (UUID v4, as today), `congregationId`,
 | `PersonAbsence` | personId, startDate, endDate, comment | "Time away": pickers exclude people absent on the program date. |
 | `Project` | name, notes, status is derived | No `programTypeId` — multi-type container. |
 | `Program` | projectId, programTypeId, weekType, date (ISO `yyyy-mm-dd` week start), label, sourceRef | `weekType` (normal, CO visit, assembly/convention, memorial, no meeting) alters the generated template — CO-visit weeks drop the CBS, assembly weeks may have no local meeting. `sourceRef` points at the MWB week it was generated from (traceability only). |
-| `ProgramSlot` | programId, position, section, title, minutes, rulesJson | **Snapshotted at creation** from the MWB cache + type template, then freely editable. A program is self-contained: it renders offline and survives upstream content changes. |
-| `Assignment` | slotId, role (principal/assistant), personId *nullable*, displayName override, status (assigned/confirmed/declined) | `personId` null + displayName covers visiting speakers without polluting the directory. Fine-grained rows keep multi-user conflicts rare (§4). |
+| `ProgramSlot` | programId, position, section, title, minutes, rulesJson | **Snapshotted at creation** from the MWB cache + type template, then freely editable. A program is self-contained: it renders offline and survives upstream content changes. *Phase-2 refinement (docs/PHASE2_PROGRAMS_IN_DB.md): realized as `programs.contentJson` (the snapshotted parsed week) + virtual slots derived by the schedule rules — materialized slot rows would need constant re-syncing with derived times for zero benefit. The essential properties hold.* |
+| `Assignment` | programId, slotKey, hall (main/aux), position, personId *nullable*, displayName | `personId` null + displayName covers visiting speakers without polluting the directory. Fine-grained rows keep multi-user conflicts rare (§4). |
 
 **Not synced:**
 
