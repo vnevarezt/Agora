@@ -1,9 +1,14 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/mwb_calendar.dart';
 import '../domain/schedule_rules.dart';
+import '../models/hall.dart';
 import '../models/program_row.dart';
 import '../models/week.dart';
+import '../models/week_type.dart';
+import 'program_content.dart';
 import 'weeks_provider.dart';
 
 /// Editable form state (immutable). Assignments are stored **per week** (index
@@ -116,21 +121,78 @@ final formProvider =
     NotifierProvider<FormController, FormModel>(FormController.new);
 
 class FormController extends Notifier<FormModel> {
+  /// DB identity behind the form (phase 2 write-through). Empty when the
+  /// editor has no open project (legacy/standalone form: state-only).
+  String? _projectId;
+  List<String> _programIds = const [];
+
   @override
   FormModel build() =>
       FormModel.initial.copyWith(issue: issueForDate(DateTime.now()));
 
+  /// Replaces the whole form with the DB-hydrated [model] and arms the
+  /// write-through ([programIds] is index-aligned with the weeks).
+  void hydrate(FormModel model,
+      {required String projectId, required List<String> programIds}) {
+    _projectId = projectId;
+    _programIds = programIds;
+    state = model;
+  }
+
+  String? _programId(int week) =>
+      (week >= 0 && week < _programIds.length) ? _programIds[week] : null;
+
+  /// Fire-and-forget DB write: the form (already updated) stays the editing
+  /// truth; the row write is what survives the restart.
+  void _write(Future<void> Function(String programId) op, {int? week}) {
+    final id = _programId(week ?? state.weekIndex);
+    if (id != null) unawaited(op(id));
+  }
+
   void setIssue(String v) => state = state.copyWith(issue: v);
   void setCongregation(String v) => state = state.copyWith(congregationId: v);
-  void setStartTime(String v) => state = state.copyWith(startTime: v);
-  void setDuration(int v) => state = state.copyWith(duration: v);
-  void setChairman(String v) => state = state.copyWith(chairman: v);
-  void setAuxRoom(bool v) => state = state.copyWith(auxRoom: v);
+
+  void setStartTime(String v) {
+    state = state.copyWith(startTime: v);
+    _writeProjectConfig(startTime: v);
+  }
+
+  void setDuration(int v) {
+    state = state.copyWith(duration: v);
+    _writeProjectConfig(durationMinutes: v);
+  }
+
+  void setAuxRoom(bool v) {
+    state = state.copyWith(auxRoom: v);
+    _writeProjectConfig(auxRoom: v);
+  }
+
+  void _writeProjectConfig(
+      {String? startTime, int? durationMinutes, bool? auxRoom}) {
+    final projectId = _projectId;
+    if (projectId == null) return;
+    unawaited(ref.read(programsRepositoryProvider).setProjectConfig(
+          projectId,
+          startTime: startTime,
+          durationMinutes: durationMinutes,
+          auxRoom: auxRoom,
+        ));
+  }
+
+  void setChairman(String v) {
+    state = state.copyWith(chairman: v);
+    _write((id) => ref.read(programsRepositoryProvider).saveSlotNames(
+        programId: id, slotKey: 'chairman', hall: Hall.main, names: [v]));
+  }
+
   /// Marks (or clears) the circuit overseer visit for the given [week] index.
   void setCircuitOverseer(int week, bool v) {
     state = state.copyWith(
       circuitOverseerByWeek: {...state.circuitOverseerByWeek, week: v},
     );
+    _write(week: week,
+        (id) => ref.read(programsRepositoryProvider).setWeekType(
+            id, v ? WeekType.circuitOverseerVisit : WeekType.normal));
   }
 
   /// Sets or clears the title override for [rowId] in the active week. An empty
@@ -143,6 +205,8 @@ class FormController extends Notifier<FormModel> {
       next[rowId] = title.trim();
     }
     state = state.copyWith(titleOverrides: next);
+    _write((id) =>
+        ref.read(programsRepositoryProvider).setTitleOverrides(id, next));
   }
 
   /// Switches week while preserving each week's assignments.
@@ -150,10 +214,14 @@ class FormController extends Notifier<FormModel> {
 
   void setMainNames(String rowId, List<String> names) {
     state = state.copyWith(main: {...state.main, rowId: names});
+    _write((id) => ref.read(programsRepositoryProvider).saveSlotNames(
+        programId: id, slotKey: rowId, hall: Hall.main, names: names));
   }
 
   void setAuxNames(String rowId, List<String> names) {
     state = state.copyWith(auxiliary: {...state.auxiliary, rowId: names});
+    _write((id) => ref.read(programsRepositoryProvider).saveSlotNames(
+        programId: id, slotKey: rowId, hall: Hall.aux, names: names));
   }
 }
 

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/mwb_cache.dart';
 import '../data/mwb_repository.dart';
 import '../models/week.dart';
+import 'editor_session.dart';
 import 'mwb_sync.dart';
 import 'program_form.dart';
 
@@ -21,6 +24,22 @@ final weeksProvider =
 class WeeksController extends AsyncNotifier<List<Week>> {
   @override
   Future<List<Week>> build() async {
+    // Project mode (phase 2): the weeks come from the programs' content
+    // snapshots, reactive to background fills. A program whose snapshot is
+    // still missing renders as an empty week (same date) until it lands.
+    if (ref.watch(editorProjectProvider) != null) {
+      final programs = ref.watch(editorProgramsProvider).asData?.value;
+      if (programs == null) return const [];
+      return [
+        for (final p in programs)
+          p.contentJson == null
+              ? Week(date: p.date)
+              : Week.fromJson(
+                  jsonDecode(p.contentJson!) as Map<String, dynamic>),
+      ];
+    }
+
+    // Legacy/standalone mode: parse the active issue from the epub cache.
     // Rebuild when the sync finishes so a freshly downloaded notebook shows up.
     ref.watch(mwbSyncProvider);
     final issue = ref.watch(formProvider.select((f) => f.issue));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/project.dart';
+import '../../state/editor_session.dart';
 import '../../state/ui_state.dart';
 import '../preview/preview_pane.dart';
 import '../responsive.dart';
@@ -12,14 +13,38 @@ import 'project_bar.dart';
 /// Editor root screen. The single place that decides the layout: desktop/
 /// tablet in two panels (46/54) and mobile in one column with tabs; both
 /// arrangements use the same [WorkspacePanel] and [PreviewPane].
-class ProgramShell extends StatelessWidget {
+///
+/// Opening/closing the editor session lives here: the form hydrates from
+/// the project's DB rows on entry and the programs stream stops on exit.
+class ProgramShell extends ConsumerStatefulWidget {
   const ProgramShell({super.key, this.project});
 
   /// Project opened from the dashboard (bar identity). Optional.
   final Project? project;
 
   @override
+  ConsumerState<ProgramShell> createState() => _ProgramShellState();
+}
+
+class _ProgramShellState extends ConsumerState<ProgramShell> {
+  @override
+  void initState() {
+    super.initState();
+    final project = widget.project;
+    if (project != null) {
+      ref.read(editorOpenerProvider).open(project);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.project != null) ref.read(editorOpenerProvider).close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final project = widget.project;
     final isMobile = context.isMobile;
 
     return Scaffold(
