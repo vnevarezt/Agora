@@ -2495,6 +2495,65 @@ class $ProgramsTable extends Programs
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _contentJsonMeta = const VerificationMeta(
+    'contentJson',
+  );
+  @override
+  late final GeneratedColumn<String> contentJson = GeneratedColumn<String>(
+    'content_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleOverridesJsonMeta =
+      const VerificationMeta('titleOverridesJson');
+  @override
+  late final GeneratedColumn<String> titleOverridesJson =
+      GeneratedColumn<String>(
+        'title_overrides_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('{}'),
+      );
+  static const VerificationMeta _startTimeMeta = const VerificationMeta(
+    'startTime',
+  );
+  @override
+  late final GeneratedColumn<String> startTime = GeneratedColumn<String>(
+    'start_time',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _auxRoomMeta = const VerificationMeta(
+    'auxRoom',
+  );
+  @override
+  late final GeneratedColumn<bool> auxRoom = GeneratedColumn<bool>(
+    'aux_room',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("aux_room" IN (0, 1))',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2507,6 +2566,11 @@ class $ProgramsTable extends Programs
     weekType,
     date,
     label,
+    contentJson,
+    titleOverridesJson,
+    startTime,
+    durationMinutes,
+    auxRoom,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2586,6 +2650,45 @@ class $ProgramsTable extends Programs
         label.isAcceptableOrUnknown(data['label']!, _labelMeta),
       );
     }
+    if (data.containsKey('content_json')) {
+      context.handle(
+        _contentJsonMeta,
+        contentJson.isAcceptableOrUnknown(
+          data['content_json']!,
+          _contentJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('title_overrides_json')) {
+      context.handle(
+        _titleOverridesJsonMeta,
+        titleOverridesJson.isAcceptableOrUnknown(
+          data['title_overrides_json']!,
+          _titleOverridesJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('start_time')) {
+      context.handle(
+        _startTimeMeta,
+        startTime.isAcceptableOrUnknown(data['start_time']!, _startTimeMeta),
+      );
+    }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('aux_room')) {
+      context.handle(
+        _auxRoomMeta,
+        auxRoom.isAcceptableOrUnknown(data['aux_room']!, _auxRoomMeta),
+      );
+    }
     return context;
   }
 
@@ -2637,6 +2740,26 @@ class $ProgramsTable extends Programs
         DriftSqlType.string,
         data['${effectivePrefix}label'],
       )!,
+      contentJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_json'],
+      ),
+      titleOverridesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title_overrides_json'],
+      )!,
+      startTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_time'],
+      ),
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      ),
+      auxRoom: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}aux_room'],
+      ),
     );
   }
 
@@ -2676,6 +2799,20 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
 
   /// Optional user-facing override ("Visita del superintendente").
   final String label;
+
+  /// Parsed MWB week snapshotted from the notebook cache (Week.toJson).
+  /// Null until the snapshot service fills it (phase-1 skeleton rows).
+  final String? contentJson;
+
+  /// Per-row title edits, JSON map slotKey → title (coarse: they ride the
+  /// program row; assignments are the fine-grained ones).
+  final String titleOverridesJson;
+
+  /// Per-program meeting config. Null = inherit the congregation settings
+  /// (start time / aux room) or the app default (duration 105).
+  final String? startTime;
+  final int? durationMinutes;
+  final bool? auxRoom;
   const ProgramRecord({
     required this.id,
     required this.createdAt,
@@ -2687,6 +2824,11 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     required this.weekType,
     required this.date,
     required this.label,
+    this.contentJson,
+    required this.titleOverridesJson,
+    this.startTime,
+    this.durationMinutes,
+    this.auxRoom,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2709,6 +2851,19 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     }
     map['date'] = Variable<String>(date);
     map['label'] = Variable<String>(label);
+    if (!nullToAbsent || contentJson != null) {
+      map['content_json'] = Variable<String>(contentJson);
+    }
+    map['title_overrides_json'] = Variable<String>(titleOverridesJson);
+    if (!nullToAbsent || startTime != null) {
+      map['start_time'] = Variable<String>(startTime);
+    }
+    if (!nullToAbsent || durationMinutes != null) {
+      map['duration_minutes'] = Variable<int>(durationMinutes);
+    }
+    if (!nullToAbsent || auxRoom != null) {
+      map['aux_room'] = Variable<bool>(auxRoom);
+    }
     return map;
   }
 
@@ -2726,6 +2881,19 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
       weekType: Value(weekType),
       date: Value(date),
       label: Value(label),
+      contentJson: contentJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contentJson),
+      titleOverridesJson: Value(titleOverridesJson),
+      startTime: startTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startTime),
+      durationMinutes: durationMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMinutes),
+      auxRoom: auxRoom == null && nullToAbsent
+          ? const Value.absent()
+          : Value(auxRoom),
     );
   }
 
@@ -2747,6 +2915,13 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
       ),
       date: serializer.fromJson<String>(json['date']),
       label: serializer.fromJson<String>(json['label']),
+      contentJson: serializer.fromJson<String?>(json['contentJson']),
+      titleOverridesJson: serializer.fromJson<String>(
+        json['titleOverridesJson'],
+      ),
+      startTime: serializer.fromJson<String?>(json['startTime']),
+      durationMinutes: serializer.fromJson<int?>(json['durationMinutes']),
+      auxRoom: serializer.fromJson<bool?>(json['auxRoom']),
     );
   }
   @override
@@ -2765,6 +2940,11 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
       ),
       'date': serializer.toJson<String>(date),
       'label': serializer.toJson<String>(label),
+      'contentJson': serializer.toJson<String?>(contentJson),
+      'titleOverridesJson': serializer.toJson<String>(titleOverridesJson),
+      'startTime': serializer.toJson<String?>(startTime),
+      'durationMinutes': serializer.toJson<int?>(durationMinutes),
+      'auxRoom': serializer.toJson<bool?>(auxRoom),
     };
   }
 
@@ -2779,6 +2959,11 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     WeekType? weekType,
     String? date,
     String? label,
+    Value<String?> contentJson = const Value.absent(),
+    String? titleOverridesJson,
+    Value<String?> startTime = const Value.absent(),
+    Value<int?> durationMinutes = const Value.absent(),
+    Value<bool?> auxRoom = const Value.absent(),
   }) => ProgramRecord(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -2790,6 +2975,13 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     weekType: weekType ?? this.weekType,
     date: date ?? this.date,
     label: label ?? this.label,
+    contentJson: contentJson.present ? contentJson.value : this.contentJson,
+    titleOverridesJson: titleOverridesJson ?? this.titleOverridesJson,
+    startTime: startTime.present ? startTime.value : this.startTime,
+    durationMinutes: durationMinutes.present
+        ? durationMinutes.value
+        : this.durationMinutes,
+    auxRoom: auxRoom.present ? auxRoom.value : this.auxRoom,
   );
   ProgramRecord copyWithCompanion(ProgramsCompanion data) {
     return ProgramRecord(
@@ -2805,6 +2997,17 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
       weekType: data.weekType.present ? data.weekType.value : this.weekType,
       date: data.date.present ? data.date.value : this.date,
       label: data.label.present ? data.label.value : this.label,
+      contentJson: data.contentJson.present
+          ? data.contentJson.value
+          : this.contentJson,
+      titleOverridesJson: data.titleOverridesJson.present
+          ? data.titleOverridesJson.value
+          : this.titleOverridesJson,
+      startTime: data.startTime.present ? data.startTime.value : this.startTime,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
+      auxRoom: data.auxRoom.present ? data.auxRoom.value : this.auxRoom,
     );
   }
 
@@ -2820,7 +3023,12 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
           ..write('programTypeId: $programTypeId, ')
           ..write('weekType: $weekType, ')
           ..write('date: $date, ')
-          ..write('label: $label')
+          ..write('label: $label, ')
+          ..write('contentJson: $contentJson, ')
+          ..write('titleOverridesJson: $titleOverridesJson, ')
+          ..write('startTime: $startTime, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('auxRoom: $auxRoom')
           ..write(')'))
         .toString();
   }
@@ -2837,6 +3045,11 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
     weekType,
     date,
     label,
+    contentJson,
+    titleOverridesJson,
+    startTime,
+    durationMinutes,
+    auxRoom,
   );
   @override
   bool operator ==(Object other) =>
@@ -2851,7 +3064,12 @@ class ProgramRecord extends DataClass implements Insertable<ProgramRecord> {
           other.programTypeId == this.programTypeId &&
           other.weekType == this.weekType &&
           other.date == this.date &&
-          other.label == this.label);
+          other.label == this.label &&
+          other.contentJson == this.contentJson &&
+          other.titleOverridesJson == this.titleOverridesJson &&
+          other.startTime == this.startTime &&
+          other.durationMinutes == this.durationMinutes &&
+          other.auxRoom == this.auxRoom);
 }
 
 class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
@@ -2865,6 +3083,11 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
   final Value<WeekType> weekType;
   final Value<String> date;
   final Value<String> label;
+  final Value<String?> contentJson;
+  final Value<String> titleOverridesJson;
+  final Value<String?> startTime;
+  final Value<int?> durationMinutes;
+  final Value<bool?> auxRoom;
   final Value<int> rowid;
   const ProgramsCompanion({
     this.id = const Value.absent(),
@@ -2877,6 +3100,11 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     this.weekType = const Value.absent(),
     this.date = const Value.absent(),
     this.label = const Value.absent(),
+    this.contentJson = const Value.absent(),
+    this.titleOverridesJson = const Value.absent(),
+    this.startTime = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
+    this.auxRoom = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProgramsCompanion.insert({
@@ -2890,6 +3118,11 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     this.weekType = const Value.absent(),
     required String date,
     this.label = const Value.absent(),
+    this.contentJson = const Value.absent(),
+    this.titleOverridesJson = const Value.absent(),
+    this.startTime = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
+    this.auxRoom = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -2908,6 +3141,11 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     Expression<String>? weekType,
     Expression<String>? date,
     Expression<String>? label,
+    Expression<String>? contentJson,
+    Expression<String>? titleOverridesJson,
+    Expression<String>? startTime,
+    Expression<int>? durationMinutes,
+    Expression<bool>? auxRoom,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2921,6 +3159,12 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
       if (weekType != null) 'week_type': weekType,
       if (date != null) 'date': date,
       if (label != null) 'label': label,
+      if (contentJson != null) 'content_json': contentJson,
+      if (titleOverridesJson != null)
+        'title_overrides_json': titleOverridesJson,
+      if (startTime != null) 'start_time': startTime,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
+      if (auxRoom != null) 'aux_room': auxRoom,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2936,6 +3180,11 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     Value<WeekType>? weekType,
     Value<String>? date,
     Value<String>? label,
+    Value<String?>? contentJson,
+    Value<String>? titleOverridesJson,
+    Value<String?>? startTime,
+    Value<int?>? durationMinutes,
+    Value<bool?>? auxRoom,
     Value<int>? rowid,
   }) {
     return ProgramsCompanion(
@@ -2949,6 +3198,11 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
       weekType: weekType ?? this.weekType,
       date: date ?? this.date,
       label: label ?? this.label,
+      contentJson: contentJson ?? this.contentJson,
+      titleOverridesJson: titleOverridesJson ?? this.titleOverridesJson,
+      startTime: startTime ?? this.startTime,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      auxRoom: auxRoom ?? this.auxRoom,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2988,6 +3242,21 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
     if (label.present) {
       map['label'] = Variable<String>(label.value);
     }
+    if (contentJson.present) {
+      map['content_json'] = Variable<String>(contentJson.value);
+    }
+    if (titleOverridesJson.present) {
+      map['title_overrides_json'] = Variable<String>(titleOverridesJson.value);
+    }
+    if (startTime.present) {
+      map['start_time'] = Variable<String>(startTime.value);
+    }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
+    }
+    if (auxRoom.present) {
+      map['aux_room'] = Variable<bool>(auxRoom.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3007,6 +3276,694 @@ class ProgramsCompanion extends UpdateCompanion<ProgramRecord> {
           ..write('weekType: $weekType, ')
           ..write('date: $date, ')
           ..write('label: $label, ')
+          ..write('contentJson: $contentJson, ')
+          ..write('titleOverridesJson: $titleOverridesJson, ')
+          ..write('startTime: $startTime, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('auxRoom: $auxRoom, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AssignmentRowsTable extends AssignmentRows
+    with TableInfo<$AssignmentRowsTable, AssignmentRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssignmentRowsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hlcMeta = const VerificationMeta('hlc');
+  @override
+  late final GeneratedColumn<String> hlc = GeneratedColumn<String>(
+    'hlc',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _programIdMeta = const VerificationMeta(
+    'programId',
+  );
+  @override
+  late final GeneratedColumn<String> programId = GeneratedColumn<String>(
+    'program_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES programs (id)',
+    ),
+  );
+  static const VerificationMeta _slotKeyMeta = const VerificationMeta(
+    'slotKey',
+  );
+  @override
+  late final GeneratedColumn<String> slotKey = GeneratedColumn<String>(
+    'slot_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Hall, String> hall =
+      GeneratedColumn<String>(
+        'hall',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<Hall>($AssignmentRowsTable.$converterhall);
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _personIdMeta = const VerificationMeta(
+    'personId',
+  );
+  @override
+  late final GeneratedColumn<String> personId = GeneratedColumn<String>(
+    'person_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES people (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    hlc,
+    programId,
+    slotKey,
+    hall,
+    position,
+    displayName,
+    personId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'assignments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AssignmentRecord> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('hlc')) {
+      context.handle(
+        _hlcMeta,
+        hlc.isAcceptableOrUnknown(data['hlc']!, _hlcMeta),
+      );
+    }
+    if (data.containsKey('program_id')) {
+      context.handle(
+        _programIdMeta,
+        programId.isAcceptableOrUnknown(data['program_id']!, _programIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_programIdMeta);
+    }
+    if (data.containsKey('slot_key')) {
+      context.handle(
+        _slotKeyMeta,
+        slotKey.isAcceptableOrUnknown(data['slot_key']!, _slotKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_slotKeyMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
+    }
+    if (data.containsKey('person_id')) {
+      context.handle(
+        _personIdMeta,
+        personId.isAcceptableOrUnknown(data['person_id']!, _personIdMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AssignmentRecord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssignmentRecord(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      hlc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hlc'],
+      ),
+      programId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}program_id'],
+      )!,
+      slotKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}slot_key'],
+      )!,
+      hall: $AssignmentRowsTable.$converterhall.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}hall'],
+        )!,
+      ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      )!,
+      personId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}person_id'],
+      ),
+    );
+  }
+
+  @override
+  $AssignmentRowsTable createAlias(String alias) {
+    return $AssignmentRowsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<Hall, String, String> $converterhall =
+      const EnumNameConverter<Hall>(Hall.values);
+}
+
+class AssignmentRecord extends DataClass
+    implements Insertable<AssignmentRecord> {
+  final String id;
+  final DateTime createdAt;
+
+  /// UTC. Only changes on user edits (never on bookkeeping like `lastUsed`):
+  /// it decides the winner when merging imports, and later LWW sync.
+  final DateTime updatedAt;
+
+  /// Tombstone. Non-null = deleted (kept for sync replication + FK safety).
+  final DateTime? deletedAt;
+
+  /// Hybrid logical clock stamp. Unused until phase 3; present so adding
+  /// sync never needs an ALTER on data tables.
+  final String? hlc;
+  final String programId;
+  final String slotKey;
+  final Hall hall;
+  final int position;
+  final String displayName;
+
+  /// Link into the person directory; null = free text (visitors, or picks
+  /// made before the picker returns ids — phase-2 default).
+  final String? personId;
+  const AssignmentRecord({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    this.hlc,
+    required this.programId,
+    required this.slotKey,
+    required this.hall,
+    required this.position,
+    required this.displayName,
+    this.personId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || hlc != null) {
+      map['hlc'] = Variable<String>(hlc);
+    }
+    map['program_id'] = Variable<String>(programId);
+    map['slot_key'] = Variable<String>(slotKey);
+    {
+      map['hall'] = Variable<String>(
+        $AssignmentRowsTable.$converterhall.toSql(hall),
+      );
+    }
+    map['position'] = Variable<int>(position);
+    map['display_name'] = Variable<String>(displayName);
+    if (!nullToAbsent || personId != null) {
+      map['person_id'] = Variable<String>(personId);
+    }
+    return map;
+  }
+
+  AssignmentRowsCompanion toCompanion(bool nullToAbsent) {
+    return AssignmentRowsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      hlc: hlc == null && nullToAbsent ? const Value.absent() : Value(hlc),
+      programId: Value(programId),
+      slotKey: Value(slotKey),
+      hall: Value(hall),
+      position: Value(position),
+      displayName: Value(displayName),
+      personId: personId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(personId),
+    );
+  }
+
+  factory AssignmentRecord.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssignmentRecord(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      hlc: serializer.fromJson<String?>(json['hlc']),
+      programId: serializer.fromJson<String>(json['programId']),
+      slotKey: serializer.fromJson<String>(json['slotKey']),
+      hall: $AssignmentRowsTable.$converterhall.fromJson(
+        serializer.fromJson<String>(json['hall']),
+      ),
+      position: serializer.fromJson<int>(json['position']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      personId: serializer.fromJson<String?>(json['personId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'hlc': serializer.toJson<String?>(hlc),
+      'programId': serializer.toJson<String>(programId),
+      'slotKey': serializer.toJson<String>(slotKey),
+      'hall': serializer.toJson<String>(
+        $AssignmentRowsTable.$converterhall.toJson(hall),
+      ),
+      'position': serializer.toJson<int>(position),
+      'displayName': serializer.toJson<String>(displayName),
+      'personId': serializer.toJson<String?>(personId),
+    };
+  }
+
+  AssignmentRecord copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> hlc = const Value.absent(),
+    String? programId,
+    String? slotKey,
+    Hall? hall,
+    int? position,
+    String? displayName,
+    Value<String?> personId = const Value.absent(),
+  }) => AssignmentRecord(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    hlc: hlc.present ? hlc.value : this.hlc,
+    programId: programId ?? this.programId,
+    slotKey: slotKey ?? this.slotKey,
+    hall: hall ?? this.hall,
+    position: position ?? this.position,
+    displayName: displayName ?? this.displayName,
+    personId: personId.present ? personId.value : this.personId,
+  );
+  AssignmentRecord copyWithCompanion(AssignmentRowsCompanion data) {
+    return AssignmentRecord(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      hlc: data.hlc.present ? data.hlc.value : this.hlc,
+      programId: data.programId.present ? data.programId.value : this.programId,
+      slotKey: data.slotKey.present ? data.slotKey.value : this.slotKey,
+      hall: data.hall.present ? data.hall.value : this.hall,
+      position: data.position.present ? data.position.value : this.position,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      personId: data.personId.present ? data.personId.value : this.personId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssignmentRecord(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('programId: $programId, ')
+          ..write('slotKey: $slotKey, ')
+          ..write('hall: $hall, ')
+          ..write('position: $position, ')
+          ..write('displayName: $displayName, ')
+          ..write('personId: $personId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    hlc,
+    programId,
+    slotKey,
+    hall,
+    position,
+    displayName,
+    personId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssignmentRecord &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.hlc == this.hlc &&
+          other.programId == this.programId &&
+          other.slotKey == this.slotKey &&
+          other.hall == this.hall &&
+          other.position == this.position &&
+          other.displayName == this.displayName &&
+          other.personId == this.personId);
+}
+
+class AssignmentRowsCompanion extends UpdateCompanion<AssignmentRecord> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String?> hlc;
+  final Value<String> programId;
+  final Value<String> slotKey;
+  final Value<Hall> hall;
+  final Value<int> position;
+  final Value<String> displayName;
+  final Value<String?> personId;
+  final Value<int> rowid;
+  const AssignmentRowsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    this.programId = const Value.absent(),
+    this.slotKey = const Value.absent(),
+    this.hall = const Value.absent(),
+    this.position = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.personId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AssignmentRowsCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.hlc = const Value.absent(),
+    required String programId,
+    required String slotKey,
+    required Hall hall,
+    required int position,
+    required String displayName,
+    this.personId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       programId = Value(programId),
+       slotKey = Value(slotKey),
+       hall = Value(hall),
+       position = Value(position),
+       displayName = Value(displayName);
+  static Insertable<AssignmentRecord> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? hlc,
+    Expression<String>? programId,
+    Expression<String>? slotKey,
+    Expression<String>? hall,
+    Expression<int>? position,
+    Expression<String>? displayName,
+    Expression<String>? personId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (hlc != null) 'hlc': hlc,
+      if (programId != null) 'program_id': programId,
+      if (slotKey != null) 'slot_key': slotKey,
+      if (hall != null) 'hall': hall,
+      if (position != null) 'position': position,
+      if (displayName != null) 'display_name': displayName,
+      if (personId != null) 'person_id': personId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AssignmentRowsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String?>? hlc,
+    Value<String>? programId,
+    Value<String>? slotKey,
+    Value<Hall>? hall,
+    Value<int>? position,
+    Value<String>? displayName,
+    Value<String?>? personId,
+    Value<int>? rowid,
+  }) {
+    return AssignmentRowsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      hlc: hlc ?? this.hlc,
+      programId: programId ?? this.programId,
+      slotKey: slotKey ?? this.slotKey,
+      hall: hall ?? this.hall,
+      position: position ?? this.position,
+      displayName: displayName ?? this.displayName,
+      personId: personId ?? this.personId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (hlc.present) {
+      map['hlc'] = Variable<String>(hlc.value);
+    }
+    if (programId.present) {
+      map['program_id'] = Variable<String>(programId.value);
+    }
+    if (slotKey.present) {
+      map['slot_key'] = Variable<String>(slotKey.value);
+    }
+    if (hall.present) {
+      map['hall'] = Variable<String>(
+        $AssignmentRowsTable.$converterhall.toSql(hall.value),
+      );
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (personId.present) {
+      map['person_id'] = Variable<String>(personId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssignmentRowsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('hlc: $hlc, ')
+          ..write('programId: $programId, ')
+          ..write('slotKey: $slotKey, ')
+          ..write('hall: $hall, ')
+          ..write('position: $position, ')
+          ..write('displayName: $displayName, ')
+          ..write('personId: $personId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3021,6 +3978,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PersonAbsencesTable personAbsences = $PersonAbsencesTable(this);
   late final $ProjectsTable projects = $ProjectsTable(this);
   late final $ProgramsTable programs = $ProgramsTable(this);
+  late final $AssignmentRowsTable assignmentRows = $AssignmentRowsTable(this);
   late final Index peopleCongregationIdx = Index(
     'people_congregation_idx',
     'CREATE INDEX people_congregation_idx ON people (congregation_id)',
@@ -3037,6 +3995,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'programs_project_idx',
     'CREATE INDEX programs_project_idx ON programs (project_id)',
   );
+  late final Index assignmentsProgramIdx = Index(
+    'assignments_program_idx',
+    'CREATE INDEX assignments_program_idx ON assignments (program_id)',
+  );
   late final PeopleDao peopleDao = PeopleDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -3048,10 +4010,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     personAbsences,
     projects,
     programs,
+    assignmentRows,
     peopleCongregationIdx,
     personAbsencesPersonIdx,
     projectsCongregationIdx,
     programsProjectIdx,
+    assignmentsProgramIdx,
   ];
   @override
   DriftDatabaseOptions get options =>
@@ -3617,6 +4581,24 @@ final class $$PeopleTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$AssignmentRowsTable, List<AssignmentRecord>>
+  _assignmentRowsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.assignmentRows,
+    aliasName: 'people__id__assignments__person_id',
+  );
+
+  $$AssignmentRowsTableProcessedTableManager get assignmentRowsRefs {
+    final manager = $$AssignmentRowsTableTableManager(
+      $_db,
+      $_db.assignmentRows,
+    ).filter((f) => f.personId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_assignmentRowsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$PeopleTableFilterComposer
@@ -3745,6 +4727,31 @@ class $$PeopleTableFilterComposer
           }) => $$PersonAbsencesTableFilterComposer(
             $db: $db,
             $table: $db.personAbsences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> assignmentRowsRefs(
+    Expression<bool> Function($$AssignmentRowsTableFilterComposer f) f,
+  ) {
+    final $$AssignmentRowsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assignmentRows,
+      getReferencedColumn: (t) => t.personId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssignmentRowsTableFilterComposer(
+            $db: $db,
+            $table: $db.assignmentRows,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3971,6 +4978,31 @@ class $$PeopleTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> assignmentRowsRefs<T extends Object>(
+    Expression<T> Function($$AssignmentRowsTableAnnotationComposer a) f,
+  ) {
+    final $$AssignmentRowsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assignmentRows,
+      getReferencedColumn: (t) => t.personId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssignmentRowsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assignmentRows,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PeopleTableTableManager
@@ -3986,7 +5018,11 @@ class $$PeopleTableTableManager
           $$PeopleTableUpdateCompanionBuilder,
           (Person, $$PeopleTableReferences),
           Person,
-          PrefetchHooks Function({bool congregationId, bool personAbsencesRefs})
+          PrefetchHooks Function({
+            bool congregationId,
+            bool personAbsencesRefs,
+            bool assignmentRowsRefs,
+          })
         > {
   $$PeopleTableTableManager(_$AppDatabase db, $PeopleTable table)
     : super(
@@ -4082,11 +5118,16 @@ class $$PeopleTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({congregationId = false, personAbsencesRefs = false}) {
+              ({
+                congregationId = false,
+                personAbsencesRefs = false,
+                assignmentRowsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (personAbsencesRefs) db.personAbsences,
+                    if (assignmentRowsRefs) db.assignmentRows,
                   ],
                   addJoins:
                       <
@@ -4143,6 +5184,27 @@ class $$PeopleTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (assignmentRowsRefs)
+                        await $_getPrefetchedData<
+                          Person,
+                          $PeopleTable,
+                          AssignmentRecord
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PeopleTableReferences
+                              ._assignmentRowsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PeopleTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).assignmentRowsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.personId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -4163,7 +5225,11 @@ typedef $$PeopleTableProcessedTableManager =
       $$PeopleTableUpdateCompanionBuilder,
       (Person, $$PeopleTableReferences),
       Person,
-      PrefetchHooks Function({bool congregationId, bool personAbsencesRefs})
+      PrefetchHooks Function({
+        bool congregationId,
+        bool personAbsencesRefs,
+        bool assignmentRowsRefs,
+      })
     >;
 typedef $$PersonAbsencesTableCreateCompanionBuilder =
     PersonAbsencesCompanion Function({
@@ -5069,6 +6135,11 @@ typedef $$ProgramsTableCreateCompanionBuilder =
       Value<WeekType> weekType,
       required String date,
       Value<String> label,
+      Value<String?> contentJson,
+      Value<String> titleOverridesJson,
+      Value<String?> startTime,
+      Value<int?> durationMinutes,
+      Value<bool?> auxRoom,
       Value<int> rowid,
     });
 typedef $$ProgramsTableUpdateCompanionBuilder =
@@ -5083,6 +6154,11 @@ typedef $$ProgramsTableUpdateCompanionBuilder =
       Value<WeekType> weekType,
       Value<String> date,
       Value<String> label,
+      Value<String?> contentJson,
+      Value<String> titleOverridesJson,
+      Value<String?> startTime,
+      Value<int?> durationMinutes,
+      Value<bool?> auxRoom,
       Value<int> rowid,
     });
 
@@ -5104,6 +6180,24 @@ final class $$ProgramsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$AssignmentRowsTable, List<AssignmentRecord>>
+  _assignmentRowsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.assignmentRows,
+    aliasName: 'programs__id__assignments__program_id',
+  );
+
+  $$AssignmentRowsTableProcessedTableManager get assignmentRowsRefs {
+    final manager = $$AssignmentRowsTableTableManager(
+      $_db,
+      $_db.assignmentRows,
+    ).filter((f) => f.programId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_assignmentRowsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -5163,6 +6257,31 @@ class $$ProgramsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get contentJson => $composableBuilder(
+    column: $table.contentJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get titleOverridesJson => $composableBuilder(
+    column: $table.titleOverridesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get auxRoom => $composableBuilder(
+    column: $table.auxRoom,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$ProjectsTableFilterComposer get projectId {
     final $$ProjectsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -5184,6 +6303,31 @@ class $$ProgramsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> assignmentRowsRefs(
+    Expression<bool> Function($$AssignmentRowsTableFilterComposer f) f,
+  ) {
+    final $$AssignmentRowsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assignmentRows,
+      getReferencedColumn: (t) => t.programId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssignmentRowsTableFilterComposer(
+            $db: $db,
+            $table: $db.assignmentRows,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -5238,6 +6382,31 @@ class $$ProgramsTableOrderingComposer
 
   ColumnOrderings<String> get label => $composableBuilder(
     column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentJson => $composableBuilder(
+    column: $table.contentJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get titleOverridesJson => $composableBuilder(
+    column: $table.titleOverridesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get auxRoom => $composableBuilder(
+    column: $table.auxRoom,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5303,6 +6472,27 @@ class $$ProgramsTableAnnotationComposer
   GeneratedColumn<String> get label =>
       $composableBuilder(column: $table.label, builder: (column) => column);
 
+  GeneratedColumn<String> get contentJson => $composableBuilder(
+    column: $table.contentJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get titleOverridesJson => $composableBuilder(
+    column: $table.titleOverridesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startTime =>
+      $composableBuilder(column: $table.startTime, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get auxRoom =>
+      $composableBuilder(column: $table.auxRoom, builder: (column) => column);
+
   $$ProjectsTableAnnotationComposer get projectId {
     final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -5325,6 +6515,31 @@ class $$ProgramsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> assignmentRowsRefs<T extends Object>(
+    Expression<T> Function($$AssignmentRowsTableAnnotationComposer a) f,
+  ) {
+    final $$AssignmentRowsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.assignmentRows,
+      getReferencedColumn: (t) => t.programId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AssignmentRowsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.assignmentRows,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProgramsTableTableManager
@@ -5340,7 +6555,7 @@ class $$ProgramsTableTableManager
           $$ProgramsTableUpdateCompanionBuilder,
           (ProgramRecord, $$ProgramsTableReferences),
           ProgramRecord,
-          PrefetchHooks Function({bool projectId})
+          PrefetchHooks Function({bool projectId, bool assignmentRowsRefs})
         > {
   $$ProgramsTableTableManager(_$AppDatabase db, $ProgramsTable table)
     : super(
@@ -5365,6 +6580,11 @@ class $$ProgramsTableTableManager
                 Value<WeekType> weekType = const Value.absent(),
                 Value<String> date = const Value.absent(),
                 Value<String> label = const Value.absent(),
+                Value<String?> contentJson = const Value.absent(),
+                Value<String> titleOverridesJson = const Value.absent(),
+                Value<String?> startTime = const Value.absent(),
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<bool?> auxRoom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProgramsCompanion(
                 id: id,
@@ -5377,6 +6597,11 @@ class $$ProgramsTableTableManager
                 weekType: weekType,
                 date: date,
                 label: label,
+                contentJson: contentJson,
+                titleOverridesJson: titleOverridesJson,
+                startTime: startTime,
+                durationMinutes: durationMinutes,
+                auxRoom: auxRoom,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5391,6 +6616,11 @@ class $$ProgramsTableTableManager
                 Value<WeekType> weekType = const Value.absent(),
                 required String date,
                 Value<String> label = const Value.absent(),
+                Value<String?> contentJson = const Value.absent(),
+                Value<String> titleOverridesJson = const Value.absent(),
+                Value<String?> startTime = const Value.absent(),
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<bool?> auxRoom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProgramsCompanion.insert(
                 id: id,
@@ -5403,6 +6633,11 @@ class $$ProgramsTableTableManager
                 weekType: weekType,
                 date: date,
                 label: label,
+                contentJson: contentJson,
+                titleOverridesJson: titleOverridesJson,
+                startTime: startTime,
+                durationMinutes: durationMinutes,
+                auxRoom: auxRoom,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5413,7 +6648,546 @@ class $$ProgramsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({projectId = false}) {
+          prefetchHooksCallback:
+              ({projectId = false, assignmentRowsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (assignmentRowsRefs) db.assignmentRows,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (projectId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.projectId,
+                                    referencedTable: $$ProgramsTableReferences
+                                        ._projectIdTable(db),
+                                    referencedColumn: $$ProgramsTableReferences
+                                        ._projectIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (assignmentRowsRefs)
+                        await $_getPrefetchedData<
+                          ProgramRecord,
+                          $ProgramsTable,
+                          AssignmentRecord
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProgramsTableReferences
+                              ._assignmentRowsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProgramsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).assignmentRowsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.programId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ProgramsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProgramsTable,
+      ProgramRecord,
+      $$ProgramsTableFilterComposer,
+      $$ProgramsTableOrderingComposer,
+      $$ProgramsTableAnnotationComposer,
+      $$ProgramsTableCreateCompanionBuilder,
+      $$ProgramsTableUpdateCompanionBuilder,
+      (ProgramRecord, $$ProgramsTableReferences),
+      ProgramRecord,
+      PrefetchHooks Function({bool projectId, bool assignmentRowsRefs})
+    >;
+typedef $$AssignmentRowsTableCreateCompanionBuilder =
+    AssignmentRowsCompanion Function({
+      required String id,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String?> hlc,
+      required String programId,
+      required String slotKey,
+      required Hall hall,
+      required int position,
+      required String displayName,
+      Value<String?> personId,
+      Value<int> rowid,
+    });
+typedef $$AssignmentRowsTableUpdateCompanionBuilder =
+    AssignmentRowsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String?> hlc,
+      Value<String> programId,
+      Value<String> slotKey,
+      Value<Hall> hall,
+      Value<int> position,
+      Value<String> displayName,
+      Value<String?> personId,
+      Value<int> rowid,
+    });
+
+final class $$AssignmentRowsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $AssignmentRowsTable, AssignmentRecord> {
+  $$AssignmentRowsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ProgramsTable _programIdTable(_$AppDatabase db) =>
+      db.programs.createAlias('assignments__program_id__programs__id');
+
+  $$ProgramsTableProcessedTableManager get programId {
+    final $_column = $_itemColumn<String>('program_id')!;
+
+    final manager = $$ProgramsTableTableManager(
+      $_db,
+      $_db.programs,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_programIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PeopleTable _personIdTable(_$AppDatabase db) =>
+      db.people.createAlias('assignments__person_id__people__id');
+
+  $$PeopleTableProcessedTableManager? get personId {
+    final $_column = $_itemColumn<String>('person_id');
+    if ($_column == null) return null;
+    final manager = $$PeopleTableTableManager(
+      $_db,
+      $_db.people,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_personIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AssignmentRowsTableFilterComposer
+    extends Composer<_$AppDatabase, $AssignmentRowsTable> {
+  $$AssignmentRowsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get slotKey => $composableBuilder(
+    column: $table.slotKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Hall, Hall, String> get hall =>
+      $composableBuilder(
+        column: $table.hall,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProgramsTableFilterComposer get programId {
+    final $$ProgramsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.programId,
+      referencedTable: $db.programs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProgramsTableFilterComposer(
+            $db: $db,
+            $table: $db.programs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PeopleTableFilterComposer get personId {
+    final $$PeopleTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.personId,
+      referencedTable: $db.people,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PeopleTableFilterComposer(
+            $db: $db,
+            $table: $db.people,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssignmentRowsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AssignmentRowsTable> {
+  $$AssignmentRowsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hlc => $composableBuilder(
+    column: $table.hlc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get slotKey => $composableBuilder(
+    column: $table.slotKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hall => $composableBuilder(
+    column: $table.hall,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProgramsTableOrderingComposer get programId {
+    final $$ProgramsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.programId,
+      referencedTable: $db.programs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProgramsTableOrderingComposer(
+            $db: $db,
+            $table: $db.programs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PeopleTableOrderingComposer get personId {
+    final $$PeopleTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.personId,
+      referencedTable: $db.people,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PeopleTableOrderingComposer(
+            $db: $db,
+            $table: $db.people,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssignmentRowsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AssignmentRowsTable> {
+  $$AssignmentRowsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get hlc =>
+      $composableBuilder(column: $table.hlc, builder: (column) => column);
+
+  GeneratedColumn<String> get slotKey =>
+      $composableBuilder(column: $table.slotKey, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Hall, String> get hall =>
+      $composableBuilder(column: $table.hall, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  $$ProgramsTableAnnotationComposer get programId {
+    final $$ProgramsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.programId,
+      referencedTable: $db.programs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProgramsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.programs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PeopleTableAnnotationComposer get personId {
+    final $$PeopleTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.personId,
+      referencedTable: $db.people,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PeopleTableAnnotationComposer(
+            $db: $db,
+            $table: $db.people,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AssignmentRowsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AssignmentRowsTable,
+          AssignmentRecord,
+          $$AssignmentRowsTableFilterComposer,
+          $$AssignmentRowsTableOrderingComposer,
+          $$AssignmentRowsTableAnnotationComposer,
+          $$AssignmentRowsTableCreateCompanionBuilder,
+          $$AssignmentRowsTableUpdateCompanionBuilder,
+          (AssignmentRecord, $$AssignmentRowsTableReferences),
+          AssignmentRecord,
+          PrefetchHooks Function({bool programId, bool personId})
+        > {
+  $$AssignmentRowsTableTableManager(
+    _$AppDatabase db,
+    $AssignmentRowsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AssignmentRowsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AssignmentRowsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AssignmentRowsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> hlc = const Value.absent(),
+                Value<String> programId = const Value.absent(),
+                Value<String> slotKey = const Value.absent(),
+                Value<Hall> hall = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<String> displayName = const Value.absent(),
+                Value<String?> personId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssignmentRowsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                hlc: hlc,
+                programId: programId,
+                slotKey: slotKey,
+                hall: hall,
+                position: position,
+                displayName: displayName,
+                personId: personId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> hlc = const Value.absent(),
+                required String programId,
+                required String slotKey,
+                required Hall hall,
+                required int position,
+                required String displayName,
+                Value<String?> personId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AssignmentRowsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                hlc: hlc,
+                programId: programId,
+                slotKey: slotKey,
+                hall: hall,
+                position: position,
+                displayName: displayName,
+                personId: personId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AssignmentRowsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({programId = false, personId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -5433,16 +7207,31 @@ class $$ProgramsTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (projectId) {
+                    if (programId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.projectId,
-                                referencedTable: $$ProgramsTableReferences
-                                    ._projectIdTable(db),
-                                referencedColumn: $$ProgramsTableReferences
-                                    ._projectIdTable(db)
-                                    .id,
+                                currentColumn: table.programId,
+                                referencedTable: $$AssignmentRowsTableReferences
+                                    ._programIdTable(db),
+                                referencedColumn:
+                                    $$AssignmentRowsTableReferences
+                                        ._programIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (personId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.personId,
+                                referencedTable: $$AssignmentRowsTableReferences
+                                    ._personIdTable(db),
+                                referencedColumn:
+                                    $$AssignmentRowsTableReferences
+                                        ._personIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -5458,19 +7247,19 @@ class $$ProgramsTableTableManager
       );
 }
 
-typedef $$ProgramsTableProcessedTableManager =
+typedef $$AssignmentRowsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $ProgramsTable,
-      ProgramRecord,
-      $$ProgramsTableFilterComposer,
-      $$ProgramsTableOrderingComposer,
-      $$ProgramsTableAnnotationComposer,
-      $$ProgramsTableCreateCompanionBuilder,
-      $$ProgramsTableUpdateCompanionBuilder,
-      (ProgramRecord, $$ProgramsTableReferences),
-      ProgramRecord,
-      PrefetchHooks Function({bool projectId})
+      $AssignmentRowsTable,
+      AssignmentRecord,
+      $$AssignmentRowsTableFilterComposer,
+      $$AssignmentRowsTableOrderingComposer,
+      $$AssignmentRowsTableAnnotationComposer,
+      $$AssignmentRowsTableCreateCompanionBuilder,
+      $$AssignmentRowsTableUpdateCompanionBuilder,
+      (AssignmentRecord, $$AssignmentRowsTableReferences),
+      AssignmentRecord,
+      PrefetchHooks Function({bool programId, bool personId})
     >;
 
 class $AppDatabaseManager {
@@ -5486,4 +7275,6 @@ class $AppDatabaseManager {
       $$ProjectsTableTableManager(_db, _db.projects);
   $$ProgramsTableTableManager get programs =>
       $$ProgramsTableTableManager(_db, _db.programs);
+  $$AssignmentRowsTableTableManager get assignmentRows =>
+      $$AssignmentRowsTableTableManager(_db, _db.assignmentRows);
 }

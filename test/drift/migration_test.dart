@@ -21,14 +21,47 @@ void main() {
     verifier = SchemaVerifier(GeneratedHelper());
   });
 
-  test('empty v1 migrates to a valid v2 schema', () async {
+  test('empty v1 migrates to a valid v3 schema', () async {
     final connection = await verifier.startAt(1);
     final db = AppDatabase(connection);
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, 3);
 
     // No participants → no auto-created congregation.
     expect(await db.select(db.congregations).get(), isEmpty);
     expect(await db.peopleDao.count(), 0);
+    await db.close();
+  });
+
+  test('v2 with skeleton programs migrates to v3 keeping rows', () async {
+    final schema = await verifier.schemaAt(2);
+    schema.rawDatabase.execute('''
+      INSERT INTO congregations (id, name, number, color, settings_json,
+        created_at, updated_at)
+      VALUES ('c1', 'Norte', '', 1, '{}',
+        '2026-01-10T10:00:00.000Z', '2026-01-10T10:00:00.000Z');
+      INSERT INTO projects (id, congregation_id, name, notes,
+        created_at, updated_at)
+      VALUES ('pr1', 'c1', 'Julio', '',
+        '2026-01-10T10:00:00.000Z', '2026-01-10T10:00:00.000Z');
+      INSERT INTO programs (id, project_id, program_type_id, week_type,
+        date, label, created_at, updated_at)
+      VALUES ('pg1', 'pr1', 'mwb-s140', 'normal', '7-13 DE JULIO', '',
+        '2026-01-10T10:00:00.000Z', '2026-01-10T10:00:00.000Z');
+    ''');
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 3);
+
+    // The skeleton program survives with NULL content (the snapshot
+    // service fills it on first open) and the defaults in place.
+    final program = await db.select(db.programs).getSingle();
+    expect(program.id, 'pg1');
+    expect(program.contentJson, isNull);
+    expect(program.titleOverridesJson, '{}');
+    expect(program.auxRoom, isNull);
+
+    // The new assignments table is queryable and empty.
+    expect(await db.select(db.assignmentRows).get(), isEmpty);
     await db.close();
   });
 
@@ -58,7 +91,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, 3);
 
     // One congregation, named after the dominant spelling of the top group.
     final congs = await db.select(db.congregations).get();
@@ -120,7 +153,7 @@ void main() {
       schema.newConnection(),
       defaultCongregationName: 'Mi congregación',
     );
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, 3);
 
     final congs = await db.select(db.congregations).get();
     expect(congs.single.name, 'Mi congregación');

@@ -3,8 +3,10 @@ import 'package:uuid/uuid.dart';
 
 import '../../models/person.dart';
 import '../../models/week_type.dart';
+import '../../models/hall.dart';
 import 'converters.dart';
 import 'people_dao.dart';
+import 'tables/assignments.dart';
 import 'tables/congregations.dart';
 import 'tables/people.dart';
 import 'tables/person_absences.dart';
@@ -22,8 +24,18 @@ part 'app_database.g.dart';
 ///   v2: phase-1 schema (docs/PHASE1_LOCAL_PERSISTENCE.md) — congregations,
 ///       people, person_absences, projects, skeleton programs; participants
 ///       migrated into people + one default congregation, then dropped.
+///   v3: phase-2 schema (docs/PHASE2_PROGRAMS_IN_DB.md) — programs gain the
+///       content snapshot + per-program config columns; new `assignments`
+///       table (one row per filled slot position).
 @DriftDatabase(
-  tables: [Congregations, People, PersonAbsences, Projects, Programs],
+  tables: [
+    Congregations,
+    People,
+    PersonAbsences,
+    Projects,
+    Programs,
+    AssignmentRows,
+  ],
   daos: [PeopleDao],
 )
 class AppDatabase extends _$AppDatabase {
@@ -35,13 +47,20 @@ class AppDatabase extends _$AppDatabase {
   final String defaultCongregationName;
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
         onUpgrade: (m, from, to) async {
-          if (from < 2) await _migrateV1ToV2(m);
+          if (from < 2) {
+            // v1 predates every other table: this step creates them with
+            // Migrator.createTable, which always uses the CURRENT schema
+            // shape — so the later steps must NOT run on top of it.
+            await _migrateV1ToV2(m);
+            return;
+          }
+          if (from < 3) await _migrateV2ToV3(m);
         },
         beforeOpen: (details) async {
           // Runs after migrations: soft deletes make FK violations rare, but
@@ -50,22 +69,26 @@ class AppDatabase extends _$AppDatabase {
         },
       );
 
-  /// v1 → v2. One transaction (drift wraps migrations): create the phase-1
-  /// schema, move every participant into `people` under ONE default
-  /// congregation, keep the old free text in `originCongregation` when it
-  /// differs, drop `participants`. Rationale: the old field mixed the tenant
-  /// with a visitor's home congregation — only the first becomes an FK; no
-  /// tenants are auto-created from stray strings (plan §"Migration v1→v2").
+  /// v1 → CURRENT. One transaction (drift wraps migrations): create every
+  /// other table (Migrator.createTable always uses the current shape, which
+  /// is why this step replaces the whole chain), move every participant into
+  /// `people` under ONE default congregation, keep the old free text in
+  /// `originCongregation` when it differs, drop `participants`. Rationale:
+  /// the old field mixed the tenant with a visitor's home congregation —
+  /// only the first becomes an FK; no tenants are auto-created from stray
+  /// strings (plan §"Migration v1→v2").
   Future<void> _migrateV1ToV2(Migrator m) async {
     await m.createTable(congregations);
     await m.createTable(people);
     await m.createTable(personAbsences);
     await m.createTable(projects);
     await m.createTable(programs);
+    await m.createTable(assignmentRows);
     await m.createIndex(peopleCongregationIdx);
     await m.createIndex(personAbsencesPersonIdx);
     await m.createIndex(projectsCongregationIdx);
     await m.createIndex(programsProjectIdx);
+    await m.createIndex(assignmentsProgramIdx);
 
     final rows = await customSelect('SELECT * FROM participants').get();
     if (rows.isNotEmpty) {
@@ -133,5 +156,19 @@ class AppDatabase extends _$AppDatabase {
     }
 
     await m.deleteTable('participants');
+  }
+
+  /// v2 → v3 (docs/PHASE2_PROGRAMS_IN_DB.md): programs gain the content
+  /// snapshot and per-program config columns; assignments arrive as their
+  /// own table. Existing skeleton programs keep NULL content — the snapshot
+  /// service fills it the first time their project opens.
+  Future<void> _migrateV2ToV3(Migrator m) async {
+    await m.addColumn(programs, programs.contentJson);
+    await m.addColumn(programs, programs.titleOverridesJson);
+    await m.addColumn(programs, programs.startTime);
+    await m.addColumn(programs, programs.durationMinutes);
+    await m.addColumn(programs, programs.auxRoom);
+    await m.createTable(assignmentRows);
+    await m.createIndex(assignmentsProgramIdx);
   }
 }

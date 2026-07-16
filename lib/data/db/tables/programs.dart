@@ -25,4 +25,19 @@ class Programs extends Table with SyncColumns {
 
   /// Optional user-facing override ("Visita del superintendente").
   TextColumn get label => text().withDefault(const Constant(''))();
+
+  /// Parsed MWB week snapshotted from the notebook cache (Week.toJson).
+  /// Null until the snapshot service fills it (phase-1 skeleton rows).
+  TextColumn get contentJson => text().nullable()();
+
+  /// Per-row title edits, JSON map slotKey → title (coarse: they ride the
+  /// program row; assignments are the fine-grained ones).
+  TextColumn get titleOverridesJson =>
+      text().withDefault(const Constant('{}'))();
+
+  /// Per-program meeting config. Null = inherit the congregation settings
+  /// (start time / aux room) or the app default (duration 105).
+  TextColumn get startTime => text().nullable()();
+  IntColumn get durationMinutes => integer().nullable()();
+  BoolColumn get auxRoom => boolean().nullable()();
 }
