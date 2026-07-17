@@ -28,6 +28,8 @@ class WeeksController extends AsyncNotifier<List<Week>> {
     // snapshots, reactive to background fills. A program whose snapshot is
     // still missing renders as an empty week (same date) until it lands.
     if (ref.watch(editorProjectProvider) != null) {
+      // Keeps the snapshot fill retrying while the notebook catalog loads.
+      ref.watch(editorContentFillProvider);
       final programs = ref.watch(editorProgramsProvider).asData?.value;
       if (programs == null) return const [];
       return [

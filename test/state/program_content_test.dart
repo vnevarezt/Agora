@@ -11,6 +11,7 @@ import 'package:jw_program/models/notebook.dart';
 import 'package:jw_program/models/week.dart';
 import 'package:jw_program/state/dashboard_provider.dart';
 import 'package:jw_program/state/db_provider.dart';
+import 'package:jw_program/state/editor_session.dart';
 import 'package:jw_program/state/program_content.dart';
 import 'package:jw_program/state/weeks_provider.dart';
 
@@ -76,6 +77,35 @@ void main() {
 
     await service.ensureProjectContent(projectId);
     expect(fake.parseCalls, 1, reason: 'nothing missing → no re-parse');
+  });
+
+  test(
+      'cold start: the fill retries when the catalog arrives while a '
+      'project is open', () async {
+    // Editor opens BEFORE the background sync fills the catalog.
+    container.read(notebooksProvider.notifier).setFrom(const []);
+    final projectId = await container.read(projectsRepositoryProvider).create(
+      name: 'P',
+      congregationId: '',
+      weeks: ['7-13 DE JULIO'],
+    );
+    container.read(editorProjectProvider.notifier).set(projectId);
+    final sub = container.listen(editorContentFillProvider, (_, _) {});
+    addTearDown(sub.close);
+    await pumpEventQueue();
+
+    final repo = container.read(programsRepositoryProvider);
+    expect((await repo.byProject(projectId)).single.contentJson, isNull,
+        reason: 'no catalog yet → nothing to fill');
+
+    // The sync lands: the fill must re-run without reopening the editor.
+    container.read(notebooksProvider.notifier).setFrom([
+      const Notebook(
+          id: '202607', label: 'Julio 2026', weeks: ['7-13 DE JULIO']),
+    ]);
+    await pumpEventQueue();
+
+    expect((await repo.byProject(projectId)).single.contentJson, isNotNull);
   });
 
   test('weeks from uncached notebooks stay skeleton (retried later)',

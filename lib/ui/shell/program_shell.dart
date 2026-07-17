@@ -27,18 +27,19 @@ class ProgramShell extends ConsumerStatefulWidget {
 }
 
 class _ProgramShellState extends ConsumerState<ProgramShell> {
+  // `ref` is unsafe inside dispose (Riverpod): capture the opener up front.
+  late final EditorOpener _opener = ref.read(editorOpenerProvider);
+
   @override
   void initState() {
     super.initState();
     final project = widget.project;
-    if (project != null) {
-      ref.read(editorOpenerProvider).open(project);
-    }
+    if (project != null) _opener.open(project);
   }
 
   @override
   void dispose() {
-    if (widget.project != null) ref.read(editorOpenerProvider).close();
+    if (widget.project != null) _opener.close();
     super.dispose();
   }
 

@@ -37,6 +37,19 @@ final editorProgramsProvider = StreamProvider<List<ProgramRecord>>((ref) {
   return ref.watch(programsRepositoryProvider).watchByProject(projectId);
 });
 
+/// Cold-start gap: the editor can open BEFORE the background sync fills the
+/// notebook catalog, leaving pre-snapshot programs without content and no
+/// retry (seen in the wild: empty titles/assignments until the project was
+/// re-saved). Watching the catalog re-runs the fill the moment it lands;
+/// `ensureProjectContent` is idempotent, so extra runs are no-ops.
+final editorContentFillProvider = Provider<void>((ref) {
+  final projectId = ref.watch(editorProjectProvider);
+  final notebooks = ref.watch(notebooksProvider);
+  if (projectId == null || notebooks.isEmpty) return;
+  final service = ref.read(programContentServiceProvider);
+  Future.microtask(() => service.ensureProjectContent(projectId));
+});
+
 final editorOpenerProvider = Provider<EditorOpener>(EditorOpener.new);
 
 class EditorOpener {
