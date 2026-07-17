@@ -3,31 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/models/participant.dart';
-import 'package:jw_program/state/participants_provider.dart';
+import 'package:jw_program/models/person.dart';
+import 'package:jw_program/state/people_provider.dart';
 import 'package:jw_program/ui/participants/participants_view.dart';
 import 'package:jw_program/ui/theme/app_theme.dart';
 import 'package:jw_program/ui/theme/tokens.dart';
 
-// Probamos solo la UI de ParticipantsView, alimentando el directorio en memoria
-// con una lista fija para que sea determinista y rápido.
-class _FakeHermanos extends ParticipantsController {
-  _FakeHermanos(this._lista);
+// Probamos solo la UI de ParticipantsView, sobreescribiendo el provider
+// síncrono con una lista fija (sin BD) para que sea determinista y rápido.
 
-  final List<Participant> _lista;
-
-  @override
-  List<Participant> build() => _lista;
-}
-
-Participant _h(String id, String nombre) {
+Person _h(String id, String nombre) {
   final t = DateTime.utc(2026, 6, 1);
-  return Participant(
+  return Person(
     id: id,
-    name: nombre,
+    congregationId: 'cong-test',
+    firstName: '',
+    lastName: '',
+    displayName: nombre,
     gender: Gender.male,
-    role: Role.publisher,
-    congregation: 'TEST',
+    privilege: Role.publisher,
+    qualifications: const [],
+    originCongregation: '',
     active: true,
     notes: '',
     createdAt: t,
@@ -35,7 +31,7 @@ Participant _h(String id, String nombre) {
   );
 }
 
-Future<void> _pump(WidgetTester tester, List<Participant> lista) async {
+Future<void> _pump(WidgetTester tester, List<Person> lista) async {
   tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
@@ -45,7 +41,7 @@ Future<void> _pump(WidgetTester tester, List<Participant> lista) async {
   await tester.pumpWidget(TranslationProvider(
     child: ProviderScope(
       overrides: [
-        participantsProvider.overrideWith(() => _FakeHermanos(lista)),
+        peopleProvider.overrideWithValue(lista),
       ],
       child: MaterialApp(
         theme: buildAppTheme(pizarra.light, Brightness.light),

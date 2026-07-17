@@ -3,8 +3,8 @@ import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
-import '../../models/participant.dart';
-import '../../state/participants_provider.dart';
+import '../../models/person.dart';
+import '../../state/people_provider.dart';
 import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -116,7 +116,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
 
   Widget _filters(BuildContext context) {
     final t = context.tokens;
-    final congregaciones = ref.watch(participantCongregationsProvider);
+    final congregaciones = ref.watch(originCongregationsProvider);
 
     return Wrap(
       spacing: 8,
@@ -171,12 +171,12 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       Container(width: 1, height: 22, color: t.border);
 
   Widget _result(BuildContext context) {
-    final all = ref.watch(participantsProvider);
-    final filtered = filterParticipants(
+    final all = ref.watch(peopleProvider);
+    final filtered = filterPeople(
       all,
       query: _query,
-      role: _role,
-      congregation: _congregation,
+      privilege: _role,
+      originCongregation: _congregation,
       includeInactive: true,
     );
 
@@ -193,7 +193,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  Widget _grid(List<Participant> participants) {
+  Widget _grid(List<Person> participants) {
     return LayoutBuilder(
       builder: (context, c) {
         const gap = 10.0;

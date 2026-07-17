@@ -1,53 +1,74 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
+import 'dart:convert';
+import 'dart:math' show min;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../data/repos/congregations_repository.dart';
+import '../data/repos/projects_repository.dart';
+import '../domain/schedule_rules.dart';
 import '../i18n/strings.g.dart';
 import '../models/congregation.dart';
+import '../models/congregation_settings.dart';
+import '../models/hall.dart';
 import '../models/notebook.dart';
 import '../models/project.dart';
 import '../models/reminder.dart';
+import '../models/week.dart';
+import '../models/week_type.dart';
+import 'auth_session.dart';
+import 'db_provider.dart';
 
-/// Dashboard state. UI-ONLY: starts empty and fills in memory during the
-/// session (no persistence). When a backend exists, only the sources of these
-/// providers change; the UI doesn't notice.
+/// Dashboard state. Congregations and projects are DB-backed (milestone 3
+/// of the phase-1 plan); everything here lives below AuthGate. The sync
+/// `List` providers keep the pre-persistence contract so the UI reads them
+/// directly (same policy as [notebooksProvider] / `peopleProvider`).
 
-/// Session user (greeting and sidebar card). No real identity yet: neutral
-/// until there is authentication.
-final sessionUserProvider = Provider<({String name, String role})>(
-    (ref) => (name: '', role: ''));
+/// Session user (greeting and sidebar card): the local profile name when
+/// unlocked in local mode ('' in cloud mode until 4b brings identity).
+final sessionUserProvider = Provider<({String name, String role})>((ref) {
+  final session = ref.watch(authSessionProvider);
+  final name = session is SessionUnlocked ? (session.profileName ?? '') : '';
+  return (name: name, role: '');
+});
 
-/// Palette for each new congregation's color dot (cycled).
-const _congColors = <int>[
-  0xFF7A2230,
-  0xFF3E6651,
-  0xFF3F6193,
-  0xFF6B4E8A,
-  0xFF9A6A2E,
-];
+final congregationsRepositoryProvider = Provider<CongregationsRepository>(
+    (ref) => CongregationsRepository(
+        ref.watch(dbProvider), ref.watch(syncScribeProvider),
+        defaultName: t.congregation.defaultName));
 
-/// In-memory congregations. Empty at first; the "Nueva congregación" modal
-/// adds them during the session.
-class CongregationsController extends Notifier<List<Congregation>> {
-  @override
-  List<Congregation> build() => const [];
+final congregationsStreamProvider = StreamProvider<List<Congregation>>(
+    (ref) => ref.watch(congregationsRepositoryProvider).watchAll());
 
-  void add({required String name, required String number}) {
-    final color = _congColors[state.length % _congColors.length];
-    state = [
-      ...state,
-      Congregation(
-        id: const Uuid().v4(),
-        name: name,
-        number: number,
-        color: color,
-      ),
-    ];
-  }
+/// Synchronous view (empty during the first frame).
+final congregationsProvider = Provider<List<Congregation>>(
+    (ref) => ref.watch(congregationsStreamProvider).asData?.value ?? const []);
+
+final congregationActionsProvider =
+    Provider<CongregationActions>(CongregationActions.new);
+
+class CongregationActions {
+  CongregationActions(this._ref);
+
+  final Ref _ref;
+
+  CongregationsRepository get _repo =>
+      _ref.read(congregationsRepositoryProvider);
+
+  Future<void> add({
+    required String name,
+    required String number,
+    CongregationSettings settings = const CongregationSettings(),
+  }) =>
+      _repo.create(name: name, number: number, settings: settings);
+
+  Future<void> update(
+    String id, {
+    required String name,
+    required String number,
+    required CongregationSettings settings,
+  }) =>
+      _repo.update(id, name: name, number: number, settings: settings);
 }
-
-final congregationsProvider =
-    NotifierProvider<CongregationsController, List<Congregation>>(
-        CongregationsController.new);
 
 /// Catalog of cached notebooks. Starts empty and is filled by the background
 /// sync ([mwbSyncProvider]) from the on-disk cache. Kept synchronous so the
@@ -63,64 +84,189 @@ final notebooksProvider =
     NotifierProvider<NotebooksController, List<Notebook>>(
         NotebooksController.new);
 
-/// Reminders/alerts. Empty without a backend (they are derived alerts).
-final remindersProvider = Provider<List<Reminder>>((ref) => const []);
+/// Pending-work reminders, derived from the drafts: one per week that
+/// still has unassigned parts, newest project first, capped at 4.
+final remindersProvider = Provider<List<Reminder>>((ref) {
+  final drafts = ref
+      .watch(projectsProvider)
+      .where((p) => p.status == ProjectStatus.draft)
+      .toList()
+    ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  final reminders = <Reminder>[];
+  for (final p in drafts) {
+    for (final w in p.weekProgress) {
+      final missing = w.total - w.done;
+      if (missing <= 0) continue;
+      reminders.add(Reminder(
+        id: '${p.id}/${w.label}',
+        type: w.done == 0 ? ReminderType.alert : ReminderType.task,
+        title: t.dashboard.pendingItem(n: missing),
+        meta: '${w.label} · ${p.name}',
+        cta: t.dashboard.openProject,
+        projectId: p.id,
+      ));
+      if (reminders.length >= 4) return reminders;
+    }
+  }
+  return reminders;
+});
 
-/// In-memory editable project list. The project modal creates, edits and
-/// deletes here; persistence comes in a later phase.
-class ProjectsController extends Notifier<List<Project>> {
-  @override
-  List<Project> build() => const [];
+final projectsRepositoryProvider = Provider<ProjectsRepository>((ref) =>
+    ProjectsRepository(ref.watch(dbProvider),
+        ref.watch(congregationsRepositoryProvider),
+        ref.watch(syncScribeProvider)));
 
-  /// 14 assignable parts per week.
-  static int _total(int weeks) => weeks * 14;
+final projectsStreamProvider = StreamProvider<List<ProjectData>>(
+    (ref) => ref.watch(projectsRepositoryProvider).watchAll());
 
-  void create({
+/// Alive assignment counts per (programId, hall), reactive.
+final _assignmentCountsProvider = StreamProvider<Map<(String, Hall), int>>(
+    (ref) => ref.watch(projectsRepositoryProvider).watchAssignmentCounts());
+
+/// Synchronous project cards derived from the DB rows: progress/status/
+/// edited label are computed, never stored (docs/PHASE1_LOCAL_PERSISTENCE.md).
+final projectsProvider = Provider<List<Project>>((ref) {
+  final data = ref.watch(projectsStreamProvider).asData?.value ?? const [];
+  final counts =
+      ref.watch(_assignmentCountsProvider).asData?.value ?? const {};
+  final congregations = ref.watch(congregationsProvider);
+  final settingsById = {for (final c in congregations) c.id: c.settings};
+  return [
+    for (final d in data)
+      _toCard(d, counts, settingsById[d.project.congregationId])
+  ];
+});
+
+/// Fallback when a program has no content snapshot yet.
+const _partsPerWeek = 14;
+
+/// Real progress (phase 2): slot totals come from each program's content
+/// snapshot through the same schedule rules the editor uses (slot counts
+/// don't depend on start time/duration); done comes from the alive
+/// assignment rows, clamped per program so stale aux rows never overflow.
+Project _toCard(
+  ProjectData d,
+  Map<(String, Hall), int> counts,
+  CongregationSettings? congregationSettings,
+) {
+  final weeks = [for (final p in d.programs) p.date];
+  final weekProgress = <WeekProgress>[];
+  var done = 0;
+  var total = 0;
+  for (final program in d.programs) {
+    final auxRoom =
+        program.auxRoom ?? congregationSettings?.auxRoom ?? false;
+    final mainCount = counts[(program.id, Hall.main)] ?? 0;
+    final auxCount = auxRoom ? (counts[(program.id, Hall.aux)] ?? 0) : 0;
+
+    int programTotal;
+    if (program.contentJson == null) {
+      programTotal = _partsPerWeek;
+    } else {
+      final week = Week.fromJson(
+          jsonDecode(program.contentJson!) as Map<String, dynamic>);
+      final schedule = buildSchedule(week, 18 * 60, 105,
+          circuitOverseer:
+              program.weekType == WeekType.circuitOverseerVisit);
+      programTotal = 1; // chairman
+      for (final row in schedule.rows) {
+        programTotal += row.slots;
+        if (auxRoom) programTotal += row.auxSlots;
+      }
+    }
+    final programDone = min(mainCount + auxCount, programTotal);
+    weekProgress.add(
+        (label: program.date, done: programDone, total: programTotal));
+    total += programTotal;
+    done += programDone;
+  }
+
+  final status = d.project.exportedAt != null
+      ? ProjectStatus.exported
+      : (total > 0 && done >= total)
+          ? ProjectStatus.complete
+          : ProjectStatus.draft;
+  return Project(
+    id: d.project.id,
+    name: d.project.name,
+    congregationId: d.project.congregationId,
+    weeks: weeks,
+    done: done,
+    total: total,
+    status: status,
+    editedLabel: relativeEditedLabel(d.project.updatedAt),
+    updatedAt: d.project.updatedAt,
+    weekProgress: weekProgress,
+  );
+}
+
+/// The hero "continue where you left off" project: the most recently edited
+/// draft (null → the dashboard hides the hero card).
+final heroProjectProvider = Provider<Project?>((ref) {
+  final drafts = ref
+      .watch(projectsProvider)
+      .where((p) => p.status == ProjectStatus.draft)
+      .toList();
+  if (drafts.isEmpty) return null;
+  drafts.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  return drafts.first;
+});
+
+/// Open drafts (subtitle count).
+final draftCountProvider = Provider<int>((ref) => ref
+    .watch(projectsProvider)
+    .where((p) => p.status == ProjectStatus.draft)
+    .length);
+
+/// Missing assignments across drafts (subtitle count).
+final pendingAssignmentsProvider = Provider<int>((ref) {
+  var pending = 0;
+  for (final p in ref.watch(projectsProvider)) {
+    if (p.status == ProjectStatus.draft) pending += p.total - p.done;
+  }
+  return pending;
+});
+
+/// "hace 2 h" label for the project cards, from the row's `updatedAt`.
+/// Coarse on purpose: it re-renders with the dashboard, it doesn't tick.
+String relativeEditedLabel(DateTime updatedAt, {DateTime? now}) {
+  final d = (now ?? DateTime.now().toUtc()).difference(updatedAt);
+  if (d.inMinutes < 1) return t.relativeTime.now;
+  if (d.inHours < 1) return t.relativeTime.minutes(n: d.inMinutes);
+  if (d.inDays < 1) return t.relativeTime.hours(n: d.inHours);
+  return t.relativeTime.days(n: d.inDays);
+}
+
+final projectActionsProvider = Provider<ProjectActions>(ProjectActions.new);
+
+class ProjectActions {
+  ProjectActions(this._ref);
+
+  final Ref _ref;
+
+  ProjectsRepository get _repo => _ref.read(projectsRepositoryProvider);
+
+  /// Returns the new project id (callers chain the content snapshot).
+  Future<String> create({
     required String name,
     required String congregationId,
     required List<String> weeks,
-  }) {
-    final newProject = Project(
-      id: const Uuid().v4(),
-      name: name,
-      congregationId: congregationId,
-      weeks: weeks,
-      done: 0,
-      total: _total(weeks.length),
-      status: ProjectStatus.draft,
-      editedLabel: t.relativeTime.now,
-    );
-    state = [newProject, ...state];
-  }
+  }) =>
+      _repo.create(name: name, congregationId: congregationId, weeks: weeks);
 
-  void update(
+  Future<void> update(
     String id, {
     required String name,
     required String congregationId,
     required List<String> weeks,
-  }) {
-    state = [
-      for (final p in state)
-        if (p.id == id)
-          p.copyWith(
-            name: name,
-            congregationId: congregationId,
-            weeks: weeks,
-            total: _total(weeks.length),
-            editedLabel: t.relativeTime.now,
-          )
-        else
-          p,
-    ];
-  }
+  }) =>
+      _repo.update(id,
+          name: name, congregationId: congregationId, weeks: weeks);
 
-  void delete(String id) =>
-      state = [for (final p in state) if (p.id != id) p];
+  Future<void> delete(String id) => _repo.delete(id);
+
+  Future<void> markExported(String id) => _repo.markExported(id);
 }
-
-final projectsProvider =
-    NotifierProvider<ProjectsController, List<Project>>(
-        ProjectsController.new);
 
 /// Active filters: congregation (`'all'` = all) and status (`null` = any).
 class DashboardFilters {

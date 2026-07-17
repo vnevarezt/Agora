@@ -6,7 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:jw_program/app.dart';
 import 'package:jw_program/i18n/strings.g.dart';
+import 'package:jw_program/models/congregation.dart';
+import 'package:jw_program/models/project.dart';
 import 'package:jw_program/state/auth_session.dart';
+import 'package:jw_program/state/dashboard_provider.dart';
 import 'package:jw_program/state/mwb_sync.dart';
 
 /// Sync de arranque sin red ni disco: evita que el smoke test toque
@@ -37,6 +40,10 @@ void main() {
         overrides: [
           mwbSyncProvider.overrideWith(_NoopSyncController.new),
           authSessionProvider.overrideWith(_UnlockedSessionController.new),
+          // Directorio y dashboard sin BD: los providers síncronos se
+          // sobreescriben para no abrir la BD cifrada real en el test.
+          congregationsProvider.overrideWithValue(const <Congregation>[]),
+          projectsProvider.overrideWithValue(const <Project>[]),
         ],
         child: const JwProgramApp(),
       ),

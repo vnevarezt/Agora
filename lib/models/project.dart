@@ -19,7 +19,12 @@ extension ProjectStatusX on ProjectStatus {
       };
 }
 
-/// Dashboard project: the program for a month/period of a congregation.
+/// Per-week progress of a project (hero card chips).
+typedef WeekProgress = ({String label, int done, int total});
+
+/// Dashboard project CARD: view model computed from the DB rows by
+/// `projectsProvider` (status/progress/edited label are derived, never
+/// stored — docs/PHASE1_LOCAL_PERSISTENCE.md).
 class Project {
   final String id;
   final String name;
@@ -29,8 +34,14 @@ class Project {
   final int total;
   final ProjectStatus status;
 
-  /// Relative last-edited text ("hace 2 horas"); UI placeholder.
+  /// Relative last-edited text ("hace 2 horas").
   final String editedLabel;
+
+  /// Raw edit stamp (picks the hero "continue" project).
+  final DateTime updatedAt;
+
+  /// Per-week done/total, in week order (hero card chips).
+  final List<WeekProgress> weekProgress;
 
   const Project({
     required this.id,
@@ -41,29 +52,10 @@ class Project {
     required this.total,
     required this.status,
     required this.editedLabel,
+    required this.updatedAt,
+    this.weekProgress = const [],
   });
 
   /// Progress fraction 0..1 for the progress bar.
   double get progress => total == 0 ? 0 : done / total;
-
-  Project copyWith({
-    String? name,
-    String? congregationId,
-    List<String>? weeks,
-    int? done,
-    int? total,
-    ProjectStatus? status,
-    String? editedLabel,
-  }) {
-    return Project(
-      id: id,
-      name: name ?? this.name,
-      congregationId: congregationId ?? this.congregationId,
-      weeks: weeks ?? this.weeks,
-      done: done ?? this.done,
-      total: total ?? this.total,
-      status: status ?? this.status,
-      editedLabel: editedLabel ?? this.editedLabel,
-    );
-  }
 }

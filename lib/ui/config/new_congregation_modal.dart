@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_options.dart';
 import '../../i18n/strings.g.dart';
+import '../../models/congregation_settings.dart';
 import '../../state/dashboard_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -45,12 +46,22 @@ class _NewCongregationModalState
   String _weekendDay = daysOfWeek[6]; // Sunday
   String _weekendTime = '10:00';
 
-  /// Adds the congregation to in-memory state and closes. Schedule/language
-  /// are not persisted yet (no backend); only name and number are saved.
-  void _crear() {
-    ref.read(congregationsProvider.notifier).add(
+  /// Persists the congregation. The schedule/language go into settingsJson
+  /// (weekday = index in the Monday-first list, stable across locales);
+  /// the program templates read them in phase 2.
+  Future<void> _crear() async {
+    final languageIndex = meetingLanguages.indexOf(_language);
+    await ref.read(congregationActionsProvider).add(
           name: _name.trim(),
           number: _number.trim(),
+          settings: CongregationSettings(
+            meetingLanguage:
+                congregationLanguageCodes[languageIndex < 0 ? 0 : languageIndex],
+            midweekDay: daysOfWeek.indexOf(_weekdayDay),
+            midweekTime: _weekdayTime,
+            weekendDay: daysOfWeek.indexOf(_weekendDay),
+            weekendTime: _weekendTime,
+          ),
         );
     widget.onClose();
   }

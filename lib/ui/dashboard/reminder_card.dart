@@ -4,12 +4,12 @@ import '../../models/reminder.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
-/// Reminder card (`.reminder`): icon colored by type, title, meta and
-/// CTA. No logic at this phase (the CTA does nothing).
+/// Reminder card (`.reminder`): icon colored by type, title, meta and CTA.
 class ReminderCard extends StatelessWidget {
-  const ReminderCard({super.key, required this.recordatorio});
+  const ReminderCard({super.key, required this.recordatorio, this.onCta});
 
   final Reminder recordatorio;
+  final VoidCallback? onCta;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +84,7 @@ class ReminderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Pressable(
-                  onTap: () {}, // sin acción en esta fase
+                  onTap: onCta,
                   builder: (context, hovered, _) => Text(
                     '${r.cta} →',
                     style: TextStyle(

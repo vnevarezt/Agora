@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/participant.dart';
+import '../../models/person.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 

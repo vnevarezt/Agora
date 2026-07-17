@@ -52,10 +52,13 @@ class SessionCloudSignedOut extends SessionState {
 }
 
 class SessionUnlocked extends SessionState {
-  const SessionUnlocked(this.dekHex, this.mode);
+  const SessionUnlocked(this.dekHex, this.mode, {this.profileName});
 
   final String dekHex;
   final AccountMode mode;
+
+  /// Local profile name (greeting); null in cloud mode for now.
+  final String? profileName;
 }
 
 /// The keychain itself failed (not a wrong password): nothing can proceed.
@@ -126,20 +129,20 @@ class SessionController extends Notifier<SessionState> {
   Future<void> createLocalProfile(String name, String password) async {
     final dek = await _keys.createAccount(password);
     await _persistLocalMode(name);
-    state = SessionUnlocked(dek, AccountMode.local);
+    state = SessionUnlocked(dek, AccountMode.local, profileName: _profileName);
   }
 
   /// Migration wizard ([SessionLocalCreate] with migration).
   Future<void> migrate(String name, String password) async {
     final dek = await _keys.migrateLegacy(password);
     await _persistLocalMode(name);
-    state = SessionUnlocked(dek, AccountMode.local);
+    state = SessionUnlocked(dek, AccountMode.local, profileName: _profileName);
   }
 
   /// Throws [WrongPasswordException] / [DbKeyException]; the screen shows the
   /// error while the state stays [SessionLocalLocked].
   Future<void> unlock(String password) async {
-    state = SessionUnlocked(await _keys.unlock(password), AccountMode.local);
+    state = SessionUnlocked(await _keys.unlock(password), AccountMode.local, profileName: _profileName);
   }
 
   void lock() => state = SessionLocalLocked(_profileName);

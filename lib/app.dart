@@ -3,8 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'i18n/strings.g.dart';
+import 'state/app_settings.dart';
 import 'state/mwb_sync.dart';
-import 'state/ui_state.dart';
 import 'ui/auth/auth_gate.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';

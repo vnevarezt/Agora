@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/assignment_ops.dart';
-import '../../state/participants_provider.dart';
+import '../../state/people_provider.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
 import '../responsive.dart';
@@ -35,7 +35,7 @@ class SlotField extends ConsumerWidget {
         case PickName(:final name):
           writeAssignment(ref, spec.ref, name);
           // Fire-and-forget: the directory updates itself.
-          unawaited(ref.read(participantActionsProvider).recordUsage(name));
+          unawaited(ref.read(personActionsProvider).recordUsage(name));
         case PickRemove():
           writeAssignment(ref, spec.ref, '');
         case null:

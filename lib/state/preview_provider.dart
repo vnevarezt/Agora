@@ -1,13 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 
+import '../data/files/file_saver.dart';
 import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'program_form.dart';
+
+/// Native save mechanism (dialog on desktop, share sheet on mobile).
+final fileSaverProvider = Provider<FileSaver>((ref) => FileSaver());
 
 /// Live preview: rasterizes the page (pdfium) when the data changes, with a
 /// debounce so typing feels real-time.
@@ -80,9 +82,9 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     }
   }
 
-  /// Builds the PDF with the current data and saves it to Downloads.
-  /// Returns the file path.
-  Future<String> export() async {
+  /// Builds the PDF with the current data and hands it to the native save
+  /// mechanism ([FileSaver]): save dialog on desktop, share sheet on mobile.
+  Future<SaveOutcome> export() async {
     final schedule = ref.read(scheduleProvider);
     final week = ref.read(currentWeekProvider);
     if (schedule == null || week == null) {
@@ -97,11 +99,12 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       chairman: f.chairman,
       auxRoom: f.auxRoom,
     );
-    final dir =
-        (await getDownloadsDirectory()) ?? await getApplicationDocumentsDirectory();
-    final path =
-        '${dir.path}${Platform.pathSeparator}programa-${f.issue}-s${f.weekIndex + 1}.pdf';
-    await File(path).writeAsBytes(pdf);
-    return path;
+    return ref.read(fileSaverProvider).save(
+          bytes: pdf,
+          suggestedName: 'programa-${f.issue}-s${f.weekIndex + 1}.pdf',
+          extension: 'pdf',
+          mimeType: 'application/pdf',
+          typeLabel: 'PDF',
+        );
   }
 }

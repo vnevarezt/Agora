@@ -353,20 +353,53 @@ class Translations$dashboard$es {
 	/// es: 'Tus proyectos y pendientes'
 	String get subtitle => 'Tus proyectos y pendientes';
 
+	/// es: 'Tienes'
+	String get youHave => 'Tienes';
+
+	/// es: '1 proyecto en curso'
+	String get draftsOne => '1 proyecto en curso';
+
+	/// es: '{n} proyectos en curso'
+	String draftsMany({required Object n}) => '${n} proyectos en curso';
+
 	/// es: 'Nuevo proyecto'
 	String get newProject => 'Nuevo proyecto';
 
 	/// es: 'Todo estado'
 	String get allStatus => 'Todo estado';
 
-	/// es: 'Proyectos'
-	String get projects => 'Proyectos';
+	/// es: 'Tus proyectos'
+	String get projects => 'Tus proyectos';
 
 	/// es: 'Recordatorios'
 	String get reminders => 'Recordatorios';
 
 	/// es: 'Ver todo'
 	String get seeAll => 'Ver todo';
+
+	/// es: 'Continúa donde quedaste'
+	String get continueWhere => 'Continúa donde quedaste';
+
+	/// es: 'Continuar'
+	String get continueCta => 'Continuar';
+
+	/// es: '{done} de {total} asignaciones completas'
+	String assignmentsDone({required Object done, required Object total}) => '${done} de ${total} asignaciones completas';
+
+	/// es: 'Pendientes'
+	String get pending => 'Pendientes';
+
+	/// es: '{n} asignaciones pendientes'
+	String pendingItem({required Object n}) => '${n} asignaciones pendientes';
+
+	/// es: 'Abrir proyecto'
+	String get openProject => 'Abrir proyecto';
+
+	/// es: 'Resolver pendientes'
+	String get resolvePending => 'Resolver pendientes';
+
+	/// es: 'Todo al día ✨'
+	String get allDone => 'Todo al día ✨';
 }
 
 // Path: projectCard
@@ -479,14 +512,23 @@ class Translations$participantModal$es {
 	/// es: 'El privilegio define qué partes se le pueden asignar.'
 	String get desc => 'El privilegio define qué partes se le pueden asignar.';
 
-	/// es: 'Nombre completo'
-	String get fullName => 'Nombre completo';
+	/// es: 'Nombre para el programa'
+	String get fullName => 'Nombre para el programa';
 
 	/// es: 'Ej. Martín Salas'
 	String get nameHint => 'Ej. Martín Salas';
 
-	/// es: 'Congregación'
-	String get congregation => 'Congregación';
+	/// es: 'Nombre'
+	String get firstName => 'Nombre';
+
+	/// es: 'Apellidos'
+	String get lastName => 'Apellidos';
+
+	/// es: 'Congregación de origen'
+	String get congregation => 'Congregación de origen';
+
+	/// es: 'Solo para visitantes; vacío = tu congregación'
+	String get originHint => 'Solo para visitantes; vacío = tu congregación';
 
 	/// es: 'Es'
 	String get isLabel => 'Es';
@@ -679,14 +721,14 @@ class Translations$settings$es {
 	/// es: 'Datos'
 	String get data => 'Datos';
 
-	/// es: 'Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.'
-	String get dataDesc => 'Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.';
+	/// es: 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.'
+	String get dataDesc => 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.';
 
 	/// es: 'Exportar datos'
 	String get exportData => 'Exportar datos';
 
-	/// es: 'Genera un archivo .jwbackup con todo'
-	String get exportDataDesc => 'Genera un archivo .jwbackup con todo';
+	/// es: 'Genera un archivo .agora cifrado con contraseña'
+	String get exportDataDesc => 'Genera un archivo .agora cifrado con contraseña';
 
 	/// es: 'Exportar'
 	String get export => 'Exportar';
@@ -694,8 +736,8 @@ class Translations$settings$es {
 	/// es: 'Importar datos'
 	String get importData => 'Importar datos';
 
-	/// es: 'Restaura desde un archivo .jwbackup'
-	String get importDataDesc => 'Restaura desde un archivo .jwbackup';
+	/// es: 'Restaura y fusiona desde un archivo .agora'
+	String get importDataDesc => 'Restaura y fusiona desde un archivo .agora';
 
 	/// es: 'Importar'
 	String get import => 'Importar';
@@ -705,6 +747,36 @@ class Translations$settings$es {
 
 	/// es: 'Sin copias todavía'
 	String get noBackupsYet => 'Sin copias todavía';
+
+	/// es: 'Contraseña de la copia'
+	String get backupPasswordTitle => 'Contraseña de la copia';
+
+	/// es: 'Protege el archivo: sin ella no se puede restaurar.'
+	String get backupPasswordDesc => 'Protege el archivo: sin ella no se puede restaurar.';
+
+	/// es: 'Repite la contraseña'
+	String get backupPasswordRepeat => 'Repite la contraseña';
+
+	/// es: 'Las contraseñas no coinciden'
+	String get backupPasswordMismatch => 'Las contraseñas no coinciden';
+
+	/// es: 'La contraseña con la que se exportó el archivo.'
+	String get backupImportPasswordDesc => 'La contraseña con la que se exportó el archivo.';
+
+	/// es: 'Copia guardada: {path}'
+	String backupSaved({required Object path}) => 'Copia guardada: ${path}';
+
+	/// es: 'Copia compartida'
+	String get backupSharedMsg => 'Copia compartida';
+
+	/// es: 'Restauración completa: {n} registros actualizados'
+	String backupRestored({required Object n}) => 'Restauración completa: ${n} registros actualizados';
+
+	/// es: 'Contraseña incorrecta'
+	String get backupWrongPassword => 'Contraseña incorrecta';
+
+	/// es: 'El archivo no es una copia de Agora válida'
+	String get backupMalformed => 'El archivo no es una copia de Agora válida';
 
 	/// es: 'Sesión'
 	String get session => 'Sesión';
@@ -810,6 +882,9 @@ class Translations$congregation$es {
 
 	/// es: 'Número'
 	String get number => 'Número';
+
+	/// es: 'Mi congregación'
+	String get defaultName => 'Mi congregación';
 
 	/// es: 'Idioma de la reunión'
 	String get meetingLanguage => 'Idioma de la reunión';
@@ -994,6 +1069,9 @@ class Translations$export$es {
 	/// es: 'PDF exportado: {path}'
 	String success({required Object path}) => 'PDF exportado: ${path}';
 
+	/// es: 'PDF compartido'
+	String get shared => 'PDF compartido';
+
 	/// es: 'Error al exportar: {error}'
 	String error({required Object error}) => 'Error al exportar: ${error}';
 
@@ -1146,6 +1224,15 @@ class Translations$relativeTime$es {
 
 	/// es: 'ahora mismo'
 	String get now => 'ahora mismo';
+
+	/// es: 'hace {n} min'
+	String minutes({required Object n}) => 'hace ${n} min';
+
+	/// es: 'hace {n} h'
+	String hours({required Object n}) => 'hace ${n} h';
+
+	/// es: 'hace {n} d'
+	String days({required Object n}) => 'hace ${n} d';
 }
 
 // Path: auth.local
@@ -1551,11 +1638,22 @@ extension on Translations {
 			'dashboard.greetingEvening' => 'Buenas noches',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Tus proyectos y pendientes',
+			'dashboard.youHave' => 'Tienes',
+			'dashboard.draftsOne' => '1 proyecto en curso',
+			'dashboard.draftsMany' => ({required Object n}) => '${n} proyectos en curso',
 			'dashboard.newProject' => 'Nuevo proyecto',
 			'dashboard.allStatus' => 'Todo estado',
-			'dashboard.projects' => 'Proyectos',
+			'dashboard.projects' => 'Tus proyectos',
 			'dashboard.reminders' => 'Recordatorios',
 			'dashboard.seeAll' => 'Ver todo',
+			'dashboard.continueWhere' => 'Continúa donde quedaste',
+			'dashboard.continueCta' => 'Continuar',
+			'dashboard.assignmentsDone' => ({required Object done, required Object total}) => '${done} de ${total} asignaciones completas',
+			'dashboard.pending' => 'Pendientes',
+			'dashboard.pendingItem' => ({required Object n}) => '${n} asignaciones pendientes',
+			'dashboard.openProject' => 'Abrir proyecto',
+			'dashboard.resolvePending' => 'Resolver pendientes',
+			'dashboard.allDone' => 'Todo al día ✨',
 			'projectCard.edited' => ({required Object label}) => 'Editado ${label}',
 			'projectCard.editProject' => 'Editar proyecto',
 			'projectModal.newTitle' => 'Nuevo proyecto',
@@ -1579,9 +1677,12 @@ extension on Translations {
 			'participantModal.addTitle' => 'Añadir participante',
 			'participantModal.editTitle' => 'Editar participante',
 			'participantModal.desc' => 'El privilegio define qué partes se le pueden asignar.',
-			'participantModal.fullName' => 'Nombre completo',
+			'participantModal.fullName' => 'Nombre para el programa',
 			'participantModal.nameHint' => 'Ej. Martín Salas',
-			'participantModal.congregation' => 'Congregación',
+			'participantModal.firstName' => 'Nombre',
+			'participantModal.lastName' => 'Apellidos',
+			'participantModal.congregation' => 'Congregación de origen',
+			'participantModal.originHint' => 'Solo para visitantes; vacío = tu congregación',
 			'participantModal.isLabel' => 'Es',
 			'participantModal.male' => 'Hombre',
 			'participantModal.female' => 'Mujer',
@@ -1638,15 +1739,25 @@ extension on Translations {
 			'settings.notif.exportsTitle' => 'Exportaciones pendientes',
 			'settings.notif.exportsDesc' => 'Recordar exportar el programa antes del fin de semana',
 			'settings.data' => 'Datos',
-			'settings.dataDesc' => 'Copia de seguridad de tus proyectos, participantes y congregaciones. Útil también para mover datos entre el modo local y la nube.',
+			'settings.dataDesc' => 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.',
 			'settings.exportData' => 'Exportar datos',
-			'settings.exportDataDesc' => 'Genera un archivo .jwbackup con todo',
+			'settings.exportDataDesc' => 'Genera un archivo .agora cifrado con contraseña',
 			'settings.export' => 'Exportar',
 			'settings.importData' => 'Importar datos',
-			'settings.importDataDesc' => 'Restaura desde un archivo .jwbackup',
+			'settings.importDataDesc' => 'Restaura y fusiona desde un archivo .agora',
 			'settings.import' => 'Importar',
 			'settings.lastBackup' => 'Última copia',
 			'settings.noBackupsYet' => 'Sin copias todavía',
+			'settings.backupPasswordTitle' => 'Contraseña de la copia',
+			'settings.backupPasswordDesc' => 'Protege el archivo: sin ella no se puede restaurar.',
+			'settings.backupPasswordRepeat' => 'Repite la contraseña',
+			'settings.backupPasswordMismatch' => 'Las contraseñas no coinciden',
+			'settings.backupImportPasswordDesc' => 'La contraseña con la que se exportó el archivo.',
+			'settings.backupSaved' => ({required Object path}) => 'Copia guardada: ${path}',
+			'settings.backupSharedMsg' => 'Copia compartida',
+			'settings.backupRestored' => ({required Object n}) => 'Restauración completa: ${n} registros actualizados',
+			'settings.backupWrongPassword' => 'Contraseña incorrecta',
+			'settings.backupMalformed' => 'El archivo no es una copia de Agora válida',
 			'settings.session' => 'Sesión',
 			'settings.sessionDesc' => 'Estás usando la app en modo local en este dispositivo.',
 			'settings.localMode' => 'Modo local',
@@ -1673,6 +1784,7 @@ extension on Translations {
 			'congregation.dataDesc' => 'Se usan en el encabezado de los programas.',
 			'congregation.name' => 'Nombre',
 			'congregation.number' => 'Número',
+			'congregation.defaultName' => 'Mi congregación',
 			'congregation.meetingLanguage' => 'Idioma de la reunión',
 			'congregation.scheduleTitle' => 'Horarios de reunión',
 			'congregation.scheduleDesc' => 'Las horas de cada parte se calculan a partir de aquí.',
@@ -1719,6 +1831,7 @@ extension on Translations {
 			'export.export' => 'Exportar',
 			'export.exportPdf' => 'Exportar PDF',
 			'export.success' => ({required Object path}) => 'PDF exportado: ${path}',
+			'export.shared' => 'PDF compartido',
 			'export.error' => ({required Object error}) => 'Error al exportar: ${error}',
 			'export.currentWeek' => 'Semana actual',
 			'export.currentWeekSub' => 'Una hoja PDF',
@@ -1760,6 +1873,9 @@ extension on Translations {
 			'workspace.editTitleHint' => 'Título de la asignación',
 			'workspace.restoreTitle' => 'Restablecer',
 			'relativeTime.now' => 'ahora mismo',
+			'relativeTime.minutes' => ({required Object n}) => 'hace ${n} min',
+			'relativeTime.hours' => ({required Object n}) => 'hace ${n} h',
+			'relativeTime.days' => ({required Object n}) => 'hace ${n} d',
 			_ => null,
 		};
 	}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../models/congregation.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
@@ -12,6 +13,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
+import 'continue_card.dart';
 import 'new_project_card.dart';
 import 'project_card.dart';
 import 'project_modal.dart';
@@ -41,8 +43,7 @@ class DashboardView extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _Filters(),
-                const SizedBox(height: 18),
+                const _HeroSection(),
                 _HomeGrid(stacked: size != ScreenSize.desktop),
               ],
             ),
@@ -73,6 +74,11 @@ class _TopBar extends ConsumerWidget {
     final greeting = user.name.isEmpty
         ? _greeting(tr)
         : tr.dashboard.greetingNamed(greeting: _greeting(tr), name: user.name);
+    final drafts = ref.watch(draftCountProvider);
+    final pending = ref.watch(pendingAssignmentsProvider);
+    final draftsLabel = drafts == 1
+        ? tr.dashboard.draftsOne
+        : tr.dashboard.draftsMany(n: drafts);
 
     return Row(
       children: [
@@ -92,14 +98,40 @@ class _TopBar extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                tr.dashboard.subtitle,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: t.textMute,
+              if (drafts == 0)
+                Text(
+                  tr.dashboard.subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: t.textMute,
+                  ),
+                )
+              else
+                Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: t.textMute,
+                    ),
+                    children: [
+                      TextSpan(text: '${tr.dashboard.youHave} '),
+                      TextSpan(
+                        text: draftsLabel,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: t.accentStrong,
+                        ),
+                      ),
+                      TextSpan(
+                          text:
+                              ' · ${tr.dashboard.pendingItem(n: pending)}'),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
             ],
           ),
         ),
@@ -214,49 +246,67 @@ class _SyncIndicator extends StatelessWidget {
   }
 }
 
-class _Filters extends ConsumerWidget {
-  const _Filters();
+/// Hero "continue where you left off": the freshest draft, or nothing.
+class _HeroSection extends ConsumerWidget {
+  const _HeroSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.tokens;
+    final hero = ref.watch(heroProjectProvider);
+    if (hero == null) return const SizedBox.shrink();
     final congregations = ref.watch(congregationsProvider);
+    Congregation? congregation;
+    for (final c in congregations) {
+      if (c.id == hero.congregationId) congregation = c;
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: ContinueCard(
+        project: hero,
+        congregation: congregation,
+        onContinue: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+              builder: (_) => ProgramShell(project: hero)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Congregation pills, only worth showing with more than one congregation.
+class _CongregationFilter extends ConsumerWidget {
+  const _CongregationFilter();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final congregations = ref.watch(congregationsProvider);
+    if (congregations.length < 2) return const SizedBox.shrink();
     final projects = ref.watch(projectsProvider);
     final filters = ref.watch(dashboardFiltersProvider);
     final notifier = ref.read(dashboardFiltersProvider.notifier);
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        FilterPill(
-          label: context.t.common.allFeminine,
-          count: projects.length,
-          active: filters.congregationId == 'all',
-          onTap: () => notifier.setCongregation('all'),
-        ),
-        for (final c in congregations)
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
           FilterPill(
-            label: c.name,
-            dotColor: Color(c.color),
-            count: projects.where((p) => p.congregationId == c.id).length,
-            active: filters.congregationId == c.id,
-            onTap: () => notifier.setCongregation(c.id),
+            label: context.t.common.allFeminine,
+            count: projects.length,
+            active: filters.congregationId == 'all',
+            onTap: () => notifier.setCongregation('all'),
           ),
-        Container(width: 1, height: 22, color: t.border),
-        FilterPill(
-          label: context.t.dashboard.allStatus,
-          active: filters.status == null,
-          onTap: () => notifier.setStatus(null),
-        ),
-        for (final e in ProjectStatus.values)
-          FilterPill(
-            label: e.plural,
-            active: filters.status == e,
-            onTap: () => notifier.setStatus(e),
-          ),
-      ],
+          for (final c in congregations)
+            FilterPill(
+              label: c.name,
+              dotColor: Color(c.color),
+              count: projects.where((p) => p.congregationId == c.id).length,
+              active: filters.congregationId == c.id,
+              onTap: () => notifier.setCongregation(c.id),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -300,12 +350,40 @@ class _ProjectsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final congregations = ref.watch(congregationsProvider);
     final projects = ref.watch(filteredProjectsProvider);
+    final allProjects = ref.watch(projectsProvider);
+    final filters = ref.watch(dashboardFiltersProvider);
+    final notifier = ref.read(dashboardFiltersProvider.notifier);
     final porId = {for (final c in congregations) c.id: c};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(title: context.t.dashboard.projects, count: projects.length),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              BlockTitle(
+                  title: context.t.dashboard.projects,
+                  count: allProjects.length),
+              const SizedBox(width: 6),
+              FilterPill(
+                label: context.t.common.allMasculine,
+                active: filters.status == null,
+                onTap: () => notifier.setStatus(null),
+              ),
+              for (final e in ProjectStatus.values)
+                FilterPill(
+                  label: e.plural,
+                  active: filters.status == e,
+                  onTap: () => notifier.setStatus(e),
+                ),
+            ],
+          ),
+        ),
+        const _CongregationFilter(),
         LayoutBuilder(
           builder: (context, c) {
             const gap = 14.0;
@@ -327,6 +405,8 @@ class _ProjectsSection extends ConsumerWidget {
                     child: ProjectCard(
                       project: p,
                       congregation: porId[p.congregationId],
+                      // The editor session hydrates the form (congregation
+                      // name included) from the DB on open.
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                             builder: (_) => ProgramShell(project: p)),
@@ -346,22 +426,55 @@ class _ProjectsSection extends ConsumerWidget {
 class _RemindersSection extends ConsumerWidget {
   const _RemindersSection();
 
+  void _openProject(BuildContext context, WidgetRef ref, String? projectId) {
+    if (projectId == null) return;
+    Project? project;
+    for (final p in ref.read(projectsProvider)) {
+      if (p.id == projectId) project = p;
+    }
+    if (project == null) return;
+    Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => ProgramShell(project: project)));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.tokens;
     final reminders = ref.watch(remindersProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BlockTitle(
-          title: context.t.dashboard.reminders,
-          count: reminders.length,
-          linkLabel: context.t.dashboard.seeAll,
-          onLink: () {},
-        ),
+            title: context.t.dashboard.pending, count: reminders.length),
+        if (reminders.isEmpty)
+          Text(
+            context.t.dashboard.allDone,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: t.textMute,
+            ),
+          ),
         for (var i = 0; i < reminders.length; i++) ...[
           if (i > 0) const SizedBox(height: 9),
-          ReminderCard(recordatorio: reminders[i]),
+          ReminderCard(
+            recordatorio: reminders[i],
+            onCta: () =>
+                _openProject(context, ref, reminders[i].projectId),
+          ),
+        ],
+        if (reminders.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              variant: AppButtonVariant.ghost,
+              label: context.t.dashboard.resolvePending,
+              onPressed: () =>
+                  _openProject(context, ref, reminders.first.projectId),
+            ),
+          ),
         ],
       ],
     );

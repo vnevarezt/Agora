@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../models/congregation.dart';
 import '../../models/notebook.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
+import '../../state/program_content.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -98,16 +101,23 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     return t.projectModal.autoName(n: _weeks.length, base: base);
   }
 
-  void _save(Notebook notebook) {
+  Future<void> _save(Notebook notebook) async {
     final name = _autoName(notebook);
-    final notifier = ref.read(projectsProvider.notifier);
+    final actions = ref.read(projectActionsProvider);
+    final String projectId;
     if (_isNew) {
-      notifier.create(
+      projectId = await actions.create(
           name: name, congregationId: _congregationId, weeks: _weeks);
     } else {
-      notifier.update(widget.original!.id,
+      projectId = widget.original!.id;
+      await actions.update(projectId,
           name: name, congregationId: _congregationId, weeks: _weeks);
     }
+    // Fire-and-forget: snapshots the picked weeks' content onto the
+    // programs (retried on editor open if a notebook wasn't cached yet).
+    unawaited(ref
+        .read(programContentServiceProvider)
+        .ensureProjectContent(projectId));
     widget.onClose();
   }
 
@@ -133,7 +143,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    ref.read(projectsProvider.notifier).delete(widget.original!.id);
+    await ref.read(projectActionsProvider).delete(widget.original!.id);
     widget.onClose();
   }
 

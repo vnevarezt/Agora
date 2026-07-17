@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
@@ -664,9 +665,17 @@ class _ExportMenu extends ConsumerWidget {
     final tr = context.t;
     ref.read(exportBusyProvider.notifier).set(true);
     try {
-      final path = await ref.read(previewProvider.notifier).export();
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.export.success(path: path))));
+      final outcome = await ref.read(previewProvider.notifier).export();
+      switch (outcome) {
+        case SaveDone(:final path):
+          messenger.showSnackBar(
+              SnackBar(content: Text(tr.export.success(path: path))));
+        case SaveShared():
+          messenger
+              .showSnackBar(SnackBar(content: Text(tr.export.shared)));
+        case SaveCanceled():
+          break; // user's choice, no feedback needed
+      }
     } catch (e) {
       messenger.showSnackBar(
           SnackBar(content: Text(tr.export.error(error: e))));
