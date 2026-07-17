@@ -15,6 +15,7 @@ import '../models/project.dart';
 import '../models/reminder.dart';
 import '../models/week.dart';
 import '../models/week_type.dart';
+import 'auth_session.dart';
 import 'db_provider.dart';
 
 /// Dashboard state. Congregations and projects are DB-backed (milestone 3
@@ -22,10 +23,13 @@ import 'db_provider.dart';
 /// `List` providers keep the pre-persistence contract so the UI reads them
 /// directly (same policy as [notebooksProvider] / `peopleProvider`).
 
-/// Session user (greeting and sidebar card). No real identity yet: neutral
-/// until there is authentication.
-final sessionUserProvider = Provider<({String name, String role})>(
-    (ref) => (name: '', role: ''));
+/// Session user (greeting and sidebar card): the local profile name when
+/// unlocked in local mode ('' in cloud mode until 4b brings identity).
+final sessionUserProvider = Provider<({String name, String role})>((ref) {
+  final session = ref.watch(authSessionProvider);
+  final name = session is SessionUnlocked ? (session.profileName ?? '') : '';
+  return (name: name, role: '');
+});
 
 final congregationsRepositoryProvider = Provider<CongregationsRepository>(
     (ref) => CongregationsRepository(
@@ -80,8 +84,32 @@ final notebooksProvider =
     NotifierProvider<NotebooksController, List<Notebook>>(
         NotebooksController.new);
 
-/// Reminders/alerts. Empty without a backend (they are derived alerts).
-final remindersProvider = Provider<List<Reminder>>((ref) => const []);
+/// Pending-work reminders, derived from the drafts: one per week that
+/// still has unassigned parts, newest project first, capped at 4.
+final remindersProvider = Provider<List<Reminder>>((ref) {
+  final drafts = ref
+      .watch(projectsProvider)
+      .where((p) => p.status == ProjectStatus.draft)
+      .toList()
+    ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  final reminders = <Reminder>[];
+  for (final p in drafts) {
+    for (final w in p.weekProgress) {
+      final missing = w.total - w.done;
+      if (missing <= 0) continue;
+      reminders.add(Reminder(
+        id: '${p.id}/${w.label}',
+        type: w.done == 0 ? ReminderType.alert : ReminderType.task,
+        title: t.dashboard.pendingItem(n: missing),
+        meta: '${w.label} · ${p.name}',
+        cta: t.dashboard.openProject,
+        projectId: p.id,
+      ));
+      if (reminders.length >= 4) return reminders;
+    }
+  }
+  return reminders;
+});
 
 final projectsRepositoryProvider = Provider<ProjectsRepository>((ref) =>
     ProjectsRepository(ref.watch(dbProvider),
@@ -122,6 +150,7 @@ Project _toCard(
   CongregationSettings? congregationSettings,
 ) {
   final weeks = [for (final p in d.programs) p.date];
+  final weekProgress = <WeekProgress>[];
   var done = 0;
   var total = 0;
   for (final program in d.programs) {
@@ -145,8 +174,11 @@ Project _toCard(
         if (auxRoom) programTotal += row.auxSlots;
       }
     }
+    final programDone = min(mainCount + auxCount, programTotal);
+    weekProgress.add(
+        (label: program.date, done: programDone, total: programTotal));
     total += programTotal;
-    done += min(mainCount + auxCount, programTotal);
+    done += programDone;
   }
 
   final status = d.project.exportedAt != null
@@ -163,8 +195,37 @@ Project _toCard(
     total: total,
     status: status,
     editedLabel: relativeEditedLabel(d.project.updatedAt),
+    updatedAt: d.project.updatedAt,
+    weekProgress: weekProgress,
   );
 }
+
+/// The hero "continue where you left off" project: the most recently edited
+/// draft (null → the dashboard hides the hero card).
+final heroProjectProvider = Provider<Project?>((ref) {
+  final drafts = ref
+      .watch(projectsProvider)
+      .where((p) => p.status == ProjectStatus.draft)
+      .toList();
+  if (drafts.isEmpty) return null;
+  drafts.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  return drafts.first;
+});
+
+/// Open drafts (subtitle count).
+final draftCountProvider = Provider<int>((ref) => ref
+    .watch(projectsProvider)
+    .where((p) => p.status == ProjectStatus.draft)
+    .length);
+
+/// Missing assignments across drafts (subtitle count).
+final pendingAssignmentsProvider = Provider<int>((ref) {
+  var pending = 0;
+  for (final p in ref.watch(projectsProvider)) {
+    if (p.status == ProjectStatus.draft) pending += p.total - p.done;
+  }
+  return pending;
+});
 
 /// "hace 2 h" label for the project cards, from the row's `updatedAt`.
 /// Coarse on purpose: it re-renders with the dashboard, it doesn't tick.

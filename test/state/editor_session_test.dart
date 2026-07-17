@@ -61,6 +61,7 @@ void main() {
                 total: 0,
                 status: ProjectStatus.draft,
                 editedLabel: '',
+                updatedAt: DateTime.utc(2026, 1, 1),
               ))
           .first;
 

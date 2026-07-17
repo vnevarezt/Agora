@@ -219,11 +219,22 @@ class _Translations$dashboard$en extends Translations$dashboard$es {
 	@override String get greetingEvening => 'Good evening';
 	@override String greetingNamed({required Object greeting, required Object name}) => '${greeting}, ${name}';
 	@override String get subtitle => 'Your projects and to-dos';
+	@override String get youHave => 'You have';
+	@override String get draftsOne => '1 project in progress';
+	@override String draftsMany({required Object n}) => '${n} projects in progress';
 	@override String get newProject => 'New project';
 	@override String get allStatus => 'Any status';
-	@override String get projects => 'Projects';
+	@override String get projects => 'Your projects';
 	@override String get reminders => 'Reminders';
 	@override String get seeAll => 'See all';
+	@override String get continueWhere => 'Continue where you left off';
+	@override String get continueCta => 'Continue';
+	@override String assignmentsDone({required Object done, required Object total}) => '${done} of ${total} assignments complete';
+	@override String get pending => 'Pending';
+	@override String pendingItem({required Object n}) => '${n} pending assignments';
+	@override String get openProject => 'Open project';
+	@override String get resolvePending => 'Resolve pending';
+	@override String get allDone => 'All caught up ✨';
 }
 
 // Path: projectCard
@@ -891,11 +902,22 @@ extension on TranslationsEn {
 			'dashboard.greetingEvening' => 'Good evening',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Your projects and to-dos',
+			'dashboard.youHave' => 'You have',
+			'dashboard.draftsOne' => '1 project in progress',
+			'dashboard.draftsMany' => ({required Object n}) => '${n} projects in progress',
 			'dashboard.newProject' => 'New project',
 			'dashboard.allStatus' => 'Any status',
-			'dashboard.projects' => 'Projects',
+			'dashboard.projects' => 'Your projects',
 			'dashboard.reminders' => 'Reminders',
 			'dashboard.seeAll' => 'See all',
+			'dashboard.continueWhere' => 'Continue where you left off',
+			'dashboard.continueCta' => 'Continue',
+			'dashboard.assignmentsDone' => ({required Object done, required Object total}) => '${done} of ${total} assignments complete',
+			'dashboard.pending' => 'Pending',
+			'dashboard.pendingItem' => ({required Object n}) => '${n} pending assignments',
+			'dashboard.openProject' => 'Open project',
+			'dashboard.resolvePending' => 'Resolve pending',
+			'dashboard.allDone' => 'All caught up ✨',
 			'projectCard.edited' => ({required Object label}) => 'Edited ${label}',
 			'projectCard.editProject' => 'Edit project',
 			'projectModal.newTitle' => 'New project',

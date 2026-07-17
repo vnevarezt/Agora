@@ -353,20 +353,53 @@ class Translations$dashboard$es {
 	/// es: 'Tus proyectos y pendientes'
 	String get subtitle => 'Tus proyectos y pendientes';
 
+	/// es: 'Tienes'
+	String get youHave => 'Tienes';
+
+	/// es: '1 proyecto en curso'
+	String get draftsOne => '1 proyecto en curso';
+
+	/// es: '{n} proyectos en curso'
+	String draftsMany({required Object n}) => '${n} proyectos en curso';
+
 	/// es: 'Nuevo proyecto'
 	String get newProject => 'Nuevo proyecto';
 
 	/// es: 'Todo estado'
 	String get allStatus => 'Todo estado';
 
-	/// es: 'Proyectos'
-	String get projects => 'Proyectos';
+	/// es: 'Tus proyectos'
+	String get projects => 'Tus proyectos';
 
 	/// es: 'Recordatorios'
 	String get reminders => 'Recordatorios';
 
 	/// es: 'Ver todo'
 	String get seeAll => 'Ver todo';
+
+	/// es: 'Continúa donde quedaste'
+	String get continueWhere => 'Continúa donde quedaste';
+
+	/// es: 'Continuar'
+	String get continueCta => 'Continuar';
+
+	/// es: '{done} de {total} asignaciones completas'
+	String assignmentsDone({required Object done, required Object total}) => '${done} de ${total} asignaciones completas';
+
+	/// es: 'Pendientes'
+	String get pending => 'Pendientes';
+
+	/// es: '{n} asignaciones pendientes'
+	String pendingItem({required Object n}) => '${n} asignaciones pendientes';
+
+	/// es: 'Abrir proyecto'
+	String get openProject => 'Abrir proyecto';
+
+	/// es: 'Resolver pendientes'
+	String get resolvePending => 'Resolver pendientes';
+
+	/// es: 'Todo al día ✨'
+	String get allDone => 'Todo al día ✨';
 }
 
 // Path: projectCard
@@ -1605,11 +1638,22 @@ extension on Translations {
 			'dashboard.greetingEvening' => 'Buenas noches',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Tus proyectos y pendientes',
+			'dashboard.youHave' => 'Tienes',
+			'dashboard.draftsOne' => '1 proyecto en curso',
+			'dashboard.draftsMany' => ({required Object n}) => '${n} proyectos en curso',
 			'dashboard.newProject' => 'Nuevo proyecto',
 			'dashboard.allStatus' => 'Todo estado',
-			'dashboard.projects' => 'Proyectos',
+			'dashboard.projects' => 'Tus proyectos',
 			'dashboard.reminders' => 'Recordatorios',
 			'dashboard.seeAll' => 'Ver todo',
+			'dashboard.continueWhere' => 'Continúa donde quedaste',
+			'dashboard.continueCta' => 'Continuar',
+			'dashboard.assignmentsDone' => ({required Object done, required Object total}) => '${done} de ${total} asignaciones completas',
+			'dashboard.pending' => 'Pendientes',
+			'dashboard.pendingItem' => ({required Object n}) => '${n} asignaciones pendientes',
+			'dashboard.openProject' => 'Abrir proyecto',
+			'dashboard.resolvePending' => 'Resolver pendientes',
+			'dashboard.allDone' => 'Todo al día ✨',
 			'projectCard.edited' => ({required Object label}) => 'Editado ${label}',
 			'projectCard.editProject' => 'Editar proyecto',
 			'projectModal.newTitle' => 'Nuevo proyecto',
