@@ -685,6 +685,66 @@ class Translations$settings$es {
 
 	late final Translations$settings$notif$es notif = Translations$settings$notif$es.internal(_root);
 
+	/// es: 'Datos'
+	String get data => 'Datos';
+
+	/// es: 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.'
+	String get dataDesc => 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.';
+
+	/// es: 'Exportar datos'
+	String get exportData => 'Exportar datos';
+
+	/// es: 'Genera un archivo .agora cifrado con contraseña'
+	String get exportDataDesc => 'Genera un archivo .agora cifrado con contraseña';
+
+	/// es: 'Exportar'
+	String get export => 'Exportar';
+
+	/// es: 'Importar datos'
+	String get importData => 'Importar datos';
+
+	/// es: 'Restaura y fusiona desde un archivo .agora'
+	String get importDataDesc => 'Restaura y fusiona desde un archivo .agora';
+
+	/// es: 'Importar'
+	String get import => 'Importar';
+
+	/// es: 'Última copia'
+	String get lastBackup => 'Última copia';
+
+	/// es: 'Sin copias todavía'
+	String get noBackupsYet => 'Sin copias todavía';
+
+	/// es: 'Contraseña de la copia'
+	String get backupPasswordTitle => 'Contraseña de la copia';
+
+	/// es: 'Protege el archivo: sin ella no se puede restaurar.'
+	String get backupPasswordDesc => 'Protege el archivo: sin ella no se puede restaurar.';
+
+	/// es: 'Repite la contraseña'
+	String get backupPasswordRepeat => 'Repite la contraseña';
+
+	/// es: 'Las contraseñas no coinciden'
+	String get backupPasswordMismatch => 'Las contraseñas no coinciden';
+
+	/// es: 'La contraseña con la que se exportó el archivo.'
+	String get backupImportPasswordDesc => 'La contraseña con la que se exportó el archivo.';
+
+	/// es: 'Copia guardada: {path}'
+	String backupSaved({required Object path}) => 'Copia guardada: ${path}';
+
+	/// es: 'Copia compartida'
+	String get backupSharedMsg => 'Copia compartida';
+
+	/// es: 'Restauración completa: {n} registros actualizados'
+	String backupRestored({required Object n}) => 'Restauración completa: ${n} registros actualizados';
+
+	/// es: 'Contraseña incorrecta'
+	String get backupWrongPassword => 'Contraseña incorrecta';
+
+	/// es: 'El archivo no es una copia de Agora válida'
+	String get backupMalformed => 'El archivo no es una copia de Agora válida';
+
 	/// es: 'Sesión'
 	String get session => 'Sesión';
 
@@ -1634,6 +1694,26 @@ extension on Translations {
 			'settings.notif.newNotebooksDesc' => 'Avisar cuando haya un nuevo cuaderno disponible',
 			'settings.notif.exportsTitle' => 'Exportaciones pendientes',
 			'settings.notif.exportsDesc' => 'Recordar exportar el programa antes del fin de semana',
+			'settings.data' => 'Datos',
+			'settings.dataDesc' => 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.',
+			'settings.exportData' => 'Exportar datos',
+			'settings.exportDataDesc' => 'Genera un archivo .agora cifrado con contraseña',
+			'settings.export' => 'Exportar',
+			'settings.importData' => 'Importar datos',
+			'settings.importDataDesc' => 'Restaura y fusiona desde un archivo .agora',
+			'settings.import' => 'Importar',
+			'settings.lastBackup' => 'Última copia',
+			'settings.noBackupsYet' => 'Sin copias todavía',
+			'settings.backupPasswordTitle' => 'Contraseña de la copia',
+			'settings.backupPasswordDesc' => 'Protege el archivo: sin ella no se puede restaurar.',
+			'settings.backupPasswordRepeat' => 'Repite la contraseña',
+			'settings.backupPasswordMismatch' => 'Las contraseñas no coinciden',
+			'settings.backupImportPasswordDesc' => 'La contraseña con la que se exportó el archivo.',
+			'settings.backupSaved' => ({required Object path}) => 'Copia guardada: ${path}',
+			'settings.backupSharedMsg' => 'Copia compartida',
+			'settings.backupRestored' => ({required Object n}) => 'Restauración completa: ${n} registros actualizados',
+			'settings.backupWrongPassword' => 'Contraseña incorrecta',
+			'settings.backupMalformed' => 'El archivo no es una copia de Agora válida',
 			'settings.session' => 'Sesión',
 			'settings.sessionDesc' => 'Estás usando la app en modo local en este dispositivo.',
 			'settings.localMode' => 'Modo local',

@@ -1,10 +1,16 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/backup/backup_crypto.dart';
+import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/app_settings.dart';
 import '../../state/auth_session.dart';
+import '../../state/backup_provider.dart';
+import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
+import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
 import 'account_card.dart';
@@ -66,6 +72,8 @@ class ApplicationTab extends ConsumerStatefulWidget {
 }
 
 class _ApplicationTabState extends ConsumerState<ApplicationTab> {
+  bool _backupBusy = false;
+
   @override
   Widget build(BuildContext context) {
     // SecurityCard is local-mode only: in cloud mode there is no local
@@ -76,8 +84,188 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     return SettingsColumns(
       left: [_appearance(), _general(), _notificationsCard()],
       right: [
+        _datos(),
         if (localMode) const SecurityCard(),
         const AccountCard(),
+      ],
+    );
+  }
+
+  /// Password prompt for export (with confirmation) / import.
+  Future<String?> _askBackupPassword({required bool confirm}) {
+    final tr = context.t;
+    var password = '';
+    var repeat = '';
+    String? error;
+    return showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(tr.settings.backupPasswordTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                confirm
+                    ? tr.settings.backupPasswordDesc
+                    : tr.settings.backupImportPasswordDesc,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                autofocus: true,
+                obscureText: true,
+                onChanged: (v) => password = v,
+              ),
+              if (confirm) ...[
+                const SizedBox(height: 10),
+                TextField(
+                  obscureText: true,
+                  decoration: InputDecoration(
+                      hintText: tr.settings.backupPasswordRepeat),
+                  onChanged: (v) => repeat = v,
+                ),
+              ],
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    error!,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: Text(tr.common.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                if (password.isEmpty) return;
+                if (confirm && password != repeat) {
+                  setState(
+                      () => error = tr.settings.backupPasswordMismatch);
+                  return;
+                }
+                Navigator.of(context).pop(password);
+              },
+              child: Text(
+                  confirm ? tr.settings.export : tr.settings.import),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportBackup() async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    final password = await _askBackupPassword(confirm: true);
+    if (password == null || password.isEmpty) return;
+    setState(() => _backupBusy = true);
+    try {
+      final bytes = await ref.read(backupServiceProvider).export(password);
+      final date =
+          DateTime.now().toIso8601String().substring(0, 10);
+      final outcome = await ref.read(fileSaverProvider).save(
+            bytes: bytes,
+            suggestedName: 'agora-$date.agora',
+            extension: 'agora',
+            mimeType: 'application/octet-stream',
+            typeLabel: 'Agora',
+          );
+      switch (outcome) {
+        case SaveDone(:final path):
+          ref.read(appSettingsProvider.notifier).markBackupNow();
+          messenger.showSnackBar(
+              SnackBar(content: Text(tr.settings.backupSaved(path: path))));
+        case SaveShared():
+          ref.read(appSettingsProvider.notifier).markBackupNow();
+          messenger.showSnackBar(
+              SnackBar(content: Text(tr.settings.backupSharedMsg)));
+        case SaveCanceled():
+          break;
+      }
+    } catch (e) {
+      messenger
+          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+    } finally {
+      if (mounted) setState(() => _backupBusy = false);
+    }
+  }
+
+  Future<void> _importBackup() async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    final file = await openFile(acceptedTypeGroups: [
+      const XTypeGroup(label: 'Agora', extensions: ['agora']),
+    ]);
+    if (file == null || !mounted) return;
+    final password = await _askBackupPassword(confirm: false);
+    if (password == null || password.isEmpty) return;
+    setState(() => _backupBusy = true);
+    try {
+      final bytes = await file.readAsBytes();
+      final applied =
+          await ref.read(backupServiceProvider).import(bytes, password);
+      messenger.showSnackBar(
+          SnackBar(content: Text(tr.settings.backupRestored(n: applied))));
+    } on WrongBackupPasswordException {
+      messenger.showSnackBar(
+          SnackBar(content: Text(tr.settings.backupWrongPassword)));
+    } on MalformedBackupException {
+      messenger.showSnackBar(
+          SnackBar(content: Text(tr.settings.backupMalformed)));
+    } catch (e) {
+      messenger
+          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+    } finally {
+      if (mounted) setState(() => _backupBusy = false);
+    }
+  }
+
+  Widget _datos() {
+    final tr = context.t;
+    final last = ref.watch(appSettingsProvider).lastBackupAt?.toLocal();
+    final lastLabel = last == null
+        ? tr.settings.noBackupsYet
+        : '${last.day.toString().padLeft(2, '0')}/'
+            '${last.month.toString().padLeft(2, '0')}/${last.year} '
+            '${last.hour.toString().padLeft(2, '0')}:'
+            '${last.minute.toString().padLeft(2, '0')}';
+    return SettingsCard(
+      title: tr.settings.data,
+      desc: tr.settings.dataDesc,
+      children: [
+        SettingRow(
+          first: true,
+          title: tr.settings.exportData,
+          subtitle: tr.settings.exportDataDesc,
+          trailing: AppButton(
+            variant: AppButtonVariant.ghost,
+            icon: Icons.file_upload_outlined,
+            label: tr.settings.export,
+            busy: _backupBusy,
+            onPressed: _backupBusy ? null : _exportBackup,
+          ),
+        ),
+        SettingRow(
+          title: tr.settings.importData,
+          subtitle: tr.settings.importDataDesc,
+          trailing: AppButton(
+            variant: AppButtonVariant.ghost,
+            icon: Icons.file_open_outlined,
+            label: tr.settings.import,
+            onPressed: _backupBusy ? null : _importBackup,
+          ),
+        ),
+        SettingRow(title: tr.settings.lastBackup, subtitle: lastLabel),
       ],
     );
   }

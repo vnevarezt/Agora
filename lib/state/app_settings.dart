@@ -15,6 +15,7 @@ const _timeFormat24Key = 'time_format_24h';
 const _weekStartMondayKey = 'week_start_monday';
 const _pdfNameFormatKey = 'pdf_name_format';
 const _notifPrefix = 'notif_';
+const _lastBackupKey = 'last_backup_at';
 
 SharedPreferences? _prefs;
 
@@ -58,11 +59,15 @@ class AppSettings {
   final PdfNameFormat pdfNameFormat;
   final Map<NotifPref, bool> notifications;
 
+  /// When the last backup was exported on THIS device (null = never).
+  final DateTime? lastBackupAt;
+
   const AppSettings({
     this.timeFormat24 = true,
     this.weekStartMonday = true,
     this.pdfNameFormat = PdfNameFormat.full,
     this.notifications = _notifDefaults,
+    this.lastBackupAt,
   });
 
   AppSettings copyWith({
@@ -70,12 +75,14 @@ class AppSettings {
     bool? weekStartMonday,
     PdfNameFormat? pdfNameFormat,
     Map<NotifPref, bool>? notifications,
+    DateTime? lastBackupAt,
   }) {
     return AppSettings(
       timeFormat24: timeFormat24 ?? this.timeFormat24,
       weekStartMonday: weekStartMonday ?? this.weekStartMonday,
       pdfNameFormat: pdfNameFormat ?? this.pdfNameFormat,
       notifications: notifications ?? this.notifications,
+      lastBackupAt: lastBackupAt ?? this.lastBackupAt,
     );
   }
 }
@@ -99,7 +106,14 @@ class AppSettingsController extends Notifier<AppSettings> {
         for (final n in NotifPref.values)
           n: p.getBool('$_notifPrefix${n.name}') ?? _notifDefaults[n]!,
       },
+      lastBackupAt: DateTime.tryParse(p.getString(_lastBackupKey) ?? ''),
     );
+  }
+
+  void markBackupNow() {
+    final now = DateTime.now().toUtc();
+    state = state.copyWith(lastBackupAt: now);
+    _prefs?.setString(_lastBackupKey, now.toIso8601String());
   }
 
   void setTimeFormat24(bool v) {
