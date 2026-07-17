@@ -34,12 +34,14 @@ class _ProgramShellState extends ConsumerState<ProgramShell> {
   void initState() {
     super.initState();
     final project = widget.project;
-    if (project != null) _opener.open(project);
+    // Providers must not change during widget lifecycles: defer past the
+    // current build (open/close flip editorProjectProvider).
+    if (project != null) Future.microtask(() => _opener.open(project));
   }
 
   @override
   void dispose() {
-    if (widget.project != null) _opener.close();
+    if (widget.project != null) Future.microtask(_opener.close);
     super.dispose();
   }
 
