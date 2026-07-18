@@ -1,0 +1,14 @@
+{
+  "name": "agora-rules-test",
+  "private": true,
+  "description": "Firestore security-rules tests (phase 4b). Run inside the emulator: firebase emulators:exec --only firestore 'npm --prefix tool/rules-test test'",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --timeout 20000 test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "firebase": "^12.0.0",
+    "mocha": "^11.0.0"
+  }
+}

@@ -1,0 +1,176 @@
+rules_version = '2';
+
+// Agora phase 4b (docs/DATA_ARCHITECTURE.md §4-§5). The server stores E2E
+// blobs plus routing metadata; these rules enforce membership + capability
+// gating per entity kind. Content-level enforcement happens client-side at
+// decrypt/apply time — blobs are opaque here by design.
+//
+// No Cloud Functions (Spark plan): invite redemption is a client batch
+// [create member, delete invite] proven atomic single-use via
+// exists()/existsAfter().
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    function memberPath(cid) {
+      return /databases/$(database)/documents/congregations/$(cid)/members/$(request.auth.uid);
+    }
+
+    // exists()+get() of the same doc are cached within one evaluation:
+    // membership checks bill ~1 read per operation.
+    function isMember(cid) {
+      return signedIn()
+        && exists(memberPath(cid))
+        && get(memberPath(cid)).data.status == 'active';
+    }
+
+    function caps(cid) { return get(memberPath(cid)).data.capabilities; }
+
+    function isAdmin(cid) { return isMember(cid) && caps(cid).admin == true; }
+
+    function invitePath(cid, id) {
+      return /databases/$(database)/documents/congregations/$(cid)/invites/$(id);
+    }
+
+    // ---- users: sync identity keys, strictly owner-only ------------------
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ---- membership discovery ("my congregations") -----------------------
+    // Provable for: collectionGroup('members').where('uid', '==', myUid).
+    // The nested members match below additionally grants intra-congregation
+    // reads; rules across matches are OR'd.
+    match /{path=**}/members/{memberUid} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /congregations/{cid} {
+      // Bootstrap: any signed-in user creates their own space (the founder
+      // member doc must ride in the same batch, see members create).
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['createdBy', 'createdAt', 'keyVersion'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.keyVersion == 1;
+      allow read: if isMember(cid);
+      // Rotation bumps keyVersion; nothing else ever changes.
+      allow update: if isAdmin(cid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['keyVersion'])
+        && request.resource.data.keyVersion is int
+        && request.resource.data.keyVersion >= resource.data.keyVersion;
+      // Recursive deletes need tooling; deferred past 4b.
+      allow delete: if false;
+
+      // ---- members -------------------------------------------------------
+      match /members/{uid} {
+        allow get, list: if isMember(cid);
+
+        // Create = founder bootstrap OR invite redemption. Self-service
+        // only: you always create YOUR OWN member doc.
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.status == 'active'
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.keys().hasAll(['uid', 'pubKey', 'capabilities', 'wrappedCcks', 'addedBy', 'status', 'createdAt'])
+          && (
+            (
+              // Founder: the same batch (or an earlier one) made this user
+              // the congregation's creator, with full capabilities.
+              request.resource.data.inviteId == null
+              && getAfter(/databases/$(database)/documents/congregations/$(cid)).data.createdBy == request.auth.uid
+              && request.resource.data.capabilities.admin == true
+              && request.resource.data.addedBy == request.auth.uid
+            ) || (
+              // Redemption: the batch must also DELETE the invite —
+              // exists() sees pre-batch state, existsAfter() post-batch
+              // state, which makes single-use atomic without Functions.
+              request.resource.data.inviteId is string
+              && exists(invitePath(cid, request.resource.data.inviteId))
+              && !existsAfter(invitePath(cid, request.resource.data.inviteId))
+              && get(invitePath(cid, request.resource.data.inviteId)).data.expiresAt > request.time
+              && request.resource.data.capabilities == get(invitePath(cid, request.resource.data.inviteId)).data.capabilities
+              && request.resource.data.addedBy == get(invitePath(cid, request.resource.data.inviteId)).data.createdBy
+            )
+          );
+
+        // Admin edits capabilities/status and APPENDS wrappedCcks versions
+        // (rotation re-wraps for the survivors). Identity fields never move.
+        allow update: if isAdmin(cid)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.pubKey == resource.data.pubKey
+          && request.resource.data.inviteId == resource.data.inviteId
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.wrappedCcks.keys().hasAll(resource.data.wrappedCcks.keys());
+
+        // Revocation (admin) or leaving (self). "Last admin" is guarded
+        // client-side only — rules can't aggregate.
+        allow delete: if isAdmin(cid) || (signedIn() && request.auth.uid == uid);
+      }
+
+      // ---- invites -------------------------------------------------------
+      match /invites/{tokenId} {
+        // get-by-id only: the random tokenId travels in the shared code and
+        // IS the read credential. Enumeration (list) is admin-only.
+        allow get: if signedIn();
+        allow list: if isAdmin(cid);
+        allow create: if isAdmin(cid)
+          && request.resource.data.keys().hasOnly(['capabilities', 'wrappedKeyring', 'createdBy', 'createdAt', 'expiresAt'])
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.expiresAt is timestamp
+          && request.resource.data.expiresAt > request.time;
+        // Cancel (admin) or consume (the redeemer whose same-batch member
+        // doc references this token).
+        allow delete: if isAdmin(cid)
+          || (signedIn() && getAfter(memberPath(cid)).data.inviteId == tokenId);
+        allow update: if false;
+      }
+
+      // ---- items: the synced entities (E2E blobs) ------------------------
+      match /items/{entityId} {
+        // Also proves the pull query (where serverTs > cursor orderBy
+        // serverTs): the condition never touches resource.data.
+        allow read: if isMember(cid);
+
+        allow create, update: if isMember(cid)
+          && request.resource.data.keys().hasOnly(['entity', 'programTypeId', 'hlc', 'srcDevice', 'keyVersion', 'blob', 'serverTs'])
+          && request.resource.data.entity is string
+          && request.resource.data.hlc is string
+          && request.resource.data.srcDevice is string
+          && request.resource.data.keyVersion is int
+          && request.resource.data.blob is string
+          && request.resource.data.blob.size() < 900000
+          // The serverTimestamp() sentinel resolves to request.time during
+          // evaluation: this forces transports to use it.
+          && request.resource.data.serverTs == request.time
+          // Kind/type are immutable on update: rewriting a program doc as
+          // entity 'person' would launder the people capability.
+          && (resource == null
+              || (request.resource.data.entity == resource.data.entity
+                  && request.resource.data.programTypeId == resource.data.programTypeId))
+          && (
+            (
+              request.resource.data.entity in ['person', 'personAbsence']
+              && (caps(cid).admin == true || caps(cid).people == true)
+            ) || (
+              request.resource.data.entity in ['program', 'assignment']
+              && request.resource.data.programTypeId is string
+              && (caps(cid).admin == true
+                  || caps(cid).editTypes.hasAny(['*', request.resource.data.programTypeId]))
+            ) || (
+              request.resource.data.entity == 'project'
+              && (caps(cid).admin == true || caps(cid).editTypes.size() > 0)
+            ) || (
+              request.resource.data.entity == 'congregation'
+              && caps(cid).admin == true
+            )
+          );
+
+        // Deleting = E2E tombstone inside the blob; docs never disappear.
+        allow delete: if false;
+      }
+    }
+  }
+}

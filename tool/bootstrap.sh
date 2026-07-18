@@ -21,6 +21,9 @@ copy_if_missing lib/firebase_options.example.dart lib/firebase_options.dart
 copy_if_missing lib/cloud_secrets.example.dart lib/cloud_secrets.dart
 copy_if_missing ios/Flutter/FirebaseSecrets.xcconfig.example ios/Flutter/FirebaseSecrets.xcconfig
 copy_if_missing macos/Runner/Configs/FirebaseSecrets.xcconfig.example macos/Runner/Configs/FirebaseSecrets.xcconfig
+# Firestore rules deploy + emulator config (rules themselves are committed).
+copy_if_missing firebase.json.example firebase.json
+copy_if_missing .firebaserc.example .firebaserc
 
 echo
 echo "Done. The app runs 100% locally with these placeholders."
