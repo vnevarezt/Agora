@@ -6,6 +6,16 @@ import 'entity_codec.dart';
 import 'sync_scribe.dart';
 import 'sync_transport.dart';
 
+/// One [SyncEngine.pullOnce] page. [fetched] drives the drain loop (a full
+/// page means there may be more); [applied] is what actually changed rows
+/// (echoes and LWW losers fetch but don't apply).
+class PullResult {
+  const PullResult({required this.fetched, required this.applied});
+
+  final int fetched;
+  final int applied;
+}
+
 /// Push/pull engine (phase 4a, docs/PHASE4_CLOUD_SYNC.md). Cloud-agnostic:
 /// everything network-shaped lives behind [SyncTransport]; everything
 /// key-shaped behind [keyringFor] (4b plugs the real key storage in).
@@ -78,6 +88,7 @@ class SyncEngine {
         ItemDoc(
           entityId: entityId,
           entity: entityName,
+          programTypeId: await _codec.programTypeOf(entity, entityId),
           hlc: hlc,
           srcDevice: deviceId,
           keyVersion: keyring.currentVersion,
@@ -100,18 +111,19 @@ class SyncEngine {
     SyncEntity.assignment,
   ];
 
-  /// Pulls one congregation since its cursor and LWW-applies. Returns the
-  /// number of rows applied.
-  Future<int> pullOnce(String congregationId) async {
+  /// Pulls one page for a congregation since its cursor and LWW-applies.
+  /// Callers drain by looping while `fetched > 0` (the transport may page).
+  Future<PullResult> pullOnce(String congregationId) async {
+    const empty = PullResult(fetched: 0, applied: 0);
     final keyring = await keyringFor(congregationId);
-    if (keyring == null) return 0;
+    if (keyring == null) return empty;
 
     final state = await (_db.select(_db.syncState)
           ..where((t) => t.congregationId.equals(congregationId)))
         .getSingleOrNull();
     final docs =
         await _transport.pullSince(congregationId, state?.pullCursor);
-    if (docs.isEmpty) return 0;
+    if (docs.isEmpty) return empty;
 
     var applied = 0;
     await _db.transaction(() async {
@@ -141,6 +153,6 @@ class SyncEngine {
             ),
           );
     });
-    return applied;
+    return PullResult(fetched: docs.length, applied: applied);
   }
 }

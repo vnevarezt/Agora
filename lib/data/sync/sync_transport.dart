@@ -9,6 +9,7 @@ class ItemDoc {
     required this.srcDevice,
     required this.keyVersion,
     required this.blob,
+    this.programTypeId,
     this.serverTs,
   });
 
@@ -17,6 +18,12 @@ class ItemDoc {
   /// Entity kind name (SyncEntity.name) — clear metadata so rules can gate
   /// writes per kind (capability roles, DATA_ARCHITECTURE.md §5).
   final String entity;
+
+  /// Program type of program/assignment docs (null for the rest) — clear
+  /// metadata, like [entity], so rules can gate `edit:<programTypeId>`
+  /// capabilities per write. Deliberately NOT secret: it only says WHICH
+  /// meeting a blob belongs to, never its content.
+  final String? programTypeId;
 
   /// Conflict clock of the row state inside [blob].
   final String hlc;
@@ -40,6 +47,7 @@ class ItemDoc {
         srcDevice: srcDevice,
         keyVersion: keyVersion,
         blob: blob,
+        programTypeId: programTypeId,
         serverTs: ts,
       );
 }

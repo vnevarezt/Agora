@@ -286,6 +286,31 @@ class EntityCodec {
     }
   }
 
+  /// Program type of program/assignment rows (clear ItemDoc metadata so
+  /// rules can gate `edit:<type>` capabilities); null for other kinds or a
+  /// broken chain.
+  Future<String?> programTypeOf(SyncEntity entity, String id) async {
+    switch (entity) {
+      case SyncEntity.program:
+        final r = await (_db.select(_db.programs)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        return r?.programTypeId;
+      case SyncEntity.assignment:
+        final r = await (_db.select(_db.assignmentRows)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        return r == null
+            ? null
+            : programTypeOf(SyncEntity.program, r.programId);
+      case SyncEntity.congregation:
+      case SyncEntity.person:
+      case SyncEntity.personAbsence:
+      case SyncEntity.project:
+        return null;
+    }
+  }
+
   /// The row's current HLC stamp (LWW comparand); null = never stamped,
   /// which loses against any remote stamp.
   Future<String?> hlcOf(SyncEntity entity, String id) async {

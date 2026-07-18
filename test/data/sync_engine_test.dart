@@ -118,9 +118,15 @@ void main() {
       expect(doc.blob.contains('Ana'), false);
       expect(doc.blob.contains('Norte'), false);
     }
+    // programTypeId IS clear metadata (rules gate edit:<type> with it), but
+    // only on program/assignment docs.
+    for (final doc in transport.docs[cong.id]!.values) {
+      final typed = doc.entity == 'program' || doc.entity == 'assignment';
+      expect(doc.programTypeId, typed ? 'mwb-s140' : isNull);
+    }
 
     // --- Device B pulls everything.
-    expect(await b.engine.pullOnce(cong.id), 5);
+    expect((await b.engine.pullOnce(cong.id)).applied, 5);
     final bPerson =
         (await b.container.read(peopleRepositoryProvider).all()).single;
     expect(bPerson.displayName, 'Ana');
@@ -141,7 +147,7 @@ void main() {
     expect(await b.outboxCount(), 0);
 
     // --- Echo suppression: A pulls its own writes back, applies nothing.
-    expect(await a.engine.pullOnce(cong.id), 0);
+    expect((await a.engine.pullOnce(cong.id)).applied, 0);
 
     // --- LWW conflict: B renames first, A renames later → A wins.
     await b.container
@@ -177,8 +183,10 @@ void main() {
     await b.engine.pullOnce(cong.id);
     expect(await b.container.read(peopleRepositoryProvider).all(), isEmpty);
 
-    // --- Cursors: a fresh pull with nothing new applies nothing.
-    expect(await b.engine.pullOnce(cong.id), 0);
+    // --- Cursors: a fresh pull with nothing new fetches nothing.
+    final noop = await b.engine.pullOnce(cong.id);
+    expect(noop.fetched, 0);
+    expect(noop.applied, 0);
   });
 
   test('coalescing: many edits to one row push one doc', () async {
@@ -193,7 +201,7 @@ void main() {
 
     final pushed = await a.engine.pushOnce();
     expect(pushed, 2); // congregation + ONE person doc
-    expect(await b.engine.pullOnce(cong.id), 2);
+    expect((await b.engine.pullOnce(cong.id)).applied, 2);
     expect(
       (await b.container.read(peopleRepositoryProvider).all())
           .single
