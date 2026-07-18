@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'i18n/strings.g.dart';
 import 'state/app_settings.dart';
 import 'state/mwb_sync.dart';
+import 'state/sync_controller.dart';
 import 'ui/auth/auth_gate.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
@@ -31,9 +32,11 @@ class JwProgramApp extends ConsumerWidget {
   }
 }
 
-/// Kicks off the background notebook sync on startup without blocking or
-/// rebuilding the [MaterialApp]. The sync runs once and only hits the network
-/// when the cache lacks coverage for the next ~2 months.
+/// Kicks off the background syncs on startup without blocking or rebuilding
+/// the [MaterialApp]: the notebook catalog sync (runs once, network only when
+/// the cache lacks the next ~2 months) and the cloud sync engine (arms its
+/// push/pull triggers once the cloud is configured, signed in and keys are
+/// ready — otherwise it stays disabled).
 class _SyncBootstrap extends ConsumerWidget {
   const _SyncBootstrap({required this.child});
 
@@ -42,6 +45,7 @@ class _SyncBootstrap extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(mwbSyncProvider);
+    ref.watch(syncControllerProvider);
     return child;
   }
 }

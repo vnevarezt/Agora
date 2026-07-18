@@ -8,7 +8,11 @@ import '../../data/config_options.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/congregation_settings.dart';
+import '../../state/cloud_auth.dart' show cloudUserProvider;
 import '../../state/dashboard_provider.dart';
+import '../../state/sync_controller.dart';
+import '../../state/sync_keys.dart';
+import '../../state/sync_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -40,6 +44,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   String _weekendDay = daysOfWeek[6]; // Sunday
   String _weekendTime = '10:00';
   bool _auxRoom = false;
+  bool _enablingCloud = false;
 
   Timer? _saveDebounce;
 
@@ -302,10 +307,71 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   Widget _usersCard() {
     final t = context.tokens;
     final tr = context.t;
+    final cid = _congregationId;
+    // Cloud state for THIS congregation. The full members list + invites land
+    // in 4b-2; 4b-1 offers the founder "enable in cloud" action.
+    final signedIn = ref.watch(cloudUserProvider).value != null;
+    final keysReady = ref.watch(syncKeysProvider) is SyncKeysReady;
+    final synced =
+        cid != null && ref.watch(isCongregationSyncedProvider(cid));
+
     return SettingsCard(
       title: tr.congregation.usersTitle,
       desc: tr.congregation.usersDesc,
       children: [
+        if (synced)
+          _CloudBadge(label: tr.cloudSync.syncedBadge, synced: true)
+        else ...[
+          _CloudBadge(label: tr.cloudSync.localBadge, synced: false),
+          const SizedBox(height: 10),
+          Text(
+            tr.cloudSync.enableDesc,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+              color: t.textMute,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppButton(
+              variant: AppButtonVariant.ghost,
+              icon: Icons.cloud_upload_outlined,
+              label: tr.cloudSync.enable,
+              busy: _enablingCloud,
+              onPressed: (!signedIn || !keysReady || cid == null || _enablingCloud)
+                  ? null
+                  : () => _enableCloud(cid),
+            ),
+          ),
+          if (signedIn && !keysReady)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                tr.cloudSync.enableSetupKeysFirst,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: t.textMute,
+                ),
+              ),
+            )
+          else if (!signedIn)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                tr.cloudSync.enableSignInFirst,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: t.textMute,
+                ),
+              ),
+            ),
+        ],
+        const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Text(
@@ -324,7 +390,60 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             variant: AppButtonVariant.ghost,
             icon: Icons.person_add_alt,
             label: tr.congregation.inviteUser,
-            onPressed: () => showInviteUser(context),
+            onPressed: synced ? () => showInviteUser(context) : null,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _enableCloud(String cid) async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _enablingCloud = true);
+    try {
+      final ok = await ref.read(enableCongregationSyncProvider)(cid);
+      if (!mounted) return;
+      if (ok) {
+        // Push the freshly seeded outbox now instead of waiting for the tick.
+        unawaited(ref.read(syncControllerProvider.notifier).syncNow());
+        messenger.showSnackBar(SnackBar(content: Text(tr.cloudSync.enabled)));
+      }
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+            SnackBar(content: Text(tr.cloudSync.unknownError)));
+      }
+    } finally {
+      if (mounted) setState(() => _enablingCloud = false);
+    }
+  }
+}
+
+/// Small pill telling whether a congregation lives in the cloud or only on
+/// this device.
+class _CloudBadge extends StatelessWidget {
+  const _CloudBadge({required this.label, required this.synced});
+
+  final String label;
+  final bool synced;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final color = synced ? t.accent : t.textMute;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(synced ? Icons.cloud_done_outlined : Icons.cloud_off_outlined,
+            size: 16, color: color),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: color,
           ),
         ),
       ],

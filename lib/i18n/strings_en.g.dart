@@ -43,6 +43,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$portada$en portada = _Translations$portada$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$security$en security = _Translations$security$en._(_root);
+	@override late final _Translations$cloudSync$en cloudSync = _Translations$cloudSync$en._(_root);
 	@override late final _Translations$account$en account = _Translations$account$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
 	@override late final _Translations$userMenu$en userMenu = _Translations$userMenu$en._(_root);
@@ -142,6 +143,58 @@ class _Translations$security$en extends Translations$security$es {
 	@override String get deviceUnlockPrompt => 'Confirm your identity to enable device unlock.';
 	@override String get unlockPrompt => 'Unlock your Agora data.';
 	@override String get deviceUnlockKeyMissing => 'Device unlock was turned off; sign in with your password and enable it again.';
+}
+
+// Path: cloudSync
+class _Translations$cloudSync$en extends Translations$cloudSync$es {
+	_Translations$cloudSync$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Cloud sync';
+	@override String get desc => 'Share and sync your end-to-end encrypted data across devices.';
+	@override String get signedOut => 'Sign in to the cloud to enable syncing.';
+	@override String get setupTitle => 'Create your sync passphrase';
+	@override String get setupDesc => 'It encrypts your data end-to-end. You\'ll need it on every new device. If you forget it you\'ll have to be re-invited — we can\'t recover it.';
+	@override String get unlockTitle => 'Enter your sync passphrase';
+	@override String get unlockDesc => 'This device needs your passphrase to decrypt your data.';
+	@override String get passphrase => 'Sync passphrase';
+	@override String get passphraseHint => 'At least 8 characters';
+	@override String get confirmPassphrase => 'Confirm passphrase';
+	@override String get create => 'Enable sync';
+	@override String get unlock => 'Unlock';
+	@override String get change => 'Change passphrase';
+	@override String get changePassphrase => 'Change sync passphrase';
+	@override String get currentPassphrase => 'Current passphrase';
+	@override String get newPassphrase => 'New passphrase';
+	@override String get tooShort => 'The passphrase must be at least 8 characters.';
+	@override String get mismatch => 'The passphrases don\'t match.';
+	@override String get wrongPassphrase => 'Wrong passphrase.';
+	@override String get unknownError => 'Couldn\'t complete. Please try again.';
+	@override String get ready => 'Sync is on';
+	@override String get readyDesc => 'Your data syncs encrypted.';
+	@override String get statusIdle => 'Up to date';
+	@override String get statusSyncing => 'Syncing…';
+	@override String get statusOffline => 'Offline';
+	@override String get statusError => 'Sync error';
+	@override String lastSync({required Object when}) => 'Last sync: ${when}';
+	@override String get neverSynced => 'Not synced yet';
+	@override String pending({required Object n}) => '${n} pending changes';
+	@override String get syncNow => 'Sync now';
+	@override String get otherAccount => 'This data belongs to another account on this device. Sync is disabled.';
+	@override String get errorPermission => 'You no longer have access to a congregation; your local data is kept.';
+	@override String get errorOffline => 'Offline; will retry automatically.';
+	@override String get errorUnknown => 'Something went wrong while syncing.';
+	@override String get enableTitle => 'Sync this congregation';
+	@override String get enableDesc => 'Upload this congregation encrypted to the cloud to share and sync it.';
+	@override String get enable => 'Enable in cloud';
+	@override String get enabling => 'Enabling…';
+	@override String get enabled => 'Sync enabled.';
+	@override String get enableSignInFirst => 'Sign in to the cloud to enable syncing.';
+	@override String get enableSetupKeysFirst => 'Create your sync passphrase in the Sync card.';
+	@override String get syncedBadge => 'In the cloud';
+	@override String get localBadge => 'This device only';
 }
 
 // Path: account
@@ -904,6 +957,49 @@ extension on TranslationsEn {
 			'security.deviceUnlockPrompt' => 'Confirm your identity to enable device unlock.',
 			'security.unlockPrompt' => 'Unlock your Agora data.',
 			'security.deviceUnlockKeyMissing' => 'Device unlock was turned off; sign in with your password and enable it again.',
+			'cloudSync.title' => 'Cloud sync',
+			'cloudSync.desc' => 'Share and sync your end-to-end encrypted data across devices.',
+			'cloudSync.signedOut' => 'Sign in to the cloud to enable syncing.',
+			'cloudSync.setupTitle' => 'Create your sync passphrase',
+			'cloudSync.setupDesc' => 'It encrypts your data end-to-end. You\'ll need it on every new device. If you forget it you\'ll have to be re-invited — we can\'t recover it.',
+			'cloudSync.unlockTitle' => 'Enter your sync passphrase',
+			'cloudSync.unlockDesc' => 'This device needs your passphrase to decrypt your data.',
+			'cloudSync.passphrase' => 'Sync passphrase',
+			'cloudSync.passphraseHint' => 'At least 8 characters',
+			'cloudSync.confirmPassphrase' => 'Confirm passphrase',
+			'cloudSync.create' => 'Enable sync',
+			'cloudSync.unlock' => 'Unlock',
+			'cloudSync.change' => 'Change passphrase',
+			'cloudSync.changePassphrase' => 'Change sync passphrase',
+			'cloudSync.currentPassphrase' => 'Current passphrase',
+			'cloudSync.newPassphrase' => 'New passphrase',
+			'cloudSync.tooShort' => 'The passphrase must be at least 8 characters.',
+			'cloudSync.mismatch' => 'The passphrases don\'t match.',
+			'cloudSync.wrongPassphrase' => 'Wrong passphrase.',
+			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
+			'cloudSync.ready' => 'Sync is on',
+			'cloudSync.readyDesc' => 'Your data syncs encrypted.',
+			'cloudSync.statusIdle' => 'Up to date',
+			'cloudSync.statusSyncing' => 'Syncing…',
+			'cloudSync.statusOffline' => 'Offline',
+			'cloudSync.statusError' => 'Sync error',
+			'cloudSync.lastSync' => ({required Object when}) => 'Last sync: ${when}',
+			'cloudSync.neverSynced' => 'Not synced yet',
+			'cloudSync.pending' => ({required Object n}) => '${n} pending changes',
+			'cloudSync.syncNow' => 'Sync now',
+			'cloudSync.otherAccount' => 'This data belongs to another account on this device. Sync is disabled.',
+			'cloudSync.errorPermission' => 'You no longer have access to a congregation; your local data is kept.',
+			'cloudSync.errorOffline' => 'Offline; will retry automatically.',
+			'cloudSync.errorUnknown' => 'Something went wrong while syncing.',
+			'cloudSync.enableTitle' => 'Sync this congregation',
+			'cloudSync.enableDesc' => 'Upload this congregation encrypted to the cloud to share and sync it.',
+			'cloudSync.enable' => 'Enable in cloud',
+			'cloudSync.enabling' => 'Enabling…',
+			'cloudSync.enabled' => 'Sync enabled.',
+			'cloudSync.enableSignInFirst' => 'Sign in to the cloud to enable syncing.',
+			'cloudSync.enableSetupKeysFirst' => 'Create your sync passphrase in the Sync card.',
+			'cloudSync.syncedBadge' => 'In the cloud',
+			'cloudSync.localBadge' => 'This device only',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',
