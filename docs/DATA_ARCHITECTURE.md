@@ -1,7 +1,11 @@
 # Data & Sync Architecture
 
 Design document for Agora's persistence and synchronization layer. Status:
-**proposal under discussion** — no code implements this yet.
+**largely implemented** — phases 1–3 and phase 4a/4b-1 are built (offline
+DB, HLC/outbox, the E2E sync engine and the Firestore cloud with security
+rules, sync keys and single-device→multi-device sync). Remaining: the
+sharing UI (invites/members/capabilities editor, 4b-2) and realtime/status
+polish (4b-3). See `docs/PHASE4_CLOUD_SYNC.md` for what's live.
 
 Goals, in the user's words: offline-first even in cloud mode (data always
 lives locally, sync when connectivity returns), multiple congregations,

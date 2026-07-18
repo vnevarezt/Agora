@@ -99,10 +99,43 @@ Pick your project; the CLI registers one app per platform and **overwrites
   never unlocks the local database, and signing out of the cloud never locks
   it.
 
+## 5. Firestore (phase 4b: cloud sync)
+
+Cloud SYNC (not just auth) needs Firestore + the security rules deployed.
+The rules are the deployed security model, so **`firestore.rules` and
+`firestore.indexes.json` ARE committed** (they contain no secrets). Only
+`firebase.json` / `.firebaserc` stay gitignored (per-dev project ids);
+`bootstrap.sh` seeds them from the committed `.example` files.
+
+1. Firebase console → **Firestore Database** → *Create database* → Native
+   mode, region `nam5` (or your closest). Free (Spark) plan is enough — the
+   whole design avoids Cloud Functions.
+2. Point the CLI at your project: edit `.firebaserc` (created by bootstrap)
+   or pass `--project <id>`.
+3. Deploy the rules + the one collection-group index:
+   ```sh
+   firebase deploy --only firestore:rules,firestore:indexes --project <id>
+   ```
+4. In the app: Settings → *Cloud sync* → create your **sync passphrase**
+   (encrypts everything E2E; you'll need it on each new device — it is NOT
+   recoverable). Then Congregation tab → *Activar en la nube* to upload a
+   congregation. A second device on the SAME account, same passphrase, pulls
+   it automatically.
+
+### Testing the rules locally (no billing)
+
+```sh
+# Java is required (the emulator is a JAR). Android Studio ships one:
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+firebase emulators:exec --only firestore 'npm --prefix tool/rules-test test'
+```
+
 ## Never commit
 
-Everything the bootstrap creates is gitignored. Before pushing, this must
-print **only `.example` files**:
+Everything the bootstrap creates is gitignored (config with per-dev ids and
+secrets). `firestore.rules` / `firestore.indexes.json` are the exception —
+they are committed on purpose. Before pushing, this must print **only
+`.example` files**:
 
 ```sh
 git ls-files | grep -iE 'google-services|GoogleService|firebase_options|cloud_secrets|FirebaseSecrets'
