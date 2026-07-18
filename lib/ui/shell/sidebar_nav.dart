@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/reminder.dart';
+import '../../state/auth_session.dart';
+import '../../state/cloud_auth.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/ui_state.dart';
 import '../theme/tokens.dart';
+import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import '../widgets/motion.dart';
 
@@ -117,11 +120,7 @@ class Sidebar extends ConsumerWidget {
             const SizedBox(height: 2),
           ],
           const Spacer(),
-          _UserCard(
-            name: user.name,
-            role: user.role,
-            compact: compact,
-          ),
+          _UserCard(user: user, compact: compact),
         ],
       ),
     );
@@ -291,65 +290,230 @@ class _NavItem extends ConsumerWidget {
       );
 }
 
-class _UserCard extends StatelessWidget {
-  const _UserCard({
-    required this.name,
-    required this.role,
-    required this.compact,
-  });
+/// User card at the bottom of the sidebar: avatar + name + account subtitle
+/// ("Perfil local" / cloud email). Clicking it opens the session menu
+/// (settings, lock, sign out); [compact] keeps just the avatar as the anchor.
+class _UserCard extends ConsumerStatefulWidget {
+  const _UserCard({required this.user, required this.compact});
 
-  final String name;
-  final String role;
+  final ({String name, String email, AccountMode? mode}) user;
   final bool compact;
+
+  @override
+  ConsumerState<_UserCard> createState() => _UserCardState();
+}
+
+class _UserCardState extends ConsumerState<_UserCard> {
+  // State-held so an open menu survives sidebar rebuilds (badge counts,
+  // section changes…); a per-build controller would orphan it.
+  final _menu = MenuController();
+
+  void _toggle() => _menu.isOpen ? _menu.close() : _menu.open();
+
+  Future<void> _signOut() async {
+    await (await ref.read(cloudAuthProvider.future))?.signOut();
+    // authStateChanges routes the session to CloudSignedOut.
+  }
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    // No session user (no backend): the card is hidden.
-    if (name.isEmpty) return const SizedBox.shrink();
-    if (compact) {
-      return Center(child: PersonAvatar(name: name, size: 32));
-    }
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: t.surface2,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: t.border2),
+    final tr = context.t;
+    final user = widget.user;
+    // No session user (locked or cloud identity still loading): hidden.
+    if (user.name.isEmpty) return const SizedBox.shrink();
+
+    final session = ref.watch(authSessionProvider);
+    final unlocked = session is SessionUnlocked ? session : null;
+    final localMode = unlocked?.mode == AccountMode.local;
+    final cloudMode = unlocked?.mode == AccountMode.cloud;
+    // Locking a cloud session only means something with the device gate on.
+    final canLock =
+        localMode || (cloudMode && (unlocked?.deviceUnlockEnabled ?? false));
+    final subtitle = localMode
+        ? tr.userMenu.localProfile
+        : (user.email.isNotEmpty ? user.email : tr.userMenu.cloudAccount);
+
+    return MenuAnchor(
+      controller: _menu,
+      alignmentOffset: const Offset(0, 6),
+      style: MenuStyle(
+        backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+        elevation: const WidgetStatePropertyAll(0),
+        padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+        shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
-      child: Row(
-        children: [
-          PersonAvatar(name: name, size: 32),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
-                    color: t.text,
-                  ),
-                ),
-                Text(
-                  role,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: t.textMute,
-                  ),
-                ),
-              ],
+      menuChildren: [
+        _UserMenu(
+          items: [
+            (
+              icon: Icons.settings_outlined,
+              label: tr.nav.settings,
+              divider: false,
+              onTap: () =>
+                  ref.read(appSectionProvider.notifier).select(AppSection.settings),
             ),
-          ),
+            if (canLock)
+              (
+                icon: Icons.lock_outline,
+                label: tr.security.lock,
+                divider: true,
+                onTap: ref.read(authSessionProvider.notifier).lock,
+              ),
+            if (cloudMode)
+              (
+                icon: Icons.logout,
+                label: tr.account.signOut,
+                divider: !canLock,
+                onTap: _signOut,
+              ),
+          ],
+          onPicked: _menu.close,
+        ),
+      ],
+      builder: (context, controller, _) {
+        if (widget.compact) {
+          return Center(
+            child: Tooltip(
+              message: user.name,
+              child: Pressable(
+                onTap: _toggle,
+                builder: (context, hovered, _) =>
+                    PersonAvatar(name: user.name, size: 32),
+              ),
+            ),
+          );
+        }
+        return Pressable(
+          onTap: _toggle,
+          builder: (context, hovered, _) {
+            final open = controller.isOpen;
+            return Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: t.surface2,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: open ? t.accent : (hovered ? t.textMute : t.border2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  PersonAvatar(name: user.name, size: 32),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          user.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                            color: t.text,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: t.textMute,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(Icons.unfold_more, size: 16, color: t.textMute),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+typedef _UserMenuEntry = ({
+  IconData icon,
+  String label,
+  bool divider,
+  VoidCallback onTap,
+});
+
+/// Menu surface for the user card (same look as the export menu).
+class _UserMenu extends StatelessWidget {
+  const _UserMenu({required this.items, required this.onPicked});
+
+  final List<_UserMenuEntry> items;
+  final VoidCallback onPicked;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Container(
+      width: 210,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: t.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: t.border),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final it in items) ...[
+            if (it.divider)
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                color: t.border2,
+              ),
+            Pressable(
+              onTap: () {
+                onPicked();
+                it.onTap();
+              },
+              builder: (context, hovered, _) => Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+                decoration: BoxDecoration(
+                  color: hovered ? t.surface2 : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(it.icon, size: 17, color: t.textMute),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Text(
+                        it.label,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: t.text,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

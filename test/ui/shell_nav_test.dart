@@ -22,7 +22,8 @@ class _NoopSyncController extends MwbSyncController {
 
 class _UnlockedSessionController extends SessionController {
   @override
-  SessionState build() => SessionUnlocked('00' * 32, AccountMode.local);
+  SessionState build() =>
+      SessionUnlocked('00' * 32, AccountMode.local, profileName: 'Vicente');
 }
 
 Future<void> _pumpShell(WidgetTester tester, Size size) async {
@@ -72,5 +73,43 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.text('Agora'), findsOneWidget); // marca del riel
     expect(find.text('Inicio'), findsOneWidget);
+  });
+
+  testWidgets(
+      'tarjeta de usuario: nombre + subtítulo, y su menú navega y bloquea',
+      (tester) async {
+    await _pumpShell(tester, const Size(1440, 900));
+
+    // La tarjeta muestra el perfil sin línea vacía debajo.
+    expect(find.text('Vicente'), findsOneWidget);
+    expect(find.text('Perfil local'), findsOneWidget);
+
+    // Abre el menú: en modo local hay Configuración y Bloquear, sin
+    // "Cerrar sesión" (eso es de nube).
+    await tester.tap(find.text('Vicente'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bloquear'), findsOneWidget);
+    expect(find.text('Cerrar sesión'), findsNothing);
+    // "Configuración" ya existe en el riel; el menú añade otra.
+    expect(find.text('Configuración'), findsNWidgets(2));
+
+    // Configuración navega a la sección.
+    await tester.tap(find.text('Configuración').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Tus proyectos y pendientes'), findsNothing);
+  });
+
+  testWidgets('menú de usuario: Bloquear manda a la pantalla de desbloqueo',
+      (tester) async {
+    await _pumpShell(tester, const Size(1440, 900));
+
+    await tester.tap(find.text('Vicente'));
+    await tester.pumpAndSettle();
+    // Desde el dashboard "Bloquear" solo existe en el menú (en Configuración
+    // también lo tiene la tarjeta de Seguridad y sería ambiguo).
+    await tester.tap(find.text('Bloquear'));
+    await tester.pumpAndSettle();
+    expect(find.text('Perfil local · este dispositivo'), findsOneWidget);
+    expect(find.text('Desbloquear'), findsOneWidget);
   });
 }

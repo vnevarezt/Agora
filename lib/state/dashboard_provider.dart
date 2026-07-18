@@ -16,6 +16,7 @@ import '../models/reminder.dart';
 import '../models/week.dart';
 import '../models/week_type.dart';
 import 'auth_session.dart';
+import 'cloud_auth.dart';
 import 'db_provider.dart';
 
 /// Dashboard state. Congregations and projects are DB-backed (milestone 3
@@ -23,12 +24,28 @@ import 'db_provider.dart';
 /// `List` providers keep the pre-persistence contract so the UI reads them
 /// directly (same policy as [notebooksProvider] / `peopleProvider`).
 
-/// Session user (greeting and sidebar card): the local profile name when
-/// unlocked in local mode ('' in cloud mode until 4b brings identity).
-final sessionUserProvider = Provider<({String name, String role})>((ref) {
+/// Session user (greeting and sidebar card). Local mode: the profile name.
+/// Cloud mode: the Firebase identity (display name, or the email's local
+/// part). Widgets derive the subtitle from [mode]/[email] via `context.t`
+/// so it follows locale switches.
+final sessionUserProvider =
+    Provider<({String name, String email, AccountMode? mode})>((ref) {
   final session = ref.watch(authSessionProvider);
-  final name = session is SessionUnlocked ? (session.profileName ?? '') : '';
-  return (name: name, role: '');
+  if (session is! SessionUnlocked) return (name: '', email: '', mode: null);
+  if (session.mode == AccountMode.local) {
+    return (
+      name: session.profileName ?? '',
+      email: '',
+      mode: AccountMode.local,
+    );
+  }
+  final user = ref.watch(cloudUserProvider).value;
+  final email = user?.email ?? '';
+  final display = user?.displayName?.trim() ?? '';
+  final name = display.isNotEmpty
+      ? display
+      : (email.contains('@') ? email.split('@').first : email);
+  return (name: name, email: email, mode: AccountMode.cloud);
 });
 
 final congregationsRepositoryProvider = Provider<CongregationsRepository>(
