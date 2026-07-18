@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/backup/backup_crypto.dart';
+import '../../data/device_auth.dart';
 import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/app_settings.dart';
@@ -76,16 +77,18 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
 
   @override
   Widget build(BuildContext context) {
-    // SecurityCard is local-mode only: in cloud mode there is no local
-    // password to change and "lock" would strand the session on an unlock
-    // screen that no password can open (the gate is the Firebase session).
+    // SecurityCard adapts to the mode (password rows are local-only; device
+    // unlock exists in both). In cloud mode it only appears when the device
+    // can actually authenticate its owner — otherwise it would be empty.
     final localMode = ref.watch(authSessionProvider.select(
         (s) => s is SessionUnlocked && s.mode == AccountMode.local));
+    final deviceAuthOk =
+        ref.watch(deviceAuthSupportedProvider).value ?? false;
     return SettingsColumns(
       left: [_appearance(), _general(), _notificationsCard()],
       right: [
         _datos(),
-        if (localMode) const SecurityCard(),
+        if (localMode || deviceAuthOk) const SecurityCard(),
         const AccountCard(),
       ],
     );

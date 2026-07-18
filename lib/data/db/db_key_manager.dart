@@ -119,6 +119,13 @@ class DbKeyManager {
   /// session is the gate, so the key is only protected by the OS keychain.
   static const cloudKeyName = 'jw_program.db_key.cloud.v1';
 
+  /// Local-mode device-unlock copy: plaintext DEK hex, written only while the
+  /// user has biometric/device unlock enabled. The password-wrapped blob stays
+  /// the source of truth; this copy trades the password gate for the OS
+  /// keychain gate (same trust level as [cloudKeyName]) so Touch ID / Face ID
+  /// / fingerprint can release the key without the password.
+  static const deviceUnlockKeyName = 'jw_program.db_key.device_unlock.v1';
+
   Future<LocalKeyStatus> status() async {
     try {
       final wrapped = await _store.read(wrappedKeyName);
@@ -218,6 +225,43 @@ class DbKeyManager {
     }
   }
 
+  /// Local mode: persist the DEK copy that device auth releases. Reuses the
+  /// verify-read-back defense against silent keychain writes.
+  Future<void> enableDeviceUnlock(String dekHex) async {
+    try {
+      await _store.write(deviceUnlockKeyName, dekHex);
+      final verified = await _store.read(deviceUnlockKeyName);
+      if (verified != dekHex) {
+        throw const DbKeyException(
+          'The system keychain did not persist the device-unlock key.',
+        );
+      }
+    } on DbKeyException {
+      rethrow;
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
+  /// DEK hex behind device unlock, or null when the copy is gone (disabled,
+  /// or the keychain lost it): callers fall back to the password.
+  Future<String?> readDeviceUnlockKey() async {
+    try {
+      final hex = await _store.read(deviceUnlockKeyName);
+      return (hex != null && hex.length == 64) ? hex : null;
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
+  Future<void> disableDeviceUnlock() async {
+    try {
+      await _store.delete(deviceUnlockKeyName);
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
   /// Delete all key material. The encrypted DB file becomes unreadable
   /// forever; callers must also delete the DB file ("forgot password" reset).
   Future<void> destroyAll() async {
@@ -225,6 +269,7 @@ class DbKeyManager {
       await _store.delete(wrappedKeyName);
       await _store.delete(legacyKeyName);
       await _store.delete(cloudKeyName);
+      await _store.delete(deviceUnlockKeyName);
     } catch (e) {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }

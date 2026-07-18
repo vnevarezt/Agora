@@ -46,6 +46,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$security$es security = Translations$security$es.internal(_root);
 	late final Translations$account$es account = Translations$account$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
+	late final Translations$userMenu$es userMenu = Translations$userMenu$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
 	late final Translations$sync$es sync = Translations$sync$es.internal(_root);
 	late final Translations$dashboard$es dashboard = Translations$dashboard$es.internal(_root);
@@ -131,6 +132,7 @@ class Translations$auth$es {
 	String get chooseOther => 'Elegir otro modo';
 
 	late final Translations$auth$local$es local = Translations$auth$local$es.internal(_root);
+	late final Translations$auth$cloudLock$es cloudLock = Translations$auth$cloudLock$es.internal(_root);
 	late final Translations$auth$cloud$es cloud = Translations$auth$cloud$es.internal(_root);
 	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
 	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
@@ -180,8 +182,32 @@ class Translations$security$es {
 	/// es: 'Cierra la sesión local; pedirá la contraseña al volver.'
 	String get lockNowDesc => 'Cierra la sesión local; pedirá la contraseña al volver.';
 
+	/// es: 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.'
+	String get lockNowDescCloud => 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.';
+
 	/// es: 'Bloquear'
 	String get lock => 'Bloquear';
+
+	/// es: 'Protege el acceso a la app en este dispositivo.'
+	String get descCloud => 'Protege el acceso a la app en este dispositivo.';
+
+	/// es: 'Desbloqueo con el dispositivo'
+	String get deviceUnlock => 'Desbloqueo con el dispositivo';
+
+	/// es: 'Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.'
+	String get deviceUnlockDesc => 'Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.';
+
+	/// es: 'Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.'
+	String get deviceUnlockDescCloud => 'Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.';
+
+	/// es: 'Confirma tu identidad para activar el desbloqueo con el dispositivo.'
+	String get deviceUnlockPrompt => 'Confirma tu identidad para activar el desbloqueo con el dispositivo.';
+
+	/// es: 'Desbloquea tus datos de Agora.'
+	String get unlockPrompt => 'Desbloquea tus datos de Agora.';
+
+	/// es: 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.'
+	String get deviceUnlockKeyMissing => 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.';
 }
 
 // Path: account
@@ -256,6 +282,21 @@ class Translations$nav$es {
 
 	/// es: 'Configuración'
 	String get settings => 'Configuración';
+}
+
+// Path: userMenu
+class Translations$userMenu$es {
+	Translations$userMenu$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Perfil local'
+	String get localProfile => 'Perfil local';
+
+	/// es: 'Cuenta en la nube'
+	String get cloudAccount => 'Cuenta en la nube';
 }
 
 // Path: common
@@ -1314,6 +1355,33 @@ class Translations$auth$local$es {
 
 	/// es: 'Crear otro perfil'
 	String get createAnother => 'Crear otro perfil';
+
+	/// es: 'Usar desbloqueo del dispositivo'
+	String get deviceUnlockButton => 'Usar desbloqueo del dispositivo';
+}
+
+// Path: auth.cloudLock
+class Translations$auth$cloudLock$es {
+	Translations$auth$cloudLock$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Sesión bloqueada'
+	String get title => 'Sesión bloqueada';
+
+	/// es: 'Confirma tu identidad para entrar.'
+	String get caption => 'Confirma tu identidad para entrar.';
+
+	/// es: 'Desbloquear'
+	String get unlock => 'Desbloquear';
+
+	/// es: '¿No eres tú?'
+	String get signOutQuestion => '¿No eres tú?';
+
+	/// es: 'Cerrar sesión'
+	String get signOut => 'Cerrar sesión';
 }
 
 // Path: auth.cloud
@@ -1545,6 +1613,12 @@ extension on Translations {
 			'auth.local.wrongPassword' => 'Contraseña incorrecta.',
 			'auth.local.startOver' => '¿Empezar de cero?',
 			'auth.local.createAnother' => 'Crear otro perfil',
+			'auth.local.deviceUnlockButton' => 'Usar desbloqueo del dispositivo',
+			'auth.cloudLock.title' => 'Sesión bloqueada',
+			'auth.cloudLock.caption' => 'Confirma tu identidad para entrar.',
+			'auth.cloudLock.unlock' => 'Desbloquear',
+			'auth.cloudLock.signOutQuestion' => '¿No eres tú?',
+			'auth.cloudLock.signOut' => 'Cerrar sesión',
 			'auth.cloud.pill' => 'Modo nube',
 			'auth.cloud.loginTitle' => 'Inicia sesión',
 			'auth.cloud.loginSub' => 'Tus congregaciones y proyectos te esperan.',
@@ -1589,7 +1663,15 @@ extension on Translations {
 			'security.changed' => 'Contraseña actualizada.',
 			'security.lockNow' => 'Bloquear ahora',
 			'security.lockNowDesc' => 'Cierra la sesión local; pedirá la contraseña al volver.',
+			'security.lockNowDescCloud' => 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.',
 			'security.lock' => 'Bloquear',
+			'security.descCloud' => 'Protege el acceso a la app en este dispositivo.',
+			'security.deviceUnlock' => 'Desbloqueo con el dispositivo',
+			'security.deviceUnlockDesc' => 'Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.',
+			'security.deviceUnlockDescCloud' => 'Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.',
+			'security.deviceUnlockPrompt' => 'Confirma tu identidad para activar el desbloqueo con el dispositivo.',
+			'security.unlockPrompt' => 'Desbloquea tus datos de Agora.',
+			'security.deviceUnlockKeyMissing' => 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',
@@ -1615,6 +1697,8 @@ extension on Translations {
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',
+			'userMenu.localProfile' => 'Perfil local',
+			'userMenu.cloudAccount' => 'Cuenta en la nube',
 			'common.cancel' => 'Cancelar',
 			'common.delete' => 'Eliminar',
 			'common.close' => 'Cerrar',

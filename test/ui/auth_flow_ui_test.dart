@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/app.dart';
 import 'package:jw_program/data/db/db_key_manager.dart';
+import 'package:jw_program/data/device_auth.dart';
 import 'package:jw_program/i18n/strings.g.dart';
 import 'package:jw_program/state/auth_session.dart';
 import 'package:jw_program/state/cloud_auth.dart';
@@ -14,7 +15,24 @@ import '../helpers/map_key_store.dart';
 // la zona fake-async de testWidgets); eso lo cubren auth_session_test y el
 // test de integración. Aquí se verifica la UI del flujo: portada, navegación
 // y validaciones síncronas.
-Future<void> pumpApp(WidgetTester tester, MapKeyStore store) async {
+class FakeDeviceAuth implements DeviceAuth {
+  FakeDeviceAuth({this.result = true});
+
+  bool result;
+  int prompts = 0;
+
+  @override
+  Future<bool> isSupported() async => true;
+
+  @override
+  Future<bool> authenticate(String reason) async {
+    prompts++;
+    return result;
+  }
+}
+
+Future<void> pumpApp(WidgetTester tester, MapKeyStore store,
+    {DeviceAuth? deviceAuth}) async {
   tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
@@ -25,6 +43,8 @@ Future<void> pumpApp(WidgetTester tester, MapKeyStore store) async {
         dbKeyManagerProvider.overrideWithValue(
             DbKeyManager(store: store, params: testKdfParams)),
         firebaseAppProvider.overrideWith((ref) => Future.value(null)),
+        if (deviceAuth != null)
+          deviceAuthProvider.overrideWithValue(deviceAuth),
       ],
       child: const JwProgramApp(),
     ),
@@ -137,5 +157,35 @@ void main() {
     expect(find.text('Perfil local · este dispositivo'), findsOneWidget);
     expect(find.text('Desbloquear'), findsOneWidget);
     expect(find.text('¿Empezar de cero?'), findsOneWidget);
+    // Sin la preferencia activada no hay botón de desbloqueo del dispositivo.
+    expect(find.text('Usar desbloqueo del dispositivo'), findsNothing);
+  });
+
+  testWidgets(
+      'desbloqueo del dispositivo activado: auto-prompt al montar y botón '
+      'para reintentar', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'account_mode': 'local',
+      'local_profile_name': 'Ana Pérez',
+      'device_unlock': true,
+    });
+    final store = MapKeyStore();
+    final keys = DbKeyManager(store: store, params: testKdfParams);
+    await tester.runAsync(() async =>
+        keys.enableDeviceUnlock(await keys.createAccount('pw-123456')));
+
+    // result=false: el prompt "cancelado" deja la pantalla montada (con
+    // result=true la app entera se construiría y tocaría la BD real).
+    final fake = FakeDeviceAuth(result: false);
+    await pumpApp(tester, store, deviceAuth: fake);
+
+    expect(fake.prompts, 1); // auto-prompt del initState
+    final button = find.text('Usar desbloqueo del dispositivo');
+    expect(button, findsOneWidget);
+
+    await tester.tap(button);
+    await tester.pump();
+    expect(fake.prompts, 2);
+    expect(find.text('Desbloquear'), findsOneWidget); // sigue bloqueado
   });
 }

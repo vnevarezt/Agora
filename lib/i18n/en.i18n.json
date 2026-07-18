@@ -39,7 +39,15 @@
       "unlocking": "Decrypting…",
       "wrongPassword": "Wrong password.",
       "startOver": "Starting over?",
-      "createAnother": "Create another profile"
+      "createAnother": "Create another profile",
+      "deviceUnlockButton": "Use device unlock"
+    },
+    "cloudLock": {
+      "title": "Session locked",
+      "caption": "Confirm your identity to continue.",
+      "unlock": "Unlock",
+      "signOutQuestion": "Not you?",
+      "signOut": "Sign out"
     },
     "cloud": {
       "pill": "Cloud mode",
@@ -93,7 +101,15 @@
     "changed": "Password updated.",
     "lockNow": "Lock now",
     "lockNowDesc": "Closes the local session; the password will be required again.",
-    "lock": "Lock"
+    "lockNowDescCloud": "Locks the app; device unlock will be required to come back.",
+    "lock": "Lock",
+    "descCloud": "Protects access to the app on this device.",
+    "deviceUnlock": "Device unlock",
+    "deviceUnlockDesc": "Sign in with Touch ID, Face ID, fingerprint or the device passcode instead of your password.",
+    "deviceUnlockDescCloud": "Asks for Touch ID, Face ID, fingerprint or the device passcode every time you open the app.",
+    "deviceUnlockPrompt": "Confirm your identity to enable device unlock.",
+    "unlockPrompt": "Unlock your Agora data.",
+    "deviceUnlockKeyMissing": "Device unlock was turned off; sign in with your password and enable it again."
   },
   "account": {
     "title": "Cloud account",
@@ -125,6 +141,10 @@
     "home": "Home",
     "participants": "Participants",
     "settings": "Settings"
+  },
+  "userMenu": {
+    "localProfile": "Local profile",
+    "cloudAccount": "Cloud account"
   },
   "common": {
     "cancel": "Cancel",

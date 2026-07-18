@@ -45,6 +45,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$security$en security = _Translations$security$en._(_root);
 	@override late final _Translations$account$en account = _Translations$account$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
+	@override late final _Translations$userMenu$en userMenu = _Translations$userMenu$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$sync$en sync = _Translations$sync$en._(_root);
 	@override late final _Translations$dashboard$en dashboard = _Translations$dashboard$en._(_root);
@@ -107,6 +108,7 @@ class _Translations$auth$en extends Translations$auth$es {
 	// Translations
 	@override String get chooseOther => 'Choose another mode';
 	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
+	@override late final _Translations$auth$cloudLock$en cloudLock = _Translations$auth$cloudLock$en._(_root);
 	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
 	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
 	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
@@ -131,7 +133,15 @@ class _Translations$security$en extends Translations$security$es {
 	@override String get changed => 'Password updated.';
 	@override String get lockNow => 'Lock now';
 	@override String get lockNowDesc => 'Closes the local session; the password will be required again.';
+	@override String get lockNowDescCloud => 'Locks the app; device unlock will be required to come back.';
 	@override String get lock => 'Lock';
+	@override String get descCloud => 'Protects access to the app on this device.';
+	@override String get deviceUnlock => 'Device unlock';
+	@override String get deviceUnlockDesc => 'Sign in with Touch ID, Face ID, fingerprint or the device passcode instead of your password.';
+	@override String get deviceUnlockDescCloud => 'Asks for Touch ID, Face ID, fingerprint or the device passcode every time you open the app.';
+	@override String get deviceUnlockPrompt => 'Confirm your identity to enable device unlock.';
+	@override String get unlockPrompt => 'Unlock your Agora data.';
+	@override String get deviceUnlockKeyMissing => 'Device unlock was turned off; sign in with your password and enable it again.';
 }
 
 // Path: account
@@ -169,6 +179,17 @@ class _Translations$nav$en extends Translations$nav$es {
 	@override String get home => 'Home';
 	@override String get participants => 'Participants';
 	@override String get settings => 'Settings';
+}
+
+// Path: userMenu
+class _Translations$userMenu$en extends Translations$userMenu$es {
+	_Translations$userMenu$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get localProfile => 'Local profile';
+	@override String get cloudAccount => 'Cloud account';
 }
 
 // Path: common
@@ -672,6 +693,21 @@ class _Translations$auth$local$en extends Translations$auth$local$es {
 	@override String get wrongPassword => 'Wrong password.';
 	@override String get startOver => 'Starting over?';
 	@override String get createAnother => 'Create another profile';
+	@override String get deviceUnlockButton => 'Use device unlock';
+}
+
+// Path: auth.cloudLock
+class _Translations$auth$cloudLock$en extends Translations$auth$cloudLock$es {
+	_Translations$auth$cloudLock$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Session locked';
+	@override String get caption => 'Confirm your identity to continue.';
+	@override String get unlock => 'Unlock';
+	@override String get signOutQuestion => 'Not you?';
+	@override String get signOut => 'Sign out';
 }
 
 // Path: auth.cloud
@@ -809,6 +845,12 @@ extension on TranslationsEn {
 			'auth.local.wrongPassword' => 'Wrong password.',
 			'auth.local.startOver' => 'Starting over?',
 			'auth.local.createAnother' => 'Create another profile',
+			'auth.local.deviceUnlockButton' => 'Use device unlock',
+			'auth.cloudLock.title' => 'Session locked',
+			'auth.cloudLock.caption' => 'Confirm your identity to continue.',
+			'auth.cloudLock.unlock' => 'Unlock',
+			'auth.cloudLock.signOutQuestion' => 'Not you?',
+			'auth.cloudLock.signOut' => 'Sign out',
 			'auth.cloud.pill' => 'Cloud mode',
 			'auth.cloud.loginTitle' => 'Sign in',
 			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',
@@ -853,7 +895,15 @@ extension on TranslationsEn {
 			'security.changed' => 'Password updated.',
 			'security.lockNow' => 'Lock now',
 			'security.lockNowDesc' => 'Closes the local session; the password will be required again.',
+			'security.lockNowDescCloud' => 'Locks the app; device unlock will be required to come back.',
 			'security.lock' => 'Lock',
+			'security.descCloud' => 'Protects access to the app on this device.',
+			'security.deviceUnlock' => 'Device unlock',
+			'security.deviceUnlockDesc' => 'Sign in with Touch ID, Face ID, fingerprint or the device passcode instead of your password.',
+			'security.deviceUnlockDescCloud' => 'Asks for Touch ID, Face ID, fingerprint or the device passcode every time you open the app.',
+			'security.deviceUnlockPrompt' => 'Confirm your identity to enable device unlock.',
+			'security.unlockPrompt' => 'Unlock your Agora data.',
+			'security.deviceUnlockKeyMissing' => 'Device unlock was turned off; sign in with your password and enable it again.',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',
@@ -879,6 +929,8 @@ extension on TranslationsEn {
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',
+			'userMenu.localProfile' => 'Local profile',
+			'userMenu.cloudAccount' => 'Cloud account',
 			'common.cancel' => 'Cancel',
 			'common.delete' => 'Delete',
 			'common.close' => 'Close',

@@ -39,7 +39,15 @@
       "unlocking": "Descifrando…",
       "wrongPassword": "Contraseña incorrecta.",
       "startOver": "¿Empezar de cero?",
-      "createAnother": "Crear otro perfil"
+      "createAnother": "Crear otro perfil",
+      "deviceUnlockButton": "Usar desbloqueo del dispositivo"
+    },
+    "cloudLock": {
+      "title": "Sesión bloqueada",
+      "caption": "Confirma tu identidad para entrar.",
+      "unlock": "Desbloquear",
+      "signOutQuestion": "¿No eres tú?",
+      "signOut": "Cerrar sesión"
     },
     "cloud": {
       "pill": "Modo nube",
@@ -93,7 +101,15 @@
     "changed": "Contraseña actualizada.",
     "lockNow": "Bloquear ahora",
     "lockNowDesc": "Cierra la sesión local; pedirá la contraseña al volver.",
-    "lock": "Bloquear"
+    "lockNowDescCloud": "Bloquea la app; pedirá el desbloqueo del dispositivo al volver.",
+    "lock": "Bloquear",
+    "descCloud": "Protege el acceso a la app en este dispositivo.",
+    "deviceUnlock": "Desbloqueo con el dispositivo",
+    "deviceUnlockDesc": "Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.",
+    "deviceUnlockDescCloud": "Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.",
+    "deviceUnlockPrompt": "Confirma tu identidad para activar el desbloqueo con el dispositivo.",
+    "unlockPrompt": "Desbloquea tus datos de Agora.",
+    "deviceUnlockKeyMissing": "El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo."
   },
   "account": {
     "title": "Cuenta en la nube",
@@ -125,6 +141,10 @@
     "home": "Inicio",
     "participants": "Participantes",
     "settings": "Configuración"
+  },
+  "userMenu": {
+    "localProfile": "Perfil local",
+    "cloudAccount": "Cuenta en la nube"
   },
   "common": {
     "cancel": "Cancelar",
