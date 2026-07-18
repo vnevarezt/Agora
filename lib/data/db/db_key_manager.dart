@@ -1,9 +1,10 @@
-import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../crypto/passphrase_envelope.dart';
+
+export '../crypto/passphrase_envelope.dart' show KdfParams;
 
 /// The system keychain is unavailable or rejected the operation. Without the
 /// key the encrypted DB can't be opened (by design there's no insecure
@@ -69,28 +70,6 @@ enum LocalKeyStatus {
 
   /// DEK wrapped with the account password: show the unlock screen.
   wrapped,
-}
-
-/// Argon2id cost parameters (OWASP Password Storage Cheat Sheet). They are
-/// stored inside every wrapped blob, so they can be tuned later without a
-/// data migration: old blobs keep unlocking with the params they were
-/// created with.
-class KdfParams {
-  const KdfParams({
-    required this.memoryKib,
-    required this.iterations,
-    required this.parallelism,
-  });
-
-  static const owasp = KdfParams(
-    memoryKib: 19456,
-    iterations: 2,
-    parallelism: 1,
-  );
-
-  final int memoryKib;
-  final int iterations;
-  final int parallelism;
 }
 
 /// DB encryption key manager (envelope encryption).
@@ -301,80 +280,21 @@ class DbKeyManager {
     }
   }
 
-  Future<String> _wrap(String dekHex, String password) async {
-    final salt = _randomBytes(16);
-    final nonce = _randomBytes(12);
-    final kek = await _deriveKek(password, salt, params);
-    final box = await AesGcm.with256bits().encrypt(
-      _hexToBytes(dekHex),
-      secretKey: SecretKey(kek),
-      nonce: nonce,
-    );
-    return jsonEncode({
-      'v': 2,
-      'kdf': 'argon2id',
-      'm': params.memoryKib,
-      't': params.iterations,
-      'p': params.parallelism,
-      'salt': base64Encode(salt),
-      'nonce': base64Encode(nonce),
-      'ct': base64Encode(box.cipherText),
-      'mac': base64Encode(box.mac.bytes),
-    });
-  }
+  // Envelope shared with the sync key bootstrap (lib/data/crypto/); the
+  // local-account blob keeps its historical `v: 2` tag.
+  PassphraseEnvelope get _envelope => PassphraseEnvelope(params: params);
+
+  Future<String> _wrap(String dekHex, String password) =>
+      _envelope.wrap(_hexToBytes(dekHex), password, version: 2);
 
   Future<String> _unwrap(String blobJson, String password) async {
-    final KdfParams blobParams;
-    final List<int> salt, nonce, ct, mac;
     try {
-      final blob = jsonDecode(blobJson) as Map<String, dynamic>;
-      blobParams = KdfParams(
-        memoryKib: blob['m'] as int,
-        iterations: blob['t'] as int,
-        parallelism: blob['p'] as int,
-      );
-      salt = base64Decode(blob['salt'] as String);
-      nonce = base64Decode(blob['nonce'] as String);
-      ct = base64Decode(blob['ct'] as String);
-      mac = base64Decode(blob['mac'] as String);
-    } catch (e) {
-      throw DbKeyException('The stored key blob is corrupted. ($e)', e);
-    }
-    final kek = await _deriveKek(password, salt, blobParams);
-    try {
-      final dek = await AesGcm.with256bits().decrypt(
-        SecretBox(ct, nonce: nonce, mac: Mac(mac)),
-        secretKey: SecretKey(kek),
-      );
-      return _bytesToHex(dek);
-    } on SecretBoxAuthenticationError {
+      return _bytesToHex(await _envelope.unwrap(blobJson, password));
+    } on WrongPassphraseException {
       throw const WrongPasswordException();
+    } on CorruptEnvelopeException catch (e) {
+      throw DbKeyException(e.message, e.cause);
     }
-  }
-
-  /// Argon2id in this package is pure Dart and takes on the order of a
-  /// second at OWASP cost: run it off the UI isolate.
-  static Future<List<int>> _deriveKek(
-    String password,
-    List<int> salt,
-    KdfParams params,
-  ) {
-    final m = params.memoryKib;
-    final t = params.iterations;
-    final p = params.parallelism;
-    return Isolate.run(() async {
-      final algorithm = Argon2id(
-        parallelism: p,
-        memory: m,
-        iterations: t,
-        hashLength: 32,
-      );
-      final key = await algorithm.deriveKeyFromPassword(
-        password: password,
-        nonce: salt,
-      );
-      return key.extractBytes();
-    });
   }
 
   static List<int> _randomBytes(int length) {
