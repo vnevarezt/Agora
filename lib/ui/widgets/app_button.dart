@@ -122,12 +122,18 @@ class AppButton extends StatelessWidget {
                 Icon(icon, size: 17, color: fg),
               if (label != null) ...[
                 if (icon != null || busy) const SizedBox(width: 8),
-                Text(
-                  label!,
-                  style: TextStyle(
-                    fontSize: height >= Dimens.hExportMobile ? 15 : 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: fg,
+                // Flexible: a label longer than the button ellipsizes instead
+                // of overflowing the Row.
+                Flexible(
+                  child: Text(
+                    label!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: height >= Dimens.hExportMobile ? 15 : 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: fg,
+                    ),
                   ),
                 ),
               ],
