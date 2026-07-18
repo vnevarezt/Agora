@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
+import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
 import '../responsive.dart';
@@ -40,13 +42,19 @@ class DashboardView extends ConsumerWidget {
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(pad, 16, pad, 120),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _HeroSection(),
-                _HomeGrid(stacked: size != ScreenSize.desktop),
-              ],
-            ),
+            child: Consumer(builder: (context, ref, _) {
+              if (ref.watch(dashboardLoadingProvider)) {
+                return _DashboardSkeleton(
+                    stacked: size != ScreenSize.desktop);
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _HeroSection(),
+                  _HomeGrid(stacked: size != ScreenSize.desktop),
+                ],
+              );
+            }),
           ),
         ),
       ],
@@ -477,6 +485,112 @@ class _RemindersSection extends ConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Skeleton dashboard while the streams warm up: the REAL cards rendered
+/// with mock data inside a [Skeletonizer], so the placeholders can never
+/// drift from the actual layout.
+class _DashboardSkeleton extends StatelessWidget {
+  const _DashboardSkeleton({required this.stacked});
+
+  final bool stacked;
+
+  static final _project = Project(
+    id: 'skeleton',
+    name: 'Programa de ejemplo',
+    congregationId: 'skeleton',
+    weeks: const ['SEMANA UNO', 'SEMANA DOS', 'SEMANA TRES'],
+    done: 12,
+    total: 59,
+    status: ProjectStatus.draft,
+    editedLabel: 'hace 2 h',
+    updatedAt: DateTime(2026),
+    weekProgress: const [
+      (label: 'SEMANA UNO', done: 14, total: 14),
+      (label: 'SEMANA DOS', done: 5, total: 15),
+      (label: 'SEMANA TRES', done: 0, total: 15),
+    ],
+  );
+
+  static const _congregation = Congregation(
+      id: 'skeleton', name: 'Congregación', number: '', color: 0xFF7A2230);
+
+  static const _reminder = Reminder(
+    id: 'skeleton',
+    type: ReminderType.task,
+    title: 'Asignaciones pendientes',
+    meta: 'Semana · Proyecto',
+    cta: 'Abrir proyecto',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final projects = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlockTitle(title: context.t.dashboard.projects, count: 0),
+        const SizedBox(height: 12),
+        LayoutBuilder(builder: (context, c) {
+          const gap = 14.0;
+          final cols = (c.maxWidth / 264).floor().clamp(1, 4);
+          final colW = (c.maxWidth - (cols - 1) * gap) / cols;
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (var i = 0; i < 4; i++)
+                SizedBox(
+                  width: colW,
+                  child: ProjectCard(
+                    project: _project,
+                    congregation: _congregation,
+                    onTap: () {},
+                    onEdit: () {},
+                  ),
+                ),
+            ],
+          );
+        }),
+      ],
+    );
+
+    final reminders = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlockTitle(title: context.t.dashboard.pending, count: 0),
+        const ReminderCard(recordatorio: _reminder),
+        const SizedBox(height: 9),
+        const ReminderCard(recordatorio: _reminder),
+      ],
+    );
+
+    return Skeletonizer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ContinueCard(
+            project: _project,
+            congregation: _congregation,
+            onContinue: () {},
+          ),
+          const SizedBox(height: 20),
+          if (stacked) ...[
+            projects,
+            const SizedBox(height: 24),
+            reminders,
+          ] else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: projects),
+                const SizedBox(width: 22),
+                SizedBox(width: 312, child: reminders),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

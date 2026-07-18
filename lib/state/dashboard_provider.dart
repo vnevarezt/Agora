@@ -43,6 +43,12 @@ final congregationsStreamProvider = StreamProvider<List<Congregation>>(
 final congregationsProvider = Provider<List<Congregation>>(
     (ref) => ref.watch(congregationsStreamProvider).asData?.value ?? const []);
 
+/// True until the dashboard streams emit their first value — the window
+/// where "empty" would lie. Drives the skeleton UI.
+final dashboardLoadingProvider = Provider<bool>((ref) =>
+    ref.watch(congregationsStreamProvider).isLoading ||
+    ref.watch(projectsStreamProvider).isLoading);
+
 final congregationActionsProvider =
     Provider<CongregationActions>(CongregationActions.new);
 

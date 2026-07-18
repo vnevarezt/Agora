@@ -25,6 +25,10 @@ final peopleStreamProvider = StreamProvider<List<Person>>(
 final peopleProvider = Provider<List<Person>>(
     (ref) => ref.watch(peopleStreamProvider).asData?.value ?? const []);
 
+/// True until the directory stream emits — drives the skeleton UI.
+final peopleLoadingProvider =
+    Provider<bool>((ref) => ref.watch(peopleStreamProvider).isLoading);
+
 /// Active ones sorted by normalized display name (picker list).
 final activePeopleProvider = Provider<List<Person>>((ref) {
   final all = ref.watch(peopleProvider);

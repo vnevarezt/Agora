@@ -44,6 +44,7 @@ void main() {
           // sobreescriben para no abrir la BD cifrada real en el test.
           congregationsProvider.overrideWithValue(const <Congregation>[]),
           projectsProvider.overrideWithValue(const <Project>[]),
+          dashboardLoadingProvider.overrideWithValue(false),
         ],
         child: const JwProgramApp(),
       ),

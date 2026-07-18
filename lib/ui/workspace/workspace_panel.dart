@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/program_row.dart';
@@ -23,7 +24,14 @@ class WorkspacePanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sched = ref.watch(scheduleProvider);
-    if (sched == null) return const _EmptyState();
+    if (sched == null) {
+      // Weeks still loading (project snapshots / manual download): skeleton
+      // part cards instead of flashing the download empty-state.
+      if (ref.watch(weeksProvider).isLoading) {
+        return const _WorkspaceSkeleton();
+      }
+      return const _EmptyState();
+    }
 
     final aux = ref.watch(formProvider.select((f) => f.auxRoom));
     final isMobile = context.isMobile;
@@ -98,6 +106,28 @@ class _SectionBlock extends ConsumerWidget {
           for (var i = 0; i < rows.length; i++) ...[
             if (i > 0) const SizedBox(height: 10),
             PartCard(view: mapRow(rows[i], auxActive: aux)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Real part cards (chairman layout) skeletonized while the week loads.
+class _WorkspaceSkeleton extends StatelessWidget {
+  const _WorkspaceSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
+    final side = isMobile ? 14.0 : 18.0;
+    return Skeletonizer(
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(side, side, side, 120),
+        children: [
+          for (var i = 0; i < 6; i++) ...[
+            if (i > 0) const SizedBox(height: 10),
+            PartCard(view: chairmanView()),
           ],
         ],
       ),

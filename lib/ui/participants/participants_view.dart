@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/person.dart';
@@ -170,7 +171,31 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   Widget _separator(AppTokens t) =>
       Container(width: 1, height: 22, color: t.border);
 
+  /// Real cards with mock data inside a [Skeletonizer]: the placeholder
+  /// can never drift from the actual card layout.
+  Widget _skeleton() {
+    final mock = Person(
+      id: 'skeleton',
+      congregationId: 'skeleton',
+      firstName: '',
+      lastName: '',
+      displayName: 'Nombre de ejemplo',
+      gender: Gender.male,
+      privilege: Role.publisher,
+      qualifications: const [],
+      originCongregation: 'Congregación',
+      active: true,
+      notes: '',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    return Skeletonizer(
+      child: _grid([for (var i = 0; i < 6; i++) mock]),
+    );
+  }
+
   Widget _result(BuildContext context) {
+    if (ref.watch(peopleLoadingProvider)) return _skeleton();
     final all = ref.watch(peopleProvider);
     final filtered = filterPeople(
       all,

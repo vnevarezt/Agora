@@ -37,6 +37,8 @@ Future<void> _pumpShell(WidgetTester tester, Size size) async {
         peopleProvider.overrideWithValue(const <Person>[]),
         congregationsProvider.overrideWithValue(const <Congregation>[]),
         projectsProvider.overrideWithValue(const <Project>[]),
+        dashboardLoadingProvider.overrideWithValue(false),
+        peopleLoadingProvider.overrideWithValue(false),
       ],
       child: const JwProgramApp(),
     ),
