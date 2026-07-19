@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show debugPrint;
-
 import '../../models/member_capabilities.dart';
 import '../db/db_key_manager.dart' show SecureKeyStore;
 import 'content_crypto.dart';
@@ -63,19 +61,11 @@ class CckService {
   /// cache is stale, or on a cache miss.
   Future<CongregationKeyring?> refresh(String cid) async {
     final seed = await _userKeys.seed();
-    if (seed == null) {
-      debugPrint('sync/cck: no seed on this device (passphrase locked) '
-          '→ no keyring for $cid');
-      return null;
-    }
+    if (seed == null) return null; // passphrase locked on this device
     final member = await _docs.readMemberDoc(cid, uid);
     final wrapped = member?['wrappedCcks'] as Map<String, dynamic>?;
-    if (wrapped == null || wrapped.isEmpty) {
-      debugPrint('sync/cck: no member doc / wrappedCcks for $cid '
-          '(cloud not enabled on this congregation, or not a member) '
-          '→ no keyring');
-      return null;
-    }
+    // No member doc / wrappedCcks = cloud not enabled here, or not a member.
+    if (wrapped == null || wrapped.isEmpty) return null;
     final keys = <int, List<int>>{};
     for (final MapEntry(key: version, value: box) in wrapped.entries) {
       keys[int.parse(version)] =

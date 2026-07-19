@@ -8,6 +8,7 @@ import '../../models/project.dart';
 import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
+import '../../state/sync_controller.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
 import '../theme/dimens.dart';
@@ -148,6 +149,7 @@ class _TopBar extends ConsumerWidget {
           state: _catalogState(ref.watch(mwbSyncProvider)),
           compact: isMobile,
         ),
+        const _CloudSyncIndicator(),
         const SizedBox(width: 8),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
@@ -249,6 +251,57 @@ class _SyncIndicator extends StatelessWidget {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// Cloud sync surfaces ONLY when the user must know something: changes are
+/// queued but there's no network, or sync hit an error/revocation. Healthy
+/// sync is invisible (the whole point of 4b-3) — this renders nothing.
+class _CloudSyncIndicator extends ConsumerWidget {
+  const _CloudSyncIndicator();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.tokens;
+    final tr = context.t;
+    final status = ref.watch(syncControllerProvider);
+    const amber = Color(0xFFB9890F);
+
+    final offlinePending =
+        status.phase == SyncPhase.offline && status.pendingOutbox > 0;
+    final (IconData icon, Color color, String tip)? shown = switch (status) {
+      _ when offlinePending => (
+          Icons.cloud_off_rounded,
+          amber,
+          tr.cloudSync.errorOffline,
+        ),
+      SyncStatus(phase: SyncPhase.error, :final errorKey) => (
+          Icons.cloud_off_rounded,
+          amber,
+          errorKey == 'permissionDenied'
+              ? tr.cloudSync.errorPermission
+              : tr.cloudSync.errorUnknown,
+        ),
+      _ => null,
+    };
+    if (shown == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Tooltip(
+        message: shown.$3,
+        child: Container(
+          height: Dimens.hControl,
+          width: Dimens.hControl,
+          decoration: BoxDecoration(
+            color: t.surface,
+            borderRadius: BorderRadius.circular(Dimens.rControl),
+            border: Border.all(color: t.border),
+          ),
+          child: Icon(shown.$1, size: 17, color: shown.$2),
+        ),
       ),
     );
   }
