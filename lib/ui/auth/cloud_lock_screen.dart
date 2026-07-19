@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
-import '../../state/cloud_auth.dart';
+import '../../state/sync_provider.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import 'auth_card_layout.dart';
@@ -61,7 +61,7 @@ class _CloudLockScreenState extends ConsumerState<CloudLockScreen> {
   Future<void> _signOut() async {
     setState(() => _busy = true);
     try {
-      await (await ref.read(cloudAuthProvider.future))?.signOut();
+      await ref.read(cloudSignOutProvider)();
       // authStateChanges routes the session to CloudSignedOut.
     } catch (_) {
       if (mounted) {

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/reminder.dart';
 import '../../state/auth_session.dart';
-import '../../state/cloud_auth.dart';
 import '../../state/dashboard_provider.dart';
+import '../../state/sync_provider.dart';
 import '../../state/ui_state.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -311,7 +311,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
   void _toggle() => _menu.isOpen ? _menu.close() : _menu.open();
 
   Future<void> _signOut() async {
-    await (await ref.read(cloudAuthProvider.future))?.signOut();
+    await ref.read(cloudSignOutProvider)();
     // authStateChanges routes the session to CloudSignedOut.
   }
 

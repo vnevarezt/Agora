@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../../state/cloud_auth.dart';
+import '../../state/sync_provider.dart';
 import '../auth/cloud_sign_in_modal.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
@@ -65,9 +66,7 @@ class AccountCard extends ConsumerWidget {
               variant: AppButtonVariant.ghost,
               icon: Icons.logout,
               label: tr.account.signOut,
-              onPressed: () async {
-                await (await ref.read(cloudAuthProvider.future))?.signOut();
-              },
+              onPressed: () => ref.read(cloudSignOutProvider)(),
             ),
           ),
       ],

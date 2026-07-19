@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/db_key_manager.dart' show KeychainKeyStore;
 import '../data/sync/cck_service.dart';
@@ -7,6 +8,7 @@ import '../data/sync/content_crypto.dart';
 import '../data/sync/firestore_key_docs.dart';
 import '../data/sync/firestore_transport.dart';
 import '../data/sync/key_docs_gateway.dart';
+import '../data/sync/link_service.dart';
 import '../data/sync/sync_engine.dart';
 import '../data/sync/sync_seeder.dart';
 import '../data/sync/sync_transport.dart';
@@ -15,6 +17,7 @@ import '../models/membership.dart';
 import 'app_settings.dart';
 import 'cloud_auth.dart';
 import 'db_provider.dart';
+import 'sync_keys.dart' show syncOwnerUidKey;
 
 /// Cloud sync plumbing (phase 4b). Everything here is null unless the cloud
 /// is configured AND a user is signed in; the SecureKeyStore mirrors
@@ -50,6 +53,16 @@ final userKeyServiceProvider = Provider<UserKeyService?>((ref) {
   final uid = ref.watch(syncUidProvider);
   if (docs == null || uid == null) return null;
   return UserKeyService(ref.watch(syncKeyStoreProvider), docs, uid: uid);
+});
+
+/// Moves the identity seed between the user's own devices (QR / pasted
+/// code). Null until the cloud is up and someone is signed in.
+final linkServiceProvider = Provider<LinkService?>((ref) {
+  final docs = ref.watch(keyDocsProvider);
+  final userKeys = ref.watch(userKeyServiceProvider);
+  final uid = ref.watch(syncUidProvider);
+  if (docs == null || userKeys == null || uid == null) return null;
+  return LinkService(docs, userKeys, uid: uid);
 });
 
 final cckServiceProvider = Provider<CckService?>((ref) {
@@ -116,6 +129,35 @@ final isCongregationSyncedProvider =
   final memberships = ref.watch(myMembershipsProvider).value ?? const [];
   return memberships.any((m) => m.congregationId == congregationId);
 });
+
+/// THE sign-out path. Signing out unlinks this device: the E2E identity seed
+/// and every cached congregation key are wiped from the keychain, so a
+/// resold or lent device keeps nothing. Coming back means linking this
+/// device again from one that still syncs.
+///
+/// Every sign-out affordance must call this — never `CloudAuthService.signOut`
+/// directly, or the keys stay behind.
+final cloudSignOutProvider = Provider((ref) => () async {
+      final cck = ref.read(cckServiceProvider);
+      if (cck != null) {
+        final cids = <String>[
+          for (final m in ref.read(myMembershipsProvider).value ?? const [])
+            m.congregationId,
+        ];
+        // Best-effort: a keychain hiccup must never trap the user signed in.
+        try {
+          await cck.forget(cids);
+        } catch (_) {}
+      }
+      try {
+        await ref.read(userKeyServiceProvider)?.forget();
+      } catch (_) {}
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(syncOwnerUidKey);
+      } catch (_) {}
+      await (await ref.read(cloudAuthProvider.future))?.signOut();
+    });
 
 /// Orchestrates enabling cloud sync for a congregation (founder path):
 /// mint the CCK + create the cloud space, seed the whole subtree into the

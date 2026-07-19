@@ -32,6 +32,11 @@ abstract interface class SecureKeyStore {
   Future<String?> read(String key);
   Future<void> write(String key, String value);
   Future<void> delete(String key);
+
+  /// Every key this app stored. Needed to wipe uid-scoped entries (the sync
+  /// identity seed and per-congregation keys) whose exact names aren't known
+  /// at reset time.
+  Future<Set<String>> keys();
 }
 
 class KeychainKeyStore implements SecureKeyStore {
@@ -58,6 +63,9 @@ class KeychainKeyStore implements SecureKeyStore {
 
   @override
   Future<void> delete(String key) => _storage.delete(key: key);
+
+  @override
+  Future<Set<String>> keys() async => (await _storage.readAll()).keys.toSet();
 }
 
 enum LocalKeyStatus {
@@ -241,7 +249,12 @@ class DbKeyManager {
     }
   }
 
-  /// Delete all key material. The encrypted DB file becomes unreadable
+  /// Namespace of the E2E sync key material (identity seed + per-congregation
+  /// keyrings). Those names embed the uid, so a wipe has to match by prefix.
+  static const syncKeyPrefix = 'jw_program.sync.';
+
+  /// Delete all key material — the DB keys AND every sync key of every
+  /// account that used this device. The encrypted DB file becomes unreadable
   /// forever; callers must also delete the DB file ("forgot password" reset).
   Future<void> destroyAll() async {
     try {
@@ -249,6 +262,9 @@ class DbKeyManager {
       await _store.delete(legacyKeyName);
       await _store.delete(cloudKeyName);
       await _store.delete(deviceUnlockKeyName);
+      for (final key in await _store.keys()) {
+        if (key.startsWith(syncKeyPrefix)) await _store.delete(key);
+      }
     } catch (e) {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }

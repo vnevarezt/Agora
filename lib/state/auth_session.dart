@@ -8,6 +8,7 @@ import '../data/db/connection.dart';
 import '../data/db/db_key_manager.dart';
 import '../data/device_auth.dart';
 import 'cloud_auth.dart';
+import 'sync_keys.dart' show syncOwnerUidKey;
 
 final dbKeyManagerProvider = Provider<DbKeyManager>((ref) => DbKeyManager());
 
@@ -273,6 +274,9 @@ class SessionController extends Notifier<SessionState> {
     await prefs.remove(_modeKey);
     await prefs.remove(_nameKey);
     await prefs.remove(_deviceUnlockKey);
+    // The sync identity is gone with the keychain: don't leave this device
+    // claimed by an account it can no longer prove.
+    await prefs.remove(syncOwnerUidKey);
     _mode = null;
     _profileName = null;
     _deviceUnlockPref = false;
