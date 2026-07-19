@@ -282,12 +282,6 @@ class Translations$cloudSync$es {
 	/// es: 'Sincronización activa'
 	String get ready => 'Sincronización activa';
 
-	/// es: 'Tus datos se sincronizan de forma cifrada.'
-	String get readyDesc => 'Tus datos se sincronizan de forma cifrada.';
-
-	/// es: 'Al día'
-	String get statusIdle => 'Al día';
-
 	/// es: 'Sincronizando…'
 	String get statusSyncing => 'Sincronizando…';
 
@@ -300,17 +294,8 @@ class Translations$cloudSync$es {
 	/// es: 'Última sincronización: {when}'
 	String lastSync({required Object when}) => 'Última sincronización: ${when}';
 
-	/// es: 'Aún no se ha sincronizado'
-	String get neverSynced => 'Aún no se ha sincronizado';
-
-	/// es: '{n} cambios pendientes'
-	String pending({required Object n}) => '${n} cambios pendientes';
-
-	/// es: 'Sincronizar ahora'
-	String get syncNow => 'Sincronizar ahora';
-
-	/// es: 'Estos datos pertenecen a otra cuenta en este dispositivo. La sincronización está desactivada.'
-	String get otherAccount => 'Estos datos pertenecen a otra cuenta en este dispositivo. La sincronización está desactivada.';
+	/// es: 'Se sincronizará automáticamente'
+	String get neverSynced => 'Se sincronizará automáticamente';
 
 	/// es: 'Ya no tienes acceso a una congregación; tus datos locales se conservan.'
 	String get errorPermission => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.';
@@ -320,33 +305,6 @@ class Translations$cloudSync$es {
 
 	/// es: 'Ocurrió un error al sincronizar.'
 	String get errorUnknown => 'Ocurrió un error al sincronizar.';
-
-	/// es: 'Sincronizar esta congregación'
-	String get enableTitle => 'Sincronizar esta congregación';
-
-	/// es: 'Sube esta congregación cifrada a la nube para compartirla y sincronizarla.'
-	String get enableDesc => 'Sube esta congregación cifrada a la nube para compartirla y sincronizarla.';
-
-	/// es: 'Activar en la nube'
-	String get enable => 'Activar en la nube';
-
-	/// es: 'Activando…'
-	String get enabling => 'Activando…';
-
-	/// es: 'Sincronización activada.'
-	String get enabled => 'Sincronización activada.';
-
-	/// es: 'Inicia sesión en la nube para activar la sincronización.'
-	String get enableSignInFirst => 'Inicia sesión en la nube para activar la sincronización.';
-
-	/// es: 'Crea tu frase de sincronización en la tarjeta de Sincronización.'
-	String get enableSetupKeysFirst => 'Crea tu frase de sincronización en la tarjeta de Sincronización.';
-
-	/// es: 'En la nube'
-	String get syncedBadge => 'En la nube';
-
-	/// es: 'Solo en este dispositivo'
-	String get localBadge => 'Solo en este dispositivo';
 }
 
 // Path: account
@@ -1832,28 +1790,14 @@ extension on Translations {
 			'cloudSync.wrongPassphrase' => 'Frase incorrecta.',
 			'cloudSync.unknownError' => 'No se pudo completar. Inténtalo de nuevo.',
 			'cloudSync.ready' => 'Sincronización activa',
-			'cloudSync.readyDesc' => 'Tus datos se sincronizan de forma cifrada.',
-			'cloudSync.statusIdle' => 'Al día',
 			'cloudSync.statusSyncing' => 'Sincronizando…',
 			'cloudSync.statusOffline' => 'Sin conexión',
 			'cloudSync.statusError' => 'Error de sincronización',
 			'cloudSync.lastSync' => ({required Object when}) => 'Última sincronización: ${when}',
-			'cloudSync.neverSynced' => 'Aún no se ha sincronizado',
-			'cloudSync.pending' => ({required Object n}) => '${n} cambios pendientes',
-			'cloudSync.syncNow' => 'Sincronizar ahora',
-			'cloudSync.otherAccount' => 'Estos datos pertenecen a otra cuenta en este dispositivo. La sincronización está desactivada.',
+			'cloudSync.neverSynced' => 'Se sincronizará automáticamente',
 			'cloudSync.errorPermission' => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.',
 			'cloudSync.errorOffline' => 'Sin conexión; se reintentará automáticamente.',
 			'cloudSync.errorUnknown' => 'Ocurrió un error al sincronizar.',
-			'cloudSync.enableTitle' => 'Sincronizar esta congregación',
-			'cloudSync.enableDesc' => 'Sube esta congregación cifrada a la nube para compartirla y sincronizarla.',
-			'cloudSync.enable' => 'Activar en la nube',
-			'cloudSync.enabling' => 'Activando…',
-			'cloudSync.enabled' => 'Sincronización activada.',
-			'cloudSync.enableSignInFirst' => 'Inicia sesión en la nube para activar la sincronización.',
-			'cloudSync.enableSetupKeysFirst' => 'Crea tu frase de sincronización en la tarjeta de Sincronización.',
-			'cloudSync.syncedBadge' => 'En la nube',
-			'cloudSync.localBadge' => 'Solo en este dispositivo',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',

@@ -173,28 +173,14 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get wrongPassphrase => 'Wrong passphrase.';
 	@override String get unknownError => 'Couldn\'t complete. Please try again.';
 	@override String get ready => 'Sync is on';
-	@override String get readyDesc => 'Your data syncs encrypted.';
-	@override String get statusIdle => 'Up to date';
 	@override String get statusSyncing => 'Syncing…';
 	@override String get statusOffline => 'Offline';
 	@override String get statusError => 'Sync error';
 	@override String lastSync({required Object when}) => 'Last sync: ${when}';
-	@override String get neverSynced => 'Not synced yet';
-	@override String pending({required Object n}) => '${n} pending changes';
-	@override String get syncNow => 'Sync now';
-	@override String get otherAccount => 'This data belongs to another account on this device. Sync is disabled.';
+	@override String get neverSynced => 'Will sync automatically';
 	@override String get errorPermission => 'You no longer have access to a congregation; your local data is kept.';
 	@override String get errorOffline => 'Offline; will retry automatically.';
 	@override String get errorUnknown => 'Something went wrong while syncing.';
-	@override String get enableTitle => 'Sync this congregation';
-	@override String get enableDesc => 'Upload this congregation encrypted to the cloud to share and sync it.';
-	@override String get enable => 'Enable in cloud';
-	@override String get enabling => 'Enabling…';
-	@override String get enabled => 'Sync enabled.';
-	@override String get enableSignInFirst => 'Sign in to the cloud to enable syncing.';
-	@override String get enableSetupKeysFirst => 'Create your sync passphrase in the Sync card.';
-	@override String get syncedBadge => 'In the cloud';
-	@override String get localBadge => 'This device only';
 }
 
 // Path: account
@@ -978,28 +964,14 @@ extension on TranslationsEn {
 			'cloudSync.wrongPassphrase' => 'Wrong passphrase.',
 			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
 			'cloudSync.ready' => 'Sync is on',
-			'cloudSync.readyDesc' => 'Your data syncs encrypted.',
-			'cloudSync.statusIdle' => 'Up to date',
 			'cloudSync.statusSyncing' => 'Syncing…',
 			'cloudSync.statusOffline' => 'Offline',
 			'cloudSync.statusError' => 'Sync error',
 			'cloudSync.lastSync' => ({required Object when}) => 'Last sync: ${when}',
-			'cloudSync.neverSynced' => 'Not synced yet',
-			'cloudSync.pending' => ({required Object n}) => '${n} pending changes',
-			'cloudSync.syncNow' => 'Sync now',
-			'cloudSync.otherAccount' => 'This data belongs to another account on this device. Sync is disabled.',
+			'cloudSync.neverSynced' => 'Will sync automatically',
 			'cloudSync.errorPermission' => 'You no longer have access to a congregation; your local data is kept.',
 			'cloudSync.errorOffline' => 'Offline; will retry automatically.',
 			'cloudSync.errorUnknown' => 'Something went wrong while syncing.',
-			'cloudSync.enableTitle' => 'Sync this congregation',
-			'cloudSync.enableDesc' => 'Upload this congregation encrypted to the cloud to share and sync it.',
-			'cloudSync.enable' => 'Enable in cloud',
-			'cloudSync.enabling' => 'Enabling…',
-			'cloudSync.enabled' => 'Sync enabled.',
-			'cloudSync.enableSignInFirst' => 'Sign in to the cloud to enable syncing.',
-			'cloudSync.enableSetupKeysFirst' => 'Create your sync passphrase in the Sync card.',
-			'cloudSync.syncedBadge' => 'In the cloud',
-			'cloudSync.localBadge' => 'This device only',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',

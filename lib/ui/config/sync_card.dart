@@ -77,24 +77,12 @@ class SyncCard extends ConsumerWidget {
 
   List<Widget> _readyRows(BuildContext context, WidgetRef ref, Translations tr) {
     final status = ref.watch(syncControllerProvider);
-    final controller = ref.read(syncControllerProvider.notifier);
     final (label, sub) = _statusText(tr, status);
 
     return [
-      SettingRow(
-        first: true,
-        title: label,
-        subtitle: sub,
-        trailing: AppButton(
-          variant: AppButtonVariant.ghost,
-          icon: Icons.sync,
-          label: tr.cloudSync.syncNow,
-          busy: status.phase == SyncPhase.syncing,
-          onPressed: status.phase == SyncPhase.syncing
-              ? null
-              : controller.syncNow,
-        ),
-      ),
+      // Purely informational: sync runs itself (pushes retry on reconnect,
+      // pulls follow the activity heartbeat), so there is nothing to press.
+      SettingRow(first: true, title: label, subtitle: sub),
       SettingRow(
         title: tr.cloudSync.change,
         subtitle: tr.cloudSync.changePassphrase,
@@ -116,8 +104,6 @@ class SyncCard extends ConsumerWidget {
     final when = s.lastSyncAt == null
         ? tr.cloudSync.neverSynced
         : tr.cloudSync.lastSync(when: relativeEditedLabel(s.lastSyncAt!));
-    final pending =
-        s.pendingOutbox > 0 ? ' · ${tr.cloudSync.pending(n: s.pendingOutbox)}' : '';
     return switch (s.phase) {
       SyncPhase.syncing => (tr.cloudSync.statusSyncing, when),
       SyncPhase.offline => (tr.cloudSync.statusOffline, tr.cloudSync.errorOffline),
@@ -129,7 +115,7 @@ class SyncCard extends ConsumerWidget {
             _ => tr.cloudSync.errorUnknown,
           }
         ),
-      _ => (tr.cloudSync.ready, '$when$pending'),
+      _ => (tr.cloudSync.ready, when),
     };
   }
 
