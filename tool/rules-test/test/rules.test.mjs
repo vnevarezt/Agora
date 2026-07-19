@@ -350,7 +350,10 @@ describe('members and users docs', () => {
   });
 
   it('users/{uid} is owner-only', async () => {
-    await assertSucceeds(setDoc(doc(db('ana'), 'users/ana'), { pubKey: 'p', wrappedPrivKey: 'w' }));
+    // Shape and identity-key rules live in linking.test.mjs; this pins the
+    // cross-account boundary.
+    await assertSucceeds(setDoc(doc(db('ana'), 'users/ana'),
+      { pubKey: 'p', keyUpdatedAt: serverTimestamp(), createdAt: serverTimestamp() }));
     await assertFails(getDoc(doc(db('bob'), 'users/ana')));
     await assertFails(setDoc(doc(db('bob'), 'users/ana'), { pubKey: 'x' }));
   });
