@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../data/sync/link_service.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/dashboard_provider.dart' show relativeEditedLabel;
 import '../../state/sync_controller.dart';
 import '../../state/sync_keys.dart';
+import '../../state/sync_provider.dart' show linkServiceProvider;
+import '../auth/widgets/auth_error_text.dart';
+import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
-import '../auth/widgets/auth_error_text.dart';
 import 'settings_card.dart';
 
-/// Settings card for cloud sync (phase 4b). Drives the sync passphrase
-/// lifecycle and shows the engine status. Only rendered when the cloud is
-/// configured and a user is signed in (the caller gates on that).
+/// Settings card for cloud sync. There is no passphrase to manage: the first
+/// device mints the E2E identity silently and further devices are authorised
+/// from one that already syncs. Only rendered when signed in.
 class SyncCard extends ConsumerWidget {
   const SyncCard({super.key});
 
@@ -34,40 +39,31 @@ class SyncCard extends ConsumerWidget {
         SyncKeysLoading() => [
             const SettingRow(first: true, title: '…'),
           ],
-        SyncKeysNotSetUp() => [
+        SyncKeysNeedsLink() => [
             SettingRow(
               first: true,
-              title: tr.cloudSync.setupTitle,
-              subtitle: tr.cloudSync.setupDesc,
+              title: tr.cloudSync.needsLinkTitle,
+              subtitle: tr.cloudSync.needsLinkDesc,
               trailing: AppButton(
-                icon: Icons.cloud_sync_outlined,
-                label: tr.cloudSync.create,
-                onPressed: () => _openPassphrase(context, setup: true),
+                icon: Icons.link,
+                label: tr.cloudSync.linkThisDevice,
+                onPressed: () => showAppModal<void>(
+                  context,
+                  builder: (ctx, sheet, close) =>
+                      _LinkThisDeviceModal(sheet: sheet, onClose: close),
+                ),
               ),
             ),
           ],
-        SyncKeysLocked() => [
+        SyncKeysError(:final messageKey) => [
             SettingRow(
               first: true,
-              title: tr.cloudSync.unlockTitle,
-              subtitle: tr.cloudSync.unlockDesc,
-              trailing: AppButton(
-                icon: Icons.lock_open_outlined,
-                label: tr.cloudSync.unlock,
-                onPressed: () => _openPassphrase(context, setup: false),
-              ),
-            ),
-          ],
-        SyncKeysError() => [
-            SettingRow(
-              first: true,
-              title: tr.cloudSync.unlockTitle,
-              subtitle: tr.cloudSync.unknownError,
-              trailing: AppButton(
-                icon: Icons.lock_open_outlined,
-                label: tr.cloudSync.unlock,
-                onPressed: () => _openPassphrase(context, setup: false),
-              ),
+              title: tr.cloudSync.statusError,
+              subtitle: switch (messageKey) {
+                'identityMismatch' => tr.cloudSync.identityMismatch,
+                'badCode' => tr.cloudSync.badCode,
+                _ => tr.cloudSync.unknownError,
+              },
             ),
           ],
         SyncKeysReady() => _readyRows(context, ref, tr),
@@ -76,24 +72,22 @@ class SyncCard extends ConsumerWidget {
   }
 
   List<Widget> _readyRows(BuildContext context, WidgetRef ref, Translations tr) {
-    final status = ref.watch(syncControllerProvider);
-    final (label, sub) = _statusText(tr, status);
-
+    final (label, sub) = _statusText(tr, ref.watch(syncControllerProvider));
     return [
       // Purely informational: sync runs itself (pushes retry on reconnect,
       // pulls follow the activity heartbeat), so there is nothing to press.
       SettingRow(first: true, title: label, subtitle: sub),
       SettingRow(
-        title: tr.cloudSync.change,
-        subtitle: tr.cloudSync.changePassphrase,
+        title: tr.cloudSync.linkOther,
+        subtitle: tr.cloudSync.linkOtherDesc,
         trailing: AppButton(
           variant: AppButtonVariant.ghost,
-          icon: Icons.key_outlined,
-          label: tr.cloudSync.change,
+          icon: Icons.add_link,
+          label: tr.cloudSync.approve,
           onPressed: () => showAppModal<void>(
             context,
             builder: (ctx, sheet, close) =>
-                _ChangePassphraseModal(sheet: sheet, onClose: close),
+                _ApproveDeviceModal(sheet: sheet, onClose: close),
           ),
         ),
       ),
@@ -118,120 +112,160 @@ class SyncCard extends ConsumerWidget {
       _ => (tr.cloudSync.ready, when),
     };
   }
-
-  void _openPassphrase(BuildContext context, {required bool setup}) {
-    showAppModal<void>(
-      context,
-      builder: (ctx, sheet, close) =>
-          _PassphraseModal(sheet: sheet, onClose: close, setup: setup),
-    );
-  }
 }
 
-/// Create (setup) or enter (unlock) the sync passphrase.
-class _PassphraseModal extends ConsumerStatefulWidget {
-  const _PassphraseModal({
-    required this.sheet,
-    required this.onClose,
-    required this.setup,
-  });
+/// NEW device: shows the linking code and waits for another device to
+/// approve it. The code carries the ephemeral public key out of band — that
+/// is what stops the server from substituting its own.
+class _LinkThisDeviceModal extends ConsumerStatefulWidget {
+  const _LinkThisDeviceModal({required this.sheet, required this.onClose});
 
   final bool sheet;
   final VoidCallback onClose;
-  final bool setup;
 
   @override
-  ConsumerState<_PassphraseModal> createState() => _PassphraseModalState();
+  ConsumerState<_LinkThisDeviceModal> createState() =>
+      _LinkThisDeviceModalState();
 }
 
-class _PassphraseModalState extends ConsumerState<_PassphraseModal> {
-  static const _minLength = 8;
-
-  String _passphrase = '';
-  String _confirm = '';
-  bool _busy = false;
+class _LinkThisDeviceModalState extends ConsumerState<_LinkThisDeviceModal> {
+  LinkSession? _session;
+  bool _expired = false;
   String? _error;
 
-  Future<void> _submit() async {
-    final tr = context.t;
-    if (widget.setup) {
-      if (_passphrase.length < _minLength) {
-        setState(() => _error = tr.cloudSync.tooShort);
-        return;
-      }
-      if (_passphrase != _confirm) {
-        setState(() => _error = tr.cloudSync.mismatch);
-        return;
-      }
+  @override
+  void initState() {
+    super.initState();
+    _start();
+  }
+
+  @override
+  void dispose() {
+    // Don't leave a mailbox dangling if the user walks away.
+    final session = _session;
+    if (session != null) {
+      ref.read(linkServiceProvider)?.cancel(session);
     }
+    super.dispose();
+  }
+
+  Future<void> _start() async {
     setState(() {
-      _busy = true;
       _error = null;
+      _expired = false;
+      _session = null;
     });
-    final notifier = ref.read(syncKeysProvider.notifier);
     try {
-      if (widget.setup) {
-        await notifier.createPassphrase(_passphrase);
+      final session = await ref.read(syncKeysProvider.notifier).startLink();
+      if (!mounted) return;
+      setState(() => _session = session);
+
+      final linked =
+          await ref.read(syncKeysProvider.notifier).completeLink(session);
+      if (!mounted) return;
+      if (linked) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(context.t.cloudSync.linked)));
+        widget.onClose();
       } else {
-        await notifier.enterPassphrase(_passphrase);
+        setState(() => _expired = true);
       }
-      if (mounted) widget.onClose();
     } catch (reason) {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _error = reason == 'wrongPassphrase'
-              ? tr.cloudSync.wrongPassphrase
-              : tr.cloudSync.unknownError;
-        });
-      }
+      if (!mounted) return;
+      final tr = context.t;
+      setState(() => _error = reason == 'identityMismatch'
+          ? tr.cloudSync.identityMismatch
+          : tr.cloudSync.unknownError);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final tr = context.t;
-    final canSubmit = _passphrase.isNotEmpty &&
-        (!widget.setup || _confirm.isNotEmpty) &&
-        !_busy;
+    final t = context.tokens;
+    final session = _session;
 
     return ModalShell(
       sheet: widget.sheet,
       onClose: widget.onClose,
-      title: widget.setup ? tr.cloudSync.setupTitle : tr.cloudSync.unlockTitle,
-      desc: widget.setup ? tr.cloudSync.setupDesc : tr.cloudSync.unlockDesc,
-      primaryLabel: widget.setup ? tr.cloudSync.create : tr.cloudSync.unlock,
-      primaryBusy: _busy,
-      onPrimary: canSubmit ? _submit : null,
+      title: tr.cloudSync.linkModalTitle,
+      desc: tr.cloudSync.linkModalDesc,
+      primaryLabel: _expired ? tr.cloudSync.regenerate : tr.common.close,
+      onPrimary: _expired ? _start : widget.onClose,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LabeledField(
-            label: tr.cloudSync.passphrase,
-            child: BoundTextField(
-              initial: '',
-              onChanged: (v) => setState(() {
-                _passphrase = v;
-                _error = null;
-              }),
-              hint: tr.cloudSync.passphraseHint,
-              obscureText: true,
-              autofocus: true,
-              onSubmitted: (_) => canSubmit ? _submit() : null,
+          if (session == null && _error == null)
+            const Center(child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ))
+          else if (session != null) ...[
+            // The QR is the convenient path (the other device scans it); the
+            // text below is the universal one — desktop can't scan.
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: t.border),
+                ),
+                child: QrImageView(
+                  data: session.code,
+                  size: 180,
+                  backgroundColor: Colors.white,
+                  errorCorrectionLevel: QrErrorCorrectLevel.M,
+                ),
+              ),
             ),
-          ),
-          if (widget.setup) ...[
             const SizedBox(height: 14),
             LabeledField(
-              label: tr.cloudSync.confirmPassphrase,
-              child: BoundTextField(
-                initial: '',
-                onChanged: (v) => setState(() {
-                  _confirm = v;
-                  _error = null;
-                }),
-                obscureText: true,
-                onSubmitted: (_) => canSubmit ? _submit() : null,
+              label: tr.cloudSync.linkCode,
+              child: SelectableText(
+                session.code,
+                style: TextStyle(
+                  fontFamily: 'JetBrainsMono',
+                  fontSize: 11.5,
+                  height: 1.5,
+                  color: t.text,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppButton(
+                variant: AppButtonVariant.ghost,
+                icon: Icons.copy_all_outlined,
+                label: tr.cloudSync.copyCode,
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: session.code));
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(tr.cloudSync.codeCopied)));
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              tr.cloudSync.shareWarning,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+                color: t.textMute,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _expired
+                  ? tr.cloudSync.linkExpired
+                  : tr.cloudSync.waitingApproval,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: _expired ? t.textMute : t.accentStrong,
               ),
             ),
           ],
@@ -242,109 +276,73 @@ class _PassphraseModalState extends ConsumerState<_PassphraseModal> {
   }
 }
 
-class _ChangePassphraseModal extends ConsumerStatefulWidget {
-  const _ChangePassphraseModal({required this.sheet, required this.onClose});
+/// EXISTING device: paste the code the new device shows and hand over the
+/// identity, sealed to the key that came in the code.
+class _ApproveDeviceModal extends ConsumerStatefulWidget {
+  const _ApproveDeviceModal({required this.sheet, required this.onClose});
 
   final bool sheet;
   final VoidCallback onClose;
 
   @override
-  ConsumerState<_ChangePassphraseModal> createState() =>
-      _ChangePassphraseModalState();
+  ConsumerState<_ApproveDeviceModal> createState() =>
+      _ApproveDeviceModalState();
 }
 
-class _ChangePassphraseModalState
-    extends ConsumerState<_ChangePassphraseModal> {
-  static const _minLength = 8;
-
-  String _current = '';
-  String _next = '';
-  String _confirm = '';
+class _ApproveDeviceModalState extends ConsumerState<_ApproveDeviceModal> {
+  String _code = '';
   bool _busy = false;
   String? _error;
 
   Future<void> _submit() async {
     final tr = context.t;
-    if (_next.length < _minLength) {
-      setState(() => _error = tr.cloudSync.tooShort);
-      return;
-    }
-    if (_next != _confirm) {
-      setState(() => _error = tr.cloudSync.mismatch);
-      return;
-    }
+    final messenger = ScaffoldMessenger.of(context);
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      await ref.read(syncKeysProvider.notifier).changePassphrase(_current, _next);
-      if (mounted) widget.onClose();
+      await ref.read(syncKeysProvider.notifier).approveLink(_code.trim());
+      if (!mounted) return;
+      widget.onClose();
+      messenger.showSnackBar(SnackBar(content: Text(tr.cloudSync.approved)));
     } catch (reason) {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-          _error = reason == 'wrongPassphrase'
-              ? tr.cloudSync.wrongPassphrase
-              : tr.cloudSync.unknownError;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = reason == 'badCode'
+            ? tr.cloudSync.badCode
+            : tr.cloudSync.unknownError;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final tr = context.t;
-    final canSubmit = _current.isNotEmpty &&
-        _next.isNotEmpty &&
-        _confirm.isNotEmpty &&
-        !_busy;
-
     return ModalShell(
       sheet: widget.sheet,
       onClose: widget.onClose,
-      title: tr.cloudSync.changePassphrase,
-      primaryLabel: tr.cloudSync.change,
+      title: tr.cloudSync.approveTitle,
+      desc: tr.cloudSync.approveDesc,
+      primaryLabel: tr.cloudSync.approve,
       primaryBusy: _busy,
-      onPrimary: canSubmit ? _submit : null,
+      onPrimary: _code.trim().isEmpty || _busy ? null : _submit,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           LabeledField(
-            label: tr.cloudSync.currentPassphrase,
+            label: tr.cloudSync.linkCode,
             child: BoundTextField(
               initial: '',
               onChanged: (v) => setState(() {
-                _current = v;
+                _code = v;
                 _error = null;
               }),
-              obscureText: true,
+              hint: 'agora-link:1:…',
               autofocus: true,
-            ),
-          ),
-          const SizedBox(height: 14),
-          LabeledField(
-            label: tr.cloudSync.newPassphrase,
-            child: BoundTextField(
-              initial: '',
-              onChanged: (v) => setState(() {
-                _next = v;
-                _error = null;
-              }),
-              obscureText: true,
-            ),
-          ),
-          const SizedBox(height: 14),
-          LabeledField(
-            label: tr.cloudSync.confirmPassphrase,
-            child: BoundTextField(
-              initial: '',
-              onChanged: (v) => setState(() {
-                _confirm = v;
-                _error = null;
-              }),
-              obscureText: true,
-              onSubmitted: (_) => canSubmit ? _submit() : null,
+              onSubmitted: (_) =>
+                  _code.trim().isEmpty || _busy ? null : _submit(),
             ),
           ),
           AuthErrorText(_error),

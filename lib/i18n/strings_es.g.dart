@@ -222,59 +222,11 @@ class Translations$cloudSync$es {
 	/// es: 'Sincronización en la nube'
 	String get title => 'Sincronización en la nube';
 
-	/// es: 'Comparte y sincroniza tus datos cifrados de extremo a extremo entre dispositivos.'
-	String get desc => 'Comparte y sincroniza tus datos cifrados de extremo a extremo entre dispositivos.';
+	/// es: 'Tus programas y publicadores viajan cifrados de extremo a extremo: nadie más puede leerlos, ni siquiera nosotros.'
+	String get desc => 'Tus programas y publicadores viajan cifrados de extremo a extremo: nadie más puede leerlos, ni siquiera nosotros.';
 
 	/// es: 'Inicia sesión en la nube para activar la sincronización.'
 	String get signedOut => 'Inicia sesión en la nube para activar la sincronización.';
-
-	/// es: 'Crea tu frase de sincronización'
-	String get setupTitle => 'Crea tu frase de sincronización';
-
-	/// es: 'Cifra tus datos de extremo a extremo. La necesitarás en cada dispositivo nuevo. Si la olvidas, tendrás que pedir que te vuelvan a invitar: no podemos recuperarla.'
-	String get setupDesc => 'Cifra tus datos de extremo a extremo. La necesitarás en cada dispositivo nuevo. Si la olvidas, tendrás que pedir que te vuelvan a invitar: no podemos recuperarla.';
-
-	/// es: 'Introduce tu frase de sincronización'
-	String get unlockTitle => 'Introduce tu frase de sincronización';
-
-	/// es: 'Este dispositivo necesita tu frase para descifrar tus datos.'
-	String get unlockDesc => 'Este dispositivo necesita tu frase para descifrar tus datos.';
-
-	/// es: 'Frase de sincronización'
-	String get passphrase => 'Frase de sincronización';
-
-	/// es: 'Mínimo 8 caracteres'
-	String get passphraseHint => 'Mínimo 8 caracteres';
-
-	/// es: 'Confirmar frase'
-	String get confirmPassphrase => 'Confirmar frase';
-
-	/// es: 'Activar sincronización'
-	String get create => 'Activar sincronización';
-
-	/// es: 'Desbloquear'
-	String get unlock => 'Desbloquear';
-
-	/// es: 'Cambiar frase'
-	String get change => 'Cambiar frase';
-
-	/// es: 'Cambiar frase de sincronización'
-	String get changePassphrase => 'Cambiar frase de sincronización';
-
-	/// es: 'Frase actual'
-	String get currentPassphrase => 'Frase actual';
-
-	/// es: 'Frase nueva'
-	String get newPassphrase => 'Frase nueva';
-
-	/// es: 'La frase debe tener al menos 8 caracteres.'
-	String get tooShort => 'La frase debe tener al menos 8 caracteres.';
-
-	/// es: 'Las frases no coinciden.'
-	String get mismatch => 'Las frases no coinciden.';
-
-	/// es: 'Frase incorrecta.'
-	String get wrongPassphrase => 'Frase incorrecta.';
 
 	/// es: 'No se pudo completar. Inténtalo de nuevo.'
 	String get unknownError => 'No se pudo completar. Inténtalo de nuevo.';
@@ -305,6 +257,69 @@ class Translations$cloudSync$es {
 
 	/// es: 'Ocurrió un error al sincronizar.'
 	String get errorUnknown => 'Ocurrió un error al sincronizar.';
+
+	/// es: 'Vincula este dispositivo'
+	String get needsLinkTitle => 'Vincula este dispositivo';
+
+	/// es: 'Tus datos están cifrados con una llave que solo tienen tus dispositivos. Autoriza este desde otro que ya esté sincronizando.'
+	String get needsLinkDesc => 'Tus datos están cifrados con una llave que solo tienen tus dispositivos. Autoriza este desde otro que ya esté sincronizando.';
+
+	/// es: 'Vincular'
+	String get linkThisDevice => 'Vincular';
+
+	/// es: 'Vincular este dispositivo'
+	String get linkModalTitle => 'Vincular este dispositivo';
+
+	/// es: 'En un dispositivo donde ya uses Agora, entra en Configuración → Sincronización → «Vincular otro dispositivo» y escanea el código o pégalo.'
+	String get linkModalDesc => 'En un dispositivo donde ya uses Agora, entra en Configuración → Sincronización → «Vincular otro dispositivo» y escanea el código o pégalo.';
+
+	/// es: 'Código de vinculación'
+	String get linkCode => 'Código de vinculación';
+
+	/// es: 'Copiar código'
+	String get copyCode => 'Copiar código';
+
+	/// es: 'Código copiado.'
+	String get codeCopied => 'Código copiado.';
+
+	/// es: 'Compártelo solo contigo o en persona: quien lo tenga podría vincular un dispositivo.'
+	String get shareWarning => 'Compártelo solo contigo o en persona: quien lo tenga podría vincular un dispositivo.';
+
+	/// es: 'Esperando la autorización…'
+	String get waitingApproval => 'Esperando la autorización…';
+
+	/// es: 'El código caducó. Genera uno nuevo.'
+	String get linkExpired => 'El código caducó. Genera uno nuevo.';
+
+	/// es: 'Generar otro'
+	String get regenerate => 'Generar otro';
+
+	/// es: 'Dispositivo vinculado.'
+	String get linked => 'Dispositivo vinculado.';
+
+	/// es: 'Vincular otro dispositivo'
+	String get linkOther => 'Vincular otro dispositivo';
+
+	/// es: 'Autoriza un dispositivo nuevo pegando el código que muestra.'
+	String get linkOtherDesc => 'Autoriza un dispositivo nuevo pegando el código que muestra.';
+
+	/// es: 'Autorizar dispositivo'
+	String get approveTitle => 'Autorizar dispositivo';
+
+	/// es: 'Pega aquí el código que muestra el dispositivo nuevo. Le enviaremos tu llave cifrada; el servidor no puede leerla.'
+	String get approveDesc => 'Pega aquí el código que muestra el dispositivo nuevo. Le enviaremos tu llave cifrada; el servidor no puede leerla.';
+
+	/// es: 'Autorizar'
+	String get approve => 'Autorizar';
+
+	/// es: 'Dispositivo autorizado.'
+	String get approved => 'Dispositivo autorizado.';
+
+	/// es: 'Ese código no es válido o ya caducó.'
+	String get badCode => 'Ese código no es válido o ya caducó.';
+
+	/// es: 'La respuesta no corresponde a tu cuenta. No se vinculó nada.'
+	String get identityMismatch => 'La respuesta no corresponde a tu cuenta. No se vinculó nada.';
 }
 
 // Path: account
@@ -1770,24 +1785,8 @@ extension on Translations {
 			'security.unlockPrompt' => 'Desbloquea tus datos de Agora.',
 			'security.deviceUnlockKeyMissing' => 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.',
 			'cloudSync.title' => 'Sincronización en la nube',
-			'cloudSync.desc' => 'Comparte y sincroniza tus datos cifrados de extremo a extremo entre dispositivos.',
+			'cloudSync.desc' => 'Tus programas y publicadores viajan cifrados de extremo a extremo: nadie más puede leerlos, ni siquiera nosotros.',
 			'cloudSync.signedOut' => 'Inicia sesión en la nube para activar la sincronización.',
-			'cloudSync.setupTitle' => 'Crea tu frase de sincronización',
-			'cloudSync.setupDesc' => 'Cifra tus datos de extremo a extremo. La necesitarás en cada dispositivo nuevo. Si la olvidas, tendrás que pedir que te vuelvan a invitar: no podemos recuperarla.',
-			'cloudSync.unlockTitle' => 'Introduce tu frase de sincronización',
-			'cloudSync.unlockDesc' => 'Este dispositivo necesita tu frase para descifrar tus datos.',
-			'cloudSync.passphrase' => 'Frase de sincronización',
-			'cloudSync.passphraseHint' => 'Mínimo 8 caracteres',
-			'cloudSync.confirmPassphrase' => 'Confirmar frase',
-			'cloudSync.create' => 'Activar sincronización',
-			'cloudSync.unlock' => 'Desbloquear',
-			'cloudSync.change' => 'Cambiar frase',
-			'cloudSync.changePassphrase' => 'Cambiar frase de sincronización',
-			'cloudSync.currentPassphrase' => 'Frase actual',
-			'cloudSync.newPassphrase' => 'Frase nueva',
-			'cloudSync.tooShort' => 'La frase debe tener al menos 8 caracteres.',
-			'cloudSync.mismatch' => 'Las frases no coinciden.',
-			'cloudSync.wrongPassphrase' => 'Frase incorrecta.',
 			'cloudSync.unknownError' => 'No se pudo completar. Inténtalo de nuevo.',
 			'cloudSync.ready' => 'Sincronización activa',
 			'cloudSync.statusSyncing' => 'Sincronizando…',
@@ -1798,6 +1797,27 @@ extension on Translations {
 			'cloudSync.errorPermission' => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.',
 			'cloudSync.errorOffline' => 'Sin conexión; se reintentará automáticamente.',
 			'cloudSync.errorUnknown' => 'Ocurrió un error al sincronizar.',
+			'cloudSync.needsLinkTitle' => 'Vincula este dispositivo',
+			'cloudSync.needsLinkDesc' => 'Tus datos están cifrados con una llave que solo tienen tus dispositivos. Autoriza este desde otro que ya esté sincronizando.',
+			'cloudSync.linkThisDevice' => 'Vincular',
+			'cloudSync.linkModalTitle' => 'Vincular este dispositivo',
+			'cloudSync.linkModalDesc' => 'En un dispositivo donde ya uses Agora, entra en Configuración → Sincronización → «Vincular otro dispositivo» y escanea el código o pégalo.',
+			'cloudSync.linkCode' => 'Código de vinculación',
+			'cloudSync.copyCode' => 'Copiar código',
+			'cloudSync.codeCopied' => 'Código copiado.',
+			'cloudSync.shareWarning' => 'Compártelo solo contigo o en persona: quien lo tenga podría vincular un dispositivo.',
+			'cloudSync.waitingApproval' => 'Esperando la autorización…',
+			'cloudSync.linkExpired' => 'El código caducó. Genera uno nuevo.',
+			'cloudSync.regenerate' => 'Generar otro',
+			'cloudSync.linked' => 'Dispositivo vinculado.',
+			'cloudSync.linkOther' => 'Vincular otro dispositivo',
+			'cloudSync.linkOtherDesc' => 'Autoriza un dispositivo nuevo pegando el código que muestra.',
+			'cloudSync.approveTitle' => 'Autorizar dispositivo',
+			'cloudSync.approveDesc' => 'Pega aquí el código que muestra el dispositivo nuevo. Le enviaremos tu llave cifrada; el servidor no puede leerla.',
+			'cloudSync.approve' => 'Autorizar',
+			'cloudSync.approved' => 'Dispositivo autorizado.',
+			'cloudSync.badCode' => 'Ese código no es válido o ya caducó.',
+			'cloudSync.identityMismatch' => 'La respuesta no corresponde a tu cuenta. No se vinculó nada.',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',
