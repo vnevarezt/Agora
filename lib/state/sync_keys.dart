@@ -112,9 +112,10 @@ class SyncKeysController extends Notifier<SyncKeysState> {
     }
   }
 
-  /// Account-switch guard: sync data belongs to ONE uid on this device (per
-  /// the deferred per-uid DB, see the 4b plan). Remembers the owner on first
-  /// setup; [ownsThisDevice] flags a mismatch so the UI refuses to sync.
+  /// Account-switch guard: this device's data belongs to ONE uid (per-uid
+  /// databases are deferred). Remembers the owner on first setup;
+  /// [ownsThisDevice] is false when a DIFFERENT account signed in later, and
+  /// SyncController refuses to upload this device's data to it.
   Future<void> _rememberOwner() async {
     final uid = ref.read(syncUidProvider);
     if (uid == null) return;

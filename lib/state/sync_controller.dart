@@ -10,8 +10,10 @@ import '../data/sync/firestore_transport.dart';
 import '../data/sync/pull_policy.dart';
 import '../data/sync/sync_engine.dart';
 import 'app_settings.dart';
+import 'dashboard_provider.dart';
 import 'db_provider.dart';
 import 'editor_session.dart';
+import 'sync_keys.dart';
 import 'sync_provider.dart';
 import 'ui_state.dart';
 
@@ -81,6 +83,10 @@ class SyncController extends Notifier<SyncStatus> {
   AppLifecycleListener? _lifecycle;
   final _heartbeatSubs = <String, StreamSubscription<void>>{};
   final _staleCids = <String>{};
+
+  /// Congregations this session already tried to put in the cloud.
+  final _autoEnabled = <String>{};
+  bool _autoEnabling = false;
   bool _pushing = false;
   bool _pulling = false;
 
@@ -102,7 +108,10 @@ class SyncController extends Notifier<SyncStatus> {
     // let the user see stale data they're looking at).
     ref.listen(myMembershipsProvider, (_, next) {
       _attachHeartbeats({for (final m in next.value ?? []) m.congregationId});
+      _autoEnable();
     });
+    // A congregation created locally must reach the cloud on its own.
+    ref.listen(congregationsProvider, (_, _) => _autoEnable());
     ref.listen(editorProjectProvider, (_, next) {
       if (next != null) _flushStale();
     });
@@ -124,6 +133,7 @@ class SyncController extends Notifier<SyncStatus> {
     }
     _heartbeatSubs.clear();
     _staleCids.clear();
+    _autoEnabled.clear();
     _pushTimer = _lazyTimer = _retryTimer = null;
     _outboxSub = null;
     _connectivitySub = null;
@@ -147,7 +157,11 @@ class SyncController extends Notifier<SyncStatus> {
     // own and redeliver anything missed.)
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       final online = results.any((r) => r != ConnectivityResult.none);
-      if (online && state.pendingOutbox > 0) _schedulePush();
+      if (!online) return;
+      // A failed auto-enable was most likely the network: let it retry.
+      _autoEnabled.clear();
+      _autoEnable();
+      if (state.pendingOutbox > 0) _schedulePush();
     });
     _lifecycle = AppLifecycleListener(onStateChange: (s) {
       if (s == AppLifecycleState.resumed && state.pendingOutbox > 0) {
@@ -158,6 +172,47 @@ class SyncController extends Notifier<SyncStatus> {
       for (final m in ref.read(myMembershipsProvider).value ?? [])
         m.congregationId,
     });
+    _autoEnable();
+  }
+
+  // ---- auto-enable ---------------------------------------------------------
+
+  /// Every local congregation belongs in the cloud once the sync keys are
+  /// ready — enabling is not a decision we make the user take per
+  /// congregation. Mints the CCK, creates the space and seeds the subtree;
+  /// the outbox watch pushes it. Attempts are remembered for the session so
+  /// a permanent failure (e.g. a space someone else owns) can't loop;
+  /// regaining connectivity clears them for a retry.
+  Future<void> _autoEnable() async {
+    if (_autoEnabling || ref.read(cckServiceProvider) == null) return;
+    // This device's local data belongs to ONE account (per-uid databases are
+    // deferred): never upload it to a different one that signed in later.
+    if (!await ref.read(syncKeysProvider.notifier).ownsThisDevice()) return;
+    final memberships = ref.read(myMembershipsProvider);
+    // Until memberships load we can't tell which are missing.
+    if (memberships.isLoading || memberships.hasError) return;
+    final inCloud = {
+      for (final m in memberships.value ?? []) m.congregationId,
+    };
+    final pending = [
+      for (final c in ref.read(congregationsProvider))
+        if (!inCloud.contains(c.id) && !_autoEnabled.contains(c.id)) c.id,
+    ];
+    if (pending.isEmpty) return;
+
+    _autoEnabling = true;
+    try {
+      for (final cid in pending) {
+        _autoEnabled.add(cid);
+        try {
+          await ref.read(enableCongregationSyncProvider)(cid);
+        } catch (_) {
+          // Offline, or a space this user can't found: retry on reconnect.
+        }
+      }
+    } finally {
+      _autoEnabling = false;
+    }
   }
 
   // ---- heartbeat listeners -------------------------------------------------
@@ -209,7 +264,9 @@ class SyncController extends Notifier<SyncStatus> {
     );
     switch (urgency) {
       case PullUrgency.none:
-        break;
+        // Nothing newer than our cursor IS the confirmation that we're up to
+        // date — with no polling, this is the only thing that says so.
+        _onSuccess();
       case PullUrgency.immediate:
         await _pull({cid});
       case PullUrgency.lazy:
