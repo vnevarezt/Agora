@@ -7,9 +7,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/crypto/passphrase_envelope.dart';
 import 'package:jw_program/data/db/app_database.dart';
 import 'package:jw_program/data/sync/cck_service.dart';
+import 'package:jw_program/data/sync/link_service.dart';
 import 'package:jw_program/data/sync/content_crypto.dart';
 import 'package:jw_program/data/sync/sync_engine.dart';
 import 'package:jw_program/data/sync/sync_seeder.dart';
@@ -25,7 +25,6 @@ import '../helpers/fake_key_docs.dart';
 import '../helpers/in_memory_transport.dart';
 import '../helpers/map_key_store.dart';
 
-const _fast = KdfParams(memoryKib: 64, iterations: 1, parallelism: 1);
 
 class CloudDevice {
   CloudDevice(
@@ -37,8 +36,7 @@ class CloudDevice {
     db = AppDatabase(NativeDatabase.memory());
     container = ProviderContainer(overrides: [dbProvider.overrideWithValue(db)]);
     store = MapKeyStore();
-    userKeys = UserKeyService(store, docs,
-        uid: uid, envelope: const PassphraseEnvelope(params: _fast));
+    userKeys = UserKeyService(store, docs, uid: uid);
     cck = CckService(store, docs, userKeys, uid: uid);
     seeder = SyncSeeder(db, SyncScribe(db, HlcClock(name)));
     engine = SyncEngine(db, transport, ContentCrypto(),
@@ -77,7 +75,7 @@ void main() {
         .read(peopleRepositoryProvider)
         .save(_person('p1', 'Ana', cong.id));
 
-    await a.userKeys.create('mi-frase-larga');
+    await a.userKeys.generate();
     await a.cck.createCongregationSpace(cong.id);
     final seeded = await a.seeder.seedCongregation(cong.id);
     expect(seeded, 2); // congregation + person
@@ -93,7 +91,11 @@ void main() {
     // Device B: SAME account, new device. Unlock with the passphrase, pull.
     final b = CloudDevice('devB', transport, docs, uid: 'u1');
     addTearDown(b.dispose);
-    await b.userKeys.unlock('mi-frase-larga');
+    // A second device is authorised from the first (no passphrase).
+    final session = await LinkService(docs, b.userKeys, uid: 'u1').start();
+    await LinkService(docs, a.userKeys, uid: 'u1').approve(session.code);
+    expect(await LinkService(docs, b.userKeys, uid: 'u1')
+        .awaitCompletion(session), isTrue);
 
     final page = await b.engine.pullOnce(cong.id);
     expect(page.applied, 2);
@@ -101,7 +103,7 @@ void main() {
     expect(bPeople.single.displayName, 'Ana');
   });
 
-  test('a device without the passphrase cannot pull (keyring null)', () async {
+  test('an unlinked device cannot pull (keyring null)', () async {
     final transport = InMemoryTransport();
     final docs = FakeKeyDocs();
     final a = CloudDevice('devA', transport, docs, uid: 'u1');
@@ -110,12 +112,12 @@ void main() {
     final cong = await a.container
         .read(congregationsRepositoryProvider)
         .create(name: 'Sur', number: '1');
-    await a.userKeys.create('frase');
+    await a.userKeys.generate();
     await a.cck.createCongregationSpace(cong.id);
     await a.seeder.seedCongregation(cong.id);
     await a.engine.pushOnce();
 
-    // Device B never unlocks: keyringFor → null, pull applies nothing.
+    // Device B was never linked: keyringFor → null, pull applies nothing.
     final b = CloudDevice('devB', transport, docs, uid: 'u1');
     addTearDown(b.dispose);
     final page = await b.engine.pullOnce(cong.id);

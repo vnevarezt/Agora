@@ -1,14 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/crypto/passphrase_envelope.dart';
+import '../data/sync/link_service.dart';
 import '../data/sync/user_key_service.dart';
 import 'sync_provider.dart';
 
-/// Where this account/device stands with the E2E sync passphrase. Minimal
-/// intrusion: after cloud sign-in sync is OFF until the user creates or
-/// enters the passphrase here (Settings → Sync card). Never touches the
-/// local-DB session (AuthGate).
+/// Where this account/device stands with its E2E sync identity. The user
+/// never types a secret: the first device mints the key silently, and any
+/// further device is authorised from one that already syncs.
 sealed class SyncKeysState {
   const SyncKeysState();
 }
@@ -22,17 +21,13 @@ class SyncKeysLoading extends SyncKeysState {
   const SyncKeysLoading();
 }
 
-/// Signed in, no `users/{uid}` yet → create-passphrase flow.
-class SyncKeysNotSetUp extends SyncKeysState {
-  const SyncKeysNotSetUp();
+/// The account has an identity but this device doesn't hold it → link it
+/// from a device that already syncs.
+class SyncKeysNeedsLink extends SyncKeysState {
+  const SyncKeysNeedsLink();
 }
 
-/// Keys exist in the cloud but this device holds no seed → enter passphrase.
-class SyncKeysLocked extends SyncKeysState {
-  const SyncKeysLocked();
-}
-
-/// Seed cached: sealed boxes open, sync can run.
+/// Seed present: sealed boxes open, sync can run.
 class SyncKeysReady extends SyncKeysState {
   const SyncKeysReady();
 }
@@ -40,16 +35,18 @@ class SyncKeysReady extends SyncKeysState {
 class SyncKeysError extends SyncKeysState {
   const SyncKeysError(this.messageKey);
 
-  /// 'wrongPassphrase' | 'unknown' — the UI maps it to a localized string.
+  /// 'identityMismatch' | 'badCode' | 'unknown' — localized by the UI.
   final String messageKey;
 }
+
+/// Which account this device's data belongs to (account-switch guard). Also
+/// cleared on sign-out, which is why it lives outside the controller.
+const syncOwnerUidKey = 'sync_owner_uid';
 
 final syncKeysProvider =
     NotifierProvider<SyncKeysController, SyncKeysState>(SyncKeysController.new);
 
 class SyncKeysController extends Notifier<SyncKeysState> {
-  static const _ownerUidKey = 'sync_owner_uid';
-
   UserKeyService? get _service => ref.read(userKeyServiceProvider);
 
   @override
@@ -67,67 +64,84 @@ class SyncKeysController extends Notifier<SyncKeysState> {
       return;
     }
     try {
-      state = switch (await service.status()) {
-        UserKeyStatus.notSetUp => const SyncKeysNotSetUp(),
-        UserKeyStatus.locked => const SyncKeysLocked(),
-        UserKeyStatus.ready => const SyncKeysReady(),
-      };
+      switch (await service.status()) {
+        case UserKeyStatus.notSetUp:
+          // Brand-new account: mint the identity with no user interaction —
+          // this is what makes sync "just work" after signing in.
+          await service.generate();
+          await _rememberOwner();
+          state = const SyncKeysReady();
+        case UserKeyStatus.needsLink:
+          state = const SyncKeysNeedsLink();
+        case UserKeyStatus.ready:
+          await _rememberOwner();
+          state = const SyncKeysReady();
+          // Retire the pre-4c passphrase envelope now that a device with the
+          // seed is running the new code.
+          await service.dropLegacyEnvelope();
+      }
     } catch (_) {
       state = const SyncKeysError('unknown');
     }
   }
 
-  /// First-time setup on this account. Throws a reason key on failure.
-  Future<bool> createPassphrase(String passphrase) =>
-      _run(() async {
-        await _service!.create(passphrase);
-        await _rememberOwner();
-      });
+  /// NEW device: open a session and show its code. The caller drives the
+  /// wait so it can render progress.
+  Future<LinkSession> startLink() async {
+    final link = ref.read(linkServiceProvider);
+    if (link == null) throw StateError('Cloud sync is unavailable.');
+    return link.start();
+  }
 
-  /// New device / relocked account. Throws a reason key on failure.
-  Future<bool> enterPassphrase(String passphrase) =>
-      _run(() async {
-        await _service!.unlock(passphrase);
-        await _rememberOwner();
-      });
-
-  Future<bool> changePassphrase(String current, String next) =>
-      _run(() => _service!.changePassphrase(current, next));
-
-  /// Returns true on success. On failure sets an error state AND rethrows a
-  /// short reason key so the calling screen can show it inline and let the
-  /// user retry without losing the form.
-  Future<bool> _run(Future<void> Function() op) async {
-    state = const SyncKeysLoading();
+  /// NEW device: block until the other device answers. Returns false on
+  /// timeout. Throws a reason key the UI can localize.
+  Future<bool> completeLink(LinkSession session) async {
+    final link = ref.read(linkServiceProvider);
+    if (link == null) return false;
     try {
-      await op();
-      await _refresh();
-      return true;
-    } on WrongPassphraseException {
-      await _refresh(); // back to Locked / NotSetUp
-      throw 'wrongPassphrase';
+      final linked = await link.awaitCompletion(session);
+      if (linked) {
+        await _rememberOwner();
+        await _refresh();
+      }
+      return linked;
+    } on LinkIdentityMismatch {
+      state = const SyncKeysError('identityMismatch');
+      throw 'identityMismatch';
     } catch (_) {
-      state = const SyncKeysError('unknown');
       throw 'unknown';
     }
   }
 
+  /// EXISTING device: approve a code shown by another device.
+  Future<void> approveLink(String code) async {
+    final link = ref.read(linkServiceProvider);
+    if (link == null) throw 'unknown';
+    try {
+      await link.approve(code);
+    } catch (_) {
+      // Bad paste, expired mailbox or no seed here — all actionable as
+      // "that code didn't work".
+      throw 'badCode';
+    }
+  }
+
   /// Account-switch guard: this device's data belongs to ONE uid (per-uid
-  /// databases are deferred). Remembers the owner on first setup;
+  /// databases are deferred). Remembers the owner once an identity exists;
   /// [ownsThisDevice] is false when a DIFFERENT account signed in later, and
   /// SyncController refuses to upload this device's data to it.
   Future<void> _rememberOwner() async {
     final uid = ref.read(syncUidProvider);
     if (uid == null) return;
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(_ownerUidKey, uid);
+    prefs.setString(syncOwnerUidKey, uid);
   }
 
   Future<bool> ownsThisDevice() async {
     final uid = ref.read(syncUidProvider);
     if (uid == null) return false;
     final prefs = await SharedPreferences.getInstance();
-    final owner = prefs.getString(_ownerUidKey);
+    final owner = prefs.getString(syncOwnerUidKey);
     return owner == null || owner == uid;
   }
 }
