@@ -57,7 +57,17 @@ class ItemDoc {
 /// must assign a monotonically increasing [ItemDoc.serverTs] per
 /// congregation on upsert.
 abstract interface class SyncTransport {
-  Future<void> upsertItem(String congregationId, ItemDoc doc);
+  /// Upserts a whole push batch atomically and, in the SAME write, bumps the
+  /// congregation's activity heartbeat for [activityScopes] (a project id,
+  /// 'people' or 'congregation' per doc — see EntityCodec.scopeOf). One
+  /// batch = one rules evaluation, so the member-doc get() is billed once
+  /// per push instead of once per doc. Implementations may split very large
+  /// pushes into multiple batches (Firestore caps a batch at 500 ops).
+  Future<void> upsertItems(
+    String congregationId,
+    List<ItemDoc> docs,
+    Set<String> activityScopes,
+  );
 
   /// Docs with `serverTs > cursor` in ascending serverTs order
   /// (cursor null = everything).

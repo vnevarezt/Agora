@@ -124,6 +124,20 @@ void main() {
       final typed = doc.entity == 'program' || doc.entity == 'assignment';
       expect(doc.programTypeId, typed ? 'mwb-s140' : isNull);
     }
+    // The push announced its activity scopes in the heartbeat: the project
+    // (for project/program/assignment), the people directory and the
+    // congregation row — with this device as the source.
+    final heartbeat = transport.activity[cong.id]!;
+    final projectId = (await a.container
+            .read(projectsRepositoryProvider)
+            .watchAll()
+            .first)
+        .single
+        .project
+        .id;
+    expect((heartbeat['scopes'] as Map).keys.toSet(),
+        {'congregation', 'people', projectId});
+    expect(heartbeat['srcDevice'], 'devA');
 
     // --- Device B pulls everything.
     expect((await b.engine.pullOnce(cong.id)).applied, 5);

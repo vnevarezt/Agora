@@ -41,9 +41,11 @@ class SyncEngine {
   late final EntityCodec _codec = EntityCodec(_db);
 
   /// Drains the outbox in id order, coalescing entries per entity (the doc
-  /// carries CURRENT row state, so only the newest matters). Pushed entries
-  /// are deleted; a crash between upsert and delete just re-pushes the same
-  /// state (idempotent LWW). Returns the number of docs pushed.
+  /// carries CURRENT row state, so only the newest matters) and batching one
+  /// atomic upsert per congregation (one rules evaluation + one activity
+  /// bump per push instead of per doc). Pushed entries are deleted after the
+  /// batch commits; a crash in between just re-pushes the same state
+  /// (idempotent LWW). Returns the number of docs pushed.
   Future<int> pushOnce() async {
     final entries = await (_db.select(_db.outbox)
           ..orderBy([(t) => OrderingTerm.asc(t.id)]))
@@ -56,7 +58,12 @@ class SyncEngine {
       groups.putIfAbsent((e.entity, e.entityId), () => []).add(e);
     }
 
-    var pushed = 0;
+    // Per congregation: docs to upsert, their activity scopes, and the
+    // outbox ids to delete once the batch lands.
+    final batches =
+        <String, (List<ItemDoc>, Set<String>, List<int>)>{};
+    final keyrings = <String, CongregationKeyring?>{};
+
     for (final MapEntry(key: (entityName, entityId), value: group)
         in groups.entries) {
       Future<void> drop() => (_db.delete(_db.outbox)
@@ -73,7 +80,9 @@ class SyncEngine {
         continue;
       }
 
-      final keyring = await keyringFor(congregationId);
+      final keyring = keyrings.containsKey(congregationId)
+          ? keyrings[congregationId]
+          : keyrings[congregationId] = await keyringFor(congregationId);
       if (keyring == null) continue; // not syncable yet: stays queued
 
       final hlc = await _codec.hlcOf(entity, entityId) ?? group.last.hlc;
@@ -83,20 +92,28 @@ class SyncEngine {
         entityId: entityId,
         payload: payload,
       );
-      await _transport.upsertItem(
-        congregationId,
-        ItemDoc(
-          entityId: entityId,
-          entity: entityName,
-          programTypeId: await _codec.programTypeOf(entity, entityId),
-          hlc: hlc,
-          srcDevice: deviceId,
-          keyVersion: keyring.currentVersion,
-          blob: blob,
-        ),
-      );
-      await drop();
-      pushed++;
+      final (docs, scopes, outboxIds) = batches.putIfAbsent(
+          congregationId, () => ([], <String>{}, []));
+      docs.add(ItemDoc(
+        entityId: entityId,
+        entity: entityName,
+        programTypeId: await _codec.programTypeOf(entity, entityId),
+        hlc: hlc,
+        srcDevice: deviceId,
+        keyVersion: keyring.currentVersion,
+        blob: blob,
+      ));
+      final scope = await _codec.scopeOf(entity, entityId);
+      if (scope != null) scopes.add(scope);
+      outboxIds.addAll([for (final e in group) e.id]);
+    }
+
+    var pushed = 0;
+    for (final MapEntry(key: congregationId, value: (docs, scopes, outboxIds))
+        in batches.entries) {
+      await _transport.upsertItems(congregationId, docs, scopes);
+      await (_db.delete(_db.outbox)..where((t) => t.id.isIn(outboxIds))).go();
+      pushed += docs.length;
     }
     return pushed;
   }

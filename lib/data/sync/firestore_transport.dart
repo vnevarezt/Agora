@@ -55,17 +55,58 @@ class FirestoreTransport implements SyncTransport {
   CollectionReference<Map<String, dynamic>> _items(String cid) =>
       _db.collection('congregations').doc(cid).collection('items');
 
+  /// The tiny heartbeat doc peers listen to instead of the items firehose:
+  /// `{scopes: {scope: serverTs}, srcDevice}`.
+  DocumentReference<Map<String, dynamic>> _activity(String cid) => _db
+      .collection('congregations')
+      .doc(cid)
+      .collection('meta')
+      .doc('activity');
+
+  /// Firestore caps a batch at 500 ops; keep headroom for the activity bump.
+  static const _batchLimit = 450;
+
   @override
-  Future<void> upsertItem(String congregationId, ItemDoc doc) =>
-      _guard(() => _items(congregationId).doc(doc.entityId).set({
-            'entity': doc.entity,
-            'programTypeId': doc.programTypeId,
-            'hlc': doc.hlc,
-            'srcDevice': doc.srcDevice,
-            'keyVersion': doc.keyVersion,
-            'blob': doc.blob,
-            'serverTs': FieldValue.serverTimestamp(),
-          }).timeout(_writeTimeout));
+  Future<void> upsertItems(
+    String congregationId,
+    List<ItemDoc> docs,
+    Set<String> activityScopes,
+  ) =>
+      _guard(() async {
+        for (var start = 0; start < docs.length; start += _batchLimit) {
+          final chunk = docs.sublist(
+              start,
+              start + _batchLimit > docs.length
+                  ? docs.length
+                  : start + _batchLimit);
+          final batch = _db.batch();
+          for (final doc in chunk) {
+            batch.set(_items(congregationId).doc(doc.entityId), {
+              'entity': doc.entity,
+              'programTypeId': doc.programTypeId,
+              'hlc': doc.hlc,
+              'srcDevice': doc.srcDevice,
+              'keyVersion': doc.keyVersion,
+              'blob': doc.blob,
+              'serverTs': FieldValue.serverTimestamp(),
+            });
+          }
+          // Same batch: peers get ONE cheap signal per push, and the rules
+          // member-doc get() is cached across the whole request.
+          batch.set(
+            _activity(congregationId),
+            {
+              'scopes': {
+                for (final scope in activityScopes)
+                  scope: FieldValue.serverTimestamp(),
+              },
+              'srcDevice': chunk.first.srcDevice,
+            },
+            SetOptions(merge: true),
+          );
+          await batch.commit().timeout(_writeTimeout);
+        }
+      });
 
   @override
   Future<List<ItemDoc>> pullSince(String congregationId, String? cursor) =>
