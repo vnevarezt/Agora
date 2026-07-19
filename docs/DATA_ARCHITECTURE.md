@@ -1,11 +1,12 @@
 # Data & Sync Architecture
 
 Design document for Agora's persistence and synchronization layer. Status:
-**largely implemented** — phases 1–3 and phase 4a/4b-1 are built (offline
-DB, HLC/outbox, the E2E sync engine and the Firestore cloud with security
-rules, sync keys and single-device→multi-device sync). Remaining: the
-sharing UI (invites/members/capabilities editor, 4b-2) and realtime/status
-polish (4b-3). See `docs/PHASE4_CLOUD_SYNC.md` for what's live.
+**largely implemented** — phases 1–3, 4a, 4b-1, 4b-3 and 4c are built
+(offline DB, HLC/outbox, the E2E sync engine, the Firestore cloud with
+security rules, heartbeat-driven sync, and passphrase-free keys with device
+linking). Remaining: the sharing UI (invites/members/capabilities editor,
+4b-2), CCK rotation and account deletion. See `docs/PHASE4_CLOUD_SYNC.md`.
+Old polish (4b-3). See `docs/PHASE4_CLOUD_SYNC.md` for what's live.
 
 Goals, in the user's words: offline-first even in cloud mode (data always
 lives locally, sync when connectivity returns), multiple congregations,
@@ -169,18 +170,21 @@ New material:
 | Key | Scope | Where it lives |
 |---|---|---|
 | **CCK** — Congregation Content Key (AES-256) | encrypts every synced blob of one congregation | never leaves devices in clear; stored in the OS keychain |
-| **User keypair** (X25519) | receiving CCKs | pubkey published in `users/{uid}`; privkey wrapped with a **sync passphrase** (Argon2id, same envelope pattern as `DbKeyManager`) and stored in `users/{uid}` so any of the user's devices can fetch + unwrap it |
+| **User keypair** (X25519) | receiving CCKs | pubkey published in `users/{uid}`; the private seed is generated on the first device and lives ONLY in device keychains — it is never uploaded in any form. Further devices get it by direct transfer (see device linking, phase 4c) |
 | **Invite key** (one-time) | carrying a CCK inside an invitation | embedded in the invite code/link, shared out-of-band, never stored server-side in clear |
 
 ### Flows
 
-- **Enable cloud / first device**: generate keypair, ask the user to set a
-  sync passphrase (shown with the same "no recovery" warning as the local
-  password), upload wrapped privkey. Creating a congregation generates its
-  CCK and stores it wrapped under the owner's pubkey in
-  `congregations/{cid}/members/{uid}`.
-- **New device, same user**: Firebase sign-in → download wrapped privkey →
-  passphrase unwraps it → unwrap the CCKs from the member docs → full pull.
+- **Enable cloud / first device**: generate the keypair silently on sign-in
+  and publish only the public half. The user is asked for nothing. Creating a
+  congregation generates its CCK and stores it wrapped under the owner's
+  pubkey in `congregations/{cid}/members/{uid}`.
+- **New device, same user**: Firebase sign-in → the device has no seed, so it
+  shows a linking code (QR + copyable text) carrying an ephemeral public key
+  **out of band**; a device that already syncs seals the seed to that key via
+  a short-lived mailbox `users/{uid}/links/{sessionId}`. The new device
+  verifies the seed derives the published pubkey before adopting it, then
+  unwraps the CCKs from the member docs → full pull.
 - **Invite** (sharing v1): inviter creates
   `congregations/{cid}/invites/{id}` = { role, expiry, CCK wrapped under a
   random invite key }; the invite key travels inside the code/link the user
@@ -191,10 +195,12 @@ New material:
   blobs stay readable by remaining members (they hold the whole keyring).
   No mass re-encryption needed. The revoked user keeps whatever was already
   on their device — unavoidable in any E2E design; documented honestly.
-- **Lost passphrase**: any still-trusted device can re-wrap keys under a new
-  passphrase (it holds them in its keychain). Sole owner + all devices lost +
-  passphrase lost = cloud data unrecoverable — consistent with the app's
-  existing "losing the password loses the data" stance.
+- **Lost devices**: any device that still syncs can authorise a new one. Sole
+  member + ALL devices lost = cloud data unrecoverable (the Signal posture) —
+  consistent with the app's existing "losing the password loses the data"
+  stance. An admin re-invite or a local `.jwpp` backup is the way back.
+- **Sign-out unlinks**: it wipes the seed and cached CCKs from that device, so
+  a lent or resold machine keeps nothing.
 
 ### What the server can see (accepted metadata leak)
 
@@ -254,7 +260,7 @@ client-side; the realistic threat model here is misclicks, not attacks).
 | **1. Local persistence** | Full schema + repositories + participant migration; congregations & projects survive restarts | metadata columns exist, unused |
 | **2. Programs in DB** | Program/slots/assignments persisted; form edits rows; PDF renders from DB; progress computed | — |
 | **3. Sync scaffolding** | HLC service, outbox written on every mutation, `sync_state`; still 100 % local | write path ready |
-| **4. Cloud v1 = multi-device + sharing** | E2E key bootstrap (passphrase), push/pull engine, invites, roles, revocation/rotation | yes — sharing ships in the first cloud release per product decision |
+| **4. Cloud v1 = multi-device + sharing** | E2E key bootstrap (silent + device linking), push/pull engine, invites, roles, revocation/rotation | yes — sharing ships in the first cloud release per product decision |
 
 Each phase is releasable on its own; phases 1–3 carry zero cloud risk.
 
@@ -279,8 +285,13 @@ Each phase is releasable on its own; phases 1–3 carry zero cloud risk.
 
 - Concurrent edits to the *same row* silently last-write-win (no merge UI).
 - E2E means: no server-side queries/search (all queries are local anyway),
-  no web-console debugging of content, and real passphrase UX friction at
-  device-link time.
+  no web-console debugging of content, and a real step at device-link time
+  (the code must move between the two devices out of band).
+- The identity seed is per USER, copied to each device, so there is no
+  per-device revocation: resetting the identity is the only answer to a
+  compromised device.
+- `members/{uid}` carries `email`/`displayName` in clear, so the guarantee is
+  "the server can't read your programs and publishers", not "no user data".
 - Firestore costs scale with doc writes; batching + debounce keep this
   negligible at congregation scale.
 - Devices offline > tombstone GC window need a full re-pull (handled, but

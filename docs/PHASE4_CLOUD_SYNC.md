@@ -116,6 +116,57 @@ they matter, idle costs zero reads, and the user never manages sync.
   in Settings; the dashboard shows a cloud indicator ONLY on offline-with-
   pending or error/revocation. Healthy sync is invisible.
 
+## Phase 4c (built): no passphrase — device linking
+
+The sync passphrase is gone. The E2E identity is generated silently on the
+first device and reaches further devices by direct transfer, so the user
+manages no secret while the server still cannot read content.
+
+- **Identity**: `users/{uid}` holds the PUBLIC key only (`wrappedPrivKey` is
+  retired and the rules forbid re-adding it; `pubKey` is immutable). The
+  32-byte X25519 seed lives solely in device keychains.
+- **Linking** (`lib/data/sync/device_link.dart`, `link_service.dart`): the new
+  device opens a short-lived mailbox `users/{uid}/links/{sessionId}` and shows
+  `agora-link:1:<sessionId>:<epk>:<linkSecret>:<check>` as QR and copyable
+  text. The existing device seals the seed to the epk **taken from that
+  payload, never from Firestore**, and drops the box in the mailbox. Sealing
+  is a sibling of `SealedBox` (domain `agora.link.v1`, uid + sessionId bound
+  into HKDF info and AAD) so a link box can never be confused with a CCK box.
+- **The identity check that makes it safe**: opening the box only proves the
+  sender had the payload. `LinkService` additionally verifies the seed derives
+  `users/{uid}.pubKey` — otherwise a forged answer would be adopted and every
+  decrypt would silently fail.
+- **Two independent factors**: writing the mailbox needs the ACCOUNT (rules
+  restrict it to the owner); opening the box needs the PAYLOAD (out of band).
+  The server operator has neither; someone who photographs a QR still can't
+  write the response.
+- **Sign-out unlinks**: `cloudSignOutProvider` is now the only sign-out path
+  and wipes the seed, the cached congregation keys and the owner marker.
+  `resetAllData` also wipes every `jw_program.sync.*` keychain entry.
+- **Poisoned docs can't wedge sync**: a blob that won't decrypt is skipped
+  (counted in `PullResult.undecryptable`) instead of aborting the batch and
+  freezing the cursor.
+
+### Security cases
+
+| Case | Verdict |
+|---|---|
+| Operator, passive | **Pass** for content. Sees pubkeys, sealed boxes, ciphertext, clear routing metadata, the membership graph — and `email`/`displayName` on member docs (so the promise is "nobody can read your programs and publishers", not "no user data"). |
+| Operator, active (link MITM) | **Pass**: the epk travels out of band. Tampering with `users.pubKey` makes linking fail loudly rather than succeed wrongly. |
+| Stolen Google account, no device | **Pass** on confidentiality — an improvement on the passphrase model, which left an offline-attackable `wrappedPrivKey` in the cloud. Availability (vandalism) still fails; `.jwpp` backups are the net. |
+| Stolen unlocked device | **Fails by design** (seed in the keychain); device unlock mitigates. Note the seed is per USER, not per device, so there is no per-device revocation — resetting the identity is the documented answer. |
+| Replayed / expired mailbox | **Pass**: fresh ephemeral key per session, sessionId bound in, write-once, rules-enforced expiry, Firestore TTL sweep. |
+| Two concurrent sessions | **Pass**: independent mailboxes and keys. |
+| Sign-out / another account on the device | Handled above; the account-switch guard (`ownsThisDevice`) blocks auto-upload to a different account. |
+| Revoked member holding a CCK | **Residual**: rotation is still unimplemented; `isMember` cuts off anything new. |
+| All devices lost | Unrecoverable by design (Signal's posture). An admin re-invite or a `.jwpp` backup is the way back. |
+
+### Operational note
+
+Deploying 4c needs `firebase deploy --only firestore:rules` **and** a
+Firestore TTL policy on the `links` collection group keyed on `expiresAt`
+(native Firestore, works on Spark — no Cloud Functions).
+
 ## Deferred to 4b-2
 
 Invite/redeem UI + real members list + capability editor + revocation
