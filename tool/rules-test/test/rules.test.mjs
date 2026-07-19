@@ -331,6 +331,24 @@ describe('members and users docs', () => {
     await assertSucceeds(deleteDoc(doc(db('admin'), 'congregations/c1/members/bob')));
   });
 
+  it('meta/activity heartbeat: writers bump, viewers read-only, strangers nothing', async () => {
+    const bump = (uid) => setDoc(
+      doc(db(uid), 'congregations/c1/meta/activity'),
+      { scopes: { p1: serverTimestamp() }, srcDevice: 'dev-' + uid },
+      { merge: true },
+    );
+    await plantMember('c1', 'editor', { admin: false, people: false, editTypes: ['mwb-s140'] });
+    await assertSucceeds(bump('admin'));
+    await assertSucceeds(bump('editor'));
+    await assertFails(bump('bob'));       // viewer: read-only caps
+    await assertFails(bump('stranger'));  // not a member
+    await assertSucceeds(getDoc(doc(db('bob'), 'congregations/c1/meta/activity')));
+    await assertFails(getDoc(doc(db('stranger'), 'congregations/c1/meta/activity')));
+    // Extra fields are rejected.
+    await assertFails(setDoc(doc(db('admin'), 'congregations/c1/meta/activity'),
+      { scopes: {}, srcDevice: 'd', extra: 1 }));
+  });
+
   it('users/{uid} is owner-only', async () => {
     await assertSucceeds(setDoc(doc(db('ana'), 'users/ana'), { pubKey: 'p', wrappedPrivKey: 'w' }));
     await assertFails(getDoc(doc(db('bob'), 'users/ana')));

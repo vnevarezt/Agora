@@ -128,6 +128,22 @@ service cloud.firestore {
         allow update: if false;
       }
 
+      // ---- meta/activity: the sync heartbeat -----------------------------
+      // Tiny doc peers listen to INSTEAD of the items collection (a listener
+      // on items would bill every intermediate version): pushes bump
+      // {scopes: {scope: serverTs}, srcDevice} in the same batch. Values are
+      // deliberately loosely validated — the worst a hostile member can do
+      // is trigger spurious pulls, never touch data. Written in the same
+      // batch as items, so the member-doc get() here is already cached.
+      match /meta/activity {
+        allow read: if isMember(cid);
+        allow write: if isMember(cid)
+          && request.resource.data.keys().hasOnly(['scopes', 'srcDevice'])
+          && (caps(cid).admin == true
+              || caps(cid).people == true
+              || caps(cid).editTypes.size() > 0);
+      }
+
       // ---- items: the synced entities (E2E blobs) ------------------------
       match /items/{entityId} {
         // Also proves the pull query (where serverTs > cursor orderBy
