@@ -10,10 +10,18 @@ import 'sync_transport.dart';
 /// page means there may be more); [applied] is what actually changed rows
 /// (echoes and LWW losers fetch but don't apply).
 class PullResult {
-  const PullResult({required this.fetched, required this.applied});
+  const PullResult({
+    required this.fetched,
+    required this.applied,
+    this.undecryptable = 0,
+  });
 
   final int fetched;
   final int applied;
+
+  /// Docs skipped because their blob wouldn't open (corrupt or injected).
+  /// They never block the batch or the cursor.
+  final int undecryptable;
 }
 
 /// Push/pull engine (phase 4a, docs/PHASE4_CLOUD_SYNC.md). Cloud-agnostic:
@@ -143,6 +151,7 @@ class SyncEngine {
     if (docs.isEmpty) return empty;
 
     var applied = 0;
+    var skipped = 0;
     await _db.transaction(() async {
       for (final kind in _applyOrder) {
         for (final doc in docs) {
@@ -151,13 +160,26 @@ class SyncEngine {
           final localHlc = await _codec.hlcOf(kind, doc.entityId);
           // LWW on the sortable HLC string; an unstamped local row loses.
           if (localHlc != null && localHlc.compareTo(doc.hlc) >= 0) continue;
-          final payload = await _crypto.decrypt(
-            keyring: keyring,
-            keyVersion: doc.keyVersion,
-            congregationId: congregationId,
-            entityId: doc.entityId,
-            blob: doc.blob,
-          );
+          final Map<String, dynamic> payload;
+          try {
+            payload = await _crypto.decrypt(
+              keyring: keyring,
+              keyVersion: doc.keyVersion,
+              congregationId: congregationId,
+              entityId: doc.entityId,
+              blob: doc.blob,
+            );
+          } on ContentDecryptException {
+            // A doc we can't open must never abort the batch or hold the
+            // cursor: one injected/corrupt blob would otherwise wedge this
+            // congregation's sync forever (a cheap denial of service for
+            // anyone who can write to the collection). Skip and move on.
+            // NOTE for when key rotation lands: an unknown keyVersion is
+            // transient (we just haven't fetched the new key), so that case
+            // must trigger a keyring refresh + re-pull instead of skipping.
+            skipped++;
+            continue;
+          }
           await _codec.apply(kind, doc.entityId, payload, doc.hlc);
           applied++;
         }
@@ -170,6 +192,7 @@ class SyncEngine {
             ),
           );
     });
-    return PullResult(fetched: docs.length, applied: applied);
+    return PullResult(
+        fetched: docs.length, applied: applied, undecryptable: skipped);
   }
 }

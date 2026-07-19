@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/data/db/app_database.dart';
 import 'package:jw_program/data/sync/content_crypto.dart';
 import 'package:jw_program/data/sync/sync_engine.dart';
+import 'package:jw_program/data/sync/sync_transport.dart';
 import 'package:jw_program/models/hall.dart';
 import 'package:jw_program/models/person.dart';
 import 'package:jw_program/state/dashboard_provider.dart';
@@ -201,6 +202,42 @@ void main() {
     final noop = await b.engine.pullOnce(cong.id);
     expect(noop.fetched, 0);
     expect(noop.applied, 0);
+  });
+
+  test('an undecryptable doc is skipped without wedging the batch or cursor',
+      () async {
+    final cong = await a.container
+        .read(congregationsRepositoryProvider)
+        .create(name: 'Este', number: '3');
+    keyrings[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
+    await a.container
+        .read(peopleRepositoryProvider)
+        .save(person('p1', 'Ana', cong.id));
+    await a.engine.pushOnce();
+
+    // Someone with write access injects a blob nobody can open (the cheap
+    // denial of service this guards against).
+    final poison = transport.docs[cong.id]!.values.first;
+    transport.docs[cong.id]!['poison'] = ItemDoc(
+      entityId: 'poison',
+      entity: 'person',
+      hlc: 'zzzzzzzzzzzzzzzzzzz-zzzz-evil',
+      srcDevice: 'evil',
+      keyVersion: 1,
+      blob: 'bm90LWEtcmVhbC1ibG9i',
+      serverTs: poison.serverTs,
+    );
+
+    final page = await b.engine.pullOnce(cong.id);
+    expect(page.undecryptable, 1);
+    // The good docs still landed...
+    expect(page.applied, greaterThan(0));
+    expect(
+      (await b.container.read(peopleRepositoryProvider).all()).single.displayName,
+      'Ana',
+    );
+    // ...and the cursor moved on, so the poison can't replay forever.
+    expect((await b.engine.pullOnce(cong.id)).fetched, 0);
   });
 
   test('coalescing: many edits to one row push one doc', () async {
