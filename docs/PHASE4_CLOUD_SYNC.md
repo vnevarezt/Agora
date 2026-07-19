@@ -86,10 +86,39 @@ implementations. Same-account multi-device sync works end-to-end.
   emulator (`firebase emulators:exec --only firestore 'npm --prefix
   tool/rules-test test'`).
 
-## Deferred to 4b-2 / 4b-3
+## Phase 4b-3 (built): transparent, cheap sync
+
+Replaces polling with a heartbeat so remote changes appear instantly where
+they matter, idle costs zero reads, and the user never manages sync.
+
+- **Batched push** (`SyncEngine.pushOnce` + `SyncTransport.upsertItems`): one
+  atomic write per congregation instead of per doc, so the rules' member-doc
+  `get()` is billed once per push, not once per doc. Each batch also bumps a
+  tiny **heartbeat** doc `congregations/{cid}/meta/activity` =
+  `{scopes: {scope: serverTs}, srcDevice}` in the SAME batch. A scope is a
+  project id (for project/program/assignment, via `EntityCodec.scopeOf`),
+  `'people'` or `'congregation'`. Firestore's 500-op batch cap is chunked at
+  450.
+- **No polling.** `SyncController` opens ONE cheap listener per congregation
+  on `meta/activity` (idle = 0 reads; a listener only bills on change).
+  `decidePull` (`lib/data/sync/pull_policy.dart`, pure/unit-tested) turns a
+  heartbeat into `none` (own device / nothing newer than the cursor),
+  `immediate` (the changed scope is the open project, or `'people'` while the
+  directory is on screen) or `lazy` (off-screen → a 3-min coalescing window,
+  flushed early when the user opens that project/section). The pull itself is
+  still the cursor query — the heartbeat is only a signal; the boot reconcile
+  and on-view flush cover any missed beat, so correctness never depends on it.
+- **Push you can't lose**: debounced on outbox change, retried on reconnect
+  (`connectivity_plus`), on resume, and with exponential backoff (30 s → 2 min
+  → 8 min). Push and pull have separate mutexes so a pull can't starve a push;
+  a failing congregation doesn't block the others.
+- **Silent UI**: the "Sincronizar ahora" button and pending count stay tucked
+  in Settings; the dashboard shows a cloud indicator ONLY on offline-with-
+  pending or error/revocation. Healthy sync is invisible.
+
+## Deferred to 4b-2
 
 Invite/redeem UI + real members list + capability editor + revocation
-rotation (4b-2); realtime pull signal, shell status badge, connectivity
-nuances (4b-3). Still deferred past 4b: `personId` linking on assignments,
-per-uid DB files (guarded by an account-owner check for now), congregation
-cloud delete, tombstone GC.
+rotation. Still deferred past 4b: `personId` linking on assignments, per-uid
+DB files (guarded by an account-owner check for now), congregation cloud
+delete, tombstone GC.

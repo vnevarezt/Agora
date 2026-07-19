@@ -116,6 +116,9 @@ The rules are the deployed security model, so **`firestore.rules` and
    ```sh
    firebase deploy --only firestore:rules,firestore:indexes --project <id>
    ```
+   Re-run this whenever `firestore.rules` changes (e.g. after pulling the
+   4b-3 `meta/activity` heartbeat rule) — an outdated deploy denies the new
+   paths and sync silently stops.
 4. In the app: Settings → *Cloud sync* → create your **sync passphrase**
    (encrypts everything E2E; you'll need it on each new device — it is NOT
    recoverable). Then Congregation tab → *Activar en la nube* to upload a
