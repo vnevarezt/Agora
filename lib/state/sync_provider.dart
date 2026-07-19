@@ -8,7 +8,6 @@ import '../data/sync/content_crypto.dart';
 import '../data/sync/firestore_key_docs.dart';
 import '../data/sync/firestore_transport.dart';
 import '../data/sync/key_docs_gateway.dart';
-import '../data/sync/link_service.dart';
 import '../data/sync/sync_engine.dart';
 import '../data/sync/sync_seeder.dart';
 import '../data/sync/sync_transport.dart';
@@ -53,16 +52,6 @@ final userKeyServiceProvider = Provider<UserKeyService?>((ref) {
   final uid = ref.watch(syncUidProvider);
   if (docs == null || uid == null) return null;
   return UserKeyService(ref.watch(syncKeyStoreProvider), docs, uid: uid);
-});
-
-/// Moves the identity seed between the user's own devices (QR / pasted
-/// code). Null until the cloud is up and someone is signed in.
-final linkServiceProvider = Provider<LinkService?>((ref) {
-  final docs = ref.watch(keyDocsProvider);
-  final userKeys = ref.watch(userKeyServiceProvider);
-  final uid = ref.watch(syncUidProvider);
-  if (docs == null || userKeys == null || uid == null) return null;
-  return LinkService(docs, userKeys, uid: uid);
 });
 
 final cckServiceProvider = Provider<CckService?>((ref) {

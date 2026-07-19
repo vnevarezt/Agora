@@ -153,7 +153,7 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 
 	// Translations
 	@override String get title => 'Cloud sync';
-	@override String get desc => 'Your programs and publishers travel end-to-end encrypted: nobody else can read them, not even us.';
+	@override String get desc => 'Your data is stored encrypted and restores itself when you sign in on any of your devices.';
 	@override String get signedOut => 'Sign in to the cloud to enable syncing.';
 	@override String get unknownError => 'Couldn\'t complete. Please try again.';
 	@override String get ready => 'Sync is on';
@@ -165,27 +165,6 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get errorPermission => 'You no longer have access to a congregation; your local data is kept.';
 	@override String get errorOffline => 'Offline; will retry automatically.';
 	@override String get errorUnknown => 'Something went wrong while syncing.';
-	@override String get needsLinkTitle => 'Link this device';
-	@override String get needsLinkDesc => 'Your data is encrypted with a key only your devices hold. Authorise this one from another device that already syncs.';
-	@override String get linkThisDevice => 'Link';
-	@override String get linkModalTitle => 'Link this device';
-	@override String get linkModalDesc => 'On a device where you already use Agora, go to Settings → Sync → "Link another device" and scan or paste this code.';
-	@override String get linkCode => 'Linking code';
-	@override String get copyCode => 'Copy code';
-	@override String get codeCopied => 'Code copied.';
-	@override String get shareWarning => 'Share it only with yourself or in person: whoever has it could link a device.';
-	@override String get waitingApproval => 'Waiting for approval…';
-	@override String get linkExpired => 'The code expired. Generate a new one.';
-	@override String get regenerate => 'Generate another';
-	@override String get linked => 'Device linked.';
-	@override String get linkOther => 'Link another device';
-	@override String get linkOtherDesc => 'Authorise a new device by pasting the code it shows.';
-	@override String get approveTitle => 'Authorise device';
-	@override String get approveDesc => 'Paste the code the new device shows. We\'ll send it your key encrypted; the server cannot read it.';
-	@override String get approve => 'Authorise';
-	@override String get approved => 'Device authorised.';
-	@override String get badCode => 'That code is not valid or has expired.';
-	@override String get identityMismatch => 'The response doesn\'t match your account. Nothing was linked.';
 }
 
 // Path: account
@@ -949,7 +928,7 @@ extension on TranslationsEn {
 			'security.unlockPrompt' => 'Unlock your Agora data.',
 			'security.deviceUnlockKeyMissing' => 'Device unlock was turned off; sign in with your password and enable it again.',
 			'cloudSync.title' => 'Cloud sync',
-			'cloudSync.desc' => 'Your programs and publishers travel end-to-end encrypted: nobody else can read them, not even us.',
+			'cloudSync.desc' => 'Your data is stored encrypted and restores itself when you sign in on any of your devices.',
 			'cloudSync.signedOut' => 'Sign in to the cloud to enable syncing.',
 			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
 			'cloudSync.ready' => 'Sync is on',
@@ -961,27 +940,6 @@ extension on TranslationsEn {
 			'cloudSync.errorPermission' => 'You no longer have access to a congregation; your local data is kept.',
 			'cloudSync.errorOffline' => 'Offline; will retry automatically.',
 			'cloudSync.errorUnknown' => 'Something went wrong while syncing.',
-			'cloudSync.needsLinkTitle' => 'Link this device',
-			'cloudSync.needsLinkDesc' => 'Your data is encrypted with a key only your devices hold. Authorise this one from another device that already syncs.',
-			'cloudSync.linkThisDevice' => 'Link',
-			'cloudSync.linkModalTitle' => 'Link this device',
-			'cloudSync.linkModalDesc' => 'On a device where you already use Agora, go to Settings → Sync → "Link another device" and scan or paste this code.',
-			'cloudSync.linkCode' => 'Linking code',
-			'cloudSync.copyCode' => 'Copy code',
-			'cloudSync.codeCopied' => 'Code copied.',
-			'cloudSync.shareWarning' => 'Share it only with yourself or in person: whoever has it could link a device.',
-			'cloudSync.waitingApproval' => 'Waiting for approval…',
-			'cloudSync.linkExpired' => 'The code expired. Generate a new one.',
-			'cloudSync.regenerate' => 'Generate another',
-			'cloudSync.linked' => 'Device linked.',
-			'cloudSync.linkOther' => 'Link another device',
-			'cloudSync.linkOtherDesc' => 'Authorise a new device by pasting the code it shows.',
-			'cloudSync.approveTitle' => 'Authorise device',
-			'cloudSync.approveDesc' => 'Paste the code the new device shows. We\'ll send it your key encrypted; the server cannot read it.',
-			'cloudSync.approve' => 'Authorise',
-			'cloudSync.approved' => 'Device authorised.',
-			'cloudSync.badCode' => 'That code is not valid or has expired.',
-			'cloudSync.identityMismatch' => 'The response doesn\'t match your account. Nothing was linked.',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',

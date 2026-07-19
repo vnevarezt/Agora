@@ -34,8 +34,11 @@ service cloud.firestore {
     }
 
     // ---- users: sync identity keys, strictly owner-only ------------------
-    // Only the PUBLIC half lives here. The private seed never leaves a
-    // device: a new device gets it from an existing one (see links below).
+    // Holds BOTH halves of the identity keypair. Escrowing the private half
+    // is what lets signing in restore everything with nothing to remember —
+    // and it is also why the project owner can read congregation content.
+    // These rules are therefore the only thing keeping one account's key
+    // away from another's: keep them strict.
     // NOTE: `allow read, write` alongside a shaped `create`/`update` would
     // defeat both — rules OR together, so the loose one would always win.
     match /users/{uid} {
@@ -43,37 +46,18 @@ service cloud.firestore {
 
       allow read, delete: if isOwner();
       allow create: if isOwner()
-        && request.resource.data.keys().hasOnly(['pubKey', 'keyUpdatedAt', 'createdAt'])
-        && request.resource.data.pubKey is string;
-      // pubKey is frozen: swapping it would strand every wrappedCck sealed to
-      // it. Resetting an identity means deleting this doc and being
-      // re-invited. hasOnly also drops the legacy `wrappedPrivKey` (the
-      // passphrase envelope) and forbids re-adding it.
+        && request.resource.data.keys().hasOnly(['pubKey', 'privKey', 'keyUpdatedAt', 'createdAt'])
+        && request.resource.data.pubKey is string
+        && request.resource.data.privKey is string;
+      // Both halves are frozen: swapping either would orphan every CCK
+      // already sealed to this identity. Resetting means deleting the doc
+      // and being re-invited. hasOnly also drops the legacy
+      // `wrappedPrivKey` (the old passphrase envelope) and forbids
+      // re-adding it.
       allow update: if isOwner()
-        && request.resource.data.keys().hasOnly(['pubKey', 'keyUpdatedAt', 'createdAt'])
-        && request.resource.data.pubKey == resource.data.pubKey;
-
-      // ---- device-linking mailbox ---------------------------------------
-      // A new device leaves an empty mailbox and shows its ephemeral public
-      // key OUT OF BAND (QR / pasted payload). An existing device seals the
-      // identity seed to that key and drops the box here. Writing needs the
-      // account; opening the box needs the out-of-band payload — an attacker
-      // needs BOTH, and the server operator has neither.
-      match /links/{sessionId} {
-        allow read, delete: if isOwner();
-        allow create: if isOwner()
-          && request.resource.data.keys().hasOnly(['createdAt', 'expiresAt'])
-          && request.resource.data.createdAt == request.time
-          && request.resource.data.expiresAt is timestamp
-          // Short-lived by construction: no long-dangling mailboxes.
-          && request.resource.data.expiresAt < request.time + duration.value(10, 'm');
-        // The response may be added exactly once, before expiry, and nothing
-        // else may move.
-        allow update: if isOwner()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['response'])
-          && !('response' in resource.data)
-          && resource.data.expiresAt > request.time;
-      }
+        && request.resource.data.keys().hasOnly(['pubKey', 'privKey', 'keyUpdatedAt', 'createdAt'])
+        && request.resource.data.pubKey == resource.data.pubKey
+        && request.resource.data.privKey == resource.data.privKey;
     }
 
     // ---- membership discovery ("my congregations") -----------------------

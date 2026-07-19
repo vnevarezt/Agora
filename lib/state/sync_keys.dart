@@ -1,13 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/sync/link_service.dart';
 import '../data/sync/user_key_service.dart';
 import 'sync_provider.dart';
 
 /// Where this account/device stands with its E2E sync identity. The user
-/// never types a secret: the first device mints the key silently, and any
-/// further device is authorised from one that already syncs.
+/// never manages a secret: the key is minted on first sign-in and stored in
+/// the account, so any device of theirs picks it up automatically.
 sealed class SyncKeysState {
   const SyncKeysState();
 }
@@ -21,21 +20,21 @@ class SyncKeysLoading extends SyncKeysState {
   const SyncKeysLoading();
 }
 
-/// The account has an identity but this device doesn't hold it → link it
-/// from a device that already syncs.
-class SyncKeysNeedsLink extends SyncKeysState {
-  const SyncKeysNeedsLink();
-}
-
-/// Seed present: sealed boxes open, sync can run.
+/// The identity is on this device: sync can run.
 class SyncKeysReady extends SyncKeysState {
   const SyncKeysReady();
+}
+
+/// The account has an identity this device couldn't fetch (offline or a
+/// read error). Transient — it resolves on its own.
+class SyncKeysStalled extends SyncKeysState {
+  const SyncKeysStalled();
 }
 
 class SyncKeysError extends SyncKeysState {
   const SyncKeysError(this.messageKey);
 
-  /// 'identityMismatch' | 'badCode' | 'unknown' — localized by the UI.
+  /// 'unknown' — localized by the UI.
   final String messageKey;
 }
 
@@ -53,76 +52,30 @@ class SyncKeysController extends Notifier<SyncKeysState> {
   SyncKeysState build() {
     // Rebuild whenever sign-in state flips.
     ref.watch(userKeyServiceProvider);
-    Future.microtask(_refresh);
+    Future.microtask(refresh);
     return const SyncKeysLoading();
   }
 
-  Future<void> _refresh() async {
+  /// Makes the identity available on this device — minting it for a new
+  /// account, or fetching the account's existing one. No user interaction
+  /// either way.
+  Future<void> refresh() async {
     final service = _service;
     if (service == null) {
       state = const SyncKeysUnavailable();
       return;
     }
     try {
-      switch (await service.status()) {
-        case UserKeyStatus.notSetUp:
-          // Brand-new account: mint the identity with no user interaction —
-          // this is what makes sync "just work" after signing in.
-          await service.generate();
-          await _rememberOwner();
-          state = const SyncKeysReady();
-        case UserKeyStatus.needsLink:
-          state = const SyncKeysNeedsLink();
-        case UserKeyStatus.ready:
-          await _rememberOwner();
-          state = const SyncKeysReady();
-          // Retire the pre-4c passphrase envelope now that a device with the
-          // seed is running the new code.
-          await service.dropLegacyEnvelope();
+      if (await service.ensureAvailable()) {
+        await _rememberOwner();
+        state = const SyncKeysReady();
+        // Retire the pre-4c passphrase envelope; nothing reads it now.
+        await service.dropLegacyEnvelope();
+      } else {
+        state = const SyncKeysStalled();
       }
     } catch (_) {
       state = const SyncKeysError('unknown');
-    }
-  }
-
-  /// NEW device: open a session and show its code. The caller drives the
-  /// wait so it can render progress.
-  Future<LinkSession> startLink() async {
-    final link = ref.read(linkServiceProvider);
-    if (link == null) throw StateError('Cloud sync is unavailable.');
-    return link.start();
-  }
-
-  /// NEW device: block until the other device answers. Returns false on
-  /// timeout. Throws a reason key the UI can localize.
-  Future<bool> completeLink(LinkSession session) async {
-    final link = ref.read(linkServiceProvider);
-    if (link == null) return false;
-    try {
-      final linked = await link.awaitCompletion(session);
-      if (linked) {
-        await _rememberOwner();
-        await _refresh();
-      }
-      return linked;
-    } on LinkIdentityMismatch {
-      state = const SyncKeysError('identityMismatch');
-      throw 'identityMismatch';
-    } catch (_) {
-      throw 'unknown';
-    }
-  }
-
-  /// EXISTING device: approve a code shown by another device.
-  Future<void> approveLink(String code) async {
-    final link = ref.read(linkServiceProvider);
-    if (link == null) throw 'unknown';
-    try {
-      await link.approve(code);
-    } catch (_) {
-      // Bad paste, expired mailbox or no seed here — all actionable as
-      // "that code didn't work".
-      throw 'badCode';
     }
   }
 

@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jw_program/data/db/app_database.dart';
 import 'package:jw_program/data/sync/cck_service.dart';
-import 'package:jw_program/data/sync/link_service.dart';
 import 'package:jw_program/data/sync/content_crypto.dart';
 import 'package:jw_program/data/sync/sync_engine.dart';
 import 'package:jw_program/data/sync/sync_seeder.dart';
@@ -75,7 +74,7 @@ void main() {
         .read(peopleRepositoryProvider)
         .save(_person('p1', 'Ana', cong.id));
 
-    await a.userKeys.generate();
+    await a.userKeys.ensureAvailable();
     await a.cck.createCongregationSpace(cong.id);
     final seeded = await a.seeder.seedCongregation(cong.id);
     expect(seeded, 2); // congregation + person
@@ -91,11 +90,8 @@ void main() {
     // Device B: SAME account, new device. Unlock with the passphrase, pull.
     final b = CloudDevice('devB', transport, docs, uid: 'u1');
     addTearDown(b.dispose);
-    // A second device is authorised from the first (no passphrase).
-    final session = await LinkService(docs, b.userKeys, uid: 'u1').start();
-    await LinkService(docs, a.userKeys, uid: 'u1').approve(session.code);
-    expect(await LinkService(docs, b.userKeys, uid: 'u1')
-        .awaitCompletion(session), isTrue);
+    // Nothing to do: signing in is enough — device B fetches the account's
+    // key by itself.
 
     final page = await b.engine.pullOnce(cong.id);
     expect(page.applied, 2);
@@ -103,7 +99,7 @@ void main() {
     expect(bPeople.single.displayName, 'Ana');
   });
 
-  test('an unlinked device cannot pull (keyring null)', () async {
+  test('a device with no identity at all cannot pull (keyring null)', () async {
     final transport = InMemoryTransport();
     final docs = FakeKeyDocs();
     final a = CloudDevice('devA', transport, docs, uid: 'u1');
@@ -112,13 +108,14 @@ void main() {
     final cong = await a.container
         .read(congregationsRepositoryProvider)
         .create(name: 'Sur', number: '1');
-    await a.userKeys.generate();
+    await a.userKeys.ensureAvailable();
     await a.cck.createCongregationSpace(cong.id);
     await a.seeder.seedCongregation(cong.id);
     await a.engine.pushOnce();
 
-    // Device B was never linked: keyringFor → null, pull applies nothing.
-    final b = CloudDevice('devB', transport, docs, uid: 'u1');
+    // Device B belongs to a DIFFERENT account, so it has no identity here
+    // and is not a member: keyringFor → null and the pull applies nothing.
+    final b = CloudDevice('devB', transport, docs, uid: 'someone-else');
     addTearDown(b.dispose);
     final page = await b.engine.pullOnce(cong.id);
     expect(page.fetched, 0);

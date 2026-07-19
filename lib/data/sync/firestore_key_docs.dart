@@ -28,9 +28,11 @@ class FirestoreKeyDocs implements KeyDocsGateway {
   }
 
   @override
-  Future<void> createUserDoc(String uid, {required String pubKey}) =>
+  Future<void> createUserDoc(String uid,
+          {required String pubKey, required String privKey}) =>
       _user(uid).set({
         'pubKey': pubKey,
+        'privKey': privKey,
         'keyUpdatedAt': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -40,32 +42,6 @@ class FirestoreKeyDocs implements KeyDocsGateway {
         'wrappedPrivKey': FieldValue.delete(),
         'keyUpdatedAt': FieldValue.serverTimestamp(),
       });
-
-  DocumentReference<Map<String, dynamic>> _link(String uid, String sessionId) =>
-      _user(uid).collection('links').doc(sessionId);
-
-  @override
-  Future<void> createLinkMailbox(String uid, String sessionId, Duration ttl) =>
-      _link(uid, sessionId).set({
-        'createdAt': FieldValue.serverTimestamp(),
-        'expiresAt': Timestamp.fromDate(DateTime.now().toUtc().add(ttl)),
-      });
-
-  @override
-  Future<Map<String, dynamic>?> readLinkResponse(
-      String uid, String sessionId) async {
-    final data = await _readOrNull(() => _link(uid, sessionId).get(_serverSource));
-    return (data?['response'] as Map?)?.cast<String, dynamic>();
-  }
-
-  @override
-  Future<void> writeLinkResponse(
-          String uid, String sessionId, Map<String, String> response) =>
-      _link(uid, sessionId).update({'response': response});
-
-  @override
-  Future<void> deleteLinkMailbox(String uid, String sessionId) =>
-      _link(uid, sessionId).delete();
 
   @override
   Future<Map<String, dynamic>?> readMemberDoc(String cid, String uid) async {

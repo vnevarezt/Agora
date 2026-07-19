@@ -352,10 +352,21 @@ describe('members and users docs', () => {
   it('users/{uid} is owner-only', async () => {
     // Shape and identity-key rules live in linking.test.mjs; this pins the
     // cross-account boundary.
-    await assertSucceeds(setDoc(doc(db('ana'), 'users/ana'),
-      { pubKey: 'p', keyUpdatedAt: serverTimestamp(), createdAt: serverTimestamp() }));
+    // The identity doc escrows the private key, so these rules are the only
+    // thing keeping one account's key away from another's.
+    const identity = {
+      pubKey: 'pk', privKey: 'sk',
+      keyUpdatedAt: serverTimestamp(), createdAt: serverTimestamp(),
+    };
+    await assertSucceeds(setDoc(doc(db('ana'), 'users/ana'), identity));
     await assertFails(getDoc(doc(db('bob'), 'users/ana')));
-    await assertFails(setDoc(doc(db('bob'), 'users/ana'), { pubKey: 'x' }));
+    await assertFails(setDoc(doc(db('bob'), 'users/ana'), identity));
+    await assertFails(getDoc(doc(anon(), 'users/ana')));
+    // Both halves are frozen; the legacy envelope is rejected outright.
+    await assertFails(updateDoc(doc(db('ana'), 'users/ana'), { privKey: 'other' }));
+    await assertFails(updateDoc(doc(db('ana'), 'users/ana'), { pubKey: 'other' }));
+    await assertFails(updateDoc(doc(db('ana'), 'users/ana'), { wrappedPrivKey: 'legacy' }));
+    await assertSucceeds(deleteDoc(doc(db('ana'), 'users/ana')));
   });
 
   it('invites: get by token for anyone signed in, list only for admins', async () => {
