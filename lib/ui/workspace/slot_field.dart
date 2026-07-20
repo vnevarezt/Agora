@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/assignment_ops.dart';
+import '../../state/editor_session.dart';
 import '../../state/people_provider.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
@@ -51,6 +52,7 @@ class SlotField extends ConsumerWidget {
     final t = context.tokens;
     final name =
         ref.watch(formProvider.select((f) => slotName(f, spec.ref)));
+    final canEdit = ref.watch(canEditOpenProgramProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,8 +70,10 @@ class SlotField extends ConsumerWidget {
           builder: (anchorContext) => AssigneeButton(
             name: name.isEmpty ? null : name,
             alwaysShowClear: context.isMobile,
-            onTap: () => _openPicker(anchorContext, ref, name),
-            onClear: name.isEmpty
+            onTap: canEdit
+                ? () => _openPicker(anchorContext, ref, name)
+                : null,
+            onClear: (name.isEmpty || !canEdit)
                 ? null
                 : () => writeAssignment(ref, spec.ref, ''),
           ),

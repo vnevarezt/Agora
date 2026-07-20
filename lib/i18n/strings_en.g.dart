@@ -484,9 +484,6 @@ class _Translations$options$en extends Translations$options$es {
 	@override String get meetingLangSpanish => 'Spanish';
 	@override String get meetingLangSign => 'Sign language';
 	@override String get meetingLangEnglish => 'English';
-	@override String get accessAdmin => 'Administrator';
-	@override String get accessEditor => 'Editor';
-	@override String get accessReader => 'Reader';
 }
 
 // Path: days
@@ -532,6 +529,19 @@ class _Translations$congregation$en extends Translations$congregation$es {
 	@override String get inviteUser => 'Invite user';
 	@override String get empty => 'No congregations yet.\nCreate the first one with "New congregation".';
 	@override String get newCongregation => 'New congregation';
+	@override String get joinWithCode => 'Join with a code';
+	@override String get you => 'you';
+	@override String get roleAdmin => 'Admin';
+	@override String get roleEditor => 'Editor';
+	@override String get roleViewer => 'Read-only';
+	@override String get editAccess => 'Change permissions';
+	@override String get revoke => 'Remove access';
+	@override String get revokeTitle => 'Remove access';
+	@override String revokeConfirm({required Object name}) => '${name} will stop receiving changes. A new key is generated for everyone else and pending invitations are cancelled. Whatever they already downloaded stays on their device.';
+	@override String get lastAdmin => 'At least one person must keep administration rights.';
+	@override String get readOnly => 'You have read-only access to this congregation.';
+	@override String get membersError => 'Could not load the member list.';
+	@override String get pendingLabel => 'Pending invitations';
 }
 
 // Path: newCongregation
@@ -557,12 +567,40 @@ class _Translations$invite$en extends Translations$invite$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Invite user';
-	@override String get desc => 'They will receive an email invitation to access this congregation.';
-	@override String get send => 'Send invitation';
-	@override String get email => 'Email';
-	@override String get emailHint => 'name@email.com';
-	@override String get role => 'Role';
+	@override String get title => 'Invite to the congregation';
+	@override String get desc => 'Generate a code and share it over a private channel. It works once.';
+	@override String get create => 'Create code';
+	@override String get capabilities => 'Permissions';
+	@override String get capabilitiesDesc => 'What the person using this code will be able to do.';
+	@override String get capAdmin => 'Administer';
+	@override String get capAdminDesc => 'Members, invitations and congregation details.';
+	@override String get capPeople => 'Participants';
+	@override String get capPeopleDesc => 'Edit the people directory.';
+	@override String get capPrograms => 'Programs';
+	@override String get capProgramsDesc => 'Create and edit projects and assignments.';
+	@override String get codeTitle => 'Invitation code';
+	@override String get codeDesc => 'Valid for 7 days and single-use. Whoever holds it can read this congregation\'s data, so share it over a private channel only.';
+	@override String get copy => 'Copy';
+	@override String get copied => 'Code copied';
+	@override String get share => 'Share';
+	@override String get done => 'Done';
+	@override String get pending => 'Pending invitations';
+	@override String expiresOn({required Object date}) => 'Expires on ${date}';
+	@override String get expired => 'Expired';
+	@override String get cancel => 'Cancel invitation';
+	@override String get joinTitle => 'Join with a code';
+	@override String get joinDesc => 'Paste the code you were given.';
+	@override String get codeLabel => 'Code';
+	@override String get codeHint => 'agora-inv:1:…';
+	@override String get join => 'Join';
+	@override String get joined => 'You joined the congregation.';
+	@override String get errorInvalid => 'That code is not valid. Copy it whole, without cutting it.';
+	@override String get errorMissing => 'This invitation no longer exists — someone may have used it.';
+	@override String get errorExpired => 'This invitation has expired. Ask for a new one.';
+	@override String get errorAlreadyMember => 'You already belong to this congregation.';
+	@override String get errorKeys => 'The sync keys are not available on this device.';
+	@override String get errorUnknown => 'Could not complete. Please try again.';
+	@override String get paste => 'Paste';
 }
 
 // Path: picker
@@ -1122,9 +1160,6 @@ extension on TranslationsEn {
 			'options.meetingLangSpanish' => 'Spanish',
 			'options.meetingLangSign' => 'Sign language',
 			'options.meetingLangEnglish' => 'English',
-			'options.accessAdmin' => 'Administrator',
-			'options.accessEditor' => 'Editor',
-			'options.accessReader' => 'Reader',
 			'days.monday' => 'Monday',
 			'days.tuesday' => 'Tuesday',
 			'days.wednesday' => 'Wednesday',
@@ -1152,6 +1187,19 @@ extension on TranslationsEn {
 			'congregation.inviteUser' => 'Invite user',
 			'congregation.empty' => 'No congregations yet.\nCreate the first one with "New congregation".',
 			'congregation.newCongregation' => 'New congregation',
+			'congregation.joinWithCode' => 'Join with a code',
+			'congregation.you' => 'you',
+			'congregation.roleAdmin' => 'Admin',
+			'congregation.roleEditor' => 'Editor',
+			'congregation.roleViewer' => 'Read-only',
+			'congregation.editAccess' => 'Change permissions',
+			'congregation.revoke' => 'Remove access',
+			'congregation.revokeTitle' => 'Remove access',
+			'congregation.revokeConfirm' => ({required Object name}) => '${name} will stop receiving changes. A new key is generated for everyone else and pending invitations are cancelled. Whatever they already downloaded stays on their device.',
+			'congregation.lastAdmin' => 'At least one person must keep administration rights.',
+			'congregation.readOnly' => 'You have read-only access to this congregation.',
+			'congregation.membersError' => 'Could not load the member list.',
+			'congregation.pendingLabel' => 'Pending invitations',
 			'newCongregation.title' => 'New congregation',
 			'newCongregation.desc' => 'You will be its administrator. You can invite users afterwards.',
 			'newCongregation.create' => 'Create congregation',
@@ -1159,12 +1207,40 @@ extension on TranslationsEn {
 			'newCongregation.nameHint' => 'e.g. Northern Gardens',
 			'newCongregation.number' => 'Number',
 			'newCongregation.numberHint' => 'e.g. 152423',
-			'invite.title' => 'Invite user',
-			'invite.desc' => 'They will receive an email invitation to access this congregation.',
-			'invite.send' => 'Send invitation',
-			'invite.email' => 'Email',
-			'invite.emailHint' => 'name@email.com',
-			'invite.role' => 'Role',
+			'invite.title' => 'Invite to the congregation',
+			'invite.desc' => 'Generate a code and share it over a private channel. It works once.',
+			'invite.create' => 'Create code',
+			'invite.capabilities' => 'Permissions',
+			'invite.capabilitiesDesc' => 'What the person using this code will be able to do.',
+			'invite.capAdmin' => 'Administer',
+			'invite.capAdminDesc' => 'Members, invitations and congregation details.',
+			'invite.capPeople' => 'Participants',
+			'invite.capPeopleDesc' => 'Edit the people directory.',
+			'invite.capPrograms' => 'Programs',
+			'invite.capProgramsDesc' => 'Create and edit projects and assignments.',
+			'invite.codeTitle' => 'Invitation code',
+			'invite.codeDesc' => 'Valid for 7 days and single-use. Whoever holds it can read this congregation\'s data, so share it over a private channel only.',
+			'invite.copy' => 'Copy',
+			'invite.copied' => 'Code copied',
+			'invite.share' => 'Share',
+			'invite.done' => 'Done',
+			'invite.pending' => 'Pending invitations',
+			'invite.expiresOn' => ({required Object date}) => 'Expires on ${date}',
+			'invite.expired' => 'Expired',
+			'invite.cancel' => 'Cancel invitation',
+			'invite.joinTitle' => 'Join with a code',
+			'invite.joinDesc' => 'Paste the code you were given.',
+			'invite.codeLabel' => 'Code',
+			'invite.codeHint' => 'agora-inv:1:…',
+			'invite.join' => 'Join',
+			'invite.joined' => 'You joined the congregation.',
+			'invite.errorInvalid' => 'That code is not valid. Copy it whole, without cutting it.',
+			'invite.errorMissing' => 'This invitation no longer exists — someone may have used it.',
+			'invite.errorExpired' => 'This invitation has expired. Ask for a new one.',
+			'invite.errorAlreadyMember' => 'You already belong to this congregation.',
+			'invite.errorKeys' => 'The sync keys are not available on this device.',
+			'invite.errorUnknown' => 'Could not complete. Please try again.',
+			'invite.paste' => 'Paste',
 			'picker.assign' => 'Assign',
 			'picker.recent' => 'Recent',
 			'picker.all' => 'All',

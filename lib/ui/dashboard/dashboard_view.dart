@@ -9,6 +9,7 @@ import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
 import '../../state/sync_controller.dart';
+import '../../state/sync_provider.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
 import '../theme/dimens.dart';
@@ -407,6 +408,15 @@ class _HomeGrid extends ConsumerWidget {
 class _ProjectsSection extends ConsumerWidget {
   const _ProjectsSection();
 
+  /// A `project` item needs `admin` or ANY edit type (mirrors the rules).
+  /// Checked against the congregation a new project would land in.
+  bool _canCreateProjects(WidgetRef ref, List<Congregation> congregations) {
+    final cid = congregations.firstOrNull?.id;
+    if (cid == null) return true;
+    final rights = ref.watch(rightsProvider(cid));
+    return rights.admin || rights.editTypes.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final congregations = ref.watch(congregationsProvider);
@@ -457,7 +467,12 @@ class _ProjectsSection extends ConsumerWidget {
                 SizedBox(
                   width: colW,
                   child: NewProjectCard(
-                    onTap: () => showProjectModal(context),
+                    // A new project lands in the first congregation, the
+                    // same one the modal defaults to. Null onTap renders the
+                    // card disabled.
+                    onTap: _canCreateProjects(ref, congregations)
+                        ? () => showProjectModal(context)
+                        : null,
                   ),
                 ),
                 for (final p in projects)

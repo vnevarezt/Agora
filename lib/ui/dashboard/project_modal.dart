@@ -11,6 +11,7 @@ import '../../models/notebook.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/program_content.dart';
+import '../../state/sync_provider.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -57,6 +58,14 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   late List<String> _weeks = List.of(widget.original?.weeks ?? const []);
 
   bool get _isNew => widget.original == null;
+
+  /// A project doc needs `admin` or ANY edit type — the same condition the
+  /// `items` rule applies to entity 'project'.
+  bool get _canEdit {
+    if (_congregationId.isEmpty) return true;
+    final rights = ref.watch(rightsProvider(_congregationId));
+    return rights.admin || rights.editTypes.isNotEmpty;
+  }
 
   @override
   void initState() {
@@ -185,8 +194,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       body: _body(context.tokens, tr, isMobile, congregations, notebooks,
           notebook, extra, autoName),
       primaryLabel: _isNew ? tr.projectModal.create : tr.common.saveChanges,
-      onPrimary: _weeks.isNotEmpty ? () => _save(notebook) : null,
-      onDanger: _isNew ? null : _delete,
+      onPrimary:
+          (_canEdit && _weeks.isNotEmpty) ? () => _save(notebook) : null,
+      onDanger: (_isNew || !_canEdit) ? null : _delete,
     );
   }
 

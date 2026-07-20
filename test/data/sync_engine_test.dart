@@ -10,6 +10,7 @@ import 'package:jw_program/data/sync/content_crypto.dart';
 import 'package:jw_program/data/sync/sync_engine.dart';
 import 'package:jw_program/data/sync/sync_transport.dart';
 import 'package:jw_program/models/hall.dart';
+import 'package:jw_program/models/member_capabilities.dart';
 import 'package:jw_program/models/person.dart';
 import 'package:jw_program/state/dashboard_provider.dart';
 import 'package:jw_program/state/db_provider.dart';
@@ -19,8 +20,12 @@ import 'package:jw_program/state/program_content.dart';
 import '../helpers/in_memory_transport.dart';
 
 class Device {
-  Device(this.name, InMemoryTransport transport,
-      Map<String, CongregationKeyring> keyrings) {
+  Device(
+    this.name,
+    InMemoryTransport transport,
+    this.keyrings, {
+    Map<String, MemberCapabilities>? capabilities,
+  }) {
     db = AppDatabase(NativeDatabase.memory());
     container = ProviderContainer(overrides: [
       dbProvider.overrideWithValue(db),
@@ -31,10 +36,16 @@ class Device {
       ContentCrypto(),
       deviceId: name,
       keyringFor: (cid) async => keyrings[cid],
+      capabilitiesFor: (cid) async => capabilities?[cid],
     );
   }
 
   final String name;
+
+  /// Shared by reference so a test can hand this device a rotated key
+  /// mid-run, the way a keyring refresh does in production.
+  final Map<String, CongregationKeyring> keyrings;
+
   late final AppDatabase db;
   late final ProviderContainer container;
   late final SyncEngine engine;
@@ -238,6 +249,184 @@ void main() {
     );
     // ...and the cursor moved on, so the poison can't replay forever.
     expect((await b.engine.pullOnce(cong.id)).fetched, 0);
+  });
+
+  // ---- rotation: an unknown key version must never be skipped past --------
+  //
+  // Skipping it would be permanent data loss: once the cursor is past a doc,
+  // nothing ever looks at it again. The DoS fix that made undecryptable docs
+  // skippable is deliberately NOT applied to this case.
+
+  /// A congregation on the transport whose newest docs use key version 2,
+  /// pushed by a device that holds both versions. Returns the cid, the full
+  /// keyring, and a fresh device that only holds v1.
+  Future<(String, CongregationKeyring, Device)> rotatedCongregation() async {
+    final full = CongregationKeyring(
+        {1: CongregationKeyring.newKey(), 2: CongregationKeyring.newKey()});
+
+    final writerKeys = <String, CongregationKeyring>{};
+    final writer = Device('devW', transport, writerKeys);
+    addTearDown(writer.dispose);
+    final cong = await writer.container
+        .read(congregationsRepositoryProvider)
+        .create(name: 'Oeste', number: '9');
+
+    // First a doc under v1, so there IS readable history behind the gap.
+    writerKeys[cong.id] = CongregationKeyring({1: full.keys[1]!});
+    await writer.container
+        .read(peopleRepositoryProvider)
+        .save(person('old', 'Ana', cong.id));
+    await writer.engine.pushOnce();
+
+    // Then the rotation, and a doc only v2 opens.
+    writerKeys[cong.id] = full;
+    await writer.container
+        .read(peopleRepositoryProvider)
+        .save(person('new', 'Bea', cong.id));
+    await writer.engine.pushOnce();
+
+    final laggingKeys = {cong.id: CongregationKeyring({1: full.keys[1]!})};
+    final lagging = Device('devL', transport, laggingKeys);
+    addTearDown(lagging.dispose);
+    return (cong.id, full, lagging);
+  }
+
+  Future<int?> missingKeyVersionOf(Device d, String cid) async =>
+      (await (d.db.select(d.db.syncState)
+                ..where((t) => t.congregationId.equals(cid)))
+              .getSingleOrNull())
+          ?.missingKeyVersion;
+
+  test('a doc with an unknown key version holds the cursor', () async {
+    final (cid, _, lagging) = await rotatedCongregation();
+
+    final page = await lagging.engine.pullOnce(cid);
+    expect(page.cursorHeld, isTrue);
+    expect(page.unknownKeyVersions, {2});
+    // Not counted as corrupt: the blob is fine, we just lack the key.
+    expect(page.undecryptable, 0);
+    // What we COULD read is applied — the hold is about the cursor only.
+    expect(
+      (await lagging.container.read(peopleRepositoryProvider).all())
+          .single
+          .displayName,
+      'Ana',
+    );
+    // The cursor did not move: a second pull sees the very same page.
+    final again = await lagging.engine.pullOnce(cid);
+    expect(again.fetched, page.fetched);
+    expect(again.cursorHeld, isTrue);
+    expect(await missingKeyVersionOf(lagging, cid), isNull);
+  });
+
+  test('once the rotated key arrives, the held page applies', () async {
+    final (cid, full, lagging) = await rotatedCongregation();
+    await lagging.engine.pullOnce(cid);
+
+    // A refresh that finds nothing new leaves us exactly where we were.
+    final page = await lagging.engine.pullOnce(cid);
+    expect(page.cursorHeld, isTrue, reason: 'still lagging');
+
+    // Now the refresh actually lands the rotated key.
+    lagging.keyrings[cid] = full;
+    final recovered = await lagging.engine.pullOnce(cid);
+    expect(recovered.cursorHeld, isFalse);
+    expect(
+      {
+        for (final p in await lagging.container.read(peopleRepositoryProvider).all())
+          p.displayName,
+      },
+      {'Ana', 'Bea'},
+    );
+    expect((await lagging.engine.pullOnce(cid)).fetched, 0);
+  });
+
+  test('a permanently unknown version advances the cursor but is remembered',
+      () async {
+    final (cid, _, lagging) = await rotatedCongregation();
+
+    // The controller's escape hatch after a refresh didn't help. Without it,
+    // a hostile member writing keyVersion: 9999 would freeze the whole
+    // congregation — the denial of service we already closed once.
+    final page =
+        await lagging.engine.pullOnce(cid, acceptUnknownKeyVersions: true);
+    expect(page.cursorHeld, isFalse);
+    expect(page.unknownKeyVersions, {2});
+    expect(await missingKeyVersionOf(lagging, cid), 2);
+    // The cursor moved on, so sync is not wedged.
+    expect((await lagging.engine.pullOnce(cid)).fetched, 0);
+  });
+
+  test('recovering a remembered version rewinds and re-reads what was skipped',
+      () async {
+    final (cid, full, lagging) = await rotatedCongregation();
+    await lagging.engine.pullOnce(cid, acceptUnknownKeyVersions: true);
+    expect(
+      (await lagging.container.read(peopleRepositoryProvider).all()).length,
+      1,
+      reason: 'Bea was skipped',
+    );
+
+    // The key finally reaches this device (a reconciliation, or an admin
+    // repairing the keyring). Rewinding is the ONLY way to get those docs.
+    lagging.keyrings[cid] = full;
+    final page = await lagging.engine.pullOnce(cid);
+
+    expect(page.applied, 1);
+    expect(await missingKeyVersionOf(lagging, cid), isNull);
+    expect(
+      {
+        for (final p in await lagging.container.read(peopleRepositoryProvider).all())
+          p.displayName,
+      },
+      {'Ana', 'Bea'},
+    );
+    // And it settles: no endless re-pull loop.
+    expect((await lagging.engine.pullOnce(cid)).fetched, 0);
+  });
+
+  // ---- push: capabilities the server would bounce ------------------------
+
+  test('pushOnce drops docs this member is not allowed to write', () async {
+    final caps = <String, MemberCapabilities>{};
+    final keys = <String, CongregationKeyring>{};
+    final viewer = Device('devV', transport, keys, capabilities: caps);
+    addTearDown(viewer.dispose);
+
+    final cong = await viewer.container
+        .read(congregationsRepositoryProvider)
+        .create(name: 'Centro', number: '2');
+    keys[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
+    // Allowed to edit people, NOT the congregation settings.
+    caps[cong.id] = const MemberCapabilities(people: true);
+
+    await viewer.container
+        .read(peopleRepositoryProvider)
+        .save(person('p1', 'Ana', cong.id));
+
+    // The whole congregation goes up as ONE batch, so keeping the forbidden
+    // `congregation` doc queued would fail the commit and block the person
+    // write behind it forever.
+    expect(await viewer.engine.pushOnce(), 1);
+    expect(await viewer.outboxCount(), 0);
+    expect(transport.docs[cong.id]!.keys, ['p1']);
+  });
+
+  test('pushOnce does not filter while capabilities are unknown', () async {
+    // Null capabilities mean "the membership stream has not loaded", NOT
+    // "no rights": dropping outbox rows on a stale read would silently lose
+    // the user's edits.
+    final keys = <String, CongregationKeyring>{};
+    final device = Device('devU', transport, keys);
+    addTearDown(device.dispose);
+
+    final cong = await device.container
+        .read(congregationsRepositoryProvider)
+        .create(name: 'Norte', number: '4');
+    keys[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
+
+    expect(await device.engine.pushOnce(), 1);
+    expect(transport.docs[cong.id]!.keys, contains(cong.id));
   });
 
   test('coalescing: many edits to one row push one doc', () async {

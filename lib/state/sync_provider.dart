@@ -1,17 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:drift/drift.dart' show InsertMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/db/app_database.dart';
 import '../data/db/db_key_manager.dart' show KeychainKeyStore;
 import '../data/sync/cck_service.dart';
 import '../data/sync/content_crypto.dart';
 import '../data/sync/firestore_key_docs.dart';
 import '../data/sync/firestore_transport.dart';
+import '../data/sync/invite_code.dart';
 import '../data/sync/key_docs_gateway.dart';
 import '../data/sync/sync_engine.dart';
 import '../data/sync/sync_seeder.dart';
 import '../data/sync/sync_transport.dart';
 import '../data/sync/user_key_service.dart';
+import '../models/congregation_invite.dart';
+import '../models/congregation_member.dart';
+import '../models/member_capabilities.dart';
 import '../models/membership.dart';
 import 'app_settings.dart';
 import 'cloud_auth.dart';
@@ -79,6 +85,9 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
     ContentCrypto(),
     deviceId: deviceId(),
     keyringFor: cck.keyringFor,
+    // Read at push time, not captured: capabilities can be downgraded
+    // mid-session and the outbox must respect the change immediately.
+    capabilitiesFor: (cid) async => ref.read(myCapabilitiesProvider(cid)),
   );
 });
 
@@ -102,14 +111,85 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
           ]);
 });
 
-/// This user's capabilities in [congregationId] (null = not a member): gates
-/// edit affordances so a view-only member never enqueues writes rules bounce.
+/// This user's capabilities in [congregationId] (null = not a member).
+///
+/// Do NOT gate the UI on this directly — null means two OPPOSITE things (a
+/// local-only congregation, where you have every right, and a revoked
+/// membership, where you have none). Use [rightsProvider], which resolves
+/// that with a local fact.
 final myCapabilitiesProvider = Provider.family((ref, String congregationId) {
   final memberships = ref.watch(myMembershipsProvider).value ?? const [];
   for (final m in memberships) {
     if (m.congregationId == congregationId) return m.capabilities;
   }
   return null;
+});
+
+/// Congregations this device has ever had a cloud presence for. A `syncState`
+/// row is written the moment one is enabled or joined, and is never removed
+/// — which is exactly what tells a never-shared congregation apart from one
+/// we were thrown out of.
+final sharedCongregationIdsProvider = StreamProvider<Set<String>>((ref) {
+  final db = ref.watch(dbProvider);
+  return db
+      .select(db.syncState)
+      .watch()
+      .map((rows) => {for (final r in rows) r.congregationId});
+});
+
+/// THE gate for every edit affordance: what this user may do in
+/// [congregationId], right now.
+///
+/// Three states that [myCapabilitiesProvider] alone cannot tell apart:
+///
+///  - never shared → full rights (it is your own local congregation);
+///  - shared, membership still loading → optimistically full (blocking the
+///    UI on an in-flight query would read as a bug, and the push filter plus
+///    the rules catch anything we get wrong);
+///  - shared before, not a member now → read-only (revoked).
+///
+/// Route every gate through here rather than re-deriving it: getting the
+/// first and third confused is the easy mistake, and they want opposite
+/// answers.
+final rightsProvider =
+    Provider.family<MemberCapabilities, String>((ref, congregationId) {
+  const readOnly = MemberCapabilities();
+  final shared = ref.watch(sharedCongregationIdsProvider).value;
+  if (shared == null || !shared.contains(congregationId)) {
+    return MemberCapabilities.founder;
+  }
+  final memberships = ref.watch(myMembershipsProvider);
+  if (memberships.isLoading || memberships.hasError) {
+    return MemberCapabilities.founder;
+  }
+  for (final m in memberships.value ?? const []) {
+    if (m.congregationId == congregationId) return m.capabilities;
+  }
+  return readOnly;
+});
+
+/// The members admin screen's live list.
+///
+/// `autoDispose` is load-bearing, not tidiness: zero reads at rest is a
+/// product goal, and this listener costs one read per member per change for
+/// as long as it is open. It must die with the screen.
+final congregationMembersProvider = StreamProvider.autoDispose
+    .family<List<CongregationMember>, String>((ref, congregationId) {
+  final docs = ref.watch(keyDocsProvider);
+  if (docs == null) return Stream.value(const []);
+  return docs.watchMembers(congregationId).map(
+      (rows) => [for (final r in rows) CongregationMember.fromDoc(r)]);
+});
+
+/// Pending invites of a congregation (admin-only per the rules). Same
+/// autoDispose reasoning as [congregationMembersProvider].
+final congregationInvitesProvider = StreamProvider.autoDispose
+    .family<List<CongregationInvite>, String>((ref, congregationId) {
+  final docs = ref.watch(keyDocsProvider);
+  if (docs == null) return Stream.value(const []);
+  return docs.watchInvites(congregationId).map((rows) => [
+        for (final e in rows.entries) CongregationInvite.fromDoc(e.key, e.value),
+      ]);
 });
 
 /// Whether [congregationId] already has a cloud space this user belongs to.
@@ -157,6 +237,52 @@ final enableCongregationSyncProvider =
           final cck = ref.read(cckServiceProvider);
           if (cck == null) return false;
           await cck.createCongregationSpace(congregationId);
+          await markCongregationShared(
+              ref.read(dbProvider), congregationId);
           await ref.read(syncSeederProvider).seedCongregation(congregationId);
           return true;
         });
+
+/// Records that [congregationId] has a cloud presence on this device.
+///
+/// It is the local fact [rightsProvider] reads to tell "never shared" from
+/// "revoked", so it must be written when sharing STARTS, not as a side
+/// effect of a first successful pull — a congregation with nothing to pull
+/// would otherwise look local-only forever.
+///
+/// insertOrIgnore, never a plain upsert: an existing row carries the pull
+/// cursor, and resetting that would silently re-download the world.
+Future<void> markCongregationShared(AppDatabase db, String congregationId) =>
+    db.into(db.syncState).insert(
+          SyncStateCompanion.insert(
+            congregationId: congregationId,
+            updatedAt: DateTime.now().toUtc(),
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+
+/// Joins the congregation an invite code points at: redeem, mark it shared,
+/// then pull explicitly — nothing else would (with a null cursor
+/// `decidePull` returns `lazy` at most, so the data would trickle in
+/// minutes later, if at all).
+final redeemInviteProvider = Provider((ref) => (InviteCode code) async {
+      final cck = ref.read(cckServiceProvider);
+      if (cck == null) {
+        throw const SharingException(
+            'keysUnavailable', 'Cloud sync is not available.');
+      }
+      final user = ref.read(cloudUserProvider).value;
+      await cck.redeemInvite(code,
+          email: user?.email, displayName: user?.displayName);
+      final cid = code.congregationId;
+      await markCongregationShared(ref.read(dbProvider), cid);
+
+      final engine = ref.read(syncEngineProvider);
+      if (engine != null) {
+        PullResult page;
+        do {
+          page = await engine.pullOnce(cid);
+        } while (page.fetched >= FirestoreTransport.pageSize);
+      }
+      return cid;
+    });

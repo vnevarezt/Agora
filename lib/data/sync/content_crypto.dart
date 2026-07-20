@@ -15,6 +15,24 @@ class ContentDecryptException implements Exception {
   String toString() => message;
 }
 
+/// The blob is fine — we just don't hold that key version yet, because a
+/// rotation happened elsewhere and this device hasn't caught up.
+///
+/// A SUBCLASS so every existing `catch (ContentDecryptException)` keeps
+/// working, but the sync engine can tell the two apart: a corrupt blob is
+/// permanent (skip it, move the cursor on), an unknown version is transient
+/// (holding the cursor is the only thing that stops those docs from being
+/// skipped FOREVER once the cursor passes them).
+class UnknownKeyVersionException extends ContentDecryptException {
+  const UnknownKeyVersionException(this.keyVersion)
+      : super('Unknown content key version.');
+
+  final int keyVersion;
+
+  @override
+  String toString() => 'Unknown content key version $keyVersion.';
+}
+
 /// Per-congregation content keys (docs/DATA_ARCHITECTURE.md §5): synced
 /// payloads are AES-256-GCM blobs under the congregation's key. The keyring
 /// holds every key version this member knows — revocation adds a NEW
@@ -68,10 +86,7 @@ class ContentCrypto {
     required String blob,
   }) async {
     final key = keyring.keys[keyVersion];
-    if (key == null) {
-      throw ContentDecryptException(
-          'Unknown content key version $keyVersion.');
-    }
+    if (key == null) throw UnknownKeyVersionException(keyVersion);
     final SecretBox box;
     try {
       box = SecretBox.fromConcatenation(

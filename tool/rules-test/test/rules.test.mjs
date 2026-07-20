@@ -376,4 +376,198 @@ describe('members and users docs', () => {
     await assertSucceeds(getDocs(collection(db('admin'), 'congregations/c1/invites')));
     await assertFails(getDocs(collection(db('bob'), 'congregations/c1/invites')));
   });
+
+  it('members: any member lists the collection, a stranger cannot', async () => {
+    // The admin screen's live member list.
+    await assertSucceeds(getDocs(collection(db('bob'), 'congregations/c1/members')));
+    await assertFails(getDocs(collection(db('stranger'), 'congregations/c1/members')));
+    await assertFails(getDocs(collection(anon(), 'congregations/c1/members')));
+  });
+});
+
+// ---------------------------------------------------------------------------
+describe('invite creation and cancellation (admin only)', () => {
+  const invite = (over = {}) => ({
+    capabilities: CAPS_VIEW,
+    wrappedKeyring: { v: '1', nonce: 'n', ct: 'c', mac: 'm' },
+    createdBy: 'admin',
+    createdAt: serverTimestamp(),
+    expiresAt: Timestamp.fromMillis(Date.now() + 86400_000),
+    ...over,
+  });
+
+  beforeEach(async () => {
+    await found('admin', 'c1');
+    await plantMember('c1', 'bob', CAPS_VIEW);
+  });
+
+  it('an admin creates an invite; a plain member and a stranger cannot', async () => {
+    await assertSucceeds(
+      setDoc(doc(db('admin'), 'congregations/c1/invites/t1'), invite()));
+    await assertFails(
+      setDoc(doc(db('bob'), 'congregations/c1/invites/t2'),
+        invite({ createdBy: 'bob' })));
+    await assertFails(
+      setDoc(doc(db('stranger'), 'congregations/c1/invites/t3'),
+        invite({ createdBy: 'stranger' })));
+  });
+
+  it('rejects extra fields, a foreign createdBy and a past expiresAt', async () => {
+    const d = db('admin');
+    await assertFails(
+      setDoc(doc(d, 'congregations/c1/invites/t1'), invite({ email: 'a@b.c' })));
+    await assertFails(
+      setDoc(doc(d, 'congregations/c1/invites/t1'), invite({ createdBy: 'bob' })));
+    await assertFails(setDoc(doc(d, 'congregations/c1/invites/t1'),
+      invite({ expiresAt: Timestamp.fromMillis(Date.now() - 1000) })));
+    // A client-chosen createdAt would let an invite lie about its age.
+    await assertFails(setDoc(doc(d, 'congregations/c1/invites/t1'),
+      invite({ createdAt: Timestamp.now() })));
+  });
+
+  it('an invite is immutable: only cancel (admin) or consume', async () => {
+    await plantInvite('c1', 'tok1', CAPS_VIEW);
+    // Escalating an invite in place would launder capabilities past the
+    // admin who created it.
+    await assertFails(updateDoc(doc(db('admin'), 'congregations/c1/invites/tok1'),
+      { capabilities: CAPS_ADMIN }));
+    await assertFails(deleteDoc(doc(db('bob'), 'congregations/c1/invites/tok1')));
+    await assertSucceeds(deleteDoc(doc(db('admin'), 'congregations/c1/invites/tok1')));
+  });
+
+  it('an existing member cannot redeem an invite onto their own doc', async () => {
+    await plantInvite('c1', 'tok1', CAPS_ADMIN);
+    // The create rule only ever creates; bob's doc already exists, so this
+    // is an update, and updates require isAdmin. Self-escalation is closed.
+    await assertFails(redeemBatch(db('bob'), 'c1', 'bob', 'tok1', CAPS_ADMIN));
+  });
+
+  it('two simultaneous redemptions: exactly one wins', async () => {
+    await plantInvite('c1', 'tok1', CAPS_VIEW);
+    const results = await Promise.allSettled([
+      redeemBatch(db('carol'), 'c1', 'carol', 'tok1', CAPS_VIEW),
+      redeemBatch(db('dave'), 'c1', 'dave', 'tok1', CAPS_VIEW),
+    ]);
+    assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const members = await getDocs(
+        collection(ctx.firestore(), 'congregations/c1/members'));
+      // admin + bob + exactly one of carol/dave.
+      assert.equal(members.size, 3);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The revoke+rotate batch. Its whole guarantee rests on isAdmin() reading the
+// CALLER's member doc in its PRE-batch state.
+describe('key rotation batch', () => {
+  const box = (v) => ({ v: '1', epk: `e${v}`, nonce: 'n', ct: 'c', mac: 'm' });
+
+  /// The shape FirestoreKeyDocs.rotateKey actually sends: a MERGED set of a
+  /// nested map (deep-merges, so old versions survive), never a `set` that
+  /// would drop inviteId/createdAt/pubKey.
+  const appendVersion = (batch, d, cid, uid, version) =>
+    batch.set(
+      doc(d, `congregations/${cid}/members/${uid}`),
+      { wrappedCcks: { [version]: box(version) } },
+      { merge: true },
+    );
+
+  beforeEach(async () => {
+    await found('admin', 'c1');
+    await plantMember('c1', 'bob', CAPS_VIEW);
+    await plantMember('c1', 'carol', CAPS_VIEW);
+  });
+
+  it('admin revokes one member, re-wraps the survivors and bumps the version',
+    async () => {
+      const d = db('admin');
+      const batch = writeBatch(d);
+      appendVersion(batch, d, 'c1', 'admin', 2);
+      appendVersion(batch, d, 'c1', 'carol', 2);
+      batch.delete(doc(d, 'congregations/c1/members/bob'));
+      batch.update(doc(d, 'congregations/c1'), { keyVersion: 2 });
+      await assertSucceeds(batch.commit());
+
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const carol = await getDoc(
+          doc(ctx.firestore(), 'congregations/c1/members/carol'));
+        // v1 survived the merge — history stays readable.
+        assert.deepEqual(Object.keys(carol.data().wrappedCcks).sort(), ['1', '2']);
+        // The merge did NOT wipe the fields the rules freeze.
+        assert.equal(carol.data().pubKey, 'pk-carol');
+        assert.equal(carol.data().uid, 'carol');
+      });
+    });
+
+  it('a non-admin cannot rotate', async () => {
+    const d = db('bob');
+    const batch = writeBatch(d);
+    appendVersion(batch, d, 'c1', 'bob', 2);
+    batch.update(doc(d, 'congregations/c1'), { keyVersion: 2 });
+    await assertFails(batch.commit());
+  });
+
+  it('an admin revokes THEMSELVES and rotates in the same batch', async () => {
+    // Pins the semantics the client depends on: isAdmin() evaluates against
+    // the pre-batch doc, so a departing admin can still rotate. Any other
+    // order is impossible — once their doc is gone they cannot write at all.
+    const d = db('admin');
+    const batch = writeBatch(d);
+    appendVersion(batch, d, 'c1', 'bob', 2);
+    appendVersion(batch, d, 'c1', 'carol', 2);
+    batch.delete(doc(d, 'congregations/c1/members/admin'));
+    batch.update(doc(d, 'congregations/c1'), { keyVersion: 2 });
+    await assertSucceeds(batch.commit());
+
+    // And afterwards they really are out: no second rotation.
+    await assertFails(
+      updateDoc(doc(db('admin'), 'congregations/c1'), { keyVersion: 3 }));
+  });
+
+  it('rotation also deletes pending invites in the same batch', async () => {
+    // Their wrappedKeyring is immutable and frozen at the old version, so a
+    // survivor invite would admit someone blind to everything written after.
+    await plantInvite('c1', 'stale', CAPS_VIEW);
+    const d = db('admin');
+    const batch = writeBatch(d);
+    appendVersion(batch, d, 'c1', 'admin', 2);
+    appendVersion(batch, d, 'c1', 'carol', 2);
+    batch.delete(doc(d, 'congregations/c1/members/bob'));
+    batch.delete(doc(d, 'congregations/c1/invites/stale'));
+    batch.update(doc(d, 'congregations/c1'), { keyVersion: 2 });
+    await assertSucceeds(batch.commit());
+  });
+
+  it('reconciles an INTERMEDIATE version without disturbing the rest', async () => {
+    // The gap a max-version model can never see: {1, 3} missing 2.
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'congregations/c1/members/carol'), {
+        wrappedCcks: { 1: box(1), 3: box(3) },
+      });
+      await updateDoc(doc(ctx.firestore(), 'congregations/c1'), { keyVersion: 3 });
+    });
+
+    const d = db('admin');
+    const batch = writeBatch(d);
+    appendVersion(batch, d, 'c1', 'carol', 2);
+    await assertSucceeds(batch.commit());
+
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const carol = await getDoc(
+        doc(ctx.firestore(), 'congregations/c1/members/carol'));
+      assert.deepEqual(
+        Object.keys(carol.data().wrappedCcks).sort(), ['1', '2', '3']);
+      assert.equal(carol.data().wrappedCcks['3'].epk, 'e3');
+    });
+  });
+
+  it('rejects a plain set that would drop the frozen identity fields', async () => {
+    // The trap the client avoids: a non-merged set loses inviteId/createdAt/
+    // pubKey, and the rules reject it — better a failed rotation than a
+    // silently mangled member doc.
+    await assertFails(setDoc(doc(db('admin'), 'congregations/c1/members/carol'),
+      { wrappedCcks: { 1: box(1), 2: box(2) } }));
+  });
 });

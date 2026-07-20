@@ -14,13 +14,16 @@ class AssigneeButton extends StatelessWidget {
   const AssigneeButton({
     super.key,
     this.name,
-    required this.onTap,
+    this.onTap,
     this.onClear,
     this.alwaysShowClear = false,
   });
 
   final String? name;
-  final VoidCallback onTap;
+
+  /// Null renders the slot inert — how a member without `editTypes` for this
+  /// program sees an assignment: readable, not editable.
+  final VoidCallback? onTap;
   final VoidCallback? onClear;
   final bool alwaysShowClear;
 

@@ -324,10 +324,7 @@ class SyncController extends Notifier<SyncStatus> {
     var failed = false;
     for (final cid in cids) {
       try {
-        PullResult page;
-        do {
-          page = await engine.pullOnce(cid);
-        } while (page.fetched >= FirestoreTransport.pageSize);
+        await _drain(engine, cid);
         _staleCids.remove(cid);
       } on SyncTransportException catch (e) {
         failed = true;
@@ -344,6 +341,35 @@ class SyncController extends Notifier<SyncStatus> {
     }
     if (!failed) _onSuccess();
     _pulling = false;
+  }
+
+  /// Pages through one congregation until it runs dry.
+  ///
+  /// A page carrying a key version we don't hold does NOT advance the cursor
+  /// (see [SyncEngine.pullOnce]) — the engine hands it back so we can fetch
+  /// the rotated key and retry the SAME page. Refreshing off
+  /// `Membership.keyVersion` instead would not work: that snapshot and the
+  /// heartbeat are two independent streams with no ordering between them, so
+  /// a heartbeat can fire the pull that burns the cursor before the
+  /// membership update ever arrives.
+  Future<void> _drain(SyncEngine engine, String cid) async {
+    PullResult page;
+    do {
+      page = await engine.pullOnce(cid);
+      if (page.cursorHeld) {
+        await ref.read(cckServiceProvider)?.refresh(cid);
+        page = await engine.pullOnce(cid);
+        if (page.cursorHeld) {
+          // Still unknown after fetching the newest keyring: either a writer
+          // used a version we will never receive, or a hostile member
+          // injected one. Holding the cursor forever would be exactly the
+          // denial of service we already closed once, so let it past — the
+          // version is remembered, and if it ever does arrive the next pull
+          // rewinds and re-reads everything we skipped.
+          page = await engine.pullOnce(cid, acceptUnknownKeyVersions: true);
+        }
+      }
+    } while (page.fetched >= FirestoreTransport.pageSize);
   }
 
   // ---- outcomes ------------------------------------------------------------

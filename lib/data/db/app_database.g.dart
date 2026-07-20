@@ -4403,6 +4403,17 @@ class $SyncStateTable extends SyncState
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _missingKeyVersionMeta = const VerificationMeta(
+    'missingKeyVersion',
+  );
+  @override
+  late final GeneratedColumn<int> missingKeyVersion = GeneratedColumn<int>(
+    'missing_key_version',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -4419,6 +4430,7 @@ class $SyncStateTable extends SyncState
     congregationId,
     pullCursor,
     pushedThrough,
+    missingKeyVersion,
     updatedAt,
   ];
   @override
@@ -4459,6 +4471,15 @@ class $SyncStateTable extends SyncState
         ),
       );
     }
+    if (data.containsKey('missing_key_version')) {
+      context.handle(
+        _missingKeyVersionMeta,
+        missingKeyVersion.isAcceptableOrUnknown(
+          data['missing_key_version']!,
+          _missingKeyVersionMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -4488,6 +4509,10 @@ class $SyncStateTable extends SyncState
         DriftSqlType.int,
         data['${effectivePrefix}pushed_through'],
       ),
+      missingKeyVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}missing_key_version'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -4509,11 +4534,18 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
 
   /// Outbox id this congregation's pusher has completed through.
   final int? pushedThrough;
+
+  /// Lowest CCK version this device gave up on decrypting, after which the
+  /// cursor was allowed past those docs (see [SyncEngine.pullOnce]). Once the
+  /// version reaches us, the cursor rewinds to null and the history is
+  /// re-pulled. Null = nothing was ever skipped.
+  final int? missingKeyVersion;
   final DateTime updatedAt;
   const SyncStateRecord({
     required this.congregationId,
     this.pullCursor,
     this.pushedThrough,
+    this.missingKeyVersion,
     required this.updatedAt,
   });
   @override
@@ -4525,6 +4557,9 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
     }
     if (!nullToAbsent || pushedThrough != null) {
       map['pushed_through'] = Variable<int>(pushedThrough);
+    }
+    if (!nullToAbsent || missingKeyVersion != null) {
+      map['missing_key_version'] = Variable<int>(missingKeyVersion);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -4539,6 +4574,9 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
       pushedThrough: pushedThrough == null && nullToAbsent
           ? const Value.absent()
           : Value(pushedThrough),
+      missingKeyVersion: missingKeyVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(missingKeyVersion),
       updatedAt: Value(updatedAt),
     );
   }
@@ -4552,6 +4590,7 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
       congregationId: serializer.fromJson<String>(json['congregationId']),
       pullCursor: serializer.fromJson<String?>(json['pullCursor']),
       pushedThrough: serializer.fromJson<int?>(json['pushedThrough']),
+      missingKeyVersion: serializer.fromJson<int?>(json['missingKeyVersion']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -4562,6 +4601,7 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
       'congregationId': serializer.toJson<String>(congregationId),
       'pullCursor': serializer.toJson<String?>(pullCursor),
       'pushedThrough': serializer.toJson<int?>(pushedThrough),
+      'missingKeyVersion': serializer.toJson<int?>(missingKeyVersion),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -4570,6 +4610,7 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
     String? congregationId,
     Value<String?> pullCursor = const Value.absent(),
     Value<int?> pushedThrough = const Value.absent(),
+    Value<int?> missingKeyVersion = const Value.absent(),
     DateTime? updatedAt,
   }) => SyncStateRecord(
     congregationId: congregationId ?? this.congregationId,
@@ -4577,6 +4618,9 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
     pushedThrough: pushedThrough.present
         ? pushedThrough.value
         : this.pushedThrough,
+    missingKeyVersion: missingKeyVersion.present
+        ? missingKeyVersion.value
+        : this.missingKeyVersion,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   SyncStateRecord copyWithCompanion(SyncStateCompanion data) {
@@ -4590,6 +4634,9 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
       pushedThrough: data.pushedThrough.present
           ? data.pushedThrough.value
           : this.pushedThrough,
+      missingKeyVersion: data.missingKeyVersion.present
+          ? data.missingKeyVersion.value
+          : this.missingKeyVersion,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -4600,14 +4647,20 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
           ..write('congregationId: $congregationId, ')
           ..write('pullCursor: $pullCursor, ')
           ..write('pushedThrough: $pushedThrough, ')
+          ..write('missingKeyVersion: $missingKeyVersion, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(congregationId, pullCursor, pushedThrough, updatedAt);
+  int get hashCode => Object.hash(
+    congregationId,
+    pullCursor,
+    pushedThrough,
+    missingKeyVersion,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4615,6 +4668,7 @@ class SyncStateRecord extends DataClass implements Insertable<SyncStateRecord> {
           other.congregationId == this.congregationId &&
           other.pullCursor == this.pullCursor &&
           other.pushedThrough == this.pushedThrough &&
+          other.missingKeyVersion == this.missingKeyVersion &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -4622,12 +4676,14 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
   final Value<String> congregationId;
   final Value<String?> pullCursor;
   final Value<int?> pushedThrough;
+  final Value<int?> missingKeyVersion;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const SyncStateCompanion({
     this.congregationId = const Value.absent(),
     this.pullCursor = const Value.absent(),
     this.pushedThrough = const Value.absent(),
+    this.missingKeyVersion = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4635,6 +4691,7 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
     required String congregationId,
     this.pullCursor = const Value.absent(),
     this.pushedThrough = const Value.absent(),
+    this.missingKeyVersion = const Value.absent(),
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   }) : congregationId = Value(congregationId),
@@ -4643,6 +4700,7 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
     Expression<String>? congregationId,
     Expression<String>? pullCursor,
     Expression<int>? pushedThrough,
+    Expression<int>? missingKeyVersion,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -4650,6 +4708,7 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
       if (congregationId != null) 'congregation_id': congregationId,
       if (pullCursor != null) 'pull_cursor': pullCursor,
       if (pushedThrough != null) 'pushed_through': pushedThrough,
+      if (missingKeyVersion != null) 'missing_key_version': missingKeyVersion,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4659,6 +4718,7 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
     Value<String>? congregationId,
     Value<String?>? pullCursor,
     Value<int?>? pushedThrough,
+    Value<int?>? missingKeyVersion,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -4666,6 +4726,7 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
       congregationId: congregationId ?? this.congregationId,
       pullCursor: pullCursor ?? this.pullCursor,
       pushedThrough: pushedThrough ?? this.pushedThrough,
+      missingKeyVersion: missingKeyVersion ?? this.missingKeyVersion,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -4683,6 +4744,9 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
     if (pushedThrough.present) {
       map['pushed_through'] = Variable<int>(pushedThrough.value);
     }
+    if (missingKeyVersion.present) {
+      map['missing_key_version'] = Variable<int>(missingKeyVersion.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -4698,6 +4762,7 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRecord> {
           ..write('congregationId: $congregationId, ')
           ..write('pullCursor: $pullCursor, ')
           ..write('pushedThrough: $pushedThrough, ')
+          ..write('missingKeyVersion: $missingKeyVersion, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -8215,6 +8280,7 @@ typedef $$SyncStateTableCreateCompanionBuilder =
       required String congregationId,
       Value<String?> pullCursor,
       Value<int?> pushedThrough,
+      Value<int?> missingKeyVersion,
       required DateTime updatedAt,
       Value<int> rowid,
     });
@@ -8223,6 +8289,7 @@ typedef $$SyncStateTableUpdateCompanionBuilder =
       Value<String> congregationId,
       Value<String?> pullCursor,
       Value<int?> pushedThrough,
+      Value<int?> missingKeyVersion,
       Value<DateTime> updatedAt,
       Value<int> rowid,
     });
@@ -8248,6 +8315,11 @@ class $$SyncStateTableFilterComposer
 
   ColumnFilters<int> get pushedThrough => $composableBuilder(
     column: $table.pushedThrough,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get missingKeyVersion => $composableBuilder(
+    column: $table.missingKeyVersion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8281,6 +8353,11 @@ class $$SyncStateTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get missingKeyVersion => $composableBuilder(
+    column: $table.missingKeyVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -8308,6 +8385,11 @@ class $$SyncStateTableAnnotationComposer
 
   GeneratedColumn<int> get pushedThrough => $composableBuilder(
     column: $table.pushedThrough,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get missingKeyVersion => $composableBuilder(
+    column: $table.missingKeyVersion,
     builder: (column) => column,
   );
 
@@ -8349,12 +8431,14 @@ class $$SyncStateTableTableManager
                 Value<String> congregationId = const Value.absent(),
                 Value<String?> pullCursor = const Value.absent(),
                 Value<int?> pushedThrough = const Value.absent(),
+                Value<int?> missingKeyVersion = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SyncStateCompanion(
                 congregationId: congregationId,
                 pullCursor: pullCursor,
                 pushedThrough: pushedThrough,
+                missingKeyVersion: missingKeyVersion,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -8363,12 +8447,14 @@ class $$SyncStateTableTableManager
                 required String congregationId,
                 Value<String?> pullCursor = const Value.absent(),
                 Value<int?> pushedThrough = const Value.absent(),
+                Value<int?> missingKeyVersion = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => SyncStateCompanion.insert(
                 congregationId: congregationId,
                 pullCursor: pullCursor,
                 pushedThrough: pushedThrough,
+                missingKeyVersion: missingKeyVersion,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),

@@ -24,7 +24,7 @@ void main() {
   test('empty v1 migrates to a valid current schema', () async {
     final connection = await verifier.startAt(1);
     final db = AppDatabase(connection);
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
 
     // No participants → no auto-created congregation.
     expect(await db.select(db.congregations).get(), isEmpty);
@@ -51,7 +51,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
 
     // The skeleton program survives with NULL content (the snapshot
     // service fills it on first open) and the defaults in place.
@@ -94,7 +94,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
 
     // One congregation, named after the dominant spelling of the top group.
     final congs = await db.select(db.congregations).get();
@@ -140,6 +140,27 @@ void main() {
     await db.close();
   });
 
+  test('v4 sync cursors survive v5 with nothing to skip', () async {
+    final schema = await verifier.schemaAt(4);
+    schema.rawDatabase.execute('''
+      INSERT INTO sync_state (congregation_id, pull_cursor, pushed_through,
+        updated_at)
+      VALUES ('c1', '2026-01-10T10:00:00.000Z|abc', 7,
+        '2026-01-10T10:00:00.000Z');
+    ''');
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 5);
+
+    // The cursor is untouched and the new column reads as "nothing was ever
+    // skipped here" without any backfill.
+    final row = await db.select(db.syncState).getSingle();
+    expect(row.pullCursor, '2026-01-10T10:00:00.000Z|abc');
+    expect(row.pushedThrough, 7);
+    expect(row.missingKeyVersion, isNull);
+    await db.close();
+  });
+
   test('all-empty congregation strings fall back to the localized default',
       () async {
     final schema = await verifier.schemaAt(1);
@@ -156,7 +177,7 @@ void main() {
       schema.newConnection(),
       defaultCongregationName: 'Mi congregación',
     );
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
 
     final congs = await db.select(db.congregations).get();
     expect(congs.single.name, 'Mi congregación');

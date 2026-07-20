@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../state/editor_session.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
@@ -118,7 +119,10 @@ class _RoleBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     // The chairman card has no real row id, so its title isn't editable.
-    final editable = view.id != 'presidente';
+    // A title override is a `program` write, so it also needs the program
+    // capability for this project's type.
+    final editable = view.id != 'presidente' &&
+        ref.watch(canEditOpenProgramProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
       child: Column(

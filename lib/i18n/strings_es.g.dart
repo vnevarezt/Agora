@@ -912,15 +912,6 @@ class Translations$options$es {
 
 	/// es: 'English'
 	String get meetingLangEnglish => 'English';
-
-	/// es: 'Administrador'
-	String get accessAdmin => 'Administrador';
-
-	/// es: 'Editor'
-	String get accessEditor => 'Editor';
-
-	/// es: 'Lector'
-	String get accessReader => 'Lector';
 }
 
 // Path: days
@@ -1020,6 +1011,45 @@ class Translations$congregation$es {
 
 	/// es: 'Nueva congregación'
 	String get newCongregation => 'Nueva congregación';
+
+	/// es: 'Unirse con un código'
+	String get joinWithCode => 'Unirse con un código';
+
+	/// es: 'tú'
+	String get you => 'tú';
+
+	/// es: 'Admin'
+	String get roleAdmin => 'Admin';
+
+	/// es: 'Editor'
+	String get roleEditor => 'Editor';
+
+	/// es: 'Lectura'
+	String get roleViewer => 'Lectura';
+
+	/// es: 'Cambiar permisos'
+	String get editAccess => 'Cambiar permisos';
+
+	/// es: 'Quitar acceso'
+	String get revoke => 'Quitar acceso';
+
+	/// es: 'Quitar acceso'
+	String get revokeTitle => 'Quitar acceso';
+
+	/// es: '{name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.'
+	String revokeConfirm({required Object name}) => '${name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.';
+
+	/// es: 'Debe quedar al menos una persona con permiso de administración.'
+	String get lastAdmin => 'Debe quedar al menos una persona con permiso de administración.';
+
+	/// es: 'Solo tienes acceso de lectura en esta congregación.'
+	String get readOnly => 'Solo tienes acceso de lectura en esta congregación.';
+
+	/// es: 'No se ha podido cargar la lista de miembros.'
+	String get membersError => 'No se ha podido cargar la lista de miembros.';
+
+	/// es: 'Invitaciones pendientes'
+	String get pendingLabel => 'Invitaciones pendientes';
 }
 
 // Path: newCongregation
@@ -1060,23 +1090,107 @@ class Translations$invite$es {
 
 	// Translations
 
-	/// es: 'Invitar usuario'
-	String get title => 'Invitar usuario';
+	/// es: 'Invitar a la congregación'
+	String get title => 'Invitar a la congregación';
 
-	/// es: 'Le llegará una invitación por correo para acceder a esta congregación.'
-	String get desc => 'Le llegará una invitación por correo para acceder a esta congregación.';
+	/// es: 'Genera un código y compártelo por un canal privado. Sirve una sola vez.'
+	String get desc => 'Genera un código y compártelo por un canal privado. Sirve una sola vez.';
 
-	/// es: 'Enviar invitación'
-	String get send => 'Enviar invitación';
+	/// es: 'Crear código'
+	String get create => 'Crear código';
 
-	/// es: 'Correo electrónico'
-	String get email => 'Correo electrónico';
+	/// es: 'Permisos'
+	String get capabilities => 'Permisos';
 
-	/// es: 'nombre@correo.com'
-	String get emailHint => 'nombre@correo.com';
+	/// es: 'Lo que podrá hacer quien use el código.'
+	String get capabilitiesDesc => 'Lo que podrá hacer quien use el código.';
 
-	/// es: 'Rol'
-	String get role => 'Rol';
+	/// es: 'Administrar'
+	String get capAdmin => 'Administrar';
+
+	/// es: 'Miembros, invitaciones y datos de la congregación.'
+	String get capAdminDesc => 'Miembros, invitaciones y datos de la congregación.';
+
+	/// es: 'Participantes'
+	String get capPeople => 'Participantes';
+
+	/// es: 'Editar el directorio de personas.'
+	String get capPeopleDesc => 'Editar el directorio de personas.';
+
+	/// es: 'Programas'
+	String get capPrograms => 'Programas';
+
+	/// es: 'Crear y editar proyectos y asignaciones.'
+	String get capProgramsDesc => 'Crear y editar proyectos y asignaciones.';
+
+	/// es: 'Código de invitación'
+	String get codeTitle => 'Código de invitación';
+
+	/// es: 'Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.'
+	String get codeDesc => 'Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.';
+
+	/// es: 'Copiar'
+	String get copy => 'Copiar';
+
+	/// es: 'Código copiado'
+	String get copied => 'Código copiado';
+
+	/// es: 'Compartir'
+	String get share => 'Compartir';
+
+	/// es: 'Hecho'
+	String get done => 'Hecho';
+
+	/// es: 'Invitaciones pendientes'
+	String get pending => 'Invitaciones pendientes';
+
+	/// es: 'Caduca el {date}'
+	String expiresOn({required Object date}) => 'Caduca el ${date}';
+
+	/// es: 'Caducada'
+	String get expired => 'Caducada';
+
+	/// es: 'Cancelar invitación'
+	String get cancel => 'Cancelar invitación';
+
+	/// es: 'Unirse con un código'
+	String get joinTitle => 'Unirse con un código';
+
+	/// es: 'Pega el código que te han compartido.'
+	String get joinDesc => 'Pega el código que te han compartido.';
+
+	/// es: 'Código'
+	String get codeLabel => 'Código';
+
+	/// es: 'agora-inv:1:…'
+	String get codeHint => 'agora-inv:1:…';
+
+	/// es: 'Unirse'
+	String get join => 'Unirse';
+
+	/// es: 'Te has unido a la congregación.'
+	String get joined => 'Te has unido a la congregación.';
+
+	/// es: 'Ese código no es válido. Cópialo entero, sin cortarlo.'
+	String get errorInvalid => 'Ese código no es válido. Cópialo entero, sin cortarlo.';
+
+	/// es: 'Esta invitación ya no existe: puede que alguien la haya usado.'
+	String get errorMissing => 'Esta invitación ya no existe: puede que alguien la haya usado.';
+
+	/// es: 'Esta invitación ha caducado. Pide una nueva.'
+	String get errorExpired => 'Esta invitación ha caducado. Pide una nueva.';
+
+	/// es: 'Ya perteneces a esta congregación.'
+	String get errorAlreadyMember => 'Ya perteneces a esta congregación.';
+
+	/// es: 'Las claves de sincronización no están disponibles en este dispositivo.'
+	String get errorKeys => 'Las claves de sincronización no están disponibles en este dispositivo.';
+
+	/// es: 'No se ha podido completar. Inténtalo de nuevo.'
+	String get errorUnknown => 'No se ha podido completar. Inténtalo de nuevo.';
+
+	/// es: 'Pegar'
+	String get paste => 'Pegar';
 }
 
 // Path: picker
@@ -1916,9 +2030,6 @@ extension on Translations {
 			'options.meetingLangSpanish' => 'Español',
 			'options.meetingLangSign' => 'Lengua de señas',
 			'options.meetingLangEnglish' => 'English',
-			'options.accessAdmin' => 'Administrador',
-			'options.accessEditor' => 'Editor',
-			'options.accessReader' => 'Lector',
 			'days.monday' => 'Lunes',
 			'days.tuesday' => 'Martes',
 			'days.wednesday' => 'Miércoles',
@@ -1946,6 +2057,19 @@ extension on Translations {
 			'congregation.inviteUser' => 'Invitar usuario',
 			'congregation.empty' => 'Aún no hay congregaciones.\nCrea la primera con "Nueva congregación".',
 			'congregation.newCongregation' => 'Nueva congregación',
+			'congregation.joinWithCode' => 'Unirse con un código',
+			'congregation.you' => 'tú',
+			'congregation.roleAdmin' => 'Admin',
+			'congregation.roleEditor' => 'Editor',
+			'congregation.roleViewer' => 'Lectura',
+			'congregation.editAccess' => 'Cambiar permisos',
+			'congregation.revoke' => 'Quitar acceso',
+			'congregation.revokeTitle' => 'Quitar acceso',
+			'congregation.revokeConfirm' => ({required Object name}) => '${name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.',
+			'congregation.lastAdmin' => 'Debe quedar al menos una persona con permiso de administración.',
+			'congregation.readOnly' => 'Solo tienes acceso de lectura en esta congregación.',
+			'congregation.membersError' => 'No se ha podido cargar la lista de miembros.',
+			'congregation.pendingLabel' => 'Invitaciones pendientes',
 			'newCongregation.title' => 'Nueva congregación',
 			'newCongregation.desc' => 'Serás su administrador. Después podrás invitar usuarios.',
 			'newCongregation.create' => 'Crear congregación',
@@ -1953,12 +2077,40 @@ extension on Translations {
 			'newCongregation.nameHint' => 'Ej. Jardines del Norte',
 			'newCongregation.number' => 'Número',
 			'newCongregation.numberHint' => 'Ej. 152423',
-			'invite.title' => 'Invitar usuario',
-			'invite.desc' => 'Le llegará una invitación por correo para acceder a esta congregación.',
-			'invite.send' => 'Enviar invitación',
-			'invite.email' => 'Correo electrónico',
-			'invite.emailHint' => 'nombre@correo.com',
-			'invite.role' => 'Rol',
+			'invite.title' => 'Invitar a la congregación',
+			'invite.desc' => 'Genera un código y compártelo por un canal privado. Sirve una sola vez.',
+			'invite.create' => 'Crear código',
+			'invite.capabilities' => 'Permisos',
+			'invite.capabilitiesDesc' => 'Lo que podrá hacer quien use el código.',
+			'invite.capAdmin' => 'Administrar',
+			'invite.capAdminDesc' => 'Miembros, invitaciones y datos de la congregación.',
+			'invite.capPeople' => 'Participantes',
+			'invite.capPeopleDesc' => 'Editar el directorio de personas.',
+			'invite.capPrograms' => 'Programas',
+			'invite.capProgramsDesc' => 'Crear y editar proyectos y asignaciones.',
+			'invite.codeTitle' => 'Código de invitación',
+			'invite.codeDesc' => 'Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.',
+			'invite.copy' => 'Copiar',
+			'invite.copied' => 'Código copiado',
+			'invite.share' => 'Compartir',
+			'invite.done' => 'Hecho',
+			'invite.pending' => 'Invitaciones pendientes',
+			'invite.expiresOn' => ({required Object date}) => 'Caduca el ${date}',
+			'invite.expired' => 'Caducada',
+			'invite.cancel' => 'Cancelar invitación',
+			'invite.joinTitle' => 'Unirse con un código',
+			'invite.joinDesc' => 'Pega el código que te han compartido.',
+			'invite.codeLabel' => 'Código',
+			'invite.codeHint' => 'agora-inv:1:…',
+			'invite.join' => 'Unirse',
+			'invite.joined' => 'Te has unido a la congregación.',
+			'invite.errorInvalid' => 'Ese código no es válido. Cópialo entero, sin cortarlo.',
+			'invite.errorMissing' => 'Esta invitación ya no existe: puede que alguien la haya usado.',
+			'invite.errorExpired' => 'Esta invitación ha caducado. Pide una nueva.',
+			'invite.errorAlreadyMember' => 'Ya perteneces a esta congregación.',
+			'invite.errorKeys' => 'Las claves de sincronización no están disponibles en este dispositivo.',
+			'invite.errorUnknown' => 'No se ha podido completar. Inténtalo de nuevo.',
+			'invite.paste' => 'Pegar',
 			'picker.assign' => 'Asignar',
 			'picker.recent' => 'Recientes',
 			'picker.all' => 'Todos',

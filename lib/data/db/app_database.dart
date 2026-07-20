@@ -30,6 +30,9 @@ part 'app_database.g.dart';
 ///       table (one row per filled slot position).
 ///   v4: phase-3 sync scaffolding (docs/PHASE3_SYNC_SCAFFOLDING.md) —
 ///       `outbox` dirty-set + `sync_state` cursors (both local-only).
+///   v5: phase-4b-2 sharing — `sync_state.missing_key_version` remembers a
+///       CCK version the cursor was allowed past, so recovering that key can
+///       rewind and re-pull what was skipped.
 @DriftDatabase(
   tables: [
     Congregations,
@@ -52,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
   final String defaultCongregationName;
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,7 +69,15 @@ class AppDatabase extends _$AppDatabase {
             return;
           }
           if (from < 3) await _migrateV2ToV3(m);
-          if (from < 4) await _migrateV3ToV4(m);
+          // Same trap as v1 above, one table down: _migrateV3ToV4 CREATES
+          // sync_state, and Migrator.createTable always uses the CURRENT
+          // shape — so the column v5 adds is already there and adding it
+          // again would fail.
+          if (from < 4) {
+            await _migrateV3ToV4(m);
+          } else if (from < 5) {
+            await _migrateV4ToV5(m);
+          }
         },
         beforeOpen: (details) async {
           // Runs after migrations: soft deletes make FK violations rare, but
@@ -185,5 +196,12 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _migrateV3ToV4(Migrator m) async {
     await m.createTable(outbox);
     await m.createTable(syncState);
+  }
+
+  /// v4 → v5 (phase 4b-2): remembers a CCK version the pull cursor was
+  /// allowed past. Nullable, so existing rows need no backfill — null
+  /// correctly means "nothing was ever skipped here".
+  Future<void> _migrateV4ToV5(Migrator m) async {
+    await m.addColumn(syncState, syncState.missingKeyVersion);
   }
 }

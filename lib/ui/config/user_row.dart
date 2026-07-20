@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 
 /// User-with-access row (`.user-row`): avatar, name, email and a control
@@ -13,6 +14,7 @@ class UserRow extends StatelessWidget {
     required this.email,
     this.trailing,
     this.first = false,
+    this.onTap,
   });
 
   final String name;
@@ -20,10 +22,13 @@ class UserRow extends StatelessWidget {
   final Widget? trailing;
   final bool first;
 
+  /// Null = the row is not interactive (a non-admin viewing the member list).
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Container(
+    final row = Container(
       padding: const EdgeInsets.symmetric(vertical: 11),
       decoration: first
           ? null
@@ -68,6 +73,9 @@ class UserRow extends StatelessWidget {
         ],
       ),
     );
+    return onTap == null
+        ? row
+        : Pressable(onTap: onTap, builder: (context, _, _) => row);
   }
 }
 
