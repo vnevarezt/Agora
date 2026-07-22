@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show AppExitResponse;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -58,7 +59,9 @@ final syncControllerProvider =
 /// 4b-3):
 ///
 /// - Push: debounced on outbox changes, plus on reconnect, on app resume and
-///   with exponential backoff after failures — the outbox drains as soon as
+///   with exponential backoff after failures. The debounce is bypassed when
+///   losing it would lose data: leaving the editor, and the app going to the
+///   background or being asked to quit — the outbox drains as soon as
 ///   physically possible.
 /// - Pull: NO polling. One tiny heartbeat listener per congregation
 ///   (`meta/activity`) tells us THAT something changed and in WHICH scope;
@@ -112,8 +115,14 @@ class SyncController extends Notifier<SyncStatus> {
     });
     // A congregation created locally must reach the cloud on its own.
     ref.listen(congregationsProvider, (_, _) => _autoEnable());
-    ref.listen(editorProjectProvider, (_, next) {
-      if (next != null) _flushStale();
+    ref.listen(editorProjectProvider, (prev, next) {
+      if (next != null) {
+        _flushStale();
+      } else if (prev != null) {
+        // Left the editor: push its edits now instead of waiting out the
+        // debounce, so leaving the program screen is a sync checkpoint.
+        _flushPushNow();
+      }
     });
     ref.listen(appSectionProvider, (_, _) => _flushStale());
 
@@ -163,11 +172,33 @@ class SyncController extends Notifier<SyncStatus> {
       _autoEnable();
       if (state.pendingOutbox > 0) _schedulePush();
     });
-    _lifecycle = AppLifecycleListener(onStateChange: (s) {
-      if (s == AppLifecycleState.resumed && state.pendingOutbox > 0) {
-        _schedulePush();
-      }
-    });
+    _lifecycle = AppLifecycleListener(
+      onStateChange: (s) {
+        switch (s) {
+          case AppLifecycleState.resumed:
+            if (state.pendingOutbox > 0) _schedulePush();
+          case AppLifecycleState.hidden:
+          case AppLifecycleState.paused:
+            // Leaving the foreground: the OS may suspend or kill us before
+            // the debounce fires, stranding a queued edit until the next
+            // launch (or forever, if the app is reinstalled). Flush now.
+            _flushPushNow();
+          case AppLifecycleState.inactive:
+          case AppLifecycleState.detached:
+            break;
+        }
+      },
+      // Desktop quit: hold termination just long enough to drain the outbox,
+      // so a change made seconds before closing still reaches the cloud.
+      onExitRequested: () async {
+        if (state.pendingOutbox > 0) {
+          try {
+            await _push();
+          } catch (_) {}
+        }
+        return AppExitResponse.exit;
+      },
+    );
     _attachHeartbeats({
       for (final m in ref.read(myMembershipsProvider).value ?? [])
         m.congregationId,
@@ -295,6 +326,16 @@ class SyncController extends Notifier<SyncStatus> {
   void _schedulePush() {
     _pushTimer?.cancel();
     _pushTimer = Timer(_pushDebounce, _push);
+  }
+
+  /// Bypass the debounce and push immediately when there is anything queued —
+  /// used on lifecycle transitions and when leaving the editor, where waiting
+  /// out the debounce risks losing the edit.
+  void _flushPushNow() {
+    if (state.pendingOutbox == 0) return;
+    _pushTimer?.cancel();
+    _pushTimer = null;
+    unawaited(_push());
   }
 
   Future<void> _push() async {
