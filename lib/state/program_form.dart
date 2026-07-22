@@ -8,6 +8,8 @@ import '../models/hall.dart';
 import '../models/program_row.dart';
 import '../models/week.dart';
 import '../models/week_type.dart';
+import '../pdf/program_document.dart' show WeekEntry;
+import 'app_settings.dart';
 import 'program_content.dart';
 import 'weeks_provider.dart';
 
@@ -251,4 +253,40 @@ final scheduleProvider = Provider<ProgramSchedule?>((ref) {
 final assignmentsProvider = Provider<Assignments>((ref) {
   final maps = ref.watch(formProvider.select((f) => (f.main, f.auxiliary)));
   return Assignments(maps.$1, maps.$2);
+});
+
+/// The 1 or 2 week indices printed on the same sheet as [weekIndex]. In
+/// two-per-sheet mode the pair is aligned to even boundaries
+/// (`[0,1] [2,3] …`), so exporting every sheet never repeats a week; the last
+/// odd week prints alone. Out-of-range indices are dropped.
+List<int> sheetWeekIndices(int weekIndex, int weekCount, bool twoPerSheet) {
+  if (weekCount <= 0) return const [];
+  if (!twoPerSheet) return [weekIndex.clamp(0, weekCount - 1)];
+  final base = weekIndex - weekIndex % 2;
+  return [for (var i = base; i < base + 2 && i < weekCount; i++) i];
+}
+
+/// The [WeekEntry] list the PDF/preview builds for the CURRENT sheet: one week
+/// normally, the aligned pair in two-per-sheet mode. Each entry carries that
+/// week's own schedule (start time, duration, circuit-overseer flag, title
+/// overrides), names and chairman — not the active week's.
+final sheetEntriesProvider = Provider<List<WeekEntry>>((ref) {
+  final weeks = ref.watch(weeksProvider).asData?.value;
+  if (weeks == null || weeks.isEmpty) return const [];
+  final f = ref.watch(formProvider);
+  final twoUp = ref.watch(twoPerSheetProvider);
+  return [
+    for (final i in sheetWeekIndices(f.weekIndex, weeks.length, twoUp))
+      (
+        week: weeks[i],
+        schedule: applyTitleOverrides(
+          buildSchedule(weeks[i], f.startMinutes, f.duration,
+              circuitOverseer: f.circuitOverseerByWeek[i] ?? false),
+          f.titleOverridesByWeek[i] ?? const {},
+        ),
+        assignments: Assignments(
+            f.mainByWeek[i] ?? const {}, f.auxByWeek[i] ?? const {}),
+        chairman: f.chairmanByWeek[i] ?? '',
+      ),
+  ];
 });

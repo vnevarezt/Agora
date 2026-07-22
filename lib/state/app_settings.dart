@@ -14,6 +14,7 @@ const _themeKey = 'theme_mode';
 const _timeFormat24Key = 'time_format_24h';
 const _weekStartMondayKey = 'week_start_monday';
 const _pdfNameFormatKey = 'pdf_name_format';
+const _twoPerSheetKey = 'two_per_sheet';
 const _notifPrefix = 'notif_';
 const _lastBackupKey = 'last_backup_at';
 
@@ -59,6 +60,10 @@ class AppSettings {
   final PdfNameFormat pdfNameFormat;
   final Map<NotifPref, bool> notifications;
 
+  /// Print/preview two weeks side by side on one landscape sheet. A device
+  /// preference (how THIS device likes to print), not synced congregation data.
+  final bool twoPerSheet;
+
   /// When the last backup was exported on THIS device (null = never).
   final DateTime? lastBackupAt;
 
@@ -67,6 +72,7 @@ class AppSettings {
     this.weekStartMonday = true,
     this.pdfNameFormat = PdfNameFormat.full,
     this.notifications = _notifDefaults,
+    this.twoPerSheet = false,
     this.lastBackupAt,
   });
 
@@ -75,6 +81,7 @@ class AppSettings {
     bool? weekStartMonday,
     PdfNameFormat? pdfNameFormat,
     Map<NotifPref, bool>? notifications,
+    bool? twoPerSheet,
     DateTime? lastBackupAt,
   }) {
     return AppSettings(
@@ -82,6 +89,7 @@ class AppSettings {
       weekStartMonday: weekStartMonday ?? this.weekStartMonday,
       pdfNameFormat: pdfNameFormat ?? this.pdfNameFormat,
       notifications: notifications ?? this.notifications,
+      twoPerSheet: twoPerSheet ?? this.twoPerSheet,
       lastBackupAt: lastBackupAt ?? this.lastBackupAt,
     );
   }
@@ -90,6 +98,11 @@ class AppSettings {
 final appSettingsProvider =
     NotifierProvider<AppSettingsController, AppSettings>(
         AppSettingsController.new);
+
+/// Two-programs-per-sheet preference, exposed on its own so the PDF/preview
+/// pipeline rebuilds only when this flag flips (not on any settings change).
+final twoPerSheetProvider =
+    Provider<bool>((ref) => ref.watch(appSettingsProvider.select((s) => s.twoPerSheet)));
 
 class AppSettingsController extends Notifier<AppSettings> {
   @override
@@ -106,6 +119,7 @@ class AppSettingsController extends Notifier<AppSettings> {
         for (final n in NotifPref.values)
           n: p.getBool('$_notifPrefix${n.name}') ?? _notifDefaults[n]!,
       },
+      twoPerSheet: p.getBool(_twoPerSheetKey) ?? false,
       lastBackupAt: DateTime.tryParse(p.getString(_lastBackupKey) ?? ''),
     );
   }
@@ -129,6 +143,11 @@ class AppSettingsController extends Notifier<AppSettings> {
   void setPdfNameFormat(PdfNameFormat v) {
     state = state.copyWith(pdfNameFormat: v);
     _prefs?.setString(_pdfNameFormatKey, v.name);
+  }
+
+  void setTwoPerSheet(bool v) {
+    state = state.copyWith(twoPerSheet: v);
+    _prefs?.setBool(_twoPerSheetKey, v);
   }
 
   void setNotification(NotifPref pref, bool v) {

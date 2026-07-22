@@ -7,16 +7,16 @@ import 'package:jw_program/models/program_row.dart';
 import 'package:jw_program/models/week.dart';
 import 'package:jw_program/pdf/program_document.dart';
 
-void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  test('buildProgramPdf genera un PDF válido', () async {
-    final week = Week(
-      date: '18-24 DE MAYO',
+Week _sampleWeek(String date) => Week(
+      date: date,
       reading: 'ISAÍAS 62-64',
       openingSong: '44',
       parts: const [
-        Part(section: Section.treasures, number: 1, title: 'El Alfarero', minutes: 10),
+        Part(
+            section: Section.treasures,
+            number: 1,
+            title: 'El Alfarero',
+            minutes: 10),
         Part(
             section: Section.treasures,
             number: 3,
@@ -34,9 +34,27 @@ void main() {
             minutes: 30),
       ],
     );
-    final schedule = buildSchedule(week, 18 * 60, 105);
+
+WeekEntry _entry(Week week) {
+  final schedule = buildSchedule(week, 18 * 60, 105);
+  return (
+    week: week,
+    schedule: schedule,
     // Nombres por id de fila (la primera de Tesoros lleva uno de ejemplo).
-    final asg = Assignments({schedule.treasures.first.id: const ['Rafael G']}, {});
+    assignments:
+        Assignments({schedule.treasures.first.id: const ['Rafael G']}, {}),
+    chairman: 'Rafael G',
+  );
+}
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('buildProgramPdf genera un PDF válido', () async {
+    final week = _sampleWeek('18-24 DE MAYO');
+    final schedule = buildSchedule(week, 18 * 60, 105);
+    final asg =
+        Assignments({schedule.treasures.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
       congregation: 'CONSTITUCIÓN J.A CASTRO',
       week: week,
@@ -46,6 +64,32 @@ void main() {
     );
 
     expect(bytes.length, greaterThan(1000));
+    expect(String.fromCharCodes(bytes.sublist(0, 4)), '%PDF');
+  });
+
+  test('buildProgramSheetPdf con dos semanas (2-up) genera un PDF válido',
+      () async {
+    final bytes = await buildProgramSheetPdf(
+      congregation: 'CONSTITUCIÓN J.A CASTRO',
+      entries: [
+        _entry(_sampleWeek('18-24 DE MAYO')),
+        _entry(_sampleWeek('25-31 DE MAYO')),
+      ],
+      twoPerSheet: true,
+    );
+
+    expect(bytes.length, greaterThan(1000));
+    expect(String.fromCharCodes(bytes.sublist(0, 4)), '%PDF');
+  });
+
+  test('2-up con una sola entrada (última hoja impar) sigue siendo válido',
+      () async {
+    final bytes = await buildProgramSheetPdf(
+      congregation: 'CONSTITUCIÓN J.A CASTRO',
+      entries: [_entry(_sampleWeek('1-7 DE JUNIO'))],
+      twoPerSheet: true,
+    );
+
     expect(String.fromCharCodes(bytes.sublist(0, 4)), '%PDF');
   });
 }
