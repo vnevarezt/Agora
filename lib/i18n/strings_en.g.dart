@@ -647,12 +647,18 @@ class _Translations$export$en extends Translations$export$es {
 
 	// Translations
 	@override String get export => 'Export';
-	@override String get exportPdf => 'Export PDF';
-	@override String success({required Object path}) => 'PDF exported: ${path}';
-	@override String get shared => 'PDF shared';
+	@override String get exportPdf => 'Export';
+	@override String success({required Object path}) => 'Saved to: ${path}';
+	@override String get shared => 'File shared';
 	@override String error({required Object error}) => 'Export error: ${error}';
+	@override String get formatPdf => 'PDF';
+	@override String get formatImage => 'Image';
+	@override String get saveAction => 'Save';
+	@override String get shareAction => 'Share';
 	@override String get currentWeek => 'Current week';
-	@override String get currentWeekSub => 'A single PDF sheet';
+	@override String get currentWeekSub => 'One week';
+	@override String get currentSheet => 'Current sheet';
+	@override String get currentSheetSub => 'Two weeks on one sheet';
 	@override String get fullProject => 'Full project';
 	@override String get fullProjectSub => 'All weeks in one PDF';
 	@override String get sheets => 'Assignment slips';
@@ -675,6 +681,8 @@ class _Translations$projectBar$en extends Translations$projectBar$es {
 	@override String weekShort({required Object n}) => 'Wk ${n}';
 	@override String get auxRoom => 'Auxiliary classroom';
 	@override String get auxRoomDesc => 'Second classroom for students';
+	@override String get twoPerSheet => 'Two per sheet';
+	@override String get twoPerSheetDesc => 'Two weeks on the same sheet';
 	@override String get circuitOverseer => 'Circuit overseer visit';
 	@override String get circuitOverseerDesc => 'Replaces the Bible study with a talk';
 }
@@ -1263,12 +1271,18 @@ extension on TranslationsEn {
 			'preview.fitPage' => 'Fit whole page',
 			'preview.fitWidth' => 'Fit to width',
 			'export.export' => 'Export',
-			'export.exportPdf' => 'Export PDF',
-			'export.success' => ({required Object path}) => 'PDF exported: ${path}',
-			'export.shared' => 'PDF shared',
+			'export.exportPdf' => 'Export',
+			'export.success' => ({required Object path}) => 'Saved to: ${path}',
+			'export.shared' => 'File shared',
 			'export.error' => ({required Object error}) => 'Export error: ${error}',
+			'export.formatPdf' => 'PDF',
+			'export.formatImage' => 'Image',
+			'export.saveAction' => 'Save',
+			'export.shareAction' => 'Share',
 			'export.currentWeek' => 'Current week',
-			'export.currentWeekSub' => 'A single PDF sheet',
+			'export.currentWeekSub' => 'One week',
+			'export.currentSheet' => 'Current sheet',
+			'export.currentSheetSub' => 'Two weeks on one sheet',
 			'export.fullProject' => 'Full project',
 			'export.fullProjectSub' => 'All weeks in one PDF',
 			'export.sheets' => 'Assignment slips',
@@ -1279,6 +1293,8 @@ extension on TranslationsEn {
 			'projectBar.weekShort' => ({required Object n}) => 'Wk ${n}',
 			'projectBar.auxRoom' => 'Auxiliary classroom',
 			'projectBar.auxRoomDesc' => 'Second classroom for students',
+			'projectBar.twoPerSheet' => 'Two per sheet',
+			'projectBar.twoPerSheetDesc' => 'Two weeks on the same sheet',
 			'projectBar.circuitOverseer' => 'Circuit overseer visit',
 			'projectBar.circuitOverseerDesc' => 'Replaces the Bible study with a talk',
 			'workspace.sectionOpening' => 'Opening',

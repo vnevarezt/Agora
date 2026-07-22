@@ -1276,23 +1276,41 @@ class Translations$export$es {
 	/// es: 'Exportar'
 	String get export => 'Exportar';
 
-	/// es: 'Exportar PDF'
-	String get exportPdf => 'Exportar PDF';
+	/// es: 'Exportar'
+	String get exportPdf => 'Exportar';
 
-	/// es: 'PDF exportado: {path}'
-	String success({required Object path}) => 'PDF exportado: ${path}';
+	/// es: 'Guardado en: {path}'
+	String success({required Object path}) => 'Guardado en: ${path}';
 
-	/// es: 'PDF compartido'
-	String get shared => 'PDF compartido';
+	/// es: 'Archivo compartido'
+	String get shared => 'Archivo compartido';
 
 	/// es: 'Error al exportar: {error}'
 	String error({required Object error}) => 'Error al exportar: ${error}';
 
+	/// es: 'PDF'
+	String get formatPdf => 'PDF';
+
+	/// es: 'Imagen'
+	String get formatImage => 'Imagen';
+
+	/// es: 'Guardar'
+	String get saveAction => 'Guardar';
+
+	/// es: 'Compartir'
+	String get shareAction => 'Compartir';
+
 	/// es: 'Semana actual'
 	String get currentWeek => 'Semana actual';
 
-	/// es: 'Una hoja PDF'
-	String get currentWeekSub => 'Una hoja PDF';
+	/// es: 'Una semana'
+	String get currentWeekSub => 'Una semana';
+
+	/// es: 'Hoja actual'
+	String get currentSheet => 'Hoja actual';
+
+	/// es: 'Dos semanas en una hoja'
+	String get currentSheetSub => 'Dos semanas en una hoja';
 
 	/// es: 'Proyecto completo'
 	String get fullProject => 'Proyecto completo';
@@ -1335,6 +1353,12 @@ class Translations$projectBar$es {
 
 	/// es: 'Segunda sala para estudiantes'
 	String get auxRoomDesc => 'Segunda sala para estudiantes';
+
+	/// es: 'Dos por hoja'
+	String get twoPerSheet => 'Dos por hoja';
+
+	/// es: 'Dos semanas en la misma hoja'
+	String get twoPerSheetDesc => 'Dos semanas en la misma hoja';
 
 	/// es: 'Visita del superintendente'
 	String get circuitOverseer => 'Visita del superintendente';
@@ -2139,12 +2163,18 @@ extension on Translations {
 			'preview.fitPage' => 'Ver hoja completa',
 			'preview.fitWidth' => 'Ajustar al ancho',
 			'export.export' => 'Exportar',
-			'export.exportPdf' => 'Exportar PDF',
-			'export.success' => ({required Object path}) => 'PDF exportado: ${path}',
-			'export.shared' => 'PDF compartido',
+			'export.exportPdf' => 'Exportar',
+			'export.success' => ({required Object path}) => 'Guardado en: ${path}',
+			'export.shared' => 'Archivo compartido',
 			'export.error' => ({required Object error}) => 'Error al exportar: ${error}',
+			'export.formatPdf' => 'PDF',
+			'export.formatImage' => 'Imagen',
+			'export.saveAction' => 'Guardar',
+			'export.shareAction' => 'Compartir',
 			'export.currentWeek' => 'Semana actual',
-			'export.currentWeekSub' => 'Una hoja PDF',
+			'export.currentWeekSub' => 'Una semana',
+			'export.currentSheet' => 'Hoja actual',
+			'export.currentSheetSub' => 'Dos semanas en una hoja',
 			'export.fullProject' => 'Proyecto completo',
 			'export.fullProjectSub' => 'Todas las semanas en un PDF',
 			'export.sheets' => 'Hojas de participación',
@@ -2155,6 +2185,8 @@ extension on Translations {
 			'projectBar.weekShort' => ({required Object n}) => 'Sem ${n}',
 			'projectBar.auxRoom' => 'Sala auxiliar',
 			'projectBar.auxRoomDesc' => 'Segunda sala para estudiantes',
+			'projectBar.twoPerSheet' => 'Dos por hoja',
+			'projectBar.twoPerSheetDesc' => 'Dos semanas en la misma hoja',
 			'projectBar.circuitOverseer' => 'Visita del superintendente',
 			'projectBar.circuitOverseerDesc' => 'Reemplaza el estudio bíblico por un discurso',
 			'workspace.sectionOpening' => 'Apertura',

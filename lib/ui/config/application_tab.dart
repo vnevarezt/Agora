@@ -181,7 +181,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
       final bytes = await ref.read(backupServiceProvider).export(password);
       final date =
           DateTime.now().toIso8601String().substring(0, 10);
-      final outcome = await ref.read(fileSaverProvider).save(
+      final outcome = await ref.read(fileSaverProvider).saveAs(
             bytes: bytes,
             suggestedName: 'agora-$date.agora',
             extension: 'agora',
@@ -194,6 +194,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
           messenger.showSnackBar(
               SnackBar(content: Text(tr.settings.backupSaved(path: path))));
         case SaveShared():
+          // saveAs never shares, but the sealed switch must stay exhaustive.
           ref.read(appSettingsProvider.notifier).markBackupNow();
           messenger.showSnackBar(
               SnackBar(content: Text(tr.settings.backupSharedMsg)));
