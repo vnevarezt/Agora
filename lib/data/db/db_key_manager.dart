@@ -1,9 +1,10 @@
-import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../crypto/passphrase_envelope.dart';
+
+export '../crypto/passphrase_envelope.dart' show KdfParams;
 
 /// The system keychain is unavailable or rejected the operation. Without the
 /// key the encrypted DB can't be opened (by design there's no insecure
@@ -31,6 +32,11 @@ abstract interface class SecureKeyStore {
   Future<String?> read(String key);
   Future<void> write(String key, String value);
   Future<void> delete(String key);
+
+  /// Every key this app stored. Needed to wipe uid-scoped entries (the sync
+  /// identity seed and per-congregation keys) whose exact names aren't known
+  /// at reset time.
+  Future<Set<String>> keys();
 }
 
 class KeychainKeyStore implements SecureKeyStore {
@@ -57,6 +63,9 @@ class KeychainKeyStore implements SecureKeyStore {
 
   @override
   Future<void> delete(String key) => _storage.delete(key: key);
+
+  @override
+  Future<Set<String>> keys() async => (await _storage.readAll()).keys.toSet();
 }
 
 enum LocalKeyStatus {
@@ -69,28 +78,6 @@ enum LocalKeyStatus {
 
   /// DEK wrapped with the account password: show the unlock screen.
   wrapped,
-}
-
-/// Argon2id cost parameters (OWASP Password Storage Cheat Sheet). They are
-/// stored inside every wrapped blob, so they can be tuned later without a
-/// data migration: old blobs keep unlocking with the params they were
-/// created with.
-class KdfParams {
-  const KdfParams({
-    required this.memoryKib,
-    required this.iterations,
-    required this.parallelism,
-  });
-
-  static const owasp = KdfParams(
-    memoryKib: 19456,
-    iterations: 2,
-    parallelism: 1,
-  );
-
-  final int memoryKib;
-  final int iterations;
-  final int parallelism;
 }
 
 /// DB encryption key manager (envelope encryption).
@@ -118,6 +105,13 @@ class DbKeyManager {
   /// Cloud-mode device key: plaintext DEK hex. In cloud mode the Firebase
   /// session is the gate, so the key is only protected by the OS keychain.
   static const cloudKeyName = 'jw_program.db_key.cloud.v1';
+
+  /// Local-mode device-unlock copy: plaintext DEK hex, written only while the
+  /// user has biometric/device unlock enabled. The password-wrapped blob stays
+  /// the source of truth; this copy trades the password gate for the OS
+  /// keychain gate (same trust level as [cloudKeyName]) so Touch ID / Face ID
+  /// / fingerprint can release the key without the password.
+  static const deviceUnlockKeyName = 'jw_program.db_key.device_unlock.v1';
 
   Future<LocalKeyStatus> status() async {
     try {
@@ -218,13 +212,59 @@ class DbKeyManager {
     }
   }
 
-  /// Delete all key material. The encrypted DB file becomes unreadable
+  /// Local mode: persist the DEK copy that device auth releases. Reuses the
+  /// verify-read-back defense against silent keychain writes.
+  Future<void> enableDeviceUnlock(String dekHex) async {
+    try {
+      await _store.write(deviceUnlockKeyName, dekHex);
+      final verified = await _store.read(deviceUnlockKeyName);
+      if (verified != dekHex) {
+        throw const DbKeyException(
+          'The system keychain did not persist the device-unlock key.',
+        );
+      }
+    } on DbKeyException {
+      rethrow;
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
+  /// DEK hex behind device unlock, or null when the copy is gone (disabled,
+  /// or the keychain lost it): callers fall back to the password.
+  Future<String?> readDeviceUnlockKey() async {
+    try {
+      final hex = await _store.read(deviceUnlockKeyName);
+      return (hex != null && hex.length == 64) ? hex : null;
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
+  Future<void> disableDeviceUnlock() async {
+    try {
+      await _store.delete(deviceUnlockKeyName);
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
+  /// Namespace of the E2E sync key material (identity seed + per-congregation
+  /// keyrings). Those names embed the uid, so a wipe has to match by prefix.
+  static const syncKeyPrefix = 'jw_program.sync.';
+
+  /// Delete all key material — the DB keys AND every sync key of every
+  /// account that used this device. The encrypted DB file becomes unreadable
   /// forever; callers must also delete the DB file ("forgot password" reset).
   Future<void> destroyAll() async {
     try {
       await _store.delete(wrappedKeyName);
       await _store.delete(legacyKeyName);
       await _store.delete(cloudKeyName);
+      await _store.delete(deviceUnlockKeyName);
+      for (final key in await _store.keys()) {
+        if (key.startsWith(syncKeyPrefix)) await _store.delete(key);
+      }
     } catch (e) {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }
@@ -256,80 +296,21 @@ class DbKeyManager {
     }
   }
 
-  Future<String> _wrap(String dekHex, String password) async {
-    final salt = _randomBytes(16);
-    final nonce = _randomBytes(12);
-    final kek = await _deriveKek(password, salt, params);
-    final box = await AesGcm.with256bits().encrypt(
-      _hexToBytes(dekHex),
-      secretKey: SecretKey(kek),
-      nonce: nonce,
-    );
-    return jsonEncode({
-      'v': 2,
-      'kdf': 'argon2id',
-      'm': params.memoryKib,
-      't': params.iterations,
-      'p': params.parallelism,
-      'salt': base64Encode(salt),
-      'nonce': base64Encode(nonce),
-      'ct': base64Encode(box.cipherText),
-      'mac': base64Encode(box.mac.bytes),
-    });
-  }
+  // Envelope shared with the sync key bootstrap (lib/data/crypto/); the
+  // local-account blob keeps its historical `v: 2` tag.
+  PassphraseEnvelope get _envelope => PassphraseEnvelope(params: params);
+
+  Future<String> _wrap(String dekHex, String password) =>
+      _envelope.wrap(_hexToBytes(dekHex), password, version: 2);
 
   Future<String> _unwrap(String blobJson, String password) async {
-    final KdfParams blobParams;
-    final List<int> salt, nonce, ct, mac;
     try {
-      final blob = jsonDecode(blobJson) as Map<String, dynamic>;
-      blobParams = KdfParams(
-        memoryKib: blob['m'] as int,
-        iterations: blob['t'] as int,
-        parallelism: blob['p'] as int,
-      );
-      salt = base64Decode(blob['salt'] as String);
-      nonce = base64Decode(blob['nonce'] as String);
-      ct = base64Decode(blob['ct'] as String);
-      mac = base64Decode(blob['mac'] as String);
-    } catch (e) {
-      throw DbKeyException('The stored key blob is corrupted. ($e)', e);
-    }
-    final kek = await _deriveKek(password, salt, blobParams);
-    try {
-      final dek = await AesGcm.with256bits().decrypt(
-        SecretBox(ct, nonce: nonce, mac: Mac(mac)),
-        secretKey: SecretKey(kek),
-      );
-      return _bytesToHex(dek);
-    } on SecretBoxAuthenticationError {
+      return _bytesToHex(await _envelope.unwrap(blobJson, password));
+    } on WrongPassphraseException {
       throw const WrongPasswordException();
+    } on CorruptEnvelopeException catch (e) {
+      throw DbKeyException(e.message, e.cause);
     }
-  }
-
-  /// Argon2id in this package is pure Dart and takes on the order of a
-  /// second at OWASP cost: run it off the UI isolate.
-  static Future<List<int>> _deriveKek(
-    String password,
-    List<int> salt,
-    KdfParams params,
-  ) {
-    final m = params.memoryKib;
-    final t = params.iterations;
-    final p = params.parallelism;
-    return Isolate.run(() async {
-      final algorithm = Argon2id(
-        parallelism: p,
-        memory: m,
-        iterations: t,
-        hashLength: 32,
-      );
-      final key = await algorithm.deriveKeyFromPassword(
-        password: password,
-        nonce: salt,
-      );
-      return key.extractBytes();
-    });
   }
 
   static List<int> _randomBytes(int length) {

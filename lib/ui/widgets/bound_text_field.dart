@@ -17,6 +17,7 @@ class BoundTextField extends StatefulWidget {
     this.dense = false,
     this.obscureText = false,
     this.autofocus = false,
+    this.enabled = true,
   });
 
   final String initial;
@@ -34,6 +35,10 @@ class BoundTextField extends StatefulWidget {
   final bool dense;
   final bool obscureText;
   final bool autofocus;
+
+  /// False renders the field read-only (greyed, not focusable) — how a
+  /// capability gate shows a member they may look but not edit.
+  final bool enabled;
 
   @override
   State<BoundTextField> createState() => _BoundTextFieldState();
@@ -55,6 +60,7 @@ class _BoundTextFieldState extends State<BoundTextField> {
       maxLength: widget.maxLength,
       maxLines: widget.maxLines,
       keyboardType: widget.keyboardType,
+      enabled: widget.enabled,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       style: widget.style,

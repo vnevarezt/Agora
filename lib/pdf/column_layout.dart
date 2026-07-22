@@ -33,14 +33,16 @@ double namesWidth(
 
 /// Computes the widths adaptively: if the names carry a lot of text, it widens
 /// the names column(s) taking space from the title (with a floor). In auxRoom
-/// mode it splits between two names columns. Measured with Carlito.
+/// mode it splits between two names columns. Measured with Carlito at the
+/// layout's [S140Metrics.base] size.
 ColumnWidths computeColumns(
+  S140Metrics m,
   ProgramSchedule sched,
   Assignments assignments,
   PdfFont regular,
   bool auxRoom,
 ) {
-  double measure(String s) => regular.stringMetrics(s).advanceWidth * S140.base;
+  double measure(String s) => regular.stringMetrics(s).advanceWidth * m.base;
   double maxMain = 0, maxAuxWidth = 0;
   for (final f in sched.rows) {
     final wp = namesWidth(f.role, assignments.main(f), measure);
@@ -50,35 +52,40 @@ ColumnWidths computeColumns(
       if (wa > maxAuxWidth) maxAuxWidth = wa;
     }
   }
-  const role = S140.roleWidth; // fixed (role labels, not user input)
+  final role = m.roleWidth; // fixed (role labels, not user input)
 
   if (!auxRoom) {
     final maxNamesOk =
-        S140.contentWidth - 2 * S140.colGap - role - S140.minContent;
+        m.contentWidth - 2 * m.colGap - role - m.minContentFrac * m.contentWidth;
     final mainNames =
-        (maxMain + S140.namePad).clamp(S140.mainNameWidth, maxNamesOk).toDouble();
-    final content = S140.contentWidth - 2 * S140.colGap - role - mainNames;
+        (maxMain + m.namePad).clamp(m.mainNameWidth, maxNamesOk).toDouble();
+    final content = m.contentWidth - 2 * m.colGap - role - mainNames;
     return ColumnWidths(
-        role: role, mainNames: mainNames, auxRoom: 0, band: content + S140.colGap + role);
+        role: role,
+        mainNames: mainNames,
+        auxRoom: 0,
+        band: content + m.colGap + role);
   }
 
   // --- Auxiliary Room mode: 4 columns (X R A P), 3 gaps ---
-  final available =
-      S140.contentWidth - 3 * S140.colGap - role - S140.minContentAux;
-  var mainNames = maxMain + S140.namePad;
-  var auxNames = maxAuxWidth + S140.namePad;
-  if (mainNames < S140.minAuxCol) mainNames = S140.minAuxCol;
-  if (auxNames < S140.minAuxCol) auxNames = S140.minAuxCol;
+  final available = m.contentWidth -
+      3 * m.colGap -
+      role -
+      m.minContentAuxFrac * m.contentWidth;
+  var mainNames = maxMain + m.namePad;
+  var auxNames = maxAuxWidth + m.namePad;
+  if (mainNames < m.minAuxCol) mainNames = m.minAuxCol;
+  if (auxNames < m.minAuxCol) auxNames = m.minAuxCol;
   if (mainNames + auxNames > available) {
     final factor = available / (mainNames + auxNames);
-    mainNames = (mainNames * factor).clamp(S140.minAuxCol, available).toDouble();
-    auxNames = (auxNames * factor).clamp(S140.minAuxCol, available).toDouble();
+    mainNames = (mainNames * factor).clamp(m.minAuxCol, available).toDouble();
+    auxNames = (auxNames * factor).clamp(m.minAuxCol, available).toDouble();
   }
   final content =
-      S140.contentWidth - 3 * S140.colGap - role - mainNames - auxNames;
+      m.contentWidth - 3 * m.colGap - role - mainNames - auxNames;
   return ColumnWidths(
       role: role,
       mainNames: mainNames,
       auxRoom: auxNames,
-      band: content + S140.colGap + role);
+      band: content + m.colGap + role);
 }

@@ -32,6 +32,12 @@ class SyncState extends Table {
   /// Outbox id this congregation's pusher has completed through.
   IntColumn get pushedThrough => integer().nullable()();
 
+  /// Lowest CCK version this device gave up on decrypting, after which the
+  /// cursor was allowed past those docs (see [SyncEngine.pullOnce]). Once the
+  /// version reaches us, the cursor rewinds to null and the history is
+  /// re-pulled. Null = nothing was ever skipped.
+  IntColumn get missingKeyVersion => integer().nullable()();
+
   DateTimeColumn get updatedAt => dateTime()();
 
   @override

@@ -20,6 +20,15 @@ class S140 {
   /// Usable width = \textwidth.
   static const double contentWidth = pageWidth - marginLeft - marginRight; // 496.8
 
+  // ---- Two-per-sheet: portrait Letter, two week blocks stacked, tighter
+  // margins so the compact layout gets the full width ----
+  static const double stackedMarginV = 0.3 * 72; // 21.6
+  static const double stackedMarginH = 0.4 * 72; // 28.8
+  static const double stackedContentWidth =
+      pageWidth - 2 * stackedMarginH; // 554.4
+  /// Vertical gap between the two week blocks.
+  static const double stackedWeekGap = 10;
+
   // ---- Font sizes (article class 10pt) ----
   static const double base = 10;
   static const double small = 9; // \small
@@ -67,6 +76,136 @@ class S140 {
   static final PdfColor labelColor = PdfColor.fromHex('575A5D'); // gray (labels)
   static final PdfColor lineColor = PdfColor.fromHex('A6A6A6'); // light gray
   static final PdfColor white = PdfColor.fromHex('FFFFFF');
+}
+
+/// The tunable layout metrics of one program block. [standard] mirrors the
+/// official S-140-S values in [S140]; [compact] is the two-per-sheet variant:
+/// slightly smaller type, tighter row/band spacing and the full width of the
+/// reduced page margins, so the content REFLOWS (titles and names use the
+/// space) instead of being photo-reduced.
+class S140Metrics {
+  final double contentWidth;
+
+  // Fonts.
+  final double base;
+  final double small; // times
+  final double footnote; // role labels / footer
+  final double large; // congregation
+  final double title; // header title
+  final double week; // week line / reading
+
+  // Columns.
+  final double hourWidth;
+  final double roleWidth;
+  final double mainNameWidth; // floor of the names column
+  final double colGap;
+
+  // Spacing.
+  final double rowSep;
+  final double fboxsep; // band padding
+  final double bandGapTop; // \addvspace{6pt}
+  final double bandGapBottom; // \addvspace{5pt}
+  final double gapHeaderRule; // header → rule
+  final double gapAfterRule; // rule → week line (\smallskip)
+  final double gapAfterWeekLine; // week line → rows (\addvspace{8pt})
+  final double gapSectionEnd; // last row → closing rule
+
+  // Adaptive-width floors (see computeColumns).
+  final double minContentFrac; // title floor, fraction of contentWidth
+  final double minContentAuxFrac; // same, Auxiliary Room mode
+  final double minAuxCol;
+  final double namePad;
+
+  /// Date + weekly reading on ONE line ("13-19 DE JULIO | LECTURA SEMANAL DE
+  /// LA BIBLIA: JEREMÍAS 16, 17") instead of the official two-line form —
+  /// saves a line per week on the stacked sheet.
+  final bool inlineWeekLine;
+
+  const S140Metrics({
+    required this.contentWidth,
+    required this.base,
+    required this.small,
+    required this.footnote,
+    required this.large,
+    required this.title,
+    required this.week,
+    required this.hourWidth,
+    required this.roleWidth,
+    required this.mainNameWidth,
+    required this.colGap,
+    required this.rowSep,
+    required this.fboxsep,
+    required this.bandGapTop,
+    required this.bandGapBottom,
+    required this.gapHeaderRule,
+    required this.gapAfterRule,
+    required this.gapAfterWeekLine,
+    required this.gapSectionEnd,
+    required this.minContentFrac,
+    required this.minContentAuxFrac,
+    required this.minAuxCol,
+    required this.namePad,
+    this.inlineWeekLine = false,
+  });
+
+  /// Official S-140-S metrics (values in [S140], one week per page).
+  static const standard = S140Metrics(
+    contentWidth: S140.contentWidth,
+    base: S140.base,
+    small: S140.small,
+    footnote: S140.footnote,
+    large: S140.large,
+    title: S140.title,
+    week: S140.week,
+    hourWidth: S140.hourWidth,
+    roleWidth: S140.roleWidth,
+    mainNameWidth: S140.mainNameWidth,
+    colGap: S140.colGap,
+    rowSep: S140.rowSep,
+    fboxsep: S140.fboxsep,
+    bandGapTop: 6,
+    bandGapBottom: 5,
+    gapHeaderRule: 4,
+    gapAfterRule: 3,
+    gapAfterWeekLine: 8,
+    gapSectionEnd: 4,
+    minContentFrac: 0.40,
+    minContentAuxFrac: 0.34,
+    minAuxCol: S140.minAuxCol,
+    namePad: S140.namePad,
+  );
+
+  /// Two-per-sheet metrics: body type slightly LARGER than the official
+  /// format (the compression comes from the row/band air and the page
+  /// margins, not the type). The hour/role columns scale with their font so
+  /// "Estudiante/Ayudante:" keeps to one line. If a heavy week overflows, the
+  /// page-level scaleDown finds the largest size that fits.
+  static const compact = S140Metrics(
+    contentWidth: S140.stackedContentWidth,
+    base: 10.5,
+    small: 10,
+    footnote: 8.5,
+    large: 12.5,
+    title: 15.5,
+    week: 11.5,
+    hourWidth: 40,
+    roleWidth: 2.8 * S140.cm, // 79.4
+    mainNameWidth: 4.8 * S140.cm, // 136.1
+    colGap: S140.colGap,
+    rowSep: 4.5,
+    fboxsep: 2.5,
+    bandGapTop: 3,
+    bandGapBottom: 3,
+    gapHeaderRule: 3,
+    gapAfterRule: 2,
+    gapAfterWeekLine: 5,
+    gapSectionEnd: 3,
+    minContentFrac: 0.40,
+    minContentAuxFrac: 0.34,
+    minAuxCol: S140.minAuxCol,
+    namePad: S140.namePad,
+    inlineWeekLine: true,
+  );
 }
 
 /// Document theme + Carlito fonts. `regular` is also used to MEASURE the names

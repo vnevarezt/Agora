@@ -286,6 +286,58 @@ class EntityCodec {
     }
   }
 
+  /// Program type of program/assignment rows (clear ItemDoc metadata so
+  /// rules can gate `edit:<type>` capabilities); null for other kinds or a
+  /// broken chain.
+  Future<String?> programTypeOf(SyncEntity entity, String id) async {
+    switch (entity) {
+      case SyncEntity.program:
+        final r = await (_db.select(_db.programs)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        return r?.programTypeId;
+      case SyncEntity.assignment:
+        final r = await (_db.select(_db.assignmentRows)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        return r == null
+            ? null
+            : programTypeOf(SyncEntity.program, r.programId);
+      case SyncEntity.congregation:
+      case SyncEntity.person:
+      case SyncEntity.personAbsence:
+      case SyncEntity.project:
+        return null;
+    }
+  }
+
+  /// Activity scope of a row for the sync heartbeat: which "thing" changed,
+  /// at the granularity peers care about. Projects (and their programs and
+  /// assignments) map to the PROJECT id so a device with that project open
+  /// pulls immediately while others defer; the people directory and the
+  /// congregation row are their own scopes. Null on a broken chain.
+  Future<String?> scopeOf(SyncEntity entity, String id) async {
+    switch (entity) {
+      case SyncEntity.congregation:
+        return 'congregation';
+      case SyncEntity.person:
+      case SyncEntity.personAbsence:
+        return 'people';
+      case SyncEntity.project:
+        return id;
+      case SyncEntity.program:
+        final r = await (_db.select(_db.programs)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        return r?.projectId;
+      case SyncEntity.assignment:
+        final r = await (_db.select(_db.assignmentRows)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        return r == null ? null : scopeOf(SyncEntity.program, r.programId);
+    }
+  }
+
   /// The row's current HLC stamp (LWW comparand); null = never stamped,
   /// which loses against any remote stamp.
   Future<String?> hlcOf(SyncEntity entity, String id) async {

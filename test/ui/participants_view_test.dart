@@ -42,6 +42,7 @@ Future<void> _pump(WidgetTester tester, List<Person> lista) async {
     child: ProviderScope(
       overrides: [
         peopleProvider.overrideWithValue(lista),
+        peopleLoadingProvider.overrideWithValue(false),
       ],
       child: MaterialApp(
         theme: buildAppTheme(pizarra.light, Brightness.light),

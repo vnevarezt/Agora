@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/backup/backup_crypto.dart';
+import '../../data/device_auth.dart';
 import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/app_settings.dart';
 import '../../state/auth_session.dart';
 import '../../state/backup_provider.dart';
+import '../../state/cloud_auth.dart' show cloudUserProvider;
 import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
 import '../widgets/app_button.dart';
@@ -16,6 +18,7 @@ import '../widgets/segmented_control.dart';
 import 'account_card.dart';
 import 'security_card.dart';
 import 'settings_card.dart';
+import 'sync_card.dart';
 
 // Dropdown option labels, index-aligned with the persisted values in
 // app_settings.dart. Getters so the labels follow the active app language.
@@ -76,17 +79,22 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
 
   @override
   Widget build(BuildContext context) {
-    // SecurityCard is local-mode only: in cloud mode there is no local
-    // password to change and "lock" would strand the session on an unlock
-    // screen that no password can open (the gate is the Firebase session).
+    // SecurityCard adapts to the mode (password rows are local-only; device
+    // unlock exists in both). In cloud mode it only appears when the device
+    // can actually authenticate its owner — otherwise it would be empty.
     final localMode = ref.watch(authSessionProvider.select(
         (s) => s is SessionUnlocked && s.mode == AccountMode.local));
+    final deviceAuthOk =
+        ref.watch(deviceAuthSupportedProvider).value ?? false;
+    // Cloud sync card: only once the cloud is configured and signed in.
+    final signedIn = ref.watch(cloudUserProvider).value != null;
     return SettingsColumns(
       left: [_appearance(), _general(), _notificationsCard()],
       right: [
         _datos(),
-        if (localMode) const SecurityCard(),
+        if (localMode || deviceAuthOk) const SecurityCard(),
         const AccountCard(),
+        if (signedIn) const SyncCard(),
       ],
     );
   }
@@ -173,7 +181,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
       final bytes = await ref.read(backupServiceProvider).export(password);
       final date =
           DateTime.now().toIso8601String().substring(0, 10);
-      final outcome = await ref.read(fileSaverProvider).save(
+      final outcome = await ref.read(fileSaverProvider).saveAs(
             bytes: bytes,
             suggestedName: 'agora-$date.agora',
             extension: 'agora',
@@ -186,6 +194,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
           messenger.showSnackBar(
               SnackBar(content: Text(tr.settings.backupSaved(path: path))));
         case SaveShared():
+          // saveAs never shares, but the sealed switch must stay exhaustive.
           ref.read(appSettingsProvider.notifier).markBackupNow();
           messenger.showSnackBar(
               SnackBar(content: Text(tr.settings.backupSharedMsg)));

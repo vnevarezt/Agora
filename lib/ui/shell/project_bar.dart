@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
+import '../../state/app_settings.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
@@ -16,6 +16,8 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/export_actions.dart';
+import '../widgets/export_panel.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
@@ -415,6 +417,7 @@ class _WeekMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final auxRoom = ref.watch(formProvider.select((f) => f.auxRoom));
+    final twoPerSheet = ref.watch(twoPerSheetProvider);
     final coByWeek =
         ref.watch(formProvider.select((f) => f.circuitOverseerByWeek));
     final progressList = ref.watch(progressPerWeekProvider);
@@ -539,6 +542,11 @@ class _WeekMenu extends ConsumerWidget {
             auxRoom: auxRoom,
             onChanged: (v) => ref.read(formProvider.notifier).setAuxRoom(v),
           ),
+          _TwoPerSheetToggle(
+            twoPerSheet: twoPerSheet,
+            onChanged: (v) =>
+                ref.read(appSettingsProvider.notifier).setTwoPerSheet(v),
+          ),
           _CircuitOverseerToggle(
             active: coByWeek[active] ?? false,
             onChanged: (v) =>
@@ -600,6 +608,59 @@ class _AuxToggle extends StatelessWidget {
   }
 }
 
+/// "Two programs per sheet" toggle (below [_AuxToggle]). A device print
+/// preference: two weeks side by side on one landscape sheet. Mirrors
+/// [_AuxToggle].
+class _TwoPerSheetToggle extends StatelessWidget {
+  const _TwoPerSheetToggle({required this.twoPerSheet, required this.onChanged});
+
+  final bool twoPerSheet;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Pressable(
+      onTap: () => onChanged(!twoPerSheet),
+      builder: (context, hovered, _) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: hovered ? t.surface2 : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.splitscreen_outlined,
+                size: 16, color: twoPerSheet ? t.accentStrong : t.textMute),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(context.t.projectBar.twoPerSheet,
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: t.text)),
+                  Text(context.t.projectBar.twoPerSheetDesc,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: t.textMute)),
+                ],
+              ),
+            ),
+            Transform.scale(
+              scale: 0.8,
+              child: Switch(value: twoPerSheet, onChanged: onChanged),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// "Circuit overseer visit" toggle for the active week (footer of the week
 /// menu, below [_AuxToggle]). When on, the Congregation Bible Study is replaced
 /// by the overseer's talk. Mirrors [_AuxToggle].
@@ -653,41 +714,18 @@ class _CircuitOverseerToggle extends StatelessWidget {
   }
 }
 
-/// Export button with a menu (`.menu`): current week (real), project and
-/// sheets (UI for now).
+/// Export button with a menu (`.menu`): the current sheet (real, PDF or image,
+/// save or share) plus project and slips (UI for now).
 class _ExportMenu extends ConsumerWidget {
   const _ExportMenu({this.compact = false});
 
   final bool compact;
 
-  Future<void> _exportWeek(BuildContext context, WidgetRef ref) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final tr = context.t;
-    ref.read(exportBusyProvider.notifier).set(true);
-    try {
-      final outcome = await ref.read(previewProvider.notifier).export();
-      switch (outcome) {
-        case SaveDone(:final path):
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.export.success(path: path))));
-        case SaveShared():
-          messenger
-              .showSnackBar(SnackBar(content: Text(tr.export.shared)));
-        case SaveCanceled():
-          break; // user's choice, no feedback needed
-      }
-    } catch (e) {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.export.error(error: e))));
-    } finally {
-      ref.read(exportBusyProvider.notifier).set(false);
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final busy = ref.watch(exportBusyProvider);
     final haySemana = ref.watch(scheduleProvider) != null;
+    final twoUp = ref.watch(twoPerSheetProvider);
     final menu = MenuController();
 
     return MenuAnchor(
@@ -703,9 +741,11 @@ class _ExportMenu extends ConsumerWidget {
       menuChildren: [
         _ExportCard(
           haySemana: haySemana,
-          onSemana: () {
+          twoPerSheet: twoUp,
+          onExport: (format, action, origin) {
             menu.close();
-            _exportWeek(context, ref);
+            runExport(context, ref,
+                format: format, action: action, shareOrigin: origin);
           },
         ),
       ],
@@ -724,16 +764,22 @@ class _ExportMenu extends ConsumerWidget {
 }
 
 class _ExportCard extends StatelessWidget {
-  const _ExportCard({required this.haySemana, required this.onSemana});
+  const _ExportCard({
+    required this.haySemana,
+    required this.twoPerSheet,
+    required this.onExport,
+  });
 
   final bool haySemana;
-  final VoidCallback onSemana;
+  final bool twoPerSheet;
+  final void Function(ExportFormat, ExportAction, Rect?) onExport;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final tr = context.t;
     return Container(
-      width: 268,
+      width: 300,
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -749,17 +795,46 @@ class _ExportCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ExportItem(
-            icon: Icons.description_outlined,
-            title: context.t.export.currentWeek,
-            sub: context.t.export.currentWeekSub,
-            onTap: haySemana ? onSemana : null,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+            child: Row(
+              children: [
+                Icon(
+                    twoPerSheet
+                        ? Icons.splitscreen_outlined
+                        : Icons.description_outlined,
+                    size: 17,
+                    color: t.textMute),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          twoPerSheet
+                              ? tr.export.currentSheet
+                              : tr.export.currentWeek,
+                          style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: t.text)),
+                      Text(
+                          twoPerSheet
+                              ? tr.export.currentSheetSub
+                              : tr.export.currentWeekSub,
+                          style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: t.textMute)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          _ExportItem(
-            icon: Icons.layers_outlined,
-            title: context.t.export.fullProject,
-            sub: context.t.export.fullProjectSub,
-            onTap: null, // próximamente
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+            child: ExportPanel(enabled: haySemana, onExport: onExport),
           ),
           Container(
             height: 1,
@@ -767,9 +842,15 @@ class _ExportCard extends StatelessWidget {
             color: t.border2,
           ),
           _ExportItem(
+            icon: Icons.layers_outlined,
+            title: tr.export.fullProject,
+            sub: tr.export.fullProjectSub,
+            onTap: null, // próximamente
+          ),
+          _ExportItem(
             icon: Icons.list_alt_outlined,
-            title: context.t.export.sheets,
-            sub: context.t.export.sheetsSub,
+            title: tr.export.sheets,
+            sub: tr.export.sheetsSub,
             onTap: null, // próximamente
           ),
         ],

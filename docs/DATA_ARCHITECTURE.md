@@ -1,13 +1,18 @@
 # Data & Sync Architecture
 
 Design document for Agora's persistence and synchronization layer. Status:
-**proposal under discussion** — no code implements this yet.
+**largely implemented** — phases 1–3, 4a, 4b-1, 4b-3 and 4c are built
+(offline DB, HLC/outbox, the E2E sync engine, the Firestore cloud with
+security rules, heartbeat-driven sync, and keys the user never manages).
+Remaining: the sharing UI (invites/members/capabilities editor, 4b-2), CCK
+rotation and account deletion. See `docs/PHASE4_CLOUD_SYNC.md` for what is
+live.
 
 Goals, in the user's words: offline-first even in cloud mode (data always
 lives locally, sync when connectivity returns), multiple congregations,
 multiple program types (only VMC/S-140 exists today), programs grouped in
 projects, sharing with other users from the first cloud release, and
-end-to-end encryption of synced content.
+encrypted synced content that restores automatically on sign-in.
 
 ---
 
@@ -22,9 +27,14 @@ end-to-end encryption of synced content.
    starts it. No `if (cloud)` in feature code.
 3. **Every synced row carries the same sync metadata** (HLC timestamp,
    tombstone). New entities become syncable by construction, not by retrofit.
-4. **The server never sees content.** Synced payloads are AES-256-GCM blobs
-   encrypted with a per-congregation key. Firestore stores routing metadata
-   only (ids, timestamps, membership).
+4. **Synced content is encrypted, but not from the operator.** Payloads are
+   AES-256-GCM blobs under a per-congregation key, and Firestore stores
+   routing metadata only (ids, timestamps, membership). The key that opens
+   them is escrowed in `users/{uid}` so that signing in restores everything
+   automatically, which means whoever controls the Firebase project can read
+   content. The encryption is still load-bearing between MEMBERS (revoking
+   someone cuts their access to future data) — see §10 for the trade and how
+   to reverse it.
 5. **Program types are pluggable.** The data model knows a `programTypeId`
    string; everything type-specific (template, eligibility rules, PDF layout)
    lives behind a code interface. Adding "public talks" or "attendants" is new
@@ -165,18 +175,18 @@ New material:
 | Key | Scope | Where it lives |
 |---|---|---|
 | **CCK** — Congregation Content Key (AES-256) | encrypts every synced blob of one congregation | never leaves devices in clear; stored in the OS keychain |
-| **User keypair** (X25519) | receiving CCKs | pubkey published in `users/{uid}`; privkey wrapped with a **sync passphrase** (Argon2id, same envelope pattern as `DbKeyManager`) and stored in `users/{uid}` so any of the user's devices can fetch + unwrap it |
+| **User keypair** (X25519) | receiving CCKs | both halves in `users/{uid}`, readable only by that account. Escrowing the private half is what makes signing in restore everything with nothing to remember — and is why the project owner can read content (see §10) |
 | **Invite key** (one-time) | carrying a CCK inside an invitation | embedded in the invite code/link, shared out-of-band, never stored server-side in clear |
 
 ### Flows
 
-- **Enable cloud / first device**: generate keypair, ask the user to set a
-  sync passphrase (shown with the same "no recovery" warning as the local
-  password), upload wrapped privkey. Creating a congregation generates its
-  CCK and stores it wrapped under the owner's pubkey in
-  `congregations/{cid}/members/{uid}`.
-- **New device, same user**: Firebase sign-in → download wrapped privkey →
-  passphrase unwraps it → unwrap the CCKs from the member docs → full pull.
+- **Enable cloud / first device**: generate the keypair silently on sign-in
+  and publish only the public half. The user is asked for nothing. Creating a
+  congregation generates its CCK and stores it wrapped under the owner's
+  pubkey in `congregations/{cid}/members/{uid}`.
+- **New device, same user**: Firebase sign-in → fetch the identity key from
+  `users/{uid}` → unwrap the CCKs from the member docs → full pull. No code,
+  no passphrase, no other device involved.
 - **Invite** (sharing v1): inviter creates
   `congregations/{cid}/invites/{id}` = { role, expiry, CCK wrapped under a
   random invite key }; the invite key travels inside the code/link the user
@@ -187,10 +197,11 @@ New material:
   blobs stay readable by remaining members (they hold the whole keyring).
   No mass re-encryption needed. The revoked user keeps whatever was already
   on their device — unavoidable in any E2E design; documented honestly.
-- **Lost passphrase**: any still-trusted device can re-wrap keys under a new
-  passphrase (it holds them in its keychain). Sole owner + all devices lost +
-  passphrase lost = cloud data unrecoverable — consistent with the app's
-  existing "losing the password loses the data" stance.
+- **Lost devices**: nothing is lost — signing in again restores the identity
+  and pulls everything back. This is the trade the product chose over
+  end-to-end secrecy (§10).
+- **Sign-out**: wipes the cached key and CCKs from that device, so a lent or
+  resold machine keeps nothing; signing back in fetches them again.
 
 ### What the server can see (accepted metadata leak)
 
@@ -250,7 +261,7 @@ client-side; the realistic threat model here is misclicks, not attacks).
 | **1. Local persistence** | Full schema + repositories + participant migration; congregations & projects survive restarts | metadata columns exist, unused |
 | **2. Programs in DB** | Program/slots/assignments persisted; form edits rows; PDF renders from DB; progress computed | — |
 | **3. Sync scaffolding** | HLC service, outbox written on every mutation, `sync_state`; still 100 % local | write path ready |
-| **4. Cloud v1 = multi-device + sharing** | E2E key bootstrap (passphrase), push/pull engine, invites, roles, revocation/rotation | yes — sharing ships in the first cloud release per product decision |
+| **4. Cloud v1 = multi-device + sharing** | silent key bootstrap, push/pull engine, invites, roles, revocation/rotation | yes — sharing ships in the first cloud release per product decision |
 
 Each phase is releasable on its own; phases 1–3 carry zero cloud risk.
 
@@ -275,8 +286,21 @@ Each phase is releasable on its own; phases 1–3 carry zero cloud risk.
 
 - Concurrent edits to the *same row* silently last-write-win (no merge UI).
 - E2E means: no server-side queries/search (all queries are local anyway),
-  no web-console debugging of content, and real passphrase UX friction at
-  device-link time.
+  no web-console debugging of content, and a real step at device-link time
+  (the code must move between the two devices out of band).
+- **Not end-to-end against the operator.** The identity key is escrowed in
+  `users/{uid}` so that signing in restores everything; whoever controls the
+  Firebase project can therefore read congregation content. This was a
+  deliberate product choice: automatic restore and operator-blindness are
+  mutually exclusive (WhatsApp's default backup makes the same trade; its
+  opt-in E2E backup requires a password or a 64-digit key). Content
+  encryption is still real against other MEMBERS — a revoked member loses
+  access to future data regardless of rules — and the format is unchanged,
+  so dropping the escrow in favour of a recovery code later needs no
+  migration.
+- There is no per-device revocation: the identity is per user, so a
+  compromised device means resetting the identity.
+- `members/{uid}` carries `email`/`displayName` in clear.
 - Firestore costs scale with doc writes; batching + debounce keep this
   negligible at congregation scale.
 - Devices offline > tombstone GC window need a full re-pull (handled, but

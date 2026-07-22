@@ -61,9 +61,11 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_auth: ^6.5.4
   google_sign_in: ^7.2.0
-
-# Selecciona la variante cifrada de sqlite3 (SQLite3MultipleCiphers) que
-# compila el hook nativo de package:sqlite3. PRAGMA key como en SQLCipher.
+  skeletonizer: ^2.1.3
+  local_auth: ^3.0.2
+  cloud_firestore: ^6.7.1
+  connectivity_plus: ^7.3.0
+  file_picker: ^11.0.2
 hooks:
   user_defines:
     sqlite3:

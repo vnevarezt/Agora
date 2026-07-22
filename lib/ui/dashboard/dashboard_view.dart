@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
+import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
+import '../../state/restore_provider.dart';
+import '../../state/sync_controller.dart';
+import '../../state/sync_provider.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_spinner.dart';
 import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
+import '../widgets/motion.dart';
 import 'continue_card.dart';
 import 'new_project_card.dart';
 import 'project_card.dart';
@@ -40,13 +47,51 @@ class DashboardView extends ConsumerWidget {
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(pad, 16, pad, 120),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _HeroSection(),
-                _HomeGrid(stacked: size != ScreenSize.desktop),
-              ],
-            ),
+            child: Consumer(builder: (context, ref, _) {
+              final stacked = size != ScreenSize.desktop;
+              final restore = ref.watch(initialRestoreProvider);
+              final phase = ref.watch(syncControllerProvider).phase;
+              // Offline/error stall the restore: show the real (empty)
+              // dashboard with the banner explaining it, never a forever
+              // skeleton.
+              final stalled =
+                  phase == SyncPhase.offline || phase == SyncPhase.error;
+              final showSkeleton = ref.watch(dashboardLoadingProvider) ||
+                  (restore != null &&
+                      ref.watch(congregationsProvider).isEmpty &&
+                      !stalled);
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FadeThroughSwitcher(
+                    child: restore == null
+                        ? const SizedBox(
+                            key: ValueKey('no-restore'),
+                            width: double.infinity)
+                        : Padding(
+                            key: const ValueKey('restore'),
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _RestoreBanner(
+                                restore: restore, phase: phase),
+                          ),
+                  ),
+                  FadeThroughSwitcher(
+                    child: showSkeleton
+                        ? _DashboardSkeleton(
+                            key: const ValueKey('skeleton'), stacked: stacked)
+                        : Column(
+                            key: const ValueKey('content'),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _HeroSection(),
+                              _HomeGrid(stacked: stacked),
+                            ],
+                          ),
+                  ),
+                ],
+              );
+            }),
           ),
         ),
       ],
@@ -140,6 +185,7 @@ class _TopBar extends ConsumerWidget {
           state: _catalogState(ref.watch(mwbSyncProvider)),
           compact: isMobile,
         ),
+        const _CloudSyncIndicator(),
         const SizedBox(width: 8),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
@@ -246,6 +292,118 @@ class _SyncIndicator extends StatelessWidget {
   }
 }
 
+/// Cloud sync surfaces ONLY when the user must know something: changes are
+/// queued but there's no network, or sync hit an error/revocation. Healthy
+/// sync is invisible (the whole point of 4b-3) — this renders nothing.
+class _CloudSyncIndicator extends ConsumerWidget {
+  const _CloudSyncIndicator();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.tokens;
+    final tr = context.t;
+    final status = ref.watch(syncControllerProvider);
+    const amber = Color(0xFFB9890F);
+
+    final offlinePending =
+        status.phase == SyncPhase.offline && status.pendingOutbox > 0;
+    final (IconData icon, Color color, String tip)? shown = switch (status) {
+      _ when offlinePending => (
+          Icons.cloud_off_rounded,
+          amber,
+          tr.cloudSync.errorOffline,
+        ),
+      SyncStatus(phase: SyncPhase.error, :final errorKey) => (
+          Icons.cloud_off_rounded,
+          amber,
+          errorKey == 'permissionDenied'
+              ? tr.cloudSync.errorPermission
+              : tr.cloudSync.errorUnknown,
+        ),
+      _ => null,
+    };
+    if (shown == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Tooltip(
+        message: shown.$3,
+        child: Container(
+          height: Dimens.hControl,
+          width: Dimens.hControl,
+          decoration: BoxDecoration(
+            color: t.surface,
+            borderRadius: BorderRadius.circular(Dimens.rControl),
+            border: Border.all(color: t.border),
+          ),
+          child: Icon(shown.$1, size: 17, color: shown.$2),
+        ),
+      ),
+    );
+  }
+}
+
+/// First-time restore banner on a freshly signed-in device: tells the user
+/// their data is on its way while the pull runs, so an empty screen never
+/// reads as "nothing is here". Rendered only while [initialRestoreProvider]
+/// is non-null.
+class _RestoreBanner extends StatelessWidget {
+  const _RestoreBanner({required this.restore, required this.phase});
+
+  final InitialRestore restore;
+  final SyncPhase phase;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final tr = context.t;
+    const amber = Color(0xFFB9890F);
+
+    final (Widget leading, String label) = switch (phase) {
+      SyncPhase.offline => (
+          const Icon(Icons.cloud_off_rounded, size: 17, color: amber),
+          tr.cloudSync.restoreOffline,
+        ),
+      SyncPhase.error => (
+          const Icon(Icons.error_outline_rounded, size: 17, color: amber),
+          tr.cloudSync.errorUnknown,
+        ),
+      _ => (
+          const AppSpinner(size: 16),
+          restore.total > 1
+              ? '${tr.cloudSync.restoring} · '
+                  '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
+              : tr.cloudSync.restoring,
+        ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: t.surface,
+        borderRadius: BorderRadius.circular(Dimens.rControl),
+        border: Border.all(color: t.border),
+      ),
+      child: Row(
+        children: [
+          leading,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: t.text,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Hero "continue where you left off": the freshest draft, or nothing.
 class _HeroSection extends ConsumerWidget {
   const _HeroSection();
@@ -346,6 +504,15 @@ class _HomeGrid extends ConsumerWidget {
 class _ProjectsSection extends ConsumerWidget {
   const _ProjectsSection();
 
+  /// A `project` item needs `admin` or ANY edit type (mirrors the rules).
+  /// Checked against the congregation a new project would land in.
+  bool _canCreateProjects(WidgetRef ref, List<Congregation> congregations) {
+    final cid = congregations.firstOrNull?.id;
+    if (cid == null) return true;
+    final rights = ref.watch(rightsProvider(cid));
+    return rights.admin || rights.editTypes.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final congregations = ref.watch(congregationsProvider);
@@ -396,7 +563,12 @@ class _ProjectsSection extends ConsumerWidget {
                 SizedBox(
                   width: colW,
                   child: NewProjectCard(
-                    onTap: () => showProjectModal(context),
+                    // A new project lands in the first congregation, the
+                    // same one the modal defaults to. Null onTap renders the
+                    // card disabled.
+                    onTap: _canCreateProjects(ref, congregations)
+                        ? () => showProjectModal(context)
+                        : null,
                   ),
                 ),
                 for (final p in projects)
@@ -477,6 +649,112 @@ class _RemindersSection extends ConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Skeleton dashboard while the streams warm up: the REAL cards rendered
+/// with mock data inside a [Skeletonizer], so the placeholders can never
+/// drift from the actual layout.
+class _DashboardSkeleton extends StatelessWidget {
+  const _DashboardSkeleton({super.key, required this.stacked});
+
+  final bool stacked;
+
+  static final _project = Project(
+    id: 'skeleton',
+    name: 'Programa de ejemplo',
+    congregationId: 'skeleton',
+    weeks: const ['SEMANA UNO', 'SEMANA DOS', 'SEMANA TRES'],
+    done: 12,
+    total: 59,
+    status: ProjectStatus.draft,
+    editedLabel: 'hace 2 h',
+    updatedAt: DateTime(2026),
+    weekProgress: const [
+      (label: 'SEMANA UNO', done: 14, total: 14),
+      (label: 'SEMANA DOS', done: 5, total: 15),
+      (label: 'SEMANA TRES', done: 0, total: 15),
+    ],
+  );
+
+  static const _congregation = Congregation(
+      id: 'skeleton', name: 'Congregación', number: '', color: 0xFF7A2230);
+
+  static const _reminder = Reminder(
+    id: 'skeleton',
+    type: ReminderType.task,
+    title: 'Asignaciones pendientes',
+    meta: 'Semana · Proyecto',
+    cta: 'Abrir proyecto',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final projects = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlockTitle(title: context.t.dashboard.projects, count: 0),
+        const SizedBox(height: 12),
+        LayoutBuilder(builder: (context, c) {
+          const gap = 14.0;
+          final cols = (c.maxWidth / 264).floor().clamp(1, 4);
+          final colW = (c.maxWidth - (cols - 1) * gap) / cols;
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (var i = 0; i < 4; i++)
+                SizedBox(
+                  width: colW,
+                  child: ProjectCard(
+                    project: _project,
+                    congregation: _congregation,
+                    onTap: () {},
+                    onEdit: () {},
+                  ),
+                ),
+            ],
+          );
+        }),
+      ],
+    );
+
+    final reminders = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlockTitle(title: context.t.dashboard.pending, count: 0),
+        const ReminderCard(recordatorio: _reminder),
+        const SizedBox(height: 9),
+        const ReminderCard(recordatorio: _reminder),
+      ],
+    );
+
+    return Skeletonizer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ContinueCard(
+            project: _project,
+            congregation: _congregation,
+            onContinue: () {},
+          ),
+          const SizedBox(height: 20),
+          if (stacked) ...[
+            projects,
+            const SizedBox(height: 24),
+            reminders,
+          ] else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: projects),
+                const SizedBox(width: 22),
+                SizedBox(width: 312, child: reminders),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

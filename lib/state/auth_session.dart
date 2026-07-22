@@ -6,9 +6,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/connection.dart';
 import '../data/db/db_key_manager.dart';
+import '../data/device_auth.dart';
 import 'cloud_auth.dart';
+import 'sync_keys.dart' show syncOwnerUidKey;
 
 final dbKeyManagerProvider = Provider<DbKeyManager>((ref) => DbKeyManager());
+
+/// The device-unlock DEK copy vanished from the keychain. The controller has
+/// already switched the preference off; the password is the way back in.
+class DeviceUnlockKeyMissing implements Exception {
+  const DeviceUnlockKeyMissing();
+}
 
 /// How this install authenticates. Chosen once on the Portada; local mode
 /// gates the DB with a password-wrapped key, cloud mode gates it with the
@@ -41,9 +49,13 @@ class SessionLocalCreate extends SessionState {
 
 /// Local mode, waiting for the password.
 class SessionLocalLocked extends SessionState {
-  const SessionLocalLocked(this.profileName);
+  const SessionLocalLocked(this.profileName, {this.deviceUnlock = false});
 
   final String? profileName;
+
+  /// Device unlock (Touch ID / Face ID / fingerprint) is enabled AND this
+  /// device supports it: the unlock screen offers it next to the password.
+  final bool deviceUnlock;
 }
 
 /// Cloud mode with no Firebase session → cloud sign-in screen.
@@ -51,14 +63,25 @@ class SessionCloudSignedOut extends SessionState {
   const SessionCloudSignedOut();
 }
 
+/// Cloud mode with a live Firebase session but the device-unlock gate armed:
+/// only entered when the user enabled it, so the OS prompt is the way in
+/// (signing out is the escape hatch).
+class SessionCloudLocked extends SessionState {
+  const SessionCloudLocked();
+}
+
 class SessionUnlocked extends SessionState {
-  const SessionUnlocked(this.dekHex, this.mode, {this.profileName});
+  const SessionUnlocked(this.dekHex, this.mode,
+      {this.profileName, this.deviceUnlockEnabled = false});
 
   final String dekHex;
   final AccountMode mode;
 
   /// Local profile name (greeting); null in cloud mode for now.
   final String? profileName;
+
+  /// Current value of the device-unlock preference (Settings toggle).
+  final bool deviceUnlockEnabled;
 }
 
 /// The keychain itself failed (not a wrong password): nothing can proceed.
@@ -74,9 +97,12 @@ final authSessionProvider =
 class SessionController extends Notifier<SessionState> {
   static const _modeKey = 'account_mode';
   static const _nameKey = 'local_profile_name';
+  static const _deviceUnlockKey = 'device_unlock';
 
   AccountMode? _mode;
   String? _profileName;
+  bool _deviceUnlockPref = false;
+  bool _deviceAuthSupported = false;
   StreamSubscription<User?>? _cloudSub;
 
   @override
@@ -88,10 +114,20 @@ class SessionController extends Notifier<SessionState> {
 
   DbKeyManager get _keys => ref.read(dbKeyManagerProvider);
 
+  DeviceAuth get _deviceAuth => ref.read(deviceAuthProvider);
+
+  /// Device unlock actually usable on this device (preference AND hardware).
+  bool get _deviceUnlock => _deviceUnlockPref && _deviceAuthSupported;
+
   Future<void> _init() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _profileName = prefs.getString(_nameKey);
+      _deviceUnlockPref = prefs.getBool(_deviceUnlockKey) ?? false;
+      // Only probe the hardware when the user opted in: avoids a platform
+      // round-trip on every boot for everyone else.
+      _deviceAuthSupported =
+          _deviceUnlockPref && await _deviceAuth.isSupported();
       _mode = switch (prefs.getString(_modeKey)) {
         'local' => AccountMode.local,
         'cloud' => AccountMode.cloud,
@@ -99,7 +135,7 @@ class SessionController extends Notifier<SessionState> {
       };
       switch (_mode) {
         case AccountMode.local:
-          state = SessionLocalLocked(_profileName);
+          state = SessionLocalLocked(_profileName, deviceUnlock: _deviceUnlock);
         case AccountMode.cloud:
           await _startCloudWatch();
         case null:
@@ -142,10 +178,59 @@ class SessionController extends Notifier<SessionState> {
   /// Throws [WrongPasswordException] / [DbKeyException]; the screen shows the
   /// error while the state stays [SessionLocalLocked].
   Future<void> unlock(String password) async {
-    state = SessionUnlocked(await _keys.unlock(password), AccountMode.local, profileName: _profileName);
+    state = SessionUnlocked(await _keys.unlock(password), AccountMode.local,
+        profileName: _profileName, deviceUnlockEnabled: _deviceUnlock);
   }
 
-  void lock() => state = SessionLocalLocked(_profileName);
+  /// OS prompt → unlocked, in either mode. False when the user cancelled or
+  /// failed the prompt (no state change; the password path stays available).
+  /// Throws [DeviceUnlockKeyMissing] if the local key copy vanished: the
+  /// preference is switched off so the screen falls back to password-only.
+  Future<bool> unlockWithDeviceAuth(String reason) async {
+    if (!_deviceUnlock) return false;
+    if (!await _deviceAuth.authenticate(reason)) return false;
+    if (_mode == AccountMode.cloud) {
+      state = SessionUnlocked(
+          await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud,
+          deviceUnlockEnabled: true);
+      return true;
+    }
+    final dek = await _keys.readDeviceUnlockKey();
+    if (dek == null) {
+      await _persistDeviceUnlockPref(false);
+      state = SessionLocalLocked(_profileName);
+      throw const DeviceUnlockKeyMissing();
+    }
+    state = SessionUnlocked(dek, AccountMode.local,
+        profileName: _profileName, deviceUnlockEnabled: true);
+    return true;
+  }
+
+  void lock() => state = switch (_mode) {
+        AccountMode.cloud => const SessionCloudLocked(),
+        _ => SessionLocalLocked(_profileName, deviceUnlock: _deviceUnlock),
+      };
+
+  /// Settings toggle, both modes; requires an unlocked session. Enabling asks
+  /// for the OS prompt right away — proves the user can actually pass it
+  /// before the password shortcut exists (and in local mode the DEK copy is
+  /// only written after that proof). Returns the resulting value.
+  Future<bool> setDeviceUnlock(bool enable, String reason) async {
+    final s = state;
+    if (s is! SessionUnlocked) return _deviceUnlockPref;
+    if (enable) {
+      if (!await _deviceAuth.authenticate(reason)) return false;
+      // Passing the prompt is the hardware probe: no separate isSupported().
+      _deviceAuthSupported = true;
+      if (s.mode == AccountMode.local) await _keys.enableDeviceUnlock(s.dekHex);
+    } else {
+      await _keys.disableDeviceUnlock();
+    }
+    await _persistDeviceUnlockPref(enable);
+    state = SessionUnlocked(s.dekHex, s.mode,
+        profileName: s.profileName, deviceUnlockEnabled: enable);
+    return enable;
+  }
 
   /// Re-wraps the DEK; the session stays unlocked. Throws
   /// [WrongPasswordException] when [current] is wrong.
@@ -160,8 +245,10 @@ class SessionController extends Notifier<SessionState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_modeKey, 'cloud');
       _mode = AccountMode.cloud;
+      // Fresh sign-in counts as proving identity: no device-unlock gate here.
       state = SessionUnlocked(
-          await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud);
+          await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud,
+          deviceUnlockEnabled: _deviceUnlock);
       await _startCloudWatch();
     } on DbKeyException catch (e) {
       state = SessionKeyError(e.message);
@@ -186,8 +273,13 @@ class SessionController extends Notifier<SessionState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_modeKey);
     await prefs.remove(_nameKey);
+    await prefs.remove(_deviceUnlockKey);
+    // The sync identity is gone with the keychain: don't leave this device
+    // claimed by an account it can no longer prove.
+    await prefs.remove(syncOwnerUidKey);
     _mode = null;
     _profileName = null;
+    _deviceUnlockPref = false;
     state = const SessionFreshChoose();
   }
 
@@ -197,6 +289,12 @@ class SessionController extends Notifier<SessionState> {
     await prefs.setString(_nameKey, name);
     _mode = AccountMode.local;
     _profileName = name;
+  }
+
+  Future<void> _persistDeviceUnlockPref(bool enable) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_deviceUnlockKey, enable);
+    _deviceUnlockPref = enable;
   }
 
   /// Cloud mode routing: the Firebase session is the gate. authStateChanges
@@ -218,7 +316,12 @@ class SessionController extends Notifier<SessionState> {
       state = const SessionCloudSignedOut();
       return;
     }
-    if (state is SessionUnlocked) return;
+    if (state is SessionUnlocked || state is SessionCloudLocked) return;
+    if (_deviceUnlock) {
+      // Session restored from disk (app relaunch): arm the gate.
+      state = const SessionCloudLocked();
+      return;
+    }
     try {
       state = SessionUnlocked(
           await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud);

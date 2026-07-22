@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/db_key_manager.dart';
+import '../../data/device_auth.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../auth/widgets/auth_error_text.dart';
@@ -12,43 +13,90 @@ import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
 import 'settings_card.dart';
 
-/// Settings card for the local account: change password (re-wraps the DB key)
-/// and lock the session immediately.
+/// Settings card for session security. Local mode: change password (re-wraps
+/// the DB key), device unlock and lock now. Cloud mode: device unlock as the
+/// app gate (the Firebase password lives with Firebase), plus lock now while
+/// the gate is on.
 class SecurityCard extends ConsumerWidget {
   const SecurityCard({super.key});
+
+  Future<void> _toggleDeviceUnlock(
+      BuildContext context, WidgetRef ref, bool enable) async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      // Cancelling the OS prompt leaves the state (and the switch) as-is.
+      await ref
+          .read(authSessionProvider.notifier)
+          .setDeviceUnlock(enable, tr.security.deviceUnlockPrompt);
+    } on DbKeyException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      messenger
+          .showSnackBar(SnackBar(content: Text(tr.account.errors.unknown)));
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tr = context.t;
+    final session = ref.watch(authSessionProvider);
+    final unlocked = session is SessionUnlocked ? session : null;
+    final localMode = unlocked?.mode == AccountMode.local;
+    final deviceUnlockOn = unlocked?.deviceUnlockEnabled ?? false;
+    final deviceAuthOk =
+        ref.watch(deviceAuthSupportedProvider).value ?? false;
+
     return SettingsCard(
       title: tr.security.title,
-      desc: tr.security.desc,
+      desc: localMode ? tr.security.desc : tr.security.descCloud,
       children: [
-        SettingRow(
-          first: true,
-          title: tr.security.changePassword,
-          subtitle: tr.security.changePasswordDesc,
-          trailing: AppButton(
-            variant: AppButtonVariant.ghost,
-            icon: Icons.key_outlined,
-            label: tr.security.change,
-            onPressed: () => showAppModal<void>(
-              context,
-              builder: (ctx, sheet, close) =>
-                  _ChangePasswordModal(sheet: sheet, onClose: close),
+        if (localMode)
+          SettingRow(
+            first: true,
+            title: tr.security.changePassword,
+            subtitle: tr.security.changePasswordDesc,
+            trailing: AppButton(
+              variant: AppButtonVariant.ghost,
+              icon: Icons.key_outlined,
+              label: tr.security.change,
+              onPressed: () => showAppModal<void>(
+                context,
+                builder: (ctx, sheet, close) =>
+                    _ChangePasswordModal(sheet: sheet, onClose: close),
+              ),
             ),
           ),
-        ),
-        SettingRow(
-          title: tr.security.lockNow,
-          subtitle: tr.security.lockNowDesc,
-          trailing: AppButton(
-            variant: AppButtonVariant.ghost,
-            icon: Icons.lock_outline,
-            label: tr.security.lock,
-            onPressed: () => ref.read(authSessionProvider.notifier).lock(),
+        if (deviceAuthOk)
+          SettingRow(
+            first: !localMode,
+            title: tr.security.deviceUnlock,
+            subtitle: localMode
+                ? tr.security.deviceUnlockDesc
+                : tr.security.deviceUnlockDescCloud,
+            trailing: Transform.scale(
+              scale: 0.85,
+              child: Switch(
+                value: deviceUnlockOn,
+                onChanged: (v) => _toggleDeviceUnlock(context, ref, v),
+              ),
+            ),
           ),
-        ),
+        // Locking a cloud session only means something while the gate is on;
+        // without it there is nothing the lock screen could ask for.
+        if (localMode || deviceUnlockOn)
+          SettingRow(
+            title: tr.security.lockNow,
+            subtitle: localMode
+                ? tr.security.lockNowDesc
+                : tr.security.lockNowDescCloud,
+            trailing: AppButton(
+              variant: AppButtonVariant.ghost,
+              icon: Icons.lock_outline,
+              label: tr.security.lock,
+              onPressed: () => ref.read(authSessionProvider.notifier).lock(),
+            ),
+          ),
       ],
     );
   }

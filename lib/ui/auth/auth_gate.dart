@@ -7,6 +7,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_spinner.dart';
 import '../widgets/motion.dart';
 import 'cloud_auth_screen.dart';
+import 'cloud_lock_screen.dart';
 import 'key_error_screen.dart';
 import 'local_create_screen.dart';
 import 'portada_screen.dart';
@@ -34,10 +35,10 @@ class AuthGate extends ConsumerWidget {
           SessionLocalCreate(:final migration) => LocalCreateScreen(
             migration: migration,
           ),
-          SessionLocalLocked(:final profileName) => UnlockScreen(
-            profileName: profileName,
-          ),
+          SessionLocalLocked(:final profileName, :final deviceUnlock) =>
+            UnlockScreen(profileName: profileName, deviceUnlock: deviceUnlock),
           SessionCloudSignedOut() => const CloudAuthScreen(),
+          SessionCloudLocked() => const CloudLockScreen(),
           SessionKeyError(:final message) => KeyErrorScreen(message: message),
           SessionUnlocked() => child,
         },

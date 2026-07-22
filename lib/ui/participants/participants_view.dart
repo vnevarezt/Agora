@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/person.dart';
 import '../../state/people_provider.dart';
+import '../../state/restore_provider.dart';
+import '../../state/sync_controller.dart';
 import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -170,8 +173,40 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   Widget _separator(AppTokens t) =>
       Container(width: 1, height: 22, color: t.border);
 
+  /// Real cards with mock data inside a [Skeletonizer]: the placeholder
+  /// can never drift from the actual card layout.
+  Widget _skeleton() {
+    final mock = Person(
+      id: 'skeleton',
+      congregationId: 'skeleton',
+      firstName: '',
+      lastName: '',
+      displayName: 'Nombre de ejemplo',
+      gender: Gender.male,
+      privilege: Role.publisher,
+      qualifications: const [],
+      originCongregation: 'Congregación',
+      active: true,
+      notes: '',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    return Skeletonizer(
+      child: _grid([for (var i = 0; i < 6; i++) mock]),
+    );
+  }
+
   Widget _result(BuildContext context) {
     final all = ref.watch(peopleProvider);
+    final restore = ref.watch(initialRestoreProvider);
+    final phase = ref.watch(syncControllerProvider).phase;
+    final stalled = phase == SyncPhase.offline || phase == SyncPhase.error;
+    // A fresh device restoring its data reads its empty local table as "no
+    // people"; keep the skeleton until the pull lands (unless it stalled).
+    if (ref.watch(peopleLoadingProvider) ||
+        (restore != null && all.isEmpty && !stalled)) {
+      return _skeleton();
+    }
     final filtered = filterPeople(
       all,
       query: _query,

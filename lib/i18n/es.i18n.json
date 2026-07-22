@@ -39,7 +39,15 @@
       "unlocking": "Descifrando…",
       "wrongPassword": "Contraseña incorrecta.",
       "startOver": "¿Empezar de cero?",
-      "createAnother": "Crear otro perfil"
+      "createAnother": "Crear otro perfil",
+      "deviceUnlockButton": "Usar desbloqueo del dispositivo"
+    },
+    "cloudLock": {
+      "title": "Sesión bloqueada",
+      "caption": "Confirma tu identidad para entrar.",
+      "unlock": "Desbloquear",
+      "signOutQuestion": "¿No eres tú?",
+      "signOut": "Cerrar sesión"
     },
     "cloud": {
       "pill": "Modo nube",
@@ -93,7 +101,33 @@
     "changed": "Contraseña actualizada.",
     "lockNow": "Bloquear ahora",
     "lockNowDesc": "Cierra la sesión local; pedirá la contraseña al volver.",
-    "lock": "Bloquear"
+    "lockNowDescCloud": "Bloquea la app; pedirá el desbloqueo del dispositivo al volver.",
+    "lock": "Bloquear",
+    "descCloud": "Protege el acceso a la app en este dispositivo.",
+    "deviceUnlock": "Desbloqueo con el dispositivo",
+    "deviceUnlockDesc": "Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.",
+    "deviceUnlockDescCloud": "Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.",
+    "deviceUnlockPrompt": "Confirma tu identidad para activar el desbloqueo con el dispositivo.",
+    "unlockPrompt": "Desbloquea tus datos de Agora.",
+    "deviceUnlockKeyMissing": "El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo."
+  },
+  "cloudSync": {
+    "title": "Sincronización en la nube",
+    "desc": "Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.",
+    "signedOut": "Inicia sesión en la nube para activar la sincronización.",
+    "unknownError": "No se pudo completar. Inténtalo de nuevo.",
+    "ready": "Sincronización activa",
+    "statusSyncing": "Sincronizando…",
+    "statusOffline": "Sin conexión",
+    "statusError": "Error de sincronización",
+    "lastSync": "Última sincronización: {when}",
+    "neverSynced": "Se sincronizará automáticamente",
+    "errorPermission": "Ya no tienes acceso a una congregación; tus datos locales se conservan.",
+    "errorOffline": "Sin conexión; se reintentará automáticamente.",
+    "errorUnknown": "Ocurrió un error al sincronizar.",
+    "restoring": "Recuperando tus datos…",
+    "restoringProgress": "{done} de {total} congregaciones",
+    "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar."
   },
   "account": {
     "title": "Cuenta en la nube",
@@ -125,6 +159,10 @@
     "home": "Inicio",
     "participants": "Participantes",
     "settings": "Configuración"
+  },
+  "userMenu": {
+    "localProfile": "Perfil local",
+    "cloudAccount": "Cuenta en la nube"
   },
   "common": {
     "cancel": "Cancelar",
@@ -313,10 +351,7 @@
     "pdfNameFirstOnly": "Solo nombre",
     "meetingLangSpanish": "Español",
     "meetingLangSign": "Lengua de señas",
-    "meetingLangEnglish": "English",
-    "accessAdmin": "Administrador",
-    "accessEditor": "Editor",
-    "accessReader": "Lector"
+    "meetingLangEnglish": "English"
   },
   "days": {
     "monday": "Lunes",
@@ -347,7 +382,20 @@
     "noUsers": "Aún no hay usuarios invitados.",
     "inviteUser": "Invitar usuario",
     "empty": "Aún no hay congregaciones.\nCrea la primera con \"Nueva congregación\".",
-    "newCongregation": "Nueva congregación"
+    "newCongregation": "Nueva congregación",
+    "joinWithCode": "Unirse con un código",
+    "you": "tú",
+    "roleAdmin": "Admin",
+    "roleEditor": "Editor",
+    "roleViewer": "Lectura",
+    "editAccess": "Cambiar permisos",
+    "revoke": "Quitar acceso",
+    "revokeTitle": "Quitar acceso",
+    "revokeConfirm": "{name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.",
+    "lastAdmin": "Debe quedar al menos una persona con permiso de administración.",
+    "readOnly": "Solo tienes acceso de lectura en esta congregación.",
+    "membersError": "No se ha podido cargar la lista de miembros.",
+    "pendingLabel": "Invitaciones pendientes"
   },
   "newCongregation": {
     "title": "Nueva congregación",
@@ -359,12 +407,40 @@
     "numberHint": "Ej. 152423"
   },
   "invite": {
-    "title": "Invitar usuario",
-    "desc": "Le llegará una invitación por correo para acceder a esta congregación.",
-    "send": "Enviar invitación",
-    "email": "Correo electrónico",
-    "emailHint": "nombre@correo.com",
-    "role": "Rol"
+    "title": "Invitar a la congregación",
+    "desc": "Genera un código y compártelo por un canal privado. Sirve una sola vez.",
+    "create": "Crear código",
+    "capabilities": "Permisos",
+    "capabilitiesDesc": "Lo que podrá hacer quien use el código.",
+    "capAdmin": "Administrar",
+    "capAdminDesc": "Miembros, invitaciones y datos de la congregación.",
+    "capPeople": "Participantes",
+    "capPeopleDesc": "Editar el directorio de personas.",
+    "capPrograms": "Programas",
+    "capProgramsDesc": "Crear y editar proyectos y asignaciones.",
+    "codeTitle": "Código de invitación",
+    "codeDesc": "Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.",
+    "copy": "Copiar",
+    "copied": "Código copiado",
+    "share": "Compartir",
+    "done": "Hecho",
+    "pending": "Invitaciones pendientes",
+    "expiresOn": "Caduca el {date}",
+    "expired": "Caducada",
+    "cancel": "Cancelar invitación",
+    "joinTitle": "Unirse con un código",
+    "joinDesc": "Pega el código que te han compartido.",
+    "codeLabel": "Código",
+    "codeHint": "agora-inv:1:…",
+    "join": "Unirse",
+    "joined": "Te has unido a la congregación.",
+    "errorInvalid": "Ese código no es válido. Cópialo entero, sin cortarlo.",
+    "errorMissing": "Esta invitación ya no existe: puede que alguien la haya usado.",
+    "errorExpired": "Esta invitación ha caducado. Pide una nueva.",
+    "errorAlreadyMember": "Ya perteneces a esta congregación.",
+    "errorKeys": "Las claves de sincronización no están disponibles en este dispositivo.",
+    "errorUnknown": "No se ha podido completar. Inténtalo de nuevo.",
+    "paste": "Pegar"
   },
   "picker": {
     "assign": "Asignar",
@@ -387,12 +463,18 @@
   },
   "export": {
     "export": "Exportar",
-    "exportPdf": "Exportar PDF",
-    "success": "PDF exportado: {path}",
-    "shared": "PDF compartido",
+    "exportPdf": "Exportar",
+    "success": "Guardado en: {path}",
+    "shared": "Archivo compartido",
     "error": "Error al exportar: {error}",
+    "formatPdf": "PDF",
+    "formatImage": "Imagen",
+    "saveAction": "Guardar",
+    "shareAction": "Compartir",
     "currentWeek": "Semana actual",
-    "currentWeekSub": "Una hoja PDF",
+    "currentWeekSub": "Una semana",
+    "currentSheet": "Hoja actual",
+    "currentSheetSub": "Dos semanas en una hoja",
     "fullProject": "Proyecto completo",
     "fullProjectSub": "Todas las semanas en un PDF",
     "sheets": "Hojas de participación",
@@ -408,6 +490,8 @@
     "weekShort": "Sem {n}",
     "auxRoom": "Sala auxiliar",
     "auxRoomDesc": "Segunda sala para estudiantes",
+    "twoPerSheet": "Dos por hoja",
+    "twoPerSheetDesc": "Dos semanas en la misma hoja",
     "circuitOverseer": "Visita del superintendente",
     "circuitOverseerDesc": "Reemplaza el estudio bíblico por un discurso"
   },

@@ -2,6 +2,8 @@
     <!-- Cloud sign-in (Firebase/Google) and the notebook sync need network in
          RELEASE builds too; debug/profile builds get it injected by Flutter. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Device unlock (fingerprint/face) for the session gate. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <application
         android:label="Agora"
         android:name="${applicationName}"

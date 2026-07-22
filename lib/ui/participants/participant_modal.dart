@@ -4,7 +4,9 @@ import 'package:uuid/uuid.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../models/person.dart';
+import '../../state/dashboard_provider.dart';
 import '../../state/people_provider.dart';
+import '../../state/sync_provider.dart';
 import '../limits.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -66,6 +68,22 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   int _congVersion = 0;
 
   bool get _isCreating => widget.original == null;
+
+  /// Which congregation this person belongs to — for a new one, the same
+  /// default the repository resolves an empty FK to.
+  String? get _congregationId =>
+      widget.original?.congregationId ??
+      (ref.watch(congregationsProvider).firstOrNull?.id);
+
+  /// The people gate lives HERE rather than on the participants screen: that
+  /// view is cross-congregation, so rights differ per row and only the
+  /// selected person's congregation can answer.
+  bool get _canEdit {
+    final cid = _congregationId;
+    if (cid == null) return true; // no congregation yet: nothing to gate
+    final rights = ref.watch(rightsProvider(cid));
+    return rights.admin || rights.people;
+  }
 
   void _setGender(Gender s) => setState(() {
         _gender = s;
@@ -151,8 +169,10 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       primaryLabel:
           _isCreating ? tr.participantModal.addTitle : tr.common.saveChanges,
       primaryBusy: _saving,
-      onPrimary: (_displayName.trim().isNotEmpty && !_saving) ? _save : null,
-      onDanger: _isCreating ? null : _delete,
+      onPrimary: (_canEdit && _displayName.trim().isNotEmpty && !_saving)
+          ? _save
+          : null,
+      onDanger: (_isCreating || !_canEdit) ? null : _delete,
     );
   }
 

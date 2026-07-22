@@ -21,5 +21,3 @@ List<String> get meetingLanguages => [
       t.options.meetingLangSign,
       t.options.meetingLangEnglish,
     ];
-List<String> get accessRoles =>
-    [t.options.accessAdmin, t.options.accessEditor, t.options.accessReader];

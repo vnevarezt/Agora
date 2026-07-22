@@ -43,8 +43,10 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$portada$en portada = _Translations$portada$en._(_root);
 	@override late final _Translations$auth$en auth = _Translations$auth$en._(_root);
 	@override late final _Translations$security$en security = _Translations$security$en._(_root);
+	@override late final _Translations$cloudSync$en cloudSync = _Translations$cloudSync$en._(_root);
 	@override late final _Translations$account$en account = _Translations$account$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
+	@override late final _Translations$userMenu$en userMenu = _Translations$userMenu$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
 	@override late final _Translations$sync$en sync = _Translations$sync$en._(_root);
 	@override late final _Translations$dashboard$en dashboard = _Translations$dashboard$en._(_root);
@@ -107,6 +109,7 @@ class _Translations$auth$en extends Translations$auth$es {
 	// Translations
 	@override String get chooseOther => 'Choose another mode';
 	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
+	@override late final _Translations$auth$cloudLock$en cloudLock = _Translations$auth$cloudLock$en._(_root);
 	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
 	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
 	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
@@ -131,7 +134,40 @@ class _Translations$security$en extends Translations$security$es {
 	@override String get changed => 'Password updated.';
 	@override String get lockNow => 'Lock now';
 	@override String get lockNowDesc => 'Closes the local session; the password will be required again.';
+	@override String get lockNowDescCloud => 'Locks the app; device unlock will be required to come back.';
 	@override String get lock => 'Lock';
+	@override String get descCloud => 'Protects access to the app on this device.';
+	@override String get deviceUnlock => 'Device unlock';
+	@override String get deviceUnlockDesc => 'Sign in with Touch ID, Face ID, fingerprint or the device passcode instead of your password.';
+	@override String get deviceUnlockDescCloud => 'Asks for Touch ID, Face ID, fingerprint or the device passcode every time you open the app.';
+	@override String get deviceUnlockPrompt => 'Confirm your identity to enable device unlock.';
+	@override String get unlockPrompt => 'Unlock your Agora data.';
+	@override String get deviceUnlockKeyMissing => 'Device unlock was turned off; sign in with your password and enable it again.';
+}
+
+// Path: cloudSync
+class _Translations$cloudSync$en extends Translations$cloudSync$es {
+	_Translations$cloudSync$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Cloud sync';
+	@override String get desc => 'Your data is stored encrypted and restores itself when you sign in on any of your devices.';
+	@override String get signedOut => 'Sign in to the cloud to enable syncing.';
+	@override String get unknownError => 'Couldn\'t complete. Please try again.';
+	@override String get ready => 'Sync is on';
+	@override String get statusSyncing => 'Syncing…';
+	@override String get statusOffline => 'Offline';
+	@override String get statusError => 'Sync error';
+	@override String lastSync({required Object when}) => 'Last sync: ${when}';
+	@override String get neverSynced => 'Will sync automatically';
+	@override String get errorPermission => 'You no longer have access to a congregation; your local data is kept.';
+	@override String get errorOffline => 'Offline; will retry automatically.';
+	@override String get errorUnknown => 'Something went wrong while syncing.';
+	@override String get restoring => 'Restoring your data…';
+	@override String restoringProgress({required Object done, required Object total}) => '${done} of ${total} congregations';
+	@override String get restoreOffline => 'Offline. Your data will be restored when you reconnect.';
 }
 
 // Path: account
@@ -169,6 +205,17 @@ class _Translations$nav$en extends Translations$nav$es {
 	@override String get home => 'Home';
 	@override String get participants => 'Participants';
 	@override String get settings => 'Settings';
+}
+
+// Path: userMenu
+class _Translations$userMenu$en extends Translations$userMenu$es {
+	_Translations$userMenu$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get localProfile => 'Local profile';
+	@override String get cloudAccount => 'Cloud account';
 }
 
 // Path: common
@@ -440,9 +487,6 @@ class _Translations$options$en extends Translations$options$es {
 	@override String get meetingLangSpanish => 'Spanish';
 	@override String get meetingLangSign => 'Sign language';
 	@override String get meetingLangEnglish => 'English';
-	@override String get accessAdmin => 'Administrator';
-	@override String get accessEditor => 'Editor';
-	@override String get accessReader => 'Reader';
 }
 
 // Path: days
@@ -488,6 +532,19 @@ class _Translations$congregation$en extends Translations$congregation$es {
 	@override String get inviteUser => 'Invite user';
 	@override String get empty => 'No congregations yet.\nCreate the first one with "New congregation".';
 	@override String get newCongregation => 'New congregation';
+	@override String get joinWithCode => 'Join with a code';
+	@override String get you => 'you';
+	@override String get roleAdmin => 'Admin';
+	@override String get roleEditor => 'Editor';
+	@override String get roleViewer => 'Read-only';
+	@override String get editAccess => 'Change permissions';
+	@override String get revoke => 'Remove access';
+	@override String get revokeTitle => 'Remove access';
+	@override String revokeConfirm({required Object name}) => '${name} will stop receiving changes. A new key is generated for everyone else and pending invitations are cancelled. Whatever they already downloaded stays on their device.';
+	@override String get lastAdmin => 'At least one person must keep administration rights.';
+	@override String get readOnly => 'You have read-only access to this congregation.';
+	@override String get membersError => 'Could not load the member list.';
+	@override String get pendingLabel => 'Pending invitations';
 }
 
 // Path: newCongregation
@@ -513,12 +570,40 @@ class _Translations$invite$en extends Translations$invite$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Invite user';
-	@override String get desc => 'They will receive an email invitation to access this congregation.';
-	@override String get send => 'Send invitation';
-	@override String get email => 'Email';
-	@override String get emailHint => 'name@email.com';
-	@override String get role => 'Role';
+	@override String get title => 'Invite to the congregation';
+	@override String get desc => 'Generate a code and share it over a private channel. It works once.';
+	@override String get create => 'Create code';
+	@override String get capabilities => 'Permissions';
+	@override String get capabilitiesDesc => 'What the person using this code will be able to do.';
+	@override String get capAdmin => 'Administer';
+	@override String get capAdminDesc => 'Members, invitations and congregation details.';
+	@override String get capPeople => 'Participants';
+	@override String get capPeopleDesc => 'Edit the people directory.';
+	@override String get capPrograms => 'Programs';
+	@override String get capProgramsDesc => 'Create and edit projects and assignments.';
+	@override String get codeTitle => 'Invitation code';
+	@override String get codeDesc => 'Valid for 7 days and single-use. Whoever holds it can read this congregation\'s data, so share it over a private channel only.';
+	@override String get copy => 'Copy';
+	@override String get copied => 'Code copied';
+	@override String get share => 'Share';
+	@override String get done => 'Done';
+	@override String get pending => 'Pending invitations';
+	@override String expiresOn({required Object date}) => 'Expires on ${date}';
+	@override String get expired => 'Expired';
+	@override String get cancel => 'Cancel invitation';
+	@override String get joinTitle => 'Join with a code';
+	@override String get joinDesc => 'Paste the code you were given.';
+	@override String get codeLabel => 'Code';
+	@override String get codeHint => 'agora-inv:1:…';
+	@override String get join => 'Join';
+	@override String get joined => 'You joined the congregation.';
+	@override String get errorInvalid => 'That code is not valid. Copy it whole, without cutting it.';
+	@override String get errorMissing => 'This invitation no longer exists — someone may have used it.';
+	@override String get errorExpired => 'This invitation has expired. Ask for a new one.';
+	@override String get errorAlreadyMember => 'You already belong to this congregation.';
+	@override String get errorKeys => 'The sync keys are not available on this device.';
+	@override String get errorUnknown => 'Could not complete. Please try again.';
+	@override String get paste => 'Paste';
 }
 
 // Path: picker
@@ -562,12 +647,18 @@ class _Translations$export$en extends Translations$export$es {
 
 	// Translations
 	@override String get export => 'Export';
-	@override String get exportPdf => 'Export PDF';
-	@override String success({required Object path}) => 'PDF exported: ${path}';
-	@override String get shared => 'PDF shared';
+	@override String get exportPdf => 'Export';
+	@override String success({required Object path}) => 'Saved to: ${path}';
+	@override String get shared => 'File shared';
 	@override String error({required Object error}) => 'Export error: ${error}';
+	@override String get formatPdf => 'PDF';
+	@override String get formatImage => 'Image';
+	@override String get saveAction => 'Save';
+	@override String get shareAction => 'Share';
 	@override String get currentWeek => 'Current week';
-	@override String get currentWeekSub => 'A single PDF sheet';
+	@override String get currentWeekSub => 'One week';
+	@override String get currentSheet => 'Current sheet';
+	@override String get currentSheetSub => 'Two weeks on one sheet';
 	@override String get fullProject => 'Full project';
 	@override String get fullProjectSub => 'All weeks in one PDF';
 	@override String get sheets => 'Assignment slips';
@@ -590,6 +681,8 @@ class _Translations$projectBar$en extends Translations$projectBar$es {
 	@override String weekShort({required Object n}) => 'Wk ${n}';
 	@override String get auxRoom => 'Auxiliary classroom';
 	@override String get auxRoomDesc => 'Second classroom for students';
+	@override String get twoPerSheet => 'Two per sheet';
+	@override String get twoPerSheetDesc => 'Two weeks on the same sheet';
 	@override String get circuitOverseer => 'Circuit overseer visit';
 	@override String get circuitOverseerDesc => 'Replaces the Bible study with a talk';
 }
@@ -672,6 +765,21 @@ class _Translations$auth$local$en extends Translations$auth$local$es {
 	@override String get wrongPassword => 'Wrong password.';
 	@override String get startOver => 'Starting over?';
 	@override String get createAnother => 'Create another profile';
+	@override String get deviceUnlockButton => 'Use device unlock';
+}
+
+// Path: auth.cloudLock
+class _Translations$auth$cloudLock$en extends Translations$auth$cloudLock$es {
+	_Translations$auth$cloudLock$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Session locked';
+	@override String get caption => 'Confirm your identity to continue.';
+	@override String get unlock => 'Unlock';
+	@override String get signOutQuestion => 'Not you?';
+	@override String get signOut => 'Sign out';
 }
 
 // Path: auth.cloud
@@ -809,6 +917,12 @@ extension on TranslationsEn {
 			'auth.local.wrongPassword' => 'Wrong password.',
 			'auth.local.startOver' => 'Starting over?',
 			'auth.local.createAnother' => 'Create another profile',
+			'auth.local.deviceUnlockButton' => 'Use device unlock',
+			'auth.cloudLock.title' => 'Session locked',
+			'auth.cloudLock.caption' => 'Confirm your identity to continue.',
+			'auth.cloudLock.unlock' => 'Unlock',
+			'auth.cloudLock.signOutQuestion' => 'Not you?',
+			'auth.cloudLock.signOut' => 'Sign out',
 			'auth.cloud.pill' => 'Cloud mode',
 			'auth.cloud.loginTitle' => 'Sign in',
 			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',
@@ -853,7 +967,31 @@ extension on TranslationsEn {
 			'security.changed' => 'Password updated.',
 			'security.lockNow' => 'Lock now',
 			'security.lockNowDesc' => 'Closes the local session; the password will be required again.',
+			'security.lockNowDescCloud' => 'Locks the app; device unlock will be required to come back.',
 			'security.lock' => 'Lock',
+			'security.descCloud' => 'Protects access to the app on this device.',
+			'security.deviceUnlock' => 'Device unlock',
+			'security.deviceUnlockDesc' => 'Sign in with Touch ID, Face ID, fingerprint or the device passcode instead of your password.',
+			'security.deviceUnlockDescCloud' => 'Asks for Touch ID, Face ID, fingerprint or the device passcode every time you open the app.',
+			'security.deviceUnlockPrompt' => 'Confirm your identity to enable device unlock.',
+			'security.unlockPrompt' => 'Unlock your Agora data.',
+			'security.deviceUnlockKeyMissing' => 'Device unlock was turned off; sign in with your password and enable it again.',
+			'cloudSync.title' => 'Cloud sync',
+			'cloudSync.desc' => 'Your data is stored encrypted and restores itself when you sign in on any of your devices.',
+			'cloudSync.signedOut' => 'Sign in to the cloud to enable syncing.',
+			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
+			'cloudSync.ready' => 'Sync is on',
+			'cloudSync.statusSyncing' => 'Syncing…',
+			'cloudSync.statusOffline' => 'Offline',
+			'cloudSync.statusError' => 'Sync error',
+			'cloudSync.lastSync' => ({required Object when}) => 'Last sync: ${when}',
+			'cloudSync.neverSynced' => 'Will sync automatically',
+			'cloudSync.errorPermission' => 'You no longer have access to a congregation; your local data is kept.',
+			'cloudSync.errorOffline' => 'Offline; will retry automatically.',
+			'cloudSync.errorUnknown' => 'Something went wrong while syncing.',
+			'cloudSync.restoring' => 'Restoring your data…',
+			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
+			'cloudSync.restoreOffline' => 'Offline. Your data will be restored when you reconnect.',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',
@@ -879,6 +1017,8 @@ extension on TranslationsEn {
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',
+			'userMenu.localProfile' => 'Local profile',
+			'userMenu.cloudAccount' => 'Cloud account',
 			'common.cancel' => 'Cancel',
 			'common.delete' => 'Delete',
 			'common.close' => 'Close',
@@ -1034,9 +1174,6 @@ extension on TranslationsEn {
 			'options.meetingLangSpanish' => 'Spanish',
 			'options.meetingLangSign' => 'Sign language',
 			'options.meetingLangEnglish' => 'English',
-			'options.accessAdmin' => 'Administrator',
-			'options.accessEditor' => 'Editor',
-			'options.accessReader' => 'Reader',
 			'days.monday' => 'Monday',
 			'days.tuesday' => 'Tuesday',
 			'days.wednesday' => 'Wednesday',
@@ -1064,6 +1201,19 @@ extension on TranslationsEn {
 			'congregation.inviteUser' => 'Invite user',
 			'congregation.empty' => 'No congregations yet.\nCreate the first one with "New congregation".',
 			'congregation.newCongregation' => 'New congregation',
+			'congregation.joinWithCode' => 'Join with a code',
+			'congregation.you' => 'you',
+			'congregation.roleAdmin' => 'Admin',
+			'congregation.roleEditor' => 'Editor',
+			'congregation.roleViewer' => 'Read-only',
+			'congregation.editAccess' => 'Change permissions',
+			'congregation.revoke' => 'Remove access',
+			'congregation.revokeTitle' => 'Remove access',
+			'congregation.revokeConfirm' => ({required Object name}) => '${name} will stop receiving changes. A new key is generated for everyone else and pending invitations are cancelled. Whatever they already downloaded stays on their device.',
+			'congregation.lastAdmin' => 'At least one person must keep administration rights.',
+			'congregation.readOnly' => 'You have read-only access to this congregation.',
+			'congregation.membersError' => 'Could not load the member list.',
+			'congregation.pendingLabel' => 'Pending invitations',
 			'newCongregation.title' => 'New congregation',
 			'newCongregation.desc' => 'You will be its administrator. You can invite users afterwards.',
 			'newCongregation.create' => 'Create congregation',
@@ -1071,12 +1221,40 @@ extension on TranslationsEn {
 			'newCongregation.nameHint' => 'e.g. Northern Gardens',
 			'newCongregation.number' => 'Number',
 			'newCongregation.numberHint' => 'e.g. 152423',
-			'invite.title' => 'Invite user',
-			'invite.desc' => 'They will receive an email invitation to access this congregation.',
-			'invite.send' => 'Send invitation',
-			'invite.email' => 'Email',
-			'invite.emailHint' => 'name@email.com',
-			'invite.role' => 'Role',
+			'invite.title' => 'Invite to the congregation',
+			'invite.desc' => 'Generate a code and share it over a private channel. It works once.',
+			'invite.create' => 'Create code',
+			'invite.capabilities' => 'Permissions',
+			'invite.capabilitiesDesc' => 'What the person using this code will be able to do.',
+			'invite.capAdmin' => 'Administer',
+			'invite.capAdminDesc' => 'Members, invitations and congregation details.',
+			'invite.capPeople' => 'Participants',
+			'invite.capPeopleDesc' => 'Edit the people directory.',
+			'invite.capPrograms' => 'Programs',
+			'invite.capProgramsDesc' => 'Create and edit projects and assignments.',
+			'invite.codeTitle' => 'Invitation code',
+			'invite.codeDesc' => 'Valid for 7 days and single-use. Whoever holds it can read this congregation\'s data, so share it over a private channel only.',
+			'invite.copy' => 'Copy',
+			'invite.copied' => 'Code copied',
+			'invite.share' => 'Share',
+			'invite.done' => 'Done',
+			'invite.pending' => 'Pending invitations',
+			'invite.expiresOn' => ({required Object date}) => 'Expires on ${date}',
+			'invite.expired' => 'Expired',
+			'invite.cancel' => 'Cancel invitation',
+			'invite.joinTitle' => 'Join with a code',
+			'invite.joinDesc' => 'Paste the code you were given.',
+			'invite.codeLabel' => 'Code',
+			'invite.codeHint' => 'agora-inv:1:…',
+			'invite.join' => 'Join',
+			'invite.joined' => 'You joined the congregation.',
+			'invite.errorInvalid' => 'That code is not valid. Copy it whole, without cutting it.',
+			'invite.errorMissing' => 'This invitation no longer exists — someone may have used it.',
+			'invite.errorExpired' => 'This invitation has expired. Ask for a new one.',
+			'invite.errorAlreadyMember' => 'You already belong to this congregation.',
+			'invite.errorKeys' => 'The sync keys are not available on this device.',
+			'invite.errorUnknown' => 'Could not complete. Please try again.',
+			'invite.paste' => 'Paste',
 			'picker.assign' => 'Assign',
 			'picker.recent' => 'Recent',
 			'picker.all' => 'All',
@@ -1093,12 +1271,18 @@ extension on TranslationsEn {
 			'preview.fitPage' => 'Fit whole page',
 			'preview.fitWidth' => 'Fit to width',
 			'export.export' => 'Export',
-			'export.exportPdf' => 'Export PDF',
-			'export.success' => ({required Object path}) => 'PDF exported: ${path}',
-			'export.shared' => 'PDF shared',
+			'export.exportPdf' => 'Export',
+			'export.success' => ({required Object path}) => 'Saved to: ${path}',
+			'export.shared' => 'File shared',
 			'export.error' => ({required Object error}) => 'Export error: ${error}',
+			'export.formatPdf' => 'PDF',
+			'export.formatImage' => 'Image',
+			'export.saveAction' => 'Save',
+			'export.shareAction' => 'Share',
 			'export.currentWeek' => 'Current week',
-			'export.currentWeekSub' => 'A single PDF sheet',
+			'export.currentWeekSub' => 'One week',
+			'export.currentSheet' => 'Current sheet',
+			'export.currentSheetSub' => 'Two weeks on one sheet',
 			'export.fullProject' => 'Full project',
 			'export.fullProjectSub' => 'All weeks in one PDF',
 			'export.sheets' => 'Assignment slips',
@@ -1109,6 +1293,8 @@ extension on TranslationsEn {
 			'projectBar.weekShort' => ({required Object n}) => 'Wk ${n}',
 			'projectBar.auxRoom' => 'Auxiliary classroom',
 			'projectBar.auxRoomDesc' => 'Second classroom for students',
+			'projectBar.twoPerSheet' => 'Two per sheet',
+			'projectBar.twoPerSheetDesc' => 'Two weeks on the same sheet',
 			'projectBar.circuitOverseer' => 'Circuit overseer visit',
 			'projectBar.circuitOverseerDesc' => 'Replaces the Bible study with a talk',
 			'workspace.sectionOpening' => 'Opening',

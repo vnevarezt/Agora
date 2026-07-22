@@ -47,6 +47,10 @@ app.*.map.json
 # Firebase / cloud auth — NEVER commit real config (see docs/FIREBASE_SETUP.md).
 # Only the .example templates belong in the repo; each developer generates
 # their own config with `flutterfire configure` (see tool/bootstrap.sh).
+# EXCEPTION: firestore.rules / firestore.indexes.json ARE committed (they are
+# not secret; they are the deployed security model). firebase.json is
+# gitignored because flutterfire regenerates it with per-dev app ids —
+# bootstrap.sh merges the committed firebase.json.example (rules + emulators).
 lib/firebase_options.dart
 lib/cloud_secrets.dart
 **/google-services.json
@@ -55,3 +59,6 @@ firebase.json
 .firebaserc
 ios/Flutter/FirebaseSecrets.xcconfig
 macos/Runner/Configs/FirebaseSecrets.xcconfig
+
+# Firestore rules test harness (Node) — committed source only, not deps.
+tool/rules-test/node_modules/

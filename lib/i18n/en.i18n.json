@@ -39,7 +39,15 @@
       "unlocking": "Decrypting…",
       "wrongPassword": "Wrong password.",
       "startOver": "Starting over?",
-      "createAnother": "Create another profile"
+      "createAnother": "Create another profile",
+      "deviceUnlockButton": "Use device unlock"
+    },
+    "cloudLock": {
+      "title": "Session locked",
+      "caption": "Confirm your identity to continue.",
+      "unlock": "Unlock",
+      "signOutQuestion": "Not you?",
+      "signOut": "Sign out"
     },
     "cloud": {
       "pill": "Cloud mode",
@@ -93,7 +101,33 @@
     "changed": "Password updated.",
     "lockNow": "Lock now",
     "lockNowDesc": "Closes the local session; the password will be required again.",
-    "lock": "Lock"
+    "lockNowDescCloud": "Locks the app; device unlock will be required to come back.",
+    "lock": "Lock",
+    "descCloud": "Protects access to the app on this device.",
+    "deviceUnlock": "Device unlock",
+    "deviceUnlockDesc": "Sign in with Touch ID, Face ID, fingerprint or the device passcode instead of your password.",
+    "deviceUnlockDescCloud": "Asks for Touch ID, Face ID, fingerprint or the device passcode every time you open the app.",
+    "deviceUnlockPrompt": "Confirm your identity to enable device unlock.",
+    "unlockPrompt": "Unlock your Agora data.",
+    "deviceUnlockKeyMissing": "Device unlock was turned off; sign in with your password and enable it again."
+  },
+  "cloudSync": {
+    "title": "Cloud sync",
+    "desc": "Your data is stored encrypted and restores itself when you sign in on any of your devices.",
+    "signedOut": "Sign in to the cloud to enable syncing.",
+    "unknownError": "Couldn't complete. Please try again.",
+    "ready": "Sync is on",
+    "statusSyncing": "Syncing…",
+    "statusOffline": "Offline",
+    "statusError": "Sync error",
+    "lastSync": "Last sync: {when}",
+    "neverSynced": "Will sync automatically",
+    "errorPermission": "You no longer have access to a congregation; your local data is kept.",
+    "errorOffline": "Offline; will retry automatically.",
+    "errorUnknown": "Something went wrong while syncing.",
+    "restoring": "Restoring your data…",
+    "restoringProgress": "{done} of {total} congregations",
+    "restoreOffline": "Offline. Your data will be restored when you reconnect."
   },
   "account": {
     "title": "Cloud account",
@@ -125,6 +159,10 @@
     "home": "Home",
     "participants": "Participants",
     "settings": "Settings"
+  },
+  "userMenu": {
+    "localProfile": "Local profile",
+    "cloudAccount": "Cloud account"
   },
   "common": {
     "cancel": "Cancel",
@@ -313,10 +351,7 @@
     "pdfNameFirstOnly": "First name only",
     "meetingLangSpanish": "Spanish",
     "meetingLangSign": "Sign language",
-    "meetingLangEnglish": "English",
-    "accessAdmin": "Administrator",
-    "accessEditor": "Editor",
-    "accessReader": "Reader"
+    "meetingLangEnglish": "English"
   },
   "days": {
     "monday": "Monday",
@@ -347,7 +382,20 @@
     "noUsers": "No invited users yet.",
     "inviteUser": "Invite user",
     "empty": "No congregations yet.\nCreate the first one with \"New congregation\".",
-    "newCongregation": "New congregation"
+    "newCongregation": "New congregation",
+    "joinWithCode": "Join with a code",
+    "you": "you",
+    "roleAdmin": "Admin",
+    "roleEditor": "Editor",
+    "roleViewer": "Read-only",
+    "editAccess": "Change permissions",
+    "revoke": "Remove access",
+    "revokeTitle": "Remove access",
+    "revokeConfirm": "{name} will stop receiving changes. A new key is generated for everyone else and pending invitations are cancelled. Whatever they already downloaded stays on their device.",
+    "lastAdmin": "At least one person must keep administration rights.",
+    "readOnly": "You have read-only access to this congregation.",
+    "membersError": "Could not load the member list.",
+    "pendingLabel": "Pending invitations"
   },
   "newCongregation": {
     "title": "New congregation",
@@ -359,12 +407,40 @@
     "numberHint": "e.g. 152423"
   },
   "invite": {
-    "title": "Invite user",
-    "desc": "They will receive an email invitation to access this congregation.",
-    "send": "Send invitation",
-    "email": "Email",
-    "emailHint": "name@email.com",
-    "role": "Role"
+    "title": "Invite to the congregation",
+    "desc": "Generate a code and share it over a private channel. It works once.",
+    "create": "Create code",
+    "capabilities": "Permissions",
+    "capabilitiesDesc": "What the person using this code will be able to do.",
+    "capAdmin": "Administer",
+    "capAdminDesc": "Members, invitations and congregation details.",
+    "capPeople": "Participants",
+    "capPeopleDesc": "Edit the people directory.",
+    "capPrograms": "Programs",
+    "capProgramsDesc": "Create and edit projects and assignments.",
+    "codeTitle": "Invitation code",
+    "codeDesc": "Valid for 7 days and single-use. Whoever holds it can read this congregation's data, so share it over a private channel only.",
+    "copy": "Copy",
+    "copied": "Code copied",
+    "share": "Share",
+    "done": "Done",
+    "pending": "Pending invitations",
+    "expiresOn": "Expires on {date}",
+    "expired": "Expired",
+    "cancel": "Cancel invitation",
+    "joinTitle": "Join with a code",
+    "joinDesc": "Paste the code you were given.",
+    "codeLabel": "Code",
+    "codeHint": "agora-inv:1:…",
+    "join": "Join",
+    "joined": "You joined the congregation.",
+    "errorInvalid": "That code is not valid. Copy it whole, without cutting it.",
+    "errorMissing": "This invitation no longer exists — someone may have used it.",
+    "errorExpired": "This invitation has expired. Ask for a new one.",
+    "errorAlreadyMember": "You already belong to this congregation.",
+    "errorKeys": "The sync keys are not available on this device.",
+    "errorUnknown": "Could not complete. Please try again.",
+    "paste": "Paste"
   },
   "picker": {
     "assign": "Assign",
@@ -387,12 +463,18 @@
   },
   "export": {
     "export": "Export",
-    "exportPdf": "Export PDF",
-    "success": "PDF exported: {path}",
-    "shared": "PDF shared",
+    "exportPdf": "Export",
+    "success": "Saved to: {path}",
+    "shared": "File shared",
     "error": "Export error: {error}",
+    "formatPdf": "PDF",
+    "formatImage": "Image",
+    "saveAction": "Save",
+    "shareAction": "Share",
     "currentWeek": "Current week",
-    "currentWeekSub": "A single PDF sheet",
+    "currentWeekSub": "One week",
+    "currentSheet": "Current sheet",
+    "currentSheetSub": "Two weeks on one sheet",
     "fullProject": "Full project",
     "fullProjectSub": "All weeks in one PDF",
     "sheets": "Assignment slips",
@@ -408,6 +490,8 @@
     "weekShort": "Wk {n}",
     "auxRoom": "Auxiliary classroom",
     "auxRoomDesc": "Second classroom for students",
+    "twoPerSheet": "Two per sheet",
+    "twoPerSheetDesc": "Two weeks on the same sheet",
     "circuitOverseer": "Circuit overseer visit",
     "circuitOverseerDesc": "Replaces the Bible study with a talk"
   },

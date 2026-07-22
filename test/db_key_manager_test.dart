@@ -145,11 +145,39 @@ void main() {
   test('destroyAll removes every key', () async {
     final store = MapKeyStore();
     final m = manager(store);
-    await m.createAccount('pw');
+    final dek = await m.createAccount('pw');
     await m.getOrCreateCloudKeyHex();
+    await m.enableDeviceUnlock(dek);
     store.data[DbKeyManager.legacyKeyName] = 'ef' * 32;
     await m.destroyAll();
     expect(store.data, isEmpty);
     expect(await m.status(), LocalKeyStatus.none);
+  });
+
+  test('device unlock: enable stores the DEK, read returns it back', () async {
+    final store = MapKeyStore();
+    final m = manager(store);
+    final dek = await m.createAccount('pw');
+    expect(await m.readDeviceUnlockKey(), isNull);
+    await m.enableDeviceUnlock(dek);
+    expect(await m.readDeviceUnlockKey(), dek);
+    // The password path is untouched.
+    expect(await m.unlock('pw'), dek);
+  });
+
+  test('device unlock: disable deletes the copy, read → null', () async {
+    final store = MapKeyStore();
+    final m = manager(store);
+    final dek = await m.createAccount('pw');
+    await m.enableDeviceUnlock(dek);
+    await m.disableDeviceUnlock();
+    expect(await m.readDeviceUnlockKey(), isNull);
+    expect(store.data.containsKey(DbKeyManager.deviceUnlockKeyName), isFalse);
+  });
+
+  test('device unlock: a malformed stored value reads as null', () async {
+    final store = MapKeyStore();
+    store.data[DbKeyManager.deviceUnlockKeyName] = 'not-a-dek';
+    expect(await manager(store).readDeviceUnlockKey(), isNull);
   });
 }

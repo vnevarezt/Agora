@@ -11,6 +11,7 @@ import '../models/week_type.dart';
 import 'dashboard_provider.dart';
 import 'program_content.dart';
 import 'program_form.dart';
+import 'sync_provider.dart';
 
 /// Editor session (phase 2, docs/PHASE2_PROGRAMS_IN_DB.md): which project
 /// the editor has open. The form is hydrated ONCE from the DB on open and
@@ -48,6 +49,31 @@ final editorContentFillProvider = Provider<void>((ref) {
   if (projectId == null || notebooks.isEmpty) return;
   final service = ref.read(programContentServiceProvider);
   Future.microtask(() => service.ensureProjectContent(projectId));
+});
+
+/// Whether this user may edit what the editor currently has open.
+///
+/// Gated per PROJECT, not per slot: every program in a project shares its
+/// type today, and the slot widgets have no cheap route back to their own
+/// program record. Defaults to true while the project or its programs are
+/// still loading — the push filter and the rules are the real backstops, and
+/// a momentarily read-only editor would read as a bug.
+final canEditOpenProgramProvider = Provider<bool>((ref) {
+  final projectId = ref.watch(editorProjectProvider);
+  if (projectId == null) return true;
+  final project = ref
+      .watch(projectsProvider)
+      .where((p) => p.id == projectId)
+      .firstOrNull;
+  if (project == null) return true;
+  final rights = ref.watch(rightsProvider(project.congregationId));
+  final types = <String>{
+    for (final p in ref.watch(editorProgramsProvider).value ?? const [])
+      p.programTypeId,
+  };
+  return types.isEmpty
+      ? rights.admin || rights.editTypes.isNotEmpty
+      : types.every(rights.canEditProgram);
 });
 
 final editorOpenerProvider = Provider<EditorOpener>(EditorOpener.new);

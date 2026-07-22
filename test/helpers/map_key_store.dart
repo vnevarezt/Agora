@@ -12,6 +12,9 @@ class MapKeyStore implements SecureKeyStore {
 
   @override
   Future<void> delete(String key) async => data.remove(key);
+
+  @override
+  Future<Set<String>> keys() async => data.keys.toSet();
 }
 
 /// Cheap Argon2id cost so suites stay fast; production uses

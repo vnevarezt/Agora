@@ -15,11 +15,17 @@ import 'auth_card_layout.dart';
 import 'widgets/auth_error_text.dart';
 import 'widgets/auth_switch_line.dart';
 
-/// Local-mode unlock: existing profile header + password.
+/// Local-mode unlock: existing profile header + password, plus device unlock
+/// (Touch ID / Face ID / fingerprint) when the user enabled it.
 class UnlockScreen extends ConsumerStatefulWidget {
-  const UnlockScreen({super.key, required this.profileName});
+  const UnlockScreen({
+    super.key,
+    required this.profileName,
+    this.deviceUnlock = false,
+  });
 
   final String? profileName;
+  final bool deviceUnlock;
 
   @override
   ConsumerState<UnlockScreen> createState() => _UnlockScreenState();
@@ -30,7 +36,61 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
   bool _busy = false;
   String? _error;
 
+  /// Local copy: flips off when the key vanished mid-session (the state stays
+  /// [SessionLocalLocked], so the widget is not remounted).
+  late bool _deviceUnlockOn = widget.deviceUnlock;
+
   bool get _canSubmit => _password.isNotEmpty && !_busy;
+
+  @override
+  void initState() {
+    super.initState();
+    // Standard lock-screen UX: offer the OS prompt right away; cancelling it
+    // just leaves the password form (the button retries).
+    if (_deviceUnlockOn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _deviceAuthUnlock();
+      });
+    }
+  }
+
+  Future<void> _deviceAuthUnlock() async {
+    if (_busy) return;
+    final tr = context.t;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final ok = await ref
+          .read(authSessionProvider.notifier)
+          .unlockWithDeviceAuth(tr.security.unlockPrompt);
+      // Success unmounts this screen; cancel just re-enables the form.
+      if (!ok && mounted) setState(() => _busy = false);
+    } on DeviceUnlockKeyMissing {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _deviceUnlockOn = false;
+          _error = tr.security.deviceUnlockKeyMissing;
+        });
+      }
+    } on DbKeyException catch (e) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = e.message;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = tr.account.errors.unknown;
+        });
+      }
+    }
+  }
 
   Future<void> _unlock() async {
     final tr = context.t;
@@ -123,6 +183,17 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
             busy: _busy,
             onPressed: _canSubmit ? _unlock : null,
           ),
+          if (_deviceUnlockOn) ...[
+            const SizedBox(height: 10),
+            AppButton(
+              variant: AppButtonVariant.ghost,
+              icon: Icons.fingerprint,
+              label: tr.auth.local.deviceUnlockButton,
+              height: 46,
+              expand: true,
+              onPressed: _busy ? null : _deviceAuthUnlock,
+            ),
+          ],
           const SizedBox(height: 16),
           AuthSwitchLine(
             text: tr.auth.local.startOver,

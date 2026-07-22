@@ -102,6 +102,37 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
   img.dispose();
 }
 
+WeekEntry _entry(String date, List<String> nombres, {bool auxRoom = false}) {
+  final s = _week()..date = date;
+  final schedule = buildSchedule(s, 18 * 60, 105);
+  final principal = <String, List<String>>{};
+  final auxiliar = <String, List<String>>{};
+  var k = 0;
+  for (final f in schedule.rows) {
+    if (f.slots == 0) continue;
+    if (f.role == 'Estudiante/Ayudante:' && f.slots == 2) {
+      principal[f.id] = ['Maximiliano Vargas H', 'Concepción Navarro'];
+      if (f.auxSlots == 2) auxiliar[f.id] = ['Ernesto Salas R', 'Pablo Treviño'];
+      continue;
+    }
+    principal[f.id] = [
+      for (var i = 0; i < f.slots; i++) nombres[k++ % nombres.length]
+    ];
+    if (auxRoom && f.auxSlots > 0) {
+      auxiliar[f.id] = [
+        for (var i = 0; i < f.auxSlots; i++)
+          'Aux ${nombres[k++ % nombres.length]}'
+      ];
+    }
+  }
+  return (
+    week: s,
+    schedule: schedule,
+    assignments: Assignments(principal, auxiliar),
+    chairman: 'Rafael G',
+  );
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -111,5 +142,55 @@ void main() {
     await _dump('jw_largo.png', ['Rafael González', 'Luis Vargas', 'José M']);
     await _dump('jw_aux.png', ['Rafael González', 'Luis Vargas', 'José M'],
         auxRoom: true);
+  });
+
+  testWidgets('render dos-por-hoja (vertical apilado)', (tester) async {
+    await pdfrxFlutterInitialize();
+    final pdf = await buildProgramSheetPdf(
+      congregation: 'CONSTITUCIÓN J.A CASTRO',
+      entries: [
+        _entry('18-24 DE MAYO', ['Rafael González', 'Luis Vargas', 'José M']),
+        _entry('25-31 DE MAYO', ['Ana Ruiz', 'Pedro Salas', 'Marta L']),
+      ],
+      twoPerSheet: true,
+    );
+    final doc = await PdfDocument.openData(pdf);
+    try {
+      // ONE portrait Letter sheet with both weeks stacked.
+      expect(doc.pages.length, 1);
+      final page = doc.pages.first;
+      expect(page.height, greaterThan(page.width));
+    } finally {
+      await doc.dispose();
+    }
+
+    final img = await rasterizePage(pdf, scale: 2);
+    final png = await img.toByteData(format: ui.ImageByteFormat.png);
+    final dir = await getApplicationDocumentsDirectory();
+    final out = File('${dir.path}/jw_2up.png');
+    await out.writeAsBytes(png!.buffer.asUint8List());
+    // ignore: avoid_print
+    print('WROTE_PNG ${out.path}');
+    img.dispose();
+
+    // Same sheet with the Auxiliary Room column (4-column layout).
+    final pdfAux = await buildProgramSheetPdf(
+      congregation: 'CONSTITUCIÓN J.A CASTRO',
+      entries: [
+        _entry('18-24 DE MAYO', ['Rafael González', 'Luis Vargas', 'José M'],
+            auxRoom: true),
+        _entry('25-31 DE MAYO', ['Ana Ruiz', 'Pedro Salas', 'Marta L'],
+            auxRoom: true),
+      ],
+      auxRoom: true,
+      twoPerSheet: true,
+    );
+    final imgAux = await rasterizePage(pdfAux, scale: 2);
+    final pngAux = await imgAux.toByteData(format: ui.ImageByteFormat.png);
+    final outAux = File('${dir.path}/jw_2up_aux.png');
+    await outAux.writeAsBytes(pngAux!.buffer.asUint8List());
+    // ignore: avoid_print
+    print('WROTE_PNG ${outAux.path}');
+    imgAux.dispose();
   });
 }

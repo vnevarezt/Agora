@@ -44,8 +44,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$portada$es portada = Translations$portada$es.internal(_root);
 	late final Translations$auth$es auth = Translations$auth$es.internal(_root);
 	late final Translations$security$es security = Translations$security$es.internal(_root);
+	late final Translations$cloudSync$es cloudSync = Translations$cloudSync$es.internal(_root);
 	late final Translations$account$es account = Translations$account$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
+	late final Translations$userMenu$es userMenu = Translations$userMenu$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
 	late final Translations$sync$es sync = Translations$sync$es.internal(_root);
 	late final Translations$dashboard$es dashboard = Translations$dashboard$es.internal(_root);
@@ -131,6 +133,7 @@ class Translations$auth$es {
 	String get chooseOther => 'Elegir otro modo';
 
 	late final Translations$auth$local$es local = Translations$auth$local$es.internal(_root);
+	late final Translations$auth$cloudLock$es cloudLock = Translations$auth$cloudLock$es.internal(_root);
 	late final Translations$auth$cloud$es cloud = Translations$auth$cloud$es.internal(_root);
 	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
 	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
@@ -180,8 +183,89 @@ class Translations$security$es {
 	/// es: 'Cierra la sesión local; pedirá la contraseña al volver.'
 	String get lockNowDesc => 'Cierra la sesión local; pedirá la contraseña al volver.';
 
+	/// es: 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.'
+	String get lockNowDescCloud => 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.';
+
 	/// es: 'Bloquear'
 	String get lock => 'Bloquear';
+
+	/// es: 'Protege el acceso a la app en este dispositivo.'
+	String get descCloud => 'Protege el acceso a la app en este dispositivo.';
+
+	/// es: 'Desbloqueo con el dispositivo'
+	String get deviceUnlock => 'Desbloqueo con el dispositivo';
+
+	/// es: 'Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.'
+	String get deviceUnlockDesc => 'Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.';
+
+	/// es: 'Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.'
+	String get deviceUnlockDescCloud => 'Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.';
+
+	/// es: 'Confirma tu identidad para activar el desbloqueo con el dispositivo.'
+	String get deviceUnlockPrompt => 'Confirma tu identidad para activar el desbloqueo con el dispositivo.';
+
+	/// es: 'Desbloquea tus datos de Agora.'
+	String get unlockPrompt => 'Desbloquea tus datos de Agora.';
+
+	/// es: 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.'
+	String get deviceUnlockKeyMissing => 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.';
+}
+
+// Path: cloudSync
+class Translations$cloudSync$es {
+	Translations$cloudSync$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Sincronización en la nube'
+	String get title => 'Sincronización en la nube';
+
+	/// es: 'Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.'
+	String get desc => 'Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.';
+
+	/// es: 'Inicia sesión en la nube para activar la sincronización.'
+	String get signedOut => 'Inicia sesión en la nube para activar la sincronización.';
+
+	/// es: 'No se pudo completar. Inténtalo de nuevo.'
+	String get unknownError => 'No se pudo completar. Inténtalo de nuevo.';
+
+	/// es: 'Sincronización activa'
+	String get ready => 'Sincronización activa';
+
+	/// es: 'Sincronizando…'
+	String get statusSyncing => 'Sincronizando…';
+
+	/// es: 'Sin conexión'
+	String get statusOffline => 'Sin conexión';
+
+	/// es: 'Error de sincronización'
+	String get statusError => 'Error de sincronización';
+
+	/// es: 'Última sincronización: {when}'
+	String lastSync({required Object when}) => 'Última sincronización: ${when}';
+
+	/// es: 'Se sincronizará automáticamente'
+	String get neverSynced => 'Se sincronizará automáticamente';
+
+	/// es: 'Ya no tienes acceso a una congregación; tus datos locales se conservan.'
+	String get errorPermission => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.';
+
+	/// es: 'Sin conexión; se reintentará automáticamente.'
+	String get errorOffline => 'Sin conexión; se reintentará automáticamente.';
+
+	/// es: 'Ocurrió un error al sincronizar.'
+	String get errorUnknown => 'Ocurrió un error al sincronizar.';
+
+	/// es: 'Recuperando tus datos…'
+	String get restoring => 'Recuperando tus datos…';
+
+	/// es: '{done} de {total} congregaciones'
+	String restoringProgress({required Object done, required Object total}) => '${done} de ${total} congregaciones';
+
+	/// es: 'Sin conexión. Tus datos se recuperarán al reconectar.'
+	String get restoreOffline => 'Sin conexión. Tus datos se recuperarán al reconectar.';
 }
 
 // Path: account
@@ -256,6 +340,21 @@ class Translations$nav$es {
 
 	/// es: 'Configuración'
 	String get settings => 'Configuración';
+}
+
+// Path: userMenu
+class Translations$userMenu$es {
+	Translations$userMenu$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Perfil local'
+	String get localProfile => 'Perfil local';
+
+	/// es: 'Cuenta en la nube'
+	String get cloudAccount => 'Cuenta en la nube';
 }
 
 // Path: common
@@ -822,15 +921,6 @@ class Translations$options$es {
 
 	/// es: 'English'
 	String get meetingLangEnglish => 'English';
-
-	/// es: 'Administrador'
-	String get accessAdmin => 'Administrador';
-
-	/// es: 'Editor'
-	String get accessEditor => 'Editor';
-
-	/// es: 'Lector'
-	String get accessReader => 'Lector';
 }
 
 // Path: days
@@ -930,6 +1020,45 @@ class Translations$congregation$es {
 
 	/// es: 'Nueva congregación'
 	String get newCongregation => 'Nueva congregación';
+
+	/// es: 'Unirse con un código'
+	String get joinWithCode => 'Unirse con un código';
+
+	/// es: 'tú'
+	String get you => 'tú';
+
+	/// es: 'Admin'
+	String get roleAdmin => 'Admin';
+
+	/// es: 'Editor'
+	String get roleEditor => 'Editor';
+
+	/// es: 'Lectura'
+	String get roleViewer => 'Lectura';
+
+	/// es: 'Cambiar permisos'
+	String get editAccess => 'Cambiar permisos';
+
+	/// es: 'Quitar acceso'
+	String get revoke => 'Quitar acceso';
+
+	/// es: 'Quitar acceso'
+	String get revokeTitle => 'Quitar acceso';
+
+	/// es: '{name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.'
+	String revokeConfirm({required Object name}) => '${name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.';
+
+	/// es: 'Debe quedar al menos una persona con permiso de administración.'
+	String get lastAdmin => 'Debe quedar al menos una persona con permiso de administración.';
+
+	/// es: 'Solo tienes acceso de lectura en esta congregación.'
+	String get readOnly => 'Solo tienes acceso de lectura en esta congregación.';
+
+	/// es: 'No se ha podido cargar la lista de miembros.'
+	String get membersError => 'No se ha podido cargar la lista de miembros.';
+
+	/// es: 'Invitaciones pendientes'
+	String get pendingLabel => 'Invitaciones pendientes';
 }
 
 // Path: newCongregation
@@ -970,23 +1099,107 @@ class Translations$invite$es {
 
 	// Translations
 
-	/// es: 'Invitar usuario'
-	String get title => 'Invitar usuario';
+	/// es: 'Invitar a la congregación'
+	String get title => 'Invitar a la congregación';
 
-	/// es: 'Le llegará una invitación por correo para acceder a esta congregación.'
-	String get desc => 'Le llegará una invitación por correo para acceder a esta congregación.';
+	/// es: 'Genera un código y compártelo por un canal privado. Sirve una sola vez.'
+	String get desc => 'Genera un código y compártelo por un canal privado. Sirve una sola vez.';
 
-	/// es: 'Enviar invitación'
-	String get send => 'Enviar invitación';
+	/// es: 'Crear código'
+	String get create => 'Crear código';
 
-	/// es: 'Correo electrónico'
-	String get email => 'Correo electrónico';
+	/// es: 'Permisos'
+	String get capabilities => 'Permisos';
 
-	/// es: 'nombre@correo.com'
-	String get emailHint => 'nombre@correo.com';
+	/// es: 'Lo que podrá hacer quien use el código.'
+	String get capabilitiesDesc => 'Lo que podrá hacer quien use el código.';
 
-	/// es: 'Rol'
-	String get role => 'Rol';
+	/// es: 'Administrar'
+	String get capAdmin => 'Administrar';
+
+	/// es: 'Miembros, invitaciones y datos de la congregación.'
+	String get capAdminDesc => 'Miembros, invitaciones y datos de la congregación.';
+
+	/// es: 'Participantes'
+	String get capPeople => 'Participantes';
+
+	/// es: 'Editar el directorio de personas.'
+	String get capPeopleDesc => 'Editar el directorio de personas.';
+
+	/// es: 'Programas'
+	String get capPrograms => 'Programas';
+
+	/// es: 'Crear y editar proyectos y asignaciones.'
+	String get capProgramsDesc => 'Crear y editar proyectos y asignaciones.';
+
+	/// es: 'Código de invitación'
+	String get codeTitle => 'Código de invitación';
+
+	/// es: 'Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.'
+	String get codeDesc => 'Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.';
+
+	/// es: 'Copiar'
+	String get copy => 'Copiar';
+
+	/// es: 'Código copiado'
+	String get copied => 'Código copiado';
+
+	/// es: 'Compartir'
+	String get share => 'Compartir';
+
+	/// es: 'Hecho'
+	String get done => 'Hecho';
+
+	/// es: 'Invitaciones pendientes'
+	String get pending => 'Invitaciones pendientes';
+
+	/// es: 'Caduca el {date}'
+	String expiresOn({required Object date}) => 'Caduca el ${date}';
+
+	/// es: 'Caducada'
+	String get expired => 'Caducada';
+
+	/// es: 'Cancelar invitación'
+	String get cancel => 'Cancelar invitación';
+
+	/// es: 'Unirse con un código'
+	String get joinTitle => 'Unirse con un código';
+
+	/// es: 'Pega el código que te han compartido.'
+	String get joinDesc => 'Pega el código que te han compartido.';
+
+	/// es: 'Código'
+	String get codeLabel => 'Código';
+
+	/// es: 'agora-inv:1:…'
+	String get codeHint => 'agora-inv:1:…';
+
+	/// es: 'Unirse'
+	String get join => 'Unirse';
+
+	/// es: 'Te has unido a la congregación.'
+	String get joined => 'Te has unido a la congregación.';
+
+	/// es: 'Ese código no es válido. Cópialo entero, sin cortarlo.'
+	String get errorInvalid => 'Ese código no es válido. Cópialo entero, sin cortarlo.';
+
+	/// es: 'Esta invitación ya no existe: puede que alguien la haya usado.'
+	String get errorMissing => 'Esta invitación ya no existe: puede que alguien la haya usado.';
+
+	/// es: 'Esta invitación ha caducado. Pide una nueva.'
+	String get errorExpired => 'Esta invitación ha caducado. Pide una nueva.';
+
+	/// es: 'Ya perteneces a esta congregación.'
+	String get errorAlreadyMember => 'Ya perteneces a esta congregación.';
+
+	/// es: 'Las claves de sincronización no están disponibles en este dispositivo.'
+	String get errorKeys => 'Las claves de sincronización no están disponibles en este dispositivo.';
+
+	/// es: 'No se ha podido completar. Inténtalo de nuevo.'
+	String get errorUnknown => 'No se ha podido completar. Inténtalo de nuevo.';
+
+	/// es: 'Pegar'
+	String get paste => 'Pegar';
 }
 
 // Path: picker
@@ -1063,23 +1276,41 @@ class Translations$export$es {
 	/// es: 'Exportar'
 	String get export => 'Exportar';
 
-	/// es: 'Exportar PDF'
-	String get exportPdf => 'Exportar PDF';
+	/// es: 'Exportar'
+	String get exportPdf => 'Exportar';
 
-	/// es: 'PDF exportado: {path}'
-	String success({required Object path}) => 'PDF exportado: ${path}';
+	/// es: 'Guardado en: {path}'
+	String success({required Object path}) => 'Guardado en: ${path}';
 
-	/// es: 'PDF compartido'
-	String get shared => 'PDF compartido';
+	/// es: 'Archivo compartido'
+	String get shared => 'Archivo compartido';
 
 	/// es: 'Error al exportar: {error}'
 	String error({required Object error}) => 'Error al exportar: ${error}';
 
+	/// es: 'PDF'
+	String get formatPdf => 'PDF';
+
+	/// es: 'Imagen'
+	String get formatImage => 'Imagen';
+
+	/// es: 'Guardar'
+	String get saveAction => 'Guardar';
+
+	/// es: 'Compartir'
+	String get shareAction => 'Compartir';
+
 	/// es: 'Semana actual'
 	String get currentWeek => 'Semana actual';
 
-	/// es: 'Una hoja PDF'
-	String get currentWeekSub => 'Una hoja PDF';
+	/// es: 'Una semana'
+	String get currentWeekSub => 'Una semana';
+
+	/// es: 'Hoja actual'
+	String get currentSheet => 'Hoja actual';
+
+	/// es: 'Dos semanas en una hoja'
+	String get currentSheetSub => 'Dos semanas en una hoja';
 
 	/// es: 'Proyecto completo'
 	String get fullProject => 'Proyecto completo';
@@ -1122,6 +1353,12 @@ class Translations$projectBar$es {
 
 	/// es: 'Segunda sala para estudiantes'
 	String get auxRoomDesc => 'Segunda sala para estudiantes';
+
+	/// es: 'Dos por hoja'
+	String get twoPerSheet => 'Dos por hoja';
+
+	/// es: 'Dos semanas en la misma hoja'
+	String get twoPerSheetDesc => 'Dos semanas en la misma hoja';
 
 	/// es: 'Visita del superintendente'
 	String get circuitOverseer => 'Visita del superintendente';
@@ -1314,6 +1551,33 @@ class Translations$auth$local$es {
 
 	/// es: 'Crear otro perfil'
 	String get createAnother => 'Crear otro perfil';
+
+	/// es: 'Usar desbloqueo del dispositivo'
+	String get deviceUnlockButton => 'Usar desbloqueo del dispositivo';
+}
+
+// Path: auth.cloudLock
+class Translations$auth$cloudLock$es {
+	Translations$auth$cloudLock$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Sesión bloqueada'
+	String get title => 'Sesión bloqueada';
+
+	/// es: 'Confirma tu identidad para entrar.'
+	String get caption => 'Confirma tu identidad para entrar.';
+
+	/// es: 'Desbloquear'
+	String get unlock => 'Desbloquear';
+
+	/// es: '¿No eres tú?'
+	String get signOutQuestion => '¿No eres tú?';
+
+	/// es: 'Cerrar sesión'
+	String get signOut => 'Cerrar sesión';
 }
 
 // Path: auth.cloud
@@ -1545,6 +1809,12 @@ extension on Translations {
 			'auth.local.wrongPassword' => 'Contraseña incorrecta.',
 			'auth.local.startOver' => '¿Empezar de cero?',
 			'auth.local.createAnother' => 'Crear otro perfil',
+			'auth.local.deviceUnlockButton' => 'Usar desbloqueo del dispositivo',
+			'auth.cloudLock.title' => 'Sesión bloqueada',
+			'auth.cloudLock.caption' => 'Confirma tu identidad para entrar.',
+			'auth.cloudLock.unlock' => 'Desbloquear',
+			'auth.cloudLock.signOutQuestion' => '¿No eres tú?',
+			'auth.cloudLock.signOut' => 'Cerrar sesión',
 			'auth.cloud.pill' => 'Modo nube',
 			'auth.cloud.loginTitle' => 'Inicia sesión',
 			'auth.cloud.loginSub' => 'Tus congregaciones y proyectos te esperan.',
@@ -1589,7 +1859,31 @@ extension on Translations {
 			'security.changed' => 'Contraseña actualizada.',
 			'security.lockNow' => 'Bloquear ahora',
 			'security.lockNowDesc' => 'Cierra la sesión local; pedirá la contraseña al volver.',
+			'security.lockNowDescCloud' => 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.',
 			'security.lock' => 'Bloquear',
+			'security.descCloud' => 'Protege el acceso a la app en este dispositivo.',
+			'security.deviceUnlock' => 'Desbloqueo con el dispositivo',
+			'security.deviceUnlockDesc' => 'Entra con Touch ID, Face ID, huella o el código del equipo en lugar de tu contraseña.',
+			'security.deviceUnlockDescCloud' => 'Pide Touch ID, Face ID, huella o el código del equipo cada vez que abras la app.',
+			'security.deviceUnlockPrompt' => 'Confirma tu identidad para activar el desbloqueo con el dispositivo.',
+			'security.unlockPrompt' => 'Desbloquea tus datos de Agora.',
+			'security.deviceUnlockKeyMissing' => 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.',
+			'cloudSync.title' => 'Sincronización en la nube',
+			'cloudSync.desc' => 'Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.',
+			'cloudSync.signedOut' => 'Inicia sesión en la nube para activar la sincronización.',
+			'cloudSync.unknownError' => 'No se pudo completar. Inténtalo de nuevo.',
+			'cloudSync.ready' => 'Sincronización activa',
+			'cloudSync.statusSyncing' => 'Sincronizando…',
+			'cloudSync.statusOffline' => 'Sin conexión',
+			'cloudSync.statusError' => 'Error de sincronización',
+			'cloudSync.lastSync' => ({required Object when}) => 'Última sincronización: ${when}',
+			'cloudSync.neverSynced' => 'Se sincronizará automáticamente',
+			'cloudSync.errorPermission' => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.',
+			'cloudSync.errorOffline' => 'Sin conexión; se reintentará automáticamente.',
+			'cloudSync.errorUnknown' => 'Ocurrió un error al sincronizar.',
+			'cloudSync.restoring' => 'Recuperando tus datos…',
+			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
+			'cloudSync.restoreOffline' => 'Sin conexión. Tus datos se recuperarán al reconectar.',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',
@@ -1615,6 +1909,8 @@ extension on Translations {
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',
+			'userMenu.localProfile' => 'Perfil local',
+			'userMenu.cloudAccount' => 'Cuenta en la nube',
 			'common.cancel' => 'Cancelar',
 			'common.delete' => 'Eliminar',
 			'common.close' => 'Cerrar',
@@ -1770,9 +2066,6 @@ extension on Translations {
 			'options.meetingLangSpanish' => 'Español',
 			'options.meetingLangSign' => 'Lengua de señas',
 			'options.meetingLangEnglish' => 'English',
-			'options.accessAdmin' => 'Administrador',
-			'options.accessEditor' => 'Editor',
-			'options.accessReader' => 'Lector',
 			'days.monday' => 'Lunes',
 			'days.tuesday' => 'Martes',
 			'days.wednesday' => 'Miércoles',
@@ -1800,6 +2093,19 @@ extension on Translations {
 			'congregation.inviteUser' => 'Invitar usuario',
 			'congregation.empty' => 'Aún no hay congregaciones.\nCrea la primera con "Nueva congregación".',
 			'congregation.newCongregation' => 'Nueva congregación',
+			'congregation.joinWithCode' => 'Unirse con un código',
+			'congregation.you' => 'tú',
+			'congregation.roleAdmin' => 'Admin',
+			'congregation.roleEditor' => 'Editor',
+			'congregation.roleViewer' => 'Lectura',
+			'congregation.editAccess' => 'Cambiar permisos',
+			'congregation.revoke' => 'Quitar acceso',
+			'congregation.revokeTitle' => 'Quitar acceso',
+			'congregation.revokeConfirm' => ({required Object name}) => '${name} dejará de recibir cambios. Se generará una clave nueva para el resto y las invitaciones pendientes se cancelarán. Lo que ya tenga descargado seguirá en su dispositivo.',
+			'congregation.lastAdmin' => 'Debe quedar al menos una persona con permiso de administración.',
+			'congregation.readOnly' => 'Solo tienes acceso de lectura en esta congregación.',
+			'congregation.membersError' => 'No se ha podido cargar la lista de miembros.',
+			'congregation.pendingLabel' => 'Invitaciones pendientes',
 			'newCongregation.title' => 'Nueva congregación',
 			'newCongregation.desc' => 'Serás su administrador. Después podrás invitar usuarios.',
 			'newCongregation.create' => 'Crear congregación',
@@ -1807,12 +2113,40 @@ extension on Translations {
 			'newCongregation.nameHint' => 'Ej. Jardines del Norte',
 			'newCongregation.number' => 'Número',
 			'newCongregation.numberHint' => 'Ej. 152423',
-			'invite.title' => 'Invitar usuario',
-			'invite.desc' => 'Le llegará una invitación por correo para acceder a esta congregación.',
-			'invite.send' => 'Enviar invitación',
-			'invite.email' => 'Correo electrónico',
-			'invite.emailHint' => 'nombre@correo.com',
-			'invite.role' => 'Rol',
+			'invite.title' => 'Invitar a la congregación',
+			'invite.desc' => 'Genera un código y compártelo por un canal privado. Sirve una sola vez.',
+			'invite.create' => 'Crear código',
+			'invite.capabilities' => 'Permisos',
+			'invite.capabilitiesDesc' => 'Lo que podrá hacer quien use el código.',
+			'invite.capAdmin' => 'Administrar',
+			'invite.capAdminDesc' => 'Miembros, invitaciones y datos de la congregación.',
+			'invite.capPeople' => 'Participantes',
+			'invite.capPeopleDesc' => 'Editar el directorio de personas.',
+			'invite.capPrograms' => 'Programas',
+			'invite.capProgramsDesc' => 'Crear y editar proyectos y asignaciones.',
+			'invite.codeTitle' => 'Código de invitación',
+			'invite.codeDesc' => 'Válido durante 7 días y de un solo uso. Quien lo tenga podrá leer los datos de la congregación: compártelo solo por un canal privado.',
+			'invite.copy' => 'Copiar',
+			'invite.copied' => 'Código copiado',
+			'invite.share' => 'Compartir',
+			'invite.done' => 'Hecho',
+			'invite.pending' => 'Invitaciones pendientes',
+			'invite.expiresOn' => ({required Object date}) => 'Caduca el ${date}',
+			'invite.expired' => 'Caducada',
+			'invite.cancel' => 'Cancelar invitación',
+			'invite.joinTitle' => 'Unirse con un código',
+			'invite.joinDesc' => 'Pega el código que te han compartido.',
+			'invite.codeLabel' => 'Código',
+			'invite.codeHint' => 'agora-inv:1:…',
+			'invite.join' => 'Unirse',
+			'invite.joined' => 'Te has unido a la congregación.',
+			'invite.errorInvalid' => 'Ese código no es válido. Cópialo entero, sin cortarlo.',
+			'invite.errorMissing' => 'Esta invitación ya no existe: puede que alguien la haya usado.',
+			'invite.errorExpired' => 'Esta invitación ha caducado. Pide una nueva.',
+			'invite.errorAlreadyMember' => 'Ya perteneces a esta congregación.',
+			'invite.errorKeys' => 'Las claves de sincronización no están disponibles en este dispositivo.',
+			'invite.errorUnknown' => 'No se ha podido completar. Inténtalo de nuevo.',
+			'invite.paste' => 'Pegar',
 			'picker.assign' => 'Asignar',
 			'picker.recent' => 'Recientes',
 			'picker.all' => 'Todos',
@@ -1829,12 +2163,18 @@ extension on Translations {
 			'preview.fitPage' => 'Ver hoja completa',
 			'preview.fitWidth' => 'Ajustar al ancho',
 			'export.export' => 'Exportar',
-			'export.exportPdf' => 'Exportar PDF',
-			'export.success' => ({required Object path}) => 'PDF exportado: ${path}',
-			'export.shared' => 'PDF compartido',
+			'export.exportPdf' => 'Exportar',
+			'export.success' => ({required Object path}) => 'Guardado en: ${path}',
+			'export.shared' => 'Archivo compartido',
 			'export.error' => ({required Object error}) => 'Error al exportar: ${error}',
+			'export.formatPdf' => 'PDF',
+			'export.formatImage' => 'Imagen',
+			'export.saveAction' => 'Guardar',
+			'export.shareAction' => 'Compartir',
 			'export.currentWeek' => 'Semana actual',
-			'export.currentWeekSub' => 'Una hoja PDF',
+			'export.currentWeekSub' => 'Una semana',
+			'export.currentSheet' => 'Hoja actual',
+			'export.currentSheetSub' => 'Dos semanas en una hoja',
 			'export.fullProject' => 'Proyecto completo',
 			'export.fullProjectSub' => 'Todas las semanas en un PDF',
 			'export.sheets' => 'Hojas de participación',
@@ -1845,6 +2185,8 @@ extension on Translations {
 			'projectBar.weekShort' => ({required Object n}) => 'Sem ${n}',
 			'projectBar.auxRoom' => 'Sala auxiliar',
 			'projectBar.auxRoomDesc' => 'Segunda sala para estudiantes',
+			'projectBar.twoPerSheet' => 'Dos por hoja',
+			'projectBar.twoPerSheetDesc' => 'Dos semanas en la misma hoja',
 			'projectBar.circuitOverseer' => 'Visita del superintendente',
 			'projectBar.circuitOverseerDesc' => 'Reemplaza el estudio bíblico por un discurso',
 			'workspace.sectionOpening' => 'Apertura',
