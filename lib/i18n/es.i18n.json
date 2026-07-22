@@ -124,7 +124,10 @@
     "neverSynced": "Se sincronizará automáticamente",
     "errorPermission": "Ya no tienes acceso a una congregación; tus datos locales se conservan.",
     "errorOffline": "Sin conexión; se reintentará automáticamente.",
-    "errorUnknown": "Ocurrió un error al sincronizar."
+    "errorUnknown": "Ocurrió un error al sincronizar.",
+    "restoring": "Recuperando tus datos…",
+    "restoringProgress": "{done} de {total} congregaciones",
+    "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar."
   },
   "account": {
     "title": "Cuenta en la nube",

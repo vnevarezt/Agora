@@ -8,6 +8,7 @@ import '../../models/project.dart';
 import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
+import '../../state/restore_provider.dart';
 import '../../state/sync_controller.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
@@ -15,8 +16,10 @@ import '../shell/program_shell.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_spinner.dart';
 import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
+import '../widgets/motion.dart';
 import 'continue_card.dart';
 import 'new_project_card.dart';
 import 'project_card.dart';
@@ -45,15 +48,47 @@ class DashboardView extends ConsumerWidget {
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(pad, 16, pad, 120),
             child: Consumer(builder: (context, ref, _) {
-              if (ref.watch(dashboardLoadingProvider)) {
-                return _DashboardSkeleton(
-                    stacked: size != ScreenSize.desktop);
-              }
+              final stacked = size != ScreenSize.desktop;
+              final restore = ref.watch(initialRestoreProvider);
+              final phase = ref.watch(syncControllerProvider).phase;
+              // Offline/error stall the restore: show the real (empty)
+              // dashboard with the banner explaining it, never a forever
+              // skeleton.
+              final stalled =
+                  phase == SyncPhase.offline || phase == SyncPhase.error;
+              final showSkeleton = ref.watch(dashboardLoadingProvider) ||
+                  (restore != null &&
+                      ref.watch(congregationsProvider).isEmpty &&
+                      !stalled);
+
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const _HeroSection(),
-                  _HomeGrid(stacked: size != ScreenSize.desktop),
+                  FadeThroughSwitcher(
+                    child: restore == null
+                        ? const SizedBox(
+                            key: ValueKey('no-restore'),
+                            width: double.infinity)
+                        : Padding(
+                            key: const ValueKey('restore'),
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _RestoreBanner(
+                                restore: restore, phase: phase),
+                          ),
+                  ),
+                  FadeThroughSwitcher(
+                    child: showSkeleton
+                        ? _DashboardSkeleton(
+                            key: const ValueKey('skeleton'), stacked: stacked)
+                        : Column(
+                            key: const ValueKey('content'),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _HeroSection(),
+                              _HomeGrid(stacked: stacked),
+                            ],
+                          ),
+                  ),
                 ],
               );
             }),
@@ -303,6 +338,67 @@ class _CloudSyncIndicator extends ConsumerWidget {
           ),
           child: Icon(shown.$1, size: 17, color: shown.$2),
         ),
+      ),
+    );
+  }
+}
+
+/// First-time restore banner on a freshly signed-in device: tells the user
+/// their data is on its way while the pull runs, so an empty screen never
+/// reads as "nothing is here". Rendered only while [initialRestoreProvider]
+/// is non-null.
+class _RestoreBanner extends StatelessWidget {
+  const _RestoreBanner({required this.restore, required this.phase});
+
+  final InitialRestore restore;
+  final SyncPhase phase;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final tr = context.t;
+    const amber = Color(0xFFB9890F);
+
+    final (Widget leading, String label) = switch (phase) {
+      SyncPhase.offline => (
+          const Icon(Icons.cloud_off_rounded, size: 17, color: amber),
+          tr.cloudSync.restoreOffline,
+        ),
+      SyncPhase.error => (
+          const Icon(Icons.error_outline_rounded, size: 17, color: amber),
+          tr.cloudSync.errorUnknown,
+        ),
+      _ => (
+          const AppSpinner(size: 16),
+          restore.total > 1
+              ? '${tr.cloudSync.restoring} · '
+                  '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
+              : tr.cloudSync.restoring,
+        ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: t.surface,
+        borderRadius: BorderRadius.circular(Dimens.rControl),
+        border: Border.all(color: t.border),
+      ),
+      child: Row(
+        children: [
+          leading,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: t.text,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -561,7 +657,7 @@ class _RemindersSection extends ConsumerWidget {
 /// with mock data inside a [Skeletonizer], so the placeholders can never
 /// drift from the actual layout.
 class _DashboardSkeleton extends StatelessWidget {
-  const _DashboardSkeleton({required this.stacked});
+  const _DashboardSkeleton({super.key, required this.stacked});
 
   final bool stacked;
 

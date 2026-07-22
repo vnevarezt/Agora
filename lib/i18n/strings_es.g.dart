@@ -257,6 +257,15 @@ class Translations$cloudSync$es {
 
 	/// es: 'Ocurrió un error al sincronizar.'
 	String get errorUnknown => 'Ocurrió un error al sincronizar.';
+
+	/// es: 'Recuperando tus datos…'
+	String get restoring => 'Recuperando tus datos…';
+
+	/// es: '{done} de {total} congregaciones'
+	String restoringProgress({required Object done, required Object total}) => '${done} de ${total} congregaciones';
+
+	/// es: 'Sin conexión. Tus datos se recuperarán al reconectar.'
+	String get restoreOffline => 'Sin conexión. Tus datos se recuperarán al reconectar.';
 }
 
 // Path: account
@@ -1848,6 +1857,9 @@ extension on Translations {
 			'cloudSync.errorPermission' => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.',
 			'cloudSync.errorOffline' => 'Sin conexión; se reintentará automáticamente.',
 			'cloudSync.errorUnknown' => 'Ocurrió un error al sincronizar.',
+			'cloudSync.restoring' => 'Recuperando tus datos…',
+			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
+			'cloudSync.restoreOffline' => 'Sin conexión. Tus datos se recuperarán al reconectar.',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',

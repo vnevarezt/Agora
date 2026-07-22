@@ -124,7 +124,10 @@
     "neverSynced": "Will sync automatically",
     "errorPermission": "You no longer have access to a congregation; your local data is kept.",
     "errorOffline": "Offline; will retry automatically.",
-    "errorUnknown": "Something went wrong while syncing."
+    "errorUnknown": "Something went wrong while syncing.",
+    "restoring": "Restoring your data…",
+    "restoringProgress": "{done} of {total} congregations",
+    "restoreOffline": "Offline. Your data will be restored when you reconnect."
   },
   "account": {
     "title": "Cloud account",

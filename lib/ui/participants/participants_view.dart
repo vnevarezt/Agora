@@ -6,6 +6,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/person.dart';
 import '../../state/people_provider.dart';
+import '../../state/restore_provider.dart';
+import '../../state/sync_controller.dart';
 import '../responsive.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -195,8 +197,16 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   }
 
   Widget _result(BuildContext context) {
-    if (ref.watch(peopleLoadingProvider)) return _skeleton();
     final all = ref.watch(peopleProvider);
+    final restore = ref.watch(initialRestoreProvider);
+    final phase = ref.watch(syncControllerProvider).phase;
+    final stalled = phase == SyncPhase.offline || phase == SyncPhase.error;
+    // A fresh device restoring its data reads its empty local table as "no
+    // people"; keep the skeleton until the pull lands (unless it stalled).
+    if (ref.watch(peopleLoadingProvider) ||
+        (restore != null && all.isEmpty && !stalled)) {
+      return _skeleton();
+    }
     final filtered = filterPeople(
       all,
       query: _query,

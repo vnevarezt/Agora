@@ -53,10 +53,16 @@ void main() {
         PullUrgency.lazy);
   });
 
-  test('null cursor treats every scope as newer', () {
+  test('null cursor: a never-pulled congregation restores immediately', () {
     expect(decide(scopes: {'p1': '1'}, openProjectId: 'p1'),
         PullUrgency.immediate);
-    expect(decide(scopes: {'p2': '1'}), PullUrgency.lazy);
+    // Even for off-screen scopes — a fresh device is 100% out of date, so
+    // there is nothing to gain by deferring the first pull.
+    expect(decide(scopes: {'p2': '1'}), PullUrgency.immediate);
+  });
+
+  test('own-device heartbeat never pulls, even with a null cursor', () {
+    expect(decide(scopes: {'p1': '1'}, fromOwnDevice: true), PullUrgency.none);
   });
 
   test('missing heartbeat doc: first-ever sync pulls, an already-synced '

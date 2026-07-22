@@ -165,6 +165,9 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get errorPermission => 'You no longer have access to a congregation; your local data is kept.';
 	@override String get errorOffline => 'Offline; will retry automatically.';
 	@override String get errorUnknown => 'Something went wrong while syncing.';
+	@override String get restoring => 'Restoring your data…';
+	@override String restoringProgress({required Object done, required Object total}) => '${done} of ${total} congregations';
+	@override String get restoreOffline => 'Offline. Your data will be restored when you reconnect.';
 }
 
 // Path: account
@@ -978,6 +981,9 @@ extension on TranslationsEn {
 			'cloudSync.errorPermission' => 'You no longer have access to a congregation; your local data is kept.',
 			'cloudSync.errorOffline' => 'Offline; will retry automatically.',
 			'cloudSync.errorUnknown' => 'Something went wrong while syncing.',
+			'cloudSync.restoring' => 'Restoring your data…',
+			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
+			'cloudSync.restoreOffline' => 'Offline. Your data will be restored when you reconnect.',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',

@@ -33,10 +33,14 @@ PullUrgency decidePull({
     return cursor == null ? PullUrgency.immediate : PullUrgency.none;
   }
   if (fromOwnDevice) return PullUrgency.none;
+  // Never pulled this congregation: it is 100% out of date, "what's on screen"
+  // included, so deferring saves no useful reads. This is the initial-restore
+  // path on a fresh device — pull now instead of trickling in minutes later.
+  if (cursor == null) return PullUrgency.immediate;
 
   final newer = [
     for (final MapEntry(key: scope, value: ts) in scopes.entries)
-      if (cursor == null || ts.compareTo(cursor) > 0) scope,
+      if (ts.compareTo(cursor) > 0) scope,
   ];
   if (newer.isEmpty) return PullUrgency.none;
   if (openProjectId != null && newer.contains(openProjectId)) {
