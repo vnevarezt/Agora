@@ -248,6 +248,29 @@ void main() {
     expect(await admin.cck.reconcileKeyrings('c1'), 0);
   });
 
+  test('refreshIfStale pulls a rotated key once, then short-circuits',
+      () async {
+    // Bob joins on his own device: his cache holds v1 only.
+    final code = await admin.cck.createInvite('c1', capabilities: _viewer);
+    final bob = await join(code, 'bob');
+    expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1});
+
+    // Another device (the admin) rotates: bob's member doc gains v2, but his
+    // LOCAL cache is still v1 — exactly the window that made him keep pushing
+    // with the old key.
+    await admin.cck.rotateAndRevoke('c1');
+    expect(docs.congregations['c1']!['keyVersion'], 2);
+
+    final before = docs.memberReads;
+    await bob.cck.refreshIfStale('c1', 2); // stale hint → one read, refreshes
+    expect(docs.memberReads, before + 1);
+    expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1, 2});
+
+    final after = docs.memberReads;
+    await bob.cck.refreshIfStale('c1', 2); // cache already covers 2 → no read
+    expect(docs.memberReads, after);
+  });
+
   test('capabilities can be changed without rotating', () async {
     // Downgrading keeps the keyring: the rules stop their writes, and
     // history they already hold is not a secret we can take back.

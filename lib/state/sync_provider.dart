@@ -85,9 +85,9 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
     ContentCrypto(),
     deviceId: deviceId(),
     keyringFor: cck.keyringFor,
-    // Read at push time, not captured: capabilities can be downgraded
-    // mid-session and the outbox must respect the change immediately.
-    capabilitiesFor: (cid) async => ref.read(myCapabilitiesProvider(cid)),
+    // Read at push time, not captured: capabilities can be downgraded (or
+    // revoked) mid-session and the outbox must respect the change immediately.
+    capabilitiesFor: (cid) async => ref.read(pushCapabilitiesProvider(cid)),
   );
 });
 
@@ -111,18 +111,30 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
           ]);
 });
 
-/// This user's capabilities in [congregationId] (null = not a member).
+/// What this user may PUSH in [congregationId] — the sync engine's write
+/// filter, with the three-state resolution the raw membership can't express:
 ///
-/// Do NOT gate the UI on this directly — null means two OPPOSITE things (a
-/// local-only congregation, where you have every right, and a revoked
-/// membership, where you have none). Use [rightsProvider], which resolves
-/// that with a local fact.
-final myCapabilitiesProvider = Provider.family((ref, String congregationId) {
-  final memberships = ref.watch(myMembershipsProvider).value ?? const [];
-  for (final m in memberships) {
+///  - never shared / not shared here → null ("don't filter": a local
+///    congregation has no keyring, so the engine leaves its outbox queued);
+///  - shared, membership still loading or errored → null (same "don't
+///    filter": dropping outbox rows on a stale read would lose the user's
+///    edits);
+///  - member → their capabilities;
+///  - shared before, absent now → read-only (REVOKED): [SyncEngine.pushOnce]
+///    drops the forbidden docs instead of rebounding them against the rules
+///    forever.
+///
+/// [rightsProvider] is the UI-facing view of the same resolution.
+final pushCapabilitiesProvider =
+    Provider.family<MemberCapabilities?, String>((ref, congregationId) {
+  final shared = ref.watch(sharedCongregationIdsProvider).value;
+  if (shared == null || !shared.contains(congregationId)) return null;
+  final memberships = ref.watch(myMembershipsProvider);
+  if (memberships.isLoading || memberships.hasError) return null;
+  for (final m in memberships.value ?? const []) {
     if (m.congregationId == congregationId) return m.capabilities;
   }
-  return null;
+  return const MemberCapabilities(); // revoked → read-only
 });
 
 /// Congregations this device has ever had a cloud presence for. A `syncState`
@@ -138,35 +150,18 @@ final sharedCongregationIdsProvider = StreamProvider<Set<String>>((ref) {
 });
 
 /// THE gate for every edit affordance: what this user may do in
-/// [congregationId], right now.
+/// [congregationId], right now — the UI-facing view of
+/// [pushCapabilitiesProvider]. A null there (a local congregation, or a
+/// membership not yet loaded) reads as full rights, so both stay fully
+/// editable; only a confirmed revocation drops to read-only.
 ///
-/// Three states that [myCapabilitiesProvider] alone cannot tell apart:
-///
-///  - never shared → full rights (it is your own local congregation);
-///  - shared, membership still loading → optimistically full (blocking the
-///    UI on an in-flight query would read as a bug, and the push filter plus
-///    the rules catch anything we get wrong);
-///  - shared before, not a member now → read-only (revoked).
-///
-/// Route every gate through here rather than re-deriving it: getting the
-/// first and third confused is the easy mistake, and they want opposite
+/// Route every gate through here rather than re-deriving it: confusing
+/// "never shared" with "revoked" is the easy mistake, and they want opposite
 /// answers.
 final rightsProvider =
-    Provider.family<MemberCapabilities, String>((ref, congregationId) {
-  const readOnly = MemberCapabilities();
-  final shared = ref.watch(sharedCongregationIdsProvider).value;
-  if (shared == null || !shared.contains(congregationId)) {
-    return MemberCapabilities.founder;
-  }
-  final memberships = ref.watch(myMembershipsProvider);
-  if (memberships.isLoading || memberships.hasError) {
-    return MemberCapabilities.founder;
-  }
-  for (final m in memberships.value ?? const []) {
-    if (m.congregationId == congregationId) return m.capabilities;
-  }
-  return readOnly;
-});
+    Provider.family<MemberCapabilities, String>((ref, congregationId) =>
+        ref.watch(pushCapabilitiesProvider(congregationId)) ??
+        MemberCapabilities.founder);
 
 /// The members admin screen's live list.
 ///

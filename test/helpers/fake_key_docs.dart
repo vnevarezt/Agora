@@ -44,9 +44,15 @@ class FakeKeyDocs implements KeyDocsGateway {
     users[uid]?.remove('wrappedPrivKey');
   }
 
+  /// Counts [readMemberDoc] calls — lets a test assert that a cache-covering
+  /// `refreshIfStale` short-circuits without a network read.
+  int memberReads = 0;
+
   @override
-  Future<Map<String, dynamic>?> readMemberDoc(String cid, String uid) async =>
-      members[cid]?[uid];
+  Future<Map<String, dynamic>?> readMemberDoc(String cid, String uid) async {
+    memberReads++;
+    return members[cid]?[uid];
+  }
 
   @override
   Future<int?> readCongregationKeyVersion(String cid) async =>

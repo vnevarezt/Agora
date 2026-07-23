@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/sync/firestore_transport.dart';
 import '../data/sync/pull_policy.dart';
 import '../data/sync/sync_engine.dart';
+import '../models/membership.dart';
 import 'app_settings.dart';
 import 'dashboard_provider.dart';
 import 'db_provider.dart';
@@ -106,13 +107,12 @@ class SyncController extends Notifier<SyncStatus> {
       return const SyncStatus(phase: SyncPhase.disabled);
     }
 
-    // Membership changes re-target the heartbeat listeners; opening a view
-    // flushes its deferred pulls (the lazy window exists to coalesce, not to
-    // let the user see stale data they're looking at).
-    ref.listen(myMembershipsProvider, (_, next) {
-      _attachHeartbeats({for (final m in next.value ?? []) m.congregationId});
-      _autoEnable();
-    });
+    // Membership changes re-target the heartbeat listeners, freshen keyrings
+    // after a rotation and clean up after a revocation; opening a view flushes
+    // its deferred pulls (the lazy window exists to coalesce, not to let the
+    // user see stale data they're looking at).
+    ref.listen(myMembershipsProvider,
+        (_, next) => unawaited(_onMemberships(next)));
     // A congregation created locally must reach the cloud on its own.
     ref.listen(congregationsProvider, (_, _) => _autoEnable());
     ref.listen(editorProjectProvider, (prev, next) {
@@ -199,11 +199,49 @@ class SyncController extends Notifier<SyncStatus> {
         return AppExitResponse.exit;
       },
     );
-    _attachHeartbeats({
-      for (final m in ref.read(myMembershipsProvider).value ?? [])
-        m.congregationId,
-    });
+    // Run once with the current value: `ref.listen` won't fire it, and a
+    // rotation may have landed while the app was closed.
+    unawaited(_onMemberships(ref.read(myMembershipsProvider)));
+  }
+
+  // ---- memberships: heartbeats, keyring freshness, revocation --------------
+
+  /// Reacts to a change in "my congregations". Besides re-targeting the
+  /// heartbeat listeners and auto-enabling new local congregations, it:
+  ///
+  ///  - freshens each congregation's keyring off the membership `keyVersion`
+  ///    hint, so the NEXT push after a rotation encrypts with the new CCK
+  ///    without waiting to pull a blob we can't open. Keyring only — pulls
+  ///    stay heartbeat-driven (see [_drain] for why the two must not mix);
+  ///  - forgets the cached keyrings of a congregation we shared before but no
+  ///    longer belong to (revoked), keychain hygiene. Only acted on once
+  ///    memberships have actually loaded, so a transient loading/error
+  ///    snapshot is never read as "revoked everywhere".
+  Future<void> _onMemberships(AsyncValue<List<Membership>> memberships) async {
+    final live = memberships.value ?? const <Membership>[];
+    _attachHeartbeats({for (final m in live) m.congregationId});
     _autoEnable();
+
+    final cck = ref.read(cckServiceProvider);
+    if (cck == null) return;
+    for (final m in live) {
+      try {
+        await cck.refreshIfStale(m.congregationId, m.keyVersion);
+      } catch (_) {
+        // A keychain/network hiccup here just defers the refresh to the next
+        // snapshot or the pull-side `cursorHeld` path — never fatal.
+      }
+    }
+
+    if (memberships.isLoading || memberships.hasError) return;
+    final shared = ref.read(sharedCongregationIdsProvider).value;
+    if (shared == null) return;
+    final revoked = shared.difference({for (final m in live) m.congregationId});
+    if (revoked.isNotEmpty) {
+      try {
+        await cck.forget(revoked);
+      } catch (_) {}
+    }
   }
 
   // ---- auto-enable ---------------------------------------------------------
@@ -225,9 +263,16 @@ class SyncController extends Notifier<SyncStatus> {
     final inCloud = {
       for (final m in memberships.value ?? []) m.congregationId,
     };
+    // A congregation already in `syncState` but NOT in our memberships was
+    // revoked (syncState is written only when sharing STARTS): never try to
+    // re-found its cloud space.
+    final shared = ref.read(sharedCongregationIdsProvider).value ?? const {};
     final pending = [
       for (final c in ref.read(congregationsProvider))
-        if (!inCloud.contains(c.id) && !_autoEnabled.contains(c.id)) c.id,
+        if (!inCloud.contains(c.id) &&
+            !shared.contains(c.id) &&
+            !_autoEnabled.contains(c.id))
+          c.id,
     ];
     if (pending.isEmpty) return;
 
