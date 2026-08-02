@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'motion.dart';
 
@@ -65,7 +66,7 @@ class _InkSurfaceState extends State<InkSurface> {
       animationDuration: Motion.med,
       color: base,
       elevation: lifted ? widget.hoverElevation : 0,
-      shadowColor: const Color(0x40000000),
+      shadowColor: Elevation.materialShadow,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: radius,

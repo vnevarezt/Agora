@@ -61,14 +61,7 @@ class SegmentedTabs extends StatelessWidget {
                 ? (esOscuro ? t.accentSoft : t.surface)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(Dimens.rChip),
-            boxShadow: activo && !esOscuro
-                ? const [
-                    BoxShadow(
-                        color: Color(0x1A000000),
-                        blurRadius: 2,
-                        offset: Offset(0, 1)),
-                  ]
-                : null,
+            boxShadow: activo && !esOscuro ? Elevation.control : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

@@ -23,7 +23,7 @@ class PickRemove extends PickResult {
   const PickRemove();
 }
 
-const _scrim = Color(0x47000000); // rgba(0,0,0,.28) del mock
+const _scrim = Elevation.scrim;
 
 /// Opens the picker: popover anchored to [anchorContext] on desktop/tablet,
 /// bottom sheet on mobile. Returns null if closed without choosing.
@@ -111,7 +111,7 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
           side: BorderSide(color: t.border),
         ),
         elevation: 18,
-        shadowColor: const Color(0x47000000),
+        shadowColor: Elevation.scrim,
         child: panel,
       ),
     );

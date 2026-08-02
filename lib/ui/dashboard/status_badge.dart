@@ -14,13 +14,10 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final dark = Theme.of(context).brightness == Brightness.dark;
 
     final (Color bg, Color fg, Color? border) = switch (status) {
       ProjectStatus.draft => (t.accentSoft, t.accentStrong, null),
-      ProjectStatus.complete => dark
-          ? (const Color(0xFF1E3A2A), const Color(0xFFA9D8B8), null)
-          : (const Color(0xFFDCF0E0), const Color(0xFF2E6A3E), null),
+      ProjectStatus.complete => (t.successSoft, t.success, null),
       ProjectStatus.exported => (t.surface2, t.textMute, t.border2),
     };
 

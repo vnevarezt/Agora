@@ -103,7 +103,7 @@ class _AvailabilityDot extends StatelessWidget {
       width: 9,
       height: 9,
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF4FA06A) : t.border,
+        color: active ? t.successStrong : t.border,
         shape: BoxShape.circle,
       ),
     );
@@ -116,11 +116,11 @@ class _IncompleteBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final t = context.tokens;
     return Pill(
       label: context.t.participantCard.incomplete,
-      background: dark ? const Color(0xFF3A3115) : const Color(0xFFF3ECD2),
-      foreground: dark ? const Color(0xFFD9C27A) : const Color(0xFF7A6512),
+      background: t.warningSoft,
+      foreground: t.warning,
     );
   }
 }

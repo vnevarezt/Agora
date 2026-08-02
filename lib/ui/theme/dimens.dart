@@ -33,6 +33,51 @@ abstract final class Dimens {
   static const double pickerMaxH = 460;
 }
 
+/// The complete elevation vocabulary. Surfaces are flat at rest and depth
+/// normally comes from the bg → surface → surface2 layering plus borders;
+/// these five shadows are the only exceptions, ordered by how far the surface
+/// sits off the canvas. Anything that needs a shadow uses one of them — a
+/// one-off `BoxShadow` is design drift.
+abstract final class Elevation {
+  /// Resting lift under a primary control, just enough to separate it.
+  static const List<BoxShadow> control = [
+    BoxShadow(color: Color(0x14000000), blurRadius: 2, offset: Offset(0, 1)),
+  ];
+
+  /// A control that floats over content (preview zoom, small FAB).
+  static const List<BoxShadow> raised = [
+    BoxShadow(color: Color(0x1A000000), blurRadius: 8, offset: Offset(0, 2)),
+  ];
+
+  /// Menus, dropdowns and pickers anchored to a trigger.
+  static const List<BoxShadow> popover = [
+    BoxShadow(color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 10)),
+  ];
+
+  /// Modal sheets and dialogs: a wide ambient pool plus a tighter contact
+  /// shadow, so the surface reads as lifted rather than pasted on.
+  static const List<BoxShadow> modal = [
+    BoxShadow(color: Color(0x33000000), blurRadius: 40, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 4)),
+  ];
+
+  /// The PDF page in the preview — physical paper lifted off the canvas.
+  static const List<BoxShadow> page = [
+    BoxShadow(color: Color(0x24000000), blurRadius: 30, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2)),
+  ];
+
+  /// Scrim behind an anchored panel.
+  static const Color scrim = Color(0x47000000);
+
+  /// Scrim behind a full modal, which must dim more of the app.
+  static const Color scrimStrong = Color(0x52000000);
+
+  /// For `Material.shadowColor`, which takes a single colour and derives the
+  /// blur from its own `elevation` instead of a [BoxShadow] list.
+  static const Color materialShadow = Color(0x40000000);
+}
+
 /// Identity colors for each program section (S-140 bands).
 /// `apertura` has no color in the mock.
 const Map<Section, Color> kSectionColors = {

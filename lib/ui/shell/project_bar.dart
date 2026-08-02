@@ -430,10 +430,7 @@ class _WeekMenu extends ConsumerWidget {
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: t.border),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 10)),
-        ],
+        boxShadow: Elevation.popover,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -786,10 +783,7 @@ class _ExportCard extends StatelessWidget {
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: t.border),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 10)),
-        ],
+        boxShadow: Elevation.popover,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

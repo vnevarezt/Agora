@@ -102,15 +102,7 @@ class AppButton extends StatelessWidget {
             color: enabled ? bg : bg.withValues(alpha: esPrimary ? 0.55 : 0),
             borderRadius: BorderRadius.circular(Dimens.rControl),
             border: esPrimary ? null : Border.all(color: t.border),
-            boxShadow: esPrimary && enabled
-                ? const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ]
-                : null,
+            boxShadow: esPrimary && enabled ? Elevation.control : null,
           ),
           child: Row(
             mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
@@ -182,15 +174,7 @@ class AppIconButton extends StatelessWidget {
                 : (hovered ? t.surface2 : Colors.transparent),
             borderRadius: BorderRadius.circular(Dimens.rControl),
             border: bordered || elevated ? Border.all(color: t.border) : null,
-            boxShadow: elevated
-                ? const [
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: elevated ? Elevation.raised : null,
           ),
           child: Icon(icon, size: 19, color: hovered ? t.text : t.textDim),
         );

@@ -197,15 +197,7 @@ class _PortadaButton extends StatelessWidget {
             border: primary
                 ? null
                 : Border.all(color: hovered ? t.textMute : t.border),
-            boxShadow: primary
-                ? const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ]
-                : null,
+            boxShadow: primary ? Elevation.control : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

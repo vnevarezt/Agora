@@ -227,7 +227,7 @@ class _SyncIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final tr = context.t;
-    const amber = Color(0xFFB9890F);
+    final amber = t.warningStrong;
 
     final (IconData? icon, String label, Color color, String tip) =
         switch (state) {
@@ -303,7 +303,7 @@ class _CloudSyncIndicator extends ConsumerWidget {
     final t = context.tokens;
     final tr = context.t;
     final status = ref.watch(syncControllerProvider);
-    const amber = Color(0xFFB9890F);
+    final amber = t.warningStrong;
 
     final offlinePending =
         status.phase == SyncPhase.offline && status.pendingOutbox > 0;
@@ -357,15 +357,15 @@ class _RestoreBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final tr = context.t;
-    const amber = Color(0xFFB9890F);
+    final amber = t.warningStrong;
 
     final (Widget leading, String label) = switch (phase) {
       SyncPhase.offline => (
-          const Icon(Icons.cloud_off_rounded, size: 17, color: amber),
+          Icon(Icons.cloud_off_rounded, size: 17, color: amber),
           tr.cloudSync.restoreOffline,
         ),
       SyncPhase.error => (
-          const Icon(Icons.error_outline_rounded, size: 17, color: amber),
+          Icon(Icons.error_outline_rounded, size: 17, color: amber),
           tr.cloudSync.errorUnknown,
         ),
       _ => (

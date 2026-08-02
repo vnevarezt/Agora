@@ -7,6 +7,7 @@ import '../../state/auth_session.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/sync_provider.dart';
 import '../../state/ui_state.dart';
+import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
@@ -467,10 +468,7 @@ class _UserMenu extends StatelessWidget {
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: t.border),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x26000000), blurRadius: 24, offset: Offset(0, 10)),
-        ],
+        boxShadow: Elevation.popover,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

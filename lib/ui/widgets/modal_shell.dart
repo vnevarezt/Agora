@@ -66,12 +66,7 @@ class ModalShell extends StatelessWidget {
         color: t.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: t.border),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x33000000), blurRadius: 40, offset: Offset(0, 12)),
-          BoxShadow(
-              color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 4)),
-        ],
+        boxShadow: Elevation.modal,
       ),
       clipBehavior: Clip.antiAlias,
       child: card,

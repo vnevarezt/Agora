@@ -205,22 +205,13 @@ class _WeekChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final dark = Theme.of(context).brightness == Brightness.dark;
     final complete = progress.total > 0 && progress.done >= progress.total;
     final started = !complete && progress.done > 0;
 
     final (IconData? icon, Color bg, Color fg) = complete
-        ? (
-            Icons.check_rounded,
-            dark ? const Color(0xFF1C3325) : const Color(0xFFE1F2E6),
-            dark ? const Color(0xFF7FC796) : const Color(0xFF2E7247),
-          )
+        ? (Icons.check_rounded, t.successSoft, t.success)
         : started
-            ? (
-                Icons.timelapse_rounded,
-                dark ? const Color(0xFF3A3115) : const Color(0xFFF7EED4),
-                dark ? const Color(0xFFD9C27A) : const Color(0xFF8A6E1B),
-              )
+            ? (Icons.timelapse_rounded, t.warningSoft, t.warning)
             : (null, t.surface2, t.textDim);
 
     return Container(
