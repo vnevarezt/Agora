@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
@@ -22,7 +23,7 @@ class SettingsColumns extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        if (c.maxWidth < 760) {
+        if (c.maxWidth < ContainerWidth.settingsTwoColumn) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: _conSeparacion([...left, ...right]),
@@ -63,7 +64,7 @@ class SettingsGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, c) {
         const gapX = 18.0;
-        final cols = c.maxWidth < 300 ? 1 : 2;
+        final cols = c.maxWidth < ContainerWidth.fieldPair ? 1 : 2;
         final colW = (c.maxWidth - (cols - 1) * gapX) / cols;
         return Wrap(
           spacing: gapX,

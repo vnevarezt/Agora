@@ -5,6 +5,7 @@ import '../../i18n/strings.g.dart';
 import '../../state/editor_session.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
+import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -254,7 +255,7 @@ class _Slots extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final perRow = c.maxWidth < 340 ? 1 : 2;
+        final perRow = c.maxWidth < ContainerWidth.slotPair ? 1 : 2;
         if (slots.length == 1 || perRow == 1) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

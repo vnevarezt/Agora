@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/cloud_auth.dart';
+import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -28,7 +29,7 @@ class PortadaScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final tr = context.t;
-    final wide = MediaQuery.sizeOf(context).width >= 1100;
+    final wide = context.screenSize == ScreenSize.desktop;
     // Optimistic while the probe resolves (milliseconds, masked by the
     // entrance animation); flips to the local-only layout when this install
     // can't hold a cloud session (macOS without provisioned signing).

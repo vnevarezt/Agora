@@ -5,6 +5,13 @@ import 'app_spinner.dart';
 import '../theme/tokens.dart';
 
 /// Shared hover/pressed detection for the catalog buttons.
+///
+/// The `hovered` flag the builder receives is true while the pointer is over
+/// the control OR while it is held down. Touch devices have no hover, so
+/// every control styled only on `hovered` — most of the ghost buttons, icon
+/// buttons and nav items — used to sit in its resting state with no reaction
+/// to a finger at all. The theme also disables the Material ripple
+/// (`NoSplash`), so nothing else was covering that gap.
 class Pressable extends StatefulWidget {
   const Pressable({super.key, required this.builder, this.onTap, this.tooltip});
 
@@ -38,7 +45,7 @@ class _PressableState extends State<Pressable> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
-        child: widget.builder(context, _hovered, _pressed),
+        child: widget.builder(context, _hovered || _pressed, _pressed),
       ),
     );
     if (widget.tooltip != null) {

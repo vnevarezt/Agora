@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
+import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -45,7 +46,7 @@ class ContinueCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           LayoutBuilder(builder: (context, c) {
-            final narrow = c.maxWidth < 560;
+            final narrow = c.maxWidth < ContainerWidth.continueRow;
             final ring = _ProgressRing(value: p.progress, label: '$pct%');
             final body = _body(t, tr, p);
             final cta = AppButton(
