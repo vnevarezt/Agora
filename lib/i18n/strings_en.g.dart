@@ -192,6 +192,16 @@ class _Translations$account$en extends Translations$account$es {
 	@override String get signedInAs => 'Signed in';
 	@override String get signOut => 'Sign out';
 	@override String get localGateNote => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.';
+	@override String get dangerZone => 'Danger zone';
+	@override String get deleteAccount => 'Delete my account';
+	@override String get deleteAccountDesc => 'Removes your cloud account and all data on this device.';
+	@override String get deleteTitle => 'Delete my account';
+	@override String get deleteWarning => 'Your cloud account and ALL data on this device will be deleted. This cannot be undone. Congregations where you are the only member are removed from the cloud; from the rest you simply leave.';
+	@override String deleteBlocked({required Object congregations}) => 'You can\'t delete your account yet: you are the only admin of ${congregations}. Hand admin over to someone else or remove the other members first.';
+	@override String get deleteReauthEmail => 'Confirm your password to continue.';
+	@override String get deleteReauthGoogle => 'You\'ll be asked to sign in with Google again to confirm.';
+	@override String get deleteConfirm => 'Delete my account';
+	@override String get deleteError => 'Could not delete the account. Try again.';
 	@override late final _Translations$account$errors$en errors = _Translations$account$errors$en._(_root);
 }
 
@@ -545,6 +555,11 @@ class _Translations$congregation$en extends Translations$congregation$es {
 	@override String get readOnly => 'You have read-only access to this congregation.';
 	@override String get membersError => 'Could not load the member list.';
 	@override String get pendingLabel => 'Pending invitations';
+	@override String get deleteCloud => 'Delete cloud data';
+	@override String get deleteCloudTitle => 'Delete cloud data';
+	@override String get deleteCloudConfirm => 'This congregation\'s cloud space will be deleted and ALL other members will lose access. Your local data is kept. This cannot be undone.';
+	@override String get deleteCloudButton => 'Delete from the cloud';
+	@override String get deleteCloudError => 'Could not delete the cloud data.';
 }
 
 // Path: newCongregation
@@ -854,6 +869,7 @@ class _Translations$account$errors$en extends Translations$account$errors$es {
 	@override String get emailInUse => 'An account already exists for that email.';
 	@override String get weakPassword => 'The password is too weak (minimum 6 characters).';
 	@override String get network => 'No connection. Try again.';
+	@override String get requiresRecentLogin => 'For your security, sign in again and retry.';
 	@override String get unknown => 'The operation could not be completed. Try again.';
 }
 
@@ -1007,12 +1023,23 @@ extension on TranslationsEn {
 			'account.signedInAs' => 'Signed in',
 			'account.signOut' => 'Sign out',
 			'account.localGateNote' => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.',
+			'account.dangerZone' => 'Danger zone',
+			'account.deleteAccount' => 'Delete my account',
+			'account.deleteAccountDesc' => 'Removes your cloud account and all data on this device.',
+			'account.deleteTitle' => 'Delete my account',
+			'account.deleteWarning' => 'Your cloud account and ALL data on this device will be deleted. This cannot be undone. Congregations where you are the only member are removed from the cloud; from the rest you simply leave.',
+			'account.deleteBlocked' => ({required Object congregations}) => 'You can\'t delete your account yet: you are the only admin of ${congregations}. Hand admin over to someone else or remove the other members first.',
+			'account.deleteReauthEmail' => 'Confirm your password to continue.',
+			'account.deleteReauthGoogle' => 'You\'ll be asked to sign in with Google again to confirm.',
+			'account.deleteConfirm' => 'Delete my account',
+			'account.deleteError' => 'Could not delete the account. Try again.',
 			'account.errors.invalidEmail' => 'The email is not valid.',
 			'account.errors.userNotFound' => 'No account exists for that email.',
 			'account.errors.wrongPassword' => 'Wrong email or password.',
 			'account.errors.emailInUse' => 'An account already exists for that email.',
 			'account.errors.weakPassword' => 'The password is too weak (minimum 6 characters).',
 			'account.errors.network' => 'No connection. Try again.',
+			'account.errors.requiresRecentLogin' => 'For your security, sign in again and retry.',
 			'account.errors.unknown' => 'The operation could not be completed. Try again.',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
@@ -1214,6 +1241,11 @@ extension on TranslationsEn {
 			'congregation.readOnly' => 'You have read-only access to this congregation.',
 			'congregation.membersError' => 'Could not load the member list.',
 			'congregation.pendingLabel' => 'Pending invitations',
+			'congregation.deleteCloud' => 'Delete cloud data',
+			'congregation.deleteCloudTitle' => 'Delete cloud data',
+			'congregation.deleteCloudConfirm' => 'This congregation\'s cloud space will be deleted and ALL other members will lose access. Your local data is kept. This cannot be undone.',
+			'congregation.deleteCloudButton' => 'Delete from the cloud',
+			'congregation.deleteCloudError' => 'Could not delete the cloud data.',
 			'newCongregation.title' => 'New congregation',
 			'newCongregation.desc' => 'You will be its administrator. You can invite users afterwards.',
 			'newCongregation.create' => 'Create congregation',

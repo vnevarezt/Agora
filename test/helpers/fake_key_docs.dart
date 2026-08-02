@@ -178,6 +178,29 @@ class FakeKeyDocs implements KeyDocsGateway {
     _emitInvites(cid);
   }
 
+  // ---- teardown -------------------------------------------------------------
+
+  /// Observes member deletions in order — lets a teardown test assert that the
+  /// caller's own member doc is deleted LAST.
+  void Function(String uid)? onDeleteMember;
+
+  @override
+  Future<void> deleteMemberDoc(String cid, String uid) async {
+    onDeleteMember?.call(uid);
+    members[cid]?.remove(uid);
+    _emitMembers(cid);
+  }
+
+  @override
+  Future<void> deleteCongregationDoc(String cid) async {
+    congregations.remove(cid);
+  }
+
+  @override
+  Future<void> deleteUserDoc(String uid) async {
+    users.remove(uid);
+  }
+
   // ---- rotation -------------------------------------------------------------
 
   @override

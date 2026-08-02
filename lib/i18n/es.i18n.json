@@ -145,6 +145,16 @@
     "signedInAs": "Sesión iniciada",
     "signOut": "Cerrar sesión",
     "localGateNote": "Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.",
+    "dangerZone": "Zona de peligro",
+    "deleteAccount": "Borrar mi cuenta",
+    "deleteAccountDesc": "Elimina tu cuenta de la nube y todos los datos de este dispositivo.",
+    "deleteTitle": "Borrar mi cuenta",
+    "deleteWarning": "Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.",
+    "deleteBlocked": "No puedes borrar tu cuenta todavía: eres el único administrador de {congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.",
+    "deleteReauthEmail": "Confirma tu contraseña para continuar.",
+    "deleteReauthGoogle": "Se te pedirá volver a iniciar sesión con Google para confirmar.",
+    "deleteConfirm": "Borrar mi cuenta",
+    "deleteError": "No se pudo borrar la cuenta. Inténtalo de nuevo.",
     "errors": {
       "invalidEmail": "El correo no es válido.",
       "userNotFound": "No existe una cuenta con ese correo.",
@@ -152,6 +162,7 @@
       "emailInUse": "Ya existe una cuenta con ese correo.",
       "weakPassword": "La contraseña es demasiado débil (mínimo 6 caracteres).",
       "network": "Sin conexión. Inténtalo de nuevo.",
+      "requiresRecentLogin": "Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.",
       "unknown": "No se pudo completar la operación. Inténtalo de nuevo."
     }
   },
@@ -395,7 +406,12 @@
     "lastAdmin": "Debe quedar al menos una persona con permiso de administración.",
     "readOnly": "Solo tienes acceso de lectura en esta congregación.",
     "membersError": "No se ha podido cargar la lista de miembros.",
-    "pendingLabel": "Invitaciones pendientes"
+    "pendingLabel": "Invitaciones pendientes",
+    "deleteCloud": "Borrar datos de la nube",
+    "deleteCloudTitle": "Borrar los datos de la nube",
+    "deleteCloudConfirm": "Se eliminará el espacio en la nube de esta congregación y TODOS los demás miembros perderán el acceso. Tus datos locales se conservan. Esta acción no se puede deshacer.",
+    "deleteCloudButton": "Borrar de la nube",
+    "deleteCloudError": "No se pudieron borrar los datos de la nube."
   },
   "newCongregation": {
     "title": "Nueva congregación",

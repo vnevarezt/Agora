@@ -18,6 +18,7 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
+import '../widgets/danger_button.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/labeled_field.dart';
 import 'invite_user_modal.dart';
@@ -423,8 +424,50 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
           ],
         ),
+        if (isAdmin) ...[
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DangerButton(
+              label: tr.congregation.deleteCloud,
+              onTap: () => _deleteCongregationCloud(cid),
+            ),
+          ),
+        ],
       ],
     );
+  }
+
+  /// Admin teardown of this congregation's cloud space (local data is kept).
+  /// Destroys every other member's access, so it confirms first.
+  Future<void> _deleteCongregationCloud(String cid) async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.congregation.deleteCloudTitle),
+        content: Text(tr.congregation.deleteCloudConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(tr.common.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(tr.congregation.deleteCloudButton,
+                style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref.read(deleteCongregationCloudProvider)(cid);
+    } catch (_) {
+      messenger.showSnackBar(
+          SnackBar(content: Text(tr.congregation.deleteCloudError)));
+    }
   }
 
   Widget _hint(AppTokens t, String text) => Padding(

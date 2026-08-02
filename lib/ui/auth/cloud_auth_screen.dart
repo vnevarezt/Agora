@@ -134,7 +134,12 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
       CloudAuthErrorCode.emailInUse => e.emailInUse,
       CloudAuthErrorCode.weakPassword => e.weakPassword,
       CloudAuthErrorCode.network => e.network,
-      CloudAuthErrorCode.canceled || CloudAuthErrorCode.unknown => e.unknown,
+      // requiresRecentLogin can't arise on sign-in/register (only on delete);
+      // fold it into the generic message here.
+      CloudAuthErrorCode.canceled ||
+      CloudAuthErrorCode.requiresRecentLogin ||
+      CloudAuthErrorCode.unknown =>
+        e.unknown,
     };
   }
 

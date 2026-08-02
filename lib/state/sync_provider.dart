@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/db/app_database.dart';
 import '../data/db/db_key_manager.dart' show KeychainKeyStore;
 import '../data/sync/cck_service.dart';
+import '../data/sync/congregation_teardown.dart';
 import '../data/sync/content_crypto.dart';
 import '../data/sync/firestore_key_docs.dart';
 import '../data/sync/firestore_transport.dart';
@@ -20,6 +21,7 @@ import '../models/congregation_member.dart';
 import '../models/member_capabilities.dart';
 import '../models/membership.dart';
 import 'app_settings.dart';
+import 'auth_session.dart';
 import 'cloud_auth.dart';
 import 'db_provider.dart';
 import 'sync_keys.dart' show syncOwnerUidKey;
@@ -280,4 +282,115 @@ final redeemInviteProvider = Provider((ref) => (InviteCode code) async {
         } while (page.fetched >= FirestoreTransport.pageSize);
       }
       return cid;
+    });
+
+// ---- account & congregation deletion ---------------------------------------
+
+/// The cloud-teardown primitive (gateway + transport). Null unless the cloud
+/// is up and a user is signed in.
+final congregationTeardownProvider = Provider<CongregationTeardown?>((ref) {
+  final docs = ref.watch(keyDocsProvider);
+  final transport = ref.watch(syncTransportProvider);
+  final uid = ref.watch(syncUidProvider);
+  if (docs == null || transport == null || uid == null) return null;
+  return CongregationTeardown(docs, transport, uid: uid);
+});
+
+/// Thrown by [deleteMyAccountProvider] when the user is the sole admin of a
+/// congregation that still has other members: deleting would strand them, so
+/// we refuse and name the congregations to hand over or empty first.
+class AccountDeletionBlocked implements Exception {
+  const AccountDeletionBlocked(this.congregationIds);
+
+  final List<String> congregationIds;
+
+  @override
+  String toString() => 'AccountDeletionBlocked($congregationIds)';
+}
+
+Future<void> _deleteSyncState(AppDatabase db, String cid) =>
+    (db.delete(db.syncState)..where((t) => t.congregationId.equals(cid))).go();
+
+/// Snapshots every congregation's member landscape into the deletion plan.
+Future<AccountDeletionPlan> _accountDeletionPlan(
+    CckService cck, String uid, List<Membership> memberships) async {
+  final landscape = <String, List<MemberRole>>{};
+  for (final m in memberships) {
+    landscape[m.congregationId] = [
+      for (final x in await cck.listMembers(m.congregationId))
+        (memberUid: x.uid, admin: x.capabilities.admin),
+    ];
+  }
+  return planAccountDeletion(uid, landscape);
+}
+
+/// Congregations that would BLOCK account deletion (I'm the sole admin and
+/// other members remain). Lets the delete modal warn upfront, before asking
+/// the user to reauthenticate. Empty when nothing blocks.
+final accountDeletionBlockersProvider =
+    FutureProvider.autoDispose<List<String>>((ref) async {
+  final cck = ref.watch(cckServiceProvider);
+  final uid = ref.watch(syncUidProvider);
+  if (cck == null || uid == null) return const [];
+  final memberships = ref.watch(myMembershipsProvider).value ?? const [];
+  return (await _accountDeletionPlan(cck, uid, memberships)).blocked;
+});
+
+/// Admin action: hard-delete this congregation's cloud space while KEEPING the
+/// local data — it reverts to a local-only congregation (un-share). Destroys
+/// every other member's access, so the UI confirms first.
+final deleteCongregationCloudProvider = Provider((ref) => (String cid) async {
+      final teardown = ref.read(congregationTeardownProvider);
+      if (teardown == null) {
+        throw const SharingException(
+            'keysUnavailable', 'Cloud sync is not available.');
+      }
+      await teardown.wipe(cid);
+      await ref.read(cckServiceProvider)?.forget([cid]);
+      // Drop the "shared" fact so rightsProvider treats it as local again.
+      await _deleteSyncState(ref.read(dbProvider), cid);
+    });
+
+/// Cancels the cloud account: for every congregation, wipe (sole member &
+/// admin) or leave; then delete the identity doc, delete the Firebase account,
+/// and nuke ALL local data (back to the Portada).
+///
+/// The caller MUST have reauthenticated first — `user.delete()` needs a recent
+/// login. Throws [AccountDeletionBlocked] BEFORE deleting anything when the
+/// user is the sole admin of a shared congregation.
+final deleteMyAccountProvider = Provider((ref) => () async {
+      final teardown = ref.read(congregationTeardownProvider);
+      final cck = ref.read(cckServiceProvider);
+      final docs = ref.read(keyDocsProvider);
+      final uid = ref.read(syncUidProvider);
+      final auth = await ref.read(cloudAuthProvider.future);
+      if (teardown == null ||
+          cck == null ||
+          docs == null ||
+          uid == null ||
+          auth == null) {
+        throw const SharingException(
+            'keysUnavailable', 'Cloud sync is not available.');
+      }
+
+      final memberships = ref.read(myMembershipsProvider).value ?? const [];
+
+      // Decide per congregation, then check FIRST (before any deletion):
+      // refuse if deleting would strand other members.
+      final plan = await _accountDeletionPlan(cck, uid, memberships);
+      if (plan.blocked.isNotEmpty) throw AccountDeletionBlocked(plan.blocked);
+
+      for (final cid in plan.wipe) {
+        await teardown.wipe(cid);
+        await cck.forget([cid]);
+      }
+      for (final cid in plan.leave) {
+        await teardown.leave(cid);
+        await cck.forget([cid]);
+      }
+      await docs.deleteUserDoc(uid);
+      await auth.deleteAccount();
+
+      // Everything cloud-side is gone: wipe local and return to the Portada.
+      await ref.read(authSessionProvider.notifier).resetAllData();
     });

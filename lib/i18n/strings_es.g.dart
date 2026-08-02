@@ -321,6 +321,36 @@ class Translations$account$es {
 	/// es: 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.'
 	String get localGateNote => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.';
 
+	/// es: 'Zona de peligro'
+	String get dangerZone => 'Zona de peligro';
+
+	/// es: 'Borrar mi cuenta'
+	String get deleteAccount => 'Borrar mi cuenta';
+
+	/// es: 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.'
+	String get deleteAccountDesc => 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.';
+
+	/// es: 'Borrar mi cuenta'
+	String get deleteTitle => 'Borrar mi cuenta';
+
+	/// es: 'Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.'
+	String get deleteWarning => 'Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.';
+
+	/// es: 'No puedes borrar tu cuenta todavía: eres el único administrador de {congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.'
+	String deleteBlocked({required Object congregations}) => 'No puedes borrar tu cuenta todavía: eres el único administrador de ${congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.';
+
+	/// es: 'Confirma tu contraseña para continuar.'
+	String get deleteReauthEmail => 'Confirma tu contraseña para continuar.';
+
+	/// es: 'Se te pedirá volver a iniciar sesión con Google para confirmar.'
+	String get deleteReauthGoogle => 'Se te pedirá volver a iniciar sesión con Google para confirmar.';
+
+	/// es: 'Borrar mi cuenta'
+	String get deleteConfirm => 'Borrar mi cuenta';
+
+	/// es: 'No se pudo borrar la cuenta. Inténtalo de nuevo.'
+	String get deleteError => 'No se pudo borrar la cuenta. Inténtalo de nuevo.';
+
 	late final Translations$account$errors$es errors = Translations$account$errors$es.internal(_root);
 }
 
@@ -1059,6 +1089,21 @@ class Translations$congregation$es {
 
 	/// es: 'Invitaciones pendientes'
 	String get pendingLabel => 'Invitaciones pendientes';
+
+	/// es: 'Borrar datos de la nube'
+	String get deleteCloud => 'Borrar datos de la nube';
+
+	/// es: 'Borrar los datos de la nube'
+	String get deleteCloudTitle => 'Borrar los datos de la nube';
+
+	/// es: 'Se eliminará el espacio en la nube de esta congregación y TODOS los demás miembros perderán el acceso. Tus datos locales se conservan. Esta acción no se puede deshacer.'
+	String get deleteCloudConfirm => 'Se eliminará el espacio en la nube de esta congregación y TODOS los demás miembros perderán el acceso. Tus datos locales se conservan. Esta acción no se puede deshacer.';
+
+	/// es: 'Borrar de la nube'
+	String get deleteCloudButton => 'Borrar de la nube';
+
+	/// es: 'No se pudieron borrar los datos de la nube.'
+	String get deleteCloudError => 'No se pudieron borrar los datos de la nube.';
 }
 
 // Path: newCongregation
@@ -1729,6 +1774,9 @@ class Translations$account$errors$es {
 	/// es: 'Sin conexión. Inténtalo de nuevo.'
 	String get network => 'Sin conexión. Inténtalo de nuevo.';
 
+	/// es: 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.'
+	String get requiresRecentLogin => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.';
+
 	/// es: 'No se pudo completar la operación. Inténtalo de nuevo.'
 	String get unknown => 'No se pudo completar la operación. Inténtalo de nuevo.';
 }
@@ -1899,12 +1947,23 @@ extension on Translations {
 			'account.signedInAs' => 'Sesión iniciada',
 			'account.signOut' => 'Cerrar sesión',
 			'account.localGateNote' => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.',
+			'account.dangerZone' => 'Zona de peligro',
+			'account.deleteAccount' => 'Borrar mi cuenta',
+			'account.deleteAccountDesc' => 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.',
+			'account.deleteTitle' => 'Borrar mi cuenta',
+			'account.deleteWarning' => 'Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.',
+			'account.deleteBlocked' => ({required Object congregations}) => 'No puedes borrar tu cuenta todavía: eres el único administrador de ${congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.',
+			'account.deleteReauthEmail' => 'Confirma tu contraseña para continuar.',
+			'account.deleteReauthGoogle' => 'Se te pedirá volver a iniciar sesión con Google para confirmar.',
+			'account.deleteConfirm' => 'Borrar mi cuenta',
+			'account.deleteError' => 'No se pudo borrar la cuenta. Inténtalo de nuevo.',
 			'account.errors.invalidEmail' => 'El correo no es válido.',
 			'account.errors.userNotFound' => 'No existe una cuenta con ese correo.',
 			'account.errors.wrongPassword' => 'Correo o contraseña incorrectos.',
 			'account.errors.emailInUse' => 'Ya existe una cuenta con ese correo.',
 			'account.errors.weakPassword' => 'La contraseña es demasiado débil (mínimo 6 caracteres).',
 			'account.errors.network' => 'Sin conexión. Inténtalo de nuevo.',
+			'account.errors.requiresRecentLogin' => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.',
 			'account.errors.unknown' => 'No se pudo completar la operación. Inténtalo de nuevo.',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
@@ -2106,6 +2165,11 @@ extension on Translations {
 			'congregation.readOnly' => 'Solo tienes acceso de lectura en esta congregación.',
 			'congregation.membersError' => 'No se ha podido cargar la lista de miembros.',
 			'congregation.pendingLabel' => 'Invitaciones pendientes',
+			'congregation.deleteCloud' => 'Borrar datos de la nube',
+			'congregation.deleteCloudTitle' => 'Borrar los datos de la nube',
+			'congregation.deleteCloudConfirm' => 'Se eliminará el espacio en la nube de esta congregación y TODOS los demás miembros perderán el acceso. Tus datos locales se conservan. Esta acción no se puede deshacer.',
+			'congregation.deleteCloudButton' => 'Borrar de la nube',
+			'congregation.deleteCloudError' => 'No se pudieron borrar los datos de la nube.',
 			'newCongregation.title' => 'Nueva congregación',
 			'newCongregation.desc' => 'Serás su administrador. Después podrás invitar usuarios.',
 			'newCongregation.create' => 'Crear congregación',

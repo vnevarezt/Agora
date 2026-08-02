@@ -218,6 +218,18 @@ class FirestoreKeyDocs implements KeyDocsGateway {
     return batch.commit();
   }
 
+  // ---- teardown -------------------------------------------------------------
+
+  @override
+  Future<void> deleteMemberDoc(String cid, String uid) =>
+      _member(cid, uid).delete();
+
+  @override
+  Future<void> deleteCongregationDoc(String cid) => _congregation(cid).delete();
+
+  @override
+  Future<void> deleteUserDoc(String uid) => _user(uid).delete();
+
   // ---- rotation -------------------------------------------------------------
 
   /// Firestore hard-caps a batch at 500 writes; leaving headroom keeps the
