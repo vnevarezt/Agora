@@ -693,6 +693,8 @@ class _Translations$projectBar$en extends Translations$projectBar$es {
 	);
 	@override String weekN({required Object n}) => 'Week ${n}';
 	@override String get goToWeek => 'Go to week';
+	@override String get prevWeek => 'Previous week';
+	@override String get nextWeek => 'Next week';
 	@override String weekShort({required Object n}) => 'Wk ${n}';
 	@override String get auxRoom => 'Auxiliary classroom';
 	@override String get auxRoomDesc => 'Second classroom for students';
@@ -1322,6 +1324,8 @@ extension on TranslationsEn {
 			'projectBar.weeks' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} week', other: '${n} weeks', ), 
 			'projectBar.weekN' => ({required Object n}) => 'Week ${n}',
 			'projectBar.goToWeek' => 'Go to week',
+			'projectBar.prevWeek' => 'Previous week',
+			'projectBar.nextWeek' => 'Next week',
 			'projectBar.weekShort' => ({required Object n}) => 'Wk ${n}',
 			'projectBar.auxRoom' => 'Auxiliary classroom',
 			'projectBar.auxRoomDesc' => 'Second classroom for students',

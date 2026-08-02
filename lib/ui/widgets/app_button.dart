@@ -13,12 +13,25 @@ import '../theme/tokens.dart';
 /// to a finger at all. The theme also disables the Material ripple
 /// (`NoSplash`), so nothing else was covering that gap.
 class Pressable extends StatefulWidget {
-  const Pressable({super.key, required this.builder, this.onTap, this.tooltip});
+  const Pressable({
+    super.key,
+    required this.builder,
+    this.onTap,
+    this.tooltip,
+    this.semanticLabel,
+  });
 
   final Widget Function(BuildContext context, bool hovered, bool pressed)
   builder;
   final VoidCallback? onTap;
   final String? tooltip;
+
+  /// What VoiceOver / TalkBack announces. Required in practice for controls
+  /// whose only content is an icon: a bare [GestureDetector] exposes the tap
+  /// action but no role and no name, so a screen reader lands on an anonymous
+  /// element. Controls that render their own text can leave this null — the
+  /// text is already the name.
+  final String? semanticLabel;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -51,7 +64,12 @@ class _PressableState extends State<Pressable> {
     if (widget.tooltip != null) {
       child = Tooltip(message: widget.tooltip!, child: child);
     }
-    return child;
+    return Semantics(
+      button: true,
+      enabled: widget.onTap != null,
+      label: widget.semanticLabel,
+      child: child,
+    );
   }
 }
 
@@ -69,6 +87,7 @@ class AppButton extends StatelessWidget {
     this.height = Dimens.hControl,
     this.busy = false,
     this.expand = false,
+    this.semanticLabel,
   });
 
   final VoidCallback? onPressed;
@@ -79,6 +98,10 @@ class AppButton extends StatelessWidget {
   final bool busy;
   final bool expand;
 
+  /// Announced name. Only needed in the icon-only form ([label] null), where
+  /// the button renders no text for a screen reader to read.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
@@ -87,6 +110,7 @@ class AppButton extends StatelessWidget {
 
     return Pressable(
       onTap: enabled ? onPressed : null,
+      semanticLabel: semanticLabel,
       builder: (context, hovered, pressed) {
         final bg = esPrimary
             ? (hovered ? t.accentStrong : t.accent)
@@ -155,6 +179,7 @@ class AppIconButton extends StatelessWidget {
     this.bordered = false,
     this.elevated = false,
     this.size = Dimens.hControl,
+    this.semanticLabel,
   });
 
   final IconData icon;
@@ -164,12 +189,18 @@ class AppIconButton extends StatelessWidget {
   final bool elevated;
   final double size;
 
+  /// Overrides the announced name. Defaults to [tooltip], which already
+  /// describes the action in words — an icon-only button has nothing else a
+  /// screen reader could read.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Pressable(
       onTap: onPressed,
       tooltip: tooltip,
+      semanticLabel: semanticLabel ?? tooltip,
       builder: (context, hovered, pressed) {
         return AnimatedContainer(
           duration: Dimens.dFast,

@@ -106,6 +106,7 @@ class _ClearButton extends StatelessWidget {
     return Pressable(
       onTap: onClear,
       tooltip: context.t.common.removeAssignment,
+      semanticLabel: context.t.common.removeAssignment,
       builder: (context, hovered, _) {
         return Container(
           width: 22,

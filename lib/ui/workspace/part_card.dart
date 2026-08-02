@@ -186,6 +186,7 @@ class _EditTitleButton extends StatelessWidget {
     final t = context.tokens;
     return Pressable(
       onTap: onTap,
+      semanticLabel: context.t.workspace.editTitle,
       builder: (context, hovered, _) => Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(

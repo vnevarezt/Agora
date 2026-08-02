@@ -503,6 +503,8 @@
     },
     "weekN": "Week {n}",
     "goToWeek": "Go to week",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
     "weekShort": "Wk {n}",
     "auxRoom": "Auxiliary classroom",
     "auxRoomDesc": "Second classroom for students",

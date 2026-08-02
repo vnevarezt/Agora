@@ -1390,6 +1390,12 @@ class Translations$projectBar$es {
 	/// es: 'Ir a la semana'
 	String get goToWeek => 'Ir a la semana';
 
+	/// es: 'Semana anterior'
+	String get prevWeek => 'Semana anterior';
+
+	/// es: 'Semana siguiente'
+	String get nextWeek => 'Semana siguiente';
+
 	/// es: 'Sem {n}'
 	String weekShort({required Object n}) => 'Sem ${n}';
 
@@ -2246,6 +2252,8 @@ extension on Translations {
 			'projectBar.weeks' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(n, one: '${n} semana', other: '${n} semanas', ), 
 			'projectBar.weekN' => ({required Object n}) => 'Semana ${n}',
 			'projectBar.goToWeek' => 'Ir a la semana',
+			'projectBar.prevWeek' => 'Semana anterior',
+			'projectBar.nextWeek' => 'Semana siguiente',
 			'projectBar.weekShort' => ({required Object n}) => 'Sem ${n}',
 			'projectBar.auxRoom' => 'Sala auxiliar',
 			'projectBar.auxRoomDesc' => 'Segunda sala para estudiantes',

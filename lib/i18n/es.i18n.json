@@ -503,6 +503,8 @@
     },
     "weekN": "Semana {n}",
     "goToWeek": "Ir a la semana",
+    "prevWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente",
     "weekShort": "Sem {n}",
     "auxRoom": "Sala auxiliar",
     "auxRoomDesc": "Segunda sala para estudiantes",

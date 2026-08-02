@@ -330,12 +330,16 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
     return Row(
       mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        _Arrow(icon: Icons.chevron_left, onTap: active == 0 ? null : () => go(-1)),
+        _Arrow(
+            icon: Icons.chevron_left,
+            label: context.t.projectBar.prevWeek,
+            onTap: active == 0 ? null : () => go(-1)),
         const SizedBox(width: 6),
         widget.expand ? Expanded(child: current) : current,
         const SizedBox(width: 6),
         _Arrow(
             icon: Icons.chevron_right,
+            label: context.t.projectBar.nextWeek,
             onTap: (n == 0 || active >= n - 1) ? null : () => go(1)),
       ],
     );
@@ -343,9 +347,12 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
 }
 
 class _Arrow extends StatelessWidget {
-  const _Arrow({required this.icon, required this.onTap});
+  const _Arrow({required this.icon, required this.label, required this.onTap});
 
   final IconData icon;
+
+  /// Announced name: the arrow renders a glyph and nothing else.
+  final String label;
   final VoidCallback? onTap;
 
   @override
@@ -354,6 +361,8 @@ class _Arrow extends StatelessWidget {
     final enabled = onTap != null;
     return Pressable(
       onTap: onTap,
+      tooltip: label,
+      semanticLabel: label,
       builder: (context, hovered, _) => Container(
         width: 34,
         height: 34,
