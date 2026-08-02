@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../widgets/pill.dart';
 
@@ -8,6 +10,28 @@ import '../widgets/avatar.dart';
 import '../widgets/ink_surface.dart';
 import 'priv_badge.dart';
 import '../theme/app_theme.dart';
+
+/// The height every [ParticipantCard] lays out at, for the current text
+/// scale. The card is uniform by construction — the avatar is a fixed 38 and
+/// all three text runs are `maxLines: 1`, so neither a long name, a visitor's
+/// origin congregation nor the incomplete badge changes it. That uniformity
+/// is what lets the participants grid virtualise with a fixed tile extent
+/// instead of materialising every card.
+///
+/// Rounds slightly high on purpose: a tile a pixel taller than its card is
+/// invisible, a tile a pixel shorter clips it. `participant_card_test` pins
+/// this against the real laid-out height, so changing the card's contents
+/// fails there rather than silently clipping the whole grid.
+double participantCardHeight(BuildContext context) {
+  final scaler = MediaQuery.textScalerOf(context);
+  const avatar = 38.0;
+  const verticalPadding = 12.0 * 2;
+  const lineHeight = 1.44;
+  final textColumn = scaler.scale(AppText.bodyLarge) * lineHeight +
+      1 +
+      scaler.scale(AppText.caption) * lineHeight;
+  return math.max(avatar, textColumn) + verticalPadding;
+}
 
 /// Person card (`.person-card`): avatar, name with an availability dot,
 /// subtitle (gender · origin congregation for visitors) and a privilege
