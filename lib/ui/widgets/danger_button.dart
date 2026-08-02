@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import 'app_button.dart';
 
@@ -32,7 +33,7 @@ class DangerButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.5,
+            fontSize: AppText.body,
             fontWeight: FontWeight.w700,
             color: err,
           ),

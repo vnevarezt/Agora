@@ -6,6 +6,7 @@ import '../../state/app_settings.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
@@ -110,7 +111,7 @@ class _ExportSheet extends StatelessWidget {
                               ? tr.export.currentSheet
                               : tr.export.currentWeek,
                           style: TextStyle(
-                              fontSize: 15,
+                              fontSize: AppText.bodyLarge,
                               fontWeight: FontWeight.w800,
                               color: t.text)),
                       Text(
@@ -118,7 +119,7 @@ class _ExportSheet extends StatelessWidget {
                               ? tr.export.currentSheetSub
                               : tr.export.currentWeekSub,
                           style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: AppText.small,
                               fontWeight: FontWeight.w600,
                               color: t.textMute)),
                     ],

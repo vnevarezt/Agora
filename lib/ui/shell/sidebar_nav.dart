@@ -7,6 +7,7 @@ import '../../state/auth_session.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/sync_provider.dart';
 import '../../state/ui_state.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -147,7 +148,7 @@ class _Brand extends StatelessWidget {
       child: Text(
         'JW',
         style: TextStyle(
-          fontSize: 13,
+          fontSize: AppText.body,
           fontWeight: FontWeight.w800,
           color: t.accentInk,
         ),
@@ -166,7 +167,7 @@ class _Brand extends StatelessWidget {
             Text(
               context.t.app.brand,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.3,
                 color: t.text,
@@ -228,7 +229,7 @@ class _NavItem extends ConsumerWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w700,
                     color: fg,
                   ),
@@ -283,7 +284,7 @@ class _NavItem extends ConsumerWidget {
         child: Text(
           '$badge',
           style: TextStyle(
-            fontSize: 10.5,
+            fontSize: AppText.micro,
             fontWeight: FontWeight.w800,
             color: t.accentInk,
           ),
@@ -413,7 +414,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: AppText.small,
                             fontWeight: FontWeight.w800,
                             height: 1.2,
                             color: t.text,
@@ -424,7 +425,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: AppText.caption,
                             fontWeight: FontWeight.w600,
                             color: t.textMute,
                           ),
@@ -501,7 +502,7 @@ class _UserMenu extends StatelessWidget {
                       child: Text(
                         it.label,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.w700,
                           color: t.text,
                         ),
@@ -555,7 +556,7 @@ class BottomNav extends ConsumerWidget {
           ),
           labelTextStyle: WidgetStateProperty.resolveWith(
             (states) => TextStyle(
-              fontSize: 11.5,
+              fontSize: AppText.caption,
               fontWeight: FontWeight.w700,
               color: states.contains(WidgetState.selected)
                   ? t.accentStrong

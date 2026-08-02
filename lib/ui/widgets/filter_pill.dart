@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
@@ -55,7 +56,7 @@ class FilterPill extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: fg,
                 ),
@@ -65,7 +66,7 @@ class FilterPill extends StatelessWidget {
                 Text(
                   '$count',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w700,
                     color: fg.withValues(alpha: 0.75),
                   ),

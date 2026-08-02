@@ -12,6 +12,7 @@ import '../../state/backup_provider.dart';
 import '../../state/cloud_auth.dart' show cloudUserProvider;
 import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
+import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
@@ -142,7 +143,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
                     error!,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.error,
-                        fontSize: 12),
+                        fontSize: AppText.small),
                   ),
                 ),
             ],

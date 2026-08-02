@@ -5,6 +5,7 @@ import '../../i18n/strings.g.dart';
 import '../../models/congregation_member.dart';
 import '../../models/member_capabilities.dart';
 import '../../state/sync_provider.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/filter_pill.dart';
@@ -179,7 +180,7 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
             Text(
               tr.congregation.lastAdmin,
               style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: t.textMute),
             ),
@@ -189,7 +190,7 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
             Text(
               _error!,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.error,
               ),

@@ -475,7 +475,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
         child: Text(
           text,
           style: TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w600, color: t.textMute),
+              fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
         ),
       );
 
@@ -526,7 +526,7 @@ class _PendingInvite extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: t.textMute),
             ),
@@ -590,7 +590,7 @@ class _CongregationChip extends StatelessWidget {
               Text(
                 congregation.name,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: fg,
                 ),
@@ -639,7 +639,7 @@ class _AddChip extends StatelessWidget {
                 Text(
                   context.t.congregation.newCongregation,
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: AppText.small,
                     fontWeight: FontWeight.w700,
                     color: fg,
                   ),

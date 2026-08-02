@@ -7,6 +7,7 @@ import '../theme/tokens.dart';
 import '../widgets/avatar.dart';
 import '../widgets/ink_surface.dart';
 import 'priv_badge.dart';
+import '../theme/app_theme.dart';
 
 /// Person card (`.person-card`): avatar, name with an availability dot,
 /// subtitle (gender · origin congregation for visitors) and a privilege
@@ -54,7 +55,7 @@ class ParticipantCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppText.bodyLarge,
                             fontWeight: FontWeight.w800,
                             color: t.text,
                           ),
@@ -70,7 +71,7 @@ class ParticipantCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: AppText.caption,
                       fontWeight: FontWeight.w600,
                       color: t.textMute,
                     ),

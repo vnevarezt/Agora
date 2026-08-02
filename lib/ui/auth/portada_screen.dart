@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/cloud_auth.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -66,7 +67,7 @@ class PortadaScreen extends ConsumerWidget {
                       child: Text(
                         'JW',
                         style: TextStyle(
-                          fontSize: 19,
+                          fontSize: AppText.display,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.38,
                           color: t.accentInk,
@@ -126,7 +127,7 @@ class PortadaScreen extends ConsumerWidget {
                             tr.portada.cloudUnsupported,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: AppText.small,
                               fontWeight: FontWeight.w600,
                               height: 1.5,
                               color: t.textMute,
@@ -146,7 +147,7 @@ class PortadaScreen extends ConsumerWidget {
                         tr.portada.legal,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w600,
                           height: 1.5,
                           color: t.textMute,
@@ -205,7 +206,7 @@ class _PortadaButton extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.15,
                   color: fg,
@@ -257,7 +258,7 @@ class _LocalEntryCard extends StatelessWidget {
                 Text(
                   tr.portada.noAccountTitle,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w800,
                     color: t.text,
                   ),
@@ -266,7 +267,7 @@ class _LocalEntryCard extends StatelessWidget {
                 Text(
                   tr.portada.noAccountCaption,
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),

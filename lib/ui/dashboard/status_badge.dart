@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/project.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 
@@ -26,7 +27,7 @@ class StatusBadge extends StatelessWidget {
       background: bg,
       foreground: fg,
       border: border,
-      fontSize: 10.5,
+      fontSize: AppText.micro,
     );
   }
 }

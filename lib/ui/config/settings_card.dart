@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// Distribuye tarjetas en dos columnas (`.settings__cols`) en escritorio y en
@@ -106,7 +107,7 @@ class SettingsCard extends StatelessWidget {
           Text(
             title.toUpperCase(),
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppText.body,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.4,
               color: t.text,
@@ -117,7 +118,7 @@ class SettingsCard extends StatelessWidget {
             Text(
               desc!,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 height: 1.35,
                 color: t.textMute,
@@ -167,7 +168,7 @@ class SettingRow extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w700,
                     color: t.text,
                   ),
@@ -176,7 +177,7 @@ class SettingRow extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppText.small,
                       fontWeight: FontWeight.w600,
                       height: 1.3,
                       color: t.textMute,

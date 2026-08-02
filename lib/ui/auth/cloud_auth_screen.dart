@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../../state/cloud_auth.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
@@ -293,7 +294,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                   child: Text(
                     tr.auth.cloud.orEmail.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: AppText.caption,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.58,
                       color: t.textMute,
@@ -358,7 +359,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                   builder: (context, hovered, _) => Text(
                     tr.auth.cloud.forgot,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppText.small,
                       fontWeight: FontWeight.w700,
                       color: t.accentStrong,
                       decoration: hovered ? TextDecoration.underline : null,

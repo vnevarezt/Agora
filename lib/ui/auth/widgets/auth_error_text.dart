@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
 import '../../widgets/motion.dart';
 
 /// Inline error line under a form field. Accepts null so call sites can keep
@@ -22,7 +23,7 @@ class AuthErrorText extends StatelessWidget {
               child: Text(
                 message!,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.error,
                 ),

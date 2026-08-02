@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 
 /// `.mode-pill`: uppercase chip with an icon marking the chosen mode.
@@ -26,7 +27,7 @@ class ModePill extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: TextStyle(
-              fontSize: 11,
+              fontSize: AppText.caption,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.44,
               color: t.accentStrong,

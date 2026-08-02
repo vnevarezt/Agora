@@ -8,14 +8,15 @@ import '../../state/dashboard_provider.dart';
 import '../../state/people_provider.dart';
 import '../../state/sync_provider.dart';
 import '../limits.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
-import '../widgets/modal_shell.dart';
 import '../widgets/mini_chip.dart';
+import '../widgets/modal_shell.dart';
 import '../widgets/segmented_control.dart';
 
 /// Description of each privilege in the modal radio cards.
@@ -359,7 +360,7 @@ class _RoleOption extends StatelessWidget {
                     Text(
                       role.label,
                       style: TextStyle(
-                        fontSize: 13.5,
+                        fontSize: AppText.body,
                         fontWeight: FontWeight.w800,
                         color: t.text,
                       ),
@@ -368,7 +369,7 @@ class _RoleOption extends StatelessWidget {
                     Text(
                       _roleDesc(role),
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: AppText.caption,
                         fontWeight: FontWeight.w600,
                         height: 1.35,
                         color: t.textMute,
@@ -404,7 +405,7 @@ class _AvailableRow extends StatelessWidget {
               Text(
                 context.t.participantModal.available,
                 style: TextStyle(
-                  fontSize: 13.5,
+                  fontSize: AppText.body,
                   fontWeight: FontWeight.w700,
                   color: t.text,
                 ),
@@ -412,7 +413,7 @@ class _AvailableRow extends StatelessWidget {
               Text(
                 context.t.participantModal.availableDesc,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: t.textMute,
                 ),

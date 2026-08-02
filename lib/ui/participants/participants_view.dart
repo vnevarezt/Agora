@@ -15,6 +15,7 @@ import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
+import '../theme/app_theme.dart';
 
 /// Participants view (`PeopleView`): topbar, filters and a grid of cards
 /// fed by `participantsProvider`. Lives inside the shell; shows a back
@@ -92,7 +93,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
               Text(
                 context.t.participants.subtitle,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.body,
                   fontWeight: FontWeight.w600,
                   color: t.textMute,
                 ),
@@ -160,7 +161,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     return TextField(
         onChanged: (v) => setState(() => _query = v),
         style: TextStyle(
-            fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
+            fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
         decoration: InputDecoration(
           hintText: context.t.common.searchParticipant,
           prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),

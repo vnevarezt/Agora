@@ -94,7 +94,7 @@ class ContinueCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: AppText.display,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.3,
                 color: t.text,
@@ -122,7 +122,7 @@ class ContinueCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: t.textMute,
                 ),
@@ -137,7 +137,7 @@ class ContinueCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 color: t.textMute,
               ),
@@ -183,7 +183,7 @@ class _ProgressRing extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w800,
                 color: t.text,
               ),
@@ -231,7 +231,7 @@ class _WeekChip extends StatelessWidget {
           Text(
             progress.label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: AppText.caption,
               fontWeight: FontWeight.w700,
               color: fg,
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
 import '../responsive.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/segmented_control.dart';
@@ -91,7 +92,7 @@ class _SettingsViewState extends State<SettingsView> {
               Text(
                 context.t.settings.subtitle,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.body,
                   fontWeight: FontWeight.w600,
                   color: t.textMute,
                 ),

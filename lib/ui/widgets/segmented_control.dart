@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
@@ -75,7 +76,7 @@ class SegmentedTabs extends StatelessWidget {
               Text(
                 segments[i].label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: activo ? t.text : t.textDim,
                 ),

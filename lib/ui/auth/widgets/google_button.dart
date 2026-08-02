@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
 import '../../theme/dimens.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
@@ -48,7 +49,7 @@ class GoogleButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w700,
                 color: t.text,
               ),

@@ -11,8 +11,8 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
-import '../widgets/modal_shell.dart';
 import '../widgets/mini_chip.dart';
+import '../widgets/modal_shell.dart';
 import 'part_presentation.dart';
 import 'slot_field.dart';
 
@@ -77,7 +77,7 @@ class _FixedLineBody extends StatelessWidget {
               TextSpan(
                 text: view.title,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w700,
                   color: t.textDim,
                 ),
@@ -151,7 +151,7 @@ class _RoleBody extends ConsumerWidget {
                 child: Text(
                   view.title,
                   style: TextStyle(
-                    fontSize: 14.5,
+                    fontSize: AppText.bodyLarge,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.15,
                     color: t.text,

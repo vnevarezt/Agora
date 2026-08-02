@@ -129,7 +129,7 @@ class _ProjectId extends ConsumerWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 17,
+            fontSize: AppText.title,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.34,
             color: t.text,
@@ -157,7 +157,7 @@ class _ProjectId extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: AppText.small,
                         fontWeight: FontWeight.w600,
                         color: t.textMute,
                       ),
@@ -181,7 +181,7 @@ class _ProjectId extends ConsumerWidget {
                     Text(
                       context.t.projectBar.weeks(n: weekCount),
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: AppText.small,
                         fontWeight: FontWeight.w600,
                         color: t.textMute,
                       ),
@@ -287,7 +287,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                             text: context.t.projectBar
                                 .weekN(n: n == 0 ? '—' : active + 1),
                             style: TextStyle(
-                              fontSize: 10.5,
+                              fontSize: AppText.micro,
                               fontWeight: FontWeight.w700,
                               color: t.textMute,
                             ),
@@ -441,7 +441,7 @@ class _WeekMenu extends ConsumerWidget {
             child: Text(
               context.t.projectBar.goToWeek.toUpperCase(),
               style: TextStyle(
-                fontSize: 10,
+                fontSize: AppText.micro,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.6,
                 color: t.textMute,
@@ -472,7 +472,7 @@ class _WeekMenu extends ConsumerWidget {
                         child: Text(
                           context.t.projectBar.weekShort(n: i + 1).toUpperCase(),
                           style: TextStyle(
-                            fontSize: 9.5,
+                            fontSize: AppText.micro,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
                             color: i == active ? t.accentStrong : t.textMute,
@@ -583,12 +583,12 @@ class _AuxToggle extends StatelessWidget {
                 children: [
                   Text(context.t.projectBar.auxRoom,
                       style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.w700,
                           color: t.text)),
                   Text(context.t.projectBar.auxRoomDesc,
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w600,
                           color: t.textMute)),
                 ],
@@ -636,12 +636,12 @@ class _TwoPerSheetToggle extends StatelessWidget {
                 children: [
                   Text(context.t.projectBar.twoPerSheet,
                       style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.w700,
                           color: t.text)),
                   Text(context.t.projectBar.twoPerSheetDesc,
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w600,
                           color: t.textMute)),
                 ],
@@ -689,12 +689,12 @@ class _CircuitOverseerToggle extends StatelessWidget {
                 children: [
                   Text(context.t.projectBar.circuitOverseer,
                       style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.w700,
                           color: t.text)),
                   Text(context.t.projectBar.circuitOverseerDesc,
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w600,
                           color: t.textMute)),
                 ],
@@ -809,7 +809,7 @@ class _ExportCard extends StatelessWidget {
                               ? tr.export.currentSheet
                               : tr.export.currentWeek,
                           style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: AppText.body,
                               fontWeight: FontWeight.w700,
                               color: t.text)),
                       Text(
@@ -817,7 +817,7 @@ class _ExportCard extends StatelessWidget {
                               ? tr.export.currentSheetSub
                               : tr.export.currentWeekSub,
                           style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: AppText.caption,
                               fontWeight: FontWeight.w600,
                               color: t.textMute)),
                     ],
@@ -890,12 +890,12 @@ class _ExportItem extends StatelessWidget {
                   children: [
                     Text(title,
                         style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppText.body,
                             fontWeight: FontWeight.w700,
                             color: t.text)),
                     Text(sub,
                         style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: AppText.caption,
                             fontWeight: FontWeight.w600,
                             color: t.textMute)),
                   ],

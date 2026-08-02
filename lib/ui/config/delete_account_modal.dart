@@ -6,6 +6,7 @@ import '../../state/cloud_auth.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/sync_provider.dart';
 import '../auth/widgets/auth_error_text.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
@@ -123,7 +124,7 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
             Text(
               tr.account.deleteReauthGoogle,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w600,
                 color: context.tokens.textMute,
               ),
@@ -169,7 +170,7 @@ class _BlockedNotice extends ConsumerWidget {
     return Text(
       context.t.account.deleteBlocked(congregations: names),
       style: TextStyle(
-        fontSize: 13,
+        fontSize: AppText.body,
         fontWeight: FontWeight.w600,
         height: 1.4,
         color: Theme.of(context).colorScheme.error,

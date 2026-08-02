@@ -7,6 +7,7 @@ import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
 import '../responsive.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -37,7 +38,7 @@ class PdfPreviewView extends ConsumerWidget {
             Text(
               context.t.preview.emptyHint,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w600,
                 color: t.textMute,
               ),
@@ -57,7 +58,7 @@ class PdfPreviewView extends ConsumerWidget {
             context.t.preview.error(error: e),
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: AppText.small,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.error,
             ),

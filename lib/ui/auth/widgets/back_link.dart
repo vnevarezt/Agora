@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
 
@@ -27,7 +28,7 @@ class BackLink extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: color,
                 ),

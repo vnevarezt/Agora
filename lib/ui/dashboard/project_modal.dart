@@ -21,6 +21,7 @@ import '../widgets/bound_text_field.dart';
 import '../widgets/modal_shell.dart';
 import '../widgets/filter_pill.dart';
 import '../widgets/labeled_field.dart';
+import '../theme/app_theme.dart';
 
 /// Opens the create/edit project modal. [project] null = new.
 Future<void> showProjectModal(BuildContext context, {Project? project}) {
@@ -323,7 +324,7 @@ class _WeekToggle extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: AppText.caption,
               fontWeight: FontWeight.w700,
               color: fg,
               fontFeatures: const [FontFeature.tabularFigures()],

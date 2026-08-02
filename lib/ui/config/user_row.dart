@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -48,7 +49,7 @@ class UserRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w800,
                     color: t.text,
                   ),
@@ -58,7 +59,7 @@ class UserRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),
@@ -98,7 +99,7 @@ class RolePill extends StatelessWidget {
       child: Text(
         role.toUpperCase(),
         style: TextStyle(
-          fontSize: 10.5,
+          fontSize: AppText.micro,
           fontWeight: FontWeight.w800,
           letterSpacing: 0.3,
           color: t.textDim,

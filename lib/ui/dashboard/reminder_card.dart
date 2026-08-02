@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/reminder.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
@@ -55,7 +56,7 @@ class ReminderCard extends StatelessWidget {
                 Text(
                   r.title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w700,
                     height: 1.35,
                     color: t.text,
@@ -65,7 +66,7 @@ class ReminderCard extends StatelessWidget {
                 Text(
                   r.meta,
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),
@@ -76,7 +77,7 @@ class ReminderCard extends StatelessWidget {
                   builder: (context, hovered, _) => Text(
                     '${r.cta} →',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppText.small,
                       fontWeight: FontWeight.w800,
                       color: t.accentStrong,
                       decoration:

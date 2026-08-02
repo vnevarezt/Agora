@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -58,7 +59,7 @@ class AssigneeButton extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.w700,
                           color: t.text,
                         ),
@@ -66,7 +67,7 @@ class AssigneeButton extends StatelessWidget {
                     : Text(
                         context.t.workspace.assignee,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.w600,
                           color: hovered ? t.textDim : t.textMute,
                         ),

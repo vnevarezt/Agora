@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/motion.dart';
@@ -84,7 +85,7 @@ class _NewProjectCardState extends State<NewProjectCard> {
                     Text(
                       context.t.dashboard.newProject,
                       style: TextStyle(
-                        fontSize: 13.5,
+                        fontSize: AppText.body,
                         fontWeight: FontWeight.w700,
                         color: fg,
                       ),

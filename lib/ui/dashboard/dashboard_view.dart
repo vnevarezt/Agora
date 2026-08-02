@@ -13,6 +13,7 @@ import '../../state/sync_controller.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -147,7 +148,7 @@ class _TopBar extends ConsumerWidget {
                 Text(
                   tr.dashboard.subtitle,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),
@@ -156,7 +157,7 @@ class _TopBar extends ConsumerWidget {
                 Text.rich(
                   TextSpan(
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.body,
                       fontWeight: FontWeight.w600,
                       color: t.textMute,
                     ),
@@ -280,7 +281,7 @@ class _SyncIndicator extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.body,
                       fontWeight: FontWeight.w600,
                       color: t.textDim,
                     ),
@@ -392,7 +393,7 @@ class _RestoreBanner extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w600,
                 color: t.text,
               ),
@@ -623,7 +624,7 @@ class _RemindersSection extends ConsumerWidget {
           Text(
             context.t.dashboard.allDone,
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: AppText.small,
               fontWeight: FontWeight.w600,
               color: t.textMute,
             ),

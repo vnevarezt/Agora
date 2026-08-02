@@ -99,7 +99,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                     context.t.picker.noResults(query: _search),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.body,
                       fontWeight: FontWeight.w600,
                       color: t.textMute,
                     ),
@@ -143,7 +143,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             maxLength: widget.maxLength,
             onChanged: (v) => setState(() => _query = v),
             style: TextStyle(
-                fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
+                fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
             decoration: InputDecoration(
               counterText: '',
               hintText: context.t.common.searchParticipant,
@@ -202,7 +202,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                 const SizedBox(width: 9),
                 Text(label,
                     style: TextStyle(
-                        fontSize: 13.5,
+                        fontSize: AppText.body,
                         fontWeight: FontWeight.w700,
                         color: color)),
               ],
@@ -258,7 +258,7 @@ class _PersonRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: AppText.bodyLarge,
                     fontWeight: FontWeight.w700,
                     color: muted ? t.textMute : t.text,
                   ),
@@ -269,7 +269,7 @@ class _PersonRow extends StatelessWidget {
                 Text(
                   tag!,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),
