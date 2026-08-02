@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
-import 'app_spinner.dart';
 import '../theme/tokens.dart';
+import 'app_spinner.dart';
+import 'motion.dart';
 
 /// Shared hover/pressed detection for the catalog buttons.
 ///
@@ -121,7 +122,7 @@ class AppButton extends StatelessWidget {
         // breaks the AnimatedContainer interpolation (finite <-> infinite). The
         // icon-only button is made square with symmetric padding.
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           height: height,
           padding: EdgeInsets.symmetric(
             horizontal: label != null ? 16 : (height - 17) / 2,
@@ -203,7 +204,7 @@ class AppIconButton extends StatelessWidget {
       semanticLabel: semanticLabel ?? tooltip,
       builder: (context, hovered, pressed) {
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           width: size,
           height: size,
           decoration: BoxDecoration(

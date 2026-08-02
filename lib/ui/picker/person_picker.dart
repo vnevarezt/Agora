@@ -4,6 +4,7 @@ import '../../i18n/strings.g.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/motion.dart';
 import 'person_picker_panel.dart';
 
 /// Result of the person picker.
@@ -95,7 +96,7 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   String get barrierLabel => t.picker.closeSelector;
 
   @override
-  Duration get transitionDuration => Dimens.dPop;
+  Duration get transitionDuration => Motion.instant;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,

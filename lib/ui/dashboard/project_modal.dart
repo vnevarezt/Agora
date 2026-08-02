@@ -1,11 +1,9 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
-import '../widgets/empty_state.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../i18n/strings.g.dart';
 import '../../domain/mwb_calendar.dart';
+import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/notebook.dart';
 import '../../models/project.dart';
@@ -13,15 +11,17 @@ import '../../state/dashboard_provider.dart';
 import '../../state/program_content.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
-import '../theme/dimens.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
-import '../widgets/modal_shell.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/filter_pill.dart';
 import '../widgets/labeled_field.dart';
-import '../theme/app_theme.dart';
+import '../widgets/modal_shell.dart';
+import '../widgets/motion.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Opens the create/edit project modal. [project] null = new.
 Future<void> showProjectModal(BuildContext context, {Project? project}) {
@@ -311,7 +311,7 @@ class _WeekToggle extends StatelessWidget {
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
           decoration: BoxDecoration(
             color: active ? t.accent : t.surface,

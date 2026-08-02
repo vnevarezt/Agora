@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
+import 'motion.dart';
 
 /// Filter pill (`.chip`): toggles active/inactive. Optionally with a
 /// color dot on the left (congregation) and a counter on the right.
@@ -31,7 +32,7 @@ class FilterPill extends StatelessWidget {
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           height: 34,
           padding: const EdgeInsets.symmetric(horizontal: 13),
           decoration: BoxDecoration(

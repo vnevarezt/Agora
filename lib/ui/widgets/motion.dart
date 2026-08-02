@@ -2,12 +2,33 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 /// Shared motion language: one ease-out curve (the mock's cubic-bezier) and
-/// consistent durations, so every surface moves the same way.
+/// one duration scale, so every surface moves the same way.
+///
+/// This is the only duration scale. Timings used to be split between here and
+/// `Dimens`, where `dSlide` (180ms) duplicated [fast] under another name and
+/// `dSheet` was never used at all.
 abstract final class Motion {
   static const Curve curve = Cubic(.2, .8, .3, 1);
+
+  /// Micro-interactions: hover and press feedback on a control. Short enough
+  /// to read as a direct response to the finger rather than an animation.
+  static const Duration instant = Duration(milliseconds: 150);
+
+  /// A single element changing state or position.
   static const Duration fast = Duration(milliseconds: 180);
+
+  /// A surface entering or leaving: sheets, page transitions.
   static const Duration med = Duration(milliseconds: 300);
+
+  /// Staggered entrances, where the delay between items carries the meaning.
   static const Duration slow = Duration(milliseconds: 500);
+
+  /// [d] unless the user has asked the OS to reduce motion, in which case
+  /// zero — the state change still happens, it just arrives immediately.
+  /// Every animation in this file goes through here; a raw duration handed
+  /// straight to an animated widget ignores the setting.
+  static Duration of(BuildContext context, Duration d) =>
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : d;
 }
 
 /// Material Design 3 "fade through": the outgoing surface fades out over the
@@ -30,7 +51,7 @@ class FadeThroughSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageTransitionSwitcher(
-      duration: duration,
+      duration: Motion.of(context, duration),
       reverse: reverse,
       transitionBuilder: (child, primary, secondary) => FadeThroughTransition(
         animation: primary,
@@ -63,7 +84,7 @@ class SlideSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: duration,
+      duration: Motion.of(context, duration),
       switchInCurve: Motion.curve,
       switchOutCurve: Motion.curve,
       transitionBuilder: (candidate, animation) {
@@ -130,6 +151,11 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // The staggered entrance is decorative: it carries no state change a
+    // reader would miss. Under Reduce Motion the content is simply already
+    // there, rather than sliding in faster.
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
+
     // FadeTransition animates the layer's opacity (no per-frame rebuild nor
     // widget-level saveLayer, unlike an Opacity built inside a builder).
     return FadeTransition(

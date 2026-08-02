@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
+import 'motion.dart';
 
 typedef Segment = ({IconData? icon, String label});
 
@@ -55,7 +56,7 @@ class SegmentedTabs extends StatelessWidget {
       onTap: onChanged == null || activo ? null : () => onChanged!(i),
       builder: (context, hovered, _) {
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
             color: activo

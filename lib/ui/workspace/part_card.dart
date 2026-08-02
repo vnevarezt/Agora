@@ -14,6 +14,7 @@ import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/modal_shell.dart';
+import '../widgets/motion.dart';
 import 'part_presentation.dart';
 import 'slot_field.dart';
 
@@ -34,7 +35,7 @@ class PartCard extends ConsumerWidget {
     ));
 
     return AnimatedContainer(
-      duration: Dimens.dFast,
+      duration: Motion.instant,
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rCard),

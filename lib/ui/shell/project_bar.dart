@@ -18,6 +18,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/export_actions.dart';
 import '../widgets/export_panel.dart';
+import '../widgets/motion.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
@@ -316,7 +317,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                   const SizedBox(width: 4),
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
-                    duration: Dimens.dFast,
+                    duration: Motion.instant,
                     child: Icon(Icons.expand_more, size: 16, color: t.textMute),
                   ),
                 ],

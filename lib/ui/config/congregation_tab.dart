@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../widgets/empty_state.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_options.dart';
 import '../../i18n/strings.g.dart';
@@ -20,11 +18,14 @@ import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/danger_button.dart';
 import '../widgets/dashed_border.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/labeled_field.dart';
+import '../widgets/motion.dart';
 import 'invite_user_modal.dart';
 import 'join_congregation_modal.dart';
 import 'member_access_modal.dart';
 import 'new_congregation_modal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'settings_card.dart';
 import 'user_row.dart';
 
@@ -565,7 +566,7 @@ class _CongregationChip extends StatelessWidget {
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           height: 34,
           padding: const EdgeInsets.symmetric(horizontal: 13),
           decoration: BoxDecoration(
@@ -624,7 +625,7 @@ class _AddChip extends StatelessWidget {
           color: hovered ? t.accent : t.border,
           radius: Dimens.rPill,
           child: AnimatedContainer(
-            duration: Dimens.dFast,
+            duration: Motion.instant,
             height: 34,
             padding: const EdgeInsets.symmetric(horizontal: 13),
             decoration: BoxDecoration(

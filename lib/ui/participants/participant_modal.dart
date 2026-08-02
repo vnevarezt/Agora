@@ -9,7 +9,6 @@ import '../../state/people_provider.dart';
 import '../../state/sync_provider.dart';
 import '../limits.dart';
 import '../theme/app_theme.dart';
-import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
@@ -17,6 +16,7 @@ import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/modal_shell.dart';
+import '../widgets/motion.dart';
 import '../widgets/segmented_control.dart';
 
 /// Description of each privilege in the modal radio cards.
@@ -316,7 +316,7 @@ class _RoleOption extends StatelessWidget {
       onTap: onTap,
       builder: (context, hovered, _) {
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
           decoration: BoxDecoration(
             color: selected ? t.accentTint : t.surface,

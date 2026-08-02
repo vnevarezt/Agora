@@ -13,11 +13,8 @@ abstract final class Dimens {
   static const double rSheet = 22; // bottom sheet móvil (esquinas superiores)
   static const double rPill = 999;
 
-  // Transition durations.
-  static const Duration dFast = Duration(milliseconds: 150);
-  static const Duration dPop = Duration(milliseconds: 160);
-  static const Duration dSlide = Duration(milliseconds: 180);
-  static const Duration dSheet = Duration(milliseconds: 220);
+  // Durations live in Motion (widgets/motion.dart), which is the single
+  // duration scale. Dimens carries sizes only.
 
   // Control heights.
   static const double hControl = 38; // botones e icon-buttons de la barra
