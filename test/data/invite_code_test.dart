@@ -31,9 +31,13 @@ void main() {
 
     expect(() => InviteCode.parse(text.substring(0, text.length - 1)),
         throwsA(isA<InviteCodeException>()));
-    // One flipped character inside the secret.
+    // One flipped character inside the secret. The replacement must differ
+    // from what is already there: the secret is random base64url, so hardcoding
+    // 'A' was a no-op roughly one run in sixty-four, leaving the code valid and
+    // failing the expectation below.
     final parts = text.split(':');
-    parts[4] = 'A${parts[4].substring(1)}';
+    final first = parts[4][0];
+    parts[4] = '${first == 'A' ? 'B' : 'A'}${parts[4].substring(1)}';
     expect(() => InviteCode.parse(parts.join(':')),
         throwsA(isA<InviteCodeException>()));
     expect(() => InviteCode.parse('hello world'),
