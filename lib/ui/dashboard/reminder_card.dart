@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/reminder.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
@@ -14,24 +15,12 @@ class ReminderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final dark = Theme.of(context).brightness == Brightness.dark;
     final r = recordatorio;
 
     final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
         switch (r.type) {
-      ReminderType.alert => dark
-          ? (
-              Icons.warning_amber_rounded,
-              const Color(0xFF40231C),
-              const Color(0xFFE8A38C),
-              null
-            )
-          : (
-              Icons.warning_amber_rounded,
-              const Color(0xFFFBE7DF),
-              const Color(0xFFB5562F),
-              null
-            ),
+      ReminderType.alert =>
+        (Icons.warning_amber_rounded, t.alertSoft, t.alert, null),
       ReminderType.task =>
         (Icons.schedule, t.accentSoft, t.accentStrong, null),
       ReminderType.info =>
@@ -67,7 +56,7 @@ class ReminderCard extends StatelessWidget {
                 Text(
                   r.title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w700,
                     height: 1.35,
                     color: t.text,
@@ -77,7 +66,7 @@ class ReminderCard extends StatelessWidget {
                 Text(
                   r.meta,
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),
@@ -88,7 +77,7 @@ class ReminderCard extends StatelessWidget {
                   builder: (context, hovered, _) => Text(
                     '${r.cta} →',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppText.small,
                       fontWeight: FontWeight.w800,
                       color: t.accentStrong,
                       decoration:

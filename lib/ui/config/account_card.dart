@@ -8,6 +8,8 @@ import '../../state/sync_provider.dart';
 import '../auth/cloud_sign_in_modal.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
+import '../widgets/danger_button.dart';
+import 'delete_account_modal.dart';
 import 'settings_card.dart';
 
 /// Settings card for the optional Firebase identity. Degrades to a
@@ -57,7 +59,7 @@ class AccountCard extends ConsumerWidget {
               ),
             ),
           )
-        else
+        else ...[
           SettingRow(
             first: true,
             title: tr.account.signedInAs,
@@ -69,6 +71,19 @@ class AccountCard extends ConsumerWidget {
               onPressed: () => ref.read(cloudSignOutProvider)(),
             ),
           ),
+          SettingRow(
+            title: tr.account.deleteAccount,
+            subtitle: tr.account.deleteAccountDesc,
+            trailing: DangerButton(
+              label: tr.account.deleteAccount,
+              onTap: () => showAppModal<void>(
+                context,
+                builder: (ctx, sheet, close) =>
+                    DeleteAccountModal(sheet: sheet, onClose: close),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

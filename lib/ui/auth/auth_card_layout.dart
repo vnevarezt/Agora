@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
 import '../responsive.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// `.auth__main` + `.auth__card`: 400px column centered on the app
@@ -39,7 +40,7 @@ class AuthCardLayout extends StatelessWidget {
                     context.t.portada.legal,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: AppText.caption,
                       fontWeight: FontWeight.w600,
                       height: 1.5,
                       color: t.textMute,
@@ -76,7 +77,7 @@ class BrandLockup extends StatelessWidget {
           child: Text(
             'JW',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppText.body,
               fontWeight: FontWeight.w800,
               color: t.accentInk,
             ),
@@ -86,7 +87,7 @@ class BrandLockup extends StatelessWidget {
         Text(
           context.t.app.brand,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: AppText.bodyLarge,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.3,
             color: t.text,
@@ -128,7 +129,7 @@ class AuthSub extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 13.5,
+        fontSize: AppText.body,
         fontWeight: FontWeight.w600,
         height: 1.5,
         color: context.tokens.textMute,

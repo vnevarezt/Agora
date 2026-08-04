@@ -13,6 +13,7 @@ import '../../state/sync_controller.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
 import '../shell/program_shell.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -147,7 +148,7 @@ class _TopBar extends ConsumerWidget {
                 Text(
                   tr.dashboard.subtitle,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),
@@ -156,7 +157,7 @@ class _TopBar extends ConsumerWidget {
                 Text.rich(
                   TextSpan(
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.body,
                       fontWeight: FontWeight.w600,
                       color: t.textMute,
                     ),
@@ -227,7 +228,7 @@ class _SyncIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final tr = context.t;
-    const amber = Color(0xFFB9890F);
+    final amber = t.warningStrong;
 
     final (IconData? icon, String label, Color color, String tip) =
         switch (state) {
@@ -280,7 +281,7 @@ class _SyncIndicator extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.body,
                       fontWeight: FontWeight.w600,
                       color: t.textDim,
                     ),
@@ -303,7 +304,7 @@ class _CloudSyncIndicator extends ConsumerWidget {
     final t = context.tokens;
     final tr = context.t;
     final status = ref.watch(syncControllerProvider);
-    const amber = Color(0xFFB9890F);
+    final amber = t.warningStrong;
 
     final offlinePending =
         status.phase == SyncPhase.offline && status.pendingOutbox > 0;
@@ -357,15 +358,15 @@ class _RestoreBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final tr = context.t;
-    const amber = Color(0xFFB9890F);
+    final amber = t.warningStrong;
 
     final (Widget leading, String label) = switch (phase) {
       SyncPhase.offline => (
-          const Icon(Icons.cloud_off_rounded, size: 17, color: amber),
+          Icon(Icons.cloud_off_rounded, size: 17, color: amber),
           tr.cloudSync.restoreOffline,
         ),
       SyncPhase.error => (
-          const Icon(Icons.error_outline_rounded, size: 17, color: amber),
+          Icon(Icons.error_outline_rounded, size: 17, color: amber),
           tr.cloudSync.errorUnknown,
         ),
       _ => (
@@ -392,7 +393,7 @@ class _RestoreBanner extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w600,
                 color: t.text,
               ),
@@ -623,7 +624,7 @@ class _RemindersSection extends ConsumerWidget {
           Text(
             context.t.dashboard.allDone,
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: AppText.small,
               fontWeight: FontWeight.w600,
               color: t.textMute,
             ),

@@ -82,8 +82,12 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['keyVersion'])
         && request.resource.data.keyVersion is int
         && request.resource.data.keyVersion >= resource.data.keyVersion;
-      // Recursive deletes need tooling; deferred past 4b.
-      allow delete: if false;
+      // Congregation teardown (account deletion / admin "delete cloud data").
+      // Firestore does NOT cascade: the client deletes items/meta/invites/
+      // members first, then this doc, then the admin's OWN member doc LAST —
+      // isAdmin() reads that member doc, so deleting it earlier would strand
+      // everything else undeletable.
+      allow delete: if isAdmin(cid);
 
       // ---- members -------------------------------------------------------
       match /members/{uid} {
@@ -164,6 +168,8 @@ service cloud.firestore {
           && (caps(cid).admin == true
               || caps(cid).people == true
               || caps(cid).editTypes.size() > 0);
+        // Part of congregation teardown (see the congregation delete rule).
+        allow delete: if isAdmin(cid);
       }
 
       // ---- items: the synced entities (E2E blobs) ------------------------
@@ -206,8 +212,10 @@ service cloud.firestore {
             )
           );
 
-        // Deleting = E2E tombstone inside the blob; docs never disappear.
-        allow delete: if false;
+        // Normal "deletes" are E2E tombstones inside the blob; the doc lives
+        // on. Hard delete is only for congregation teardown (account deletion
+        // / admin wipe), admin-gated like the congregation doc itself.
+        allow delete: if isAdmin(cid);
       }
     }
   }

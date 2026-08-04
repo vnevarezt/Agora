@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
@@ -66,12 +67,7 @@ class ModalShell extends StatelessWidget {
         color: t.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: t.border),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x33000000), blurRadius: 40, offset: Offset(0, 12)),
-          BoxShadow(
-              color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 4)),
-        ],
+        boxShadow: Elevation.modal,
       ),
       clipBehavior: Clip.antiAlias,
       child: card,
@@ -105,7 +101,7 @@ class ModalShell extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16.5,
+                      fontSize: AppText.title,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.2,
                       color: t.text,
@@ -116,7 +112,7 @@ class ModalShell extends StatelessWidget {
                     Text(
                       desc!,
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: AppText.small,
                         fontWeight: FontWeight.w600,
                         height: 1.35,
                         color: t.textMute,

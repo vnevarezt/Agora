@@ -38,4 +38,10 @@ class InMemoryTransport implements SyncTransport {
         cursor == null || d.serverTs!.compareTo(cursor) > 0);
     return [...all]..sort((a, b) => a.serverTs!.compareTo(b.serverTs!));
   }
+
+  @override
+  Future<void> deleteAllItems(String congregationId) async {
+    docs.remove(congregationId);
+    activity.remove(congregationId);
+  }
 }

@@ -51,13 +51,13 @@ class MiniChip extends StatelessWidget {
       _ChipKind.time => AppText.mono(size: 12, weight: FontWeight.w700, color: fg),
       _ChipKind.allMeeting => AppText.label(color: fg),
       _ChipKind.duration =>
-        TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
+        TextStyle(fontSize: AppText.caption, fontWeight: FontWeight.w700, color: fg),
       _ChipKind.tag =>
-        TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
+        TextStyle(fontSize: AppText.caption, fontWeight: FontWeight.w700, color: fg),
       _ChipKind.aux =>
-        TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: fg),
+        TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w700, color: fg),
       _ChipKind.week => TextStyle(
-          fontSize: 10.5,
+          fontSize: AppText.micro,
           fontWeight: FontWeight.w700,
           color: fg,
           fontFeatures: const [FontFeature.tabularFigures()],

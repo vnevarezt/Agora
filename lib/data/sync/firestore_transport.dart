@@ -127,6 +127,27 @@ class FirestoreTransport implements SyncTransport {
         ];
       });
 
+  @override
+  Future<void> deleteAllItems(String congregationId) => _guard(() async {
+        // Page through the items collection deleting in batches under the
+        // 500-op cap. Each page re-queries from the start, so already-deleted
+        // docs fall away and an interrupted run simply resumes.
+        while (true) {
+          final snap = await _items(congregationId)
+              .limit(_batchLimit)
+              .get(const GetOptions(source: Source.server));
+          if (snap.docs.isEmpty) break;
+          final batch = _db.batch();
+          for (final d in snap.docs) {
+            batch.delete(d.reference);
+          }
+          await batch.commit().timeout(_writeTimeout);
+          if (snap.docs.length < _batchLimit) break;
+        }
+        // The heartbeat is not in the items collection: delete it explicitly.
+        await _activity(congregationId).delete().timeout(_writeTimeout);
+      });
+
   ItemDoc _toItemDoc(QueryDocumentSnapshot<Map<String, dynamic>> d) {
     final data = d.data();
     return ItemDoc(

@@ -268,9 +268,6 @@ describe('items: capability matrix per entity kind', () => {
     await assertFails(write('admin', { entity: 'person', serverTs: Timestamp.now() }));
     // Extra fields are rejected.
     await assertFails(write('admin', { entity: 'person', extra: 1 }));
-    // Deletes are rejected (tombstones live inside blobs).
-    await write('admin', { entity: 'person' });
-    await assertFails(deleteDoc(doc(db('admin'), 'congregations/c1/items/x-person')));
     // Rewriting the kind (person → program) is rejected even for admins.
     await assertFails(setDoc(doc(db('admin'), 'congregations/c1/items/x-person'),
       item({ entity: 'program', programTypeId: 'mwb-s140' })));
@@ -570,4 +567,55 @@ describe('key rotation batch', () => {
     await assertFails(setDoc(doc(db('admin'), 'congregations/c1/members/carol'),
       { wrappedCcks: { 1: box(1), 2: box(2) } }));
   });
+});
+
+// ---------------------------------------------------------------------------
+// Congregation teardown: hard deletes for account deletion and the admin
+// "delete this congregation's cloud data" action. Firestore does NOT cascade,
+// so the client deletes items/meta/invites/members, then the congregation doc,
+// then the admin's OWN member doc LAST — every teardown delete is gated on
+// isAdmin(), which reads that member doc.
+describe('congregation teardown (hard deletes)', () => {
+  async function plant(cid, path, data) {
+    await env.withSecurityRulesDisabled(async (ctx) =>
+      setDoc(doc(ctx.firestore(), `congregations/${cid}/${path}`), data));
+  }
+
+  beforeEach(async () => {
+    await found('admin', 'c1');
+    await plantMember('c1', 'viewer', CAPS_VIEW);
+    await plant('c1', 'items/x-person', item({ entity: 'person' }));
+    await plant('c1', 'meta/activity', { scopes: {}, srcDevice: 'dev' });
+  });
+
+  it('an admin hard-deletes items, meta and the congregation doc', async () => {
+    const d = db('admin');
+    await assertSucceeds(deleteDoc(doc(d, 'congregations/c1/items/x-person')));
+    await assertSucceeds(deleteDoc(doc(d, 'congregations/c1/meta/activity')));
+    await assertSucceeds(deleteDoc(doc(d, 'congregations/c1')));
+  });
+
+  it('a non-admin member cannot delete items, meta or the congregation', async () => {
+    const d = db('viewer');
+    await assertFails(deleteDoc(doc(d, 'congregations/c1/items/x-person')));
+    await assertFails(deleteDoc(doc(d, 'congregations/c1/meta/activity')));
+    await assertFails(deleteDoc(doc(d, 'congregations/c1')));
+  });
+
+  it('a stranger cannot delete anything', async () => {
+    const d = db('stranger');
+    await assertFails(deleteDoc(doc(d, 'congregations/c1/items/x-person')));
+    await assertFails(deleteDoc(doc(d, 'congregations/c1')));
+  });
+
+  it('deleting the admin member doc first strands the rest (why it goes last)',
+    async () => {
+      // Simulate the wrong order: the admin's member doc is already gone.
+      await env.withSecurityRulesDisabled(async (ctx) =>
+        deleteDoc(doc(ctx.firestore(), 'congregations/c1/members/admin')));
+      // isAdmin() now reads no member doc → every teardown delete is denied.
+      const d = db('admin');
+      await assertFails(deleteDoc(doc(d, 'congregations/c1/items/x-person')));
+      await assertFails(deleteDoc(doc(d, 'congregations/c1')));
+    });
 });

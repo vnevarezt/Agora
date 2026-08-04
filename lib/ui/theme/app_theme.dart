@@ -8,9 +8,37 @@ abstract final class AppText {
   static const String family = 'Manrope';
   static const String monoFamily = 'JetBrainsMono';
 
+  // ---- type scale ---------------------------------------------------------
+  // Every font size in the app comes from here; a bare number at a call site
+  // is drift. Deliberately coarse at seven steps — the free-form scale this
+  // replaces had grown to nineteen distinct values between 9.5 and 19 with no
+  // rule for choosing among them, which is why equivalent elements on
+  // different screens did not match.
+
+  /// Uppercase labels and badges. The floor: nothing renders smaller.
+  static const double micro = 10.5;
+
+  /// Secondary and helper text.
+  static const double caption = 11.5;
+
+  /// Dense supporting text inside cards and rows.
+  static const double small = 12.5;
+
+  /// Default reading size.
+  static const double body = 13.5;
+
+  /// Emphasised body: primary names, list item titles.
+  static const double bodyLarge = 15;
+
+  /// Section and modal titles.
+  static const double title = 16.5;
+
+  /// Screen titles and large counts.
+  static const double display = 19;
+
   /// JetBrains Mono for times, codes and percentages (tabular figures).
   static TextStyle mono({
-    double size = 12,
+    double size = small,
     FontWeight weight = FontWeight.w600,
     Color? color,
   }) {
@@ -25,7 +53,7 @@ abstract final class AppText {
 
   /// Small uppercase labels (field, slot and picker-group labels).
   /// The text must be passed already uppercased.
-  static TextStyle label({double size = 10.5, Color? color}) {
+  static TextStyle label({double size = micro, Color? color}) {
     return TextStyle(
       fontSize: size,
       fontWeight: FontWeight.w700,
@@ -73,29 +101,31 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     extensions: [t],
     textTheme: TextTheme(
       bodyLarge: TextStyle(
-          fontSize: 15,
+          fontSize: AppText.bodyLarge,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.15,
           color: t.text),
       bodyMedium: TextStyle(
-          fontSize: 13.5,
+          fontSize: AppText.body,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.1,
           color: t.text),
       bodySmall: TextStyle(
-          fontSize: 11.5, fontWeight: FontWeight.w600, color: t.textDim),
+          fontSize: AppText.caption,
+          fontWeight: FontWeight.w600,
+          color: t.textDim),
       titleLarge: TextStyle(
-          fontSize: 16,
+          fontSize: AppText.title,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.3,
           color: t.text),
       titleMedium: TextStyle(
-          fontSize: 14.5,
+          fontSize: AppText.bodyLarge,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.15,
           color: t.text),
       labelLarge: TextStyle(
-          fontSize: 13.5, fontWeight: FontWeight.w700, color: t.text),
+          fontSize: AppText.body, fontWeight: FontWeight.w700, color: t.text),
     ),
     iconTheme: IconThemeData(color: t.textDim, size: 19),
     inputDecorationTheme: InputDecorationThemeData(

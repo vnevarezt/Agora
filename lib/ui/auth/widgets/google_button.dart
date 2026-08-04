@@ -2,10 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../theme/dimens.dart';
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_spinner.dart';
+import '../../widgets/motion.dart';
 
 /// `.btn-google`: surface button with the four-color Google mark.
 class GoogleButton extends StatelessWidget {
@@ -27,7 +28,7 @@ class GoogleButton extends StatelessWidget {
     return Pressable(
       onTap: enabled ? onPressed : null,
       builder: (context, hovered, pressed) => AnimatedContainer(
-        duration: Dimens.dFast,
+        duration: Motion.instant,
         height: 46,
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : t.surface,
@@ -48,7 +49,7 @@ class GoogleButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w700,
                 color: t.text,
               ),

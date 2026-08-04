@@ -4,6 +4,7 @@ import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
 import '../responsive.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/ink_surface.dart';
@@ -57,7 +58,7 @@ class ProjectCard extends StatelessWidget {
                             Text(
                               p.name,
                               style: TextStyle(
-                                fontSize: 15.5,
+                                fontSize: AppText.bodyLarge,
                                 fontWeight: FontWeight.w800,
                                 height: 1.25,
                                 letterSpacing: -0.1,
@@ -84,7 +85,7 @@ class ProjectCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 11.5,
+                                      fontSize: AppText.caption,
                                       fontWeight: FontWeight.w700,
                                       color: t.textMute,
                                     ),
@@ -115,7 +116,7 @@ class ProjectCard extends StatelessWidget {
                       Text(
                         '${p.done}/${p.total}',
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w800,
                           color: t.textDim,
                         ),
@@ -126,7 +127,7 @@ class ProjectCard extends StatelessWidget {
                   Text(
                     context.t.projectCard.edited(label: p.editedLabel),
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: AppText.caption,
                       fontWeight: FontWeight.w600,
                       color: t.textMute,
                     ),

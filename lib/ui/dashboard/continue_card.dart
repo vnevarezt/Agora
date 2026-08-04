@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/congregation.dart';
 import '../../models/project.dart';
+import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -45,7 +46,7 @@ class ContinueCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           LayoutBuilder(builder: (context, c) {
-            final narrow = c.maxWidth < 560;
+            final narrow = c.maxWidth < ContainerWidth.continueRow;
             final ring = _ProgressRing(value: p.progress, label: '$pct%');
             final body = _body(t, tr, p);
             final cta = AppButton(
@@ -94,7 +95,7 @@ class ContinueCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: AppText.display,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.3,
                 color: t.text,
@@ -122,7 +123,7 @@ class ContinueCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: t.textMute,
                 ),
@@ -137,7 +138,7 @@ class ContinueCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 color: t.textMute,
               ),
@@ -183,7 +184,7 @@ class _ProgressRing extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w800,
                 color: t.text,
               ),
@@ -205,22 +206,13 @@ class _WeekChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final dark = Theme.of(context).brightness == Brightness.dark;
     final complete = progress.total > 0 && progress.done >= progress.total;
     final started = !complete && progress.done > 0;
 
     final (IconData? icon, Color bg, Color fg) = complete
-        ? (
-            Icons.check_rounded,
-            dark ? const Color(0xFF1C3325) : const Color(0xFFE1F2E6),
-            dark ? const Color(0xFF7FC796) : const Color(0xFF2E7247),
-          )
+        ? (Icons.check_rounded, t.successSoft, t.success)
         : started
-            ? (
-                Icons.timelapse_rounded,
-                dark ? const Color(0xFF3A3115) : const Color(0xFFF7EED4),
-                dark ? const Color(0xFFD9C27A) : const Color(0xFF8A6E1B),
-              )
+            ? (Icons.timelapse_rounded, t.warningSoft, t.warning)
             : (null, t.surface2, t.textDim);
 
     return Container(
@@ -240,7 +232,7 @@ class _WeekChip extends StatelessWidget {
           Text(
             progress.label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: AppText.caption,
               fontWeight: FontWeight.w700,
               color: fg,
             ),

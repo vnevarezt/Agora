@@ -5,14 +5,16 @@ import '../../i18n/strings.g.dart';
 import '../../state/editor_session.dart';
 import '../../state/program_form.dart';
 import '../../state/ui_state.dart';
+import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
-import '../widgets/modal_shell.dart';
 import '../widgets/mini_chip.dart';
+import '../widgets/modal_shell.dart';
+import '../widgets/motion.dart';
 import 'part_presentation.dart';
 import 'slot_field.dart';
 
@@ -33,7 +35,7 @@ class PartCard extends ConsumerWidget {
     ));
 
     return AnimatedContainer(
-      duration: Dimens.dFast,
+      duration: Motion.instant,
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rCard),
@@ -77,7 +79,7 @@ class _FixedLineBody extends StatelessWidget {
               TextSpan(
                 text: view.title,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w700,
                   color: t.textDim,
                 ),
@@ -151,7 +153,7 @@ class _RoleBody extends ConsumerWidget {
                 child: Text(
                   view.title,
                   style: TextStyle(
-                    fontSize: 14.5,
+                    fontSize: AppText.bodyLarge,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.15,
                     color: t.text,
@@ -185,6 +187,7 @@ class _EditTitleButton extends StatelessWidget {
     final t = context.tokens;
     return Pressable(
       onTap: onTap,
+      semanticLabel: context.t.workspace.editTitle,
       builder: (context, hovered, _) => Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
@@ -254,7 +257,7 @@ class _Slots extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final perRow = c.maxWidth < 340 ? 1 : 2;
+        final perRow = c.maxWidth < ContainerWidth.slotPair ? 1 : 2;
         if (slots.length == 1 || perRow == 1) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -121,7 +121,7 @@ class _JoinCongregationModalState
             Text(
               _error!,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.error,
               ),

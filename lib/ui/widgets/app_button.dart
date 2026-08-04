@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
-import 'app_spinner.dart';
 import '../theme/tokens.dart';
+import 'app_spinner.dart';
+import 'motion.dart';
 
 /// Shared hover/pressed detection for the catalog buttons.
+///
+/// The `hovered` flag the builder receives is true while the pointer is over
+/// the control OR while it is held down. Touch devices have no hover, so
+/// every control styled only on `hovered` — most of the ghost buttons, icon
+/// buttons and nav items — used to sit in its resting state with no reaction
+/// to a finger at all. The theme also disables the Material ripple
+/// (`NoSplash`), so nothing else was covering that gap.
 class Pressable extends StatefulWidget {
-  const Pressable({super.key, required this.builder, this.onTap, this.tooltip});
+  const Pressable({
+    super.key,
+    required this.builder,
+    this.onTap,
+    this.tooltip,
+    this.semanticLabel,
+  });
 
   final Widget Function(BuildContext context, bool hovered, bool pressed)
   builder;
   final VoidCallback? onTap;
   final String? tooltip;
+
+  /// What VoiceOver / TalkBack announces. Required in practice for controls
+  /// whose only content is an icon: a bare [GestureDetector] exposes the tap
+  /// action but no role and no name, so a screen reader lands on an anonymous
+  /// element. Controls that render their own text can leave this null — the
+  /// text is already the name.
+  final String? semanticLabel;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -38,13 +59,18 @@ class _PressableState extends State<Pressable> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
-        child: widget.builder(context, _hovered, _pressed),
+        child: widget.builder(context, _hovered || _pressed, _pressed),
       ),
     );
     if (widget.tooltip != null) {
       child = Tooltip(message: widget.tooltip!, child: child);
     }
-    return child;
+    return Semantics(
+      button: true,
+      enabled: widget.onTap != null,
+      label: widget.semanticLabel,
+      child: child,
+    );
   }
 }
 
@@ -62,6 +88,7 @@ class AppButton extends StatelessWidget {
     this.height = Dimens.hControl,
     this.busy = false,
     this.expand = false,
+    this.semanticLabel,
   });
 
   final VoidCallback? onPressed;
@@ -72,6 +99,10 @@ class AppButton extends StatelessWidget {
   final bool busy;
   final bool expand;
 
+  /// Announced name. Only needed in the icon-only form ([label] null), where
+  /// the button renders no text for a screen reader to read.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
@@ -80,6 +111,7 @@ class AppButton extends StatelessWidget {
 
     return Pressable(
       onTap: enabled ? onPressed : null,
+      semanticLabel: semanticLabel,
       builder: (context, hovered, pressed) {
         final bg = esPrimary
             ? (hovered ? t.accentStrong : t.accent)
@@ -90,7 +122,7 @@ class AppButton extends StatelessWidget {
         // breaks the AnimatedContainer interpolation (finite <-> infinite). The
         // icon-only button is made square with symmetric padding.
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           height: height,
           padding: EdgeInsets.symmetric(
             horizontal: label != null ? 16 : (height - 17) / 2,
@@ -102,15 +134,7 @@ class AppButton extends StatelessWidget {
             color: enabled ? bg : bg.withValues(alpha: esPrimary ? 0.55 : 0),
             borderRadius: BorderRadius.circular(Dimens.rControl),
             border: esPrimary ? null : Border.all(color: t.border),
-            boxShadow: esPrimary && enabled
-                ? const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ]
-                : null,
+            boxShadow: esPrimary && enabled ? Elevation.control : null,
           ),
           child: Row(
             mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
@@ -156,6 +180,7 @@ class AppIconButton extends StatelessWidget {
     this.bordered = false,
     this.elevated = false,
     this.size = Dimens.hControl,
+    this.semanticLabel,
   });
 
   final IconData icon;
@@ -165,15 +190,21 @@ class AppIconButton extends StatelessWidget {
   final bool elevated;
   final double size;
 
+  /// Overrides the announced name. Defaults to [tooltip], which already
+  /// describes the action in words — an icon-only button has nothing else a
+  /// screen reader could read.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Pressable(
       onTap: onPressed,
       tooltip: tooltip,
+      semanticLabel: semanticLabel ?? tooltip,
       builder: (context, hovered, pressed) {
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           width: size,
           height: size,
           decoration: BoxDecoration(
@@ -182,15 +213,7 @@ class AppIconButton extends StatelessWidget {
                 : (hovered ? t.surface2 : Colors.transparent),
             borderRadius: BorderRadius.circular(Dimens.rControl),
             border: bordered || elevated ? Border.all(color: t.border) : null,
-            boxShadow: elevated
-                ? const [
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: elevated ? Elevation.raised : null,
           ),
           child: Icon(icon, size: 19, color: hovered ? t.text : t.textDim),
         );

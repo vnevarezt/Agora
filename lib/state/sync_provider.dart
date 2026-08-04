@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/db/app_database.dart';
 import '../data/db/db_key_manager.dart' show KeychainKeyStore;
 import '../data/sync/cck_service.dart';
+import '../data/sync/congregation_teardown.dart';
 import '../data/sync/content_crypto.dart';
 import '../data/sync/firestore_key_docs.dart';
 import '../data/sync/firestore_transport.dart';
@@ -20,6 +21,7 @@ import '../models/congregation_member.dart';
 import '../models/member_capabilities.dart';
 import '../models/membership.dart';
 import 'app_settings.dart';
+import 'auth_session.dart';
 import 'cloud_auth.dart';
 import 'db_provider.dart';
 import 'sync_keys.dart' show syncOwnerUidKey;
@@ -85,9 +87,9 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
     ContentCrypto(),
     deviceId: deviceId(),
     keyringFor: cck.keyringFor,
-    // Read at push time, not captured: capabilities can be downgraded
-    // mid-session and the outbox must respect the change immediately.
-    capabilitiesFor: (cid) async => ref.read(myCapabilitiesProvider(cid)),
+    // Read at push time, not captured: capabilities can be downgraded (or
+    // revoked) mid-session and the outbox must respect the change immediately.
+    capabilitiesFor: (cid) async => ref.read(pushCapabilitiesProvider(cid)),
   );
 });
 
@@ -111,18 +113,30 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
           ]);
 });
 
-/// This user's capabilities in [congregationId] (null = not a member).
+/// What this user may PUSH in [congregationId] — the sync engine's write
+/// filter, with the three-state resolution the raw membership can't express:
 ///
-/// Do NOT gate the UI on this directly — null means two OPPOSITE things (a
-/// local-only congregation, where you have every right, and a revoked
-/// membership, where you have none). Use [rightsProvider], which resolves
-/// that with a local fact.
-final myCapabilitiesProvider = Provider.family((ref, String congregationId) {
-  final memberships = ref.watch(myMembershipsProvider).value ?? const [];
-  for (final m in memberships) {
+///  - never shared / not shared here → null ("don't filter": a local
+///    congregation has no keyring, so the engine leaves its outbox queued);
+///  - shared, membership still loading or errored → null (same "don't
+///    filter": dropping outbox rows on a stale read would lose the user's
+///    edits);
+///  - member → their capabilities;
+///  - shared before, absent now → read-only (REVOKED): [SyncEngine.pushOnce]
+///    drops the forbidden docs instead of rebounding them against the rules
+///    forever.
+///
+/// [rightsProvider] is the UI-facing view of the same resolution.
+final pushCapabilitiesProvider =
+    Provider.family<MemberCapabilities?, String>((ref, congregationId) {
+  final shared = ref.watch(sharedCongregationIdsProvider).value;
+  if (shared == null || !shared.contains(congregationId)) return null;
+  final memberships = ref.watch(myMembershipsProvider);
+  if (memberships.isLoading || memberships.hasError) return null;
+  for (final m in memberships.value ?? const []) {
     if (m.congregationId == congregationId) return m.capabilities;
   }
-  return null;
+  return const MemberCapabilities(); // revoked → read-only
 });
 
 /// Congregations this device has ever had a cloud presence for. A `syncState`
@@ -138,35 +152,18 @@ final sharedCongregationIdsProvider = StreamProvider<Set<String>>((ref) {
 });
 
 /// THE gate for every edit affordance: what this user may do in
-/// [congregationId], right now.
+/// [congregationId], right now — the UI-facing view of
+/// [pushCapabilitiesProvider]. A null there (a local congregation, or a
+/// membership not yet loaded) reads as full rights, so both stay fully
+/// editable; only a confirmed revocation drops to read-only.
 ///
-/// Three states that [myCapabilitiesProvider] alone cannot tell apart:
-///
-///  - never shared → full rights (it is your own local congregation);
-///  - shared, membership still loading → optimistically full (blocking the
-///    UI on an in-flight query would read as a bug, and the push filter plus
-///    the rules catch anything we get wrong);
-///  - shared before, not a member now → read-only (revoked).
-///
-/// Route every gate through here rather than re-deriving it: getting the
-/// first and third confused is the easy mistake, and they want opposite
+/// Route every gate through here rather than re-deriving it: confusing
+/// "never shared" with "revoked" is the easy mistake, and they want opposite
 /// answers.
 final rightsProvider =
-    Provider.family<MemberCapabilities, String>((ref, congregationId) {
-  const readOnly = MemberCapabilities();
-  final shared = ref.watch(sharedCongregationIdsProvider).value;
-  if (shared == null || !shared.contains(congregationId)) {
-    return MemberCapabilities.founder;
-  }
-  final memberships = ref.watch(myMembershipsProvider);
-  if (memberships.isLoading || memberships.hasError) {
-    return MemberCapabilities.founder;
-  }
-  for (final m in memberships.value ?? const []) {
-    if (m.congregationId == congregationId) return m.capabilities;
-  }
-  return readOnly;
-});
+    Provider.family<MemberCapabilities, String>((ref, congregationId) =>
+        ref.watch(pushCapabilitiesProvider(congregationId)) ??
+        MemberCapabilities.founder);
 
 /// The members admin screen's live list.
 ///
@@ -285,4 +282,115 @@ final redeemInviteProvider = Provider((ref) => (InviteCode code) async {
         } while (page.fetched >= FirestoreTransport.pageSize);
       }
       return cid;
+    });
+
+// ---- account & congregation deletion ---------------------------------------
+
+/// The cloud-teardown primitive (gateway + transport). Null unless the cloud
+/// is up and a user is signed in.
+final congregationTeardownProvider = Provider<CongregationTeardown?>((ref) {
+  final docs = ref.watch(keyDocsProvider);
+  final transport = ref.watch(syncTransportProvider);
+  final uid = ref.watch(syncUidProvider);
+  if (docs == null || transport == null || uid == null) return null;
+  return CongregationTeardown(docs, transport, uid: uid);
+});
+
+/// Thrown by [deleteMyAccountProvider] when the user is the sole admin of a
+/// congregation that still has other members: deleting would strand them, so
+/// we refuse and name the congregations to hand over or empty first.
+class AccountDeletionBlocked implements Exception {
+  const AccountDeletionBlocked(this.congregationIds);
+
+  final List<String> congregationIds;
+
+  @override
+  String toString() => 'AccountDeletionBlocked($congregationIds)';
+}
+
+Future<void> _deleteSyncState(AppDatabase db, String cid) =>
+    (db.delete(db.syncState)..where((t) => t.congregationId.equals(cid))).go();
+
+/// Snapshots every congregation's member landscape into the deletion plan.
+Future<AccountDeletionPlan> _accountDeletionPlan(
+    CckService cck, String uid, List<Membership> memberships) async {
+  final landscape = <String, List<MemberRole>>{};
+  for (final m in memberships) {
+    landscape[m.congregationId] = [
+      for (final x in await cck.listMembers(m.congregationId))
+        (memberUid: x.uid, admin: x.capabilities.admin),
+    ];
+  }
+  return planAccountDeletion(uid, landscape);
+}
+
+/// Congregations that would BLOCK account deletion (I'm the sole admin and
+/// other members remain). Lets the delete modal warn upfront, before asking
+/// the user to reauthenticate. Empty when nothing blocks.
+final accountDeletionBlockersProvider =
+    FutureProvider.autoDispose<List<String>>((ref) async {
+  final cck = ref.watch(cckServiceProvider);
+  final uid = ref.watch(syncUidProvider);
+  if (cck == null || uid == null) return const [];
+  final memberships = ref.watch(myMembershipsProvider).value ?? const [];
+  return (await _accountDeletionPlan(cck, uid, memberships)).blocked;
+});
+
+/// Admin action: hard-delete this congregation's cloud space while KEEPING the
+/// local data — it reverts to a local-only congregation (un-share). Destroys
+/// every other member's access, so the UI confirms first.
+final deleteCongregationCloudProvider = Provider((ref) => (String cid) async {
+      final teardown = ref.read(congregationTeardownProvider);
+      if (teardown == null) {
+        throw const SharingException(
+            'keysUnavailable', 'Cloud sync is not available.');
+      }
+      await teardown.wipe(cid);
+      await ref.read(cckServiceProvider)?.forget([cid]);
+      // Drop the "shared" fact so rightsProvider treats it as local again.
+      await _deleteSyncState(ref.read(dbProvider), cid);
+    });
+
+/// Cancels the cloud account: for every congregation, wipe (sole member &
+/// admin) or leave; then delete the identity doc, delete the Firebase account,
+/// and nuke ALL local data (back to the Portada).
+///
+/// The caller MUST have reauthenticated first — `user.delete()` needs a recent
+/// login. Throws [AccountDeletionBlocked] BEFORE deleting anything when the
+/// user is the sole admin of a shared congregation.
+final deleteMyAccountProvider = Provider((ref) => () async {
+      final teardown = ref.read(congregationTeardownProvider);
+      final cck = ref.read(cckServiceProvider);
+      final docs = ref.read(keyDocsProvider);
+      final uid = ref.read(syncUidProvider);
+      final auth = await ref.read(cloudAuthProvider.future);
+      if (teardown == null ||
+          cck == null ||
+          docs == null ||
+          uid == null ||
+          auth == null) {
+        throw const SharingException(
+            'keysUnavailable', 'Cloud sync is not available.');
+      }
+
+      final memberships = ref.read(myMembershipsProvider).value ?? const [];
+
+      // Decide per congregation, then check FIRST (before any deletion):
+      // refuse if deleting would strand other members.
+      final plan = await _accountDeletionPlan(cck, uid, memberships);
+      if (plan.blocked.isNotEmpty) throw AccountDeletionBlocked(plan.blocked);
+
+      for (final cid in plan.wipe) {
+        await teardown.wipe(cid);
+        await cck.forget([cid]);
+      }
+      for (final cid in plan.leave) {
+        await teardown.leave(cid);
+        await cck.forget([cid]);
+      }
+      await docs.deleteUserDoc(uid);
+      await auth.deleteAccount();
+
+      // Everything cloud-side is gone: wipe local and return to the Portada.
+      await ref.read(authSessionProvider.notifier).resetAllData();
     });

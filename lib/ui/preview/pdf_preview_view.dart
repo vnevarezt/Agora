@@ -7,8 +7,14 @@ import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
 import '../../state/program_form.dart';
 import '../responsive.dart';
+import '../theme/app_theme.dart';
+import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+
+/// Paper is white regardless of theme: this is the printed page, not an app
+/// surface, so it does not follow the palette.
+const _paper = Color(0xFFFFFFFF);
 
 /// Rasterized PDF viewer (pdfrx). The zoom/quality logic is unchanged;
 /// only the chrome changes: token background, a sheet with the radius and
@@ -32,7 +38,7 @@ class PdfPreviewView extends ConsumerWidget {
             Text(
               context.t.preview.emptyHint,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w600,
                 color: t.textMute,
               ),
@@ -52,7 +58,7 @@ class PdfPreviewView extends ConsumerWidget {
             context.t.preview.error(error: e),
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: AppText.small,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -123,18 +129,11 @@ class _Vista extends ConsumerWidget {
                   width: pageW,
                   height: pageH,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFFFFFFF),
+                    // Paper is white regardless of theme: this is the printed
+                    // page, not an app surface.
+                    color: _paper,
                     borderRadius: BorderRadius.all(Radius.circular(4)),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Color(0x24000000),
-                          blurRadius: 30,
-                          offset: Offset(0, 8)),
-                      BoxShadow(
-                          color: Color(0x14000000),
-                          blurRadius: 8,
-                          offset: Offset(0, 2)),
-                    ],
+                    boxShadow: Elevation.page,
                   ),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(4)),

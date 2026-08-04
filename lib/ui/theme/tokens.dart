@@ -20,6 +20,20 @@ class AppTokens extends ThemeExtension<AppTokens> {
   final Color accentSoft;
   final Color accentTint;
 
+  // Status roles. Each family is a soft tint used as a background plus the ink
+  // that sits on it; `*Strong` is the solid version for marks that sit
+  // directly on [bg]/[surface] (dots, standalone icons) with no tint behind.
+  // Material's `colorScheme.error` stays separate: that is validation and
+  // destructive actions, this is content status.
+  final Color success;
+  final Color successSoft;
+  final Color successStrong;
+  final Color warning;
+  final Color warningSoft;
+  final Color warningStrong;
+  final Color alert;
+  final Color alertSoft;
+
   const AppTokens({
     required this.bg,
     required this.surface,
@@ -34,6 +48,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.accentInk,
     required this.accentSoft,
     required this.accentTint,
+    required this.success,
+    required this.successSoft,
+    required this.successStrong,
+    required this.warning,
+    required this.warningSoft,
+    required this.warningStrong,
+    required this.alert,
+    required this.alertSoft,
   });
 
   @override
@@ -51,6 +73,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? accentInk,
     Color? accentSoft,
     Color? accentTint,
+    Color? success,
+    Color? successSoft,
+    Color? successStrong,
+    Color? warning,
+    Color? warningSoft,
+    Color? warningStrong,
+    Color? alert,
+    Color? alertSoft,
   }) {
     return AppTokens(
       bg: bg ?? this.bg,
@@ -66,6 +96,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accentInk: accentInk ?? this.accentInk,
       accentSoft: accentSoft ?? this.accentSoft,
       accentTint: accentTint ?? this.accentTint,
+      success: success ?? this.success,
+      successSoft: successSoft ?? this.successSoft,
+      successStrong: successStrong ?? this.successStrong,
+      warning: warning ?? this.warning,
+      warningSoft: warningSoft ?? this.warningSoft,
+      warningStrong: warningStrong ?? this.warningStrong,
+      alert: alert ?? this.alert,
+      alertSoft: alertSoft ?? this.alertSoft,
     );
   }
 
@@ -86,6 +124,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accentInk: Color.lerp(accentInk, other.accentInk, t)!,
       accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
       accentTint: Color.lerp(accentTint, other.accentTint, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      successSoft: Color.lerp(successSoft, other.successSoft, t)!,
+      successStrong: Color.lerp(successStrong, other.successStrong, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      warningSoft: Color.lerp(warningSoft, other.warningSoft, t)!,
+      warningStrong: Color.lerp(warningStrong, other.warningStrong, t)!,
+      alert: Color.lerp(alert, other.alert, t)!,
+      alertSoft: Color.lerp(alertSoft, other.alertSoft, t)!,
     );
   }
 }
@@ -116,6 +162,14 @@ const pizarra = AppPalette(
     accentInk: Color(0xFFF8FCFF),
     accentSoft: Color(0xFFE7F1FF),
     accentTint: Color(0xFFF2F7FF),
+    success: Color(0xFF2E6A3E),
+    successSoft: Color(0xFFDCF0E0),
+    successStrong: Color(0xFF4FA06A),
+    warning: Color(0xFF7A6512),
+    warningSoft: Color(0xFFF3ECD2),
+    warningStrong: Color(0xFFB9890F),
+    alert: Color(0xFFB5562F),
+    alertSoft: Color(0xFFFBE7DF),
   ),
   dark: AppTokens(
     bg: Color(0xFF0B0F14),
@@ -131,6 +185,14 @@ const pizarra = AppPalette(
     accentInk: Color(0xFF060D1A),
     accentSoft: Color(0xFF21344C),
     accentTint: Color(0xFF192431),
+    success: Color(0xFFA9D8B8),
+    successSoft: Color(0xFF1E3A2A),
+    successStrong: Color(0xFF4FA06A),
+    warning: Color(0xFFD9C27A),
+    warningSoft: Color(0xFF3A3115),
+    warningStrong: Color(0xFFB9890F),
+    alert: Color(0xFFE8A38C),
+    alertSoft: Color(0xFF40231C),
   ),
 );
 

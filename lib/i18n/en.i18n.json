@@ -145,6 +145,16 @@
     "signedInAs": "Signed in",
     "signOut": "Sign out",
     "localGateNote": "Signing out of the cloud does not lock your local data; use Security → Lock now for that.",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete my account",
+    "deleteAccountDesc": "Removes your cloud account and all data on this device.",
+    "deleteTitle": "Delete my account",
+    "deleteWarning": "Your cloud account and ALL data on this device will be deleted. This cannot be undone. Congregations where you are the only member are removed from the cloud; from the rest you simply leave.",
+    "deleteBlocked": "You can't delete your account yet: you are the only admin of {congregations}. Hand admin over to someone else or remove the other members first.",
+    "deleteReauthEmail": "Confirm your password to continue.",
+    "deleteReauthGoogle": "You'll be asked to sign in with Google again to confirm.",
+    "deleteConfirm": "Delete my account",
+    "deleteError": "Could not delete the account. Try again.",
     "errors": {
       "invalidEmail": "The email is not valid.",
       "userNotFound": "No account exists for that email.",
@@ -152,6 +162,7 @@
       "emailInUse": "An account already exists for that email.",
       "weakPassword": "The password is too weak (minimum 6 characters).",
       "network": "No connection. Try again.",
+      "requiresRecentLogin": "For your security, sign in again and retry.",
       "unknown": "The operation could not be completed. Try again."
     }
   },
@@ -395,7 +406,12 @@
     "lastAdmin": "At least one person must keep administration rights.",
     "readOnly": "You have read-only access to this congregation.",
     "membersError": "Could not load the member list.",
-    "pendingLabel": "Pending invitations"
+    "pendingLabel": "Pending invitations",
+    "deleteCloud": "Delete cloud data",
+    "deleteCloudTitle": "Delete cloud data",
+    "deleteCloudConfirm": "This congregation's cloud space will be deleted and ALL other members will lose access. Your local data is kept. This cannot be undone.",
+    "deleteCloudButton": "Delete from the cloud",
+    "deleteCloudError": "Could not delete the cloud data."
   },
   "newCongregation": {
     "title": "New congregation",
@@ -487,6 +503,8 @@
     },
     "weekN": "Week {n}",
     "goToWeek": "Go to week",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
     "weekShort": "Wk {n}",
     "auxRoom": "Auxiliary classroom",
     "auxRoomDesc": "Second classroom for students",

@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../widgets/empty_state.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/config_options.dart';
 import '../../i18n/strings.g.dart';
@@ -18,12 +16,16 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
+import '../widgets/danger_button.dart';
 import '../widgets/dashed_border.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/labeled_field.dart';
+import '../widgets/motion.dart';
 import 'invite_user_modal.dart';
 import 'join_congregation_modal.dart';
 import 'member_access_modal.dart';
 import 'new_congregation_modal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'settings_card.dart';
 import 'user_row.dart';
 
@@ -423,8 +425,50 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
           ],
         ),
+        if (isAdmin) ...[
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DangerButton(
+              label: tr.congregation.deleteCloud,
+              onTap: () => _deleteCongregationCloud(cid),
+            ),
+          ),
+        ],
       ],
     );
+  }
+
+  /// Admin teardown of this congregation's cloud space (local data is kept).
+  /// Destroys every other member's access, so it confirms first.
+  Future<void> _deleteCongregationCloud(String cid) async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.congregation.deleteCloudTitle),
+        content: Text(tr.congregation.deleteCloudConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(tr.common.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(tr.congregation.deleteCloudButton,
+                style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref.read(deleteCongregationCloudProvider)(cid);
+    } catch (_) {
+      messenger.showSnackBar(
+          SnackBar(content: Text(tr.congregation.deleteCloudError)));
+    }
   }
 
   Widget _hint(AppTokens t, String text) => Padding(
@@ -432,7 +476,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
         child: Text(
           text,
           style: TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w600, color: t.textMute),
+              fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
         ),
       );
 
@@ -483,7 +527,7 @@ class _PendingInvite extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: t.textMute),
             ),
@@ -522,7 +566,7 @@ class _CongregationChip extends StatelessWidget {
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           height: 34,
           padding: const EdgeInsets.symmetric(horizontal: 13),
           decoration: BoxDecoration(
@@ -547,7 +591,7 @@ class _CongregationChip extends StatelessWidget {
               Text(
                 congregation.name,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: fg,
                 ),
@@ -581,7 +625,7 @@ class _AddChip extends StatelessWidget {
           color: hovered ? t.accent : t.border,
           radius: Dimens.rPill,
           child: AnimatedContainer(
-            duration: Dimens.dFast,
+            duration: Motion.instant,
             height: 34,
             padding: const EdgeInsets.symmetric(horizontal: 13),
             decoration: BoxDecoration(
@@ -596,7 +640,7 @@ class _AddChip extends StatelessWidget {
                 Text(
                   context.t.congregation.newCongregation,
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: AppText.small,
                     fontWeight: FontWeight.w700,
                     color: fg,
                   ),

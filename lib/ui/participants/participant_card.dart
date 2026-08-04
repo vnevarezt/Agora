@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../widgets/pill.dart';
 
@@ -7,6 +9,29 @@ import '../theme/tokens.dart';
 import '../widgets/avatar.dart';
 import '../widgets/ink_surface.dart';
 import 'priv_badge.dart';
+import '../theme/app_theme.dart';
+
+/// The height every [ParticipantCard] lays out at, for the current text
+/// scale. The card is uniform by construction — the avatar is a fixed 38 and
+/// all three text runs are `maxLines: 1`, so neither a long name, a visitor's
+/// origin congregation nor the incomplete badge changes it. That uniformity
+/// is what lets the participants grid virtualise with a fixed tile extent
+/// instead of materialising every card.
+///
+/// Rounds slightly high on purpose: a tile a pixel taller than its card is
+/// invisible, a tile a pixel shorter clips it. `participant_card_test` pins
+/// this against the real laid-out height, so changing the card's contents
+/// fails there rather than silently clipping the whole grid.
+double participantCardHeight(BuildContext context) {
+  final scaler = MediaQuery.textScalerOf(context);
+  const avatar = 38.0;
+  const verticalPadding = 12.0 * 2;
+  const lineHeight = 1.44;
+  final textColumn = scaler.scale(AppText.bodyLarge) * lineHeight +
+      1 +
+      scaler.scale(AppText.caption) * lineHeight;
+  return math.max(avatar, textColumn) + verticalPadding;
+}
 
 /// Person card (`.person-card`): avatar, name with an availability dot,
 /// subtitle (gender · origin congregation for visitors) and a privilege
@@ -54,7 +79,7 @@ class ParticipantCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppText.bodyLarge,
                             fontWeight: FontWeight.w800,
                             color: t.text,
                           ),
@@ -70,7 +95,7 @@ class ParticipantCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: AppText.caption,
                       fontWeight: FontWeight.w600,
                       color: t.textMute,
                     ),
@@ -103,7 +128,7 @@ class _AvailabilityDot extends StatelessWidget {
       width: 9,
       height: 9,
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF4FA06A) : t.border,
+        color: active ? t.successStrong : t.border,
         shape: BoxShape.circle,
       ),
     );
@@ -116,11 +141,11 @@ class _IncompleteBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final t = context.tokens;
     return Pill(
       label: context.t.participantCard.incomplete,
-      background: dark ? const Color(0xFF3A3115) : const Color(0xFFF3ECD2),
-      foreground: dark ? const Color(0xFFD9C27A) : const Color(0xFF7A6512),
+      background: t.warningSoft,
+      foreground: t.warning,
     );
   }
 }

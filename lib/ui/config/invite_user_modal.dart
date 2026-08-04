@@ -6,6 +6,7 @@ import '../../data/sync/invite_code.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/member_capabilities.dart';
 import '../../state/sync_provider.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/filter_pill.dart';
@@ -92,7 +93,7 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
           Text(
             tr.invite.capabilitiesDesc,
             style: TextStyle(
-                fontSize: 12.5, fontWeight: FontWeight.w600, color: t.textMute),
+                fontSize: AppText.small, fontWeight: FontWeight.w600, color: t.textMute),
           ),
           const SizedBox(height: 12),
           // Toggling FilterPills rather than a new multi-select primitive:
@@ -141,7 +142,7 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
             Text(
               _error!,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -178,7 +179,7 @@ class _CapabilityHint extends StatelessWidget {
             child: Text(
               '· $line',
               style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: t.textDim),
+                  fontSize: AppText.small, fontWeight: FontWeight.w600, color: t.textDim),
             ),
           ),
       ],

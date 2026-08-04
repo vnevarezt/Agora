@@ -62,3 +62,9 @@ macos/Runner/Configs/FirebaseSecrets.xcconfig
 
 # Firestore rules test harness (Node) — committed source only, not deps.
 tool/rules-test/node_modules/
+
+# AI harness config and installed skills (impeccable, ui-ux-pro-max, …).
+# Local tooling, not project source — each dev installs their own.
+.claude/
+.codex/
+.impeccable/

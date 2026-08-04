@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import 'app_button.dart';
+import 'motion.dart';
 
 /// Destructive-action button in the error color (no danger variant in
 /// [AppButton]). Used by the project and participant modal footers.
@@ -21,7 +23,7 @@ class DangerButton extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) => AnimatedContainer(
-        duration: Dimens.dFast,
+        duration: Motion.instant,
         height: Dimens.hControl,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,
@@ -32,7 +34,7 @@ class DangerButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.5,
+            fontSize: AppText.body,
             fontWeight: FontWeight.w700,
             color: err,
           ),

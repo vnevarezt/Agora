@@ -4,7 +4,7 @@ import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-const _scrim = Color(0x52000000);
+const _scrim = Elevation.scrimStrong;
 
 /// Presents an app modal: centered dialog on desktop/tablet and a bottom
 /// sheet on mobile. [builder] receives whether it shows as a sheet (`sheet`)

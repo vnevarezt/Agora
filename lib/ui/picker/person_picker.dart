@@ -4,6 +4,7 @@ import '../../i18n/strings.g.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/motion.dart';
 import 'person_picker_panel.dart';
 
 /// Result of the person picker.
@@ -23,7 +24,7 @@ class PickRemove extends PickResult {
   const PickRemove();
 }
 
-const _scrim = Color(0x47000000); // rgba(0,0,0,.28) del mock
+const _scrim = Elevation.scrim;
 
 /// Opens the picker: popover anchored to [anchorContext] on desktop/tablet,
 /// bottom sheet on mobile. Returns null if closed without choosing.
@@ -95,7 +96,7 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   String get barrierLabel => t.picker.closeSelector;
 
   @override
-  Duration get transitionDuration => Dimens.dPop;
+  Duration get transitionDuration => Motion.instant;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
@@ -111,7 +112,7 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
           side: BorderSide(color: t.border),
         ),
         elevation: 18,
-        shadowColor: const Color(0x47000000),
+        shadowColor: Elevation.scrim,
         child: panel,
       ),
     );

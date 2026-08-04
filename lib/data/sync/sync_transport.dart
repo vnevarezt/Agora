@@ -72,4 +72,10 @@ abstract interface class SyncTransport {
   /// Docs with `serverTs > cursor` in ascending serverTs order
   /// (cursor null = everything).
   Future<List<ItemDoc>> pullSince(String congregationId, String? cursor);
+
+  /// Congregation teardown: hard-deletes EVERY item doc and the `meta/activity`
+  /// heartbeat (both this transport's domain). Batched under the 500-op cap and
+  /// idempotent — a re-run after an interruption just finds fewer docs. The
+  /// caller must still hold admin rights (rules gate the deletes).
+  Future<void> deleteAllItems(String congregationId);
 }

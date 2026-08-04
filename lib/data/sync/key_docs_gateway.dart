@@ -84,6 +84,21 @@ abstract interface class KeyDocsGateway {
     required Map<String, dynamic> memberData,
   });
 
+  // ---- teardown (account deletion / admin "delete cloud data") -------------
+
+  /// Deletes one member doc. Admin (revoke/teardown) or self (leave). During a
+  /// full teardown the CALLER's own member doc must be deleted LAST — isAdmin()
+  /// reads it, so removing it early strands the rest undeletable.
+  Future<void> deleteMemberDoc(String cid, String uid);
+
+  /// Deletes the `congregations/{cid}` doc (admin only). Its subcollections
+  /// must already be gone — Firestore does not cascade.
+  Future<void> deleteCongregationDoc(String cid);
+
+  /// Deletes the caller's own `users/{uid}` identity doc (owner only), the
+  /// last step before deleting the Firebase Auth account.
+  Future<void> deleteUserDoc(String uid);
+
   // ---- rotation ------------------------------------------------------------
 
   /// Revoke + rotate, ONE batch: append [wrappedForMember] (uid → sealed box)

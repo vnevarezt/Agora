@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// Section header (`.section__head`): color dot, uppercase title and
@@ -40,7 +41,7 @@ class SectionHeader extends StatelessWidget {
             child: Text(
               title.toUpperCase(),
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.26,
                 color: t.text,
@@ -51,7 +52,7 @@ class SectionHeader extends StatelessWidget {
             Text(
               '${done ?? 0}/$total',
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: AppText.caption,
                 fontWeight: FontWeight.w700,
                 color: t.textMute,
               ),

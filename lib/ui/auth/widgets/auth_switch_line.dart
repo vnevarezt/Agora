@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
 
@@ -27,7 +28,7 @@ class AuthSwitchLine extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppText.body,
               fontWeight: FontWeight.w600,
               color: t.textMute,
             ),
@@ -40,7 +41,7 @@ class AuthSwitchLine extends StatelessWidget {
             child: Text(
               actionLabel,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w800,
                 color: t.accentStrong,
                 decoration: hovered ? TextDecoration.underline : null,

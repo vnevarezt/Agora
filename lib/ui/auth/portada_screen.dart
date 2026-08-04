@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/cloud_auth.dart';
+import '../responsive.dart';
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
@@ -27,7 +29,7 @@ class PortadaScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final tr = context.t;
-    final wide = MediaQuery.sizeOf(context).width >= 1100;
+    final wide = context.screenSize == ScreenSize.desktop;
     // Optimistic while the probe resolves (milliseconds, masked by the
     // entrance animation); flips to the local-only layout when this install
     // can't hold a cloud session (macOS without provisioned signing).
@@ -66,7 +68,7 @@ class PortadaScreen extends ConsumerWidget {
                       child: Text(
                         'JW',
                         style: TextStyle(
-                          fontSize: 19,
+                          fontSize: AppText.display,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.38,
                           color: t.accentInk,
@@ -126,7 +128,7 @@ class PortadaScreen extends ConsumerWidget {
                             tr.portada.cloudUnsupported,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: AppText.small,
                               fontWeight: FontWeight.w600,
                               height: 1.5,
                               color: t.textMute,
@@ -146,7 +148,7 @@ class PortadaScreen extends ConsumerWidget {
                         tr.portada.legal,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w600,
                           height: 1.5,
                           color: t.textMute,
@@ -186,7 +188,7 @@ class _PortadaButton extends StatelessWidget {
             : (hovered ? t.surface2 : t.surface);
         final fg = primary ? t.accentInk : t.text;
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           height: 48,
           transform: pressed
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
@@ -197,15 +199,7 @@ class _PortadaButton extends StatelessWidget {
             border: primary
                 ? null
                 : Border.all(color: hovered ? t.textMute : t.border),
-            boxShadow: primary
-                ? const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ]
-                : null,
+            boxShadow: primary ? Elevation.control : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -213,7 +207,7 @@ class _PortadaButton extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.15,
                   color: fg,
@@ -222,7 +216,7 @@ class _PortadaButton extends StatelessWidget {
               if (primary) ...[
                 const SizedBox(width: 8),
                 AnimatedSlide(
-                  duration: Dimens.dFast,
+                  duration: Motion.instant,
                   offset: hovered ? const Offset(0.18, 0) : Offset.zero,
                   child: Icon(Icons.arrow_forward, size: 17, color: fg),
                 ),
@@ -248,7 +242,7 @@ class _LocalEntryCard extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) => AnimatedContainer(
-        duration: Dimens.dFast,
+        duration: Motion.instant,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
           color: hovered ? t.accentTint : t.surface2,
@@ -265,7 +259,7 @@ class _LocalEntryCard extends StatelessWidget {
                 Text(
                   tr.portada.noAccountTitle,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppText.body,
                     fontWeight: FontWeight.w800,
                     color: t.text,
                   ),
@@ -274,7 +268,7 @@ class _LocalEntryCard extends StatelessWidget {
                 Text(
                   tr.portada.noAccountCaption,
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,
                     color: t.textMute,
                   ),

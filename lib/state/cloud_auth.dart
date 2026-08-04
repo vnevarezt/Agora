@@ -23,6 +23,8 @@ enum CloudAuthErrorCode {
   weakPassword,
   network,
   canceled,
+  /// The session is too old for a sensitive op (delete): reauthenticate first.
+  requiresRecentLogin,
   unknown,
 }
 
@@ -150,6 +152,15 @@ class CloudAuthService {
       });
 
   Future<void> signInWithGoogle() async {
+    final idToken = await _freshGoogleIdToken();
+    await _mapAuthErrors(() => _auth
+        .signInWithCredential(GoogleAuthProvider.credential(idToken: idToken)));
+  }
+
+  /// Runs the interactive Google flow and returns a fresh id token, shared by
+  /// [signInWithGoogle] and [reauthenticateWithGoogle]. Throws
+  /// [CloudAuthErrorCode.canceled] when the user dismisses the sheet.
+  Future<String> _freshGoogleIdToken() async {
     final gsi = GoogleSignIn.instance;
     if (!_googleInitialized) {
       await gsi.initialize(
@@ -185,8 +196,7 @@ class CloudAuthService {
       throw const CloudAuthException(
           CloudAuthErrorCode.unknown, 'Google returned no idToken');
     }
-    await _mapAuthErrors(() => _auth
-        .signInWithCredential(GoogleAuthProvider.credential(idToken: idToken)));
+    return idToken;
   }
 
   Future<void> signOut() async {
@@ -197,6 +207,58 @@ class CloudAuthService {
     }
     await _auth.signOut();
   }
+
+  // ---- account deletion -----------------------------------------------------
+
+  /// Sign-in provider of the current user ('password' | 'google.com'), so the
+  /// UI knows whether to ask for a password or re-run Google to reauthenticate.
+  /// Null when signed out or when no provider is recorded.
+  String? get currentProviderId =>
+      _auth.currentUser?.providerData.firstOrNull?.providerId;
+
+  /// Email of the current user (for the email reauth credential).
+  String? get currentEmail => _auth.currentUser?.email;
+
+  /// Reauthenticates a password user — deleting the account needs a recent
+  /// login. Reuses [signInWithGoogle]'s credential path for Google users.
+  Future<void> reauthenticateWithEmail(String password) =>
+      _mapAuthErrors(() async {
+        final user = _auth.currentUser;
+        final email = user?.email;
+        if (user == null || email == null) {
+          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+        }
+        await user.reauthenticateWithCredential(
+            EmailAuthProvider.credential(email: email, password: password));
+      });
+
+  /// Reauthenticates a Google user by re-running the Google flow and feeding a
+  /// fresh credential back. Throws [CloudAuthErrorCode.canceled] if dismissed.
+  Future<void> reauthenticateWithGoogle() async {
+    final idToken = await _freshGoogleIdToken();
+    await _mapAuthErrors(() async {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+      }
+      await user.reauthenticateWithCredential(
+          GoogleAuthProvider.credential(idToken: idToken));
+    });
+  }
+
+  /// Deletes the Firebase Auth account. The caller must have reauthenticated
+  /// recently; otherwise this throws [CloudAuthErrorCode.requiresRecentLogin]
+  /// and the UI prompts to reauth. Best-effort Google sign-out afterwards.
+  Future<void> deleteAccount() => _mapAuthErrors(() async {
+        final user = _auth.currentUser;
+        if (user == null) {
+          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+        }
+        await user.delete();
+        try {
+          await GoogleSignIn.instance.signOut();
+        } catch (_) {}
+      });
 
   Future<T> _mapAuthErrors<T>(Future<T> Function() action) async {
     try {
@@ -219,6 +281,7 @@ class CloudAuthService {
         'email-already-in-use' => CloudAuthErrorCode.emailInUse,
         'weak-password' => CloudAuthErrorCode.weakPassword,
         'network-request-failed' => CloudAuthErrorCode.network,
+        'requires-recent-login' => CloudAuthErrorCode.requiresRecentLogin,
         _ => CloudAuthErrorCode.unknown,
       };
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
+import 'motion.dart';
 
 typedef Segment = ({IconData? icon, String label});
 
@@ -54,21 +56,14 @@ class SegmentedTabs extends StatelessWidget {
       onTap: onChanged == null || activo ? null : () => onChanged!(i),
       builder: (context, hovered, _) {
         return AnimatedContainer(
-          duration: Dimens.dFast,
+          duration: Motion.instant,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
             color: activo
                 ? (esOscuro ? t.accentSoft : t.surface)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(Dimens.rChip),
-            boxShadow: activo && !esOscuro
-                ? const [
-                    BoxShadow(
-                        color: Color(0x1A000000),
-                        blurRadius: 2,
-                        offset: Offset(0, 1)),
-                  ]
-                : null,
+            boxShadow: activo && !esOscuro ? Elevation.control : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -82,7 +77,7 @@ class SegmentedTabs extends StatelessWidget {
               Text(
                 segments[i].label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: activo ? t.text : t.textDim,
                 ),

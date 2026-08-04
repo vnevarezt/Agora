@@ -63,7 +63,7 @@ class AppDropdown<T> extends StatelessWidget {
         dropdownColor: t.surface,
         style: TextStyle(
           fontFamily: AppText.family,
-          fontSize: 13.5,
+          fontSize: AppText.body,
           fontWeight: FontWeight.w600,
           color: t.text,
         ),
@@ -103,7 +103,7 @@ class ReadonlyField extends StatelessWidget {
       child: Text(
         texto,
         style: TextStyle(
-            fontSize: 13.5, fontWeight: FontWeight.w600, color: t.textDim),
+            fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textDim),
       ),
     );
   }

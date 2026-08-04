@@ -15,6 +15,7 @@ import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
+import '../theme/app_theme.dart';
 
 /// Participants view (`PeopleView`): topbar, filters and a grid of cards
 /// fed by `participantsProvider`. Lives inside the shell; shows a back
@@ -44,16 +45,26 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           child: _topBar(context, isMobile),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(pad, 16, pad, 120),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _filters(context),
-                const SizedBox(height: 18),
-                _result(context),
-              ],
-            ),
+          // CustomScrollView rather than SingleChildScrollView: the grid below
+          // is a sliver, so only the cards actually on screen are built. With
+          // the old Column + Wrap every card in the congregation was
+          // materialised, and rebuilt on every keystroke in the filter.
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(pad, 16, pad, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _filters(context),
+                      const SizedBox(height: 18),
+                    ],
+                  ),
+                ),
+              ),
+              ..._resultSlivers(context, pad),
+            ],
           ),
         ),
       ],
@@ -92,7 +103,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
               Text(
                 context.t.participants.subtitle,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.body,
                   fontWeight: FontWeight.w600,
                   color: t.textMute,
                 ),
@@ -160,7 +171,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     return TextField(
         onChanged: (v) => setState(() => _query = v),
         style: TextStyle(
-            fontSize: 13.5, fontWeight: FontWeight.w600, color: t.text),
+            fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
         decoration: InputDecoration(
           hintText: context.t.common.searchParticipant,
           prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
@@ -192,11 +203,13 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       updatedAt: DateTime(2026),
     );
     return Skeletonizer(
-      child: _grid([for (var i = 0; i < 6; i++) mock]),
+      child: _skeletonGrid([for (var i = 0; i < 6; i++) mock]),
     );
   }
 
-  Widget _result(BuildContext context) {
+  /// Title + either the empty state or the virtualised grid, as slivers so
+  /// the grid can build lazily.
+  List<Widget> _resultSlivers(BuildContext context, double pad) {
     final all = ref.watch(peopleProvider);
     final restore = ref.watch(initialRestoreProvider);
     final phase = ref.watch(syncControllerProvider).phase;
@@ -205,7 +218,12 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     // people"; keep the skeleton until the pull lands (unless it stalled).
     if (ref.watch(peopleLoadingProvider) ||
         (restore != null && all.isEmpty && !stalled)) {
-      return _skeleton();
+      return [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(pad, 0, pad, 120),
+          sliver: SliverToBoxAdapter(child: _skeleton()),
+        ),
+      ];
     }
     final filtered = filterPeople(
       all,
@@ -215,20 +233,57 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       includeInactive: true,
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        BlockTitle(
-            title: context.t.participants.title, count: filtered.length),
-        if (filtered.isEmpty)
-          _empty(context, all.isEmpty)
-        else
-          _grid(filtered),
-      ],
+    return [
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(pad, 0, pad, 0),
+        sliver: SliverToBoxAdapter(
+          child: BlockTitle(
+              title: context.t.participants.title, count: filtered.length),
+        ),
+      ),
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(pad, 0, pad, 120),
+        sliver: filtered.isEmpty
+            ? SliverToBoxAdapter(child: _empty(context, all.isEmpty))
+            : _grid(context, filtered),
+      ),
+    ];
+  }
+
+  /// Virtualised card grid. The columns stay responsive the way the old Wrap
+  /// was — one per 330 logical pixels, capped at four — and the tile extent
+  /// comes from [participantCardHeight], which is exact because every card
+  /// lays out at the same height.
+  Widget _grid(BuildContext context, List<Person> participants) {
+    const gap = 10.0;
+    return SliverLayoutBuilder(
+      builder: (context, c) {
+        final cols = (c.crossAxisExtent / 330).floor().clamp(1, 4);
+        return SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            crossAxisSpacing: gap,
+            mainAxisSpacing: gap,
+            mainAxisExtent: participantCardHeight(context),
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, i) {
+              final h = participants[i];
+              return ParticipantCard(
+                participant: h,
+                onTap: () => showParticipantModal(context, original: h),
+              );
+            },
+            childCount: participants.length,
+          ),
+        );
+      },
     );
   }
 
-  Widget _grid(List<Person> participants) {
+  /// The skeleton keeps the old Wrap: it is a fixed six placeholders, so
+  /// there is nothing to virtualise.
+  Widget _skeletonGrid(List<Person> participants) {
     return LayoutBuilder(
       builder: (context, c) {
         const gap = 10.0;
@@ -241,10 +296,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             for (final h in participants)
               SizedBox(
                 width: colW,
-                child: ParticipantCard(
-                  participant: h,
-                  onTap: () => showParticipantModal(context, original: h),
-                ),
+                child: ParticipantCard(participant: h, onTap: () {}),
               ),
           ],
         );

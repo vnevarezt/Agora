@@ -105,6 +105,18 @@ class CckService {
     return server != null && server > cached.currentVersion;
   }
 
+  /// Refreshes ONLY when a membership hint announces a version we don't hold
+  /// yet (a rotation elsewhere re-wrapped our member doc). Cheap in the common
+  /// case — a cache hit already covering [hintVersion] does zero network I/O —
+  /// so the membership listener can call it on every snapshot. This is what
+  /// makes a survivor's NEXT push encrypt with the rotated key without waiting
+  /// for an incoming blob it can't open.
+  Future<void> refreshIfStale(String cid, int hintVersion) async {
+    final cached = await _cached(cid);
+    if (cached != null && cached.currentVersion >= hintVersion) return;
+    await refresh(cid);
+  }
+
   /// Founder bootstrap: mint CCK v1 and create the cloud space + own member
   /// doc in one batch (the shape the rules require). Requires [UserKeyStatus.ready].
   Future<CongregationKeyring> createCongregationSpace(

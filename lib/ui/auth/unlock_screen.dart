@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/db_key_manager.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
@@ -143,7 +144,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
                 Text(
                   name,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.title,
                     fontWeight: FontWeight.w800,
                     color: t.text,
                   ),
@@ -152,7 +153,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
               Text(
                 tr.auth.local.profileCaption,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: t.textMute,
                 ),

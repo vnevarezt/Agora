@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 
@@ -32,7 +33,7 @@ class BlockTitle extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.26,
                 color: t.text,
@@ -44,7 +45,7 @@ class BlockTitle extends StatelessWidget {
             Text(
               '· $count',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppText.body,
                 fontWeight: FontWeight.w700,
                 color: t.textMute,
               ),
@@ -57,7 +58,7 @@ class BlockTitle extends StatelessWidget {
               builder: (context, hovered, _) => Text(
                 linkLabel!,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w700,
                   color: t.accentStrong,
                   decoration: hovered ? TextDecoration.underline : null,

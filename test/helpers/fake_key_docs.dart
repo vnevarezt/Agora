@@ -44,9 +44,15 @@ class FakeKeyDocs implements KeyDocsGateway {
     users[uid]?.remove('wrappedPrivKey');
   }
 
+  /// Counts [readMemberDoc] calls — lets a test assert that a cache-covering
+  /// `refreshIfStale` short-circuits without a network read.
+  int memberReads = 0;
+
   @override
-  Future<Map<String, dynamic>?> readMemberDoc(String cid, String uid) async =>
-      members[cid]?[uid];
+  Future<Map<String, dynamic>?> readMemberDoc(String cid, String uid) async {
+    memberReads++;
+    return members[cid]?[uid];
+  }
 
   @override
   Future<int?> readCongregationKeyVersion(String cid) async =>
@@ -170,6 +176,29 @@ class FakeKeyDocs implements KeyDocsGateway {
     invites[cid]!.remove(tokenId);
     _emitMembers(cid);
     _emitInvites(cid);
+  }
+
+  // ---- teardown -------------------------------------------------------------
+
+  /// Observes member deletions in order — lets a teardown test assert that the
+  /// caller's own member doc is deleted LAST.
+  void Function(String uid)? onDeleteMember;
+
+  @override
+  Future<void> deleteMemberDoc(String cid, String uid) async {
+    onDeleteMember?.call(uid);
+    members[cid]?.remove(uid);
+    _emitMembers(cid);
+  }
+
+  @override
+  Future<void> deleteCongregationDoc(String cid) async {
+    congregations.remove(cid);
+  }
+
+  @override
+  Future<void> deleteUserDoc(String uid) async {
+    users.remove(uid);
   }
 
   // ---- rotation -------------------------------------------------------------

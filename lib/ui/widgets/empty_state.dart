@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// Reusable empty state: icon + (optional title) + message + (optional
@@ -36,7 +37,7 @@ class EmptyState extends StatelessWidget {
                 title!,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700, color: t.text),
+                    fontSize: AppText.bodyLarge, fontWeight: FontWeight.w700, color: t.text),
               ),
               const SizedBox(height: 4),
             ],
@@ -44,7 +45,7 @@ class EmptyState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 13.5, fontWeight: FontWeight.w600, color: t.textMute),
+                  fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
             ),
             if (action != null) ...[
               const SizedBox(height: 18),
@@ -56,7 +57,7 @@ class EmptyState extends StatelessWidget {
                 error!,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppText.small,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.error,
                 ),

@@ -412,6 +412,34 @@ void main() {
     expect(transport.docs[cong.id]!.keys, ['p1']);
   });
 
+  test('a revoked member (read-only) drops its outbox instead of rebounding',
+      () async {
+    final caps = <String, MemberCapabilities>{};
+    final keys = <String, CongregationKeyring>{};
+    final revoked = Device('devRev', transport, keys, capabilities: caps);
+    addTearDown(revoked.dispose);
+
+    final cong = await revoked.container
+        .read(congregationsRepositoryProvider)
+        .create(name: 'Oriente', number: '7');
+    keys[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
+    await revoked.container
+        .read(peopleRepositoryProvider)
+        .save(person('p1', 'Ana', cong.id));
+
+    // Revoked = shared-before-but-not-a-member-now: pushCapabilitiesProvider
+    // hands the engine read-only rights, so every write is forbidden. Without
+    // this the outbox would rebound against the rules forever (the bug).
+    caps[cong.id] = const MemberCapabilities();
+
+    expect(await revoked.engine.pushOnce(), 0);
+    expect(await revoked.outboxCount(), 0, reason: 'dropped, not rebounding');
+    expect(transport.docs[cong.id], anyOf(isNull, isEmpty));
+
+    // A later push has nothing left to retry.
+    expect(await revoked.engine.pushOnce(), 0);
+  });
+
   test('pushOnce does not filter while capabilities are unknown', () async {
     // Null capabilities mean "the membership stream has not loaded", NOT
     // "no rights": dropping outbox rows on a stale read would silently lose

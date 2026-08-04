@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 
 /// `.auth-note`: informative note on an accent-tint card. [spans] lets the
@@ -32,7 +33,7 @@ class AuthNote extends StatelessWidget {
             child: Text.rich(
               TextSpan(children: spans),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppText.small,
                 fontWeight: FontWeight.w600,
                 height: 1.5,
                 color: t.textDim,
