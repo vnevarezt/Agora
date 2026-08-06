@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:agora/data/mwb_cache.dart';
+import 'package:agora/data/mwb_store_native.dart';
 
 void main() {
   late Directory tmp;
@@ -10,7 +11,7 @@ void main() {
 
   setUp(() async {
     tmp = await Directory.systemTemp.createTemp('mwb_cache_test');
-    cache = MwbCache(root: tmp);
+    cache = MwbCache(store: DirectoryMwbStore(root: tmp));
   });
 
   tearDown(() async {

@@ -1,10 +1,11 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' show Rect;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:share_plus/share_plus.dart';
+
+import 'file_saver_platform.dart' as platform;
 
 /// Where the bytes ended up after a save request.
 sealed class SaveOutcome {
@@ -33,7 +34,9 @@ class SaveCanceled extends SaveOutcome {
 ///
 /// * [saveAs] — the user chooses WHERE to save: native save dialog on
 ///   macOS/Windows/Linux (file_selector), document picker / SAF on
-///   Android/iOS (file_picker).
+///   Android/iOS (file_picker), browser download on web (see
+///   `file_saver_platform_web.dart` — there the browser owns the location, so
+///   [SaveDone.path] carries only the file name).
 /// * [share] — the native share sheet on every platform (share_plus).
 ///
 /// The platform calls are injectable so unit tests can simulate
@@ -50,9 +53,9 @@ class FileSaver {
     Future<ShareResultStatus> Function(
             Uint8List bytes, String name, String mimeType, Rect? origin)?
         shareSheet,
-  })  : _mobile = mobile ?? (Platform.isAndroid || Platform.isIOS),
-        _pickSavePath = pickSavePath ?? _defaultPickSavePath,
-        _writeFile = writeFile ?? _defaultWriteFile,
+  })  : _mobile = mobile ?? platform.isMobilePlatform,
+        _pickSavePath = pickSavePath ?? platform.pickSavePath,
+        _writeFile = writeFile ?? platform.writeFile,
         _saveMobile = saveMobile ?? _defaultSaveMobile,
         _shareSheet = shareSheet ?? _defaultShareSheet;
 
@@ -100,18 +103,6 @@ class FileSaver {
         throw Exception('Share sheet unavailable on this device.'),
     };
   }
-
-  static Future<String?> _defaultPickSavePath(
-      String suggestedName, XTypeGroup type) async {
-    final location = await getSaveLocation(
-      suggestedName: suggestedName,
-      acceptedTypeGroups: [type],
-    );
-    return location?.path;
-  }
-
-  static Future<void> _defaultWriteFile(String path, Uint8List bytes) =>
-      File(path).writeAsBytes(bytes);
 
   static Future<String?> _defaultSaveMobile(
       String suggestedName, String extension, Uint8List bytes) {
