@@ -49,11 +49,11 @@ Bump `version:` in `pubspec.yaml` (`x.y.z+build`). Android maps it to
 
 ## 3b. Web
 
-Always build with `--wasm`:
-
 ```bash
-flutter build web --wasm --release
+flutter build web --wasm --no-web-resources-cdn --release
 ```
+
+Both flags are required.
 
 The default JS build compiles to dart2js and picks the CanvasKit renderer;
 `--wasm` compiles to WasmGC and picks skwasm instead. Measured on the sign-in
@@ -70,9 +70,33 @@ after the UI appears. Flutter emits a dart2js bundle alongside the wasm one and
 falls back to it automatically on browsers without WasmGC, so the flag costs
 nothing in compatibility.
 
-Serve with cross-origin isolation (`Cross-Origin-Opener-Policy: same-origin`
-and `Cross-Origin-Embedder-Policy: require-corp`) so drift can use OPFS; without
-those headers it still works, on the slower IndexedDB path.
+`--no-web-resources-cdn` bundles CanvasKit instead of pulling it from
+`gstatic.com` on every load. Uncompressed that adds ~2MB, but the payload
+compresses to about a third (3.4MB of skwasm ships as 1.5MB gzipped) and
+hosting compresses automatically, so the real cost is small — and the app stops
+announcing itself to a third party on every visit.
+
+**Headers.** `firebase.json.example` carries the deploy configuration. Two
+things there are deliberate and easy to "fix" into breakage:
+
+- `Cross-Origin-Opener-Policy` is `same-origin-allow-popups`, not
+  `same-origin`. The stricter value is what cross-origin isolation needs (it
+  would let drift use OPFS with a SharedArrayBuffer) but it severs
+  `window.opener` for cross-origin popups, which is how `signInWithPopup`
+  returns the Google credential. Sign-in wins; drift uses IndexedDB.
+- The CSP allows `'unsafe-inline'` in `script-src`, because Flutter's bootstrap
+  emits inline scripts. The directive doing the work is `connect-src`: it pins
+  where anything can be sent, so injected script still cannot exfiltrate the
+  congregation to an arbitrary host. This matters because the web database is
+  not encrypted (see `lib/data/db/connection_web.dart`).
+
+The allowed third-party origins are not optional and were each confirmed
+against a real page load: `www.gstatic.com` serves the Firebase JS SDK that
+`firebase_core` loads at runtime, `accounts.google.com` is the GSI client that
+`google_sign_in_web` injects when it registers, and `fonts.gstatic.com` is
+CanvasKit fetching its Roboto fallback. After changing the policy, load the app
+and check the console: a CSP that blocks the engine looks exactly like one that
+works until someone opens the page.
 
 `web/sqlite3.wasm` and `web/drift_worker.js` are committed but version-coupled
 to `pubspec.lock`. Re-run `sh tool/build_web_assets.sh` after bumping `drift`

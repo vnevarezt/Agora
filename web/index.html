@@ -18,18 +18,24 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Meeting program planning and participant scheduling.">
+
+  <!--
+    Congregation data is private and there is nothing to gain from search
+    engines indexing an app shell that renders nothing without a session.
+  -->
+  <meta name="robots" content="noindex, nofollow">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="agora">
+  <meta name="apple-mobile-web-app-title" content="Agora">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>agora</title>
+  <title>Agora</title>
   <link rel="manifest" href="manifest.json">
 
   <!--
@@ -73,29 +79,6 @@
 <body>
   <div id="boot"><i></i></div>
   <script src="flutter_bootstrap.js" async></script>
-  <script>
-    // Watch for the engine's own host element rather than hooking
-    // flutter_bootstrap.js internals, which are generated and version-specific.
-    (function () {
-      var boot = document.getElementById('boot');
-      var done = false;
-      function clear() {
-        if (done) return;
-        done = true;
-        boot.classList.add('done');
-        setTimeout(function () { boot.remove(); }, 250);
-      }
-      var obs = new MutationObserver(function () {
-        if (document.querySelector('flt-scene-host, flutter-view, flt-glass-pane')) {
-          obs.disconnect();
-          clear();
-        }
-      });
-      obs.observe(document.documentElement, {childList: true, subtree: true});
-      // Never strand the user behind a spinner if the engine fails to boot or
-      // the host element is renamed by a future Flutter release.
-      setTimeout(function () { obs.disconnect(); clear(); }, 10000);
-    })();
-  </script>
+  <script src="boot.js" defer></script>
 </body>
 </html>

@@ -1,12 +1,12 @@
 {
-    "name": "agora",
-    "short_name": "agora",
+    "name": "Agora",
+    "short_name": "Agora",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F8FAFD",
+    "theme_color": "#41629F",
+    "description": "Meeting program planning and participant scheduling.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

@@ -3,6 +3,38 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "hosting": {
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "headers": [
+      {
+        "//": "COOP is deliberately NOT 'same-origin'. That value is what full cross-origin isolation requires (it would let drift use OPFS with a SharedArrayBuffer), but it also severs window.opener for cross-origin popups — which is exactly how firebase_auth's signInWithPopup returns the Google credential. Sign-in wins; drift falls back to IndexedDB, which it supports and which measured no slower here.",
+        "source": "**",
+        "headers": [
+          { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "same-origin" },
+          {
+            "//": "connect-src is the directive that earns its keep: the local database is not encrypted (see connection_web.dart), so the risk the browser adds over native is script injection reading it — and this pins where anything can be sent to. An attacker who lands script here still cannot POST the congregation to a host of their choosing. script-src keeps 'unsafe-inline' because Flutter's bootstrap emits inline scripts; dropping it needs per-release hashes that break on every engine bump, so this policy does NOT claim to stop XSS execution, only its exfiltration. Verified against a real load: fonts.gstatic.com is CanvasKit fetching its Roboto fallback and accounts.google.com is google_sign_in_web injecting the GSI client on registration, both of which the engine requires even though web signs in through firebase_auth's popup. www.gstatic.com serves the Firebase JS SDK that firebase_core loads at runtime — without it cloud mode cannot start at all, which is the whole of web.",
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://fonts.gstatic.com https://www.gstatic.com https://accounts.google.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+          }
+        ]
+      },
+      {
+        "//": "Hashed engine and app payloads are immutable; index.html must never be, or a deploy leaves clients on the old build.",
+        "source": "**/*.@(wasm|js|mjs|ttf|otf|png)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "/index.html",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ]
+  },
   "emulators": {
     "firestore": { "port": 8080 },
     "auth": { "port": 9099 },
