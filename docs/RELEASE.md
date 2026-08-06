@@ -102,6 +102,24 @@ works until someone opens the page.
 to `pubspec.lock`. Re-run `sh tool/build_web_assets.sh` after bumping `drift`
 or `sqlite3`.
 
+**Tests.** `flutter test` covers the shared code on the VM and skips
+`test/web/`, which is `@TestOn('browser')`. Run those separately:
+
+```bash
+flutter test --platform chrome test/web
+```
+
+They exist because the interesting web failures are ones the VM cannot see:
+hand-written IndexedDB interop that compiles whether or not its requests ever
+resolve, and plugins whose web behaviour is neither a result nor an exception.
+`local_auth` was found this way — on the web it does not throw, it never
+completes, which would have hung the auth gate at boot.
+
+`kIsWeb` UI branches (the hidden local-mode card, the Google button) are not
+covered: the VM compiles `kIsWeb` as a constant false, so those paths are
+unreachable from the normal suite and would need widget tests running in the
+browser.
+
 ## 4. Firebase console (cloud mode)
 
 - **Authentication → Sign-in method**: enable Email/Password and Google.

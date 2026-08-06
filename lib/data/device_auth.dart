@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -20,8 +21,16 @@ class LocalAuthDeviceAuth implements DeviceAuth {
 
   final LocalAuthentication _auth = LocalAuthentication();
 
+  /// local_auth has no web implementation, and its calls there do not throw —
+  /// they never complete. A hung future would be worse than a thrown one:
+  /// [AuthSession] awaits [isSupported] during boot, inside a try that would
+  /// never catch, so the auth gate would simply never resolve. Answering up
+  /// front keeps that from depending on a lucky short-circuit.
+  bool get _unavailable => kIsWeb;
+
   @override
   Future<bool> isSupported() async {
+    if (_unavailable) return false;
     try {
       return await _auth.isDeviceSupported();
     } catch (_) {
@@ -31,6 +40,7 @@ class LocalAuthDeviceAuth implements DeviceAuth {
 
   @override
   Future<bool> authenticate(String reason) async {
+    if (_unavailable) return false;
     try {
       return await _auth.authenticate(localizedReason: reason);
     } on LocalAuthException {
