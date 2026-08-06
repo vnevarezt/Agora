@@ -66,6 +66,9 @@ dependencies:
   cloud_firestore: ^6.7.1
   connectivity_plus: ^7.3.0
   file_picker: ^11.0.2
+  # Web-only DOM access (blob downloads, IndexedDB). Already pulled in
+  # transitively; declared because lib/ imports it directly.
+  web: ^1.1.1
 hooks:
   user_defines:
     sqlite3:

@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:path_provider/path_provider.dart';
+import 'mwb_store.dart';
+import 'mwb_store_platform.dart';
 
 /// One cached notebook EPUB.
 class CacheEntry {
@@ -99,64 +99,46 @@ class CacheManifest {
 /// parsed `Week`s: the EPUB is the canonical artifact, so a parser change never
 /// needs a cache migration. The manifest is app-owned metadata.
 class MwbCache {
-  /// [root] is injectable for tests; in the app it defaults to the application
-  /// support directory (same base as the encrypted DB).
-  MwbCache({Directory? root}) : _root = root;
+  /// [store] is injectable for tests; in the app it defaults to whatever this
+  /// platform provides — a directory under application support on native, an
+  /// IndexedDB object store on web.
+  MwbCache({MwbStore? store}) : _store = store ?? defaultMwbStore();
 
-  final Directory? _root;
-  Directory? _resolved;
+  final MwbStore _store;
 
   static const _manifestName = 'manifest.json';
 
-  Future<Directory> _dir() async {
-    if (_resolved != null) return _resolved!;
-    final base = _root ?? await getApplicationSupportDirectory();
-    final dir = Directory('${base.path}${Platform.pathSeparator}mwb_cache');
-    await dir.create(recursive: true);
-    return _resolved = dir;
-  }
-
   String _epubName(String issue, String lang) => '$issue.$lang.epub';
-
-  Future<File> _file(String name) async =>
-      File('${(await _dir()).path}${Platform.pathSeparator}$name');
 
   /// Reads the manifest. Returns an empty manifest if missing or corrupt.
   Future<CacheManifest> readManifest() async {
-    final f = await _file(_manifestName);
-    if (!await f.exists()) return const CacheManifest();
+    final raw = await _store.readString(_manifestName);
+    if (raw == null) return const CacheManifest();
     try {
-      final json = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
-      return CacheManifest.fromJson(json);
+      return CacheManifest.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (_) {
       return const CacheManifest();
     }
   }
 
-  /// Writes the manifest atomically (.tmp + rename) to survive abrupt exits.
-  Future<void> _writeManifest(CacheManifest m) async {
-    final f = await _file(_manifestName);
-    final tmp = await _file('$_manifestName.tmp');
-    await tmp.writeAsString(jsonEncode(m.toJson()), flush: true);
-    await tmp.rename(f.path);
-  }
+  /// Writes the manifest. [MwbStore.writeString] is atomic, so an abrupt exit
+  /// cannot leave the cache describing EPUBs that are not there.
+  Future<void> _writeManifest(CacheManifest m) =>
+      _store.writeString(_manifestName, jsonEncode(m.toJson()));
 
   bool has(CacheManifest m, String issue, String lang) =>
       m.entries.any((e) => e.issue == issue && e.lang == lang);
 
   /// Cached EPUB bytes for [issue]/[lang], or null if not present.
-  Future<Uint8List?> readEpub(String issue, String lang) async {
-    final f = await _file(_epubName(issue, lang));
-    if (!await f.exists()) return null;
-    return f.readAsBytes();
-  }
+  Future<Uint8List?> readEpub(String issue, String lang) =>
+      _store.readBytes(_epubName(issue, lang));
 
   /// Stores [bytes], records the entry in the manifest and clears any prior
   /// failure for this issue.
   Future<void> putEpub(
       String issue, String lang, Uint8List bytes, int weekCount) async {
     final name = _epubName(issue, lang);
-    await (await _file(name)).writeAsBytes(bytes, flush: true);
+    await _store.writeBytes(name, bytes);
 
     final m = await readManifest();
     await _writeManifest(CacheManifest(

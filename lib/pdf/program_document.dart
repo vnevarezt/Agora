@@ -1,9 +1,9 @@
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../data/background.dart';
 import '../models/program_row.dart';
 import '../models/week.dart';
 import 'column_layout.dart';
@@ -62,7 +62,7 @@ Future<Uint8List> buildProgramSheetPdf({
   bool twoPerSheet = false,
 }) async {
   final fontBytes = await carlitoFontBytes();
-  return Isolate.run(() => _buildPdf(
+  return runInBackground(() => _buildPdf(
         fontBytes: fontBytes,
         congregation: congregation,
         entries: entries,

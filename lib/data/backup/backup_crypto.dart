@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+
+import '../background.dart';
 
 /// The password failed to open the backup (GCM tag mismatch).
 class WrongBackupPasswordException implements Exception {
@@ -95,7 +96,7 @@ class BackupCrypto {
   /// (same rationale as DbKeyManager).
   static Future<List<int>> _deriveKey(
       String password, List<int> salt, int m, int t, int p) {
-    return Isolate.run(() async {
+    return runInBackground(() async {
       final key = await Argon2id(
         parallelism: p,
         memory: m,

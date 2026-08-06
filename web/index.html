@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Meeting program planning and participant scheduling.">
+
+  <!--
+    Congregation data is private and there is nothing to gain from search
+    engines indexing an app shell that renders nothing without a session.
+  -->
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Agora">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Agora</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!--
+    Boot screen. The engine needs roughly a second to download and start, and
+    without this the page is blank white for all of it — long enough to read as
+    broken. Inline on purpose: an external stylesheet would be one more request
+    on the critical path, which is the thing being papered over.
+
+    Colours track lib/ui/theme/tokens.dart (pizarra.light.bg / .dark.bg and
+    .accent) so the handover to the first Flutter frame is not a colour jump.
+  -->
+  <style>
+    body { margin: 0; background: #F8FAFD; }
+    #boot {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F8FAFD;
+      transition: opacity .2s ease;
+    }
+    #boot.done { opacity: 0; pointer-events: none; }
+    #boot i {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(65, 98, 159, .25);
+      border-top-color: #41629F;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #boot i { animation-duration: 2.4s; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, #boot { background: #0B0F14; }
+    }
+  </style>
+</head>
+<body>
+  <div id="boot"><i></i></div>
+  <script src="flutter_bootstrap.js" async></script>
+  <script src="boot.js" defer></script>
+</body>
+</html>

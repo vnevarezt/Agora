@@ -1,7 +1,8 @@
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+
+import 'background.dart';
 
 import '../models/week.dart';
 import 'epub_parser.dart';
@@ -11,7 +12,7 @@ import 'mwb_cache.dart';
 /// Unzip + HTML parsing are tens-of-ms of pure CPU per notebook: run them off
 /// the UI isolate (they hit it on editor open and during the startup sync).
 Future<List<Week>> _parseEpubInBackground(Uint8List bytes) =>
-    Isolate.run(() => parseEpub(bytes));
+    runInBackground(() => parseEpub(bytes));
 
 /// Data facade: serves the mwb notebook from the on-disk cache, downloading it
 /// from jw.org only the first time (then re-parsing the cached EPUB).

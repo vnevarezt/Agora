@@ -267,8 +267,7 @@ class SessionController extends Notifier<SessionState> {
     try {
       await (await ref.read(cloudAuthProvider.future))?.signOut();
     } catch (_) {}
-    final file = await databaseFile();
-    if (await file.exists()) await file.delete();
+    await deleteDatabase();
     await _keys.destroyAll();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_modeKey);

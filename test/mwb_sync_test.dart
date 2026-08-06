@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:agora/data/mwb_cache.dart';
+import 'package:agora/data/mwb_store_native.dart';
 import 'package:agora/data/mwb_repository.dart';
 import 'package:agora/models/notebook.dart';
 import 'package:agora/state/mwb_sync.dart';
@@ -29,7 +30,7 @@ void main() {
 
   setUp(() async {
     tmp = await Directory.systemTemp.createTemp('mwb_sync_test');
-    cache = MwbCache(root: tmp);
+    cache = MwbCache(store: DirectoryMwbStore(root: tmp));
   });
 
   tearDown(() async {
