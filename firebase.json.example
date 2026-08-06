@@ -9,12 +9,11 @@
     "rewrites": [{ "source": "**", "destination": "/index.html" }],
     "headers": [
       {
-        "//": "COOP is deliberately NOT 'same-origin'. That value is what full cross-origin isolation requires (it would let drift use OPFS with a SharedArrayBuffer), but it also severs window.opener for cross-origin popups — which is exactly how firebase_auth's signInWithPopup returns the Google credential. Sign-in wins; drift falls back to IndexedDB, which it supports and which measured no slower here.",
+        "//": "There is deliberately no Cross-Origin-Opener-Policy here. Any value interferes with firebase_auth's signInWithPopup, which needs the opener link to get the Google credential back — sign-in was observed hanging with one set. The only value worth the risk would be 'same-origin', for the cross-origin isolation that lets drift use OPFS, and that is the value that breaks popups outright. drift uses IndexedDB, which measured no slower. Referrer-Policy is strict-origin-when-cross-origin rather than same-origin: the stricter value sends no origin at all to Google, which its OAuth endpoints may check.",
         "source": "**",
         "headers": [
-          { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
           { "key": "X-Content-Type-Options", "value": "nosniff" },
-          { "key": "Referrer-Policy", "value": "same-origin" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
           {
             "//": "connect-src is the directive that earns its keep: the local database is not encrypted (see connection_web.dart), so the risk the browser adds over native is script injection reading it — and this pins where anything can be sent to. An attacker who lands script here still cannot POST the congregation to a host of their choosing. script-src keeps 'unsafe-inline' because Flutter's bootstrap emits inline scripts; dropping it needs per-release hashes that break on every engine bump, so this policy does NOT claim to stop XSS execution, only its exfiltration. Verified against a real load: fonts.gstatic.com is CanvasKit fetching its Roboto fallback and accounts.google.com is google_sign_in_web injecting the GSI client on registration, both of which the engine requires even though web signs in through firebase_auth's popup. www.gstatic.com serves the Firebase JS SDK that firebase_core loads at runtime — without it cloud mode cannot start at all, which is the whole of web.",
             "key": "Content-Security-Policy",
