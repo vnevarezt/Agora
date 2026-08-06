@@ -68,3 +68,7 @@ tool/rules-test/node_modules/
 .claude/
 .codex/
 .impeccable/
+
+# Byproducts of `sh tool/build_web_assets.sh`; the .js itself is committed.
+web/drift_worker.js.deps
+web/drift_worker.js.map

@@ -266,8 +266,14 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
     // stores its session in the data-protection keychain, which requires a
     // provisioning profile — unavailable on free Apple accounts; hidden until
     // the app is signed with a paid team profile.
-    final googleAvailable = defaultTargetPlatform != TargetPlatform.windows &&
-        defaultTargetPlatform != TargetPlatform.macOS;
+    //
+    // Neither limit applies on the web, which signs in through firebase_auth's
+    // popup instead of google_sign_in. The kIsWeb check has to come first:
+    // defaultTargetPlatform reports the *host* OS in a browser, so a macOS or
+    // Windows Chrome would otherwise fall into the exclusions above.
+    final googleAvailable = kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.windows &&
+            defaultTargetPlatform != TargetPlatform.macOS);
 
     return AnimatedSize(
       duration: Motion.med,

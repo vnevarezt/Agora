@@ -152,6 +152,14 @@ class CloudAuthService {
       });
 
   Future<void> signInWithGoogle() async {
+    // google_sign_in leaves authenticate() unimplemented on the web: Google
+    // Identity Services only starts the flow from its own rendered button.
+    // firebase_auth drives that popup itself, so the web path skips the
+    // id-token dance and hands Firebase the provider directly.
+    if (kIsWeb) {
+      await _mapAuthErrors(() => _auth.signInWithPopup(GoogleAuthProvider()));
+      return;
+    }
     final idToken = await _freshGoogleIdToken();
     await _mapAuthErrors(() => _auth
         .signInWithCredential(GoogleAuthProvider.credential(idToken: idToken)));
@@ -200,10 +208,14 @@ class CloudAuthService {
   }
 
   Future<void> signOut() async {
-    try {
-      await GoogleSignIn.instance.signOut();
-    } catch (_) {
-      // Best-effort: Google session may not exist (email/password sign-in).
+    // On the web the Google session lives in the popup's Firebase credential,
+    // which _auth.signOut() clears; GoogleSignIn was never initialised there.
+    if (!kIsWeb) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {
+        // Best-effort: Google session may not exist (email/password sign-in).
+      }
     }
     await _auth.signOut();
   }
@@ -235,6 +247,16 @@ class CloudAuthService {
   /// Reauthenticates a Google user by re-running the Google flow and feeding a
   /// fresh credential back. Throws [CloudAuthErrorCode.canceled] if dismissed.
   Future<void> reauthenticateWithGoogle() async {
+    if (kIsWeb) {
+      await _mapAuthErrors(() async {
+        final user = _auth.currentUser;
+        if (user == null) {
+          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+        }
+        await user.reauthenticateWithPopup(GoogleAuthProvider());
+      });
+      return;
+    }
     final idToken = await _freshGoogleIdToken();
     await _mapAuthErrors(() async {
       final user = _auth.currentUser;
@@ -281,6 +303,12 @@ class CloudAuthService {
         'email-already-in-use' => CloudAuthErrorCode.emailInUse,
         'weak-password' => CloudAuthErrorCode.weakPassword,
         'network-request-failed' => CloudAuthErrorCode.network,
+        // Web popup flow: dismissing the window is a cancel, not a failure —
+        // the native path reports the same thing from GoogleSignInException.
+        'popup-closed-by-user' ||
+        'cancelled-popup-request' ||
+        'user-cancelled' =>
+          CloudAuthErrorCode.canceled,
         'requires-recent-login' => CloudAuthErrorCode.requiresRecentLogin,
         _ => CloudAuthErrorCode.unknown,
       };
