@@ -120,6 +120,11 @@ covered: the VM compiles `kIsWeb` as a constant false, so those paths are
 unreachable from the normal suite and would need widget tests running in the
 browser.
 
+Neither is PDF rendering, end to end. The browser test asserts that
+`rasterizePage` selects the WASM engine, but the harness serves the package's
+Dart without pdfrx's wasm assets, so the load after selection always fails
+there. Open a preview against a real build before shipping.
+
 ## 4. Firebase console (cloud mode)
 
 - **Authentication → Sign-in method**: enable Email/Password and Google.

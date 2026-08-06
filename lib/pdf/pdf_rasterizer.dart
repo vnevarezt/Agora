@@ -18,9 +18,16 @@ Future<Uint8List> renderPagePng(Uint8List pdf, {double dpi = 300}) async {
   }
 }
 
-/// Rasterizes the first PDF page to an image using pdfium (pdfrx), which works
-/// on desktop. `scale` raises the resolution for sharpness when zooming.
+/// Rasterizes the first PDF page to an image using pdfium (pdfrx).
+/// `scale` raises the resolution for sharpness when zooming.
 Future<ui.Image> rasterizePage(Uint8List pdf, {double scale = 3.0}) async {
+  // Must come before openData. PdfDocument.openData goes straight to
+  // PdfrxEntryFunctions.instance, and it is pdfrxFlutterInitialize that points
+  // that at the WASM engine on web — the lazy init inside pdfrx only covers the
+  // PdfDocumentRef API, which this does not use. The call is idempotent, so
+  // paying it here rather than in main() keeps the 5MB pdfium download out of
+  // startup and lands it when a preview is actually opened.
+  await pdfrxFlutterInitialize();
   final doc = await PdfDocument.openData(pdf);
   try {
     final page = doc.pages.first;
