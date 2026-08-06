@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -134,8 +135,14 @@ class PortadaScreen extends ConsumerWidget {
                               color: t.textMute,
                             ),
                           ),
-                        const SizedBox(height: 14),
-                        _LocalEntryCard(onTap: onLocal),
+                        // Local mode is native-only. Its password wraps the DEK
+                        // and the OS keychain holds the result; a browser has
+                        // no keychain, so offering it here would walk the user
+                        // into a gate with nothing behind it.
+                        if (!kIsWeb) ...[
+                          const SizedBox(height: 14),
+                          _LocalEntryCard(onTap: onLocal),
+                        ],
                       ],
                     ),
                   ),

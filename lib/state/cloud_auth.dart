@@ -88,19 +88,6 @@ final cloudUserProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instanceFor(app: app).authStateChanges();
 });
 
-/// Google button availability: needs the cloud, a supported platform
-/// (no Windows implementation; macOS needs provisioned signing the app
-/// doesn't have yet) and, on Android, the OAuth web client ID from
-/// cloud_secrets.dart.
-final googleSignInAvailableProvider = Provider<bool>((ref) {
-  if (!ref.watch(firebaseAvailableProvider)) return false;
-  return switch (defaultTargetPlatform) {
-    TargetPlatform.android => googleServerClientId.isNotEmpty,
-    TargetPlatform.iOS => true,
-    _ => false,
-  };
-});
-
 /// null once init settles with the cloud disabled. Await `.future` before
 /// acting so a tap during initialization waits instead of concluding the
 /// cloud is missing.
