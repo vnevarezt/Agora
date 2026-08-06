@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
+
+import '../background.dart';
 
 /// The passphrase failed to open the envelope (AES-GCM tag mismatch).
 class WrongPassphraseException implements Exception {
@@ -121,7 +122,7 @@ class PassphraseEnvelope {
     final m = params.memoryKib;
     final t = params.iterations;
     final p = params.parallelism;
-    return Isolate.run(() async {
+    return runInBackground(() async {
       final algorithm = Argon2id(
         parallelism: p,
         memory: m,
