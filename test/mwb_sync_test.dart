@@ -6,10 +6,10 @@ import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:jw_program/data/mwb_cache.dart';
-import 'package:jw_program/data/mwb_repository.dart';
-import 'package:jw_program/models/notebook.dart';
-import 'package:jw_program/state/mwb_sync.dart';
+import 'package:agora/data/mwb_cache.dart';
+import 'package:agora/data/mwb_repository.dart';
+import 'package:agora/models/notebook.dart';
+import 'package:agora/state/mwb_sync.dart';
 
 /// Minimal but valid mwb EPUB: one weekly XHTML with one numbered part, so
 /// [parseEpub] returns a single week.

@@ -9,8 +9,8 @@
 
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/db/app_database.dart';
-import 'package:jw_program/models/person.dart';
+import 'package:agora/data/db/app_database.dart';
+import 'package:agora/models/person.dart';
 
 import 'generated/schema.dart';
 

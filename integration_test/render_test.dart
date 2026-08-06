@@ -8,11 +8,11 @@ import 'dart:ui' as ui;
 
 import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/domain/schedule_rules.dart';
-import 'package:jw_program/models/program_row.dart';
-import 'package:jw_program/models/week.dart';
-import 'package:jw_program/pdf/pdf_rasterizer.dart';
-import 'package:jw_program/pdf/program_document.dart';
+import 'package:agora/domain/schedule_rules.dart';
+import 'package:agora/models/program_row.dart';
+import 'package:agora/models/week.dart';
+import 'package:agora/pdf/pdf_rasterizer.dart';
+import 'package:agora/pdf/program_document.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 

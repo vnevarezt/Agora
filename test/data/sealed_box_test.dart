@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/crypto/passphrase_envelope.dart';
-import 'package:jw_program/data/sync/sealed_box.dart';
+import 'package:agora/data/crypto/passphrase_envelope.dart';
+import 'package:agora/data/sync/sealed_box.dart';
 
 void main() {
   test('seal → open roundtrips with the recipient seed', () async {

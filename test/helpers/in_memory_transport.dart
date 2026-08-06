@@ -1,4 +1,4 @@
-import 'package:jw_program/data/sync/sync_transport.dart';
+import 'package:agora/data/sync/sync_transport.dart';
 
 /// In-memory [SyncTransport]: one doc per entity per congregation, with a
 /// zero-padded monotonic counter as serverTs (sortable like the Firestore

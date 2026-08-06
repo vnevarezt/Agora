@@ -1,16 +1,16 @@
-// Smoke test básico de la app JW Program: arranca en el dashboard (Inicio).
+// Smoke test básico de la app Agora: arranca en el dashboard (Inicio).
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jw_program/app.dart';
-import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/models/congregation.dart';
-import 'package:jw_program/models/project.dart';
-import 'package:jw_program/state/auth_session.dart';
-import 'package:jw_program/state/dashboard_provider.dart';
-import 'package:jw_program/state/mwb_sync.dart';
+import 'package:agora/app.dart';
+import 'package:agora/i18n/strings.g.dart';
+import 'package:agora/models/congregation.dart';
+import 'package:agora/models/project.dart';
+import 'package:agora/state/auth_session.dart';
+import 'package:agora/state/dashboard_provider.dart';
+import 'package:agora/state/mwb_sync.dart';
 
 /// Sync de arranque sin red ni disco: evita que el smoke test toque
 /// path_provider/jw.org y que el I/O real cuelgue en la zona fake-async.
@@ -46,7 +46,7 @@ void main() {
           projectsProvider.overrideWithValue(const <Project>[]),
           dashboardLoadingProvider.overrideWithValue(false),
         ],
-        child: const JwProgramApp(),
+        child: const AgoraApp(),
       ),
     ));
     await tester.pump();

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/cck_service.dart';
-import 'package:jw_program/data/sync/sealed_box.dart';
-import 'package:jw_program/data/sync/user_key_service.dart';
+import 'package:agora/data/sync/cck_service.dart';
+import 'package:agora/data/sync/sealed_box.dart';
+import 'package:agora/data/sync/user_key_service.dart';
 
 import '../helpers/fake_key_docs.dart';
 import '../helpers/map_key_store.dart';

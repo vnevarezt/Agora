@@ -4,16 +4,16 @@
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/db/app_database.dart';
-import 'package:jw_program/data/mwb_cache.dart';
-import 'package:jw_program/data/mwb_repository.dart';
-import 'package:jw_program/models/notebook.dart';
-import 'package:jw_program/models/week.dart';
-import 'package:jw_program/state/dashboard_provider.dart';
-import 'package:jw_program/state/db_provider.dart';
-import 'package:jw_program/state/editor_session.dart';
-import 'package:jw_program/state/program_content.dart';
-import 'package:jw_program/state/weeks_provider.dart';
+import 'package:agora/data/db/app_database.dart';
+import 'package:agora/data/mwb_cache.dart';
+import 'package:agora/data/mwb_repository.dart';
+import 'package:agora/models/notebook.dart';
+import 'package:agora/models/week.dart';
+import 'package:agora/state/dashboard_provider.dart';
+import 'package:agora/state/db_provider.dart';
+import 'package:agora/state/editor_session.dart';
+import 'package:agora/state/program_content.dart';
+import 'package:agora/state/weeks_provider.dart';
 
 /// Serves canned weeks per issue and counts the parses (must be 1 per
 /// issue thanks to the service's memo, and 0 when nothing is missing).

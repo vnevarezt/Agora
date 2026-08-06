@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/app.dart';
-import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/models/congregation.dart';
-import 'package:jw_program/models/person.dart';
-import 'package:jw_program/models/project.dart';
-import 'package:jw_program/state/auth_session.dart';
-import 'package:jw_program/state/dashboard_provider.dart';
-import 'package:jw_program/state/mwb_sync.dart';
-import 'package:jw_program/state/people_provider.dart';
+import 'package:agora/app.dart';
+import 'package:agora/i18n/strings.g.dart';
+import 'package:agora/models/congregation.dart';
+import 'package:agora/models/person.dart';
+import 'package:agora/models/project.dart';
+import 'package:agora/state/auth_session.dart';
+import 'package:agora/state/dashboard_provider.dart';
+import 'package:agora/state/mwb_sync.dart';
+import 'package:agora/state/people_provider.dart';
 
 /// Startup sync stubbed out (no network/disk), the session forced unlocked
 /// and the people directory overridden (so no drift stream touches the real
@@ -41,7 +41,7 @@ Future<void> _pumpShell(WidgetTester tester, Size size) async {
         dashboardLoadingProvider.overrideWithValue(false),
         peopleLoadingProvider.overrideWithValue(false),
       ],
-      child: const JwProgramApp(),
+      child: const AgoraApp(),
     ),
   ));
   await tester.pump();

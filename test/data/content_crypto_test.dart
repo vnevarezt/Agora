@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/content_crypto.dart';
+import 'package:agora/data/sync/content_crypto.dart';
 
 void main() {
   final crypto = ContentCrypto();

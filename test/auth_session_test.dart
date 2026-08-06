@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/db/db_key_manager.dart';
-import 'package:jw_program/data/device_auth.dart';
-import 'package:jw_program/state/auth_session.dart';
-import 'package:jw_program/state/cloud_auth.dart';
+import 'package:agora/data/db/db_key_manager.dart';
+import 'package:agora/data/device_auth.dart';
+import 'package:agora/state/auth_session.dart';
+import 'package:agora/state/cloud_auth.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

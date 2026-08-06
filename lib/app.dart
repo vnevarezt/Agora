@@ -11,8 +11,8 @@ import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/tokens.dart';
 
-class JwProgramApp extends ConsumerWidget {
-  const JwProgramApp({super.key});
+class AgoraApp extends ConsumerWidget {
+  const AgoraApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

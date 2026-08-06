@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/models/congregation_settings.dart';
+import 'package:agora/models/congregation_settings.dart';
 
 void main() {
   test('toJson/fromJson roundtrip', () {

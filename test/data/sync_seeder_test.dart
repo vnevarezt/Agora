@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart' hide isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/db/app_database.dart';
-import 'package:jw_program/data/sync/hlc.dart';
-import 'package:jw_program/data/sync/sync_scribe.dart';
-import 'package:jw_program/data/sync/sync_seeder.dart';
-import 'package:jw_program/models/person.dart' show Gender, Role;
+import 'package:agora/data/db/app_database.dart';
+import 'package:agora/data/sync/hlc.dart';
+import 'package:agora/data/sync/sync_scribe.dart';
+import 'package:agora/data/sync/sync_seeder.dart';
+import 'package:agora/models/person.dart' show Gender, Role;
 
 void main() {
   late AppDatabase db;

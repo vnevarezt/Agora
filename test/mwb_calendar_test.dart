@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/domain/mwb_calendar.dart';
+import 'package:agora/domain/mwb_calendar.dart';
 
 void main() {
   group('issueForDate', () {

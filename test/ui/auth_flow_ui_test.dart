@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/app.dart';
-import 'package:jw_program/data/db/db_key_manager.dart';
-import 'package:jw_program/data/device_auth.dart';
-import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/state/auth_session.dart';
-import 'package:jw_program/state/cloud_auth.dart';
+import 'package:agora/app.dart';
+import 'package:agora/data/db/db_key_manager.dart';
+import 'package:agora/data/device_auth.dart';
+import 'package:agora/i18n/strings.g.dart';
+import 'package:agora/state/auth_session.dart';
+import 'package:agora/state/cloud_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/map_key_store.dart';
@@ -46,7 +46,7 @@ Future<void> pumpApp(WidgetTester tester, MapKeyStore store,
         if (deviceAuth != null)
           deviceAuthProvider.overrideWithValue(deviceAuth),
       ],
-      child: const JwProgramApp(),
+      child: const AgoraApp(),
     ),
   ));
   // _init (prefs + keychain) y animaciones de entrada de la portada.

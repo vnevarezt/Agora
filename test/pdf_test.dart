@@ -2,10 +2,10 @@
 // válido (sin red ni GUI).
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/domain/schedule_rules.dart';
-import 'package:jw_program/models/program_row.dart';
-import 'package:jw_program/models/week.dart';
-import 'package:jw_program/pdf/program_document.dart';
+import 'package:agora/domain/schedule_rules.dart';
+import 'package:agora/models/program_row.dart';
+import 'package:agora/models/week.dart';
+import 'package:agora/pdf/program_document.dart';
 
 Week _sampleWeek(String date) => Week(
       date: date,

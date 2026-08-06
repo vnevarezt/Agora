@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/state/program_form.dart';
+import 'package:agora/state/program_form.dart';
 
 void main() {
   group('sheetWeekIndices', () {
