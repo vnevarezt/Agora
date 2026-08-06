@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/db/db_key_manager.dart';
+import 'package:agora/data/db/db_key_manager.dart';
 
 import 'helpers/map_key_store.dart';
 

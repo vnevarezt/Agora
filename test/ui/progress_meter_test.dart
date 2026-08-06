@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jw_program/ui/theme/app_theme.dart';
-import 'package:jw_program/ui/theme/tokens.dart';
-import 'package:jw_program/ui/widgets/progress_meter.dart';
+import 'package:agora/ui/theme/app_theme.dart';
+import 'package:agora/ui/theme/tokens.dart';
+import 'package:agora/ui/widgets/progress_meter.dart';
 
 void main() {
   // Regression: a 0% meter (widthFactor 0) reported a non-finite intrinsic

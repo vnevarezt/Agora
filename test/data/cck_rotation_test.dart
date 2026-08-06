@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/cck_service.dart';
-import 'package:jw_program/data/sync/invite_code.dart';
-import 'package:jw_program/data/sync/user_key_service.dart';
-import 'package:jw_program/models/member_capabilities.dart';
+import 'package:agora/data/sync/cck_service.dart';
+import 'package:agora/data/sync/invite_code.dart';
+import 'package:agora/data/sync/user_key_service.dart';
+import 'package:agora/models/member_capabilities.dart';
 
 import '../helpers/fake_key_docs.dart';
 import '../helpers/map_key_store.dart';

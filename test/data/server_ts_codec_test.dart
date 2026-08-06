@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/firestore_transport.dart';
+import 'package:agora/data/sync/firestore_transport.dart';
 
 void main() {
   test('encode/decode roundtrips', () {

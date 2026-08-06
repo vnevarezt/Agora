@@ -13,6 +13,6 @@ Future<void> main() async {
   await initLocale(); // restaura el idioma guardado o sigue el del dispositivo
   await initAppSettings(); // restaura tema y preferencias de la app
   runApp(
-    TranslationProvider(child: const ProviderScope(child: JwProgramApp())),
+    TranslationProvider(child: const ProviderScope(child: AgoraApp())),
   );
 }

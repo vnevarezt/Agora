@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/models/person.dart';
-import 'package:jw_program/ui/participants/participant_card.dart';
-import 'package:jw_program/ui/theme/app_theme.dart';
-import 'package:jw_program/ui/theme/tokens.dart';
+import 'package:agora/i18n/strings.g.dart';
+import 'package:agora/models/person.dart';
+import 'package:agora/ui/participants/participant_card.dart';
+import 'package:agora/ui/theme/app_theme.dart';
+import 'package:agora/ui/theme/tokens.dart';
 
 // The participants grid virtualises with a fixed tile extent taken from
 // participantCardHeight(). That is only safe while every card really does lay

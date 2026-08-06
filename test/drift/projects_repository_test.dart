@@ -5,14 +5,14 @@
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/db/app_database.dart';
-import 'package:jw_program/data/repos/congregations_repository.dart';
-import 'package:jw_program/data/repos/projects_repository.dart';
-import 'package:jw_program/models/congregation_settings.dart';
-import 'package:jw_program/models/program_type_ids.dart';
-import 'package:jw_program/models/week_type.dart';
-import 'package:jw_program/state/dashboard_provider.dart';
-import 'package:jw_program/state/db_provider.dart';
+import 'package:agora/data/db/app_database.dart';
+import 'package:agora/data/repos/congregations_repository.dart';
+import 'package:agora/data/repos/projects_repository.dart';
+import 'package:agora/models/congregation_settings.dart';
+import 'package:agora/models/program_type_ids.dart';
+import 'package:agora/models/week_type.dart';
+import 'package:agora/state/dashboard_provider.dart';
+import 'package:agora/state/db_provider.dart';
 
 void main() {
   late AppDatabase db;

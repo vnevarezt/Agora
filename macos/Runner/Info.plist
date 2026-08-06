@@ -51,7 +51,7 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>JW Program Participantes</string>
+			<string>Participantes de Agora</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.vnevarezt.agora.jwpp</string>
 			<key>UTTypeTagSpecification</key>

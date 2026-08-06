@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/hlc.dart';
+import 'package:agora/data/sync/hlc.dart';
 
 void main() {
   test('encode/parse roundtrip and lexicographic order matches compareTo',

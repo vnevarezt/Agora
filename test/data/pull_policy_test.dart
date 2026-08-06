@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/pull_policy.dart';
+import 'package:agora/data/sync/pull_policy.dart';
 
 void main() {
   PullUrgency decide({

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/domain/schedule_rules.dart';
-import 'package:jw_program/models/week.dart';
+import 'package:agora/domain/schedule_rules.dart';
+import 'package:agora/models/week.dart';
 
 Week _week() => Week(
       date: '18-24 DE MAYO',

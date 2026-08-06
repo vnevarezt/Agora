@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/models/congregation.dart';
-import 'package:jw_program/models/member_capabilities.dart';
-import 'package:jw_program/models/membership.dart';
-import 'package:jw_program/state/dashboard_provider.dart';
-import 'package:jw_program/state/restore_provider.dart';
-import 'package:jw_program/state/sync_provider.dart';
+import 'package:agora/models/congregation.dart';
+import 'package:agora/models/member_capabilities.dart';
+import 'package:agora/models/membership.dart';
+import 'package:agora/state/dashboard_provider.dart';
+import 'package:agora/state/restore_provider.dart';
+import 'package:agora/state/sync_provider.dart';
 
 void main() {
   Congregation cong(String id) =>

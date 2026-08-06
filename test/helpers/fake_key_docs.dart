@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:jw_program/data/sync/key_docs_gateway.dart';
+import 'package:agora/data/sync/key_docs_gateway.dart';
 
 /// In-memory [KeyDocsGateway]: the docs the key services would keep in
 /// Firestore, minus the network and the rules.

@@ -10,10 +10,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:jw_program/data/db/connection.dart';
-import 'package:jw_program/data/db/db_key_manager.dart';
-import 'package:jw_program/main.dart' as app;
-import 'package:jw_program/ui/widgets/app_button.dart';
+import 'package:agora/data/db/connection.dart';
+import 'package:agora/data/db/db_key_manager.dart';
+import 'package:agora/main.dart' as app;
+import 'package:agora/ui/widgets/app_button.dart';
 
 const _password = 'integration-test-pass';
 

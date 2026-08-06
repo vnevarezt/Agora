@@ -87,6 +87,11 @@ enum LocalKeyStatus {
 /// password via Argon2id. A successful unwrap (the GCM tag verifies) IS the
 /// password check — no separate hash is stored. Losing the password loses
 /// the data: there is deliberately no recovery path.
+///
+/// The keychain entry names below keep the `jw_program.` prefix from before
+/// the Agora rename. They address key material already written on users'
+/// devices, so renaming them without a read-through migration would strand
+/// every existing install behind an unopenable database.
 class DbKeyManager {
   DbKeyManager({SecureKeyStore? store, this.params = KdfParams.owasp})
     : _store = store ?? const KeychainKeyStore();

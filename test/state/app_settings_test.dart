@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/state/app_settings.dart';
+import 'package:agora/state/app_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

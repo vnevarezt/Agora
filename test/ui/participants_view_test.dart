@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jw_program/i18n/strings.g.dart';
-import 'package:jw_program/models/person.dart';
-import 'package:jw_program/state/people_provider.dart';
-import 'package:jw_program/ui/participants/participants_view.dart';
-import 'package:jw_program/ui/theme/app_theme.dart';
-import 'package:jw_program/ui/theme/tokens.dart';
+import 'package:agora/i18n/strings.g.dart';
+import 'package:agora/models/person.dart';
+import 'package:agora/state/people_provider.dart';
+import 'package:agora/ui/participants/participants_view.dart';
+import 'package:agora/ui/theme/app_theme.dart';
+import 'package:agora/ui/theme/tokens.dart';
 
 // Probamos solo la UI de ParticipantsView, sobreescribiendo el provider
 // síncrono con una lista fija (sin BD) para que sea determinista y rápido.

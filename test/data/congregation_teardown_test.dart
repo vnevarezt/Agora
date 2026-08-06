@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jw_program/data/sync/congregation_teardown.dart';
-import 'package:jw_program/models/member_capabilities.dart';
+import 'package:agora/data/sync/congregation_teardown.dart';
+import 'package:agora/models/member_capabilities.dart';
 
 import '../helpers/fake_key_docs.dart';
 import '../helpers/in_memory_transport.dart';
