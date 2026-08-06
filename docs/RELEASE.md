@@ -47,6 +47,37 @@ Bump `version:` in `pubspec.yaml` (`x.y.z+build`). Android maps it to
   provides `GOOGLE_REVERSED_CLIENT_ID` for the Google sign-in URL scheme.
 - `flutter build ipa --release`.
 
+## 3b. Web
+
+Always build with `--wasm`:
+
+```bash
+flutter build web --wasm --release
+```
+
+The default JS build compiles to dart2js and picks the CanvasKit renderer;
+`--wasm` compiles to WasmGC and picks skwasm instead. Measured on the sign-in
+screen with a cold cache:
+
+| | default | `--wasm` |
+| --- | --- | --- |
+| transferred | 8.0 MB | 6.2 MB |
+| main-thread blocking after first paint | 224 ms | 0 ms |
+| worst single task | 274 ms | 0 ms |
+
+The blocking column is the one that matters: it is the visible stutter just
+after the UI appears. Flutter emits a dart2js bundle alongside the wasm one and
+falls back to it automatically on browsers without WasmGC, so the flag costs
+nothing in compatibility.
+
+Serve with cross-origin isolation (`Cross-Origin-Opener-Policy: same-origin`
+and `Cross-Origin-Embedder-Policy: require-corp`) so drift can use OPFS; without
+those headers it still works, on the slower IndexedDB path.
+
+`web/sqlite3.wasm` and `web/drift_worker.js` are committed but version-coupled
+to `pubspec.lock`. Re-run `sh tool/build_web_assets.sh` after bumping `drift`
+or `sqlite3`.
+
 ## 4. Firebase console (cloud mode)
 
 - **Authentication → Sign-in method**: enable Email/Password and Google.

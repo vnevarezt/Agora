@@ -31,16 +31,71 @@
 
   <title>agora</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Boot screen. The engine needs roughly a second to download and start, and
+    without this the page is blank white for all of it — long enough to read as
+    broken. Inline on purpose: an external stylesheet would be one more request
+    on the critical path, which is the thing being papered over.
+
+    Colours track lib/ui/theme/tokens.dart (pizarra.light.bg / .dark.bg and
+    .accent) so the handover to the first Flutter frame is not a colour jump.
+  -->
+  <style>
+    body { margin: 0; background: #F8FAFD; }
+    #boot {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F8FAFD;
+      transition: opacity .2s ease;
+    }
+    #boot.done { opacity: 0; pointer-events: none; }
+    #boot i {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(65, 98, 159, .25);
+      border-top-color: #41629F;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #boot i { animation-duration: 2.4s; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, #boot { background: #0B0F14; }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <div id="boot"><i></i></div>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Watch for the engine's own host element rather than hooking
+    // flutter_bootstrap.js internals, which are generated and version-specific.
+    (function () {
+      var boot = document.getElementById('boot');
+      var done = false;
+      function clear() {
+        if (done) return;
+        done = true;
+        boot.classList.add('done');
+        setTimeout(function () { boot.remove(); }, 250);
+      }
+      var obs = new MutationObserver(function () {
+        if (document.querySelector('flt-scene-host, flutter-view, flt-glass-pane')) {
+          obs.disconnect();
+          clear();
+        }
+      });
+      obs.observe(document.documentElement, {childList: true, subtree: true});
+      // Never strand the user behind a spinner if the engine fails to boot or
+      // the host element is renamed by a future Flutter release.
+      setTimeout(function () { obs.disconnect(); clear(); }, 10000);
+    })();
+  </script>
 </body>
 </html>
