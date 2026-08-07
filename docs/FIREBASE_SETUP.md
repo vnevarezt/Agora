@@ -56,6 +56,14 @@ Pick your project; the CLI registers one app per platform and **overwrites
 > the google-services Gradle plugin, and the plists are unused. `git status`
 > must show nothing new outside gitignored paths.
 
+> **Keep the web hosting headers.** The CSP and security headers live in the
+> `hosting` block of `firebase.json.example`. `flutterfire configure` rewrites
+> `firebase.json` without that block, and `tool/bootstrap.sh` only seeds the
+> file when it is missing — so after running `flutterfire`, re-merge the
+> `hosting` block from `firebase.json.example` into `firebase.json`, or a
+> `firebase deploy --only hosting` ships the web app with no CSP. Verify after
+> deploying: `curl -sI https://<your-site> | grep -i content-security-policy`.
+
 ## 3. Only for Google Sign-In (per platform)
 
 - **Android** — two things:
