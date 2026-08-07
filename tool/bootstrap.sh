@@ -18,9 +18,13 @@ copy_if_missing() {
 }
 
 copy_if_missing lib/firebase_options.example.dart lib/firebase_options.dart
+copy_if_missing lib/firebase_options_dev.example.dart lib/firebase_options_dev.dart
 copy_if_missing lib/cloud_secrets.example.dart lib/cloud_secrets.dart
+# Google Sign-In reversed client id, per flavor (prod = FirebaseSecrets, dev = -dev).
 copy_if_missing ios/Flutter/FirebaseSecrets.xcconfig.example ios/Flutter/FirebaseSecrets.xcconfig
+copy_if_missing ios/Flutter/FirebaseSecrets-dev.xcconfig.example ios/Flutter/FirebaseSecrets-dev.xcconfig
 copy_if_missing macos/Runner/Configs/FirebaseSecrets.xcconfig.example macos/Runner/Configs/FirebaseSecrets.xcconfig
+copy_if_missing macos/Runner/Configs/FirebaseSecrets-dev.xcconfig.example macos/Runner/Configs/FirebaseSecrets-dev.xcconfig
 # Firestore rules deploy + emulator config (rules themselves are committed).
 copy_if_missing firebase.json.example firebase.json
 copy_if_missing .firebaserc.example .firebaserc

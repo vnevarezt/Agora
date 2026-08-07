@@ -1,13 +1,14 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../cloud_secrets.dart';
-import '../firebase_options.dart';
+import '../firebase_flavor.dart';
 import '../i18n/strings.g.dart';
 
 /// Optional cloud identity (Firebase Auth). The app is local-first by
@@ -44,7 +45,7 @@ class CloudAuthException implements Exception {
 final firebaseAppProvider = FutureProvider<FirebaseApp?>((ref) async {
   final FirebaseOptions options;
   try {
-    options = DefaultFirebaseOptions.currentPlatform;
+    options = currentFirebaseOptions;
   } on UnsupportedError {
     return null;
   }
@@ -52,6 +53,8 @@ final firebaseAppProvider = FutureProvider<FirebaseApp?>((ref) async {
   try {
     final app = await Firebase.initializeApp(options: options);
     await _activateAppCheck();
+    await _initCrashlytics();
+    await _initAnalytics();
     return app;
   } catch (e) {
     debugPrint('Firebase init failed, cloud disabled: $e');
@@ -87,6 +90,47 @@ Future<void> _activateAppCheck() async {
     }
   } catch (e) {
     debugPrint('App Check activation skipped: $e');
+  }
+}
+
+/// Wires Crashlytics to the running Firebase project — a `dev` build reports to
+/// the dev project, `prod` to prod, by flavor (no per-build code needed).
+/// Collection is enabled only in RELEASE: debug/dev runs report nothing (you
+/// watch those in the debugger), which keeps the dashboards clean. Best-effort —
+/// never breaks cloud init. Dart/Flutter errors are captured; full native
+/// symbolication (NDK / dSYM) would need the Crashlytics Gradle plugin, which
+/// this app deliberately avoids (Firebase is Dart-only here).
+Future<void> _initCrashlytics() async {
+  try {
+    final crashlytics = FirebaseCrashlytics.instance;
+    await crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
+    final priorOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      priorOnError?.call(details); // keep the console / red screen in debug
+      crashlytics.recordFlutterError(details); // sent only when collection is on
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      crashlytics.recordError(error, stack, fatal: true);
+      return true;
+    };
+  } catch (e) {
+    debugPrint('Crashlytics setup skipped: $e');
+  }
+}
+
+/// Enables Firebase Analytics for the running project (dev→dev, prod→prod by
+/// flavor). Collection is on in release, and in debug ONLY for the dev flavor —
+/// so you can verify events in dev's DebugView without a local prod-debug run
+/// skewing prod's numbers. Best-effort. The reports you usually want (active
+/// users, geography, devices, sessions) are automatic; no extra code. Runs only
+/// when the cloud is configured, so local-first users are never tracked.
+Future<void> _initAnalytics() async {
+  try {
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
+      !kDebugMode || currentFlavor == Flavor.dev,
+    );
+  } catch (e) {
+    debugPrint('Analytics setup skipped: $e');
   }
 }
 
@@ -198,7 +242,7 @@ class CloudAuthService {
         clientId: switch (defaultTargetPlatform) {
           TargetPlatform.iOS ||
           TargetPlatform.macOS =>
-            DefaultFirebaseOptions.currentPlatform.iosClientId,
+            currentFirebaseOptions.iosClientId,
           _ => null,
         },
         serverClientId:

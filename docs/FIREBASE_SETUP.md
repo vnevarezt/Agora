@@ -16,16 +16,87 @@ This copies the committed `.example` placeholders to their real, gitignored
 locations. The app now builds and runs fully local; Settings shows
 "Cloud not configured".
 
-| Real file (gitignored)                          | Purpose                                    |
-| ----------------------------------------------- | ------------------------------------------ |
-| `lib/firebase_options.dart`                     | Firebase project config (all platforms)    |
-| `lib/cloud_secrets.dart`                        | OAuth web client ID (Google on Android)    |
-| `ios/Flutter/FirebaseSecrets.xcconfig`          | `GOOGLE_REVERSED_CLIENT_ID` for iOS        |
-| `macos/Runner/Configs/FirebaseSecrets.xcconfig` | `GOOGLE_REVERSED_CLIENT_ID` for macOS      |
+| Real file (gitignored)                               | Purpose                                          |
+| ---------------------------------------------------- | ------------------------------------------------ |
+| `lib/firebase_options.dart`                          | **prod** Firebase project config (all platforms) |
+| `lib/firebase_options_dev.dart`                      | **dev** Firebase project config (all platforms)  |
+| `lib/cloud_secrets.dart`                             | OAuth web client ID + App Check key, per flavor  |
+| `ios/Flutter/FirebaseSecrets.xcconfig` (+ `-dev`)    | `GOOGLE_REVERSED_CLIENT_ID` iOS, per flavor      |
+| `macos/Runner/Configs/FirebaseSecrets.xcconfig` (+ `-dev`) | `GOOGLE_REVERSED_CLIENT_ID` macOS, per flavor |
 
 `firebase.json`, `.firebaserc`, `google-services.json` and
 `GoogleService-Info.plist` are gitignored too: the app never reads them
 (Firebase initializes from Dart only), they are just CLI byproducts.
+
+## Flavors: `dev` vs `prod` (two Firebase projects)
+
+Two projects keep testing off real users: **`prod`** (the project with your
+users) and **`dev`** (a throwaway project for development). Selection is by
+flavor at launch — `flutter run --flavor dev|prod` — or the VS Code launch
+configs **"Agora dev" / "Agora prod"** (`.vscode/launch.json`).
+
+- The Firebase **project** is chosen in Dart ([lib/firebase_flavor.dart](../lib/firebase_flavor.dart)):
+  `--flavor` sets `FLUTTER_APP_FLAVOR`, and the selector picks
+  `firebase_options_dev.dart` vs `firebase_options.dart` (web/tests fall back to
+  `--dart-define=FLAVOR=`). **Default is `dev`** on purpose — an unflavored build
+  never reaches prod. **Store/release builds MUST pass `--flavor prod`.**
+- **Side-by-side installs**: `dev` gets `applicationId`/`bundleId` suffix `.dev`,
+  so both apps coexist on one device (Android app name shows "Agora Dev").
+
+**Configure each project** (§2 covers prod as the default `firebase_options.dart`;
+for dev add `--out` and the `.dev` ids):
+
+```sh
+# DEV project (create it in the console first)
+flutterfire configure --project=<your-dev-id> \
+  --out=lib/firebase_options_dev.dart \
+  --android-package-name=com.vnevarezt.agora.dev \
+  --ios-bundle-id=com.vnevarezt.agora.dev \
+  --macos-bundle-id=com.vnevarezt.agora.dev
+```
+
+**Native flavor wiring:**
+- **Android** — already set in `android/app/build.gradle.kts` (`productFlavors`
+  dev/prod). Nothing else to do.
+- **Web / Windows** — no native flavor; the `--dart-define=FLAVOR` in the launch
+  configs is enough.
+- **iOS / macOS** — one-time Xcode setup:
+  1. Duplicate the build configurations into `Debug-dev / Release-dev /
+     Profile-dev` and `…-prod`.
+  2. Create **schemes** named `dev` and `prod` bound to those configs.
+  3. Set `PRODUCT_BUNDLE_IDENTIFIER` = `com.vnevarezt.agora` (prod) and
+     `com.vnevarezt.agora.dev` (dev) per config.
+  4. Make each config include the matching secrets file — change the
+     `#include?` in `ios/Flutter/Debug.xcconfig`/`Release.xcconfig` (and the
+     macOS equivalents) to `FirebaseSecrets-$(FLAVOR).xcconfig`, and set a
+     `FLAVOR = dev|prod` build setting per config. `Info.plist` already reads
+     `$(GOOGLE_REVERSED_CLIENT_ID)`.
+
+`cloud_secrets.dart` values are **maps keyed by flavor** (`{'dev':…, 'prod':…}`).
+
+### Crashlytics (optional)
+
+Crashlytics is wired in `firebaseAppProvider` (see `lib/state/cloud_auth.dart`)
+and follows the flavor automatically: a `dev` build reports to the dev project,
+`prod` to prod — no per-build code. **Collection is enabled only in release**
+(`!kDebugMode`), so debug/dev runs report nothing and the dashboards stay clean;
+you see those crashes in the debugger. To use it, enable Crashlytics once per
+project in the console (**Release & Monitor → Crashlytics → Enable**). Only
+Dart/Flutter errors are captured — full native symbolication (NDK / dSYM) would
+need the Crashlytics Gradle plugin, which this app avoids on purpose.
+
+### Analytics (optional — privacy tradeoff)
+
+Firebase Analytics is wired the same way (`_initAnalytics` in
+`lib/state/cloud_auth.dart`) and follows the flavor: `dev`→dev, `prod`→prod.
+Collection is on in release and, in debug, only for the `dev` flavor (so dev's
+**DebugView** works without a local prod-debug run skewing prod). It only runs
+when the cloud is configured, so **local-first users are never tracked**. The
+usual reports (active users, country/city, devices, sessions) are automatic; no
+event code needed. To see the data, enable **Google Analytics** in each
+project's console (Project settings → Integrations, or the Analytics tab links a
+GA property). Note this sends usage + coarse location to Google — a deliberate
+choice for an otherwise E2E/private app.
 
 ## 1. Create the Firebase project and enable providers
 
@@ -71,14 +142,16 @@ Pick your project; the CLI registers one app per platform and **overwrites
      `keytool -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore -storepass android | grep SHA1`
   2. Paste the **Web client** OAuth ID (Google Cloud console → *APIs &
      Services → Credentials*, it looks like `…apps.googleusercontent.com`)
-     into `googleServerClientId` in `lib/cloud_secrets.dart`.
-     While it is empty the Google button stays hidden on Android.
+     into the matching flavor key of `googleServerClientId` in
+     `lib/cloud_secrets.dart` (`{'dev': …, 'prod': …}`).
+     While a flavor's value is empty the Google button stays hidden on Android.
 - **iOS / macOS** — find the **iOS client** in the same Credentials page and
   copy its *reversed* ID (starts with `com.googleusercontent.apps.`), or
   download the `GoogleService-Info.plist` once, copy `REVERSED_CLIENT_ID`,
-  and delete the plist. Paste it into **both**
-  `ios/Flutter/FirebaseSecrets.xcconfig` and
-  `macos/Runner/Configs/FirebaseSecrets.xcconfig`:
+  and delete the plist. Paste the **prod** value into
+  `ios/Flutter/FirebaseSecrets.xcconfig` +
+  `macos/Runner/Configs/FirebaseSecrets.xcconfig`, and the **dev** project's
+  value into the `-dev` variants of each:
 
   ```
   GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.1234567890-abc…
@@ -118,11 +191,13 @@ The rules are the deployed security model, so **`firestore.rules` and
 1. Firebase console → **Firestore Database** → *Create database* → Native
    mode, region `nam5` (or your closest). Free (Spark) plan is enough — the
    whole design avoids Cloud Functions.
-2. Point the CLI at your project: edit `.firebaserc` (created by bootstrap)
-   or pass `--project <id>`.
-3. Deploy the rules + the one collection-group index:
+2. `.firebaserc` (created by bootstrap) defines both **dev** and **prod**
+   project ids — fill both in.
+3. Deploy the rules + the one collection-group index **to each project** (the
+   rules are shared, so dev tests exactly what prod runs):
    ```sh
-   firebase deploy --only firestore:rules,firestore:indexes --project <id>
+   firebase deploy --only firestore:rules,firestore:indexes --project dev
+   firebase deploy --only firestore:rules,firestore:indexes --project prod
    ```
    Re-run this whenever `firestore.rules` changes (e.g. after pulling the
    4b-3 `meta/activity` heartbeat rule) — an outdated deploy denies the new

@@ -52,13 +52,16 @@ app.*.map.json
 # gitignored because flutterfire regenerates it with per-dev app ids —
 # bootstrap.sh merges the committed firebase.json.example (rules + emulators).
 lib/firebase_options.dart
+lib/firebase_options_dev.dart
 lib/cloud_secrets.dart
 **/google-services.json
 **/GoogleService-Info.plist
 firebase.json
 .firebaserc
 ios/Flutter/FirebaseSecrets.xcconfig
+ios/Flutter/FirebaseSecrets-dev.xcconfig
 macos/Runner/Configs/FirebaseSecrets.xcconfig
+macos/Runner/Configs/FirebaseSecrets-dev.xcconfig
 
 # Firestore rules test harness (Node) — committed source only, not deps.
 tool/rules-test/node_modules/

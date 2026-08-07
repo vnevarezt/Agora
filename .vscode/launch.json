@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Agora dev",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--flavor", "dev", "--dart-define=FLAVOR=dev"]
+    },
+    {
+      "name": "Agora prod",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--flavor", "prod", "--dart-define=FLAVOR=prod"]
+    },
+    {
+      "name": "Agora dev (web)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["-d", "chrome", "--dart-define=FLAVOR=dev"]
+    },
+    {
+      "name": "Agora prod (web)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["-d", "chrome", "--dart-define=FLAVOR=prod"]
+    }
+  ]
+}
