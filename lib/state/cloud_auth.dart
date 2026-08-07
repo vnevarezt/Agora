@@ -1,3 +1,4 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -49,12 +50,45 @@ final firebaseAppProvider = FutureProvider<FirebaseApp?>((ref) async {
   }
   if (options.apiKey.startsWith('REPLACE')) return null;
   try {
-    return await Firebase.initializeApp(options: options);
+    final app = await Firebase.initializeApp(options: options);
+    await _activateAppCheck();
+    return app;
   } catch (e) {
     debugPrint('Firebase init failed, cloud disabled: $e');
     return null;
   }
 });
+
+/// Best-effort Firebase App Check activation. Attests that requests come from a
+/// genuine instance of this app, so once *enforcement* is enabled in the
+/// Firebase console the backend can reject direct API calls that carry only a
+/// stolen auth token. Deliberately best-effort: enforcement stays OFF until the
+/// project is configured, so a failure here changes nothing and must never
+/// disable the cloud (same contract as the rest of this file). Web needs a
+/// reCAPTCHA v3 site key ([googleRecaptchaV3SiteKey]); left empty, web App Check
+/// is skipped. Native uses Play Integrity / DeviceCheck in release and the debug
+/// providers otherwise (register the printed debug token in the console).
+Future<void> _activateAppCheck() async {
+  try {
+    if (kIsWeb) {
+      if (googleRecaptchaV3SiteKey.isEmpty) return;
+      await FirebaseAppCheck.instance.activate(
+        providerWeb: ReCaptchaV3Provider(googleRecaptchaV3SiteKey),
+      );
+    } else {
+      await FirebaseAppCheck.instance.activate(
+        providerAndroid: kDebugMode
+            ? const AndroidDebugProvider()
+            : const AndroidPlayIntegrityProvider(),
+        providerApple: kDebugMode
+            ? const AppleDebugProvider()
+            : const AppleDeviceCheckProvider(),
+      );
+    }
+  } catch (e) {
+    debugPrint('App Check activation skipped: $e');
+  }
+}
 
 final firebaseAvailableProvider = Provider<bool>(
     (ref) => ref.watch(firebaseAppProvider).value != null);

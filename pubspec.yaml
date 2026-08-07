@@ -69,6 +69,7 @@ dependencies:
   # Web-only DOM access (blob downloads, IndexedDB). Already pulled in
   # transitively; declared because lib/ imports it directly.
   web: ^1.1.1
+  firebase_app_check: ^0.4.6
 hooks:
   user_defines:
     sqlite3:

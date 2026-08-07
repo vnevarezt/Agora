@@ -269,6 +269,10 @@ describe('items: capability matrix per entity kind', () => {
     // Extra fields are rejected.
     await assertFails(write('admin', { entity: 'person', extra: 1 }));
     // Rewriting the kind (person → program) is rejected even for admins.
+    // Create the person doc first so the rewrite is an UPDATE: the two asserts
+    // above fail by design (client serverTs, extra field) and never create it,
+    // so without this the setDoc below would be a fresh — and allowed — create.
+    await assertSucceeds(write('admin', { entity: 'person' }));
     await assertFails(setDoc(doc(db('admin'), 'congregations/c1/items/x-person'),
       item({ entity: 'program', programTypeId: 'mwb-s140' })));
   });
