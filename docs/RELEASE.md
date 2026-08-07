@@ -34,8 +34,10 @@ Bump `version:` in `pubspec.yaml` (`x.y.z+build`). Android maps it to
 3. Build and verify:
 
    ```bash
-   flutter build appbundle --release   # Play Store
-   flutter build apk --release         # direct distribution
+   # Store/release builds MUST target the prod flavor — the Dart default is
+   # dev, so omitting --flavor ships a build pointed at the DEV project.
+   flutter build appbundle --release --flavor prod   # Play Store
+   flutter build apk --release --flavor prod         # direct distribution
    ```
 
 ## 3. iOS
@@ -43,14 +45,16 @@ Bump `version:` in `pubspec.yaml` (`x.y.z+build`). Android maps it to
 - Signing needs a paid Apple Developer team (the data-protection keychain
   used by Firebase/Google sessions requires a provisioning profile; the
   runtime probe hides cloud mode on machines where that's missing).
-- `ios/Flutter/FirebaseSecrets.xcconfig` (gitignored, see the `.example`)
-  provides `GOOGLE_REVERSED_CLIENT_ID` for the Google sign-in URL scheme.
-- `flutter build ipa --release`.
+- `ios/Flutter/FirebaseSecrets.xcconfig` (prod; `-dev` for the dev flavor,
+  both gitignored, see the `.example`s) provides `GOOGLE_REVERSED_CLIENT_ID`
+  for the Google sign-in URL scheme.
+- `flutter build ipa --release --flavor prod` (the `prod` scheme; see
+  docs/FIREBASE_SETUP.md for the one-time Xcode flavor setup).
 
 ## 3b. Web
 
 ```bash
-flutter build web --wasm --no-web-resources-cdn --release
+flutter build web --wasm --no-web-resources-cdn --release --dart-define=FLAVOR=prod
 ```
 
 Both flags are required.

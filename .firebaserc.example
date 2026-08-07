@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "REPLACE_ME-your-firebase-project-id"
+    "dev": "REPLACE_ME-your-dev-firebase-project-id",
+    "prod": "REPLACE_ME-your-prod-firebase-project-id",
+    "default": "dev"
   }
 }

@@ -38,6 +38,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appName"] = "Agora"
     }
 
     signingConfigs {
@@ -58,6 +59,21 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+        }
+    }
+
+    // dev/prod flavors: dev gets a `.dev` applicationId so both install
+    // side-by-side on one device. The Firebase PROJECT is chosen in Dart
+    // (lib/firebase_flavor.dart via --flavor / --dart-define=FLAVOR), not here.
+    flavorDimensions += "env"
+    productFlavors {
+        create("prod") {
+            dimension = "env"
+        }
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders["appName"] = "Agora Dev"
         }
     }
 }
