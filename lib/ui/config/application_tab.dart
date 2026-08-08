@@ -10,6 +10,7 @@ import '../../state/app_settings.dart';
 import '../../state/auth_session.dart';
 import '../../state/backup_provider.dart';
 import '../../state/cloud_auth.dart' show cloudUserProvider;
+import '../../state/locale_boot.dart' show shippedLocales;
 import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
@@ -327,7 +328,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
               label: tr.settings.appLanguage,
               child: AppDropdown<AppLocale>(
                 value: ref.watch(localeProvider),
-                items: AppLocale.values,
+                items: shippedLocales,
                 itemLabel: _localeName,
                 onChanged: (v) => ref.read(localeProvider.notifier).set(v),
               ),

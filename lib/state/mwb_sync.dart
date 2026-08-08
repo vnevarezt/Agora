@@ -91,15 +91,10 @@ Future<List<Notebook>> _buildCatalog(
       final weeks = await repository.weeks(e.issue, lang: lang);
       notebooks.add(Notebook(
         id: e.issue,
-        label: labelForIssue(e.issue),
         weeks: [for (final w in weeks) w.date],
       ));
     } catch (_) {
-      notebooks.add(Notebook(
-        id: e.issue,
-        label: labelForIssue(e.issue),
-        weeks: const [],
-      ));
+      notebooks.add(Notebook(id: e.issue, weeks: const []));
     }
   }
   return notebooks;

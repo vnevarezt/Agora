@@ -187,7 +187,8 @@
     "searchParticipant": "Buscar participante…",
     "removeAssignment": "Quitar asignación",
     "allFeminine": "Todas",
-    "allMasculine": "Todos"
+    "allMasculine": "Todos",
+    "assigned": "asignados"
   },
   "sync": {
     "updating": "Actualizando catálogos",
@@ -372,6 +373,20 @@
     "friday": "Viernes",
     "saturday": "Sábado",
     "sunday": "Domingo"
+  },
+  "months": {
+    "january": "Enero",
+    "february": "Febrero",
+    "march": "Marzo",
+    "april": "Abril",
+    "may": "Mayo",
+    "june": "Junio",
+    "july": "Julio",
+    "august": "Agosto",
+    "september": "Septiembre",
+    "october": "Octubre",
+    "november": "Noviembre",
+    "december": "Diciembre"
   },
   "congregation": {
     "dataTitle": "Datos de la congregación",

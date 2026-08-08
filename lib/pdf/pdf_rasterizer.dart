@@ -11,7 +11,7 @@ Future<Uint8List> renderPagePng(Uint8List pdf, {double dpi = 300}) async {
   final img = await rasterizePage(pdf, scale: dpi / 72);
   try {
     final data = await img.toByteData(format: ui.ImageByteFormat.png);
-    if (data == null) throw Exception('No se pudo codificar la imagen.');
+    if (data == null) throw Exception('Could not encode the image.');
     return data.buffer.asUint8List();
   } finally {
     img.dispose();

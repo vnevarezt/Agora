@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -67,7 +68,7 @@ class ProgressRing extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     height: 1.1,
                     color: t.text)),
-            Text('asignados',
+            Text(context.t.common.assigned,
                 style: TextStyle(
                     fontSize: AppText.caption,
                     fontWeight: FontWeight.w600,

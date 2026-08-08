@@ -53,9 +53,7 @@ void main() {
     addTearDown(db.close);
     container.read(notebooksProvider.notifier).setFrom([
       const Notebook(
-          id: '202607',
-          label: 'Julio 2026',
-          weeks: ['7-13 DE JULIO', '14-20 DE JULIO']),
+          id: '202607', weeks: ['7-13 DE JULIO', '14-20 DE JULIO']),
     ]);
   });
 
@@ -100,8 +98,7 @@ void main() {
 
     // The sync lands: the fill must re-run without reopening the editor.
     container.read(notebooksProvider.notifier).setFrom([
-      const Notebook(
-          id: '202607', label: 'Julio 2026', weeks: ['7-13 DE JULIO']),
+      const Notebook(id: '202607', weeks: ['7-13 DE JULIO']),
     ]);
     await pumpEventQueue();
 

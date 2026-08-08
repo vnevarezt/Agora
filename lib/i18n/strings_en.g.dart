@@ -61,6 +61,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$settings$en settings = _Translations$settings$en._(_root);
 	@override late final _Translations$options$en options = _Translations$options$en._(_root);
 	@override late final _Translations$days$en days = _Translations$days$en._(_root);
+	@override late final _Translations$months$en months = _Translations$months$en._(_root);
 	@override late final _Translations$congregation$en congregation = _Translations$congregation$en._(_root);
 	@override late final _Translations$newCongregation$en newCongregation = _Translations$newCongregation$en._(_root);
 	@override late final _Translations$invite$en invite = _Translations$invite$en._(_root);
@@ -247,6 +248,7 @@ class _Translations$common$en extends Translations$common$es {
 	@override String get removeAssignment => 'Remove assignment';
 	@override String get allFeminine => 'All';
 	@override String get allMasculine => 'All';
+	@override String get assigned => 'assigned';
 }
 
 // Path: sync
@@ -513,6 +515,27 @@ class _Translations$days$en extends Translations$days$es {
 	@override String get friday => 'Friday';
 	@override String get saturday => 'Saturday';
 	@override String get sunday => 'Sunday';
+}
+
+// Path: months
+class _Translations$months$en extends Translations$months$es {
+	_Translations$months$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get january => 'January';
+	@override String get february => 'February';
+	@override String get march => 'March';
+	@override String get april => 'April';
+	@override String get may => 'May';
+	@override String get june => 'June';
+	@override String get july => 'July';
+	@override String get august => 'August';
+	@override String get september => 'September';
+	@override String get october => 'October';
+	@override String get november => 'November';
+	@override String get december => 'December';
 }
 
 // Path: congregation
@@ -1060,6 +1083,7 @@ extension on TranslationsEn {
 			'common.removeAssignment' => 'Remove assignment',
 			'common.allFeminine' => 'All',
 			'common.allMasculine' => 'All',
+			'common.assigned' => 'assigned',
 			'sync.updating' => 'Updating catalogs',
 			'sync.updatingTip' => 'Downloading the latest workbooks…',
 			'sync.upToDate' => 'Catalogs up to date',
@@ -1210,6 +1234,18 @@ extension on TranslationsEn {
 			'days.friday' => 'Friday',
 			'days.saturday' => 'Saturday',
 			'days.sunday' => 'Sunday',
+			'months.january' => 'January',
+			'months.february' => 'February',
+			'months.march' => 'March',
+			'months.april' => 'April',
+			'months.may' => 'May',
+			'months.june' => 'June',
+			'months.july' => 'July',
+			'months.august' => 'August',
+			'months.september' => 'September',
+			'months.october' => 'October',
+			'months.november' => 'November',
+			'months.december' => 'December',
 			'congregation.dataTitle' => 'Congregation details',
 			'congregation.dataDesc' => 'Used in the header of the programs.',
 			'congregation.name' => 'Name',

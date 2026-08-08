@@ -62,6 +62,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$settings$es settings = Translations$settings$es.internal(_root);
 	late final Translations$options$es options = Translations$options$es.internal(_root);
 	late final Translations$days$es days = Translations$days$es.internal(_root);
+	late final Translations$months$es months = Translations$months$es.internal(_root);
 	late final Translations$congregation$es congregation = Translations$congregation$es.internal(_root);
 	late final Translations$newCongregation$es newCongregation = Translations$newCongregation$es.internal(_root);
 	late final Translations$invite$es invite = Translations$invite$es.internal(_root);
@@ -430,6 +431,9 @@ class Translations$common$es {
 
 	/// es: 'Todos'
 	String get allMasculine => 'Todos';
+
+	/// es: 'asignados'
+	String get assigned => 'asignados';
 }
 
 // Path: sync
@@ -981,6 +985,51 @@ class Translations$days$es {
 
 	/// es: 'Domingo'
 	String get sunday => 'Domingo';
+}
+
+// Path: months
+class Translations$months$es {
+	Translations$months$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Enero'
+	String get january => 'Enero';
+
+	/// es: 'Febrero'
+	String get february => 'Febrero';
+
+	/// es: 'Marzo'
+	String get march => 'Marzo';
+
+	/// es: 'Abril'
+	String get april => 'Abril';
+
+	/// es: 'Mayo'
+	String get may => 'Mayo';
+
+	/// es: 'Junio'
+	String get june => 'Junio';
+
+	/// es: 'Julio'
+	String get july => 'Julio';
+
+	/// es: 'Agosto'
+	String get august => 'Agosto';
+
+	/// es: 'Septiembre'
+	String get september => 'Septiembre';
+
+	/// es: 'Octubre'
+	String get october => 'Octubre';
+
+	/// es: 'Noviembre'
+	String get november => 'Noviembre';
+
+	/// es: 'Diciembre'
+	String get december => 'Diciembre';
 }
 
 // Path: congregation
@@ -1988,6 +2037,7 @@ extension on Translations {
 			'common.removeAssignment' => 'Quitar asignación',
 			'common.allFeminine' => 'Todas',
 			'common.allMasculine' => 'Todos',
+			'common.assigned' => 'asignados',
 			'sync.updating' => 'Actualizando catálogos',
 			'sync.updatingTip' => 'Descargando los cuadernos más recientes…',
 			'sync.upToDate' => 'Catálogos al día',
@@ -2138,6 +2188,18 @@ extension on Translations {
 			'days.friday' => 'Viernes',
 			'days.saturday' => 'Sábado',
 			'days.sunday' => 'Domingo',
+			'months.january' => 'Enero',
+			'months.february' => 'Febrero',
+			'months.march' => 'Marzo',
+			'months.april' => 'Abril',
+			'months.may' => 'Mayo',
+			'months.june' => 'Junio',
+			'months.july' => 'Julio',
+			'months.august' => 'Agosto',
+			'months.september' => 'Septiembre',
+			'months.october' => 'Octubre',
+			'months.november' => 'Noviembre',
+			'months.december' => 'Diciembre',
 			'congregation.dataTitle' => 'Datos de la congregación',
 			'congregation.dataDesc' => 'Se usan en el encabezado de los programas.',
 			'congregation.name' => 'Nombre',

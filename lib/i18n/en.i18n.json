@@ -187,7 +187,8 @@
     "searchParticipant": "Search participant…",
     "removeAssignment": "Remove assignment",
     "allFeminine": "All",
-    "allMasculine": "All"
+    "allMasculine": "All",
+    "assigned": "assigned"
   },
   "sync": {
     "updating": "Updating catalogs",
@@ -372,6 +373,20 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
   },
   "congregation": {
     "dataTitle": "Congregation details",

@@ -26,7 +26,7 @@ class MwbApi {
       final resp = await c.get(uri);
       if (resp.statusCode != 200) {
         throw Exception(
-          'No se encontró el EPUB para issue=$issue lang=$lang '
+          'No EPUB found for issue=$issue lang=$lang '
           '(HTTP ${resp.statusCode}).',
         );
       }
@@ -37,7 +37,7 @@ class MwbApi {
         final date = (data['formattedDate'] as String?) ?? '';
         return (url: url, date: date);
       } catch (_) {
-        throw Exception('No se encontró el EPUB para issue=$issue lang=$lang.');
+        throw Exception('No EPUB found for issue=$issue lang=$lang.');
       }
     } finally {
       if (client == null) c.close();

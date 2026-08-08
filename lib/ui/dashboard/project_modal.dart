@@ -103,16 +103,18 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   void _remove(String w) =>
       setState(() => _weeks = _weeks.where((x) => x != w).toList());
 
-  /// Default name when the field is empty.
-  String _autoName(Notebook notebook) {
+  /// Default name when the field is empty. Built from the notebook's starting
+  /// month in the CURRENT app language and then persisted as plain text — the
+  /// user can edit it, and it is not re-derived afterwards.
+  String _autoName(Notebook notebook, Translations tr) {
     if (_name.trim().isNotEmpty) return _name.trim();
     if (_weeks.isEmpty) return '';
-    final base = notebook.label.split('–').first.trim();
-    return t.projectModal.autoName(n: _weeks.length, base: base);
+    final base = tr.monthNames[issueMonth(notebook.id) - 1];
+    return tr.projectModal.autoName(n: _weeks.length, base: base);
   }
 
-  Future<void> _save(Notebook notebook) async {
-    final name = _autoName(notebook);
+  Future<void> _save(Notebook notebook, Translations tr) async {
+    final name = _autoName(notebook, tr);
     final actions = ref.read(projectActionsProvider);
     final String projectId;
     if (_isNew) {
@@ -185,7 +187,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final notebook = notebooks.firstWhere((c) => c.id == _notebookId,
         orElse: () => notebooks.first);
     final extra = _weeks.where((x) => !notebook.weeks.contains(x)).toList();
-    final autoName = _autoName(notebook);
+    final autoName = _autoName(notebook, tr);
 
     return ModalShell(
       sheet: widget.sheet,
@@ -196,7 +198,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           notebook, extra, autoName),
       primaryLabel: _isNew ? tr.projectModal.create : tr.common.saveChanges,
       onPrimary:
-          (_canEdit && _weeks.isNotEmpty) ? () => _save(notebook) : null,
+          (_canEdit && _weeks.isNotEmpty) ? () => _save(notebook, tr) : null,
       onDanger: (_isNew || !_canEdit) ? null : _delete,
     );
   }
@@ -241,7 +243,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                   children: [
                     for (final c in notebooks)
                       FilterPill(
-                        label: c.label,
+                        label: c.label(tr),
                         active: c.id == _notebookId,
                         onTap: () => setState(() => _notebookId = c.id),
                       ),
