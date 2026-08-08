@@ -18,16 +18,10 @@ String hhmm(int minutes) {
 
 /// Role + number of names for a part.
 ///
-/// Classification is POSITIONAL, so it holds in any meeting language. Verified
-/// against the Spanish and English `mwb_202607` workbooks, all 9 weeks each:
-///
-///   * the Bible Reading always closes "Treasures From God's Word";
-///   * the Congregation Bible Study always closes "Living as Christians".
-///
-/// The one thing position cannot tell apart is a ministry talk from a
-/// demonstration — the last part of that section is a talk some weeks and a
-/// demonstration others. That flag is read from the workbook body at parse
-/// time; see [Part.isTalk].
+/// Positional, so it holds in any meeting language: the Bible Reading closes
+/// Treasures and the Congregation Bible Study closes Living as Christians
+/// (verified across both mwb_202607 workbooks, 9 weeks each). Position cannot
+/// tell a ministry talk from a demonstration, hence [Part.isTalk].
 ({SlotRole role, int n}) roleAndNames(
   Section section,
   Part part, {
@@ -35,15 +29,13 @@ String hhmm(int minutes) {
 }) {
   switch (section) {
     case Section.treasures:
-      // Bible Reading.
-      if (isLastInSection) return (role: SlotRole.student, n: 1);
+      if (isLastInSection) return (role: SlotRole.student, n: 1); // Bible Reading
       return (role: SlotRole.none, n: 1); // talk / spiritual gems
     case Section.ministry:
       if (part.isTalk) return (role: SlotRole.student, n: 1);
       return (role: SlotRole.studentAssistant, n: 2); // demonstration
     case Section.christianLife:
-      // Congregation Bible Study.
-      if (isLastInSection) return (role: SlotRole.conductorReader, n: 2);
+      if (isLastInSection) return (role: SlotRole.conductorReader, n: 2); // CBS
       return (role: SlotRole.none, n: 1); // discussion / talk
   }
 }
@@ -84,9 +76,7 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   final treasures = parts.where((p) => p.section == Section.treasures).toList();
   final ministry = parts.where((p) => p.section == Section.ministry).toList();
   final life = parts.where((p) => p.section == Section.christianLife).toList();
-  // The Congregation Bible Study closes the section in every workbook, in
-  // every language — see [roleAndNames].
-  final Part? cbs = life.isEmpty ? null : life.last;
+  final Part? cbs = life.isEmpty ? null : life.last; // see [roleAndNames]
   final lifeNoCbs = life.where((p) => !identical(p, cbs)).toList();
 
   final intro = week.introMinutes;
@@ -221,9 +211,7 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
 }
 
 /// Replaces a row's title with the user override (keyed by `ProgramRow.id`).
-/// The duration is a field now, so it survives the override on its own — the
-/// renderer re-appends the "(N mins.)" suffix. Returns [schedule] unchanged
-/// when there are no overrides.
+/// The duration is a field, so it survives the override on its own.
 ProgramSchedule applyTitleOverrides(
     ProgramSchedule schedule, Map<String, String> overrides) {
   if (overrides.isEmpty) return schedule;

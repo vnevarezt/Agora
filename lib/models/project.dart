@@ -3,8 +3,7 @@ import '../i18n/strings.g.dart';
 /// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
 
-// Takes the active [Translations] rather than the global `t` — see the note
-// on the same pattern in `person.dart`.
+// Takes [Translations], not the global `t` — see the note in `person.dart`.
 extension ProjectStatusX on ProjectStatus {
   /// Singular label for the badge ("Borrador").
   String label(Translations tr) => switch (this) {

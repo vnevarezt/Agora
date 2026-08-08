@@ -1,7 +1,5 @@
-// The parser must read a workbook in ANY meeting language. It keys off the
-// EPUB's markup (section colors, the music-glyph and top-rule classes, the
-// numbered-heading form), all of which are identical across languages; the one
-// exception is the ministry talk marker. See test/fixtures/mwb/README.md.
+// The parser must read a workbook in ANY meeting language, keying off markup
+// rather than wording. See test/fixtures/mwb/README.md.
 
 import 'dart:io';
 
@@ -57,9 +55,8 @@ void main() {
   });
 
   group('song numbers survive the duration in the same heading', () {
-    // The opening line puts the song FIRST and the duration last; the closing
-    // line reverses them. Taking "the first number" would read 3 as the
-    // closing song.
+    // The closing line puts the duration before the song, so "first number
+    // wins" would read 3 here.
     test('the closing song is not the concluding-comment duration', () {
       expect(es.closingSong, isNot('3'));
       expect(en.closingSong, isNot('3'));
@@ -67,9 +64,8 @@ void main() {
   });
 
   group('ministry talk marker', () {
-    // Part 5 is "Explique sus creencias" / "Explaining Your Beliefs": a TALK,
-    // but the marker is in the body, not the title. The old title-only match
-    // read this as a demonstration and gave it two slots.
+    // Part 5 is a talk marked in the BODY, not the title — the case the old
+    // title-only match read as a demonstration and gave two slots.
     test('is found in the body, not just the title', () {
       expect(es.parts[4].isTalk, isTrue);
       expect(en.parts[4].isTalk, isTrue);

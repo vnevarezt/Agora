@@ -34,13 +34,10 @@ class ProgramContentService {
     ];
     if (missing.isEmpty) return;
 
-    // The catalog and the parse both follow the project's congregation: an
-    // English congregation must snapshot from the English workbook, not
-    // whichever one happened to sync first.
-    //
-    // Resolved with two direct lookups rather than `congregationLangProvider`:
-    // this runs fire-and-forget in the background, and reading the stream-backed
-    // providers from here would leave a drift subscription open behind it.
+    // Catalog and parse follow the project's congregation, resolved with
+    // direct lookups rather than `congregationLangProvider`: this runs
+    // fire-and-forget, and the stream-backed providers would leave a drift
+    // subscription open behind it.
     final congregationId = await _ref
             .read(projectsRepositoryProvider)
             .congregationIdOf(projectId) ??

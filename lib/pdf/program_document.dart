@@ -84,8 +84,7 @@ Future<Uint8List> _buildPdf({
   required bool auxRoom,
   required bool twoPerSheet,
 }) async {
-  // Built HERE, inside the isolate: only the AppLocale enum crosses the
-  // boundary, never the Translations object graph.
+  // Built inside the isolate: only the enum crosses the boundary.
   final tr = locale.buildSync();
   final carlito = carlitoFromBytes(fontBytes);
   final doc = pw.Document();

@@ -15,13 +15,10 @@ class Part {
   /// Duration in minutes, or null if the EPUB doesn't specify it.
   final int? minutes;
 
-  /// Ministry part that is a student TALK rather than a demonstration (so one
-  /// student, no assistant). Read from the workbook at parse time — the marker
-  /// can sit in the title or in the body, and only the parser sees the body.
-  /// False for every other section.
-  ///
-  /// Snapshots written before this field existed decode as false, i.e. as a
-  /// demonstration — the same answer the old title-only matching gave them.
+  /// Ministry part that is a student TALK, not a demonstration (one student, no
+  /// assistant). Set at parse time — the marker can sit in the body, which only
+  /// the parser sees. Pre-existing snapshots decode as false, i.e. as a
+  /// demonstration, matching what the old title-only check gave them.
   final bool isTalk;
 
   const Part({

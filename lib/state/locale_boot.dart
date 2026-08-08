@@ -8,13 +8,9 @@ import '../i18n/strings.g.dart';
 const _localeKey = 'app_locale';
 SharedPreferences? _prefs;
 
-/// Languages actually offered to the user.
-///
-/// [AppLocale.values] lists every `*.i18n.json` in `lib/i18n/`, including
-/// catalogs that are still too incomplete to ship. Because `slang.yaml` sets
-/// `fallback_strategy: base_locale`, an incomplete locale renders its missing
-/// keys in Spanish with no warning — so offering it is worse than not offering
-/// it. Add a locale here once its catalog is complete (see lib/i18n/README.md).
+/// Languages offered to the user — NOT [AppLocale.values], which includes
+/// catalogs too incomplete to ship. `fallback_strategy: base_locale` renders
+/// their gaps in Spanish with no warning. See lib/i18n/README.md.
 const List<AppLocale> shippedLocales = [AppLocale.es, AppLocale.en];
 
 /// Restores the saved locale, or follows the device locale on first run.
@@ -27,8 +23,7 @@ Future<void> initLocale() async {
   } else {
     LocaleSettings.useDeviceLocaleSync();
   }
-  // Guard both paths: the device may be set to a language we don't ship yet,
-  // and a saved value may come from a build that still offered one.
+  // The device locale, or a value saved by a build that still offered it.
   if (!shippedLocales.contains(LocaleSettings.currentLocale)) {
     LocaleSettings.setLocaleSync(AppLocale.es);
   }

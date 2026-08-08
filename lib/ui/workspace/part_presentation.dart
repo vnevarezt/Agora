@@ -66,8 +66,7 @@ class PartView {
   });
 }
 
-/// Slot labels for a row's role. Keyed off [SlotRole], so it no longer depends
-/// on how the role happens to be spelled in the printed program.
+/// Slot labels, keyed off [SlotRole] rather than how the role is spelled.
 List<String> _labelsForRole(ProgramRow row, Translations tr) =>
     switch (row.role) {
       SlotRole.conductorReader => [

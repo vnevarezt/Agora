@@ -3,29 +3,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Guards the rule that makes the language switch actually work in the UI.
-///
-/// slang exposes two accessors (lib/i18n/strings.g.dart):
-///
-///   * the global `t`  — a plain getter over the current translations. It
-///     returns the right strings, but registers NO dependency.
-///   * `context.t`     — reads the `InheritedLocaleData`, which subscribes the
-///     widget so it rebuilds when the locale changes.
-///
-/// The tree is insulated by `const` barriers (`main.dart` passes a
-/// `const ProviderScope`, `app.dart` a `const AuthGate`), so on a locale change
-/// `Element.updateChild` short-circuits on those identical widgets and the
-/// subtree below is never walked. Only registered dependents get rebuilt —
-/// which means a widget reading the global `t` keeps rendering the previous
-/// language until something unrelated happens to dirty it. That was issue #10.
-///
-/// Outside the widget layer (providers, models, pure helpers) the global `t` is
-/// fine and expected; the helpers there take a `Translations` parameter so the
-/// caller stays the one holding the subscription.
+/// The global `t` registers no dependency, and `const` barriers in main.dart /
+/// app.dart stop a locale change from walking the tree — so a widget reading it
+/// keeps the previous language until something unrelated dirties it (issue #10).
+/// Outside the widget layer it is fine; see lib/i18n/README.md.
 void main() {
-  /// Files under lib/ui/ that legitimately read the global `t`, with the reason.
-  /// Keep this list short — each entry is a widget that will NOT re-render on a
-  /// language change.
+  /// Each entry is a widget that will NOT re-render on a language change.
+  /// Keep it short.
   const allowed = <String, String>{
     'lib/ui/picker/person_picker.dart':
         'ModalRoute.barrierLabel has no BuildContext; read once by the a11y '
@@ -36,8 +20,7 @@ void main() {
     final catalog = jsonDecode(
       File('lib/i18n/es.i18n.json').readAsStringSync(),
     ) as Map<String, dynamic>;
-    // Only top-level translation groups: `t.text` / `t.accent` in the UI are
-    // the `context.tokens` alias, not translations.
+    // Top-level groups only: `t.text` / `t.accent` are the tokens alias.
     final groups = catalog.keys.toList()..sort();
     final offender = RegExp(r'(?<![\w.])t\.(' + groups.join('|') + r')\b');
 

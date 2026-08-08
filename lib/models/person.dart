@@ -10,11 +10,9 @@ import '../i18n/strings.g.dart';
 
 enum Gender { male, female, unspecified }
 
-// The label helpers below take the active [Translations] instead of reading
-// the global `t`. A widget that renders one is then forced to hold a
-// `context.t`, which is what subscribes it to locale changes — reading the
-// global getter here would resolve the right string but leave the widget with
-// nothing to rebuild it. See lib/i18n/README.md.
+// The label helpers take [Translations] rather than the global `t`: that forces
+// the caller to hold a `context.t`, which is what subscribes it to locale
+// changes. See lib/i18n/README.md.
 
 extension GenderX on Gender {
   String label(Translations tr) => switch (this) {
