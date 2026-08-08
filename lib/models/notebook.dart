@@ -1,8 +1,6 @@
 import '../domain/mwb_calendar.dart';
 import '../i18n/strings.g.dart';
 
-/// Workbook (issue) of the Christian Life and Ministry: a period with its
-/// weeks. Feeds the project modal to offer the available weeks.
 class Notebook {
   /// Issue id, `YYYYMM` — identity and source of the label ([NotebookX.label]).
   final String id;

@@ -1,18 +1,15 @@
 import '../i18n/strings.g.dart';
 
-/// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
 
 // Takes [Translations], not the global `t` — see the note in `person.dart`.
 extension ProjectStatusX on ProjectStatus {
-  /// Singular label for the badge ("Borrador").
   String label(Translations tr) => switch (this) {
         ProjectStatus.draft => tr.status.draft,
         ProjectStatus.complete => tr.status.complete,
         ProjectStatus.exported => tr.status.exported,
       };
 
-  /// Plural label for the filter chips ("Borradores").
   String plural(Translations tr) => switch (this) {
         ProjectStatus.draft => tr.status.draftPlural,
         ProjectStatus.complete => tr.status.completePlural,
@@ -20,7 +17,6 @@ extension ProjectStatusX on ProjectStatus {
       };
 }
 
-/// Per-week progress of a project (hero card chips).
 typedef WeekProgress = ({String label, int done, int total});
 
 /// Dashboard project CARD: view model computed from the DB rows by
@@ -35,13 +31,11 @@ class Project {
   final int total;
   final ProjectStatus status;
 
-  /// Relative last-edited text ("hace 2 horas").
   final String editedLabel;
 
   /// Raw edit stamp (picks the hero "continue" project).
   final DateTime updatedAt;
 
-  /// Per-week done/total, in week order (hero card chips).
   final List<WeekProgress> weekProgress;
 
   const Project({
@@ -57,6 +51,5 @@ class Project {
     this.weekProgress = const [],
   });
 
-  /// Progress fraction 0..1 for the progress bar.
   double get progress => total == 0 ? 0 : done / total;
 }

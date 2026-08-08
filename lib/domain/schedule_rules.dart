@@ -102,7 +102,6 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   final ministryRows = <ProgramRow>[];
   final lifeRows = <ProgramRow>[];
 
-  // --- Opening ---
   if (week.openingSong != null) {
     opening.add(ProgramRow(
       id: 'ap${opening.length}',
@@ -141,7 +140,6 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   }
   t = ministryStart + ministryMinutes; // pin the section to 15 min
 
-  // --- Living as Christians ---
   if (week.middleSong != null) {
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
@@ -175,7 +173,6 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     t += cbsMinutes;
   }
 
-  // --- Conclusion and closing song ---
   // Skipped on a circuit overseer visit (the meeting closes with his talk).
   if (!circuitOverseer) {
     lifeRows.add(ProgramRow(

@@ -9,29 +9,21 @@
 
 import '../i18n/strings.g.dart';
 
-/// What a row *is*, independent of the text rendered for it.
 enum RowKind {
   /// A numbered workbook part. [ProgramRow.title] holds the title parsed from
   /// the EPUB and is NOT translated: it stays in the meeting's own language.
   part,
 
-  /// Opening / middle / closing song, identified by [ProgramRow.songNumber].
   song,
 
-  /// The chairman's opening comments.
   openingWords,
 
-  /// The chairman's concluding comments.
   closingWords,
 
-  /// Talk that replaces the Congregation Bible Study on a circuit overseer's
-  /// visit.
   circuitOverseerTalk,
 }
 
-/// Who fills a row's slots.
 enum SlotRole {
-  /// No role prefix printed (talks, discussions).
   none,
   student,
   studentAssistant,
@@ -56,7 +48,6 @@ extension SlotRoleX on SlotRole {
   bool get isStudentPair => this == SlotRole.studentAssistant;
 }
 
-/// A program row (an assignment, a song, or intro/conclusion words).
 class ProgramRow {
   /// Stable id within the schedule (block + index), used to link the names.
   final String id;
@@ -173,7 +164,6 @@ extension ProgramRowX on ProgramRow {
       minutes > 0 ? tr.workspace.duration(n: '$minutes') : null;
 }
 
-/// Rows computed per block + the meeting's actual duration.
 class ProgramSchedule {
   final List<ProgramRow> opening;
   final List<ProgramRow> treasures;
@@ -189,7 +179,6 @@ class ProgramSchedule {
     required this.actualMinutes,
   });
 
-  /// All rows in order of appearance.
   List<ProgramRow> get rows =>
       [...opening, ...treasures, ...ministry, ...christianLife];
 }

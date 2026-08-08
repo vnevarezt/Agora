@@ -1,7 +1,5 @@
-/// Reminder type: drives the card's icon and colors.
 enum ReminderType { alert, task, info }
 
-/// Dashboard reminder, derived from the drafts' missing assignments.
 class Reminder {
   final String id;
   final ReminderType type;

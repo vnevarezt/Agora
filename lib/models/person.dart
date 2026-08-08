@@ -31,7 +31,6 @@ extension RoleX on Role {
         Role.publisher => tr.roles.publisher,
       };
 
-  /// Plural form used by the filter chips on the participants screen.
   String plural(Translations tr) => switch (this) {
         Role.elder => tr.roles.elderPlural,
         Role.ministerialServant => tr.roles.ministerialServantPlural,

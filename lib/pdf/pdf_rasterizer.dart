@@ -18,8 +18,7 @@ Future<Uint8List> renderPagePng(Uint8List pdf, {double dpi = 300}) async {
   }
 }
 
-/// Rasterizes the first PDF page to an image using pdfium (pdfrx).
-/// `scale` raises the resolution for sharpness when zooming.
+/// [scale] raises the resolution for sharpness when zooming.
 Future<ui.Image> rasterizePage(Uint8List pdf, {double scale = 3.0}) async {
   // Must come before openData. PdfDocument.openData goes straight to
   // PdfrxEntryFunctions.instance, and it is pdfrxFlutterInitialize that points

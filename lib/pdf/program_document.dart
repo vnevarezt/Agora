@@ -20,8 +20,7 @@ typedef WeekEntry = ({
   String chairman,
 });
 
-/// Single-week PDF (one portrait Letter page), reproducing the S-140-S form
-/// (S-140-S format). Kept for callers that still print one week; forwards to
+/// Kept for callers that still print a single week; forwards to
 /// [buildProgramSheetPdf].
 Future<Uint8List> buildProgramPdf({
   required AppLocale locale,
@@ -104,8 +103,7 @@ List<pw.Widget> _headerBlock(S140Metrics m, Translations tr, String congregation
       _thinThickRule(m),
     ];
 
-/// One week's block: week line (date/reading/chairman) + the four sections +
-/// closing rule. No page header — see [_headerBlock].
+/// No page header — that is [_headerBlock], printed once per sheet.
 List<pw.Widget> _weekBlock(pw.Context ctx, Carlito carlito, S140Metrics m,
     Translations tr, WeekEntry e, bool auxRoom) {
   // Adaptive widths based on the real content (getFont needs the ctx).
@@ -355,7 +353,7 @@ pw.Widget _band(S140Metrics m, PdfColor color, String title, String labelText,
   );
 }
 
-// ---- Rows table (tabularx @{}X R P@{} or @{}X R A P@{} in auxRoom) ----
+// ---- Rows table (3 columns, 4 in auxRoom) ----
 pw.Widget _table(S140Metrics m, Translations tr, List<ProgramRow> rows,
     Assignments assignments, ColumnWidths cols,
     double Function(String) measure, bool auxRoom) {

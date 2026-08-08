@@ -6,8 +6,7 @@ import '../../models/congregation_settings.dart';
 import '../db/app_database.dart';
 import '../sync/sync_scribe.dart';
 
-/// Dot colors cycled over new congregations (moved from the old in-memory
-/// dashboard controller).
+/// Dot colors cycled over new congregations.
 const congregationPalette = <int>[
   0xFF7A2230,
   0xFF3E6651,
@@ -47,7 +46,7 @@ class CongregationsRepository {
         : CongregationSettings.fromJson(row.settingsJson);
   }
 
-  /// Creation order (new ones append at the end, as the old controller did).
+  /// Creation order: new ones append at the end.
   Stream<List<Congregation>> watchAll() =>
       _alive().watch().map((rows) => [for (final r in rows) _toModel(r)]);
 
@@ -77,7 +76,7 @@ class CongregationsRepository {
     return _toModel(record);
   }
 
-  /// User edit from the settings screen: name/number/schedule in one write.
+  /// name/number/schedule in one write.
   Future<void> update(
     String id, {
     required String name,

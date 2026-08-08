@@ -7,7 +7,7 @@
 /// `schedule_rules.dart`.
 library;
 
-/// Odd starting month of the period that contains [month] (1..12).
+/// [month] is 1..12.
 int _oddMonth(int month) => month - ((month - 1) % 2);
 
 String _pad4(int v) => v.toString().padLeft(4, '0');
@@ -62,6 +62,5 @@ String labelForIssue(String issue, List<String> monthNames) {
   return '${monthNames[m - 1]}–${monthNames[m]} ${_year(issue)}';
 }
 
-/// Period components, for callers that format it themselves.
 int issueMonth(String issue) => _month(issue);
 int issueYear(String issue) => _year(issue);

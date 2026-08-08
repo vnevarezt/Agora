@@ -17,7 +17,7 @@ class S140 {
   static const double marginLeft = 0.8 * 72; // 57.6
   static const double marginRight = 0.8 * 72; // 57.6
 
-  /// Usable width = \textwidth.
+  /// Usable width.
   static const double contentWidth = pageWidth - marginLeft - marginRight; // 496.8
 
   // ---- Two-per-sheet: portrait Letter, two week blocks stacked, tighter
@@ -86,7 +86,6 @@ class S140 {
 class S140Metrics {
   final double contentWidth;
 
-  // Fonts.
   final double base;
   final double small; // times
   final double footnote; // role labels / footer
@@ -94,13 +93,11 @@ class S140Metrics {
   final double title; // header title
   final double week; // week line / reading
 
-  // Columns.
   final double hourWidth;
   final double roleWidth;
   final double mainNameWidth; // floor of the names column
   final double colGap;
 
-  // Spacing.
   final double rowSep;
   final double fboxsep; // band padding
   final double bandGapTop; // \addvspace{6pt}
@@ -110,7 +107,6 @@ class S140Metrics {
   final double gapAfterWeekLine; // week line → rows (\addvspace{8pt})
   final double gapSectionEnd; // last row → closing rule
 
-  // Adaptive-width floors (see computeColumns).
   final double minContentFrac; // title floor, fraction of contentWidth
   final double minContentAuxFrac; // same, Auxiliary Room mode
   final double minAuxCol;

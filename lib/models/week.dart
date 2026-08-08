@@ -1,6 +1,5 @@
 // Data models for one week of the Christian Life and Ministry program.
 
-/// Meeting section a part belongs to.
 enum Section { treasures, ministry, christianLife }
 
 /// A numbered program part (h3 "N. Title" in the EPUB).
@@ -43,7 +42,6 @@ class Part {
       };
 }
 
-/// Full program of one week.
 class Week {
   String date;
   String reading;
