@@ -23,14 +23,16 @@ import 'settings_card.dart';
 import 'sync_card.dart';
 
 // Dropdown option labels, index-aligned with the persisted values in
-// app_settings.dart. Getters so the labels follow the active app language.
-List<String> get _timeFormats =>
-    [t.options.timeFormat24, t.options.timeFormat12];
-List<String> get _weekStarts => [t.days.monday, t.days.sunday];
-List<String> get _pdfNameFormats => [
-      t.options.pdfNameFull,
-      t.options.pdfNameLastFirst,
-      t.options.pdfNameFirstOnly,
+// app_settings.dart. They take the active [Translations] rather than reading
+// the global `t`, so the labels are resolved against the same snapshot the
+// calling widget rebuilt with (see lib/i18n/README.md).
+List<String> _timeFormats(Translations tr) =>
+    [tr.options.timeFormat24, tr.options.timeFormat12];
+List<String> _weekStarts(Translations tr) => [tr.days.monday, tr.days.sunday];
+List<String> _pdfNameFormats(Translations tr) => [
+      tr.options.pdfNameFull,
+      tr.options.pdfNameLastFirst,
+      tr.options.pdfNameFirstOnly,
     ];
 
 /// Row copy per notification preference, in display order.
@@ -335,35 +337,32 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
             ),
             LabeledField(
               label: tr.settings.timeFormat,
-              child: AppDropdown<String>(
-                value: _timeFormats[settings.timeFormat24 ? 0 : 1],
-                items: _timeFormats,
-                itemLabel: (s) => s,
-                onChanged: (v) =>
-                    controller.setTimeFormat24(_timeFormats.indexOf(v) == 0),
+              child: AppDropdown<int>(
+                value: settings.timeFormat24 ? 0 : 1,
+                items: const [0, 1],
+                itemLabel: (i) => _timeFormats(tr)[i],
+                onChanged: (v) => controller.setTimeFormat24(v == 0),
               ),
             ),
             LabeledField(
               label: tr.settings.weekStart,
-              child: AppDropdown<String>(
-                value: _weekStarts[settings.weekStartMonday ? 0 : 1],
-                items: _weekStarts,
-                itemLabel: (s) => s,
-                onChanged: (v) => controller
-                    .setWeekStartMonday(_weekStarts.indexOf(v) == 0),
+              child: AppDropdown<int>(
+                value: settings.weekStartMonday ? 0 : 1,
+                items: const [0, 1],
+                itemLabel: (i) => _weekStarts(tr)[i],
+                onChanged: (v) => controller.setWeekStartMonday(v == 0),
               ),
             ),
             LabeledField(
               label: tr.settings.pdfName,
-              child: AppDropdown<String>(
-                value: _pdfNameFormats[settings.pdfNameFormat.index],
-                items: _pdfNameFormats,
-                itemLabel: (s) => s,
-                onChanged: (v) {
-                  final i = _pdfNameFormats.indexOf(v);
-                  controller.setPdfNameFormat(
-                      PdfNameFormat.values[i < 0 ? 0 : i]);
-                },
+              child: AppDropdown<int>(
+                value: settings.pdfNameFormat.index,
+                items: [
+                  for (var i = 0; i < PdfNameFormat.values.length; i++) i,
+                ],
+                itemLabel: (i) => _pdfNameFormats(tr)[i],
+                onChanged: (v) =>
+                    controller.setPdfNameFormat(PdfNameFormat.values[v]),
               ),
             ),
           ],

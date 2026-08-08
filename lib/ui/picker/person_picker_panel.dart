@@ -118,7 +118,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   Widget _row(Person h) {
     return _PersonRow(
       name: h.displayName,
-      tag: h.privilege == Role.publisher ? null : h.privilege.label,
+      tag: h.privilege == Role.publisher ? null : h.privilege.label(context.t),
       selected: h.displayName == widget.current,
       onTap: () => _pop(PickName(h.displayName)),
     );

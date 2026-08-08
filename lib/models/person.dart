@@ -10,28 +10,34 @@ import '../i18n/strings.g.dart';
 
 enum Gender { male, female, unspecified }
 
+// The label helpers below take the active [Translations] instead of reading
+// the global `t`. A widget that renders one is then forced to hold a
+// `context.t`, which is what subscribes it to locale changes — reading the
+// global getter here would resolve the right string but leave the widget with
+// nothing to rebuild it. See lib/i18n/README.md.
+
 extension GenderX on Gender {
-  String get label => switch (this) {
-        Gender.male => t.gender.male,
-        Gender.female => t.gender.female,
-        Gender.unspecified => t.gender.unspecified,
+  String label(Translations tr) => switch (this) {
+        Gender.male => tr.gender.male,
+        Gender.female => tr.gender.female,
+        Gender.unspecified => tr.gender.unspecified,
       };
 }
 
 enum Role { elder, ministerialServant, publisher }
 
 extension RoleX on Role {
-  String get label => switch (this) {
-        Role.elder => t.roles.elder,
-        Role.ministerialServant => t.roles.ministerialServant,
-        Role.publisher => t.roles.publisher,
+  String label(Translations tr) => switch (this) {
+        Role.elder => tr.roles.elder,
+        Role.ministerialServant => tr.roles.ministerialServant,
+        Role.publisher => tr.roles.publisher,
       };
 
   /// Plural form used by the filter chips on the participants screen.
-  String get plural => switch (this) {
-        Role.elder => t.roles.elderPlural,
-        Role.ministerialServant => t.roles.ministerialServantPlural,
-        Role.publisher => t.roles.publisherPlural,
+  String plural(Translations tr) => switch (this) {
+        Role.elder => tr.roles.elderPlural,
+        Role.ministerialServant => tr.roles.ministerialServantPlural,
+        Role.publisher => tr.roles.publisherPlural,
       };
 }
 

@@ -158,7 +158,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
         ),
         for (final p in Role.values)
           FilterPill(
-            label: p.plural,
+            label: p.plural(context.t),
             active: _role == p,
             onTap: () => setState(() => _role = p),
           ),
