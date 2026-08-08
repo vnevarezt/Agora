@@ -254,13 +254,11 @@ final heroProjectProvider = Provider<Project?>((ref) {
   return drafts.first;
 });
 
-/// Open drafts (subtitle count).
 final draftCountProvider = Provider<int>((ref) => ref
     .watch(projectsProvider)
     .where((p) => p.status == ProjectStatus.draft)
     .length);
 
-/// Missing assignments across drafts (subtitle count).
 final pendingAssignmentsProvider = Provider<int>((ref) {
   var pending = 0;
   for (final p in ref.watch(projectsProvider)) {
@@ -336,7 +334,6 @@ final dashboardFiltersProvider =
     NotifierProvider<DashboardFiltersController, DashboardFilters>(
         DashboardFiltersController.new);
 
-/// Projects visible after applying the active filters.
 final filteredProjectsProvider = Provider<List<Project>>((ref) {
   final projects = ref.watch(projectsProvider);
   final f = ref.watch(dashboardFiltersProvider);

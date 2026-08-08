@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/program_row.dart';
 import 'program_form.dart';
 
-/// Reference to a concrete UI assignment slot. Maps onto the form's existing
-/// storage ([FormModel.main] / [FormModel.auxiliary], lists keyed by
-/// `ProgramRow.id`) without changing its contract.
+/// Maps onto [FormModel.main] / [FormModel.auxiliary], lists keyed by
+/// `ProgramRow.id`.
 sealed class SlotRef {
   const SlotRef();
 
@@ -19,7 +18,6 @@ sealed class SlotRef {
   int get hashCode => key.hashCode;
 }
 
-/// Meeting chairman ([FormModel.chairman]).
 class ChairmanSlot extends SlotRef {
   const ChairmanSlot();
 
@@ -40,8 +38,7 @@ class RowSlot extends SlotRef {
   String get key => aux ? '${row.id}:aux:$index' : '${row.id}:$index';
 }
 
-/// List of [slots] entries with [name] placed at [index], keeping the other
-/// values of [current] (pure, testable function).
+/// [slots] entries with [name] at [index], keeping the rest of [current].
 List<String> listWithName(
     List<String>? current, int slots, int index, String name) {
   return [
@@ -52,7 +49,6 @@ List<String> listWithName(
   ];
 }
 
-/// How many of the first [slots] entries of [names] are filled.
 int filledNames(List<String>? names, int slots) {
   if (names == null) return 0;
   var n = 0;

@@ -40,11 +40,9 @@ String deviceId() {
   return id;
 }
 
-/// How participant names are printed on the PDF (consumed in phase 2 when
-/// the PDF renders from Person rows; the preference persists already).
+/// How participant names are printed on the PDF.
 enum PdfNameFormat { full, lastFirst, firstOnly }
 
-/// Notification toggles, by stable key (the UI shows them in this order).
 enum NotifPref { unassigned, load, newNotebooks, exports }
 
 const _notifDefaults = {
@@ -157,8 +155,7 @@ class AppSettingsController extends Notifier<AppSettings> {
   }
 }
 
-/// Theme mode, persisted. Kept as its own provider because the MaterialApp
-/// watches it directly (moved here from ui_state.dart).
+/// Its own provider because the MaterialApp watches it directly.
 final themeModeProvider =
     NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
 
@@ -171,7 +168,6 @@ class ThemeModeController extends Notifier<ThemeMode> {
   void toggle() =>
       set(state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
 
-  /// Sets the mode explicitly (Light / Dark / System in Settings).
   void set(ThemeMode mode) {
     state = mode;
     _prefs?.setString(_themeKey, mode.name);
