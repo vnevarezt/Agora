@@ -51,10 +51,14 @@ void main() {
     ]);
     addTearDown(container.dispose);
     addTearDown(db.close);
-    container.read(notebooksProvider.notifier).setFrom([
-      const Notebook(
-          id: '202607', weeks: ['7-13 DE JULIO', '14-20 DE JULIO']),
-    ]);
+    // Keyed by workbook language; these projects have no congregation, which
+    // resolves to the schema default (Spanish -> 'S').
+    container.read(notebooksByLangProvider.notifier).setFrom({
+      'S': [
+        const Notebook(
+            id: '202607', weeks: ['7-13 DE JULIO', '14-20 DE JULIO']),
+      ],
+    });
   });
 
   test('fills missing snapshots, one parse per issue, then idempotent',
@@ -81,7 +85,7 @@ void main() {
       'cold start: the fill retries when the catalog arrives while a '
       'project is open', () async {
     // Editor opens BEFORE the background sync fills the catalog.
-    container.read(notebooksProvider.notifier).setFrom(const []);
+    container.read(notebooksByLangProvider.notifier).setFrom(const {});
     final projectId = await container.read(projectsRepositoryProvider).create(
       name: 'P',
       congregationId: '',
@@ -97,9 +101,9 @@ void main() {
         reason: 'no catalog yet → nothing to fill');
 
     // The sync lands: the fill must re-run without reopening the editor.
-    container.read(notebooksProvider.notifier).setFrom([
-      const Notebook(id: '202607', weeks: ['7-13 DE JULIO']),
-    ]);
+    container.read(notebooksByLangProvider.notifier).setFrom({
+      'S': [const Notebook(id: '202607', weeks: ['7-13 DE JULIO'])],
+    });
     await pumpEventQueue();
 
     expect((await repo.byProject(projectId)).single.contentJson, isNotNull);

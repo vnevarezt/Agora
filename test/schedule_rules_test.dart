@@ -91,6 +91,86 @@ void main() {
     });
   });
 
+  group('classification is positional, not textual', () {
+    // Same week with English titles: the roles must come out identical, because
+    // nothing here reads the wording any more. Verified against the real
+    // mwb_202607 workbooks in both languages.
+    Week englishWeek() => Week(
+          date: 'MAY 18-24',
+          reading: 'ISAIAH 62-64',
+          openingSong: '44',
+          parts: const [
+            Part(
+                section: Section.treasures,
+                number: 1,
+                title: 'The Potter',
+                minutes: 10),
+            Part(
+                section: Section.treasures,
+                number: 3,
+                title: 'Bible Reading',
+                minutes: 4),
+            Part(
+                section: Section.ministry,
+                number: 4,
+                title: 'Starting a Conversation',
+                minutes: 3),
+            Part(
+                section: Section.christianLife,
+                number: 7,
+                title: 'Congregation Bible Study',
+                minutes: 30),
+          ],
+        );
+
+    List<SlotRole> rolesOf(Week w) =>
+        buildSchedule(w, 18 * 60, 105).rows.map((r) => r.role).toList();
+
+    test('an English workbook yields the same roles as the Spanish one', () {
+      expect(rolesOf(englishWeek()), rolesOf(_week()));
+    });
+
+    test('the last Treasures part is the Bible Reading (student + aux)', () {
+      final s = buildSchedule(englishWeek(), 18 * 60, 105);
+      final reading = s.treasures.last;
+      expect(reading.role, SlotRole.student);
+      expect(reading.slots, 1);
+      expect(reading.auxEligible, isTrue);
+      // The part before it carries no role.
+      expect(s.treasures.first.role, SlotRole.none);
+      expect(s.treasures.first.auxEligible, isFalse);
+    });
+
+    test('the last Christian Life part is the CBS (conductor + reader)', () {
+      final s = buildSchedule(englishWeek(), 18 * 60, 105);
+      final cbs = s.christianLife
+          .firstWhere((r) => r.role == SlotRole.conductorReader);
+      expect(cbs.slots, 2);
+    });
+
+    test('a ministry part is a talk only when the workbook says so', () {
+      Week withMinistry({required bool isTalk}) => Week(
+            openingSong: '1',
+            parts: [
+              Part(
+                  section: Section.ministry,
+                  number: 4,
+                  title: 'Explaining Your Beliefs',
+                  minutes: 4,
+                  isTalk: isTalk),
+            ],
+          );
+
+      final talk = buildSchedule(withMinistry(isTalk: true), 18 * 60, 105);
+      expect(talk.ministry.single.role, SlotRole.student);
+      expect(talk.ministry.single.slots, 1);
+
+      final demo = buildSchedule(withMinistry(isTalk: false), 18 * 60, 105);
+      expect(demo.ministry.single.role, SlotRole.studentAssistant);
+      expect(demo.ministry.single.slots, 2);
+    });
+  });
+
   group('rendering follows the language it is given', () {
     // The point of RowKind/SlotRole: the schedule is computed once and rendered
     // per language, so the UI can show one language while the PDF prints

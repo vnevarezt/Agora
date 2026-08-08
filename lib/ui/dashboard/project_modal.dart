@@ -72,9 +72,12 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   void initState() {
     super.initState();
     final congregations = ref.read(congregationsProvider);
-    final notebooks = ref.read(notebooksProvider);
     _congregationId = widget.original?.congregationId ??
         (congregations.isNotEmpty ? congregations.first.id : '');
+    // Catalog of THIS congregation's meeting language — read after the id is
+    // resolved, since that is what selects it.
+    final notebooks =
+        ref.read(notebooksForCongregationProvider(_congregationId));
     // New project: starts at the current notebook (the one covering today), not
     // the oldest cached one. When editing, keep the first in the catalog.
     final current = issueForDate(DateTime.now());
@@ -164,7 +167,8 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final isMobile = context.isMobile;
     final tr = context.t;
     final congregations = ref.watch(congregationsProvider);
-    final notebooks = ref.watch(notebooksProvider);
+    final notebooks =
+        ref.watch(notebooksForCongregationProvider(_congregationId));
 
     final desc = tr.projectModal.desc;
     final title = _isNew ? tr.projectModal.newTitle : tr.projectModal.editTitle;

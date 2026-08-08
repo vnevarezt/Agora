@@ -5,12 +5,13 @@ import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/files/file_saver.dart';
+import '../domain/meeting_language.dart';
 import '../i18n/strings.g.dart';
 import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'app_settings.dart';
+import 'dashboard_provider.dart';
 import 'program_form.dart';
-import 'ui_state.dart' show localeProvider;
 import 'weeks_provider.dart';
 
 /// Output file kind the user picked in the export menu.
@@ -28,6 +29,23 @@ enum ExportAction {
 /// Native save mechanism (dialog on desktop, document picker on mobile) and
 /// the share sheet.
 final fileSaverProvider = Provider<FileSaver>((ref) => FileSaver());
+
+/// Language the printed program is rendered in.
+///
+/// This is the congregation's MEETING language, not the app language: the
+/// sheet is pinned on a board for that congregation, so it must match how the
+/// meeting is actually held. Running the UI in English while printing a
+/// Spanish program is the normal case, not an edge one.
+final programLocaleProvider = Provider<AppLocale>((ref) {
+  final congregationId =
+      ref.watch(formProvider.select((f) => f.congregationId));
+  for (final c in ref.watch(congregationsProvider)) {
+    if (c.id == congregationId) {
+      return programLocaleFor(c.settings.meetingLanguage);
+    }
+  }
+  return programLocaleFor('spanish');
+});
 
 /// Live preview: rasterizes the page (pdfium) when the data changes, with a
 /// debounce so typing feels real-time.
@@ -55,9 +73,9 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       formProvider.select((f) => (f.congregationId, f.auxRoom)),
       (_, _) => _scheduleRender(),
     );
-    // The printed program is localized too, so a language switch invalidates
-    // the rendered sheet.
-    ref.listen(localeProvider, (_, _) => _scheduleRender());
+    // The sheet is rendered in the congregation's MEETING language, so it is
+    // that — not the app language — that invalidates it.
+    ref.listen(programLocaleProvider, (_, _) => _scheduleRender());
     _scheduleRender();
     return const AsyncValue.loading();
   }
@@ -75,7 +93,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final twoUp = ref.read(twoPerSheetProvider);
     try {
       final pdf = await buildProgramSheetPdf(
-        locale: ref.read(localeProvider),
+        locale: ref.read(programLocaleProvider),
         congregation: f.congregationId,
         entries: entries,
         auxRoom: f.auxRoom,
@@ -120,7 +138,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final f = ref.read(formProvider);
     final twoUp = ref.read(twoPerSheetProvider);
     final pdf = await buildProgramSheetPdf(
-      locale: ref.read(localeProvider),
+      locale: ref.read(programLocaleProvider),
       congregation: f.congregationId,
       entries: entries,
       auxRoom: f.auxRoom,

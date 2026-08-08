@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repos/congregations_repository.dart';
 import '../data/repos/projects_repository.dart';
+import '../domain/meeting_language.dart';
 import '../domain/schedule_rules.dart';
 import '../i18n/strings.g.dart';
 import '../models/congregation.dart';
@@ -93,19 +94,43 @@ class CongregationActions {
       _repo.update(id, name: name, number: number, settings: settings);
 }
 
-/// Catalog of cached notebooks. Starts empty and is filled by the background
-/// sync ([mwbSyncProvider]) from the on-disk cache. Kept synchronous so the
-/// project modal keeps reading it directly.
-class NotebooksController extends Notifier<List<Notebook>> {
+/// Catalog of cached notebooks, **keyed by workbook language** (the jw.org
+/// `langwritten` code — see `domain/meeting_language.dart`). Starts empty and
+/// is filled by the background sync ([mwbSyncProvider]) from the on-disk cache.
+/// Kept synchronous so the project modal keeps reading it directly.
+///
+/// Per-language because the meeting language is a per-CONGREGATION setting: a
+/// user with one Spanish and one English congregation needs both catalogs at
+/// once, and each project must offer the weeks of its own congregation's
+/// workbook.
+class NotebooksController extends Notifier<Map<String, List<Notebook>>> {
   @override
-  List<Notebook> build() => const [];
+  Map<String, List<Notebook>> build() => const {};
 
-  void setFrom(List<Notebook> notebooks) => state = notebooks;
+  void setFrom(Map<String, List<Notebook>> byLang) => state = byLang;
 }
 
-final notebooksProvider =
-    NotifierProvider<NotebooksController, List<Notebook>>(
+final notebooksByLangProvider =
+    NotifierProvider<NotebooksController, Map<String, List<Notebook>>>(
         NotebooksController.new);
+
+/// The catalog for one workbook language ('S', 'E', …).
+final notebooksForLangProvider = Provider.family<List<Notebook>, String>(
+    (ref, lang) => ref.watch(notebooksByLangProvider)[lang] ?? const []);
+
+/// Workbook language a congregation's programs are built from. Falls back to
+/// Spanish for an unknown id, which is also the schema default.
+final congregationLangProvider = Provider.family<String, String>((ref, id) {
+  for (final c in ref.watch(congregationsProvider)) {
+    if (c.id == id) return workbookLangFor(c.settings.meetingLanguage);
+  }
+  return workbookLangFor('spanish');
+});
+
+/// The catalog a given congregation should offer.
+final notebooksForCongregationProvider =
+    Provider.family<List<Notebook>, String>((ref, congregationId) =>
+        ref.watch(notebooksForLangProvider(ref.watch(congregationLangProvider(congregationId)))));
 
 /// Pending-work reminders, derived from the drafts: one per week that
 /// still has unassigned parts, newest project first, capped at 4.

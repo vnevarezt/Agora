@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repos/programs_repository.dart';
+import '../domain/meeting_language.dart';
+import '../models/congregation_settings.dart';
 import '../models/notebook.dart';
 import '../models/week.dart';
 import 'dashboard_provider.dart';
@@ -32,7 +34,23 @@ class ProgramContentService {
     ];
     if (missing.isEmpty) return;
 
-    final notebooks = _ref.read(notebooksProvider);
+    // The catalog and the parse both follow the project's congregation: an
+    // English congregation must snapshot from the English workbook, not
+    // whichever one happened to sync first.
+    //
+    // Resolved with two direct lookups rather than `congregationLangProvider`:
+    // this runs fire-and-forget in the background, and reading the stream-backed
+    // providers from here would leave a drift subscription open behind it.
+    final congregationId = await _ref
+            .read(projectsRepositoryProvider)
+            .congregationIdOf(projectId) ??
+        '';
+    final settings = await _ref
+        .read(congregationsRepositoryProvider)
+        .settingsOf(congregationId);
+    final lang = workbookLangFor(
+        settings?.meetingLanguage ?? const CongregationSettings().meetingLanguage);
+    final notebooks = _ref.read(notebooksForLangProvider(lang));
     final weeksByIssue = <String, List<Week>>{};
     for (final program in missing) {
       Notebook? notebook;
@@ -47,7 +65,7 @@ class ProgramContentService {
       // Cache-first parse (never the network here: the catalog only lists
       // notebooks that are already on disk).
       final weeks = weeksByIssue[notebook.id] ??=
-          await _ref.read(repositoryProvider).weeks(notebook.id);
+          await _ref.read(repositoryProvider).weeks(notebook.id, lang: lang);
       for (final week in weeks) {
         if (week.date == program.date) {
           await repo.setContent(program.id, week);

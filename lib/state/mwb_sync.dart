@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/mwb_cache.dart';
 import '../data/mwb_repository.dart';
+import '../domain/meeting_language.dart';
 import '../domain/mwb_calendar.dart';
 import '../models/notebook.dart';
 import 'dashboard_provider.dart';
@@ -25,6 +26,16 @@ class SyncReport {
   /// off). False means a needed notebook couldn't be fetched yet (e.g. the next
   /// one isn't published).
   bool get complete => failed.isEmpty && skippedBackoff.isEmpty;
+
+  /// Folds the per-language passes into one status for the dashboard card.
+  /// Issue ids repeat across languages, which is fine — nothing keys off them
+  /// beyond [complete] and the counts.
+  static SyncReport merge(Iterable<SyncReport> reports) => SyncReport(
+        downloaded: [for (final r in reports) ...r.downloaded],
+        skippedCached: [for (final r in reports) ...r.skippedCached],
+        skippedBackoff: [for (final r in reports) ...r.skippedBackoff],
+        failed: {for (final r in reports) ...r.failed},
+      );
 }
 
 /// Core sync algorithm (no Riverpod, so it is unit-testable):
@@ -105,11 +116,33 @@ Future<List<Notebook>> _buildCatalog(
 /// to show a persistent catalog-status card.
 class MwbSyncController extends AsyncNotifier<SyncReport> {
   @override
-  Future<SyncReport> build() => runMwbSync(
-        cache: ref.read(cacheProvider),
-        repository: ref.read(repositoryProvider),
-        onCatalog: (ns) => ref.read(notebooksProvider.notifier).setFrom(ns),
-      );
+  Future<SyncReport> build() async {
+    // One pass per workbook language actually in use. Watching the
+    // congregations means adding one that meets in another language pulls its
+    // workbook down without a restart; passes whose issues are already cached
+    // make no network request, so re-running is cheap.
+    final langs = workbookLangsFor(
+      ref.watch(congregationsProvider).map((c) => c.settings.meetingLanguage),
+    );
+    // Before the congregation stream emits, fall back to the schema default so
+    // the very first launch still fills a catalog.
+    final targets = langs.isEmpty ? {workbookLangFor('spanish')} : langs;
+
+    final cache = ref.read(cacheProvider);
+    final repository = ref.read(repositoryProvider);
+    final catalog = <String, List<Notebook>>{};
+    final reports = <SyncReport>[];
+    for (final lang in targets) {
+      reports.add(await runMwbSync(
+        cache: cache,
+        repository: repository,
+        lang: lang,
+        onCatalog: (ns) => catalog[lang] = ns,
+      ));
+    }
+    ref.read(notebooksByLangProvider.notifier).setFrom(catalog);
+    return SyncReport.merge(reports);
+  }
 }
 
 final mwbSyncProvider =

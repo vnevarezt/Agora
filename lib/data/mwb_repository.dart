@@ -11,8 +11,8 @@ import 'mwb_cache.dart';
 
 /// Unzip + HTML parsing are tens-of-ms of pure CPU per notebook: run them off
 /// the UI isolate (they hit it on editor open and during the startup sync).
-Future<List<Week>> _parseEpubInBackground(Uint8List bytes) =>
-    runInBackground(() => parseEpub(bytes));
+Future<List<Week>> _parseEpubInBackground(Uint8List bytes, String lang) =>
+    runInBackground(() => parseEpub(bytes, lang: lang));
 
 /// Data facade: serves the mwb notebook from the on-disk cache, downloading it
 /// from jw.org only the first time (then re-parsing the cached EPUB).
@@ -32,7 +32,7 @@ class MwbRepository {
     final cached = await _cache.readEpub(issue, lang);
     final bytes =
         cached ?? await MwbApi.downloadEpub(issue, lang: lang, client: _client);
-    final weeks = await _parseEpubInBackground(bytes);
+    final weeks = await _parseEpubInBackground(bytes, lang);
     if (weeks.isEmpty) {
       throw Exception('No se encontraron semanas en el notebook $issue.');
     }
@@ -45,9 +45,9 @@ class MwbRepository {
   /// back-off policy), kept separate from the UI-facing [weeks].
   Future<int> ensureCached(String issue, {String lang = 'S'}) async {
     final cached = await _cache.readEpub(issue, lang);
-    if (cached != null) return (await _parseEpubInBackground(cached)).length;
+    if (cached != null) return (await _parseEpubInBackground(cached, lang)).length;
     final bytes = await MwbApi.downloadEpub(issue, lang: lang, client: _client);
-    final weeks = await _parseEpubInBackground(bytes);
+    final weeks = await _parseEpubInBackground(bytes, lang);
     if (weeks.isEmpty) {
       throw Exception('No se encontraron semanas en el notebook $issue.');
     }
