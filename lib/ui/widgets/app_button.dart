@@ -76,8 +76,8 @@ class _PressableState extends State<Pressable> {
 
 enum AppButtonVariant { primary, ghost }
 
-/// Button (`.btn--primary` / `.btn--ghost`). With a null [label] it
-/// becomes square (icon only, like the compact mobile Export).
+/// Button. With a null [label] it becomes square (icon only, like the compact
+/// mobile Export).
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,

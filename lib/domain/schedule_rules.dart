@@ -2,9 +2,6 @@ import '../models/program_row.dart';
 import '../models/week.dart';
 
 /// Assignment rules and meeting-clock calculation (pure logic).
-///
-/// Port of generar_programa.py:129-246 (rol_y_nombres, es_aux_elegible,
-/// construir_filas, hhmm) and the SEAMOS_MIN / CONSEJO_MIN constants.
 
 const int ministryMinutes = 15; // "Apply Yourself" section lasts 15 min (S-38 §6)
 const int adviceMinutes = 1; // chairman's counsel after each student (§18)

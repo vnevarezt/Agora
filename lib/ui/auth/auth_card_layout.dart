@@ -5,10 +5,9 @@ import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// `.auth__main` + `.auth__card`: 400px column centered on the app
-/// background, brand lockup on top and the legal line at the bottom.
-/// Mobile (<720): top-aligned, full width, larger title handled by
-/// [AuthTitle].
+/// 400px column centered on the app background, brand lockup on top and the
+/// legal line at the bottom. Mobile (<720): top-aligned, full width, larger
+/// title handled by [AuthTitle].
 class AuthCardLayout extends StatelessWidget {
   const AuthCardLayout({super.key, required this.child});
 
@@ -98,7 +97,6 @@ class BrandLockup extends StatelessWidget {
   }
 }
 
-/// `.auth__title` (22px desktop / 20px mobile).
 class AuthTitle extends StatelessWidget {
   const AuthTitle(this.text, {super.key});
 
@@ -118,7 +116,6 @@ class AuthTitle extends StatelessWidget {
   }
 }
 
-/// `.auth__sub`.
 class AuthSub extends StatelessWidget {
   const AuthSub(this.text, {super.key});
 

@@ -6,7 +6,7 @@ import '../theme/tokens.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/motion.dart';
 
-/// "Nuevo proyecto" card (`.project--new`): dashed border and a "+" ring.
+/// "Nuevo proyecto" card: dashed border and a "+" ring.
 /// The creation modal comes in a later phase; for now [onTap] stays optional.
 ///
 /// Hover is driven by a single opaque [MouseRegion] (the one authority — no

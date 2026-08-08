@@ -4,12 +4,12 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-/// Layout constants taken EXACTLY from programa-vmc.tex.
-/// (Official S-140-S format.) 1 cm = 28.3465 pt; 1 in = 72 pt.
+/// Layout constants of the official S-140-S format, transcribed exactly —
+/// they are not free parameters. 1 cm = 28.3465 pt; 1 in = 72 pt.
 class S140 {
   S140._();
 
-  // ---- Page: Letter, margins from the original Word doc (tex:13) ----
+  // ---- Page: Letter, margins from the original form ----
   static const double pageWidth = 612; // 8.5 in
   static const double pageHeight = 792; // 11 in
   static const double marginTop = 0.7 * 72; // 50.4
@@ -37,7 +37,7 @@ class S140 {
   static const double title = 16.5; // header title
   static const double week = 12; // week line / reading
 
-  // ---- Column widths (tex:57-61) ----
+  // ---- Column widths ----
   static const double cm = 28.3465;
   static const double hourWidth = 1.3 * cm; // 36.85
   static const double roleWidth = 2.6 * cm; // 73.70
@@ -69,7 +69,7 @@ class S140 {
   /// Slack added to the measured width of the longest name.
   static const double namePad = 6;
 
-  // ---- Official colors (tex:31-35) ----
+  // ---- Official colors ----
   static final PdfColor treasures = PdfColor.fromHex('575A5D'); // gray
   static final PdfColor ministryColor = PdfColor.fromHex('BE8900'); // gold
   static final PdfColor christianLife = PdfColor.fromHex('7E0024'); // maroon
@@ -223,7 +223,7 @@ typedef CarlitoBytes = ({
 
 CarlitoBytes? _bytesCache;
 
-/// Loads (once) the Carlito TTFs — a free Calibri clone (tex:17-22). Caching
+/// Loads (once) the Carlito TTFs — a free Calibri clone. Caching
 /// is essential: reloading ~2.7 MB on each keystroke would break the live
 /// preview.
 Future<CarlitoBytes> carlitoFontBytes() async {

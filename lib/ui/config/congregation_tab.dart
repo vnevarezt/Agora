@@ -600,7 +600,7 @@ class _CongregationChip extends StatelessWidget {
   }
 }
 
-/// Dashed "Nueva congregación" chip (`.chip--add`).
+/// Dashed "Nueva congregación" chip.
 class _AddChip extends StatelessWidget {
   const _AddChip({required this.onTap});
 

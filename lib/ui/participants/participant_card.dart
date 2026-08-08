@@ -115,7 +115,7 @@ class ParticipantCard extends StatelessWidget {
   }
 }
 
-/// Availability dot (`.dot-avail`): green if active, gray otherwise.
+/// Availability dot: green if active, gray otherwise.
 class _AvailabilityDot extends StatelessWidget {
   const _AvailabilityDot({required this.active});
 

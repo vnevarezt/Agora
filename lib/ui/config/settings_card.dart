@@ -4,8 +4,8 @@ import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// Distribuye tarjetas en dos columnas (`.settings__cols`) en escritorio y en
-/// a single column on narrow screens.
+/// Distribuye tarjetas en dos columnas en escritorio y en una sola en
+/// pantallas estrechas.
 class SettingsColumns extends StatelessWidget {
   const SettingsColumns({super.key, required this.left, required this.right});
 

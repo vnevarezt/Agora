@@ -1,7 +1,4 @@
 // Data models for one week of the Christian Life and Ministry program.
-//
-// Mirrors the dict produced by `parsear_semana` in generar_programa.py
-// (generador/generar_programa.py:68-70 and :104-105).
 
 /// Meeting section a part belongs to.
 enum Section { treasures, ministry, christianLife }

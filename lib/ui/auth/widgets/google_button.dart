@@ -8,7 +8,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_spinner.dart';
 import '../../widgets/motion.dart';
 
-/// `.btn-google`: surface button with the four-color Google mark.
+/// Surface button with the four-color Google mark.
 class GoogleButton extends StatelessWidget {
   const GoogleButton({
     super.key,

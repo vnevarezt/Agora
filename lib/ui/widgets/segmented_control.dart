@@ -8,8 +8,8 @@ import 'motion.dart';
 
 typedef Segment = ({IconData? icon, String label});
 
-/// Segmented control (`.seg`): Assign/Preview tabs on mobile and the
-/// static chip on the preview bar ([onChanged] null).
+/// Segmented control: Assign/Preview tabs on mobile, and the static chip on
+/// the preview bar ([onChanged] null).
 class SegmentedTabs extends StatelessWidget {
   const SegmentedTabs({
     super.key,

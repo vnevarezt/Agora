@@ -7,9 +7,8 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Assignment progress ring (`.ring` + `.progress__txt`): accent arc over
-/// a border-colored base, number in the center and, optionally, the
-/// "N/M asignados" text alongside.
+/// Assignment progress ring: accent arc over a border-colored base, number in
+/// the center and, optionally, the "N/M asignados" text alongside.
 class ProgressRing extends StatelessWidget {
   const ProgressRing({
     super.key,

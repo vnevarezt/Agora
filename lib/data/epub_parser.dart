@@ -7,11 +7,8 @@ import 'package:html/parser.dart' as html_parser;
 import '../models/week.dart';
 
 /// Parsing of the mwb notebook EPUB -> list of weeks.
-///
-/// 1:1 port of `parsear_epub` / `parsear_semana` / `_text` / `_duration` from
-/// generar_programa.py:54-124. Keeps the SAME regular expressions.
 
-// EPUB heading color -> section (SECCION_POR_COLOR, py:24-28).
+// EPUB heading color -> section.
 const Map<String, Section> _sectionByColor = {
   'teal': Section.treasures,
   'gold': Section.ministry,

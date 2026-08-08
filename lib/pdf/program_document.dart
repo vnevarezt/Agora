@@ -20,7 +20,7 @@ typedef WeekEntry = ({
   String chairman,
 });
 
-/// Single-week PDF (one portrait Letter page), reproducing programa-vmc.tex
+/// Single-week PDF (one portrait Letter page), reproducing the S-140-S form
 /// (S-140-S format). Kept for callers that still print one week; forwards to
 /// [buildProgramSheetPdf].
 Future<Uint8List> buildProgramPdf({
@@ -150,7 +150,7 @@ void _addSinglePage(pw.Document doc, Carlito carlito, Translations tr, String co
           marginRight: S140.marginRight,
         ),
       ),
-      // Footer on every page: "S-140-S   11/23" (tex:40).
+      // Footer on every page: "S-140-S   11/23".
       footer: (ctx) => pw.Container(
           alignment: pw.Alignment.centerLeft, child: _footer(m)),
       build: (ctx) => [
@@ -217,7 +217,7 @@ void _addStackedPage(pw.Document doc, Carlito carlito, Translations tr, String c
   );
 }
 
-// ---- Header: congregation (left) and title (right) (tex:171-178) ----
+// ---- Header: congregation (left) and title (right) ----
 pw.Widget _header(S140Metrics m, Translations tr, String congregation) {
   return pw.Row(
     crossAxisAlignment: pw.CrossAxisAlignment.end, // minipages [b]
@@ -242,7 +242,7 @@ pw.Widget _header(S140Metrics m, Translations tr, String congregation) {
   );
 }
 
-// ---- Thin + thick rule (tex:161-163) ----
+// ---- Thin + thick rule ----
 pw.Widget _thinThickRule(S140Metrics m) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -254,7 +254,7 @@ pw.Widget _thinThickRule(S140Metrics m) {
   );
 }
 
-// ---- Week line + chairman + reading (tex:183-187) ----
+// ---- Week line + chairman + reading ----
 pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) {
   final weekStyle =
       pw.TextStyle(fontSize: m.week, fontWeight: pw.FontWeight.bold);
@@ -298,7 +298,7 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
   );
 }
 
-// ---- Single rooms header (tex:150-155, auxRoom mode only) ----
+// ---- Single rooms header (auxRoom mode only) ----
 pw.Widget _roomsHeader(S140Metrics m, Translations tr, ColumnWidths cols) {
   final st = pw.TextStyle(
       fontSize: m.footnote,
@@ -316,7 +316,7 @@ pw.Widget _roomsHeader(S140Metrics m, Translations tr, ColumnWidths cols) {
   );
 }
 
-// ---- Section band (tex:135-145) ----
+// ---- Section band ----
 pw.Widget _band(S140Metrics m, PdfColor color, String title, String labelText,
     ColumnWidths cols, bool auxRoom) {
   return pw.Column(

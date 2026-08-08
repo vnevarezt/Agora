@@ -1,7 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
-/// Shared motion language: one ease-out curve (the mock's cubic-bezier) and
+/// Shared motion language: one ease-out curve and
 /// one duration scale, so every surface moves the same way.
 ///
 /// This is the only duration scale. Timings used to be split between here and
@@ -108,7 +108,7 @@ class SlideSwitcher extends StatelessWidget {
 }
 
 /// Fade + slide-up entrance, played once on mount; [delay] staggers items
-/// (the mock's `portUp` keyframes).
+/// staggers items.
 class EnterUp extends StatefulWidget {
   const EnterUp({
     super.key,

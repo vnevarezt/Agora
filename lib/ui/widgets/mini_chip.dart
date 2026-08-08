@@ -6,9 +6,7 @@ import '../theme/tokens.dart';
 
 enum _ChipKind { time, allMeeting, duration, tag, aux, week }
 
-/// Small chip. A single widget with presets that mirror
-/// `.time-badge`, `.time-badge--all`, `.dur-chip`, `.fixed-line__tag` y
-/// `.aux-flag` from the mock.
+/// Small chip, with a preset per usage.
 class MiniChip extends StatelessWidget {
   /// Part time (mono, accent-soft background).
   const MiniChip.time(this.texto, {super.key}) : _kind = _ChipKind.time;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Color tokens — mirror of the mock CSS variables
-/// (`--bg`, `--surface`, `--accent`…), converted from oklch to exact sRGB.
+/// Color tokens, converted from oklch to exact sRGB.
 ///
 /// Each palette defines its light and dark version; add a new palette
 /// (Granate, Salvia, Biblioteca) es declarar otra constante [AppPalette].
