@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../models/person.dart';
 import '../../models/week_type.dart';
@@ -19,20 +18,6 @@ part 'app_database.g.dart';
 /// Local database (SQLite encrypted with SQLite3MultipleCiphers in production —
 /// see `connection.dart`). The executor is INJECTED so tests can use
 /// `NativeDatabase.memory()` without keychain or encryption.
-///
-/// Schema history:
-///   v1: single `participants` table (flat, free-text congregation).
-///   v2: phase-1 schema (docs/PHASE1_LOCAL_PERSISTENCE.md) — congregations,
-///       people, person_absences, projects, skeleton programs; participants
-///       migrated into people + one default congregation, then dropped.
-///   v3: phase-2 schema (docs/PHASE2_PROGRAMS_IN_DB.md) — programs gain the
-///       content snapshot + per-program config columns; new `assignments`
-///       table (one row per filled slot position).
-///   v4: phase-3 sync scaffolding (docs/PHASE3_SYNC_SCAFFOLDING.md) —
-///       `outbox` dirty-set + `sync_state` cursors (both local-only).
-///   v5: phase-4b-2 sharing — `sync_state.missing_key_version` remembers a
-///       CCK version the cursor was allowed past, so recovering that key can
-///       rewind and re-pull what was skipped.
 @DriftDatabase(
   tables: [
     Congregations,
@@ -47,165 +32,18 @@ part 'app_database.g.dart';
   daos: [PeopleDao],
 )
 class AppDatabase extends _$AppDatabase {
-  /// [defaultCongregationName] is only used by the v1→v2 migration when no
-  /// participant carries a usable congregation string (the UI passes the
-  /// localized fallback; the Spanish default keeps tests self-contained).
-  /// [defaultCongregationName] names the congregation seeded on first open.
-  /// The app always injects the localized `t.congregation.defaultName`
-  /// (`state/db_provider.dart`); this fallback only applies to direct
-  /// constructions in tests, so it is intentionally not localized.
-  AppDatabase(super.e, {this.defaultCongregationName = 'My congregation'});
-
-  final String defaultCongregationName;
+  AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            // v1 predates every other table: this step creates them with
-            // Migrator.createTable, which always uses the CURRENT schema
-            // shape — so the later steps must NOT run on top of it.
-            await _migrateV1ToV2(m);
-            return;
-          }
-          if (from < 3) await _migrateV2ToV3(m);
-          // Same trap as v1 above, one table down: _migrateV3ToV4 CREATES
-          // sync_state, and Migrator.createTable always uses the CURRENT
-          // shape — so the column v5 adds is already there and adding it
-          // again would fail.
-          if (from < 4) {
-            await _migrateV3ToV4(m);
-          } else if (from < 5) {
-            await _migrateV4ToV5(m);
-          }
-        },
         beforeOpen: (details) async {
-          // Runs after migrations: soft deletes make FK violations rare, but
-          // hard paths (replaceAll, reset) must still be caught early.
+          // Soft deletes make FK violations rare, but the hard paths
+          // (replaceAll, reset) must still be caught early.
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
-
-  /// v1 → CURRENT. One transaction (drift wraps migrations): create every
-  /// other table (Migrator.createTable always uses the current shape, which
-  /// is why this step replaces the whole chain), move every participant into
-  /// `people` under ONE default congregation, keep the old free text in
-  /// `originCongregation` when it differs, drop `participants`. Rationale:
-  /// the old field mixed the tenant with a visitor's home congregation —
-  /// only the first becomes an FK; no tenants are auto-created from stray
-  /// strings (plan §"Migration v1→v2").
-  Future<void> _migrateV1ToV2(Migrator m) async {
-    await m.createTable(congregations);
-    await m.createTable(people);
-    await m.createTable(personAbsences);
-    await m.createTable(projects);
-    await m.createTable(programs);
-    await m.createTable(assignmentRows);
-    await m.createTable(outbox);
-    await m.createTable(syncState);
-    await m.createIndex(peopleCongregationIdx);
-    await m.createIndex(personAbsencesPersonIdx);
-    await m.createIndex(projectsCongregationIdx);
-    await m.createIndex(programsProjectIdx);
-    await m.createIndex(assignmentsProgramIdx);
-
-    final rows = await customSelect('SELECT * FROM participants').get();
-    if (rows.isNotEmpty) {
-      // Most frequent congregation string, grouped accent/case-insensitively
-      // (that group is the user's own hall in practice). The winning group's
-      // most frequent raw spelling becomes the congregation name.
-      final groupCounts = <String, int>{};
-      final spellings = <String, Map<String, int>>{};
-      for (final row in rows) {
-        final raw = row.read<String>('congregation').trim();
-        if (raw.isEmpty) continue;
-        final key = normalizeName(raw);
-        groupCounts[key] = (groupCounts[key] ?? 0) + 1;
-        final variants = spellings.putIfAbsent(key, () => {});
-        variants[raw] = (variants[raw] ?? 0) + 1;
-      }
-
-      var congregationName = defaultCongregationName;
-      if (groupCounts.isNotEmpty) {
-        final topGroup = groupCounts.entries
-            .reduce((a, b) => b.value > a.value ? b : a)
-            .key;
-        congregationName = spellings[topGroup]!
-            .entries
-            .reduce((a, b) => b.value > a.value ? b : a)
-            .key;
-      }
-      final congregationKey = normalizeName(congregationName);
-
-      final now = DateTime.now().toUtc();
-      final congregationId = const Uuid().v4();
-      await into(congregations).insert(CongregationsCompanion.insert(
-        id: congregationId,
-        name: congregationName,
-        // First color of the dashboard palette; the cycled assignment for
-        // new congregations lands with milestone 3.
-        color: 0xFF7A2230,
-        createdAt: now,
-        updatedAt: now,
-      ));
-
-      await batch((b) {
-        for (final row in rows) {
-          final origin = row.read<String>('congregation').trim();
-          b.insert(
-            people,
-            PeopleCompanion.insert(
-              id: row.read<String>('id'),
-              congregationId: congregationId,
-              displayName: row.read<String>('name'),
-              gender: Gender.values.byName(row.read<String>('gender')),
-              privilege: Role.values.byName(row.read<String>('role')),
-              originCongregation: Value(
-                normalizeName(origin) == congregationKey ? '' : origin,
-              ),
-              active: Value(row.read<bool>('active')),
-              notes: Value(row.read<String>('notes')),
-              createdAt: row.read<DateTime>('created_at'),
-              updatedAt: row.read<DateTime>('updated_at'),
-              lastUsed: Value(row.readNullable<DateTime>('last_used')),
-            ),
-          );
-        }
-      });
-    }
-
-    await m.deleteTable('participants');
-  }
-
-  /// v2 → v3 (docs/PHASE2_PROGRAMS_IN_DB.md): programs gain the content
-  /// snapshot and per-program config columns; assignments arrive as their
-  /// own table. Existing skeleton programs keep NULL content — the snapshot
-  /// service fills it the first time their project opens.
-  Future<void> _migrateV2ToV3(Migrator m) async {
-    await m.addColumn(programs, programs.sortIndex);
-    await m.addColumn(programs, programs.contentJson);
-    await m.addColumn(programs, programs.titleOverridesJson);
-    await m.addColumn(programs, programs.startTime);
-    await m.addColumn(programs, programs.durationMinutes);
-    await m.addColumn(programs, programs.auxRoom);
-    await m.createTable(assignmentRows);
-    await m.createIndex(assignmentsProgramIdx);
-  }
-
-  /// v3 → v4 (docs/PHASE3_SYNC_SCAFFOLDING.md): local-only sync bookkeeping.
-  Future<void> _migrateV3ToV4(Migrator m) async {
-    await m.createTable(outbox);
-    await m.createTable(syncState);
-  }
-
-  /// v4 → v5 (phase 4b-2): remembers a CCK version the pull cursor was
-  /// allowed past. Nullable, so existing rows need no backfill — null
-  /// correctly means "nothing was ever skipped here".
-  Future<void> _migrateV4ToV5(Migrator m) async {
-    await m.addColumn(syncState, syncState.missingKeyVersion);
-  }
 }

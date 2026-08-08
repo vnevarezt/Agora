@@ -24,8 +24,7 @@ class CongregationsRepository {
   final AppDatabase _db;
   final SyncScribe _scribe;
 
-  /// Localized fallback used by [ensureDefault] on fresh installs (the
-  /// v1→v2 migration covers upgrades).
+  /// Localized fallback used by [ensureDefault] on fresh installs.
   final String defaultName;
 
   SimpleSelectStatement<$CongregationsTable, CongregationRecord> _alive() =>

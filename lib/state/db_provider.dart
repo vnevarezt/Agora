@@ -5,7 +5,6 @@ import '../data/db/connection.dart';
 import '../data/db/people_dao.dart';
 import '../data/sync/hlc.dart';
 import '../data/sync/sync_scribe.dart';
-import '../i18n/strings.g.dart';
 import 'app_settings.dart';
 import 'auth_session.dart';
 
@@ -25,11 +24,7 @@ final dbProvider = Provider<AppDatabase>((ref) {
         'dbProvider read while the local session is locked; every DB '
         'consumer must live below AuthGate.');
   }
-  final db = AppDatabase(
-    openEncryptedExecutor(dek),
-    // Only used if the v1→v2 migration finds no usable congregation string.
-    defaultCongregationName: t.congregation.defaultName,
-  );
+  final db = AppDatabase(openEncryptedExecutor(dek));
   ref.onDispose(db.close);
   return db;
 });
