@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 import 'package:integration_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:agora/domain/schedule_rules.dart';
+import 'package:agora/i18n/strings.g.dart';
 import 'package:agora/models/program_row.dart';
 import 'package:agora/models/week.dart';
 import 'package:agora/pdf/pdf_rasterizer.dart';
@@ -71,7 +72,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
   var k = 0;
   for (final f in schedule.rows) {
     if (f.slots == 0) continue;
-    if (f.role == 'Estudiante/Ayudante:' && f.slots == 2) {
+    if (f.role.isStudentPair && f.slots == 2) {
       principal[f.id] = ['Maximiliano Vargas H', 'Concepción Navarro'];
       if (f.auxSlots == 2) auxiliar[f.id] = ['Ernesto Salas R', 'Pablo Treviño'];
       continue;
@@ -84,6 +85,7 @@ Future<void> _dump(String nombreArchivo, List<String> nombres,
     }
   }
   final pdf = await buildProgramPdf(
+    locale: AppLocale.es,
     congregation: 'CONSTITUCIÓN J.A CASTRO',
     week: s,
     schedule: schedule,
@@ -110,7 +112,7 @@ WeekEntry _entry(String date, List<String> nombres, {bool auxRoom = false}) {
   var k = 0;
   for (final f in schedule.rows) {
     if (f.slots == 0) continue;
-    if (f.role == 'Estudiante/Ayudante:' && f.slots == 2) {
+    if (f.role.isStudentPair && f.slots == 2) {
       principal[f.id] = ['Maximiliano Vargas H', 'Concepción Navarro'];
       if (f.auxSlots == 2) auxiliar[f.id] = ['Ernesto Salas R', 'Pablo Treviño'];
       continue;
@@ -147,6 +149,7 @@ void main() {
   testWidgets('render dos-por-hoja (vertical apilado)', (tester) async {
     await pdfrxFlutterInitialize();
     final pdf = await buildProgramSheetPdf(
+      locale: AppLocale.es,
       congregation: 'CONSTITUCIÓN J.A CASTRO',
       entries: [
         _entry('18-24 DE MAYO', ['Rafael González', 'Luis Vargas', 'José M']),
@@ -175,6 +178,7 @@ void main() {
 
     // Same sheet with the Auxiliary Room column (4-column layout).
     final pdfAux = await buildProgramSheetPdf(
+      locale: AppLocale.es,
       congregation: 'CONSTITUCIÓN J.A CASTRO',
       entries: [
         _entry('18-24 DE MAYO', ['Rafael González', 'Luis Vargas', 'José M'],

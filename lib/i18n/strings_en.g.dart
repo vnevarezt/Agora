@@ -71,6 +71,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$projectBar$en projectBar = _Translations$projectBar$en._(_root);
 	@override late final _Translations$workspace$en workspace = _Translations$workspace$en._(_root);
 	@override late final _Translations$relativeTime$en relativeTime = _Translations$relativeTime$en._(_root);
+	@override late final _Translations$program$en program = _Translations$program$en._(_root);
 }
 
 // Path: app
@@ -701,6 +702,7 @@ class _Translations$export$en extends Translations$export$es {
 	@override String get fullProjectSub => 'All weeks in one PDF';
 	@override String get sheets => 'Assignment slips';
 	@override String get sheetsSub => 'One per assigned participant';
+	@override String get noWeeks => 'Download a workbook and pick a week first.';
 }
 
 // Path: projectBar
@@ -772,6 +774,33 @@ class _Translations$relativeTime$en extends Translations$relativeTime$es {
 	@override String minutes({required Object n}) => '${n} min ago';
 	@override String hours({required Object n}) => '${n} h ago';
 	@override String days({required Object n}) => '${n} d ago';
+}
+
+// Path: program
+class _Translations$program$en extends Translations$program$es {
+	_Translations$program$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String song({required Object n}) => 'Song ${n}';
+	@override String get openingWords => 'Opening Comments';
+	@override String get closingWords => 'Concluding Comments';
+	@override String get circuitOverseerTalk => 'Circuit Overseer\'s Talk';
+	@override String partWithDuration({required Object title, required Object n}) => '${title} (${n} mins.)';
+	@override String commentsWithDuration({required Object title, required Object n}) => '${title} (${n} min.)';
+	@override String get roleStudent => 'Student:';
+	@override String get roleStudentAssistant => 'Student/Assistant:';
+	@override String get roleConductorReader => 'Conductor/Reader:';
+	@override String get rolePrayer => 'Prayer:';
+	@override String get roleSpeaker => 'Speaker:';
+	@override String get title => 'Midweek Meeting Program';
+	@override String get chairman => 'Chairman: ';
+	@override String get mainHall => 'Main Hall';
+	@override String get auxRoom => 'Auxiliary Classroom';
+	@override String get sectionTreasures => 'TREASURES FROM GOD\'S WORD';
+	@override String get sectionMinistry => 'APPLY YOURSELF TO THE FIELD MINISTRY';
+	@override String get sectionChristianLife => 'LIVING AS CHRISTIANS';
 }
 
 // Path: auth.local
@@ -1357,6 +1386,7 @@ extension on TranslationsEn {
 			'export.fullProjectSub' => 'All weeks in one PDF',
 			'export.sheets' => 'Assignment slips',
 			'export.sheetsSub' => 'One per assigned participant',
+			'export.noWeeks' => 'Download a workbook and pick a week first.',
 			'projectBar.weeks' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} week', other: '${n} weeks', ), 
 			'projectBar.weekN' => ({required Object n}) => 'Week ${n}',
 			'projectBar.goToWeek' => 'Go to week',
@@ -1398,6 +1428,24 @@ extension on TranslationsEn {
 			'relativeTime.minutes' => ({required Object n}) => '${n} min ago',
 			'relativeTime.hours' => ({required Object n}) => '${n} h ago',
 			'relativeTime.days' => ({required Object n}) => '${n} d ago',
+			'program.song' => ({required Object n}) => 'Song ${n}',
+			'program.openingWords' => 'Opening Comments',
+			'program.closingWords' => 'Concluding Comments',
+			'program.circuitOverseerTalk' => 'Circuit Overseer\'s Talk',
+			'program.partWithDuration' => ({required Object title, required Object n}) => '${title} (${n} mins.)',
+			'program.commentsWithDuration' => ({required Object title, required Object n}) => '${title} (${n} min.)',
+			'program.roleStudent' => 'Student:',
+			'program.roleStudentAssistant' => 'Student/Assistant:',
+			'program.roleConductorReader' => 'Conductor/Reader:',
+			'program.rolePrayer' => 'Prayer:',
+			'program.roleSpeaker' => 'Speaker:',
+			'program.title' => 'Midweek Meeting Program',
+			'program.chairman' => 'Chairman: ',
+			'program.mainHall' => 'Main Hall',
+			'program.auxRoom' => 'Auxiliary Classroom',
+			'program.sectionTreasures' => 'TREASURES FROM GOD\'S WORD',
+			'program.sectionMinistry' => 'APPLY YOURSELF TO THE FIELD MINISTRY',
+			'program.sectionChristianLife' => 'LIVING AS CHRISTIANS',
 			_ => null,
 		};
 	}

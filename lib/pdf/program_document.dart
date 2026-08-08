@@ -4,6 +4,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../data/background.dart';
+import '../i18n/strings.g.dart';
 import '../models/program_row.dart';
 import '../models/week.dart';
 import 'column_layout.dart';
@@ -23,6 +24,7 @@ typedef WeekEntry = ({
 /// (S-140-S format). Kept for callers that still print one week; forwards to
 /// [buildProgramSheetPdf].
 Future<Uint8List> buildProgramPdf({
+  required AppLocale locale,
   required String congregation,
   required Week week,
   required ProgramSchedule schedule,
@@ -31,6 +33,7 @@ Future<Uint8List> buildProgramPdf({
   bool auxRoom = false,
 }) {
   return buildProgramSheetPdf(
+    locale: locale,
     congregation: congregation,
     entries: [
       (
@@ -56,6 +59,7 @@ Future<Uint8List> buildProgramPdf({
 /// bytes are loaded here (rootBundle needs the main isolate) and the models
 /// are plain data, safe to send across.
 Future<Uint8List> buildProgramSheetPdf({
+  required AppLocale locale,
   required String congregation,
   required List<WeekEntry> entries,
   bool auxRoom = false,
@@ -64,6 +68,7 @@ Future<Uint8List> buildProgramSheetPdf({
   final fontBytes = await carlitoFontBytes();
   return runInBackground(() => _buildPdf(
         fontBytes: fontBytes,
+        locale: locale,
         congregation: congregation,
         entries: entries,
         auxRoom: auxRoom,
@@ -73,25 +78,29 @@ Future<Uint8List> buildProgramSheetPdf({
 
 Future<Uint8List> _buildPdf({
   required CarlitoBytes fontBytes,
+  required AppLocale locale,
   required String congregation,
   required List<WeekEntry> entries,
   required bool auxRoom,
   required bool twoPerSheet,
 }) async {
+  // Built HERE, inside the isolate: only the AppLocale enum crosses the
+  // boundary, never the Translations object graph.
+  final tr = locale.buildSync();
   final carlito = carlitoFromBytes(fontBytes);
   final doc = pw.Document();
   if (twoPerSheet) {
-    _addStackedPage(doc, carlito, congregation, entries, auxRoom);
+    _addStackedPage(doc, carlito, tr, congregation, entries, auxRoom);
   } else {
-    _addSinglePage(doc, carlito, congregation, entries.first, auxRoom);
+    _addSinglePage(doc, carlito, tr, congregation, entries.first, auxRoom);
   }
   return doc.save();
 }
 
 /// Shared page header: congregation + title + the thin/thick rule. Printed
 /// ONCE per sheet (also in two-per-sheet mode, per the pinned-board original).
-List<pw.Widget> _headerBlock(S140Metrics m, String congregation) => [
-      _header(m, congregation),
+List<pw.Widget> _headerBlock(S140Metrics m, Translations tr, String congregation) => [
+      _header(m, tr, congregation),
       pw.SizedBox(height: m.gapHeaderRule),
       _thinThickRule(m),
     ];
@@ -99,25 +108,25 @@ List<pw.Widget> _headerBlock(S140Metrics m, String congregation) => [
 /// One week's block: week line (date/reading/chairman) + the four sections +
 /// closing rule. No page header — see [_headerBlock].
 List<pw.Widget> _weekBlock(pw.Context ctx, Carlito carlito, S140Metrics m,
-    WeekEntry e, bool auxRoom) {
+    Translations tr, WeekEntry e, bool auxRoom) {
   // Adaptive widths based on the real content (getFont needs the ctx).
   final regularFont = carlito.regular.getFont(ctx);
   final cols = computeColumns(m, e.schedule, e.assignments, regularFont, auxRoom);
   double measure(String s) =>
       regularFont.stringMetrics(s).advanceWidth * m.base;
   return [
-    _weekLine(m, e.week, e.chairman),
+    _weekLine(m, tr, e.week, e.chairman),
     pw.SizedBox(height: m.gapAfterWeekLine),
-    if (auxRoom) ...[_roomsHeader(m, cols), pw.SizedBox(height: 2)],
-    _table(m, e.schedule.opening, e.assignments, cols, measure, auxRoom),
-    _band(m, S140.treasures, 'TESOROS DE LA BIBLIA', 'Auditorio principal',
+    if (auxRoom) ...[_roomsHeader(m, tr, cols), pw.SizedBox(height: 2)],
+    _table(m, tr, e.schedule.opening, e.assignments, cols, measure, auxRoom),
+    _band(m, S140.treasures, tr.program.sectionTreasures, tr.program.mainHall,
         cols, auxRoom),
-    _table(m, e.schedule.treasures, e.assignments, cols, measure, auxRoom),
-    _band(m, S140.ministryColor, 'SEAMOS MEJORES MAESTROS',
-        'Auditorio principal', cols, auxRoom),
-    _table(m, e.schedule.ministry, e.assignments, cols, measure, auxRoom),
-    _band(m, S140.christianLife, 'NUESTRA VIDA CRISTIANA', '', cols, auxRoom),
-    _table(m, e.schedule.christianLife, e.assignments, cols, measure, auxRoom),
+    _table(m, tr, e.schedule.treasures, e.assignments, cols, measure, auxRoom),
+    _band(m, S140.ministryColor, tr.program.sectionMinistry,
+        tr.program.mainHall, cols, auxRoom),
+    _table(m, tr, e.schedule.ministry, e.assignments, cols, measure, auxRoom),
+    _band(m, S140.christianLife, tr.program.sectionChristianLife, '', cols, auxRoom),
+    _table(m, tr, e.schedule.christianLife, e.assignments, cols, measure, auxRoom),
     pw.SizedBox(height: m.gapSectionEnd),
     _thinThickRule(m),
   ];
@@ -126,7 +135,7 @@ List<pw.Widget> _weekBlock(pw.Context ctx, Carlito carlito, S140Metrics m,
 pw.Widget _footer(S140Metrics m) => pw.Text('S-140-S    11/23',
     style: pw.TextStyle(fontSize: m.footnote));
 
-void _addSinglePage(pw.Document doc, Carlito carlito, String congregation,
+void _addSinglePage(pw.Document doc, Carlito carlito, Translations tr, String congregation,
     WeekEntry entry, bool auxRoom) {
   const m = S140Metrics.standard;
   doc.addPage(
@@ -146,9 +155,9 @@ void _addSinglePage(pw.Document doc, Carlito carlito, String congregation,
       footer: (ctx) => pw.Container(
           alignment: pw.Alignment.centerLeft, child: _footer(m)),
       build: (ctx) => [
-        ..._headerBlock(m, congregation),
+        ..._headerBlock(m, tr, congregation),
         pw.SizedBox(height: m.gapAfterRule), // \par\smallskip
-        ..._weekBlock(ctx, carlito, m, entry, auxRoom),
+        ..._weekBlock(ctx, carlito, m, tr, entry, auxRoom),
       ],
     ),
   );
@@ -159,7 +168,7 @@ void _addSinglePage(pw.Document doc, Carlito carlito, String congregation,
 /// page's real width — titles and names reflow to use the space — and a
 /// [pw.BoxFit.scaleDown] wrapper shrinks it uniformly ONLY if an unusually
 /// tall program would overflow the sheet.
-void _addStackedPage(pw.Document doc, Carlito carlito, String congregation,
+void _addStackedPage(pw.Document doc, Carlito carlito, Translations tr, String congregation,
     List<WeekEntry> entries, bool auxRoom) {
   const m = S140Metrics.compact;
   doc.addPage(
@@ -189,12 +198,12 @@ void _addStackedPage(pw.Document doc, Carlito carlito, String congregation,
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   mainAxisSize: pw.MainAxisSize.min,
                   children: [
-                    ..._headerBlock(m, congregation),
+                    ..._headerBlock(m, tr, congregation),
                     pw.SizedBox(height: m.gapAfterRule),
-                    ..._weekBlock(ctx, carlito, m, entries[0], auxRoom),
+                    ..._weekBlock(ctx, carlito, m, tr, entries[0], auxRoom),
                     if (entries.length > 1) ...[
                       pw.SizedBox(height: S140.stackedWeekGap),
-                      ..._weekBlock(ctx, carlito, m, entries[1], auxRoom),
+                      ..._weekBlock(ctx, carlito, m, tr, entries[1], auxRoom),
                     ],
                   ],
                 ),
@@ -210,7 +219,7 @@ void _addStackedPage(pw.Document doc, Carlito carlito, String congregation,
 }
 
 // ---- Header: congregation (left) and title (right) (tex:171-178) ----
-pw.Widget _header(S140Metrics m, String congregation) {
+pw.Widget _header(S140Metrics m, Translations tr, String congregation) {
   return pw.Row(
     crossAxisAlignment: pw.CrossAxisAlignment.end, // minipages [b]
     children: [
@@ -224,7 +233,7 @@ pw.Widget _header(S140Metrics m, String congregation) {
       pw.SizedBox(
         width: 0.64 * m.contentWidth,
         child: pw.Text(
-          'Programa para la reunión de entre semana',
+          tr.program.title,
           textAlign: pw.TextAlign.right,
           style:
               pw.TextStyle(fontSize: m.title, fontWeight: pw.FontWeight.bold),
@@ -247,7 +256,7 @@ pw.Widget _thinThickRule(S140Metrics m) {
 }
 
 // ---- Week line + chairman + reading (tex:183-187) ----
-pw.Widget _weekLine(S140Metrics m, Week week, String chairman) {
+pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) {
   final weekStyle =
       pw.TextStyle(fontSize: m.week, fontWeight: pw.FontWeight.bold);
   final roleStyle = pw.TextStyle(
@@ -255,7 +264,7 @@ pw.Widget _weekLine(S140Metrics m, Week week, String chairman) {
       fontWeight: pw.FontWeight.bold,
       color: S140.labelColor);
   final chairmanCell = [
-    pw.Text('Presidente: ', style: roleStyle),
+    pw.Text(tr.program.chairman, style: roleStyle),
     pw.Text(chairman, style: pw.TextStyle(fontSize: m.week)),
   ];
   if (m.inlineWeekLine) {
@@ -291,7 +300,7 @@ pw.Widget _weekLine(S140Metrics m, Week week, String chairman) {
 }
 
 // ---- Single rooms header (tex:150-155, auxRoom mode only) ----
-pw.Widget _roomsHeader(S140Metrics m, ColumnWidths cols) {
+pw.Widget _roomsHeader(S140Metrics m, Translations tr, ColumnWidths cols) {
   final st = pw.TextStyle(
       fontSize: m.footnote,
       fontWeight: pw.FontWeight.bold,
@@ -300,10 +309,10 @@ pw.Widget _roomsHeader(S140Metrics m, ColumnWidths cols) {
     children: [
       pw.Expanded(child: pw.SizedBox()), // title + role area
       pw.SizedBox(width: m.colGap),
-      pw.SizedBox(width: cols.auxRoom, child: pw.Text('Sala Auxiliar', style: st)),
+      pw.SizedBox(width: cols.auxRoom, child: pw.Text(tr.program.auxRoom, style: st)),
       pw.SizedBox(width: m.colGap),
       pw.SizedBox(
-          width: cols.mainNames, child: pw.Text('Auditorio principal', style: st)),
+          width: cols.mainNames, child: pw.Text(tr.program.mainHall, style: st)),
     ],
   );
 }
@@ -348,12 +357,13 @@ pw.Widget _band(S140Metrics m, PdfColor color, String title, String labelText,
 }
 
 // ---- Rows table (tabularx @{}X R P@{} or @{}X R A P@{} in auxRoom) ----
-pw.Widget _table(S140Metrics m, List<ProgramRow> rows, Assignments assignments,
-    ColumnWidths cols, double Function(String) measure, bool auxRoom) {
+pw.Widget _table(S140Metrics m, Translations tr, List<ProgramRow> rows,
+    Assignments assignments, ColumnWidths cols,
+    double Function(String) measure, bool auxRoom) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      for (final f in rows) _row(m, f, assignments, cols, measure, auxRoom)
+      for (final f in rows) _row(m, tr, f, assignments, cols, measure, auxRoom)
     ],
   );
 }
@@ -361,11 +371,11 @@ pw.Widget _table(S140Metrics m, List<ProgramRow> rows, Assignments assignments,
 // Names cell (Main Hall or Auxiliary Room). Ministry rule: if the
 // Estudiante/Ayudante pair doesn't fit on one line, it ALWAYS stacks: line 1
 // Assistant, line 2 Student. Returns the widget and whether it stacked.
-({pw.Widget widget, bool stacked}) _namesCell(String role,
+({pw.Widget widget, bool stacked}) _namesCell(SlotRole role,
     List<String> names, double width, double Function(String) measure,
     pw.TextStyle style) {
   final joined = joinedNames(names);
-  final isStudentAssistant = role == 'Estudiante/Ayudante:' && names.length == 2;
+  final isStudentAssistant = role.isStudentPair && names.length == 2;
   if (isStudentAssistant && measure(joined) > width) {
     return (
       widget: pw.Column(
@@ -386,8 +396,9 @@ pw.Widget _table(S140Metrics m, List<ProgramRow> rows, Assignments assignments,
   );
 }
 
-pw.Widget _row(S140Metrics m, ProgramRow r, Assignments assignments,
-    ColumnWidths cols, double Function(String) measure, bool auxRoom) {
+pw.Widget _row(S140Metrics m, Translations tr, ProgramRow r,
+    Assignments assignments, ColumnWidths cols,
+    double Function(String) measure, bool auxRoom) {
   final timeStyle = pw.TextStyle(
       fontSize: m.small,
       fontWeight: pw.FontWeight.bold,
@@ -433,7 +444,7 @@ pw.Widget _row(S140Metrics m, ProgramRow r, Assignments assignments,
             : pw.Text(r.time, style: timeStyle),
       ),
       pw.Expanded(
-        child: pw.Text(r.content, style: pw.TextStyle(fontSize: m.base)),
+        child: pw.Text(r.content(tr), style: pw.TextStyle(fontSize: m.base)),
       ),
     ],
   );
@@ -450,7 +461,7 @@ pw.Widget _row(S140Metrics m, ProgramRow r, Assignments assignments,
         pw.SizedBox(width: m.colGap),
         pw.SizedBox(
           width: cols.role,
-          child: pw.Text(r.role, textAlign: pw.TextAlign.right, style: roleStyle),
+          child: pw.Text(r.role.label(tr), textAlign: pw.TextAlign.right, style: roleStyle),
         ),
         if (auxRoom) ...[
           pw.SizedBox(width: m.colGap),

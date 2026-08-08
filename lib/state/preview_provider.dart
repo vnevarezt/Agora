@@ -5,10 +5,12 @@ import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/files/file_saver.dart';
+import '../i18n/strings.g.dart';
 import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'app_settings.dart';
 import 'program_form.dart';
+import 'ui_state.dart' show localeProvider;
 import 'weeks_provider.dart';
 
 /// Output file kind the user picked in the export menu.
@@ -53,6 +55,9 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       formProvider.select((f) => (f.congregationId, f.auxRoom)),
       (_, _) => _scheduleRender(),
     );
+    // The printed program is localized too, so a language switch invalidates
+    // the rendered sheet.
+    ref.listen(localeProvider, (_, _) => _scheduleRender());
     _scheduleRender();
     return const AsyncValue.loading();
   }
@@ -70,6 +75,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final twoUp = ref.read(twoPerSheetProvider);
     try {
       final pdf = await buildProgramSheetPdf(
+        locale: ref.read(localeProvider),
         congregation: f.congregationId,
         entries: entries,
         auxRoom: f.auxRoom,
@@ -107,11 +113,14 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   }) async {
     final entries = ref.read(sheetEntriesProvider);
     if (entries.isEmpty) {
-      throw Exception('Descarga un cuaderno y elige una semana primero.');
+      // Surfaced to the user by `ui/widgets/export_actions.dart`, so it has
+      // to be localized. Global `t`: no BuildContext in a provider.
+      throw Exception(t.export.noWeeks);
     }
     final f = ref.read(formProvider);
     final twoUp = ref.read(twoPerSheetProvider);
     final pdf = await buildProgramSheetPdf(
+      locale: ref.read(localeProvider),
       congregation: f.congregationId,
       entries: entries,
       auxRoom: f.auxRoom,

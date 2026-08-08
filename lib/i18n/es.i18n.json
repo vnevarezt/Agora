@@ -509,7 +509,8 @@
     "fullProject": "Proyecto completo",
     "fullProjectSub": "Todas las semanas en un PDF",
     "sheets": "Hojas de participación",
-    "sheetsSub": "Una por participante asignado"
+    "sheetsSub": "Una por participante asignado",
+    "noWeeks": "Descarga un cuaderno y elige una semana primero."
   },
   "projectBar": {
     "weeks(plural)": {
@@ -560,5 +561,25 @@
     "minutes": "hace {n} min",
     "hours": "hace {n} h",
     "days": "hace {n} d"
+  },
+  "program": {
+    "song": "Canción {n}",
+    "openingWords": "Palabras de introducción",
+    "closingWords": "Palabras de conclusión",
+    "circuitOverseerTalk": "Discurso del superintendente de circuito",
+    "partWithDuration": "{title} ({n} mins.)",
+    "commentsWithDuration": "{title} ({n} min.)",
+    "roleStudent": "Estudiante:",
+    "roleStudentAssistant": "Estudiante/Ayudante:",
+    "roleConductorReader": "Conductor/Lector:",
+    "rolePrayer": "Oración:",
+    "roleSpeaker": "Orador:",
+    "title": "Programa para la reunión de entre semana",
+    "chairman": "Presidente: ",
+    "mainHall": "Auditorio principal",
+    "auxRoom": "Sala Auxiliar",
+    "sectionTreasures": "TESOROS DE LA BIBLIA",
+    "sectionMinistry": "SEAMOS MEJORES MAESTROS",
+    "sectionChristianLife": "NUESTRA VIDA CRISTIANA"
   }
 }

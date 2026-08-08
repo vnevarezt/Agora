@@ -72,6 +72,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$projectBar$es projectBar = Translations$projectBar$es.internal(_root);
 	late final Translations$workspace$es workspace = Translations$workspace$es.internal(_root);
 	late final Translations$relativeTime$es relativeTime = Translations$relativeTime$es.internal(_root);
+	late final Translations$program$es program = Translations$program$es.internal(_root);
 }
 
 // Path: app
@@ -1417,6 +1418,9 @@ class Translations$export$es {
 
 	/// es: 'Una por participante asignado'
 	String get sheetsSub => 'Una por participante asignado';
+
+	/// es: 'Descarga un cuaderno y elige una semana primero.'
+	String get noWeeks => 'Descarga un cuaderno y elige una semana primero.';
 }
 
 // Path: projectBar
@@ -1570,6 +1574,69 @@ class Translations$relativeTime$es {
 
 	/// es: 'hace {n} d'
 	String days({required Object n}) => 'hace ${n} d';
+}
+
+// Path: program
+class Translations$program$es {
+	Translations$program$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Canción {n}'
+	String song({required Object n}) => 'Canción ${n}';
+
+	/// es: 'Palabras de introducción'
+	String get openingWords => 'Palabras de introducción';
+
+	/// es: 'Palabras de conclusión'
+	String get closingWords => 'Palabras de conclusión';
+
+	/// es: 'Discurso del superintendente de circuito'
+	String get circuitOverseerTalk => 'Discurso del superintendente de circuito';
+
+	/// es: '{title} ({n} mins.)'
+	String partWithDuration({required Object title, required Object n}) => '${title} (${n} mins.)';
+
+	/// es: '{title} ({n} min.)'
+	String commentsWithDuration({required Object title, required Object n}) => '${title} (${n} min.)';
+
+	/// es: 'Estudiante:'
+	String get roleStudent => 'Estudiante:';
+
+	/// es: 'Estudiante/Ayudante:'
+	String get roleStudentAssistant => 'Estudiante/Ayudante:';
+
+	/// es: 'Conductor/Lector:'
+	String get roleConductorReader => 'Conductor/Lector:';
+
+	/// es: 'Oración:'
+	String get rolePrayer => 'Oración:';
+
+	/// es: 'Orador:'
+	String get roleSpeaker => 'Orador:';
+
+	/// es: 'Programa para la reunión de entre semana'
+	String get title => 'Programa para la reunión de entre semana';
+
+	/// es: 'Presidente: '
+	String get chairman => 'Presidente: ';
+
+	/// es: 'Auditorio principal'
+	String get mainHall => 'Auditorio principal';
+
+	/// es: 'Sala Auxiliar'
+	String get auxRoom => 'Sala Auxiliar';
+
+	/// es: 'TESOROS DE LA BIBLIA'
+	String get sectionTreasures => 'TESOROS DE LA BIBLIA';
+
+	/// es: 'SEAMOS MEJORES MAESTROS'
+	String get sectionMinistry => 'SEAMOS MEJORES MAESTROS';
+
+	/// es: 'NUESTRA VIDA CRISTIANA'
+	String get sectionChristianLife => 'NUESTRA VIDA CRISTIANA';
 }
 
 // Path: auth.local
@@ -2311,6 +2378,7 @@ extension on Translations {
 			'export.fullProjectSub' => 'Todas las semanas en un PDF',
 			'export.sheets' => 'Hojas de participación',
 			'export.sheetsSub' => 'Una por participante asignado',
+			'export.noWeeks' => 'Descarga un cuaderno y elige una semana primero.',
 			'projectBar.weeks' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(n, one: '${n} semana', other: '${n} semanas', ), 
 			'projectBar.weekN' => ({required Object n}) => 'Semana ${n}',
 			'projectBar.goToWeek' => 'Ir a la semana',
@@ -2352,6 +2420,24 @@ extension on Translations {
 			'relativeTime.minutes' => ({required Object n}) => 'hace ${n} min',
 			'relativeTime.hours' => ({required Object n}) => 'hace ${n} h',
 			'relativeTime.days' => ({required Object n}) => 'hace ${n} d',
+			'program.song' => ({required Object n}) => 'Canción ${n}',
+			'program.openingWords' => 'Palabras de introducción',
+			'program.closingWords' => 'Palabras de conclusión',
+			'program.circuitOverseerTalk' => 'Discurso del superintendente de circuito',
+			'program.partWithDuration' => ({required Object title, required Object n}) => '${title} (${n} mins.)',
+			'program.commentsWithDuration' => ({required Object title, required Object n}) => '${title} (${n} min.)',
+			'program.roleStudent' => 'Estudiante:',
+			'program.roleStudentAssistant' => 'Estudiante/Ayudante:',
+			'program.roleConductorReader' => 'Conductor/Lector:',
+			'program.rolePrayer' => 'Oración:',
+			'program.roleSpeaker' => 'Orador:',
+			'program.title' => 'Programa para la reunión de entre semana',
+			'program.chairman' => 'Presidente: ',
+			'program.mainHall' => 'Auditorio principal',
+			'program.auxRoom' => 'Sala Auxiliar',
+			'program.sectionTreasures' => 'TESOROS DE LA BIBLIA',
+			'program.sectionMinistry' => 'SEAMOS MEJORES MAESTROS',
+			'program.sectionChristianLife' => 'NUESTRA VIDA CRISTIANA',
 			_ => null,
 		};
 	}

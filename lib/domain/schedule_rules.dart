@@ -16,22 +16,26 @@ String hhmm(int minutes) {
   return '$h:${m.toString().padLeft(2, '0')}';
 }
 
-/// Role label + number of names for a part. The match strings stay in Spanish
-/// because they test the title parsed from the jw.org workbook.
-({String role, int n}) roleAndNames(Section section, String title) {
+/// Role + number of names for a part. The match strings stay in Spanish
+/// because they test the title parsed from the jw.org workbook, which is
+/// downloaded in the meeting's language (today always Spanish — see
+/// `state/mwb_sync.dart`).
+({SlotRole role, int n}) roleAndNames(Section section, String title) {
   final t = title.toLowerCase();
   switch (section) {
     case Section.treasures:
-      if (t.contains('lectura de la biblia')) return (role: 'Estudiante:', n: 1);
-      return (role: '', n: 1); // talk / spiritual gems
+      if (t.contains('lectura de la biblia')) {
+        return (role: SlotRole.student, n: 1);
+      }
+      return (role: SlotRole.none, n: 1); // talk / spiritual gems
     case Section.ministry:
-      if (t.contains('discurso')) return (role: 'Estudiante:', n: 1);
-      return (role: 'Estudiante/Ayudante:', n: 2); // demonstration
+      if (t.contains('discurso')) return (role: SlotRole.student, n: 1);
+      return (role: SlotRole.studentAssistant, n: 2); // demonstration
     case Section.christianLife:
       if (t.contains('estudio bíblico de la congregaci')) {
-        return (role: 'Conductor/Lector:', n: 2);
+        return (role: SlotRole.conductorReader, n: 2);
       }
-      return (role: '', n: 1); // discussion / talk
+      return (role: SlotRole.none, n: 1); // discussion / talk
   }
 }
 
@@ -48,25 +52,19 @@ bool isAuxEligible(Section section, String title) {
 
 ProgramRow _row(String id, Section section, int t, Part p) {
   final roleNames = roleAndNames(section, p.title);
-  final mins = p.minutes ?? 0;
-  final content = mins > 0 ? '${p.title} ($mins mins.)' : p.title;
   final eligible = isAuxEligible(section, p.title);
   return ProgramRow(
     id: id,
     time: hhmm(t),
-    content: content,
+    kind: RowKind.part,
+    title: p.title,
+    minutes: p.minutes ?? 0,
     role: roleNames.role,
     slots: roleNames.n,
     auxSlots: eligible ? roleNames.n : 0,
     auxEligible: eligible,
   );
 }
-
-/// Default title for the talk that replaces the Congregation Bible Study on a
-/// circuit overseer's visit. Stays in the meeting language, like the other
-/// fixed titles built here ("Palabras de introducción", "Canción N").
-const String circuitOverseerTalkTitle =
-    'Discurso del superintendente de circuito';
 
 /// Builds the schedule honoring the total duration, the fixed 15 min of the
 /// ministry section and the one-minute counsel after each student assignment.
@@ -119,17 +117,17 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     opening.add(ProgramRow(
       id: 'ap${opening.length}',
       time: hhmm(t),
-      content: 'Canción ${week.openingSong}',
-      role: 'Oración:',
-      bullet: true,
+      kind: RowKind.song,
+      songNumber: week.openingSong,
+      role: SlotRole.prayer,
     ));
     t += sOpen;
   }
   opening.add(ProgramRow(
     id: 'ap${opening.length}',
     time: hhmm(t),
-    content: 'Palabras de introducción ($intro min.)',
-    bullet: true,
+    kind: RowKind.openingWords,
+    minutes: intro,
     slots: 0,
   ));
   t += intro;
@@ -156,8 +154,8 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
       time: hhmm(t),
-      content: 'Canción ${week.middleSong}',
-      bullet: true,
+      kind: RowKind.song,
+      songNumber: week.middleSong,
       slots: 0,
     ));
     t += sMid;
@@ -172,8 +170,9 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
       lifeRows.add(ProgramRow(
         id: 'vi${lifeRows.length}',
         time: hhmm(t),
-        content: '$circuitOverseerTalkTitle ($cbsMinutes mins.)',
-        role: 'Orador:',
+        kind: RowKind.circuitOverseerTalk,
+        minutes: cbsMinutes,
+        role: SlotRole.speaker,
         slots: 1,
       ));
     } else {
@@ -188,8 +187,8 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
       time: hhmm(t),
-      content: 'Palabras de conclusión ($concl min.)',
-      bullet: true,
+      kind: RowKind.closingWords,
+      minutes: concl,
       slots: 0,
     ));
     t += concl;
@@ -198,9 +197,9 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
       time: hhmm(t),
-      content: 'Canción ${week.closingSong}',
-      role: 'Oración:',
-      bullet: true,
+      kind: RowKind.song,
+      songNumber: week.closingSong,
+      role: SlotRole.prayer,
     ));
     t += sClose;
   }
@@ -214,21 +213,17 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   );
 }
 
-final _titleDurationSuffix = RegExp(r'\s*\(\d+\s*mins?\.\)$');
-
-/// Replaces a row's title with the user override (keyed by `ProgramRow.id`)
-/// while keeping its "(N mins.)" suffix, so the duration chip and the PDF stay
-/// in sync. Returns [schedule] unchanged when there are no overrides.
+/// Replaces a row's title with the user override (keyed by `ProgramRow.id`).
+/// The duration is a field now, so it survives the override on its own — the
+/// renderer re-appends the "(N mins.)" suffix. Returns [schedule] unchanged
+/// when there are no overrides.
 ProgramSchedule applyTitleOverrides(
     ProgramSchedule schedule, Map<String, String> overrides) {
   if (overrides.isEmpty) return schedule;
   List<ProgramRow> mapped(List<ProgramRow> rows) => [
         for (final r in rows)
           if (overrides.containsKey(r.id))
-            r.copyWith(
-              content: overrides[r.id]! +
-                  (_titleDurationSuffix.firstMatch(r.content)?.group(0) ?? ''),
-            )
+            r.copyWith(titleOverride: overrides[r.id])
           else
             r,
       ];

@@ -509,7 +509,8 @@
     "fullProject": "Full project",
     "fullProjectSub": "All weeks in one PDF",
     "sheets": "Assignment slips",
-    "sheetsSub": "One per assigned participant"
+    "sheetsSub": "One per assigned participant",
+    "noWeeks": "Download a workbook and pick a week first."
   },
   "projectBar": {
     "weeks(plural)": {
@@ -560,5 +561,25 @@
     "minutes": "{n} min ago",
     "hours": "{n} h ago",
     "days": "{n} d ago"
+  },
+  "program": {
+    "song": "Song {n}",
+    "openingWords": "Opening Comments",
+    "closingWords": "Concluding Comments",
+    "circuitOverseerTalk": "Circuit Overseer's Talk",
+    "partWithDuration": "{title} ({n} mins.)",
+    "commentsWithDuration": "{title} ({n} min.)",
+    "roleStudent": "Student:",
+    "roleStudentAssistant": "Student/Assistant:",
+    "roleConductorReader": "Conductor/Reader:",
+    "rolePrayer": "Prayer:",
+    "roleSpeaker": "Speaker:",
+    "title": "Midweek Meeting Program",
+    "chairman": "Chairman: ",
+    "mainHall": "Main Hall",
+    "auxRoom": "Auxiliary Classroom",
+    "sectionTreasures": "TREASURES FROM GOD'S WORD",
+    "sectionMinistry": "APPLY YOURSELF TO THE FIELD MINISTRY",
+    "sectionChristianLife": "LIVING AS CHRISTIANS"
   }
 }

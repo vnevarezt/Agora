@@ -66,27 +66,28 @@ class PartView {
   });
 }
 
-final _durationSuffix = RegExp(r'\s*\((\d+)\s*mins?\.\)$');
-
-/// Slot labels based on the row's role (same rule as the old editor). The
-/// `contains('Conductor')` check matches the raw workbook data (kept in the
-/// meeting language); only the displayed labels are translated.
-List<String> _labelsForRole(ProgramRow row, Translations tr) {
-  if (row.slots == 2) {
-    return row.role.contains('Conductor')
-        ? [tr.workspace.slotConductor, tr.workspace.slotReader]
-        : [tr.workspace.slotStudent, tr.workspace.slotAssistant];
-  }
-  if (row.role == 'Orador:') return [tr.workspace.slotSpeaker];
-  return [
-    row.role.isNotEmpty ? row.role.replaceAll(':', '') : tr.workspace.slotInCharge
-  ];
-}
+/// Slot labels for a row's role. Keyed off [SlotRole], so it no longer depends
+/// on how the role happens to be spelled in the printed program.
+List<String> _labelsForRole(ProgramRow row, Translations tr) =>
+    switch (row.role) {
+      SlotRole.conductorReader => [
+          tr.workspace.slotConductor,
+          tr.workspace.slotReader,
+        ],
+      SlotRole.studentAssistant => [
+          tr.workspace.slotStudent,
+          tr.workspace.slotAssistant,
+        ],
+      SlotRole.speaker => [tr.workspace.slotSpeaker],
+      SlotRole.none => [tr.workspace.slotInCharge],
+      // Single-slot roles reuse the printed prefix without its colon.
+      SlotRole.student ||
+      SlotRole.prayer =>
+        [row.role.label(tr).replaceAll(':', '')],
+    };
 
 int _maxLengthForRole(ProgramRow row) =>
-    row.slots == 2 && !row.role.contains('Conductor')
-        ? Limits.studentAssistant
-        : Limits.name;
+    row.role.isStudentPair ? Limits.studentAssistant : Limits.name;
 
 /// Synthetic card for the meeting chairman.
 PartView chairmanView(Translations tr) {
@@ -112,12 +113,9 @@ PartView mapRow(
   required bool auxActive,
   required Translations tr,
 }) {
-  final match = _durationSuffix.firstMatch(row.content);
-  final title = row.content.replaceAll(_durationSuffix, '');
-  final duration =
-      match != null ? tr.workspace.duration(n: match.group(1)!) : null;
-  // `startsWith('Canción')` checks the raw workbook data (meeting language).
-  final isSong = row.content.startsWith('Canción');
+  final title = row.titleOnly(tr);
+  final duration = row.durationLabel(tr);
+  final isSong = row.kind == RowKind.song;
 
   if (row.slots == 0) {
     return PartView(

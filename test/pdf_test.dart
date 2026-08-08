@@ -1,11 +1,12 @@
 // Verifica que el render del PDF carga las fuentes Carlito y produce un PDF
 // válido (sin red ni GUI).
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:agora/domain/schedule_rules.dart';
+import 'package:agora/i18n/strings.g.dart';
 import 'package:agora/models/program_row.dart';
 import 'package:agora/models/week.dart';
 import 'package:agora/pdf/program_document.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 Week _sampleWeek(String date) => Week(
       date: date,
@@ -56,6 +57,7 @@ void main() {
     final asg =
         Assignments({schedule.treasures.first.id: const ['Rafael G']}, {});
     final bytes = await buildProgramPdf(
+      locale: AppLocale.es,
       congregation: 'CONSTITUCIÓN J.A CASTRO',
       week: week,
       schedule: schedule,
@@ -70,6 +72,7 @@ void main() {
   test('buildProgramSheetPdf con dos semanas (2-up) genera un PDF válido',
       () async {
     final bytes = await buildProgramSheetPdf(
+      locale: AppLocale.es,
       congregation: 'CONSTITUCIÓN J.A CASTRO',
       entries: [
         _entry(_sampleWeek('18-24 DE MAYO')),
@@ -85,6 +88,7 @@ void main() {
   test('2-up con una sola entrada (última hoja impar) sigue siendo válido',
       () async {
     final bytes = await buildProgramSheetPdf(
+      locale: AppLocale.es,
       congregation: 'CONSTITUCIÓN J.A CASTRO',
       entries: [_entry(_sampleWeek('1-7 DE JUNIO'))],
       twoPerSheet: true,
