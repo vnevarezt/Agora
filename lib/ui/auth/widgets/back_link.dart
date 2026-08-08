@@ -4,7 +4,6 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
 
-/// `.auth-back`: arrow + label that brightens on hover.
 class BackLink extends StatelessWidget {
   const BackLink({super.key, required this.label, required this.onTap});
 

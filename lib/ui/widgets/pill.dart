@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/dimens.dart';
 
-/// Label pill/badge: uppercase text with background/foreground colors.
-/// Shared base for StatusBadge, PrivBadge and the "Incompleto" badge.
 class Pill extends StatelessWidget {
   const Pill({
     super.key,

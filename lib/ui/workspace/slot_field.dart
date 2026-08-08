@@ -15,8 +15,6 @@ import '../picker/person_picker.dart';
 import 'assignee_button.dart';
 import 'part_presentation.dart';
 
-/// An assignment slot: uppercase label + [AssigneeButton]. Opens the picker
-/// and writes the result into the form via [writeAssignment].
 class SlotField extends ConsumerWidget {
   const SlotField({super.key, required this.spec});
 

@@ -10,16 +10,12 @@ import '../workspace/workspace_panel.dart';
 import 'mobile_bars.dart';
 import 'project_bar.dart';
 
-/// Editor root screen. The single place that decides the layout: desktop/
-/// tablet in two panels (46/54) and mobile in one column with tabs; both
-/// arrangements use the same [WorkspacePanel] and [PreviewPane].
 ///
 /// Opening/closing the editor session lives here: the form hydrates from
 /// the project's DB rows on entry and the programs stream stops on exit.
 class ProgramShell extends ConsumerStatefulWidget {
   const ProgramShell({super.key, this.project});
 
-  /// Project opened from the dashboard (bar identity). Optional.
   final Project? project;
 
   @override
@@ -78,9 +74,6 @@ class _ProgramShellState extends ConsumerState<ProgramShell> {
   }
 }
 
-/// Mobile body: the tabs switch panels with [IndexedStack] (the preview
-/// zoom survives tab changes) and the bottom bar floats above with its
-/// frosted glass.
 class _MobileBody extends ConsumerWidget {
   const _MobileBody();
 

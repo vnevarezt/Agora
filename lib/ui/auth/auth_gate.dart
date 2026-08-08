@@ -13,8 +13,6 @@ import 'local_create_screen.dart';
 import 'portada_screen.dart';
 import 'unlock_screen.dart';
 
-/// Routes the session: nothing below [child] builds (and therefore nothing
-/// can read `dbProvider`) until the session is unlocked.
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key, required this.child});
 
@@ -49,8 +47,6 @@ class AuthGate extends ConsumerWidget {
 
 enum _FlowStep { choose, local, cloud }
 
-/// Portada + step navigation while no account mode exists yet; a successful
-/// sign-up/sign-in flips the session state and unmounts the whole flow.
 class _AuthFlow extends StatefulWidget {
   const _AuthFlow();
 

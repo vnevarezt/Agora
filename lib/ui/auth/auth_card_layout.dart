@@ -5,9 +5,6 @@ import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// 400px column centered on the app background, brand lockup on top and the
-/// legal line at the bottom. Mobile (<720): top-aligned, full width, larger
-/// title handled by [AuthTitle].
 class AuthCardLayout extends StatelessWidget {
   const AuthCardLayout({super.key, required this.child});
 
@@ -55,7 +52,6 @@ class AuthCardLayout extends StatelessWidget {
   }
 }
 
-/// `.brand`: the same mark + name lockup as the dashboard sidebar.
 class BrandLockup extends StatelessWidget {
   const BrandLockup({super.key});
 

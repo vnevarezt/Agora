@@ -3,18 +3,13 @@ import '../../models/program_row.dart';
 import '../../state/assignment_ops.dart';
 import '../limits.dart';
 
-/// Pure row → card-view mapper. The single place where the parts' presentation
-/// logic lives (card kind, chips, slot labels).
 
 enum PartKind {
-  /// Single fixed line with no assignment (middle song, intro/conclusion).
   fixedLine,
 
-  /// Card with assignment slots.
   role,
 }
 
-/// An assignment slot inside a card.
 class SlotSpec {
   final String label;
   final SlotRef ref;
@@ -31,7 +26,6 @@ class SlotSpec {
   });
 }
 
-/// Ready-to-render data for a workspace card.
 class PartView {
   final String id;
   final PartKind kind;
@@ -41,14 +35,10 @@ class PartView {
   /// "10 min" (extracted from the "(10 mins.)" suffix of `content`).
   final String? durationLabel;
 
-  /// Right-hand label on fixed lines ("Cántico", "A cargo del presidente"); on
-  /// role cards, an extra header chip.
   final String? fixedTag;
 
-  /// Show "TODA LA REUNIÓN" instead of the time (chairman).
   final bool allMeetingBadge;
 
-  /// "Auxiliary room" indicator in the header.
   final bool auxFlag;
 
   final List<SlotSpec> slots;
@@ -88,7 +78,6 @@ List<String> _labelsForRole(ProgramRow row, Translations tr) =>
 int _maxLengthForRole(ProgramRow row) =>
     row.role.isStudentPair ? Limits.studentAssistant : Limits.name;
 
-/// Synthetic card for the meeting chairman.
 PartView chairmanView(Translations tr) {
   return PartView(
     id: 'presidente',
@@ -105,8 +94,6 @@ PartView chairmanView(Translations tr) {
   );
 }
 
-/// Maps a schedule row to its card. [auxActive] = the form's Auxiliary Room
-/// switch.
 PartView mapRow(
   ProgramRow row, {
   required bool auxActive,

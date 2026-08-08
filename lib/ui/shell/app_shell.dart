@@ -9,9 +9,6 @@ import '../responsive.dart';
 import '../widgets/motion.dart';
 import 'sidebar_nav.dart';
 
-/// App root shell: side navigation + content area that switches between
-/// Home (dashboard), Participants and Settings. On mobile the side bar is
-/// replaced by a bottom bar.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
 

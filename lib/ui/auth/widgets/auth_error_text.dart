@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/motion.dart';
 
-/// Inline error line under a form field. Accepts null so call sites can keep
-/// it mounted; appearing/disappearing animates instead of jumping.
 class AuthErrorText extends StatelessWidget {
   const AuthErrorText(this.message, {super.key});
 

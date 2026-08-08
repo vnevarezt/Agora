@@ -22,8 +22,6 @@ import '../widgets/motion.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
 
-/// Editor bar (`.projbar`): project identity, progress, week selector and
-/// export.
 class ProjectBar extends ConsumerWidget {
   const ProjectBar({super.key, this.project});
 
@@ -101,7 +99,6 @@ class ProjectBar extends ConsumerWidget {
       );
 }
 
-/// Project identity: name + congregation + week count.
 class _ProjectId extends ConsumerWidget {
   const _ProjectId({this.project});
 
@@ -198,8 +195,6 @@ class _ProjectId extends ConsumerWidget {
   }
 }
 
-/// Week selector (`.week-nav`): arrows + central button with a "Go to
-/// week" popover.
 class _WeekNav extends ConsumerStatefulWidget {
   const _WeekNav({this.expand = false});
 
@@ -411,7 +406,6 @@ class _PctBadge extends StatelessWidget {
   }
 }
 
-/// "Go to week" popover content (`.week-menu`) + Auxiliary Room toggle.
 class _WeekMenu extends ConsumerWidget {
   const _WeekMenu({
     required this.weeks,
@@ -615,9 +609,6 @@ class _AuxToggle extends StatelessWidget {
   }
 }
 
-/// "Two programs per sheet" toggle (below [_AuxToggle]). A device print
-/// preference: two weeks side by side on one landscape sheet. Mirrors
-/// [_AuxToggle].
 class _TwoPerSheetToggle extends StatelessWidget {
   const _TwoPerSheetToggle({required this.twoPerSheet, required this.onChanged});
 
@@ -721,8 +712,6 @@ class _CircuitOverseerToggle extends StatelessWidget {
   }
 }
 
-/// Export button with a menu (`.menu`): the current sheet (real, PDF or image,
-/// save or share) plus project and slips (UI for now).
 class _ExportMenu extends ConsumerWidget {
   const _ExportMenu({this.compact = false});
 

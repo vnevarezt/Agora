@@ -1,12 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
-/// Shared motion language: one ease-out curve and
-/// one duration scale, so every surface moves the same way.
-///
-/// This is the only duration scale. Timings used to be split between here and
-/// `Dimens`, where `dSlide` (180ms) duplicated [fast] under another name and
-/// `dSheet` was never used at all.
+/// The ONLY duration scale — do not add timings elsewhere.
 abstract final class Motion {
   static const Curve curve = Cubic(.2, .8, .3, 1);
 

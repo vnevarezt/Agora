@@ -6,9 +6,6 @@ import '../theme/tokens.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/motion.dart';
 
-/// "Nuevo proyecto" card: dashed border and a "+" ring.
-/// The creation modal comes in a later phase; for now [onTap] stays optional.
-///
 /// Hover is driven by a single opaque [MouseRegion] (the one authority — no
 /// nested hover regions to thrash against) and a single [TweenAnimationBuilder]
 /// so the border, fill, ring, icon and label all ease together over the same

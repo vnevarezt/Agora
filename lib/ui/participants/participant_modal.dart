@@ -19,14 +19,12 @@ import '../widgets/modal_shell.dart';
 import '../widgets/motion.dart';
 import '../widgets/segmented_control.dart';
 
-/// Description of each privilege in the modal radio cards.
 String _roleDesc(Role role, Translations tr) => switch (role) {
       Role.publisher => tr.participantModal.roleDescPublisher,
       Role.ministerialServant => tr.participantModal.roleDescServant,
       Role.elder => tr.participantModal.roleDescElder,
     };
 
-/// Opens the create/edit person modal. [original] null = new.
 Future<void> showParticipantModal(BuildContext context, {Person? original}) {
   return showAppModal<void>(
     context,
@@ -35,7 +33,6 @@ Future<void> showParticipantModal(BuildContext context, {Person? original}) {
   );
 }
 
-/// Person modal content. Reads/writes via Riverpod.
 class PersonModal extends ConsumerStatefulWidget {
   const PersonModal({
     super.key,
@@ -297,7 +294,6 @@ class _PersonModalState extends ConsumerState<PersonModal> {
 
 }
 
-/// Privilege radio card (`.priv-option`): circle + title + description.
 class _RoleOption extends StatelessWidget {
   const _RoleOption({
     required this.role,
@@ -386,7 +382,6 @@ class _RoleOption extends StatelessWidget {
   }
 }
 
-/// "Disponible" row with a switch (`.set-row`): maps to `active`.
 class _AvailableRow extends StatelessWidget {
   const _AvailableRow({required this.active, required this.onChanged});
 

@@ -5,8 +5,6 @@ import '../../models/person.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 
-/// Privilege badge: elder (accent), servant (amber) and publisher
-/// (neutral). The amber has a dark-mode variant.
 class PrivBadge extends StatelessWidget {
   const PrivBadge({super.key, required this.role});
 

@@ -7,9 +7,6 @@ import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'danger_button.dart';
 
-/// Shared structure for the app modals: handle (on sheet), header
-/// (title + description + close), scrollable body and a button footer.
-/// Used with [showAppModal], which chooses dialog vs bottom sheet.
 class ModalShell extends StatelessWidget {
   const ModalShell({
     super.key,

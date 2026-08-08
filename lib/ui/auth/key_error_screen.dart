@@ -6,8 +6,6 @@ import '../../state/auth_session.dart';
 import '../widgets/app_button.dart';
 import 'auth_card_layout.dart';
 
-/// The OS keychain failed (not a wrong password): the encrypted DB cannot be
-/// opened at all. Shows the technical detail and offers a retry.
 class KeyErrorScreen extends ConsumerWidget {
   const KeyErrorScreen({super.key, required this.message});
 

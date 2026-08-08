@@ -5,7 +5,6 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
-/// Reminder card (`.reminder`): icon colored by type, title, meta and CTA.
 class ReminderCard extends StatelessWidget {
   const ReminderCard({super.key, required this.recordatorio, this.onCta});
 

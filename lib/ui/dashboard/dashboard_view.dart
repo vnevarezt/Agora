@@ -27,8 +27,6 @@ import 'project_card.dart';
 import 'project_modal.dart';
 import 'reminder_card.dart';
 
-/// Home view (`HomeView`): greeting, filters, a grid of projects and a
-/// reminders panel. Data is example-only (UI-only).
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
 
@@ -100,7 +98,6 @@ class DashboardView extends ConsumerWidget {
   }
 }
 
-/// Greeting based on the time of day.
 String _greeting(Translations tr) {
   final h = DateTime.now().hour;
   if (h < 12) return tr.dashboard.greetingMorning;
@@ -205,7 +202,6 @@ class _TopBar extends ConsumerWidget {
   }
 }
 
-/// Persistent state of the notebook catalog, shown in the header.
 enum _CatalogState { busy, ok, incomplete }
 
 _CatalogState _catalogState(AsyncValue<SyncReport> sync) {
@@ -215,9 +211,6 @@ _CatalogState _catalogState(AsyncValue<SyncReport> sync) {
   return report.complete ? _CatalogState.ok : _CatalogState.incomplete;
 }
 
-/// Persistent card next to the notifications button: spinner while syncing,
-/// a check when everything is up to date, a warning when a notebook is missing.
-/// On mobile it collapses to an icon-only square to save space.
 class _SyncIndicator extends StatelessWidget {
   const _SyncIndicator({required this.state, this.compact = false});
 
@@ -405,7 +398,6 @@ class _RestoreBanner extends StatelessWidget {
   }
 }
 
-/// Hero "continue where you left off": the freshest draft, or nothing.
 class _HeroSection extends ConsumerWidget {
   const _HeroSection();
 
@@ -432,7 +424,6 @@ class _HeroSection extends ConsumerWidget {
   }
 }
 
-/// Congregation pills, only worth showing with more than one congregation.
 class _CongregationFilter extends ConsumerWidget {
   const _CongregationFilter();
 

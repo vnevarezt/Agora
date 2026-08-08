@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// Linear progress bar: `border2` track and `accent` fill, both fully rounded.
 class ProgressMeter extends StatelessWidget {
   const ProgressMeter({super.key, required this.value, this.height = 5});
 
-  /// Progress fraction 0..1.
   final double value;
   final double height;
 

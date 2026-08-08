@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 
-/// `.auth-note`: informative note on an accent-tint card. [spans] lets the
-/// copy mix regular and bold runs (e.g. the no-recovery warning).
 class AuthNote extends StatelessWidget {
   const AuthNote({super.key, required this.icon, required this.spans});
 

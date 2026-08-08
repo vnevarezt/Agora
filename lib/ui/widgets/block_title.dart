@@ -4,8 +4,6 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 
-/// Dashboard block title (`.block-title`): uppercase title, "· N" counter
-/// and an optional right-aligned link ("Ver todo").
 class BlockTitle extends StatelessWidget {
   const BlockTitle({
     super.key,

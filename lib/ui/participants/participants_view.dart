@@ -17,9 +17,6 @@ import 'participant_card.dart';
 import 'participant_modal.dart';
 import '../theme/app_theme.dart';
 
-/// Participants view (`PeopleView`): topbar, filters and a grid of cards
-/// fed by `participantsProvider`. Lives inside the shell; shows a back
-/// button when opened from the editor.
 class ParticipantsView extends ConsumerStatefulWidget {
   const ParticipantsView({super.key});
 
@@ -207,8 +204,6 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     );
   }
 
-  /// Title + either the empty state or the virtualised grid, as slivers so
-  /// the grid can build lazily.
   List<Widget> _resultSlivers(BuildContext context, double pad) {
     final all = ref.watch(peopleProvider);
     final restore = ref.watch(initialRestoreProvider);

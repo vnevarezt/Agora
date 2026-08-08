@@ -4,8 +4,6 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
-/// Settings-panel field: small uppercase label above any control ([child]:
-/// input, dropdown, switch, readonly…).
 class LabeledField extends StatelessWidget {
   const LabeledField({super.key, required this.label, required this.child});
 

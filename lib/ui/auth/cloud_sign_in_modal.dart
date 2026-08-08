@@ -5,9 +5,6 @@ import '../widgets/modal_shell.dart';
 import '../widgets/segmented_control.dart';
 import 'cloud_auth_screen.dart';
 
-/// Settings entry point for local-mode users adding a cloud identity: wraps
-/// the shared [CloudAuthForm] in a modal. Signing in here never changes the
-/// session gate.
 class CloudSignInModal extends StatefulWidget {
   const CloudSignInModal({
     super.key,

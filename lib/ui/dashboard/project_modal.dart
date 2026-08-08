@@ -23,7 +23,6 @@ import '../widgets/modal_shell.dart';
 import '../widgets/motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Opens the create/edit project modal. [project] null = new.
 Future<void> showProjectModal(BuildContext context, {Project? project}) {
   return showAppModal<void>(
     context,
@@ -32,7 +31,6 @@ Future<void> showProjectModal(BuildContext context, {Project? project}) {
   );
 }
 
-/// Project modal content. Reads/writes via Riverpod.
 class ProjectModal extends ConsumerStatefulWidget {
   const ProjectModal({
     super.key,
@@ -45,7 +43,6 @@ class ProjectModal extends ConsumerStatefulWidget {
   final Project? original;
   final VoidCallback onClose;
 
-  /// true when presented as a bottom sheet (mobile).
   final bool sheet;
 
   @override
@@ -86,8 +83,6 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         : (notebooks.isNotEmpty ? notebooks.first.id : '');
   }
 
-  /// Toggles a notebook week, preserving the notebook order and the "extra"
-  /// weeks (from other notebooks) at the end.
   void _toggle(String w, Notebook notebook) {
     setState(() {
       if (_weeks.contains(w)) {
@@ -292,7 +287,6 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
 
 }
 
-/// Week toggle (`.week-toggle`): rectangular, 1.5 border, tabular figures.
 class _WeekToggle extends StatelessWidget {
   const _WeekToggle({
     required this.label,
@@ -305,7 +299,6 @@ class _WeekToggle extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  /// Week from another notebook: tap removes it.
   final bool extra;
 
   @override

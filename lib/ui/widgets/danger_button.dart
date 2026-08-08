@@ -6,8 +6,7 @@ import '../theme/dimens.dart';
 import 'app_button.dart';
 import 'motion.dart';
 
-/// Destructive-action button in the error color (no danger variant in
-/// [AppButton]). Used by the project and participant modal footers.
+/// Destructive action: [AppButton] has no danger variant.
 class DangerButton extends StatelessWidget {
   const DangerButton({super.key, required this.onTap, this.label});
 

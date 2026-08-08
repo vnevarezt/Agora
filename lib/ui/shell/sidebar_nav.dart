@@ -39,7 +39,6 @@ List<({AppSection section, IconData icon, IconData activeIcon, String label})>
       ),
     ];
 
-/// Number of urgent reminders; shown as a badge on "Inicio".
 final _alertsProvider = Provider<int>((ref) => ref
     .watch(remindersProvider)
     .where((r) => r.type == ReminderType.alert)
@@ -82,8 +81,6 @@ class _NavIcon extends StatelessWidget {
   }
 }
 
-/// Side bar (`.sidebar`): brand, navigation and user card.
-/// With [compact] it goes icon-only (64px) for tablet.
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key, this.compact = false});
 
@@ -180,9 +177,6 @@ class _Brand extends StatelessWidget {
   }
 }
 
-/// Navigation rail item (MD3): a rounded active-indicator surface that fades
-/// in behind the selected destination, real ink ripple + state layers, and
-/// the outline→filled icon transition.
 class _NavItem extends ConsumerWidget {
   const _NavItem({
     required this.section,
@@ -292,9 +286,6 @@ class _NavItem extends ConsumerWidget {
       );
 }
 
-/// User card at the bottom of the sidebar: avatar + name + account subtitle
-/// ("Perfil local" / cloud email). Clicking it opens the session menu
-/// (settings, lock, sign out); [compact] keeps just the avatar as the anchor.
 class _UserCard extends ConsumerStatefulWidget {
   const _UserCard({required this.user, required this.compact});
 
@@ -452,7 +443,6 @@ typedef _UserMenuEntry = ({
   VoidCallback onTap,
 });
 
-/// Menu surface for the user card (same look as the export menu).
 class _UserMenu extends StatelessWidget {
   const _UserMenu({required this.items, required this.onPicked});
 
@@ -519,10 +509,6 @@ class _UserMenu extends StatelessWidget {
   }
 }
 
-/// Mobile bottom navigation (`.bottom-nav`): the Material 3 [NavigationBar],
-/// themed to the app tokens. It brings the sliding pill indicator, the ink
-/// ripple and the outline→filled icon change for free — and animates the same
-/// way on every platform (the hand-rolled version stuttered on Windows).
 class BottomNav extends ConsumerWidget {
   const BottomNav({super.key});
 

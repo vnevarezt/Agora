@@ -33,9 +33,6 @@ double participantCardHeight(BuildContext context) {
   return math.max(avatar, textColumn) + verticalPadding;
 }
 
-/// Person card (`.person-card`): avatar, name with an availability dot,
-/// subtitle (gender · origin congregation for visitors) and a privilege
-/// badge. Tapping it opens the edit modal.
 class ParticipantCard extends StatelessWidget {
   const ParticipantCard({super.key, required this.participant, required this.onTap});
 
@@ -115,7 +112,6 @@ class ParticipantCard extends StatelessWidget {
   }
 }
 
-/// Availability dot: green if active, gray otherwise.
 class _AvailabilityDot extends StatelessWidget {
   const _AvailabilityDot({required this.active});
 
@@ -135,7 +131,6 @@ class _AvailabilityDot extends StatelessWidget {
   }
 }
 
-/// Amber badge for participants with incomplete data (gender unset).
 class _IncompleteBadge extends StatelessWidget {
   const _IncompleteBadge();
 

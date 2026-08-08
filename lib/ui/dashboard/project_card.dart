@@ -12,8 +12,6 @@ import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
 
-/// Project card (`.project`): name, congregation, status, weeks,
-/// progress and edited date. Tapping it opens the editor.
 class ProjectCard extends StatelessWidget {
   const ProjectCard({
     super.key,
