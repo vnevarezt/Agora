@@ -42,10 +42,13 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   String? _congregationId;
   String _name = '';
   String _number = '';
-  String _language = meetingLanguages.first;
-  String _weekdayDay = daysOfWeek[1]; // Tuesday
+  // Selections are held as INDEXES, never as the localized label: the label
+  // changes with the app language, which would strand the selection (and, on
+  // save, silently write the schema defaults over the real settings).
+  int _language = 0; // index into congregationLanguageCodes
+  int _weekdayDay = 1; // Monday-first weekday index — Tuesday
   String _weekdayTime = '19:00';
-  String _weekendDay = daysOfWeek[6]; // Sunday
+  int _weekendDay = 6; // Sunday
   String _weekendTime = '10:00';
   bool _auxRoom = false;
 
@@ -77,10 +80,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
       _congregationId = congregation.id;
       _name = congregation.name;
       _number = congregation.number;
-      _language = meetingLanguages[languageIndex < 0 ? 0 : languageIndex];
-      _weekdayDay = daysOfWeek[s.midweekDay];
+      _language = languageIndex < 0 ? 0 : languageIndex;
+      _weekdayDay = s.midweekDay;
       _weekdayTime = s.midweekTime;
-      _weekendDay = daysOfWeek[s.weekendDay];
+      _weekendDay = s.weekendDay;
       _weekendTime = s.weekendTime;
       _auxRoom = s.auxRoom;
     }
@@ -106,21 +109,15 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     // debounce timer and from dispose(), either of which can fire after the
     // capabilities changed under us.
     if (!ref.read(rightsProvider(id)).admin) return;
-    final languageIndex = meetingLanguages.indexOf(_language);
-    // indexOf is -1 if the app locale changed under us (localized labels):
-    // fall back to the schema defaults rather than storing garbage.
-    final midweekDay = daysOfWeek.indexOf(_weekdayDay);
-    final weekendDay = daysOfWeek.indexOf(_weekendDay);
     ref.read(congregationActionsProvider).update(
           id,
           name: _name.trim(),
           number: _number.trim(),
           settings: CongregationSettings(
-            meetingLanguage: congregationLanguageCodes[
-                languageIndex < 0 ? 0 : languageIndex],
-            midweekDay: midweekDay < 0 ? 1 : midweekDay,
+            meetingLanguage: congregationLanguageCodes[_language],
+            midweekDay: _weekdayDay,
             midweekTime: _weekdayTime.trim(),
-            weekendDay: weekendDay < 0 ? 6 : weekendDay,
+            weekendDay: _weekendDay,
             weekendTime: _weekendTime.trim(),
             auxRoom: _auxRoom,
           ),
@@ -227,12 +224,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
             LabeledField(
               label: tr.congregation.meetingLanguage,
-              child: AppDropdown<String>(
-                value: meetingLanguages.contains(_language)
-                    ? _language
-                    : meetingLanguages.first,
-                items: meetingLanguages,
-                itemLabel: (s) => s,
+              child: AppDropdown<int>(
+                value: _language,
+                items: [for (var i = 0; i < meetingLanguages.length; i++) i],
+                itemLabel: (i) => meetingLanguages[i],
                 onChanged: !editable
                     ? null
                     : (v) {
@@ -261,11 +256,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           children: [
             LabeledField(
               label: tr.congregation.weekdayDay,
-              child: AppDropdown<String>(
-                value:
-                    daysOfWeek.contains(_weekdayDay) ? _weekdayDay : daysOfWeek[1],
-                items: daysOfWeek,
-                itemLabel: (s) => s,
+              child: AppDropdown<int>(
+                value: _weekdayDay,
+                items: [for (var i = 0; i < daysOfWeek.length; i++) i],
+                itemLabel: (i) => daysOfWeek[i],
                 onChanged: !editable
                     ? null
                     : (v) {
@@ -289,11 +283,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
             LabeledField(
               label: tr.congregation.weekendDay,
-              child: AppDropdown<String>(
-                value:
-                    daysOfWeek.contains(_weekendDay) ? _weekendDay : daysOfWeek[6],
-                items: daysOfWeek,
-                itemLabel: (s) => s,
+              child: AppDropdown<int>(
+                value: _weekendDay,
+                items: [for (var i = 0; i < daysOfWeek.length; i++) i],
+                itemLabel: (i) => daysOfWeek[i],
                 onChanged: !editable
                     ? null
                     : (v) {

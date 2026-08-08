@@ -187,7 +187,8 @@
     "searchParticipant": "Buscar participante…",
     "removeAssignment": "Quitar asignación",
     "allFeminine": "Todas",
-    "allMasculine": "Todos"
+    "allMasculine": "Todos",
+    "assigned": "asignados"
   },
   "sync": {
     "updating": "Actualizando catálogos",
@@ -373,6 +374,20 @@
     "saturday": "Sábado",
     "sunday": "Domingo"
   },
+  "months": {
+    "january": "Enero",
+    "february": "Febrero",
+    "march": "Marzo",
+    "april": "Abril",
+    "may": "Mayo",
+    "june": "Junio",
+    "july": "Julio",
+    "august": "Agosto",
+    "september": "Septiembre",
+    "october": "Octubre",
+    "november": "Noviembre",
+    "december": "Diciembre"
+  },
   "congregation": {
     "dataTitle": "Datos de la congregación",
     "dataDesc": "Se usan en el encabezado de los programas.",
@@ -494,7 +509,8 @@
     "fullProject": "Proyecto completo",
     "fullProjectSub": "Todas las semanas en un PDF",
     "sheets": "Hojas de participación",
-    "sheetsSub": "Una por participante asignado"
+    "sheetsSub": "Una por participante asignado",
+    "noWeeks": "Descarga un cuaderno y elige una semana primero."
   },
   "projectBar": {
     "weeks(plural)": {
@@ -545,5 +561,25 @@
     "minutes": "hace {n} min",
     "hours": "hace {n} h",
     "days": "hace {n} d"
+  },
+  "program": {
+    "song": "Canción {n}",
+    "openingWords": "Palabras de introducción",
+    "closingWords": "Palabras de conclusión",
+    "circuitOverseerTalk": "Discurso del superintendente de circuito",
+    "partWithDuration": "{title} ({n} mins.)",
+    "commentsWithDuration": "{title} ({n} min.)",
+    "roleStudent": "Estudiante:",
+    "roleStudentAssistant": "Estudiante/Ayudante:",
+    "roleConductorReader": "Conductor/Lector:",
+    "rolePrayer": "Oración:",
+    "roleSpeaker": "Orador:",
+    "title": "Programa para la reunión de entre semana",
+    "chairman": "Presidente: ",
+    "mainHall": "Auditorio principal",
+    "auxRoom": "Sala Auxiliar",
+    "sectionTreasures": "TESOROS DE LA BIBLIA",
+    "sectionMinistry": "SEAMOS MEJORES MAESTROS",
+    "sectionChristianLife": "NUESTRA VIDA CRISTIANA"
   }
 }

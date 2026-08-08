@@ -5,9 +5,12 @@ import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/files/file_saver.dart';
+import '../domain/meeting_language.dart';
+import '../i18n/strings.g.dart';
 import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'app_settings.dart';
+import 'dashboard_provider.dart';
 import 'program_form.dart';
 import 'weeks_provider.dart';
 
@@ -26,6 +29,23 @@ enum ExportAction {
 /// Native save mechanism (dialog on desktop, document picker on mobile) and
 /// the share sheet.
 final fileSaverProvider = Provider<FileSaver>((ref) => FileSaver());
+
+/// Language the printed program is rendered in.
+///
+/// This is the congregation's MEETING language, not the app language: the
+/// sheet is pinned on a board for that congregation, so it must match how the
+/// meeting is actually held. Running the UI in English while printing a
+/// Spanish program is the normal case, not an edge one.
+final programLocaleProvider = Provider<AppLocale>((ref) {
+  final congregationId =
+      ref.watch(formProvider.select((f) => f.congregationId));
+  for (final c in ref.watch(congregationsProvider)) {
+    if (c.id == congregationId) {
+      return programLocaleFor(c.settings.meetingLanguage);
+    }
+  }
+  return programLocaleFor('spanish');
+});
 
 /// Live preview: rasterizes the page (pdfium) when the data changes, with a
 /// debounce so typing feels real-time.
@@ -53,6 +73,9 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       formProvider.select((f) => (f.congregationId, f.auxRoom)),
       (_, _) => _scheduleRender(),
     );
+    // The sheet is rendered in the congregation's MEETING language, so it is
+    // that — not the app language — that invalidates it.
+    ref.listen(programLocaleProvider, (_, _) => _scheduleRender());
     _scheduleRender();
     return const AsyncValue.loading();
   }
@@ -70,6 +93,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final twoUp = ref.read(twoPerSheetProvider);
     try {
       final pdf = await buildProgramSheetPdf(
+        locale: ref.read(programLocaleProvider),
         congregation: f.congregationId,
         entries: entries,
         auxRoom: f.auxRoom,
@@ -107,11 +131,14 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   }) async {
     final entries = ref.read(sheetEntriesProvider);
     if (entries.isEmpty) {
-      throw Exception('Descarga un cuaderno y elige una semana primero.');
+      // Surfaced to the user by `ui/widgets/export_actions.dart`, so it has
+      // to be localized. Global `t`: no BuildContext in a provider.
+      throw Exception(t.export.noWeeks);
     }
     final f = ref.read(formProvider);
     final twoUp = ref.read(twoPerSheetProvider);
     final pdf = await buildProgramSheetPdf(
+      locale: ref.read(programLocaleProvider),
       congregation: f.congregationId,
       entries: entries,
       auxRoom: f.auxRoom,

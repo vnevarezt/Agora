@@ -16,57 +16,62 @@ String hhmm(int minutes) {
   return '$h:${m.toString().padLeft(2, '0')}';
 }
 
-/// Role label + number of names for a part. The match strings stay in Spanish
-/// because they test the title parsed from the jw.org workbook.
-({String role, int n}) roleAndNames(Section section, String title) {
-  final t = title.toLowerCase();
+/// Role + number of names for a part.
+///
+/// Classification is POSITIONAL, so it holds in any meeting language. Verified
+/// against the Spanish and English `mwb_202607` workbooks, all 9 weeks each:
+///
+///   * the Bible Reading always closes "Treasures From God's Word";
+///   * the Congregation Bible Study always closes "Living as Christians".
+///
+/// The one thing position cannot tell apart is a ministry talk from a
+/// demonstration — the last part of that section is a talk some weeks and a
+/// demonstration others. That flag is read from the workbook body at parse
+/// time; see [Part.isTalk].
+({SlotRole role, int n}) roleAndNames(
+  Section section,
+  Part part, {
+  required bool isLastInSection,
+}) {
   switch (section) {
     case Section.treasures:
-      if (t.contains('lectura de la biblia')) return (role: 'Estudiante:', n: 1);
-      return (role: '', n: 1); // talk / spiritual gems
+      // Bible Reading.
+      if (isLastInSection) return (role: SlotRole.student, n: 1);
+      return (role: SlotRole.none, n: 1); // talk / spiritual gems
     case Section.ministry:
-      if (t.contains('discurso')) return (role: 'Estudiante:', n: 1);
-      return (role: 'Estudiante/Ayudante:', n: 2); // demonstration
+      if (part.isTalk) return (role: SlotRole.student, n: 1);
+      return (role: SlotRole.studentAssistant, n: 2); // demonstration
     case Section.christianLife:
-      if (t.contains('estudio bíblico de la congregaci')) {
-        return (role: 'Conductor/Lector:', n: 2);
-      }
-      return (role: '', n: 1); // discussion / talk
+      // Congregation Bible Study.
+      if (isLastInSection) return (role: SlotRole.conductorReader, n: 2);
+      return (role: SlotRole.none, n: 1); // discussion / talk
   }
 }
 
 /// Parts with a parallel assignment in the auxiliary room (S-38 §26): Bible
 /// Reading + every part of the "Apply Yourself to the Ministry" section.
-bool isAuxEligible(Section section, String title) {
-  if (section == Section.treasures &&
-      title.toLowerCase().contains('lectura de la biblia')) {
-    return true;
-  }
-  if (section == Section.ministry) return true;
-  return false;
-}
+bool isAuxEligible(Section section, {required bool isLastInSection}) =>
+    (section == Section.treasures && isLastInSection) ||
+    section == Section.ministry;
 
-ProgramRow _row(String id, Section section, int t, Part p) {
-  final roleNames = roleAndNames(section, p.title);
-  final mins = p.minutes ?? 0;
-  final content = mins > 0 ? '${p.title} ($mins mins.)' : p.title;
-  final eligible = isAuxEligible(section, p.title);
+ProgramRow _row(String id, Section section, int t, Part p,
+    {required bool isLastInSection}) {
+  final roleNames =
+      roleAndNames(section, p, isLastInSection: isLastInSection);
+  final eligible =
+      isAuxEligible(section, isLastInSection: isLastInSection);
   return ProgramRow(
     id: id,
     time: hhmm(t),
-    content: content,
+    kind: RowKind.part,
+    title: p.title,
+    minutes: p.minutes ?? 0,
     role: roleNames.role,
     slots: roleNames.n,
     auxSlots: eligible ? roleNames.n : 0,
     auxEligible: eligible,
   );
 }
-
-/// Default title for the talk that replaces the Congregation Bible Study on a
-/// circuit overseer's visit. Stays in the meeting language, like the other
-/// fixed titles built here ("Palabras de introducción", "Canción N").
-const String circuitOverseerTalkTitle =
-    'Discurso del superintendente de circuito';
 
 /// Builds the schedule honoring the total duration, the fixed 15 min of the
 /// ministry section and the one-minute counsel after each student assignment.
@@ -79,13 +84,9 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   final treasures = parts.where((p) => p.section == Section.treasures).toList();
   final ministry = parts.where((p) => p.section == Section.ministry).toList();
   final life = parts.where((p) => p.section == Section.christianLife).toList();
-  Part? cbs;
-  for (final p in life) {
-    if (p.title.toLowerCase().contains('estudio bíblico de la congrega')) {
-      cbs = p;
-      break;
-    }
-  }
+  // The Congregation Bible Study closes the section in every workbook, in
+  // every language — see [roleAndNames].
+  final Part? cbs = life.isEmpty ? null : life.last;
   final lifeNoCbs = life.where((p) => !identical(p, cbs)).toList();
 
   final intro = week.introMinutes;
@@ -119,34 +120,36 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     opening.add(ProgramRow(
       id: 'ap${opening.length}',
       time: hhmm(t),
-      content: 'Canción ${week.openingSong}',
-      role: 'Oración:',
-      bullet: true,
+      kind: RowKind.song,
+      songNumber: week.openingSong,
+      role: SlotRole.prayer,
     ));
     t += sOpen;
   }
   opening.add(ProgramRow(
     id: 'ap${opening.length}',
     time: hhmm(t),
-    content: 'Palabras de introducción ($intro min.)',
-    bullet: true,
+    kind: RowKind.openingWords,
+    minutes: intro,
     slots: 0,
   ));
   t += intro;
 
   // --- Treasures From God's Word (counsel after the Bible Reading) ---
   for (final p in treasures) {
-    treasuresRows.add(_row('te${treasuresRows.length}', Section.treasures, t, p));
+    final isLast = identical(p, treasures.last);
+    treasuresRows.add(_row(
+        'te${treasuresRows.length}', Section.treasures, t, p,
+        isLastInSection: isLast));
     t += (p.minutes ?? 0);
-    if (p.title.toLowerCase().contains('lectura de la biblia')) {
-      t += adviceMinutes;
-    }
+    if (isLast) t += adviceMinutes; // counsel after the Bible Reading
   }
 
   // --- Apply Yourself: 15-min block, +1 of counsel per part ---
   final ministryStart = t;
   for (final p in ministry) {
-    ministryRows.add(_row('se${ministryRows.length}', Section.ministry, t, p));
+    ministryRows.add(_row('se${ministryRows.length}', Section.ministry, t, p,
+        isLastInSection: identical(p, ministry.last)));
     t += (p.minutes ?? 0) + adviceMinutes;
   }
   t = ministryStart + ministryMinutes; // pin the section to 15 min
@@ -156,14 +159,15 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
       time: hhmm(t),
-      content: 'Canción ${week.middleSong}',
-      bullet: true,
+      kind: RowKind.song,
+      songNumber: week.middleSong,
       slots: 0,
     ));
     t += sMid;
   }
   for (final p in lifeNoCbs) {
-    lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, p));
+    lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, p,
+        isLastInSection: false));
     t += (p.minutes ?? 0);
   }
   if (cbs != null) {
@@ -172,12 +176,14 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
       lifeRows.add(ProgramRow(
         id: 'vi${lifeRows.length}',
         time: hhmm(t),
-        content: '$circuitOverseerTalkTitle ($cbsMinutes mins.)',
-        role: 'Orador:',
+        kind: RowKind.circuitOverseerTalk,
+        minutes: cbsMinutes,
+        role: SlotRole.speaker,
         slots: 1,
       ));
     } else {
-      lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, cbs));
+      lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, cbs,
+          isLastInSection: true));
     }
     t += cbsMinutes;
   }
@@ -188,8 +194,8 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
       time: hhmm(t),
-      content: 'Palabras de conclusión ($concl min.)',
-      bullet: true,
+      kind: RowKind.closingWords,
+      minutes: concl,
       slots: 0,
     ));
     t += concl;
@@ -198,9 +204,9 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
     lifeRows.add(ProgramRow(
       id: 'vi${lifeRows.length}',
       time: hhmm(t),
-      content: 'Canción ${week.closingSong}',
-      role: 'Oración:',
-      bullet: true,
+      kind: RowKind.song,
+      songNumber: week.closingSong,
+      role: SlotRole.prayer,
     ));
     t += sClose;
   }
@@ -214,21 +220,17 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   );
 }
 
-final _titleDurationSuffix = RegExp(r'\s*\(\d+\s*mins?\.\)$');
-
-/// Replaces a row's title with the user override (keyed by `ProgramRow.id`)
-/// while keeping its "(N mins.)" suffix, so the duration chip and the PDF stay
-/// in sync. Returns [schedule] unchanged when there are no overrides.
+/// Replaces a row's title with the user override (keyed by `ProgramRow.id`).
+/// The duration is a field now, so it survives the override on its own — the
+/// renderer re-appends the "(N mins.)" suffix. Returns [schedule] unchanged
+/// when there are no overrides.
 ProgramSchedule applyTitleOverrides(
     ProgramSchedule schedule, Map<String, String> overrides) {
   if (overrides.isEmpty) return schedule;
   List<ProgramRow> mapped(List<ProgramRow> rows) => [
         for (final r in rows)
           if (overrides.containsKey(r.id))
-            r.copyWith(
-              content: overrides[r.id]! +
-                  (_titleDurationSuffix.firstMatch(r.content)?.group(0) ?? ''),
-            )
+            r.copyWith(titleOverride: overrides[r.id])
           else
             r,
       ];

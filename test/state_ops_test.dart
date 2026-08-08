@@ -23,7 +23,11 @@ void main() {
 
   group('SlotRef', () {
     const fila = ProgramRow(
-        id: 'se1', time: '18:31', content: 'Demostración', slots: 2);
+        id: 'se1',
+        time: '18:31',
+        kind: RowKind.part,
+        title: 'Demostración',
+        slots: 2);
 
     test('claves estables para principal y auxiliar', () {
       expect(const ChairmanSlot().key, 'chairman');
@@ -40,7 +44,11 @@ void main() {
 
   group('slotName / filledNames', () {
     const fila = ProgramRow(
-        id: 'te0', time: '18:06', content: 'Discurso', slots: 1);
+        id: 'te0',
+        time: '18:06',
+        kind: RowKind.part,
+        title: 'Discurso',
+        slots: 1);
 
     test('lee del mapa correcto y tolera listas cortas', () {
       final f = FormModel.initial.copyWith(

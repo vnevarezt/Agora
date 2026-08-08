@@ -20,6 +20,18 @@ class ProjectsRepository {
   final CongregationsRepository _congregations;
   final SyncScribe _scribe;
 
+  /// Congregation a project belongs to, or null if it is gone. A direct lookup
+  /// rather than a read of `projectsProvider`, which derives progress for every
+  /// project (assignment counts, week snapshots) — far too much to pull in just
+  /// to answer which workbook language a project uses.
+  Future<String?> congregationIdOf(String projectId) async {
+    final row = await (_db.select(_db.projects)
+          ..where((p) => p.id.equals(projectId))
+          ..limit(1))
+        .getSingleOrNull();
+    return row?.congregationId;
+  }
+
   /// Newest project first (the old controller prepended new ones).
   Stream<List<ProjectData>> watchAll() {
     final query = _db.select(_db.projects).join([

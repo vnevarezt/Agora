@@ -7,21 +7,6 @@
 /// `schedule_rules.dart`.
 library;
 
-const List<String> _monthNames = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre',
-];
-
 /// Odd starting month of the period that contains [month] (1..12).
 int _oddMonth(int month) => month - ((month - 1) % 2);
 
@@ -66,9 +51,23 @@ List<String> requiredIssues(DateTime from, {int monthsAhead = 2}) {
   return issues;
 }
 
-/// Human label for an issue, e.g. '202605' -> 'Mayo–Junio 2026'. The second
-/// month is always within the same year (odd month + 1 is at most December).
-String labelForIssue(String issue) {
+/// Human label for an issue, e.g. '202605' -> 'Mayo–Junio 2026' (es) or
+/// 'May–June 2026' (en). The second month is always within the same year
+/// (odd month + 1 is at most December).
+///
+/// [monthNames] must be the 12 month names of the target language, January
+/// first. It is passed in rather than looked up so this library stays pure
+/// (no i18n/Flutter imports) and the caller decides *which* language applies:
+/// the notebook catalog follows the app language, the printed program follows
+/// the meeting language. See [NotebookX.label] for the app-language wrapper.
+String labelForIssue(String issue, List<String> monthNames) {
   final m = _month(issue);
-  return '${_monthNames[m - 1]}–${_monthNames[m]} ${_year(issue)}';
+  return '${monthNames[m - 1]}–${monthNames[m]} ${_year(issue)}';
 }
+
+/// The starting month of an issue (1..12), for callers that format the period
+/// themselves instead of using [labelForIssue].
+int issueMonth(String issue) => _month(issue);
+
+/// The year of an issue.
+int issueYear(String issue) => _year(issue);

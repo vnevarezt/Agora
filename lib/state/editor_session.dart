@@ -45,7 +45,9 @@ final editorProgramsProvider = StreamProvider<List<ProgramRecord>>((ref) {
 /// `ensureProjectContent` is idempotent, so extra runs are no-ops.
 final editorContentFillProvider = Provider<void>((ref) {
   final projectId = ref.watch(editorProjectProvider);
-  final notebooks = ref.watch(notebooksProvider);
+  // Any language's catalog landing is worth a retry — the service picks the
+  // right one from the project's congregation.
+  final notebooks = ref.watch(notebooksByLangProvider);
   if (projectId == null || notebooks.isEmpty) return;
   final service = ref.read(programContentServiceProvider);
   Future.microtask(() => service.ensureProjectContent(projectId));

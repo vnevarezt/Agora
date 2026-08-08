@@ -93,6 +93,9 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   bool get barrierDismissible => true;
 
   @override
+  // Global `t`, not `context.t`: this is a route, not a widget — there is no
+  // BuildContext here, and a route's barrier label is read once by the a11y
+  // layer when the route is pushed, so it cannot go stale mid-display.
   String get barrierLabel => t.picker.closeSelector;
 
   @override

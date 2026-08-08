@@ -20,10 +20,10 @@ import '../widgets/motion.dart';
 import '../widgets/segmented_control.dart';
 
 /// Description of each privilege in the modal radio cards.
-String _roleDesc(Role role) => switch (role) {
-      Role.publisher => t.participantModal.roleDescPublisher,
-      Role.ministerialServant => t.participantModal.roleDescServant,
-      Role.elder => t.participantModal.roleDescElder,
+String _roleDesc(Role role, Translations tr) => switch (role) {
+      Role.publisher => tr.participantModal.roleDescPublisher,
+      Role.ministerialServant => tr.participantModal.roleDescServant,
+      Role.elder => tr.participantModal.roleDescElder,
     };
 
 /// Opens the create/edit person modal. [original] null = new.
@@ -358,7 +358,7 @@ class _RoleOption extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      role.label,
+                      role.label(context.t),
                       style: TextStyle(
                         fontSize: AppText.body,
                         fontWeight: FontWeight.w800,
@@ -367,7 +367,7 @@ class _RoleOption extends StatelessWidget {
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      _roleDesc(role),
+                      _roleDesc(role, context.t),
                       style: TextStyle(
                         fontSize: AppText.caption,
                         fontWeight: FontWeight.w600,

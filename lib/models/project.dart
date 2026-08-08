@@ -3,19 +3,21 @@ import '../i18n/strings.g.dart';
 /// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
 
+// Takes the active [Translations] rather than the global `t` — see the note
+// on the same pattern in `person.dart`.
 extension ProjectStatusX on ProjectStatus {
   /// Singular label for the badge ("Borrador").
-  String get label => switch (this) {
-        ProjectStatus.draft => t.status.draft,
-        ProjectStatus.complete => t.status.complete,
-        ProjectStatus.exported => t.status.exported,
+  String label(Translations tr) => switch (this) {
+        ProjectStatus.draft => tr.status.draft,
+        ProjectStatus.complete => tr.status.complete,
+        ProjectStatus.exported => tr.status.exported,
       };
 
   /// Plural label for the filter chips ("Borradores").
-  String get plural => switch (this) {
-        ProjectStatus.draft => t.status.draftPlural,
-        ProjectStatus.complete => t.status.completePlural,
-        ProjectStatus.exported => t.status.exportedPlural,
+  String plural(Translations tr) => switch (this) {
+        ProjectStatus.draft => tr.status.draftPlural,
+        ProjectStatus.complete => tr.status.completePlural,
+        ProjectStatus.exported => tr.status.exportedPlural,
       };
 }
 

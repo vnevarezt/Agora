@@ -58,9 +58,33 @@ void main() {
     });
   });
 
-  test('labelForIssue is human readable', () {
-    expect(labelForIssue('202605'), 'Mayo–Junio 2026');
-    expect(labelForIssue('202611'), 'Noviembre–Diciembre 2026');
-    expect(labelForIssue('202701'), 'Enero–Febrero 2027');
+  group('labelForIssue', () {
+    const es = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', //
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+    ];
+    const en = [
+      'January', 'February', 'March', 'April', 'May', 'June', //
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+
+    test('is human readable', () {
+      expect(labelForIssue('202605', es), 'Mayo–Junio 2026');
+      expect(labelForIssue('202611', es), 'Noviembre–Diciembre 2026');
+      expect(labelForIssue('202701', es), 'Enero–Febrero 2027');
+    });
+
+    test('follows the month names it is given', () {
+      expect(labelForIssue('202605', en), 'May–June 2026');
+      expect(labelForIssue('202611', en), 'November–December 2026');
+      expect(labelForIssue('202701', en), 'January–February 2027');
+    });
+  });
+
+  test('issueMonth / issueYear expose the period', () {
+    expect(issueMonth('202605'), 5);
+    expect(issueYear('202605'), 2026);
+    expect(issueMonth('202701'), 1);
+    expect(issueYear('202701'), 2027);
   });
 }

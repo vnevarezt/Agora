@@ -15,11 +15,21 @@ class Part {
   /// Duration in minutes, or null if the EPUB doesn't specify it.
   final int? minutes;
 
+  /// Ministry part that is a student TALK rather than a demonstration (so one
+  /// student, no assistant). Read from the workbook at parse time — the marker
+  /// can sit in the title or in the body, and only the parser sees the body.
+  /// False for every other section.
+  ///
+  /// Snapshots written before this field existed decode as false, i.e. as a
+  /// demonstration — the same answer the old title-only matching gave them.
+  final bool isTalk;
+
   const Part({
     required this.section,
     required this.number,
     required this.title,
     this.minutes,
+    this.isTalk = false,
   });
 
   factory Part.fromJson(Map<String, dynamic> json) => Part(
@@ -27,6 +37,7 @@ class Part {
         number: json['number'] as int,
         title: json['title'] as String,
         minutes: json['minutes'] as int?,
+        isTalk: json['isTalk'] as bool? ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +45,7 @@ class Part {
         'number': number,
         'title': title,
         'minutes': minutes,
+        'isTalk': isTalk,
       };
 }
 

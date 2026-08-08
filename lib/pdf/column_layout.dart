@@ -18,12 +18,12 @@ class ColumnWidths {
   });
 }
 
-/// Width a row's names column needs. For Estudiante/Ayudante it uses the
-/// longest individual name (they stack); for the rest, the joined text.
+/// Width a row's names column needs. For the student/assistant pair it uses
+/// the longest individual name (they stack); for the rest, the joined text.
 double namesWidth(
-    String role, List<String> names, double Function(String) measure) {
+    SlotRole role, List<String> names, double Function(String) measure) {
   if (names.isEmpty) return 0;
-  if (role == 'Estudiante/Ayudante:' && names.length == 2) {
+  if (role.isStudentPair && names.length == 2) {
     final a = measure(names[0]);
     final b = measure(names[1]);
     return a > b ? a : b;

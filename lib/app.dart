@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'i18n/strings.g.dart';
 import 'state/app_settings.dart';
+import 'state/locale_boot.dart';
 import 'state/mwb_sync.dart';
 import 'state/sync_controller.dart';
 import 'ui/auth/auth_gate.dart';
@@ -20,7 +21,7 @@ class AgoraApp extends ConsumerWidget {
       title: 'Agora',
       debugShowCheckedModeBanner: false,
       locale: TranslationProvider.of(context).flutterLocale,
-      supportedLocales: AppLocaleUtils.supportedLocales,
+      supportedLocales: [for (final l in shippedLocales) l.flutterLocale],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: buildAppTheme(pizarra.light, Brightness.light),
       darkTheme: buildAppTheme(pizarra.dark, Brightness.dark),

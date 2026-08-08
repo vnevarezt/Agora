@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/person.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
@@ -21,6 +22,6 @@ class PrivBadge extends StatelessWidget {
       Role.publisher => (t.surface2, t.textDim, t.border2),
     };
 
-    return Pill(label: role.label, background: bg, foreground: fg, border: border);
+    return Pill(label: role.label(context.t), background: bg, foreground: fg, border: border);
   }
 }

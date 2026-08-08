@@ -41,7 +41,7 @@ class WorkspacePanel extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(side, side, side, isMobile ? 150 : 120),
       children: [
-        PartCard(view: chairmanView()),
+        PartCard(view: chairmanView(tr)),
         const SizedBox(height: 22),
         _SectionBlock(
             title: tr.workspace.sectionOpening, rows: sched.opening, aux: aux),
@@ -105,7 +105,8 @@ class _SectionBlock extends ConsumerWidget {
               title: title, dotColor: dotColor, done: done, total: total),
           for (var i = 0; i < rows.length; i++) ...[
             if (i > 0) const SizedBox(height: 10),
-            PartCard(view: mapRow(rows[i], auxActive: aux)),
+            PartCard(
+                view: mapRow(rows[i], auxActive: aux, tr: context.t)),
           ],
         ],
       ),
@@ -127,7 +128,7 @@ class _WorkspaceSkeleton extends StatelessWidget {
         children: [
           for (var i = 0; i < 6; i++) ...[
             if (i > 0) const SizedBox(height: 10),
-            PartCard(view: chairmanView()),
+            PartCard(view: chairmanView(context.t)),
           ],
         ],
       ),

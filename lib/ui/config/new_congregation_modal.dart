@@ -40,26 +40,25 @@ class _NewCongregationModalState
     extends ConsumerState<NewCongregationModal> {
   String _name = '';
   String _number = '';
-  String _language = meetingLanguages.first;
-  String _weekdayDay = daysOfWeek[1]; // Tuesday
+  // Indexes, not localized labels — see the note in `congregation_tab.dart`.
+  int _language = 0; // index into congregationLanguageCodes
+  int _weekdayDay = 1; // Monday-first weekday index — Tuesday
   String _weekdayTime = '19:00';
-  String _weekendDay = daysOfWeek[6]; // Sunday
+  int _weekendDay = 6; // Sunday
   String _weekendTime = '10:00';
 
   /// Persists the congregation. The schedule/language go into settingsJson
   /// (weekday = index in the Monday-first list, stable across locales);
   /// the program templates read them in phase 2.
   Future<void> _crear() async {
-    final languageIndex = meetingLanguages.indexOf(_language);
     await ref.read(congregationActionsProvider).add(
           name: _name.trim(),
           number: _number.trim(),
           settings: CongregationSettings(
-            meetingLanguage:
-                congregationLanguageCodes[languageIndex < 0 ? 0 : languageIndex],
-            midweekDay: daysOfWeek.indexOf(_weekdayDay),
+            meetingLanguage: congregationLanguageCodes[_language],
+            midweekDay: _weekdayDay,
             midweekTime: _weekdayTime,
-            weekendDay: daysOfWeek.indexOf(_weekendDay),
+            weekendDay: _weekendDay,
             weekendTime: _weekendTime,
           ),
         );
@@ -122,12 +121,10 @@ class _NewCongregationModalState
               colW,
               LabeledField(
                 label: tr.congregation.meetingLanguage,
-                child: AppDropdown<String>(
-                  value: meetingLanguages.contains(_language)
-                      ? _language
-                      : meetingLanguages.first,
-                  items: meetingLanguages,
-                  itemLabel: (s) => s,
+                child: AppDropdown<int>(
+                  value: _language,
+                  items: [for (var i = 0; i < meetingLanguages.length; i++) i],
+                  itemLabel: (i) => meetingLanguages[i],
                   onChanged: (v) => setState(() => _language = v),
                 ),
               ),
@@ -136,12 +133,10 @@ class _NewCongregationModalState
               colW,
               LabeledField(
                 label: tr.congregation.weekdayDay,
-                child: AppDropdown<String>(
-                  value: daysOfWeek.contains(_weekdayDay)
-                      ? _weekdayDay
-                      : daysOfWeek[1],
-                  items: daysOfWeek,
-                  itemLabel: (s) => s,
+                child: AppDropdown<int>(
+                  value: _weekdayDay,
+                  items: [for (var i = 0; i < daysOfWeek.length; i++) i],
+                  itemLabel: (i) => daysOfWeek[i],
                   onChanged: (v) => setState(() => _weekdayDay = v),
                 ),
               ),
@@ -161,12 +156,10 @@ class _NewCongregationModalState
               colW,
               LabeledField(
                 label: tr.congregation.weekendDay,
-                child: AppDropdown<String>(
-                  value: daysOfWeek.contains(_weekendDay)
-                      ? _weekendDay
-                      : daysOfWeek[6],
-                  items: daysOfWeek,
-                  itemLabel: (s) => s,
+                child: AppDropdown<int>(
+                  value: _weekendDay,
+                  items: [for (var i = 0; i < daysOfWeek.length; i++) i],
+                  itemLabel: (i) => daysOfWeek[i],
                   onChanged: (v) => setState(() => _weekendDay = v),
                 ),
               ),

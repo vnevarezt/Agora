@@ -33,6 +33,20 @@ class CongregationsRepository {
         ..where((t) => t.deletedAt.isNull())
         ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
 
+  /// Settings of one congregation, or null if it is gone. A one-row lookup for
+  /// callers that only need a setting and must NOT subscribe to [watchAll] —
+  /// opening that stream from a background fill keeps a drift subscription
+  /// alive for the rest of the caller's life.
+  Future<CongregationSettings?> settingsOf(String id) async {
+    final row = await (_db.select(_db.congregations)
+          ..where((t) => t.id.equals(id) & t.deletedAt.isNull())
+          ..limit(1))
+        .getSingleOrNull();
+    return row == null
+        ? null
+        : CongregationSettings.fromJson(row.settingsJson);
+  }
+
   /// Creation order (new ones append at the end, as the old controller did).
   Stream<List<Congregation>> watchAll() =>
       _alive().watch().map((rows) => [for (final r in rows) _toModel(r)]);

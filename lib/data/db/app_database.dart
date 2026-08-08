@@ -50,7 +50,11 @@ class AppDatabase extends _$AppDatabase {
   /// [defaultCongregationName] is only used by the v1→v2 migration when no
   /// participant carries a usable congregation string (the UI passes the
   /// localized fallback; the Spanish default keeps tests self-contained).
-  AppDatabase(super.e, {this.defaultCongregationName = 'Mi congregación'});
+  /// [defaultCongregationName] names the congregation seeded on first open.
+  /// The app always injects the localized `t.congregation.defaultName`
+  /// (`state/db_provider.dart`); this fallback only applies to direct
+  /// constructions in tests, so it is intentionally not localized.
+  AppDatabase(super.e, {this.defaultCongregationName = 'My congregation'});
 
   final String defaultCongregationName;
 

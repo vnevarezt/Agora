@@ -544,7 +544,7 @@ class _ProjectsSection extends ConsumerWidget {
               ),
               for (final e in ProjectStatus.values)
                 FilterPill(
-                  label: e.plural,
+                  label: e.plural(context.t),
                   active: filters.status == e,
                   onTap: () => notifier.setStatus(e),
                 ),
