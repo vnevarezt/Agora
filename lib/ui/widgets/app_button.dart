@@ -122,7 +122,7 @@ class AppButton extends StatelessWidget {
         // breaks the AnimatedContainer interpolation (finite <-> infinite). The
         // icon-only button is made square with symmetric padding.
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           height: height,
           padding: EdgeInsets.symmetric(
             horizontal: label != null ? 16 : (height - 17) / 2,
@@ -204,7 +204,7 @@ class AppIconButton extends StatelessWidget {
       semanticLabel: semanticLabel ?? tooltip,
       builder: (context, hovered, pressed) {
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           width: size,
           height: size,
           decoration: BoxDecoration(

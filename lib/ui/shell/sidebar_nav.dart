@@ -63,7 +63,7 @@ class _NavIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: Motion.fast,
+      duration: Motion.of(context, Motion.fast),
       switchInCurve: Motion.curve,
       transitionBuilder: (child, anim) => FadeTransition(
         opacity: anim,

@@ -195,7 +195,7 @@ class _PortadaButton extends StatelessWidget {
             : (hovered ? t.surface2 : t.surface);
         final fg = primary ? t.accentInk : t.text;
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           height: 48,
           transform: pressed
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
@@ -223,7 +223,7 @@ class _PortadaButton extends StatelessWidget {
               if (primary) ...[
                 const SizedBox(width: 8),
                 AnimatedSlide(
-                  duration: Motion.instant,
+                  duration: Motion.of(context, Motion.instant),
                   offset: hovered ? const Offset(0.18, 0) : Offset.zero,
                   child: Icon(Icons.arrow_forward, size: 17, color: fg),
                 ),
@@ -249,7 +249,7 @@ class _LocalEntryCard extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) => AnimatedContainer(
-        duration: Motion.instant,
+        duration: Motion.of(context, Motion.instant),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
           color: hovered ? t.accentTint : t.surface2,

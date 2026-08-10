@@ -317,7 +317,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                   const SizedBox(width: 4),
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
-                    duration: Motion.instant,
+                    duration: Motion.of(context, Motion.instant),
                     child: Icon(Icons.expand_more, size: 16, color: t.textMute),
                   ),
                 ],
