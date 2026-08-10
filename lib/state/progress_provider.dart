@@ -36,7 +36,12 @@ Progress _progressOf(
 final progressProvider = Provider<Progress>((ref) {
   final schedule = ref.watch(scheduleProvider);
   if (schedule == null) return (done: 0, total: 0);
-  final f = ref.watch(formProvider);
+  final f = ref.watch(formProvider.select((f) => (
+        chairman: f.chairman,
+        main: f.main,
+        auxiliary: f.auxiliary,
+        auxRoom: f.auxRoom,
+      )));
   return _progressOf(schedule,
       chairman: f.chairman,
       main: f.main,
@@ -45,10 +50,23 @@ final progressProvider = Provider<Progress>((ref) {
 });
 
 /// Progress of each notebook week (for the "Go to week" meters).
+///
+/// The select leaves out `weekIndex` and the title overrides on purpose:
+/// neither moves any week's progress, and both change often. copyWith keeps
+/// the untouched per-week maps identical, so those edits compare equal here
+/// and skip rebuilding the schedules — and with them the always-visible
+/// project ring that reads [projectProgressProvider].
 final progressPerWeekProvider = Provider<List<Progress>>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return const [];
-  final f = ref.watch(formProvider);
+  final f = ref.watch(formProvider.select((f) => (
+        startMinutes: f.startMinutes,
+        duration: f.duration,
+        auxRoom: f.auxRoom,
+        chairmanByWeek: f.chairmanByWeek,
+        mainByWeek: f.mainByWeek,
+        auxByWeek: f.auxByWeek,
+      )));
   return [
     for (var i = 0; i < weeks.length; i++)
       _progressOf(
