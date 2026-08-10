@@ -179,21 +179,26 @@ class ProjectsRepository {
   }
 
   /// Alive assignment counts per (programId, hall) — feeds the dashboard
-  /// cards' real progress. Grouped in Dart over a plain table watch: the
-  /// row volume is tiny and `selectOnly(..groupBy).watch()` proved to
-  /// starve the event loop with endless re-emissions (2026-07: timers
-  /// stopped firing in tests once the stream became active).
+  /// cards' real progress.
+  ///
+  /// Aggregated in SQL, not in Dart: the previous version selected every alive
+  /// assignment row and grouped them here, so each saved name re-emitted the
+  /// whole table and re-derived every project card. `selectOnly(..groupBy)` is
+  /// still avoided — that is the builder that starved the event loop with
+  /// endless re-emissions (2026-07: timers stopped firing in tests once the
+  /// stream became active); customSelect does not share that path.
   Stream<Map<(String, Hall), int>> watchAssignmentCounts() {
-    final query = _db.select(_db.assignmentRows)
-      ..where((t) => t.deletedAt.isNull());
-    return query.watch().map((rows) {
-      final counts = <(String, Hall), int>{};
-      for (final row in rows) {
-        final key = (row.programId, row.hall);
-        counts[key] = (counts[key] ?? 0) + 1;
-      }
-      return counts;
-    });
+    return _db.customSelect(
+      'SELECT program_id, hall, COUNT(*) AS c FROM assignments '
+      'WHERE deleted_at IS NULL GROUP BY program_id, hall',
+      readsFrom: {_db.assignmentRows},
+    ).watch().map((rows) => {
+          for (final row in rows)
+            (
+              row.read<String>('program_id'),
+              Hall.values.byName(row.read<String>('hall')),
+            ): row.read<int>('c'),
+        });
   }
 
   /// Stamps the export (drives the derived `exported` status).
