@@ -12,9 +12,6 @@ import '../widgets/avatar.dart';
 import '../widgets/motion.dart';
 import 'person_picker.dart';
 
-/// Person picker content, shared between the desktop popover and the
-/// mobile bottom sheet. Returns the result by popping its own route with
-/// a [PickResult].
 class PersonPickerPanel extends ConsumerStatefulWidget {
   const PersonPickerPanel({
     super.key,
@@ -114,7 +111,6 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// A person row: privilege as a label (only elder/servant).
   Widget _row(Person h) {
     return _PersonRow(
       name: h.displayName,
@@ -166,8 +162,6 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     );
   }
 
-  /// "Añadir" footer: assigns the typed name and adds it to the in-memory
-  /// directory (full management comes in another phase).
   Widget _footer(BuildContext context) {
     final t = context.tokens;
     final enabled = _search.isNotEmpty;

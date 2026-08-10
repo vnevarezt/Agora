@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Text field bound to state: seeded once with [initial] and
-/// reports changes via [onChanged] (the provider is the source of truth).
+/// Seeded ONCE with [initial]: the provider stays the source of truth.
 class BoundTextField extends StatefulWidget {
   const BoundTextField({
     super.key,
@@ -23,8 +22,7 @@ class BoundTextField extends StatefulWidget {
   final String initial;
   final ValueChanged<String> onChanged;
 
-  /// Material floating label; empty for fields with an external label
-  /// (LabeledField in the settings panel).
+  /// Empty for fields that already have an external [LabeledField].
   final String label;
   final String? hint;
   final TextStyle? style;
@@ -36,8 +34,7 @@ class BoundTextField extends StatefulWidget {
   final bool obscureText;
   final bool autofocus;
 
-  /// False renders the field read-only (greyed, not focusable) — how a
-  /// capability gate shows a member they may look but not edit.
+  /// False = read-only: how a capability gate shows look-but-not-edit.
   final bool enabled;
 
   @override

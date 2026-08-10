@@ -13,9 +13,6 @@ import 'widgets/auth_note.dart';
 import 'widgets/back_link.dart';
 import 'widgets/mode_pill.dart';
 
-/// Local profile wizard: name + password wrap the DB key. [migration] keeps
-/// the pre-existing key (and its data); [onBack] is null when the step is
-/// forced (migration or direct navigation).
 class LocalCreateScreen extends ConsumerStatefulWidget {
   const LocalCreateScreen({super.key, required this.migration, this.onBack});
 

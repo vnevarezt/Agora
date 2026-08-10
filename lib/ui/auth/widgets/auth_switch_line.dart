@@ -4,8 +4,6 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/app_button.dart';
 
-/// `.auth-switch`: centered muted line with an inline accent action
-/// ("¿No tienes cuenta? Regístrate").
 class AuthSwitchLine extends StatelessWidget {
   const AuthSwitchLine({
     super.key,

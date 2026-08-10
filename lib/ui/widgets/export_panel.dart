@@ -7,10 +7,8 @@ import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'export_actions.dart';
 
-/// Format picker (PDF / Imagen) + the two export actions (Guardar / Compartir)
-/// for the current sheet. Shared by the desktop export menu and the mobile
-/// export sheet so both offer the same choices. Holds the selected format;
-/// [onExport] fires with (format, action, shareOrigin).
+/// Shared by the desktop menu and the mobile sheet so both offer the same
+/// choices. Holds the selected format.
 class ExportPanel extends StatefulWidget {
   const ExportPanel({
     super.key,

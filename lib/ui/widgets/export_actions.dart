@@ -6,10 +6,8 @@ import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
 import '../../state/ui_state.dart';
 
-/// Runs one export (build → save-as or share) and reports the outcome via a
-/// snackbar. Shared by the desktop export menu and the mobile export sheet so
-/// both behave identically. [context] must stay mounted for the messenger, so
-/// pass a bar/screen context, not a menu item that closes first.
+/// [context] must stay mounted for the messenger — pass a bar/screen context,
+/// not a menu item that closes first.
 Future<void> runExport(
   BuildContext context,
   WidgetRef ref, {

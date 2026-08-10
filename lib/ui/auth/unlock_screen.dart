@@ -16,8 +16,6 @@ import 'auth_card_layout.dart';
 import 'widgets/auth_error_text.dart';
 import 'widgets/auth_switch_line.dart';
 
-/// Local-mode unlock: existing profile header + password, plus device unlock
-/// (Touch ID / Face ID / fingerprint) when the user enabled it.
 class UnlockScreen extends ConsumerStatefulWidget {
   const UnlockScreen({
     super.key,
@@ -215,8 +213,6 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
   }
 }
 
-/// "Start over" — the data is unrecoverable by design. Deleting everything is
-/// the only way forward, gated by typing a confirm phrase.
 class _ResetDataModal extends ConsumerStatefulWidget {
   const _ResetDataModal({required this.sheet, required this.onClose});
 

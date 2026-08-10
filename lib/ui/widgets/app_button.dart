@@ -76,8 +76,7 @@ class _PressableState extends State<Pressable> {
 
 enum AppButtonVariant { primary, ghost }
 
-/// Button (`.btn--primary` / `.btn--ghost`). With a null [label] it
-/// becomes square (icon only, like the compact mobile Export).
+/// A null [label] makes it square (icon only).
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -99,8 +98,7 @@ class AppButton extends StatelessWidget {
   final bool busy;
   final bool expand;
 
-  /// Announced name. Only needed in the icon-only form ([label] null), where
-  /// the button renders no text for a screen reader to read.
+  /// Only needed in the icon-only form: there is no text to announce.
   final String? semanticLabel;
 
   @override
@@ -146,8 +144,6 @@ class AppButton extends StatelessWidget {
                 Icon(icon, size: 17, color: fg),
               if (label != null) ...[
                 if (icon != null || busy) const SizedBox(width: 8),
-                // Flexible: a label longer than the button ellipsizes instead
-                // of overflowing the Row.
                 Flexible(
                   child: Text(
                     label!,
@@ -169,7 +165,6 @@ class AppButton extends StatelessWidget {
   }
 }
 
-/// 38x38 icon button (`.icon-btn`). [bordered] adds the subtle border;
 /// [elevated] turns it into a small FAB (preview zoom).
 class AppIconButton extends StatelessWidget {
   const AppIconButton({
@@ -190,9 +185,7 @@ class AppIconButton extends StatelessWidget {
   final bool elevated;
   final double size;
 
-  /// Overrides the announced name. Defaults to [tooltip], which already
-  /// describes the action in words — an icon-only button has nothing else a
-  /// screen reader could read.
+  /// Defaults to [tooltip]: an icon-only button has nothing else to announce.
   final String? semanticLabel;
 
   @override

@@ -6,9 +6,7 @@ import '../theme/tokens.dart';
 
 const _scrim = Elevation.scrimStrong;
 
-/// Presents an app modal: centered dialog on desktop/tablet and a bottom
-/// sheet on mobile. [builder] receives whether it shows as a sheet (`sheet`)
-/// and a close callback. Used by the project and participant modals.
+/// Centered dialog on desktop/tablet, bottom sheet on mobile.
 Future<T?> showAppModal<T>(
   BuildContext context, {
   required Widget Function(BuildContext context, bool sheet, VoidCallback close)

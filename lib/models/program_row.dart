@@ -2,39 +2,28 @@
 // here but in the form state; this only holds the structure produced by the
 // schedule calculation. See [Assignments].
 //
-// Rows carry stable IDENTITY ([RowKind], [SlotRole]) rather than rendered text.
-// Everything downstream — the workspace cards, the PDF, the column widths —
-// used to branch on the Spanish strings this file produced
-// (`role == 'Estudiante/Ayudante:'`, `content.startsWith('Canción')`), so
-// translating the program silently broke the layout. Presentation now happens
-// at the edge, via [ProgramRowX.content] / [SlotRoleX.label], each taking the
-// [Translations] of the language that output is meant to be in.
+// Rows carry IDENTITY ([RowKind], [SlotRole]), never rendered text: downstream
+// used to branch on the Spanish strings this file produced, so translating the
+// program broke the layout. Rendering happens at the edge, via
+// [ProgramRowX.content] / [SlotRoleX.label], against a target [Translations].
 
 import '../i18n/strings.g.dart';
 
-/// What a row *is*, independent of the text rendered for it.
 enum RowKind {
   /// A numbered workbook part. [ProgramRow.title] holds the title parsed from
   /// the EPUB and is NOT translated: it stays in the meeting's own language.
   part,
 
-  /// Opening / middle / closing song, identified by [ProgramRow.songNumber].
   song,
 
-  /// The chairman's opening comments.
   openingWords,
 
-  /// The chairman's concluding comments.
   closingWords,
 
-  /// Talk that replaces the Congregation Bible Study on a circuit overseer's
-  /// visit.
   circuitOverseerTalk,
 }
 
-/// Who fills a row's slots. Replaces the old free-text role label.
 enum SlotRole {
-  /// No role prefix printed (talks, discussions).
   none,
   student,
   studentAssistant,
@@ -44,7 +33,7 @@ enum SlotRole {
 }
 
 extension SlotRoleX on SlotRole {
-  /// Printed role prefix ('Estudiante/Ayudante:'), in the language of [tr].
+  /// Printed role prefix ('Estudiante/Ayudante:'), in [tr]'s language.
   String label(Translations tr) => switch (this) {
         SlotRole.none => '',
         SlotRole.student => tr.program.roleStudent,
@@ -59,7 +48,6 @@ extension SlotRoleX on SlotRole {
   bool get isStudentPair => this == SlotRole.studentAssistant;
 }
 
-/// A program row (an assignment, a song, or intro/conclusion words).
 class ProgramRow {
   /// Stable id within the schedule (block + index), used to link the names.
   final String id;
@@ -80,8 +68,7 @@ class ProgramRow {
   final int minutes;
 
   /// User-supplied replacement for the row's text (see `applyTitleOverrides`).
-  /// Wins over [kind]-based rendering; the duration suffix is still appended,
-  /// so the duration chip and the PDF stay in sync.
+  /// Wins over [kind]-based rendering; the duration is still appended.
   final String? titleOverride;
 
   final SlotRole role;
@@ -145,11 +132,8 @@ class ProgramRow {
 }
 
 extension ProgramRowX on ProgramRow {
-  /// The row's display text, in the language of [tr].
-  ///
-  /// [RowKind.part] returns the EPUB title untouched (plus its duration): the
-  /// workbook content is authored in the meeting's language and is not ours to
-  /// translate. Every other kind is generated from the catalog.
+  /// The row's display text in [tr]'s language. [RowKind.part] keeps the EPUB
+  /// title verbatim — workbook content is authored in the meeting's language.
   String content(Translations tr) {
     final text = titleOnly(tr);
     if (minutes <= 0) return text;
@@ -162,8 +146,7 @@ extension ProgramRowX on ProgramRow {
     };
   }
 
-  /// The row's text WITHOUT the duration suffix. The workspace shows the
-  /// duration as a separate chip, so it needs the two apart.
+  /// Text without the duration — the workspace shows that as its own chip.
   String titleOnly(Translations tr) {
     final override = titleOverride;
     if (override != null) return override;
@@ -181,7 +164,6 @@ extension ProgramRowX on ProgramRow {
       minutes > 0 ? tr.workspace.duration(n: '$minutes') : null;
 }
 
-/// Rows computed per block + the meeting's actual duration.
 class ProgramSchedule {
   final List<ProgramRow> opening;
   final List<ProgramRow> treasures;
@@ -197,7 +179,6 @@ class ProgramSchedule {
     required this.actualMinutes,
   });
 
-  /// All rows in order of appearance.
   List<ProgramRow> get rows =>
       [...opening, ...treasures, ...ministry, ...christianLife];
 }

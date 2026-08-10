@@ -10,10 +10,6 @@ import 'auth_card_layout.dart';
 import 'widgets/auth_error_text.dart';
 import 'widgets/auth_switch_line.dart';
 
-/// Cloud mode with the device-unlock gate armed: the Firebase session is
-/// alive, but the app asks for Touch ID / Face ID / fingerprint before
-/// showing anything. Signing out is the escape hatch (it routes to the
-/// cloud sign-in screen).
 class CloudLockScreen extends ConsumerStatefulWidget {
   const CloudLockScreen({super.key});
 

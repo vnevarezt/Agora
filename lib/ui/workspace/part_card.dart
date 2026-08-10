@@ -18,9 +18,6 @@ import '../widgets/motion.dart';
 import 'part_presentation.dart';
 import 'slot_field.dart';
 
-/// Card for a program part (`.part`). A single widget: the body kind (fixed
-/// line or role card) is decided by [PartView.kind], and the chairman card is
-/// the same widget with a synthetic view.
 class PartCard extends ConsumerWidget {
   const PartCard({super.key, required this.view});
 
@@ -51,8 +48,6 @@ class PartCard extends ConsumerWidget {
   }
 }
 
-/// Middle song / intro and conclusion words: a single line with time, title
-/// and a right-hand label.
 class _FixedLineBody extends StatelessWidget {
   const _FixedLineBody({required this.view});
 
@@ -111,7 +106,6 @@ class _FixedLineBody extends StatelessWidget {
   }
 }
 
-/// Card with a chip header, title and assignment slots.
 class _RoleBody extends ConsumerWidget {
   const _RoleBody({required this.view});
 
@@ -176,7 +170,6 @@ class _RoleBody extends ConsumerWidget {
   }
 }
 
-/// Small pencil button to rename an assignment's title.
 class _EditTitleButton extends StatelessWidget {
   const _EditTitleButton({required this.onTap});
 
@@ -204,7 +197,6 @@ class _EditTitleButton extends StatelessWidget {
   }
 }
 
-/// Opens a compact dialog to edit (or restore) the assignment's title.
 void _showEditTitleDialog(BuildContext context, WidgetRef ref, PartView view) {
   var text = view.title;
   final hasOverride =
@@ -246,8 +238,6 @@ void _showEditTitleDialog(BuildContext context, WidgetRef ref, PartView view) {
   );
 }
 
-/// Slots in a row (sharing the width); on very narrow widths (≤460 in the
-/// mock) they collapse to a column, one per line.
 class _Slots extends StatelessWidget {
   const _Slots({required this.slots});
 

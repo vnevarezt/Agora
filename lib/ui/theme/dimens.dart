@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/week.dart';
 
-/// Visual dimensions and constants (mirror of the mock CSS).
+/// Visual dimensions and constants.
 abstract final class Dimens {
   // Border radii.
   static const double rChip = 7;
@@ -76,7 +76,7 @@ abstract final class Elevation {
 }
 
 /// Identity colors for each program section (S-140 bands).
-/// `apertura` has no color in the mock.
+/// `apertura` has no color.
 const Map<Section, Color> kSectionColors = {
   Section.treasures: Color(0xFF5C5C5C),
   Section.ministry: Color(0xFFB9890F),

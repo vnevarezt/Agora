@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// Section header (`.section__head`): color dot, uppercase title and
-/// assigned/total counter on the right.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,

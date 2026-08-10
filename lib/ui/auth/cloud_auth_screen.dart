@@ -21,9 +21,6 @@ import 'widgets/mode_pill.dart';
 
 enum CloudFormMode { login, register }
 
-/// Cloud-mode gate: Firebase sign-in IS the session. Reached from the
-/// Portada ([onBack] set) or when a cloud-mode install has no Firebase
-/// session ([onBack] null).
 class CloudAuthScreen extends ConsumerStatefulWidget {
   const CloudAuthScreen({
     super.key,
@@ -95,8 +92,6 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
   }
 }
 
-/// Google + email form, shared between the gate screen and the Settings
-/// modal. [onSuccess] runs after Firebase confirms the sign-in.
 class CloudAuthForm extends ConsumerStatefulWidget {
   const CloudAuthForm({super.key, required this.mode, required this.onSuccess});
 

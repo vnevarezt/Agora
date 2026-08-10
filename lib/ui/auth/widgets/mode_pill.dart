@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 
-/// `.mode-pill`: uppercase chip with an icon marking the chosen mode.
 class ModePill extends StatelessWidget {
   const ModePill({super.key, required this.icon, required this.label});
 

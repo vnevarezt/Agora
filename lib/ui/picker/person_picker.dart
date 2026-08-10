@@ -7,27 +7,22 @@ import '../theme/tokens.dart';
 import '../widgets/motion.dart';
 import 'person_picker_panel.dart';
 
-/// Result of the person picker.
 sealed class PickResult {
   const PickResult();
 }
 
-/// Assign [name] to the slot.
 class PickName extends PickResult {
   const PickName(this.name);
 
   final String name;
 }
 
-/// Remove the current assignment.
 class PickRemove extends PickResult {
   const PickRemove();
 }
 
 const _scrim = Elevation.scrim;
 
-/// Opens the picker: popover anchored to [anchorContext] on desktop/tablet,
-/// bottom sheet on mobile. Returns null if closed without choosing.
 Future<PickResult?> showPersonPicker(
   BuildContext anchorContext, {
   required String roleLabel,
@@ -78,8 +73,6 @@ Future<PickResult?> showPersonPicker(
   );
 }
 
-/// Desktop popover: soft scrim + panel anchored to the button with the
-/// "pop" animation (scale 0.96 -> 1 over 160 ms).
 class _PickerPopupRoute extends PopupRoute<PickResult> {
   _PickerPopupRoute({required this.anchor, required this.panel});
 
@@ -93,9 +86,8 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   bool get barrierDismissible => true;
 
   @override
-  // Global `t`, not `context.t`: this is a route, not a widget — there is no
-  // BuildContext here, and a route's barrier label is read once by the a11y
-  // layer when the route is pushed, so it cannot go stale mid-display.
+  // Global `t`: a route has no BuildContext, and the a11y layer reads this
+  // once at push time, so it cannot go stale on screen.
   String get barrierLabel => t.picker.closeSelector;
 
   @override
@@ -137,8 +129,6 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   }
 }
 
-/// Positions the popover under the anchor, clamped to the window edges;
-/// if it does not fit below, places it above.
 class _PopoverLayout extends SingleChildLayoutDelegate {
   _PopoverLayout({required this.anchor});
 

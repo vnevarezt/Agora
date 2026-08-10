@@ -94,15 +94,12 @@ class CongregationActions {
       _repo.update(id, name: name, number: number, settings: settings);
 }
 
-/// Catalog of cached notebooks, **keyed by workbook language** (the jw.org
-/// `langwritten` code — see `domain/meeting_language.dart`). Starts empty and
-/// is filled by the background sync ([mwbSyncProvider]) from the on-disk cache.
-/// Kept synchronous so the project modal keeps reading it directly.
+/// Catalog of cached notebooks, keyed by workbook language. Filled by the
+/// background sync ([mwbSyncProvider]) from the on-disk cache; kept synchronous
+/// so the project modal reads it directly.
 ///
-/// Per-language because the meeting language is a per-CONGREGATION setting: a
-/// user with one Spanish and one English congregation needs both catalogs at
-/// once, and each project must offer the weeks of its own congregation's
-/// workbook.
+/// Per-language because meeting language is a per-CONGREGATION setting: one
+/// Spanish and one English congregation need both catalogs at once.
 class NotebooksController extends Notifier<Map<String, List<Notebook>>> {
   @override
   Map<String, List<Notebook>> build() => const {};
@@ -114,12 +111,10 @@ final notebooksByLangProvider =
     NotifierProvider<NotebooksController, Map<String, List<Notebook>>>(
         NotebooksController.new);
 
-/// The catalog for one workbook language ('S', 'E', …).
 final notebooksForLangProvider = Provider.family<List<Notebook>, String>(
     (ref, lang) => ref.watch(notebooksByLangProvider)[lang] ?? const []);
 
-/// Workbook language a congregation's programs are built from. Falls back to
-/// Spanish for an unknown id, which is also the schema default.
+/// Falls back to Spanish for an unknown id, which is also the schema default.
 final congregationLangProvider = Provider.family<String, String>((ref, id) {
   for (final c in ref.watch(congregationsProvider)) {
     if (c.id == id) return workbookLangFor(c.settings.meetingLanguage);
@@ -127,7 +122,6 @@ final congregationLangProvider = Provider.family<String, String>((ref, id) {
   return workbookLangFor('spanish');
 });
 
-/// The catalog a given congregation should offer.
 final notebooksForCongregationProvider =
     Provider.family<List<Notebook>, String>((ref, congregationId) =>
         ref.watch(notebooksForLangProvider(ref.watch(congregationLangProvider(congregationId)))));
@@ -260,13 +254,11 @@ final heroProjectProvider = Provider<Project?>((ref) {
   return drafts.first;
 });
 
-/// Open drafts (subtitle count).
 final draftCountProvider = Provider<int>((ref) => ref
     .watch(projectsProvider)
     .where((p) => p.status == ProjectStatus.draft)
     .length);
 
-/// Missing assignments across drafts (subtitle count).
 final pendingAssignmentsProvider = Provider<int>((ref) {
   var pending = 0;
   for (final p in ref.watch(projectsProvider)) {
@@ -342,7 +334,6 @@ final dashboardFiltersProvider =
     NotifierProvider<DashboardFiltersController, DashboardFilters>(
         DashboardFiltersController.new);
 
-/// Projects visible after applying the active filters.
 final filteredProjectsProvider = Provider<List<Project>>((ref) {
   final projects = ref.watch(projectsProvider);
   final f = ref.watch(dashboardFiltersProvider);

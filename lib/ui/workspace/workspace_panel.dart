@@ -16,8 +16,6 @@ import '../widgets/section_header.dart';
 import 'part_card.dart';
 import 'part_presentation.dart';
 
-/// Assignments column: chairman card + the program's four sections. Empty
-/// state with a download CTA when there's no notebook.
 class WorkspacePanel extends ConsumerWidget {
   const WorkspacePanel({super.key});
 
@@ -68,7 +66,6 @@ class WorkspacePanel extends ConsumerWidget {
   }
 }
 
-/// One program section: header with its own counter + its cards.
 class _SectionBlock extends ConsumerWidget {
   const _SectionBlock({
     required this.title,
@@ -114,7 +111,6 @@ class _SectionBlock extends ConsumerWidget {
   }
 }
 
-/// Real part cards (chairman layout) skeletonized while the week loads.
 class _WorkspaceSkeleton extends StatelessWidget {
   const _WorkspaceSkeleton();
 

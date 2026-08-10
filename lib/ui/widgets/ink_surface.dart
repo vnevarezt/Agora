@@ -4,15 +4,8 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'motion.dart';
 
-/// Material 3 interactive surface for the app's cards: a real ink ripple,
-/// hover/pressed state layers and a smoothly animated elevation + border,
-/// all in one. Replaces the hand-rolled `Pressable` + `AnimatedContainer`
-/// hover (a hard border swap and a manual shadow) so cards respond the MD3
-/// way — a state layer that grows under the cursor, a soft shadow that lifts
-/// the surface and ink that follows the tap.
-///
-/// [builder] receives the current hover flag for content that reveals on
-/// hover (e.g. a card's kebab button).
+/// MD3 interactive surface for the app's cards. [builder] receives the hover
+/// flag for content that only appears on hover (e.g. a card's kebab).
 class InkSurface extends StatefulWidget {
   const InkSurface({
     super.key,

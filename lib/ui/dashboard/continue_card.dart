@@ -9,8 +9,6 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import 'status_badge.dart';
 
-/// Hero "continue where you left off" card: progress ring, identity line,
-/// one chip per week showing its state, and the big continue CTA.
 class ContinueCard extends StatelessWidget {
   const ContinueCard({
     super.key,
@@ -196,8 +194,6 @@ class _ProgressRing extends StatelessWidget {
   }
 }
 
-/// Week chip tinted by state: complete (check, green), started (half,
-/// amber), untouched (plain).
 class _WeekChip extends StatelessWidget {
   const _WeekChip({required this.progress});
 

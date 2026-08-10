@@ -6,8 +6,6 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/pill.dart';
 
-/// Project status badge: draft (accent), complete (green) and
-/// exported (neutral). The green has a dark-mode variant.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.status});
 

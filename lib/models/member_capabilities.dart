@@ -9,10 +9,8 @@ class MemberCapabilities {
     this.editTypes = const [],
   });
 
-  /// Manage members, invites, congregation settings and key rotation.
   final bool admin;
 
-  /// Edit the people directory (person + absences).
   final bool people;
 
   /// Program type ids this member can edit; [everyType] = all of them.

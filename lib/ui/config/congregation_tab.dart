@@ -42,9 +42,8 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   String? _congregationId;
   String _name = '';
   String _number = '';
-  // Selections are held as INDEXES, never as the localized label: the label
-  // changes with the app language, which would strand the selection (and, on
-  // save, silently write the schema defaults over the real settings).
+  // INDEXES, never the localized label: that changes with the app language,
+  // stranding the selection and writing schema defaults over the real settings.
   int _language = 0; // index into congregationLanguageCodes
   int _weekdayDay = 1; // Monday-first weekday index — Tuesday
   String _weekdayTime = '19:00';
@@ -601,7 +600,7 @@ class _CongregationChip extends StatelessWidget {
   }
 }
 
-/// Dashed "Nueva congregación" chip (`.chip--add`).
+/// Dashed "Nueva congregación" chip.
 class _AddChip extends StatelessWidget {
   const _AddChip({required this.onTap});
 

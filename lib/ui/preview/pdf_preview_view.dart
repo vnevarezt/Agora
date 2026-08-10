@@ -16,13 +16,9 @@ import '../widgets/app_button.dart';
 /// surface, so it does not follow the palette.
 const _paper = Color(0xFFFFFFFF);
 
-/// Rasterized PDF viewer (pdfrx). The zoom/quality logic is unchanged;
-/// only the chrome changes: token background, a sheet with the radius and
-/// shadows, and catalog zoom FABs.
 class PdfPreviewView extends ConsumerWidget {
   const PdfPreviewView({super.key, required this.controller});
 
-  /// Driven by [PreviewPane], which shows the zoom % in its bar.
   final TransformationController controller;
 
   @override

@@ -6,8 +6,6 @@ import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'motion.dart';
 
-/// Filter pill (`.chip`): toggles active/inactive. Optionally with a
-/// color dot on the left (congregation) and a counter on the right.
 class FilterPill extends StatelessWidget {
   const FilterPill({
     super.key,

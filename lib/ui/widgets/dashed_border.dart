@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Dashed border on a rounded rectangle (circle = max radius).
-/// Flutter has no dashed borders; used by the empty avatar and the
-/// "Asignar…" button to mirror the mock dashed border.
+/// Flutter has no dashed borders, hence the custom painter.
 class DashedBorder extends StatelessWidget {
   const DashedBorder({
     super.key,

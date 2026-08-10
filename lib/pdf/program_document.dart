@@ -20,8 +20,7 @@ typedef WeekEntry = ({
   String chairman,
 });
 
-/// Single-week PDF (one portrait Letter page), reproducing programa-vmc.tex
-/// (S-140-S format). Kept for callers that still print one week; forwards to
+/// Kept for callers that still print a single week; forwards to
 /// [buildProgramSheetPdf].
 Future<Uint8List> buildProgramPdf({
   required AppLocale locale,
@@ -84,8 +83,7 @@ Future<Uint8List> _buildPdf({
   required bool auxRoom,
   required bool twoPerSheet,
 }) async {
-  // Built HERE, inside the isolate: only the AppLocale enum crosses the
-  // boundary, never the Translations object graph.
+  // Built inside the isolate: only the enum crosses the boundary.
   final tr = locale.buildSync();
   final carlito = carlitoFromBytes(fontBytes);
   final doc = pw.Document();
@@ -105,8 +103,7 @@ List<pw.Widget> _headerBlock(S140Metrics m, Translations tr, String congregation
       _thinThickRule(m),
     ];
 
-/// One week's block: week line (date/reading/chairman) + the four sections +
-/// closing rule. No page header — see [_headerBlock].
+/// No page header — that is [_headerBlock], printed once per sheet.
 List<pw.Widget> _weekBlock(pw.Context ctx, Carlito carlito, S140Metrics m,
     Translations tr, WeekEntry e, bool auxRoom) {
   // Adaptive widths based on the real content (getFont needs the ctx).
@@ -151,7 +148,7 @@ void _addSinglePage(pw.Document doc, Carlito carlito, Translations tr, String co
           marginRight: S140.marginRight,
         ),
       ),
-      // Footer on every page: "S-140-S   11/23" (tex:40).
+      // Footer on every page: "S-140-S   11/23".
       footer: (ctx) => pw.Container(
           alignment: pw.Alignment.centerLeft, child: _footer(m)),
       build: (ctx) => [
@@ -218,7 +215,7 @@ void _addStackedPage(pw.Document doc, Carlito carlito, Translations tr, String c
   );
 }
 
-// ---- Header: congregation (left) and title (right) (tex:171-178) ----
+// ---- Header: congregation (left) and title (right) ----
 pw.Widget _header(S140Metrics m, Translations tr, String congregation) {
   return pw.Row(
     crossAxisAlignment: pw.CrossAxisAlignment.end, // minipages [b]
@@ -243,7 +240,7 @@ pw.Widget _header(S140Metrics m, Translations tr, String congregation) {
   );
 }
 
-// ---- Thin + thick rule (tex:161-163) ----
+// ---- Thin + thick rule ----
 pw.Widget _thinThickRule(S140Metrics m) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -255,7 +252,7 @@ pw.Widget _thinThickRule(S140Metrics m) {
   );
 }
 
-// ---- Week line + chairman + reading (tex:183-187) ----
+// ---- Week line + chairman + reading ----
 pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) {
   final weekStyle =
       pw.TextStyle(fontSize: m.week, fontWeight: pw.FontWeight.bold);
@@ -299,7 +296,7 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
   );
 }
 
-// ---- Single rooms header (tex:150-155, auxRoom mode only) ----
+// ---- Single rooms header (auxRoom mode only) ----
 pw.Widget _roomsHeader(S140Metrics m, Translations tr, ColumnWidths cols) {
   final st = pw.TextStyle(
       fontSize: m.footnote,
@@ -317,7 +314,7 @@ pw.Widget _roomsHeader(S140Metrics m, Translations tr, ColumnWidths cols) {
   );
 }
 
-// ---- Section band (tex:135-145) ----
+// ---- Section band ----
 pw.Widget _band(S140Metrics m, PdfColor color, String title, String labelText,
     ColumnWidths cols, bool auxRoom) {
   return pw.Column(
@@ -356,7 +353,7 @@ pw.Widget _band(S140Metrics m, PdfColor color, String title, String labelText,
   );
 }
 
-// ---- Rows table (tabularx @{}X R P@{} or @{}X R A P@{} in auxRoom) ----
+// ---- Rows table (3 columns, 4 in auxRoom) ----
 pw.Widget _table(S140Metrics m, Translations tr, List<ProgramRow> rows,
     Assignments assignments, ColumnWidths cols,
     double Function(String) measure, bool auxRoom) {

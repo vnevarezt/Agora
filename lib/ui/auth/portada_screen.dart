@@ -11,9 +11,6 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/motion.dart';
 
-/// `.portada--a`: immersive welcome screen — brand mark, tagline and the
-/// three entry actions (cloud register / cloud sign-in / local only), with
-/// the mock's staggered entrance animation.
 class PortadaScreen extends ConsumerWidget {
   const PortadaScreen({
     super.key,
@@ -236,7 +233,6 @@ class _PortadaButton extends StatelessWidget {
   }
 }
 
-/// `.portada__local`: "continue without an account" entry row.
 class _LocalEntryCard extends StatelessWidget {
   const _LocalEntryCard({required this.onTap});
 

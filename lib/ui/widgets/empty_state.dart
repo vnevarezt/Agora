@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// Reusable empty state: icon + (optional title) + message + (optional
-/// action) + (optional error text). Centers its content.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,

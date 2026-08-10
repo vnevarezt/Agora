@@ -30,12 +30,9 @@ enum ExportAction {
 /// the share sheet.
 final fileSaverProvider = Provider<FileSaver>((ref) => FileSaver());
 
-/// Language the printed program is rendered in.
-///
-/// This is the congregation's MEETING language, not the app language: the
-/// sheet is pinned on a board for that congregation, so it must match how the
-/// meeting is actually held. Running the UI in English while printing a
-/// Spanish program is the normal case, not an edge one.
+/// Language the printed program is rendered in: the congregation's MEETING
+/// language, not the app language. Running the UI in English while printing a
+/// Spanish program is the normal case.
 final programLocaleProvider = Provider<AppLocale>((ref) {
   final congregationId =
       ref.watch(formProvider.select((f) => f.congregationId));
@@ -73,8 +70,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
       formProvider.select((f) => (f.congregationId, f.auxRoom)),
       (_, _) => _scheduleRender(),
     );
-    // The sheet is rendered in the congregation's MEETING language, so it is
-    // that — not the app language — that invalidates it.
+    // Rendered in the MEETING language, so that is what invalidates it.
     ref.listen(programLocaleProvider, (_, _) => _scheduleRender());
     _scheduleRender();
     return const AsyncValue.loading();
@@ -131,8 +127,7 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   }) async {
     final entries = ref.read(sheetEntriesProvider);
     if (entries.isEmpty) {
-      // Surfaced to the user by `ui/widgets/export_actions.dart`, so it has
-      // to be localized. Global `t`: no BuildContext in a provider.
+      // Shown to the user by `export_actions.dart`, so it must be localized.
       throw Exception(t.export.noWeeks);
     }
     final f = ref.read(formProvider);

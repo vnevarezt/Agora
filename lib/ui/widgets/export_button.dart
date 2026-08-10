@@ -25,10 +25,8 @@ enum ExportVariant {
   full,
 }
 
-/// Mobile export entry point: opens a sheet to pick format (PDF / image) and
-/// action (save / share). The busy state is shared via [exportBusyProvider] so
-/// all instances disable together. (Desktop uses the popover menu in the
-/// project bar instead.)
+/// Busy state is shared via [exportBusyProvider] so every instance disables
+/// together. Desktop uses the project-bar popover instead.
 class ExportButton extends ConsumerWidget {
   const ExportButton({super.key, this.variant = ExportVariant.bar});
 

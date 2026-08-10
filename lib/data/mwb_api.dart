@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 
 /// Access to jw.org's public media API to fetch the EPUB of the "Christian
 /// Life and Ministry Meeting Workbook".
-///
-/// Port of `url_epub` / `descargar_epub` from generar_programa.py:33-49.
+
 class MwbApi {
   static const String _api =
       'https://app.jw-cdn.org/apis/pub-media/GETPUBMEDIALINKS';

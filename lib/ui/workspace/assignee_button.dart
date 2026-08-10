@@ -9,9 +9,6 @@ import '../widgets/avatar.dart';
 import '../widgets/dashed_border.dart';
 import '../widgets/motion.dart';
 
-/// Assignment button (`.assignee`): empty shows a dashed border and
-/// "Asignar…"; filled shows avatar + name + X to clear (visible on hover, or
-/// always on touch via [alwaysShowClear]).
 class AssigneeButton extends StatelessWidget {
   const AssigneeButton({
     super.key,

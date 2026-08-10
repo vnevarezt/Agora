@@ -27,9 +27,8 @@ class SyncReport {
   /// one isn't published).
   bool get complete => failed.isEmpty && skippedBackoff.isEmpty;
 
-  /// Folds the per-language passes into one status for the dashboard card.
-  /// Issue ids repeat across languages, which is fine — nothing keys off them
-  /// beyond [complete] and the counts.
+  /// Folds the per-language passes into one status. Issue ids repeat across
+  /// languages; nothing keys off them beyond [complete].
   static SyncReport merge(Iterable<SyncReport> reports) => SyncReport(
         downloaded: [for (final r in reports) ...r.downloaded],
         skippedCached: [for (final r in reports) ...r.skippedCached],
@@ -117,15 +116,14 @@ Future<List<Notebook>> _buildCatalog(
 class MwbSyncController extends AsyncNotifier<SyncReport> {
   @override
   Future<SyncReport> build() async {
-    // One pass per workbook language actually in use. Watching the
-    // congregations means adding one that meets in another language pulls its
-    // workbook down without a restart; passes whose issues are already cached
-    // make no network request, so re-running is cheap.
+    // One pass per language in use. Watching the congregations means adding
+    // one pulls its workbook down without a restart; cached passes cost no
+    // network, so re-running is cheap.
     final langs = workbookLangsFor(
       ref.watch(congregationsProvider).map((c) => c.settings.meetingLanguage),
     );
-    // Before the congregation stream emits, fall back to the schema default so
-    // the very first launch still fills a catalog.
+    // Before the stream emits, keep the schema default so a first launch
+    // still fills a catalog.
     final targets = langs.isEmpty ? {workbookLangFor('spanish')} : langs;
 
     final cache = ref.read(cacheProvider);

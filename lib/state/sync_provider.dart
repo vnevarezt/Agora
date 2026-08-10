@@ -31,7 +31,6 @@ import 'sync_keys.dart' show syncOwnerUidKey;
 /// DbKeyManager's keychain so sync key material shares the app's keychain
 /// hygiene. Tests override the leaf providers with fakes.
 
-/// The OS keychain for sync key material (same store DbKeyManager uses).
 final syncKeyStoreProvider =
     Provider((ref) => const KeychainKeyStore());
 
@@ -46,7 +45,6 @@ final firestoreProvider = Provider<FirebaseFirestore?>((ref) {
   return fs;
 });
 
-/// Signed-in uid (null while signed out / cloud disabled).
 final syncUidProvider = Provider<String?>(
     (ref) => ref.watch(cloudUserProvider).value?.uid);
 
@@ -75,7 +73,6 @@ final syncTransportProvider = Provider<SyncTransport?>((ref) {
   return fs == null ? null : FirestoreTransport(fs);
 });
 
-/// The push/pull engine, wired to the real transport + CCK key storage.
 /// Null unless the DB is open, the cloud is up and a user is signed in.
 final syncEngineProvider = Provider<SyncEngine?>((ref) {
   final transport = ref.watch(syncTransportProvider);

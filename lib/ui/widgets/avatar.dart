@@ -12,8 +12,6 @@ String inicialesDe(String name) {
   return (a + b).toUpperCase();
 }
 
-/// Avatar circular (`.avatar`): iniciales sobre fondo accent-soft, o el
-/// empty state with a dashed border and a person icon.
 class PersonAvatar extends StatelessWidget {
   const PersonAvatar({super.key, this.name, this.size = Dimens.avatar});
 

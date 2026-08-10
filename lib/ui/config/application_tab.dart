@@ -23,9 +23,8 @@ import 'settings_card.dart';
 import 'sync_card.dart';
 
 // Dropdown option labels, index-aligned with the persisted values in
-// app_settings.dart. They take the active [Translations] rather than reading
-// the global `t`, so the labels are resolved against the same snapshot the
-// calling widget rebuilt with (see lib/i18n/README.md).
+// app_settings.dart. They take [Translations] so the labels resolve against the
+// same snapshot the calling widget rebuilt with.
 List<String> _timeFormats(Translations tr) =>
     [tr.options.timeFormat24, tr.options.timeFormat12];
 List<String> _weekStarts(Translations tr) => [tr.days.monday, tr.days.sunday];

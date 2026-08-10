@@ -6,28 +6,19 @@ import '../theme/tokens.dart';
 
 enum _ChipKind { time, allMeeting, duration, tag, aux, week }
 
-/// Small chip. A single widget with presets that mirror
-/// `.time-badge`, `.time-badge--all`, `.dur-chip`, `.fixed-line__tag` y
-/// `.aux-flag` from the mock.
 class MiniChip extends StatelessWidget {
-  /// Part time (mono, accent-soft background).
   const MiniChip.time(this.texto, {super.key}) : _kind = _ChipKind.time;
 
-  /// Insignia neutra uppercase ("TODA LA REUNIÓN").
   const MiniChip.allMeeting(this.texto, {super.key})
       : _kind = _ChipKind.allMeeting;
 
-  /// Duration ("10 min").
   const MiniChip.duration(this.texto, {super.key})
       : _kind = _ChipKind.duration;
 
-  /// Fixed-line tag ("Cántico", "A cargo del presidente").
   const MiniChip.tag(this.texto, {super.key}) : _kind = _ChipKind.tag;
 
-  /// Auxiliary-room indicator (accent pill with a building icon).
   const MiniChip.aux(this.texto, {super.key}) : _kind = _ChipKind.aux;
 
-  /// Dashboard week pill ("4–10 MAY"): neutral, with tabular figures.
   const MiniChip.week(this.texto, {super.key}) : _kind = _ChipKind.week;
 
   final String texto;
