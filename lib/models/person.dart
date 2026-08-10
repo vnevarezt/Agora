@@ -147,13 +147,25 @@ class Person {
 const _diacritics = 'áàäâéèëêíìïîóòöôúùüûñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑ';
 const _plain = 'aaaaeeeeiiiioooouuuunAAAAEEEEIIIIOOOOUUUUN';
 
+final _reSpaces = RegExp(r'\s+');
+
+final Map<int, int> _foldMap = {
+  for (var i = 0; i < _diacritics.length; i++)
+    _diacritics.codeUnitAt(i): _plain.codeUnitAt(i),
+};
+
 /// Normalizes for accent-insensitive search and duplicate detection:
 /// trim, collapse whitespace, lowercase and strip accents (ñ→n).
+///
+/// The trim/collapse pair has to stay as it is: `String.trim` and a Dart
+/// RegExp's `\s` disagree on which code points are whitespace, so open coding
+/// it changes which names count as the same person.
 String normalizeName(String s) {
-  final sb = StringBuffer();
-  for (final ch in s.trim().replaceAll(RegExp(r'\s+'), ' ').split('')) {
-    final i = _diacritics.indexOf(ch);
-    sb.write(i >= 0 ? _plain[i] : ch);
+  final collapsed = s.trim().replaceAll(_reSpaces, ' ');
+  final units = List<int>.filled(collapsed.length, 0);
+  for (var i = 0; i < collapsed.length; i++) {
+    final c = collapsed.codeUnitAt(i);
+    units[i] = _foldMap[c] ?? c;
   }
-  return sb.toString().toLowerCase();
+  return String.fromCharCodes(units).toLowerCase();
 }
