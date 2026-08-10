@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,6 +58,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
     final recent = _search.isEmpty
         ? ref.watch(recentPeopleProvider).take(4).toList()
         : const <Person>[];
+    final rowHeight = personPickerRowHeight(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -75,38 +78,63 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
           ),
         _header(context),
         Flexible(
-          child: ListView(
+          child: CustomScrollView(
+            // shrinkWrap so the popover still sizes to its content. It stays
+            // cheap because the person slivers declare a fixed extent: the
+            // list derives its height from childCount * itemExtent instead of
+            // laying out every row, which is what a plain ListView did on
+            // every keystroke.
             shrinkWrap: true,
-            padding: const EdgeInsets.all(6),
-            children: [
-              if (widget.current.isNotEmpty)
-                _PersonRow(
-                  name: context.t.common.removeAssignment,
-                  avatarVacio: true,
-                  muted: true,
-                  selected: true,
-                  onTap: () => _pop(const PickRemove()),
-                ),
-              if (recent.isNotEmpty) ...[
-                _group(t, context.t.picker.recent),
-                for (final h in recent) _row(h),
-                _group(t, context.t.picker.all),
-              ],
-              for (final h in filtered) _row(h),
-              if (filtered.isEmpty && _search.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 18),
-                  child: Text(
-                    context.t.picker.noResults(query: _search),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppText.body,
-                      fontWeight: FontWeight.w600,
-                      color: t.textMute,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(6),
+                sliver: SliverMainAxisGroup(
+                  slivers: [
+                    if (widget.current.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: PersonPickerRow(
+                          name: context.t.common.removeAssignment,
+                          avatarVacio: true,
+                          muted: true,
+                          selected: true,
+                          onTap: () => _pop(const PickRemove()),
+                        ),
+                      ),
+                    if (recent.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                          child: _group(t, context.t.picker.recent)),
+                      SliverFixedExtentList.builder(
+                        itemExtent: rowHeight,
+                        itemCount: recent.length,
+                        itemBuilder: (context, i) => _row(recent[i]),
+                      ),
+                      SliverToBoxAdapter(
+                          child: _group(t, context.t.picker.all)),
+                    ],
+                    SliverFixedExtentList.builder(
+                      itemExtent: rowHeight,
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) => _row(filtered[i]),
                     ),
-                  ),
+                    if (filtered.isEmpty && _search.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 18),
+                          child: Text(
+                            context.t.picker.noResults(query: _search),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: AppText.body,
+                              fontWeight: FontWeight.w600,
+                              color: t.textMute,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -117,7 +145,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
 
   /// A person row: privilege as a label (only elder/servant).
   Widget _row(Person h) {
-    return _PersonRow(
+    return PersonPickerRow(
       name: h.displayName,
       tag: h.privilege == Role.publisher ? null : h.privilege.label(context.t),
       selected: h.displayName == widget.current,
@@ -216,8 +244,25 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   }
 }
 
-class _PersonRow extends StatelessWidget {
-  const _PersonRow({
+/// The height every [PersonPickerRow] lays out at, for the current text scale.
+/// The row is uniform by construction: a fixed avatar and a single-line name,
+/// so neither a long name nor the privilege tag changes it. That uniformity
+/// is what lets the picker virtualise while still sizing to its content.
+///
+/// Rounds high rather than low — a row a pixel taller than its content is
+/// invisible, a pixel shorter clips it. Pinned against the real laid-out
+/// height by `person_picker_test`.
+double personPickerRowHeight(BuildContext context) {
+  final scaler = MediaQuery.textScalerOf(context);
+  const verticalPadding = 7.0 * 2;
+  const lineHeight = 1.44;
+  return math.max(Dimens.avatar, scaler.scale(AppText.bodyLarge) * lineHeight) +
+      verticalPadding;
+}
+
+class PersonPickerRow extends StatelessWidget {
+  const PersonPickerRow({
+    super.key,
     required this.name,
     required this.onTap,
     this.tag,
