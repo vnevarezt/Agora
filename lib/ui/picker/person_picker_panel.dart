@@ -46,12 +46,13 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final active = ref.watch(activePeopleProvider);
+    final active = ref.watch(activePeopleKeyedProvider);
 
     final key = normalizeName(_search);
-    final filtered = active
-        .where((h) => normalizeName(h.displayName).contains(key))
-        .toList();
+    final filtered = [
+      for (final e in active)
+        if (e.key.contains(key)) e.person,
+    ];
     final recent = _search.isEmpty
         ? ref.watch(recentPeopleProvider).take(4).toList()
         : const <Person>[];
