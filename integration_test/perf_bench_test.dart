@@ -18,6 +18,8 @@ import 'package:agora/models/person.dart';
 import 'package:agora/models/program_row.dart';
 import 'package:agora/models/week.dart';
 import 'package:agora/pdf/pdf_rasterizer.dart';
+import 'package:agora/data/crypto/passphrase_envelope.dart';
+import 'package:agora/pdf/pdf_theme.dart';
 import 'package:agora/pdf/program_document.dart';
 
 Week _week([String date = '18-24 DE MAYO']) => Week(
@@ -164,6 +166,33 @@ void main() {
       final p = await buildProgramSheetPdf(
           locale: AppLocale.es, congregation: 'CONGREGACIÓN', entries: one);
       (await rasterizePage(p, scale: 3)).dispose();
+    });
+  });
+
+  testWidgets('coste de las fuentes en cada render', (tester) async {
+    final bytes = await carlitoFontBytes();
+    final total = bytes.regular.lengthInBytes +
+        bytes.bold.lengthInBytes +
+        bytes.italic.lengthInBytes +
+        bytes.boldItalic.lengthInBytes;
+    // ignore: avoid_print
+    print('BENCH fuentes_KB ${(total / 1024).toStringAsFixed(0)}');
+
+    // Esto corre DENTRO del isolate en cada build del PDF, y el isolate muere
+    // al terminar, asi que nunca se reaprovecha.
+    _timeSync('carlito_parseo_por_render', 8, () {
+      carlitoFromBytes(bytes);
+    });
+  });
+
+  // El desbloqueo con contrasena. En nativo va en isolate (el usuario espera,
+  // la UI no se congela); en web corre inline en el hilo de UI.
+  testWidgets('KDF del desbloqueo', (tester) async {
+    const envelope = PassphraseEnvelope();
+    const pass = 'correcta-caballo-bateria';
+    final blob = await envelope.wrap([for (var i = 0; i < 32; i++) i], pass);
+    await _timeAsync('kdf_desbloqueo', 3, () async {
+      await envelope.unwrap(blob, pass);
     });
   });
 
