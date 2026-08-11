@@ -93,6 +93,7 @@ class SyncController extends Notifier<SyncStatus> {
   bool _autoEnabling = false;
   bool _pushing = false;
   bool _pulling = false;
+  bool _paused = false;
 
   SyncEngine? get _engine => ref.read(syncEngineProvider);
 
@@ -130,7 +131,33 @@ class SyncController extends Notifier<SyncStatus> {
     return const SyncStatus(phase: SyncPhase.idle);
   }
 
+  /// Suspends every automatic cycle (push, pull, auto-enable) while a cloud
+  /// teardown runs. Firestore does not cascade, so a teardown deletes docs one
+  /// by one with the caller's member doc alive until the very end: a push
+  /// landing in that window recreates items that no `isAdmin(cid)` can ever
+  /// delete again. Always pair with [resume].
+  void pause() {
+    _paused = true;
+    _pushTimer?.cancel();
+    _lazyTimer?.cancel();
+    _retryTimer?.cancel();
+    _pushTimer = _lazyTimer = _retryTimer = null;
+  }
+
+  /// Re-arms after [pause]. [keepLocal] marks congregations as already
+  /// attempted so auto-enable does not re-found the cloud space that was just
+  /// torn down.
+  void resume({Iterable<String> keepLocal = const []}) {
+    _autoEnabled.addAll(keepLocal);
+    _paused = false;
+    if (state.pendingOutbox > 0) _schedulePush();
+    _flushStale();
+  }
+
   void _teardown() {
+    // Never leave a pause behind: re-arming after a sign-out with the flag
+    // still set would mute sync for the rest of the process.
+    _paused = false;
     _pushTimer?.cancel();
     _lazyTimer?.cancel();
     _retryTimer?.cancel();
@@ -253,7 +280,9 @@ class SyncController extends Notifier<SyncStatus> {
   /// a permanent failure (e.g. a space someone else owns) can't loop;
   /// regaining connectivity clears them for a retry.
   Future<void> _autoEnable() async {
-    if (_autoEnabling || ref.read(cckServiceProvider) == null) return;
+    if (_paused || _autoEnabling || ref.read(cckServiceProvider) == null) {
+      return;
+    }
     // This device's local data belongs to ONE account (per-uid databases are
     // deferred): never upload it to a different one that signed in later.
     if (!await ref.read(syncKeysProvider.notifier).ownsThisDevice()) return;
@@ -369,6 +398,7 @@ class SyncController extends Notifier<SyncStatus> {
   // ---- push ----------------------------------------------------------------
 
   void _schedulePush() {
+    if (_paused) return;
     _pushTimer?.cancel();
     _pushTimer = Timer(_pushDebounce, _push);
   }
@@ -377,7 +407,7 @@ class SyncController extends Notifier<SyncStatus> {
   /// used on lifecycle transitions and when leaving the editor, where waiting
   /// out the debounce risks losing the edit.
   void _flushPushNow() {
-    if (state.pendingOutbox == 0) return;
+    if (_paused || state.pendingOutbox == 0) return;
     _pushTimer?.cancel();
     _pushTimer = null;
     unawaited(_push());
@@ -385,7 +415,7 @@ class SyncController extends Notifier<SyncStatus> {
 
   Future<void> _push() async {
     final engine = _engine;
-    if (_pushing || engine == null) return;
+    if (_paused || _pushing || engine == null) return;
     _pushing = true;
     state = state.copyWith(phase: SyncPhase.syncing, clearError: true);
     try {
@@ -404,7 +434,7 @@ class SyncController extends Notifier<SyncStatus> {
 
   Future<void> _pull(Set<String> cids) async {
     final engine = _engine;
-    if (_pulling || engine == null) return;
+    if (_paused || _pulling || engine == null) return;
     _pulling = true;
     state = state.copyWith(phase: SyncPhase.syncing, clearError: true);
     var failed = false;
