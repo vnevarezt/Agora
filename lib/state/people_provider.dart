@@ -29,17 +29,24 @@ final peopleProvider = Provider<List<Person>>(
 final peopleLoadingProvider =
     Provider<bool>((ref) => ref.watch(peopleStreamProvider).isLoading);
 
-/// Active ones sorted by normalized display name (picker list).
+typedef KeyedPerson = ({String key, Person person});
+
+/// Active ones with their normalized name, sorted by it.
 ///
 /// The key is computed once per person: inside the comparator it was two
-/// [normalizeName] calls per comparison, 11.65 ms with 150 people.
-final activePeopleProvider = Provider<List<Person>>((ref) {
-  final keyed = [
+/// [normalizeName] calls per comparison, 11.65 ms with 150 people. It is kept
+/// on the entry so the picker can filter against it instead of re-normalizing
+/// the whole directory on every keystroke.
+final activePeopleKeyedProvider = Provider<List<KeyedPerson>>((ref) {
+  return [
     for (final p in ref.watch(peopleProvider))
       if (p.active) (key: normalizeName(p.displayName), person: p),
   ]..sort((a, b) => a.key.compareTo(b.key));
-  return [for (final e in keyed) e.person];
 });
+
+/// Active ones sorted by normalized display name (picker list).
+final activePeopleProvider = Provider<List<Person>>((ref) =>
+    [for (final e in ref.watch(activePeopleKeyedProvider)) e.person]);
 
 /// Recently used (by `lastUsed` desc), max 6.
 final recentPeopleProvider = Provider<List<Person>>((ref) {
