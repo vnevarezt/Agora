@@ -24,6 +24,7 @@ import 'app_settings.dart';
 import 'auth_session.dart';
 import 'cloud_auth.dart';
 import 'db_provider.dart';
+import 'sync_controller.dart';
 import 'sync_keys.dart' show syncOwnerUidKey;
 
 /// Cloud sync plumbing (phase 4b). Everything here is null unless the cloud
@@ -296,6 +297,12 @@ final congregationTeardownProvider = Provider<CongregationTeardown?>((ref) {
   return CongregationTeardown(docs, transport, uid: uid);
 });
 
+/// The Firebase-side "delete this user" step as a plain function, so the
+/// deletion flow can be exercised without a real FirebaseAuth. Null once cloud
+/// init settles with the cloud disabled.
+final deleteCloudUserProvider = FutureProvider<Future<void> Function()?>(
+    (ref) async => (await ref.watch(cloudAuthProvider.future))?.deleteAccount);
+
 /// Thrown by [deleteMyAccountProvider] when the user is the sole admin of a
 /// congregation that still has other members: deleting would strand them, so
 /// we refuse and name the congregations to hand over or empty first.
@@ -306,6 +313,19 @@ class AccountDeletionBlocked implements Exception {
 
   @override
   String toString() => 'AccountDeletionBlocked($congregationIds)';
+}
+
+/// "My congregations", guaranteed loaded. Riverpod only subscribes to the
+/// underlying query WHILE the provider is listened to, so reading `.future`
+/// from a bare action would wait forever if nothing else happened to be
+/// watching: hold a subscription across the read.
+Future<List<Membership>> _awaitMemberships(Ref ref) async {
+  final sub = ref.listen(myMembershipsProvider, (_, _) {});
+  try {
+    return await ref.read(myMembershipsProvider.future);
+  } finally {
+    sub.close();
+  }
 }
 
 Future<void> _deleteSyncState(AppDatabase db, String cid) =>
@@ -332,7 +352,10 @@ final accountDeletionBlockersProvider =
   final cck = ref.watch(cckServiceProvider);
   final uid = ref.watch(syncUidProvider);
   if (cck == null || uid == null) return const [];
-  final memberships = ref.watch(myMembershipsProvider).value ?? const [];
+  // Awaited, never `.value ?? []`: a stream that has not emitted yet would read
+  // as "no congregations" and clear the very blockers this provider exists to
+  // raise, enabling the button. Staying loading keeps the modal's spinner up.
+  final memberships = await ref.watch(myMembershipsProvider.future);
   return (await _accountDeletionPlan(cck, uid, memberships)).blocked;
 });
 
@@ -345,10 +368,21 @@ final deleteCongregationCloudProvider = Provider((ref) => (String cid) async {
         throw const SharingException(
             'keysUnavailable', 'Cloud sync is not available.');
       }
-      await teardown.wipe(cid);
-      await ref.read(cckServiceProvider)?.forget([cid]);
-      // Drop the "shared" fact so rightsProvider treats it as local again.
-      await _deleteSyncState(ref.read(dbProvider), cid);
+      final sync = ref.read(syncControllerProvider.notifier);
+      // A push landing mid-wipe recreates item docs that nobody can delete
+      // afterwards: `isAdmin(cid)` reads the member doc the wipe just removed.
+      sync.pause();
+      try {
+        await teardown.wipe(cid);
+        await ref.read(cckServiceProvider)?.forget([cid]);
+        // Drop the "shared" fact so rightsProvider treats it as local again.
+        await _deleteSyncState(ref.read(dbProvider), cid);
+      } finally {
+        // keepLocal: un-sharing removes both facts auto-enable uses to skip a
+        // congregation (member doc + syncState), so without this it would
+        // re-found the cloud space seconds later and undo the action.
+        sync.resume(keepLocal: [cid]);
+      }
     });
 
 /// Cancels the cloud account: for every congregation, wipe (sole member &
@@ -363,33 +397,47 @@ final deleteMyAccountProvider = Provider((ref) => () async {
       final cck = ref.read(cckServiceProvider);
       final docs = ref.read(keyDocsProvider);
       final uid = ref.read(syncUidProvider);
-      final auth = await ref.read(cloudAuthProvider.future);
+      final deleteCloudUser = await ref.read(deleteCloudUserProvider.future);
       if (teardown == null ||
           cck == null ||
           docs == null ||
           uid == null ||
-          auth == null) {
+          deleteCloudUser == null) {
         throw const SharingException(
             'keysUnavailable', 'Cloud sync is not available.');
       }
 
-      final memberships = ref.read(myMembershipsProvider).value ?? const [];
+      // Awaited, never `.value ?? []`: planning off a stream that has not
+      // emitted would delete the account while leaving every congregation doc
+      // behind — and no account able to delete them ever again.
+      final memberships = await _awaitMemberships(ref);
 
       // Decide per congregation, then check FIRST (before any deletion):
       // refuse if deleting would strand other members.
       final plan = await _accountDeletionPlan(cck, uid, memberships);
       if (plan.blocked.isNotEmpty) throw AccountDeletionBlocked(plan.blocked);
 
-      for (final cid in plan.wipe) {
-        await teardown.wipe(cid);
-        await cck.forget([cid]);
+      final sync = ref.read(syncControllerProvider.notifier);
+      // See deleteCongregationCloudProvider: a push mid-wipe outlives the
+      // teardown as undeletable docs.
+      sync.pause();
+      try {
+        for (final cid in plan.wipe) {
+          await teardown.wipe(cid);
+          await cck.forget([cid]);
+        }
+        for (final cid in plan.leave) {
+          await teardown.leave(cid);
+          await cck.forget([cid]);
+        }
+        await docs.deleteUserDoc(uid);
+        await deleteCloudUser();
+      } catch (_) {
+        // The account outlived the failure: the session is still live, so give
+        // it its sync back instead of leaving a half-torn-down app mute.
+        sync.resume();
+        rethrow;
       }
-      for (final cid in plan.leave) {
-        await teardown.leave(cid);
-        await cck.forget([cid]);
-      }
-      await docs.deleteUserDoc(uid);
-      await auth.deleteAccount();
 
       // Everything cloud-side is gone: wipe local and return to the Portada.
       await ref.read(authSessionProvider.notifier).resetAllData();
