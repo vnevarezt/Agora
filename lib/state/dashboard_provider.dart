@@ -3,6 +3,7 @@ import 'dart:math' show min;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/db/app_database.dart';
 import '../data/repos/congregations_repository.dart';
 import '../data/repos/projects_repository.dart';
 import '../domain/meeting_language.dart';
@@ -179,11 +180,68 @@ final projectsProvider = Provider<List<Project>>((ref) {
       ref.watch(_assignmentCountsProvider).asData?.value ?? const {};
   final congregations = ref.watch(congregationsProvider);
   final settingsById = {for (final c in congregations) c.id: c.settings};
-  return [
+  final slotTotals = ref.watch(_slotTotalsProvider);
+  final cards = [
     for (final d in data)
-      _toCard(d, counts, settingsById[d.project.congregationId])
+      _toCard(d, counts, settingsById[d.project.congregationId], slotTotals)
   ];
+  slotTotals.retainAll({
+    for (final d in data)
+      for (final p in d.programs) p.id,
+  });
+  return cards;
 });
+
+/// Slot totals per program, kept across rebuilds of [projectsProvider].
+///
+/// That provider re-runs on every assignment saved anywhere — including from
+/// the editor, with the dashboard off screen — and deriving the totals costs a
+/// jsonDecode plus a buildSchedule per program of every project (0.6 ms for 90
+/// programs on a desktop Mac, several times that on a phone). The totals only
+/// change when a program's snapshot or week type does, which is rare.
+final _slotTotalsProvider = Provider<_SlotTotals>((ref) => _SlotTotals());
+
+typedef _ProgramSlots = ({int base, int aux});
+
+class _SlotTotals {
+  final _cache = <String, ({String? content, WeekType type, _ProgramSlots slots})>{};
+
+  _ProgramSlots of(ProgramRecord program) {
+    final hit = _cache[program.id];
+    if (hit != null &&
+        hit.content == program.contentJson &&
+        hit.type == program.weekType) {
+      return hit.slots;
+    }
+    final slots = _compute(program);
+    _cache[program.id] = (
+      content: program.contentJson,
+      type: program.weekType,
+      slots: slots,
+    );
+    return slots;
+  }
+
+  void retainAll(Set<String> programIds) =>
+      _cache.removeWhere((id, _) => !programIds.contains(id));
+
+  static _ProgramSlots _compute(ProgramRecord program) {
+    if (program.contentJson == null) {
+      return (base: _partsPerWeek, aux: 0);
+    }
+    final week =
+        Week.fromJson(jsonDecode(program.contentJson!) as Map<String, dynamic>);
+    final schedule = buildSchedule(week, 18 * 60, 105,
+        circuitOverseer: program.weekType == WeekType.circuitOverseerVisit);
+    var base = 1; // chairman
+    var aux = 0;
+    for (final row in schedule.rows) {
+      base += row.slots;
+      aux += row.auxSlots;
+    }
+    return (base: base, aux: aux);
+  }
+}
 
 /// Fallback when a program has no content snapshot yet.
 const _partsPerWeek = 14;
@@ -196,6 +254,7 @@ Project _toCard(
   ProjectData d,
   Map<(String, Hall), int> counts,
   CongregationSettings? congregationSettings,
+  _SlotTotals slotTotals,
 ) {
   final weeks = [for (final p in d.programs) p.date];
   final weekProgress = <WeekProgress>[];
@@ -207,21 +266,8 @@ Project _toCard(
     final mainCount = counts[(program.id, Hall.main)] ?? 0;
     final auxCount = auxRoom ? (counts[(program.id, Hall.aux)] ?? 0) : 0;
 
-    int programTotal;
-    if (program.contentJson == null) {
-      programTotal = _partsPerWeek;
-    } else {
-      final week = Week.fromJson(
-          jsonDecode(program.contentJson!) as Map<String, dynamic>);
-      final schedule = buildSchedule(week, 18 * 60, 105,
-          circuitOverseer:
-              program.weekType == WeekType.circuitOverseerVisit);
-      programTotal = 1; // chairman
-      for (final row in schedule.rows) {
-        programTotal += row.slots;
-        if (auxRoom) programTotal += row.auxSlots;
-      }
-    }
+    final slots = slotTotals.of(program);
+    final programTotal = slots.base + (auxRoom ? slots.aux : 0);
     final programDone = min(mainCount + auxCount, programTotal);
     weekProgress.add(
         (label: program.date, done: programDone, total: programTotal));

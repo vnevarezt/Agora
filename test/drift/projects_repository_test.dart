@@ -9,10 +9,12 @@ import 'package:agora/data/db/app_database.dart';
 import 'package:agora/data/repos/congregations_repository.dart';
 import 'package:agora/data/repos/projects_repository.dart';
 import 'package:agora/models/congregation_settings.dart';
+import 'package:agora/models/hall.dart';
 import 'package:agora/models/program_type_ids.dart';
 import 'package:agora/models/week_type.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
+import 'package:agora/state/program_content.dart';
 
 void main() {
   late AppDatabase db;
@@ -133,5 +135,45 @@ void main() {
     expect(stored.settings.auxRoom, true);
     expect(stored.settings.midweekDay, 0);
     expect(stored.settings.midweekTime, '19:00'); // untouched default
+  });
+
+  test('assignment counts group per program and hall, ignoring tombstones',
+      () async {
+    await projects()
+        .create(name: 'P', congregationId: '', weeks: ['2026-07-06']);
+    final programId = (await snapshot()).single.programs.single.id;
+    final programs = container.read(programsRepositoryProvider);
+
+    await programs.saveSlotNames(
+        programId: programId,
+        slotKey: 'te0',
+        hall: Hall.main,
+        names: ['Ana', 'Luis']);
+    await programs.saveSlotNames(
+        programId: programId,
+        slotKey: 'se0',
+        hall: Hall.aux,
+        names: ['Marta']);
+
+    expect(await projects().watchAssignmentCounts().first, {
+      (programId, Hall.main): 2,
+      (programId, Hall.aux): 1,
+    });
+
+    // Clearing a name tombstones its row; it must leave the count.
+    await programs.saveSlotNames(
+        programId: programId,
+        slotKey: 'te0',
+        hall: Hall.main,
+        names: ['Ana', '']);
+
+    expect(await projects().watchAssignmentCounts().first, {
+      (programId, Hall.main): 1,
+      (programId, Hall.aux): 1,
+    });
+  });
+
+  test('assignment counts start empty', () async {
+    expect(await projects().watchAssignmentCounts().first, isEmpty);
   });
 }

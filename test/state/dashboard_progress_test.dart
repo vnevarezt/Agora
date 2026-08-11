@@ -16,6 +16,7 @@ import 'package:agora/data/db/app_database.dart';
 import 'package:agora/models/hall.dart';
 import 'package:agora/models/project.dart';
 import 'package:agora/models/week.dart';
+import 'package:agora/models/week_type.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
 import 'package:agora/state/program_content.dart';
@@ -76,5 +77,65 @@ void main() {
     c = await settled();
     expect(c.done, 2);
     expect(c.status, ProjectStatus.complete);
+  });
+
+  // The card totals are cached per program, so a snapshot or week-type change
+  // has to invalidate that entry.
+  test('totals follow snapshot and week-type changes', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final container = ProviderContainer(overrides: [
+      dbProvider.overrideWithValue(db),
+    ]);
+    addTearDown(container.dispose);
+
+    final projects = container.read(projectsRepositoryProvider);
+    final programs = container.read(programsRepositoryProvider);
+    await projects.create(
+        name: 'P', congregationId: '', weeks: ['7-13 DE JULIO']);
+    final program = (await projects.watchAll().first).single.programs.single;
+
+    Week weekWith({required bool withStudy}) => Week(
+          date: '7-13 DE JULIO',
+          parts: [
+            const Part(
+                section: Section.treasures,
+                number: 1,
+                title: 'Lectura de la Biblia',
+                minutes: 4),
+            if (withStudy)
+              const Part(
+                  section: Section.christianLife,
+                  number: 2,
+                  title: 'Estudio biblico de la congregacion',
+                  minutes: 30),
+          ],
+        );
+
+    await programs.setContent(program.id, weekWith(withStudy: false));
+
+    final sub = container.listen(projectsProvider, (_, _) {});
+    addTearDown(sub.close);
+
+    Future<Project> settled() async {
+      for (var i = 0; i < 10; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      return container.read(projectsProvider).single;
+    }
+
+    // chairman + student
+    expect((await settled()).total, 2);
+
+    // A new snapshot adds the study: conductor + reader.
+    await programs.setContent(program.id, weekWith(withStudy: true));
+    expect((await settled()).total, 4);
+
+    // On a circuit overseer visit the study becomes a single speaker.
+    await programs.setWeekType(program.id, WeekType.circuitOverseerVisit);
+    expect((await settled()).total, 3);
+
+    await programs.setWeekType(program.id, WeekType.normal);
+    expect((await settled()).total, 4);
   });
 }
