@@ -43,13 +43,17 @@ class MobileTabs extends ConsumerWidget {
 
 /// Fixed mobile bottom bar (`.bottom-bar`): frosted glass with the progress
 /// ring and a full-width Export button.
-class MobileBottomBar extends ConsumerWidget {
+///
+/// Deliberately not a Consumer: a blur is the most expensive thing this app
+/// asks of the GPU, and watching the progress here rebuilt — and so repainted
+/// — the whole frosted layer on every name assigned. The ring watches it
+/// instead, behind a RepaintBoundary so its repaints stay off the blur.
+class MobileBottomBar extends StatelessWidget {
   const MobileBottomBar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = context.tokens;
-    final progreso = ref.watch(progressProvider);
     final safeBottom = MediaQuery.paddingOf(context).bottom;
 
     return ClipRect(
@@ -61,17 +65,25 @@ class MobileBottomBar extends ConsumerWidget {
             color: t.surface.withValues(alpha: 0.88),
             border: Border(top: BorderSide(color: t.border)),
           ),
-          child: Row(
+          child: const Row(
             children: [
-              ProgressRing(done: progreso.done, total: progreso.total),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: ExportButton(variant: ExportVariant.full),
-              ),
+              RepaintBoundary(child: _BottomBarProgress()),
+              SizedBox(width: 12),
+              Expanded(child: ExportButton(variant: ExportVariant.full)),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+class _BottomBarProgress extends ConsumerWidget {
+  const _BottomBarProgress();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progreso = ref.watch(progressProvider);
+    return ProgressRing(done: progreso.done, total: progreso.total);
   }
 }

@@ -38,41 +38,67 @@ class WorkspacePanel extends ConsumerWidget {
     final side = isMobile ? 14.0 : 18.0;
     final tr = context.t;
 
-    return ListView(
-      padding: EdgeInsets.fromLTRB(side, side, side, isMobile ? 150 : 120),
-      children: [
-        PartCard(view: chairmanView(tr)),
-        const SizedBox(height: 22),
-        _SectionBlock(
-            title: tr.workspace.sectionOpening, rows: sched.opening, aux: aux),
-        _SectionBlock(
-          title: tr.workspace.sectionTreasures,
-          dotColor: kSectionColors[Section.treasures],
-          rows: sched.treasures,
-          aux: aux,
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(side, side, side, 22),
+          sliver: SliverToBoxAdapter(child: PartCard(view: chairmanView(tr))),
         ),
-        _SectionBlock(
-          title: tr.workspace.sectionMinistry,
-          dotColor: kSectionColors[Section.ministry],
-          rows: sched.ministry,
-          aux: aux,
-        ),
-        _SectionBlock(
-          title: tr.workspace.sectionChristianLife,
-          dotColor: kSectionColors[Section.christianLife],
-          rows: sched.christianLife,
-          aux: aux,
-        ),
+        for (final section in [
+          (title: tr.workspace.sectionOpening, dot: null, rows: sched.opening),
+          (
+            title: tr.workspace.sectionTreasures,
+            dot: kSectionColors[Section.treasures],
+            rows: sched.treasures,
+          ),
+          (
+            title: tr.workspace.sectionMinistry,
+            dot: kSectionColors[Section.ministry],
+            rows: sched.ministry,
+          ),
+          (
+            title: tr.workspace.sectionChristianLife,
+            dot: kSectionColors[Section.christianLife],
+            rows: sched.christianLife,
+          ),
+        ]) ...[
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: side),
+            sliver: SliverToBoxAdapter(
+              child: _SectionCounter(
+                  title: section.title,
+                  dotColor: section.dot,
+                  rows: section.rows,
+                  aux: aux),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(side, 0, side, 22),
+            sliver: SliverList.builder(
+              itemCount: section.rows.length,
+              itemBuilder: (context, i) => Padding(
+                padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                child: PartCard(
+                    view: mapRow(section.rows[i], auxActive: aux, tr: tr)),
+              ),
+            ),
+          ),
+        ],
+        SliverToBoxAdapter(child: SizedBox(height: isMobile ? 128 : 98)),
       ],
     );
   }
 }
 
-/// One program section: header with its own counter + its cards.
-class _SectionBlock extends ConsumerWidget {
-  const _SectionBlock({
+/// The section's assigned/total counter.
+///
+/// Its own widget with a `select` so a name landing in one section rebuilds
+/// that header alone: watching the form from the block rebuilt every card of
+/// every section, which also defeated the per-slot `select` in [SlotField].
+class _SectionCounter extends ConsumerWidget {
+  const _SectionCounter({
     required this.title,
-    this.dotColor,
+    required this.dotColor,
     required this.rows,
     required this.aux,
   });
@@ -84,33 +110,25 @@ class _SectionBlock extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final f = ref.watch(formProvider);
-    var total = 0;
-    var done = 0;
-    for (final row in rows) {
-      total += row.slots;
-      done += filledNames(f.main[row.id], row.slots);
-      if (aux && row.auxSlots > 0) {
-        total += row.auxSlots;
-        done += filledNames(f.auxiliary[row.id], row.auxSlots);
+    final progress = ref.watch(formProvider.select((f) {
+      var total = 0;
+      var done = 0;
+      for (final row in rows) {
+        total += row.slots;
+        done += filledNames(f.main[row.id], row.slots);
+        if (aux && row.auxSlots > 0) {
+          total += row.auxSlots;
+          done += filledNames(f.auxiliary[row.id], row.auxSlots);
+        }
       }
-    }
+      return (done: done, total: total);
+    }));
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(
-              title: title, dotColor: dotColor, done: done, total: total),
-          for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0) const SizedBox(height: 10),
-            PartCard(
-                view: mapRow(rows[i], auxActive: aux, tr: context.t)),
-          ],
-        ],
-      ),
-    );
+    return SectionHeader(
+        title: title,
+        dotColor: dotColor,
+        done: progress.done,
+        total: progress.total);
   }
 }
 

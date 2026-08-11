@@ -57,7 +57,7 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
           ModePill(icon: Icons.cloud_outlined, label: tr.auth.cloud.pill),
           const SizedBox(height: 14),
           FadeThroughSwitcher(
-            duration: Motion.fast,
+            duration: Motion.of(context, Motion.fast),
             child: Column(
               key: ValueKey(_mode),
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +276,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
             defaultTargetPlatform != TargetPlatform.macOS);
 
     return AnimatedSize(
-      duration: Motion.med,
+      duration: Motion.of(context, Motion.med),
       curve: Motion.curve,
       alignment: Alignment.topCenter,
       child: Column(

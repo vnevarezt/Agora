@@ -559,7 +559,7 @@ class _CongregationChip extends StatelessWidget {
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           height: 34,
           padding: const EdgeInsets.symmetric(horizontal: 13),
           decoration: BoxDecoration(
@@ -618,7 +618,7 @@ class _AddChip extends StatelessWidget {
           color: hovered ? t.accent : t.border,
           radius: Dimens.rPill,
           child: AnimatedContainer(
-            duration: Motion.instant,
+            duration: Motion.of(context, Motion.instant),
             height: 34,
             padding: const EdgeInsets.symmetric(horizontal: 13),
             decoration: BoxDecoration(

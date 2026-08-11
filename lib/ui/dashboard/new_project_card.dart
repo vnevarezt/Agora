@@ -44,7 +44,7 @@ class _NewProjectCardState extends State<NewProjectCard> {
         onTap: widget.onTap,
         child: TweenAnimationBuilder<double>(
           tween: Tween(end: _hovered && enabled ? 1.0 : 0.0),
-          duration: Motion.med,
+          duration: Motion.of(context, Motion.med),
           curve: Motion.curve,
           builder: (context, a, _) {
             final border = Color.lerp(t.border, t.accent, a)!;

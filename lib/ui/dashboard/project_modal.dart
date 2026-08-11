@@ -317,7 +317,7 @@ class _WeekToggle extends StatelessWidget {
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
           decoration: BoxDecoration(
             color: active ? t.accent : t.surface,

@@ -56,7 +56,7 @@ class SegmentedTabs extends StatelessWidget {
       onTap: onChanged == null || activo ? null : () => onChanged!(i),
       builder: (context, hovered, _) {
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
             color: activo

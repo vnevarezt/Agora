@@ -316,7 +316,7 @@ class _RoleOption extends StatelessWidget {
       onTap: onTap,
       builder: (context, hovered, _) {
         return AnimatedContainer(
-          duration: Motion.instant,
+          duration: Motion.of(context, Motion.instant),
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
           decoration: BoxDecoration(
             color: selected ? t.accentTint : t.surface,
