@@ -28,7 +28,7 @@ class GoogleButton extends StatelessWidget {
     return Pressable(
       onTap: enabled ? onPressed : null,
       builder: (context, hovered, pressed) => AnimatedContainer(
-        duration: Motion.instant,
+        duration: Motion.of(context, Motion.instant),
         height: 46,
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : t.surface,

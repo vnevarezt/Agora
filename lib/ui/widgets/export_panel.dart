@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'export_actions.dart';
+import 'motion.dart';
 
 /// Format picker (PDF / Imagen) + the two export actions (Guardar / Compartir)
 /// for the current sheet. Shared by the desktop export menu and the mobile
@@ -135,7 +136,7 @@ class _Segment extends StatelessWidget {
       child: Pressable(
         onTap: onTap,
         builder: (context, hovered, _) => AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
+          duration: Motion.of(context, Motion.instant),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: selected

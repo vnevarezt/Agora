@@ -13,7 +13,7 @@ class AuthErrorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: Motion.fast,
+      duration: Motion.of(context, Motion.fast),
       curve: Motion.curve,
       alignment: Alignment.topCenter,
       child: message == null
