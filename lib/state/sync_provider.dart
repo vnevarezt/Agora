@@ -117,6 +117,9 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
 /// What this user may PUSH in [congregationId] — the sync engine's write
 /// filter, with the three-state resolution the raw membership can't express:
 ///
+///  - no cloud session at all → null ("don't filter"): signed out, or Firebase
+///    down. Without this the empty membership list reads as a revocation and
+///    locks the user out of their OWN data;
 ///  - never shared / not shared here → null ("don't filter": a local
 ///    congregation has no keyring, so the engine leaves its outbox queued);
 ///  - shared, membership still loading or errored → null (same "don't
@@ -130,6 +133,7 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
 /// [rightsProvider] is the UI-facing view of the same resolution.
 final pushCapabilitiesProvider =
     Provider.family<MemberCapabilities?, String>((ref, congregationId) {
+  if (ref.watch(syncUidProvider) == null) return null;
   final shared = ref.watch(sharedCongregationIdsProvider).value;
   if (shared == null || !shared.contains(congregationId)) return null;
   final memberships = ref.watch(myMembershipsProvider);
