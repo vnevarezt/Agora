@@ -25,8 +25,10 @@ void main() {
   Future<ProviderContainer> build({
     Stream<Set<String>>? shared,
     Stream<List<Membership>>? memberships,
+    String? uid = 'me',
   }) async {
     final c = ProviderContainer(overrides: [
+      syncUidProvider.overrideWithValue(uid),
       sharedCongregationIdsProvider.overrideWith((ref) => shared ?? pending()),
       myMembershipsProvider.overrideWith((ref) => memberships ?? pending()),
     ]);
@@ -69,6 +71,21 @@ void main() {
     final c = await build(shared: Stream.value(const {cid}));
     addTearDown(c.dispose);
     expect(c.read(pushCapabilitiesProvider(cid)), isNull);
+  });
+
+  // Signing out, going back to local mode and a failed Firebase init all look
+  // identical to a revocation from the membership stream alone: an empty list
+  // over a populated syncState. Reading that as "revoked" locked the user out
+  // of their OWN congregations.
+  test('no cloud session → null even when shared (not a revocation)', () async {
+    final c = await build(
+      uid: null,
+      shared: Stream.value(const {cid}),
+      memberships: Stream.value(const []),
+    );
+    addTearDown(c.dispose);
+    expect(c.read(pushCapabilitiesProvider(cid)), isNull);
+    expect(c.read(rightsProvider(cid)).admin, isTrue);
   });
 
   test('revoked (shared, no membership) → read-only', () async {
