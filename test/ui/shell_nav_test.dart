@@ -109,7 +109,7 @@ void main() {
     // también lo tiene la tarjeta de Seguridad y sería ambiguo).
     await tester.tap(find.text('Bloquear'));
     await tester.pumpAndSettle();
-    expect(find.text('Perfil local · este dispositivo'), findsOneWidget);
+    expect(find.text(t.auth.local.profileCaption), findsOneWidget);
     expect(find.text('Desbloquear'), findsOneWidget);
   });
 }

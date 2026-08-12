@@ -117,11 +117,11 @@ class Translations$portada$es {
 	/// es: 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.'
 	String get legal => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.';
 
-	/// es: 'La nube no está configurada en esta instalación; puedes usar el modo local.'
-	String get cloudUnavailable => 'La nube no está configurada en esta instalación; puedes usar el modo local.';
+	/// es: 'Esta versión de la app todavía no puede usar cuentas; puedes guardar todo solo en este dispositivo.'
+	String get cloudUnavailable => 'Esta versión de la app todavía no puede usar cuentas; puedes guardar todo solo en este dispositivo.';
 
-	/// es: 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.'
-	String get cloudUnsupported => 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.';
+	/// es: 'En este Mac todavía no se pueden usar cuentas; puedes guardar todo solo en este dispositivo.'
+	String get cloudUnsupported => 'En este Mac todavía no se pueden usar cuentas; puedes guardar todo solo en este dispositivo.';
 }
 
 // Path: auth
@@ -132,8 +132,8 @@ class Translations$auth$es {
 
 	// Translations
 
-	/// es: 'Elegir otro modo'
-	String get chooseOther => 'Elegir otro modo';
+	/// es: 'Elegir otra opción'
+	String get chooseOther => 'Elegir otra opción';
 
 	late final Translations$auth$local$es local = Translations$auth$local$es.internal(_root);
 	late final Translations$auth$cloudLock$es cloudLock = Translations$auth$cloudLock$es.internal(_root);
@@ -153,14 +153,14 @@ class Translations$security$es {
 	/// es: 'Seguridad'
 	String get title => 'Seguridad';
 
-	/// es: 'Cuenta local que protege tus datos cifrados en este dispositivo.'
-	String get desc => 'Cuenta local que protege tus datos cifrados en este dispositivo.';
+	/// es: 'Protege la información guardada en este dispositivo.'
+	String get desc => 'Protege la información guardada en este dispositivo.';
 
 	/// es: 'Cambiar contraseña'
 	String get changePassword => 'Cambiar contraseña';
 
-	/// es: 'Vuelve a proteger la llave de cifrado con una contraseña nueva.'
-	String get changePasswordDesc => 'Vuelve a proteger la llave de cifrado con una contraseña nueva.';
+	/// es: 'Elige una contraseña nueva para abrir la app.'
+	String get changePasswordDesc => 'Elige una contraseña nueva para abrir la app.';
 
 	/// es: 'Cambiar'
 	String get change => 'Cambiar';
@@ -183,8 +183,8 @@ class Translations$security$es {
 	/// es: 'Bloquear ahora'
 	String get lockNow => 'Bloquear ahora';
 
-	/// es: 'Cierra la sesión local; pedirá la contraseña al volver.'
-	String get lockNowDesc => 'Cierra la sesión local; pedirá la contraseña al volver.';
+	/// es: 'Cierra la app; te pedirá la contraseña al volver.'
+	String get lockNowDesc => 'Cierra la app; te pedirá la contraseña al volver.';
 
 	/// es: 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.'
 	String get lockNowDescCloud => 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.';
@@ -222,14 +222,14 @@ class Translations$cloudSync$es {
 
 	// Translations
 
-	/// es: 'Sincronización en la nube'
-	String get title => 'Sincronización en la nube';
+	/// es: 'Sincronización'
+	String get title => 'Sincronización';
 
-	/// es: 'Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.'
-	String get desc => 'Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.';
+	/// es: 'Tu información se guarda protegida y aparece sola al iniciar sesión desde otro dispositivo.'
+	String get desc => 'Tu información se guarda protegida y aparece sola al iniciar sesión desde otro dispositivo.';
 
-	/// es: 'Inicia sesión en la nube para activar la sincronización.'
-	String get signedOut => 'Inicia sesión en la nube para activar la sincronización.';
+	/// es: 'Inicia sesión para activar la sincronización.'
+	String get signedOut => 'Inicia sesión para activar la sincronización.';
 
 	/// es: 'No se pudo completar. Inténtalo de nuevo.'
 	String get unknownError => 'No se pudo completar. Inténtalo de nuevo.';
@@ -252,8 +252,8 @@ class Translations$cloudSync$es {
 	/// es: 'Se sincronizará automáticamente'
 	String get neverSynced => 'Se sincronizará automáticamente';
 
-	/// es: 'Ya no tienes acceso a una congregación; tus datos locales se conservan.'
-	String get errorPermission => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.';
+	/// es: 'Ya no tienes acceso a una congregación. Lo que tienes en este dispositivo se conserva.'
+	String get errorPermission => 'Ya no tienes acceso a una congregación. Lo que tienes en este dispositivo se conserva.';
 
 	/// es: 'Sin conexión; se reintentará automáticamente.'
 	String get errorOffline => 'Sin conexión; se reintentará automáticamente.';
@@ -279,17 +279,17 @@ class Translations$account$es {
 
 	// Translations
 
-	/// es: 'Cuenta en la nube'
-	String get title => 'Cuenta en la nube';
+	/// es: 'Tu cuenta'
+	String get title => 'Tu cuenta';
 
 	/// es: 'Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.'
 	String get desc => 'Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.';
 
-	/// es: 'Nube no configurada'
-	String get notConfigured => 'Nube no configurada';
+	/// es: 'Cuentas no disponibles'
+	String get notConfigured => 'Cuentas no disponibles';
 
-	/// es: 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.'
-	String get notConfiguredDesc => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.';
+	/// es: 'Esta versión de la app todavía no puede usar cuentas: todo se guarda solo en este dispositivo.'
+	String get notConfiguredDesc => 'Esta versión de la app todavía no puede usar cuentas: todo se guarda solo en este dispositivo.';
 
 	/// es: 'Iniciar sesión'
 	String get signIn => 'Iniciar sesión';
@@ -327,14 +327,14 @@ class Translations$account$es {
 	/// es: 'Borrar mi cuenta'
 	String get deleteAccount => 'Borrar mi cuenta';
 
-	/// es: 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.'
-	String get deleteAccountDesc => 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.';
+	/// es: 'Elimina tu cuenta y toda la información de este dispositivo.'
+	String get deleteAccountDesc => 'Elimina tu cuenta y toda la información de este dispositivo.';
 
 	/// es: 'Borrar mi cuenta'
 	String get deleteTitle => 'Borrar mi cuenta';
 
-	/// es: 'Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.'
-	String get deleteWarning => 'Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.';
+	/// es: 'Se borrará tu cuenta y TODA la información de este dispositivo. Esto no se puede deshacer. Las congregaciones donde eres la única persona se eliminarán; de las demás simplemente saldrás.'
+	String get deleteWarning => 'Se borrará tu cuenta y TODA la información de este dispositivo. Esto no se puede deshacer. Las congregaciones donde eres la única persona se eliminarán; de las demás simplemente saldrás.';
 
 	/// es: 'No puedes borrar tu cuenta todavía: eres el único administrador de {congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.'
 	String deleteBlocked({required Object congregations}) => 'No puedes borrar tu cuenta todavía: eres el único administrador de ${congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.';
@@ -943,14 +943,14 @@ class Translations$settings$es {
 	/// es: 'Datos'
 	String get data => 'Datos';
 
-	/// es: 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.'
-	String get dataDesc => 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.';
+	/// es: 'Copia de seguridad de tus congregaciones, participantes y programas, protegida con una contraseña. También sirve para llevar tu información a otro dispositivo.'
+	String get dataDesc => 'Copia de seguridad de tus congregaciones, participantes y programas, protegida con una contraseña. También sirve para llevar tu información a otro dispositivo.';
 
 	/// es: 'Exportar datos'
 	String get exportData => 'Exportar datos';
 
-	/// es: 'Genera un archivo .agora cifrado con contraseña'
-	String get exportDataDesc => 'Genera un archivo .agora cifrado con contraseña';
+	/// es: 'Crea un archivo .agora protegido con la contraseña que elijas'
+	String get exportDataDesc => 'Crea un archivo .agora protegido con la contraseña que elijas';
 
 	/// es: 'Exportar'
 	String get export => 'Exportar';
@@ -1003,11 +1003,11 @@ class Translations$settings$es {
 	/// es: 'Sesión'
 	String get session => 'Sesión';
 
-	/// es: 'Estás usando la app en modo local en este dispositivo.'
-	String get sessionDesc => 'Estás usando la app en modo local en este dispositivo.';
+	/// es: 'Tu información se guarda solo en este dispositivo.'
+	String get sessionDesc => 'Tu información se guarda solo en este dispositivo.';
 
-	/// es: 'Modo local'
-	String get localMode => 'Modo local';
+	/// es: 'Solo en este dispositivo'
+	String get localMode => 'Solo en este dispositivo';
 
 	/// es: 'Los datos viven solo en este dispositivo'
 	String get localModeDesc => 'Los datos viven solo en este dispositivo';
@@ -1735,8 +1735,8 @@ class Translations$auth$local$es {
 
 	// Translations
 
-	/// es: 'Modo local'
-	String get pill => 'Modo local';
+	/// es: 'Solo en este dispositivo'
+	String get pill => 'Solo en este dispositivo';
 
 	/// es: 'Crea tu perfil local'
 	String get createTitle => 'Crea tu perfil local';
@@ -1789,14 +1789,14 @@ class Translations$auth$local$es {
 	/// es: 'Las contraseñas no coinciden.'
 	String get mismatch => 'Las contraseñas no coinciden.';
 
-	/// es: 'Perfil local · este dispositivo'
-	String get profileCaption => 'Perfil local · este dispositivo';
+	/// es: 'Tu perfil · solo en este dispositivo'
+	String get profileCaption => 'Tu perfil · solo en este dispositivo';
 
 	/// es: 'Desbloquear'
 	String get unlockButton => 'Desbloquear';
 
-	/// es: 'Descifrando…'
-	String get unlocking => 'Descifrando…';
+	/// es: 'Abriendo…'
+	String get unlocking => 'Abriendo…';
 
 	/// es: 'Contraseña incorrecta.'
 	String get wrongPassword => 'Contraseña incorrecta.';
@@ -1843,8 +1843,8 @@ class Translations$auth$cloud$es {
 
 	// Translations
 
-	/// es: 'Modo nube'
-	String get pill => 'Modo nube';
+	/// es: 'Con tu cuenta'
+	String get pill => 'Con tu cuenta';
 
 	/// es: 'Inicia sesión'
 	String get loginTitle => 'Inicia sesión';
@@ -1912,11 +1912,11 @@ class Translations$auth$cloud$es {
 	/// es: 'Inicia sesión'
 	String get login => 'Inicia sesión';
 
-	/// es: 'Nube no configurada'
-	String get unavailableTitle => 'Nube no configurada';
+	/// es: 'Cuentas no disponibles'
+	String get unavailableTitle => 'Cuentas no disponibles';
 
-	/// es: 'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.'
-	String get unavailableDesc => 'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.';
+	/// es: 'Esta versión de la app todavía no puede usar cuentas. Puedes guardar todo solo en este dispositivo.'
+	String get unavailableDesc => 'Esta versión de la app todavía no puede usar cuentas. Puedes guardar todo solo en este dispositivo.';
 }
 
 // Path: auth.reset
@@ -1930,8 +1930,8 @@ class Translations$auth$reset$es {
 	/// es: 'Borrar todos los datos'
 	String get title => 'Borrar todos los datos';
 
-	/// es: 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.'
-	String get warning => 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.';
+	/// es: 'Sin la contraseña no hay forma de recuperar tu información: se borrará todo lo que tienes en este dispositivo y empezarás de cero.'
+	String get warning => 'Sin la contraseña no hay forma de recuperar tu información: se borrará todo lo que tienes en este dispositivo y empezarás de cero.';
 
 	/// es: 'BORRAR'
 	String get confirmPhrase => 'BORRAR';
@@ -1951,8 +1951,8 @@ class Translations$auth$keyError$es {
 
 	// Translations
 
-	/// es: 'No se pudo acceder al llavero del sistema'
-	String get title => 'No se pudo acceder al llavero del sistema';
+	/// es: 'No se pudo acceder al almacén seguro del dispositivo'
+	String get title => 'No se pudo acceder al almacén seguro del dispositivo';
 
 	/// es: 'Reintentar'
 	String get retry => 'Reintentar';
@@ -2040,10 +2040,10 @@ extension on Translations {
 			'portada.noAccountTitle' => 'Continuar sin cuenta',
 			'portada.noAccountCaption' => 'Solo en este dispositivo',
 			'portada.legal' => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.',
-			'portada.cloudUnavailable' => 'La nube no está configurada en esta instalación; puedes usar el modo local.',
-			'portada.cloudUnsupported' => 'El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local.',
-			'auth.chooseOther' => 'Elegir otro modo',
-			'auth.local.pill' => 'Modo local',
+			'portada.cloudUnavailable' => 'Esta versión de la app todavía no puede usar cuentas; puedes guardar todo solo en este dispositivo.',
+			'portada.cloudUnsupported' => 'En este Mac todavía no se pueden usar cuentas; puedes guardar todo solo en este dispositivo.',
+			'auth.chooseOther' => 'Elegir otra opción',
+			'auth.local.pill' => 'Solo en este dispositivo',
 			'auth.local.createTitle' => 'Crea tu perfil local',
 			'auth.local.createSub' => 'Se guarda únicamente en este dispositivo.',
 			'auth.local.migrateTitle' => 'Protege tus datos',
@@ -2061,9 +2061,9 @@ extension on Translations {
 			'auth.local.working' => 'Protegiendo…',
 			'auth.local.tooShort' => 'La contraseña debe tener al menos 8 caracteres.',
 			'auth.local.mismatch' => 'Las contraseñas no coinciden.',
-			'auth.local.profileCaption' => 'Perfil local · este dispositivo',
+			'auth.local.profileCaption' => 'Tu perfil · solo en este dispositivo',
 			'auth.local.unlockButton' => 'Desbloquear',
-			'auth.local.unlocking' => 'Descifrando…',
+			'auth.local.unlocking' => 'Abriendo…',
 			'auth.local.wrongPassword' => 'Contraseña incorrecta.',
 			'auth.local.startOver' => '¿Empezar de cero?',
 			'auth.local.createAnother' => 'Crear otro perfil',
@@ -2073,7 +2073,7 @@ extension on Translations {
 			'auth.cloudLock.unlock' => 'Desbloquear',
 			'auth.cloudLock.signOutQuestion' => '¿No eres tú?',
 			'auth.cloudLock.signOut' => 'Cerrar sesión',
-			'auth.cloud.pill' => 'Modo nube',
+			'auth.cloud.pill' => 'Con tu cuenta',
 			'auth.cloud.loginTitle' => 'Inicia sesión',
 			'auth.cloud.loginSub' => 'Tus congregaciones y proyectos te esperan.',
 			'auth.cloud.registerTitle' => 'Crea tu cuenta',
@@ -2096,19 +2096,19 @@ extension on Translations {
 			'auth.cloud.register' => 'Regístrate',
 			'auth.cloud.hasAccount' => '¿Ya tienes cuenta?',
 			'auth.cloud.login' => 'Inicia sesión',
-			'auth.cloud.unavailableTitle' => 'Nube no configurada',
-			'auth.cloud.unavailableDesc' => 'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.',
+			'auth.cloud.unavailableTitle' => 'Cuentas no disponibles',
+			'auth.cloud.unavailableDesc' => 'Esta versión de la app todavía no puede usar cuentas. Puedes guardar todo solo en este dispositivo.',
 			'auth.reset.title' => 'Borrar todos los datos',
-			'auth.reset.warning' => 'Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.',
+			'auth.reset.warning' => 'Sin la contraseña no hay forma de recuperar tu información: se borrará todo lo que tienes en este dispositivo y empezarás de cero.',
 			'auth.reset.confirmPhrase' => 'BORRAR',
 			'auth.reset.confirmHint' => ({required Object phrase}) => 'Escribe ${phrase} para confirmar',
 			'auth.reset.button' => 'Borrar todo',
-			'auth.keyError.title' => 'No se pudo acceder al llavero del sistema',
+			'auth.keyError.title' => 'No se pudo acceder al almacén seguro del dispositivo',
 			'auth.keyError.retry' => 'Reintentar',
 			'security.title' => 'Seguridad',
-			'security.desc' => 'Cuenta local que protege tus datos cifrados en este dispositivo.',
+			'security.desc' => 'Protege la información guardada en este dispositivo.',
 			'security.changePassword' => 'Cambiar contraseña',
-			'security.changePasswordDesc' => 'Vuelve a proteger la llave de cifrado con una contraseña nueva.',
+			'security.changePasswordDesc' => 'Elige una contraseña nueva para abrir la app.',
 			'security.change' => 'Cambiar',
 			'security.current' => 'Contraseña actual',
 			'security.newPassword' => 'Contraseña nueva',
@@ -2116,7 +2116,7 @@ extension on Translations {
 			'security.wrongCurrent' => 'La contraseña actual no es correcta.',
 			'security.changed' => 'Contraseña actualizada.',
 			'security.lockNow' => 'Bloquear ahora',
-			'security.lockNowDesc' => 'Cierra la sesión local; pedirá la contraseña al volver.',
+			'security.lockNowDesc' => 'Cierra la app; te pedirá la contraseña al volver.',
 			'security.lockNowDescCloud' => 'Bloquea la app; pedirá el desbloqueo del dispositivo al volver.',
 			'security.lock' => 'Bloquear',
 			'security.descCloud' => 'Protege el acceso a la app en este dispositivo.',
@@ -2126,9 +2126,9 @@ extension on Translations {
 			'security.deviceUnlockPrompt' => 'Confirma tu identidad para activar el desbloqueo con el dispositivo.',
 			'security.unlockPrompt' => 'Desbloquea tus datos de Agora.',
 			'security.deviceUnlockKeyMissing' => 'El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo.',
-			'cloudSync.title' => 'Sincronización en la nube',
-			'cloudSync.desc' => 'Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.',
-			'cloudSync.signedOut' => 'Inicia sesión en la nube para activar la sincronización.',
+			'cloudSync.title' => 'Sincronización',
+			'cloudSync.desc' => 'Tu información se guarda protegida y aparece sola al iniciar sesión desde otro dispositivo.',
+			'cloudSync.signedOut' => 'Inicia sesión para activar la sincronización.',
 			'cloudSync.unknownError' => 'No se pudo completar. Inténtalo de nuevo.',
 			'cloudSync.ready' => 'Sincronización activa',
 			'cloudSync.statusSyncing' => 'Sincronizando…',
@@ -2136,16 +2136,16 @@ extension on Translations {
 			'cloudSync.statusError' => 'Error de sincronización',
 			'cloudSync.lastSync' => ({required Object when}) => 'Última sincronización: ${when}',
 			'cloudSync.neverSynced' => 'Se sincronizará automáticamente',
-			'cloudSync.errorPermission' => 'Ya no tienes acceso a una congregación; tus datos locales se conservan.',
+			'cloudSync.errorPermission' => 'Ya no tienes acceso a una congregación. Lo que tienes en este dispositivo se conserva.',
 			'cloudSync.errorOffline' => 'Sin conexión; se reintentará automáticamente.',
 			'cloudSync.errorUnknown' => 'Ocurrió un error al sincronizar.',
 			'cloudSync.restoring' => 'Recuperando tus datos…',
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
 			'cloudSync.restoreOffline' => 'Sin conexión. Tus datos se recuperarán al reconectar.',
-			'account.title' => 'Cuenta en la nube',
+			'account.title' => 'Tu cuenta',
 			'account.desc' => 'Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.',
-			'account.notConfigured' => 'Nube no configurada',
-			'account.notConfiguredDesc' => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.',
+			'account.notConfigured' => 'Cuentas no disponibles',
+			'account.notConfiguredDesc' => 'Esta versión de la app todavía no puede usar cuentas: todo se guarda solo en este dispositivo.',
 			'account.signIn' => 'Iniciar sesión',
 			'account.register' => 'Crear cuenta',
 			'account.google' => 'Continuar con Google',
@@ -2158,9 +2158,9 @@ extension on Translations {
 			'account.signOut' => 'Cerrar sesión',
 			'account.dangerZone' => 'Zona de peligro',
 			'account.deleteAccount' => 'Borrar mi cuenta',
-			'account.deleteAccountDesc' => 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.',
+			'account.deleteAccountDesc' => 'Elimina tu cuenta y toda la información de este dispositivo.',
 			'account.deleteTitle' => 'Borrar mi cuenta',
-			'account.deleteWarning' => 'Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.',
+			'account.deleteWarning' => 'Se borrará tu cuenta y TODA la información de este dispositivo. Esto no se puede deshacer. Las congregaciones donde eres la única persona se eliminarán; de las demás simplemente saldrás.',
 			'account.deleteBlocked' => ({required Object congregations}) => 'No puedes borrar tu cuenta todavía: eres el único administrador de ${congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.',
 			'account.deleteReauthEmail' => 'Confirma tu contraseña para continuar.',
 			'account.deleteReauthGoogle' => 'Se te pedirá volver a iniciar sesión con Google para confirmar.',
@@ -2331,9 +2331,9 @@ extension on Translations {
 			'settings.notif.exportsTitle' => 'Exportaciones pendientes',
 			'settings.notif.exportsDesc' => 'Recordar exportar el programa antes del fin de semana',
 			'settings.data' => 'Datos',
-			'settings.dataDesc' => 'Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.',
+			'settings.dataDesc' => 'Copia de seguridad de tus congregaciones, participantes y programas, protegida con una contraseña. También sirve para llevar tu información a otro dispositivo.',
 			'settings.exportData' => 'Exportar datos',
-			'settings.exportDataDesc' => 'Genera un archivo .agora cifrado con contraseña',
+			'settings.exportDataDesc' => 'Crea un archivo .agora protegido con la contraseña que elijas',
 			'settings.export' => 'Exportar',
 			'settings.importData' => 'Importar datos',
 			'settings.importDataDesc' => 'Restaura y fusiona desde un archivo .agora',
@@ -2351,8 +2351,8 @@ extension on Translations {
 			'settings.backupWrongPassword' => 'Contraseña incorrecta',
 			'settings.backupMalformed' => 'El archivo no es una copia de Agora válida',
 			'settings.session' => 'Sesión',
-			'settings.sessionDesc' => 'Estás usando la app en modo local en este dispositivo.',
-			'settings.localMode' => 'Modo local',
+			'settings.sessionDesc' => 'Tu información se guarda solo en este dispositivo.',
+			'settings.localMode' => 'Solo en este dispositivo',
 			'settings.localModeDesc' => 'Los datos viven solo en este dispositivo',
 			'options.timeFormat24' => '24 horas (18:00)',
 			'options.timeFormat12' => '12 horas (6:00 p. m.)',

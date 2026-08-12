@@ -99,8 +99,8 @@ class _Translations$portada$en extends Translations$portada$es {
 	@override String get noAccountTitle => 'Continue without an account';
 	@override String get noAccountCaption => 'Only on this device';
 	@override String get legal => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.';
-	@override String get cloudUnavailable => 'The cloud is not configured on this install; you can use local mode.';
-	@override String get cloudUnsupported => 'Cloud mode isn\'t available on this Mac (requires Apple developer signing); you can use local mode.';
+	@override String get cloudUnavailable => 'This version of the app can\'t use accounts yet; you can keep everything on this device only.';
+	@override String get cloudUnsupported => 'This Mac can\'t use accounts yet; you can keep everything on this device only.';
 }
 
 // Path: auth
@@ -110,7 +110,7 @@ class _Translations$auth$en extends Translations$auth$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get chooseOther => 'Choose another mode';
+	@override String get chooseOther => 'Choose another option';
 	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
 	@override late final _Translations$auth$cloudLock$en cloudLock = _Translations$auth$cloudLock$en._(_root);
 	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
@@ -126,9 +126,9 @@ class _Translations$security$en extends Translations$security$es {
 
 	// Translations
 	@override String get title => 'Security';
-	@override String get desc => 'Local account protecting your encrypted data on this device.';
+	@override String get desc => 'Protects the information kept on this device.';
 	@override String get changePassword => 'Change password';
-	@override String get changePasswordDesc => 'Re-protect the encryption key with a new password.';
+	@override String get changePasswordDesc => 'Pick a new password to open the app.';
 	@override String get change => 'Change';
 	@override String get current => 'Current password';
 	@override String get newPassword => 'New password';
@@ -136,7 +136,7 @@ class _Translations$security$en extends Translations$security$es {
 	@override String get wrongCurrent => 'The current password is not correct.';
 	@override String get changed => 'Password updated.';
 	@override String get lockNow => 'Lock now';
-	@override String get lockNowDesc => 'Closes the local session; the password will be required again.';
+	@override String get lockNowDesc => 'Closes the app; it will ask for your password when you come back.';
 	@override String get lockNowDescCloud => 'Locks the app; device unlock will be required to come back.';
 	@override String get lock => 'Lock';
 	@override String get descCloud => 'Protects access to the app on this device.';
@@ -155,9 +155,9 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Cloud sync';
-	@override String get desc => 'Your data is stored encrypted and restores itself when you sign in on any of your devices.';
-	@override String get signedOut => 'Sign in to the cloud to enable syncing.';
+	@override String get title => 'Sync';
+	@override String get desc => 'Your information is kept protected and shows up on its own when you sign in from another device.';
+	@override String get signedOut => 'Sign in to turn sync on.';
 	@override String get unknownError => 'Couldn\'t complete. Please try again.';
 	@override String get ready => 'Sync is on';
 	@override String get statusSyncing => 'Syncing…';
@@ -165,7 +165,7 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get statusError => 'Sync error';
 	@override String lastSync({required Object when}) => 'Last sync: ${when}';
 	@override String get neverSynced => 'Will sync automatically';
-	@override String get errorPermission => 'You no longer have access to a congregation; your local data is kept.';
+	@override String get errorPermission => 'You no longer have access to a congregation. What you have on this device is kept.';
 	@override String get errorOffline => 'Offline; will retry automatically.';
 	@override String get errorUnknown => 'Something went wrong while syncing.';
 	@override String get restoring => 'Restoring your data…';
@@ -180,10 +180,10 @@ class _Translations$account$en extends Translations$account$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Cloud account';
+	@override String get title => 'Your account';
 	@override String get desc => 'Open your information from another device and share congregations with other people.';
-	@override String get notConfigured => 'Cloud not configured';
-	@override String get notConfiguredDesc => 'This install has no Firebase project: the app runs 100% locally.';
+	@override String get notConfigured => 'Accounts unavailable';
+	@override String get notConfiguredDesc => 'This version of the app can\'t use accounts yet: everything is kept on this device only.';
 	@override String get signIn => 'Sign in';
 	@override String get register => 'Create account';
 	@override String get google => 'Continue with Google';
@@ -196,9 +196,9 @@ class _Translations$account$en extends Translations$account$es {
 	@override String get signOut => 'Sign out';
 	@override String get dangerZone => 'Danger zone';
 	@override String get deleteAccount => 'Delete my account';
-	@override String get deleteAccountDesc => 'Removes your cloud account and all data on this device.';
+	@override String get deleteAccountDesc => 'Deletes your account and all the information on this device.';
 	@override String get deleteTitle => 'Delete my account';
-	@override String get deleteWarning => 'Your cloud account and ALL data on this device will be deleted. This cannot be undone. Congregations where you are the only member are removed from the cloud; from the rest you simply leave.';
+	@override String get deleteWarning => 'Your account and ALL the information on this device will be deleted. This cannot be undone. Congregations where you are the only person are removed; from the rest you simply leave.';
 	@override String deleteBlocked({required Object congregations}) => 'You can\'t delete your account yet: you are the only admin of ${congregations}. Hand admin over to someone else or remove the other members first.';
 	@override String get deleteReauthEmail => 'Confirm your password to continue.';
 	@override String get deleteReauthGoogle => 'You\'ll be asked to sign in with Google again to confirm.';
@@ -496,9 +496,9 @@ class _Translations$settings$en extends Translations$settings$es {
 	@override String get notificationsDesc => 'Reminders generated by the app.';
 	@override late final _Translations$settings$notif$en notif = _Translations$settings$notif$en._(_root);
 	@override String get data => 'Data';
-	@override String get dataDesc => 'Encrypted backup of your congregations, participants and programs. Also useful to move data between devices.';
+	@override String get dataDesc => 'Backup of your congregations, participants and programs, protected with a password. Also handy to move your information to another device.';
 	@override String get exportData => 'Export data';
-	@override String get exportDataDesc => 'Generates a password-encrypted .agora file';
+	@override String get exportDataDesc => 'Creates an .agora file protected with the password you choose';
 	@override String get export => 'Export';
 	@override String get importData => 'Import data';
 	@override String get importDataDesc => 'Restore and merge from an .agora file';
@@ -516,8 +516,8 @@ class _Translations$settings$en extends Translations$settings$es {
 	@override String get backupWrongPassword => 'Wrong password';
 	@override String get backupMalformed => 'The file is not a valid Agora backup';
 	@override String get session => 'Session';
-	@override String get sessionDesc => 'You are using the app in local mode on this device.';
-	@override String get localMode => 'Local mode';
+	@override String get sessionDesc => 'Your information is kept on this device only.';
+	@override String get localMode => 'This device only';
 	@override String get localModeDesc => 'Data lives only on this device';
 }
 
@@ -846,7 +846,7 @@ class _Translations$auth$local$en extends Translations$auth$local$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get pill => 'Local mode';
+	@override String get pill => 'This device only';
 	@override String get createTitle => 'Create your local profile';
 	@override String get createSub => 'Stored only on this device.';
 	@override String get migrateTitle => 'Protect your data';
@@ -864,9 +864,9 @@ class _Translations$auth$local$en extends Translations$auth$local$es {
 	@override String get working => 'Protecting…';
 	@override String get tooShort => 'The password must be at least 8 characters long.';
 	@override String get mismatch => 'The passwords don\'t match.';
-	@override String get profileCaption => 'Local profile · this device';
+	@override String get profileCaption => 'Your profile · this device only';
 	@override String get unlockButton => 'Unlock';
-	@override String get unlocking => 'Decrypting…';
+	@override String get unlocking => 'Opening…';
 	@override String get wrongPassword => 'Wrong password.';
 	@override String get startOver => 'Starting over?';
 	@override String get createAnother => 'Create another profile';
@@ -894,7 +894,7 @@ class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get pill => 'Cloud mode';
+	@override String get pill => 'With your account';
 	@override String get loginTitle => 'Sign in';
 	@override String get loginSub => 'Your congregations and projects are waiting.';
 	@override String get registerTitle => 'Create your account';
@@ -917,8 +917,8 @@ class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
 	@override String get register => 'Register';
 	@override String get hasAccount => 'Already have an account?';
 	@override String get login => 'Sign in';
-	@override String get unavailableTitle => 'Cloud not configured';
-	@override String get unavailableDesc => 'This install has no Firebase project; cloud mode is unavailable.';
+	@override String get unavailableTitle => 'Accounts unavailable';
+	@override String get unavailableDesc => 'This version of the app can\'t use accounts yet. You can keep everything on this device only.';
 }
 
 // Path: auth.reset
@@ -929,7 +929,7 @@ class _Translations$auth$reset$en extends Translations$auth$reset$es {
 
 	// Translations
 	@override String get title => 'Delete all data';
-	@override String get warning => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.';
+	@override String get warning => 'Without the password there is no way to get your information back: everything on this device will be erased and you\'ll start over.';
 	@override String get confirmPhrase => 'DELETE';
 	@override String confirmHint({required Object phrase}) => 'Type ${phrase} to confirm';
 	@override String get button => 'Delete everything';
@@ -942,7 +942,7 @@ class _Translations$auth$keyError$en extends Translations$auth$keyError$es {
 	final TranslationsEn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Could not access the system keychain';
+	@override String get title => 'Could not reach the device\'s secure storage';
 	@override String get retry => 'Retry';
 }
 
@@ -996,10 +996,10 @@ extension on TranslationsEn {
 			'portada.noAccountTitle' => 'Continue without an account',
 			'portada.noAccountCaption' => 'Only on this device',
 			'portada.legal' => 'Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.',
-			'portada.cloudUnavailable' => 'The cloud is not configured on this install; you can use local mode.',
-			'portada.cloudUnsupported' => 'Cloud mode isn\'t available on this Mac (requires Apple developer signing); you can use local mode.',
-			'auth.chooseOther' => 'Choose another mode',
-			'auth.local.pill' => 'Local mode',
+			'portada.cloudUnavailable' => 'This version of the app can\'t use accounts yet; you can keep everything on this device only.',
+			'portada.cloudUnsupported' => 'This Mac can\'t use accounts yet; you can keep everything on this device only.',
+			'auth.chooseOther' => 'Choose another option',
+			'auth.local.pill' => 'This device only',
 			'auth.local.createTitle' => 'Create your local profile',
 			'auth.local.createSub' => 'Stored only on this device.',
 			'auth.local.migrateTitle' => 'Protect your data',
@@ -1017,9 +1017,9 @@ extension on TranslationsEn {
 			'auth.local.working' => 'Protecting…',
 			'auth.local.tooShort' => 'The password must be at least 8 characters long.',
 			'auth.local.mismatch' => 'The passwords don\'t match.',
-			'auth.local.profileCaption' => 'Local profile · this device',
+			'auth.local.profileCaption' => 'Your profile · this device only',
 			'auth.local.unlockButton' => 'Unlock',
-			'auth.local.unlocking' => 'Decrypting…',
+			'auth.local.unlocking' => 'Opening…',
 			'auth.local.wrongPassword' => 'Wrong password.',
 			'auth.local.startOver' => 'Starting over?',
 			'auth.local.createAnother' => 'Create another profile',
@@ -1029,7 +1029,7 @@ extension on TranslationsEn {
 			'auth.cloudLock.unlock' => 'Unlock',
 			'auth.cloudLock.signOutQuestion' => 'Not you?',
 			'auth.cloudLock.signOut' => 'Sign out',
-			'auth.cloud.pill' => 'Cloud mode',
+			'auth.cloud.pill' => 'With your account',
 			'auth.cloud.loginTitle' => 'Sign in',
 			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',
 			'auth.cloud.registerTitle' => 'Create your account',
@@ -1052,19 +1052,19 @@ extension on TranslationsEn {
 			'auth.cloud.register' => 'Register',
 			'auth.cloud.hasAccount' => 'Already have an account?',
 			'auth.cloud.login' => 'Sign in',
-			'auth.cloud.unavailableTitle' => 'Cloud not configured',
-			'auth.cloud.unavailableDesc' => 'This install has no Firebase project; cloud mode is unavailable.',
+			'auth.cloud.unavailableTitle' => 'Accounts unavailable',
+			'auth.cloud.unavailableDesc' => 'This version of the app can\'t use accounts yet. You can keep everything on this device only.',
 			'auth.reset.title' => 'Delete all data',
-			'auth.reset.warning' => 'Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.',
+			'auth.reset.warning' => 'Without the password there is no way to get your information back: everything on this device will be erased and you\'ll start over.',
 			'auth.reset.confirmPhrase' => 'DELETE',
 			'auth.reset.confirmHint' => ({required Object phrase}) => 'Type ${phrase} to confirm',
 			'auth.reset.button' => 'Delete everything',
-			'auth.keyError.title' => 'Could not access the system keychain',
+			'auth.keyError.title' => 'Could not reach the device\'s secure storage',
 			'auth.keyError.retry' => 'Retry',
 			'security.title' => 'Security',
-			'security.desc' => 'Local account protecting your encrypted data on this device.',
+			'security.desc' => 'Protects the information kept on this device.',
 			'security.changePassword' => 'Change password',
-			'security.changePasswordDesc' => 'Re-protect the encryption key with a new password.',
+			'security.changePasswordDesc' => 'Pick a new password to open the app.',
 			'security.change' => 'Change',
 			'security.current' => 'Current password',
 			'security.newPassword' => 'New password',
@@ -1072,7 +1072,7 @@ extension on TranslationsEn {
 			'security.wrongCurrent' => 'The current password is not correct.',
 			'security.changed' => 'Password updated.',
 			'security.lockNow' => 'Lock now',
-			'security.lockNowDesc' => 'Closes the local session; the password will be required again.',
+			'security.lockNowDesc' => 'Closes the app; it will ask for your password when you come back.',
 			'security.lockNowDescCloud' => 'Locks the app; device unlock will be required to come back.',
 			'security.lock' => 'Lock',
 			'security.descCloud' => 'Protects access to the app on this device.',
@@ -1082,9 +1082,9 @@ extension on TranslationsEn {
 			'security.deviceUnlockPrompt' => 'Confirm your identity to enable device unlock.',
 			'security.unlockPrompt' => 'Unlock your Agora data.',
 			'security.deviceUnlockKeyMissing' => 'Device unlock was turned off; sign in with your password and enable it again.',
-			'cloudSync.title' => 'Cloud sync',
-			'cloudSync.desc' => 'Your data is stored encrypted and restores itself when you sign in on any of your devices.',
-			'cloudSync.signedOut' => 'Sign in to the cloud to enable syncing.',
+			'cloudSync.title' => 'Sync',
+			'cloudSync.desc' => 'Your information is kept protected and shows up on its own when you sign in from another device.',
+			'cloudSync.signedOut' => 'Sign in to turn sync on.',
 			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
 			'cloudSync.ready' => 'Sync is on',
 			'cloudSync.statusSyncing' => 'Syncing…',
@@ -1092,16 +1092,16 @@ extension on TranslationsEn {
 			'cloudSync.statusError' => 'Sync error',
 			'cloudSync.lastSync' => ({required Object when}) => 'Last sync: ${when}',
 			'cloudSync.neverSynced' => 'Will sync automatically',
-			'cloudSync.errorPermission' => 'You no longer have access to a congregation; your local data is kept.',
+			'cloudSync.errorPermission' => 'You no longer have access to a congregation. What you have on this device is kept.',
 			'cloudSync.errorOffline' => 'Offline; will retry automatically.',
 			'cloudSync.errorUnknown' => 'Something went wrong while syncing.',
 			'cloudSync.restoring' => 'Restoring your data…',
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
 			'cloudSync.restoreOffline' => 'Offline. Your data will be restored when you reconnect.',
-			'account.title' => 'Cloud account',
+			'account.title' => 'Your account',
 			'account.desc' => 'Open your information from another device and share congregations with other people.',
-			'account.notConfigured' => 'Cloud not configured',
-			'account.notConfiguredDesc' => 'This install has no Firebase project: the app runs 100% locally.',
+			'account.notConfigured' => 'Accounts unavailable',
+			'account.notConfiguredDesc' => 'This version of the app can\'t use accounts yet: everything is kept on this device only.',
 			'account.signIn' => 'Sign in',
 			'account.register' => 'Create account',
 			'account.google' => 'Continue with Google',
@@ -1114,9 +1114,9 @@ extension on TranslationsEn {
 			'account.signOut' => 'Sign out',
 			'account.dangerZone' => 'Danger zone',
 			'account.deleteAccount' => 'Delete my account',
-			'account.deleteAccountDesc' => 'Removes your cloud account and all data on this device.',
+			'account.deleteAccountDesc' => 'Deletes your account and all the information on this device.',
 			'account.deleteTitle' => 'Delete my account',
-			'account.deleteWarning' => 'Your cloud account and ALL data on this device will be deleted. This cannot be undone. Congregations where you are the only member are removed from the cloud; from the rest you simply leave.',
+			'account.deleteWarning' => 'Your account and ALL the information on this device will be deleted. This cannot be undone. Congregations where you are the only person are removed; from the rest you simply leave.',
 			'account.deleteBlocked' => ({required Object congregations}) => 'You can\'t delete your account yet: you are the only admin of ${congregations}. Hand admin over to someone else or remove the other members first.',
 			'account.deleteReauthEmail' => 'Confirm your password to continue.',
 			'account.deleteReauthGoogle' => 'You\'ll be asked to sign in with Google again to confirm.',
@@ -1287,9 +1287,9 @@ extension on TranslationsEn {
 			'settings.notif.exportsTitle' => 'Pending exports',
 			'settings.notif.exportsDesc' => 'Remind to export the program before the weekend',
 			'settings.data' => 'Data',
-			'settings.dataDesc' => 'Encrypted backup of your congregations, participants and programs. Also useful to move data between devices.',
+			'settings.dataDesc' => 'Backup of your congregations, participants and programs, protected with a password. Also handy to move your information to another device.',
 			'settings.exportData' => 'Export data',
-			'settings.exportDataDesc' => 'Generates a password-encrypted .agora file',
+			'settings.exportDataDesc' => 'Creates an .agora file protected with the password you choose',
 			'settings.export' => 'Export',
 			'settings.importData' => 'Import data',
 			'settings.importDataDesc' => 'Restore and merge from an .agora file',
@@ -1307,8 +1307,8 @@ extension on TranslationsEn {
 			'settings.backupWrongPassword' => 'Wrong password',
 			'settings.backupMalformed' => 'The file is not a valid Agora backup',
 			'settings.session' => 'Session',
-			'settings.sessionDesc' => 'You are using the app in local mode on this device.',
-			'settings.localMode' => 'Local mode',
+			'settings.sessionDesc' => 'Your information is kept on this device only.',
+			'settings.localMode' => 'This device only',
 			'settings.localModeDesc' => 'Data lives only on this device',
 			'options.timeFormat24' => '24-hour (18:00)',
 			'options.timeFormat12' => '12-hour (6:00 p.m.)',

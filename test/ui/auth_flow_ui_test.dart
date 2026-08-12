@@ -78,7 +78,7 @@ void main() {
     // AnimatedSwitcher a mitad de transición (y duplicaría los finders).
     await tester.pumpAndSettle();
 
-    expect(find.text('Modo nube'.toUpperCase()), findsOneWidget);
+    expect(find.text(t.auth.cloud.pill.toUpperCase()), findsOneWidget);
     expect(find.text('Inicia sesión'), findsOneWidget);
     expect(find.text('Continuar con Google'), findsOneWidget);
     expect(find.text('Correo'.toUpperCase()), findsOneWidget);
@@ -94,12 +94,9 @@ void main() {
     // Sin Firebase configurado, Google explica en lugar de fallar mudo.
     await tester.tap(find.text('Continuar con Google'));
     await tester.pump();
-    expect(
-        find.text(
-            'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.'),
-        findsOneWidget);
+    expect(find.text(t.auth.cloud.unavailableDesc), findsOneWidget);
 
-    await tester.tap(find.text('Elegir otro modo'));
+    await tester.tap(find.text(t.auth.chooseOther));
     await tester.pumpAndSettle();
     expect(find.text('Continuar sin cuenta'), findsOneWidget);
   });
@@ -112,7 +109,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Crea tu perfil local'), findsOneWidget);
-    expect(find.text('Modo local'.toUpperCase()), findsOneWidget);
+    expect(find.text(t.auth.local.pill.toUpperCase()), findsOneWidget);
 
     final fields = find.byType(TextField);
     await tester.enterText(fields.at(0), 'Ana Pérez');
@@ -134,7 +131,7 @@ void main() {
     expect(find.text('Las contraseñas no coinciden.'), findsOneWidget);
 
     // Volver a la portada.
-    await tester.tap(find.text('Elegir otro modo'));
+    await tester.tap(find.text(t.auth.chooseOther));
     await tester.pumpAndSettle();
     expect(find.text('Continuar sin cuenta'), findsOneWidget);
   });
@@ -154,7 +151,7 @@ void main() {
 
     expect(find.text('Ana Pérez'), findsOneWidget);
     expect(find.text('AP'), findsOneWidget); // iniciales del avatar
-    expect(find.text('Perfil local · este dispositivo'), findsOneWidget);
+    expect(find.text(t.auth.local.profileCaption), findsOneWidget);
     expect(find.text('Desbloquear'), findsOneWidget);
     expect(find.text('¿Empezar de cero?'), findsOneWidget);
     // Sin la preferencia activada no hay botón de desbloqueo del dispositivo.

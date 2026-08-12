@@ -10,13 +10,13 @@
     "noAccountTitle": "Continue without an account",
     "noAccountCaption": "Only on this device",
     "legal": "Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or its associated entities.",
-    "cloudUnavailable": "The cloud is not configured on this install; you can use local mode.",
-    "cloudUnsupported": "Cloud mode isn't available on this Mac (requires Apple developer signing); you can use local mode."
+    "cloudUnavailable": "This version of the app can't use accounts yet; you can keep everything on this device only.",
+    "cloudUnsupported": "This Mac can't use accounts yet; you can keep everything on this device only."
   },
   "auth": {
-    "chooseOther": "Choose another mode",
+    "chooseOther": "Choose another option",
     "local": {
-      "pill": "Local mode",
+      "pill": "This device only",
       "createTitle": "Create your local profile",
       "createSub": "Stored only on this device.",
       "migrateTitle": "Protect your data",
@@ -34,9 +34,9 @@
       "working": "Protecting…",
       "tooShort": "The password must be at least 8 characters long.",
       "mismatch": "The passwords don't match.",
-      "profileCaption": "Local profile · this device",
+      "profileCaption": "Your profile · this device only",
       "unlockButton": "Unlock",
-      "unlocking": "Decrypting…",
+      "unlocking": "Opening…",
       "wrongPassword": "Wrong password.",
       "startOver": "Starting over?",
       "createAnother": "Create another profile",
@@ -50,7 +50,7 @@
       "signOut": "Sign out"
     },
     "cloud": {
-      "pill": "Cloud mode",
+      "pill": "With your account",
       "loginTitle": "Sign in",
       "loginSub": "Your congregations and projects are waiting.",
       "registerTitle": "Create your account",
@@ -73,26 +73,26 @@
       "register": "Register",
       "hasAccount": "Already have an account?",
       "login": "Sign in",
-      "unavailableTitle": "Cloud not configured",
-      "unavailableDesc": "This install has no Firebase project; cloud mode is unavailable."
+      "unavailableTitle": "Accounts unavailable",
+      "unavailableDesc": "This version of the app can't use accounts yet. You can keep everything on this device only."
     },
     "reset": {
       "title": "Delete all data",
-      "warning": "Without the password the information cannot be recovered: the local database and its keys will be permanently deleted and you will start over.",
+      "warning": "Without the password there is no way to get your information back: everything on this device will be erased and you'll start over.",
       "confirmPhrase": "DELETE",
       "confirmHint": "Type {phrase} to confirm",
       "button": "Delete everything"
     },
     "keyError": {
-      "title": "Could not access the system keychain",
+      "title": "Could not reach the device's secure storage",
       "retry": "Retry"
     }
   },
   "security": {
     "title": "Security",
-    "desc": "Local account protecting your encrypted data on this device.",
+    "desc": "Protects the information kept on this device.",
     "changePassword": "Change password",
-    "changePasswordDesc": "Re-protect the encryption key with a new password.",
+    "changePasswordDesc": "Pick a new password to open the app.",
     "change": "Change",
     "current": "Current password",
     "newPassword": "New password",
@@ -100,7 +100,7 @@
     "wrongCurrent": "The current password is not correct.",
     "changed": "Password updated.",
     "lockNow": "Lock now",
-    "lockNowDesc": "Closes the local session; the password will be required again.",
+    "lockNowDesc": "Closes the app; it will ask for your password when you come back.",
     "lockNowDescCloud": "Locks the app; device unlock will be required to come back.",
     "lock": "Lock",
     "descCloud": "Protects access to the app on this device.",
@@ -112,9 +112,9 @@
     "deviceUnlockKeyMissing": "Device unlock was turned off; sign in with your password and enable it again."
   },
   "cloudSync": {
-    "title": "Cloud sync",
-    "desc": "Your data is stored encrypted and restores itself when you sign in on any of your devices.",
-    "signedOut": "Sign in to the cloud to enable syncing.",
+    "title": "Sync",
+    "desc": "Your information is kept protected and shows up on its own when you sign in from another device.",
+    "signedOut": "Sign in to turn sync on.",
     "unknownError": "Couldn't complete. Please try again.",
     "ready": "Sync is on",
     "statusSyncing": "Syncing…",
@@ -122,7 +122,7 @@
     "statusError": "Sync error",
     "lastSync": "Last sync: {when}",
     "neverSynced": "Will sync automatically",
-    "errorPermission": "You no longer have access to a congregation; your local data is kept.",
+    "errorPermission": "You no longer have access to a congregation. What you have on this device is kept.",
     "errorOffline": "Offline; will retry automatically.",
     "errorUnknown": "Something went wrong while syncing.",
     "restoring": "Restoring your data…",
@@ -130,10 +130,10 @@
     "restoreOffline": "Offline. Your data will be restored when you reconnect."
   },
   "account": {
-    "title": "Cloud account",
+    "title": "Your account",
     "desc": "Open your information from another device and share congregations with other people.",
-    "notConfigured": "Cloud not configured",
-    "notConfiguredDesc": "This install has no Firebase project: the app runs 100% locally.",
+    "notConfigured": "Accounts unavailable",
+    "notConfiguredDesc": "This version of the app can't use accounts yet: everything is kept on this device only.",
     "signIn": "Sign in",
     "register": "Create account",
     "google": "Continue with Google",
@@ -146,9 +146,9 @@
     "signOut": "Sign out",
     "dangerZone": "Danger zone",
     "deleteAccount": "Delete my account",
-    "deleteAccountDesc": "Removes your cloud account and all data on this device.",
+    "deleteAccountDesc": "Deletes your account and all the information on this device.",
     "deleteTitle": "Delete my account",
-    "deleteWarning": "Your cloud account and ALL data on this device will be deleted. This cannot be undone. Congregations where you are the only member are removed from the cloud; from the rest you simply leave.",
+    "deleteWarning": "Your account and ALL the information on this device will be deleted. This cannot be undone. Congregations where you are the only person are removed; from the rest you simply leave.",
     "deleteBlocked": "You can't delete your account yet: you are the only admin of {congregations}. Hand admin over to someone else or remove the other members first.",
     "deleteReauthEmail": "Confirm your password to continue.",
     "deleteReauthGoogle": "You'll be asked to sign in with Google again to confirm.",
@@ -359,9 +359,9 @@
       "exportsDesc": "Remind to export the program before the weekend"
     },
     "data": "Data",
-    "dataDesc": "Encrypted backup of your congregations, participants and programs. Also useful to move data between devices.",
+    "dataDesc": "Backup of your congregations, participants and programs, protected with a password. Also handy to move your information to another device.",
     "exportData": "Export data",
-    "exportDataDesc": "Generates a password-encrypted .agora file",
+    "exportDataDesc": "Creates an .agora file protected with the password you choose",
     "export": "Export",
     "importData": "Import data",
     "importDataDesc": "Restore and merge from an .agora file",
@@ -379,8 +379,8 @@
     "backupWrongPassword": "Wrong password",
     "backupMalformed": "The file is not a valid Agora backup",
     "session": "Session",
-    "sessionDesc": "You are using the app in local mode on this device.",
-    "localMode": "Local mode",
+    "sessionDesc": "Your information is kept on this device only.",
+    "localMode": "This device only",
     "localModeDesc": "Data lives only on this device"
   },
   "options": {

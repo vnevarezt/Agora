@@ -10,13 +10,13 @@
     "noAccountTitle": "Continuar sin cuenta",
     "noAccountCaption": "Solo en este dispositivo",
     "legal": "Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a sus entidades asociadas.",
-    "cloudUnavailable": "La nube no está configurada en esta instalación; puedes usar el modo local.",
-    "cloudUnsupported": "El modo nube no está disponible en este Mac (requiere firma de desarrollador de Apple); puedes usar el modo local."
+    "cloudUnavailable": "Esta versión de la app todavía no puede usar cuentas; puedes guardar todo solo en este dispositivo.",
+    "cloudUnsupported": "En este Mac todavía no se pueden usar cuentas; puedes guardar todo solo en este dispositivo."
   },
   "auth": {
-    "chooseOther": "Elegir otro modo",
+    "chooseOther": "Elegir otra opción",
     "local": {
-      "pill": "Modo local",
+      "pill": "Solo en este dispositivo",
       "createTitle": "Crea tu perfil local",
       "createSub": "Se guarda únicamente en este dispositivo.",
       "migrateTitle": "Protege tus datos",
@@ -34,9 +34,9 @@
       "working": "Protegiendo…",
       "tooShort": "La contraseña debe tener al menos 8 caracteres.",
       "mismatch": "Las contraseñas no coinciden.",
-      "profileCaption": "Perfil local · este dispositivo",
+      "profileCaption": "Tu perfil · solo en este dispositivo",
       "unlockButton": "Desbloquear",
-      "unlocking": "Descifrando…",
+      "unlocking": "Abriendo…",
       "wrongPassword": "Contraseña incorrecta.",
       "startOver": "¿Empezar de cero?",
       "createAnother": "Crear otro perfil",
@@ -50,7 +50,7 @@
       "signOut": "Cerrar sesión"
     },
     "cloud": {
-      "pill": "Modo nube",
+      "pill": "Con tu cuenta",
       "loginTitle": "Inicia sesión",
       "loginSub": "Tus congregaciones y proyectos te esperan.",
       "registerTitle": "Crea tu cuenta",
@@ -73,26 +73,26 @@
       "register": "Regístrate",
       "hasAccount": "¿Ya tienes cuenta?",
       "login": "Inicia sesión",
-      "unavailableTitle": "Nube no configurada",
-      "unavailableDesc": "Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible."
+      "unavailableTitle": "Cuentas no disponibles",
+      "unavailableDesc": "Esta versión de la app todavía no puede usar cuentas. Puedes guardar todo solo en este dispositivo."
     },
     "reset": {
       "title": "Borrar todos los datos",
-      "warning": "Sin la contraseña no es posible recuperar la información: se borrarán permanentemente la base de datos local y sus llaves, y empezarás de cero.",
+      "warning": "Sin la contraseña no hay forma de recuperar tu información: se borrará todo lo que tienes en este dispositivo y empezarás de cero.",
       "confirmPhrase": "BORRAR",
       "confirmHint": "Escribe {phrase} para confirmar",
       "button": "Borrar todo"
     },
     "keyError": {
-      "title": "No se pudo acceder al llavero del sistema",
+      "title": "No se pudo acceder al almacén seguro del dispositivo",
       "retry": "Reintentar"
     }
   },
   "security": {
     "title": "Seguridad",
-    "desc": "Cuenta local que protege tus datos cifrados en este dispositivo.",
+    "desc": "Protege la información guardada en este dispositivo.",
     "changePassword": "Cambiar contraseña",
-    "changePasswordDesc": "Vuelve a proteger la llave de cifrado con una contraseña nueva.",
+    "changePasswordDesc": "Elige una contraseña nueva para abrir la app.",
     "change": "Cambiar",
     "current": "Contraseña actual",
     "newPassword": "Contraseña nueva",
@@ -100,7 +100,7 @@
     "wrongCurrent": "La contraseña actual no es correcta.",
     "changed": "Contraseña actualizada.",
     "lockNow": "Bloquear ahora",
-    "lockNowDesc": "Cierra la sesión local; pedirá la contraseña al volver.",
+    "lockNowDesc": "Cierra la app; te pedirá la contraseña al volver.",
     "lockNowDescCloud": "Bloquea la app; pedirá el desbloqueo del dispositivo al volver.",
     "lock": "Bloquear",
     "descCloud": "Protege el acceso a la app en este dispositivo.",
@@ -112,9 +112,9 @@
     "deviceUnlockKeyMissing": "El desbloqueo del dispositivo se desactivó; entra con tu contraseña y actívalo de nuevo."
   },
   "cloudSync": {
-    "title": "Sincronización en la nube",
-    "desc": "Tus datos se guardan cifrados y se restauran solos al iniciar sesión en cualquiera de tus dispositivos.",
-    "signedOut": "Inicia sesión en la nube para activar la sincronización.",
+    "title": "Sincronización",
+    "desc": "Tu información se guarda protegida y aparece sola al iniciar sesión desde otro dispositivo.",
+    "signedOut": "Inicia sesión para activar la sincronización.",
     "unknownError": "No se pudo completar. Inténtalo de nuevo.",
     "ready": "Sincronización activa",
     "statusSyncing": "Sincronizando…",
@@ -122,7 +122,7 @@
     "statusError": "Error de sincronización",
     "lastSync": "Última sincronización: {when}",
     "neverSynced": "Se sincronizará automáticamente",
-    "errorPermission": "Ya no tienes acceso a una congregación; tus datos locales se conservan.",
+    "errorPermission": "Ya no tienes acceso a una congregación. Lo que tienes en este dispositivo se conserva.",
     "errorOffline": "Sin conexión; se reintentará automáticamente.",
     "errorUnknown": "Ocurrió un error al sincronizar.",
     "restoring": "Recuperando tus datos…",
@@ -130,10 +130,10 @@
     "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar."
   },
   "account": {
-    "title": "Cuenta en la nube",
+    "title": "Tu cuenta",
     "desc": "Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.",
-    "notConfigured": "Nube no configurada",
-    "notConfiguredDesc": "Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.",
+    "notConfigured": "Cuentas no disponibles",
+    "notConfiguredDesc": "Esta versión de la app todavía no puede usar cuentas: todo se guarda solo en este dispositivo.",
     "signIn": "Iniciar sesión",
     "register": "Crear cuenta",
     "google": "Continuar con Google",
@@ -146,9 +146,9 @@
     "signOut": "Cerrar sesión",
     "dangerZone": "Zona de peligro",
     "deleteAccount": "Borrar mi cuenta",
-    "deleteAccountDesc": "Elimina tu cuenta de la nube y todos los datos de este dispositivo.",
+    "deleteAccountDesc": "Elimina tu cuenta y toda la información de este dispositivo.",
     "deleteTitle": "Borrar mi cuenta",
-    "deleteWarning": "Se borrará tu cuenta de la nube y TODOS los datos de este dispositivo. Esta acción no se puede deshacer. Las congregaciones donde eres el único integrante se eliminarán de la nube; de las demás simplemente saldrás.",
+    "deleteWarning": "Se borrará tu cuenta y TODA la información de este dispositivo. Esto no se puede deshacer. Las congregaciones donde eres la única persona se eliminarán; de las demás simplemente saldrás.",
     "deleteBlocked": "No puedes borrar tu cuenta todavía: eres el único administrador de {congregations}. Pasa el rol de administrador a otra persona o quita a los demás miembros primero.",
     "deleteReauthEmail": "Confirma tu contraseña para continuar.",
     "deleteReauthGoogle": "Se te pedirá volver a iniciar sesión con Google para confirmar.",
@@ -359,9 +359,9 @@
       "exportsDesc": "Recordar exportar el programa antes del fin de semana"
     },
     "data": "Datos",
-    "dataDesc": "Copia de seguridad cifrada de tus congregaciones, participantes y programas. Útil también para mover datos entre dispositivos.",
+    "dataDesc": "Copia de seguridad de tus congregaciones, participantes y programas, protegida con una contraseña. También sirve para llevar tu información a otro dispositivo.",
     "exportData": "Exportar datos",
-    "exportDataDesc": "Genera un archivo .agora cifrado con contraseña",
+    "exportDataDesc": "Crea un archivo .agora protegido con la contraseña que elijas",
     "export": "Exportar",
     "importData": "Importar datos",
     "importDataDesc": "Restaura y fusiona desde un archivo .agora",
@@ -379,8 +379,8 @@
     "backupWrongPassword": "Contraseña incorrecta",
     "backupMalformed": "El archivo no es una copia de Agora válida",
     "session": "Sesión",
-    "sessionDesc": "Estás usando la app en modo local en este dispositivo.",
-    "localMode": "Modo local",
+    "sessionDesc": "Tu información se guarda solo en este dispositivo.",
+    "localMode": "Solo en este dispositivo",
     "localModeDesc": "Los datos viven solo en este dispositivo"
   },
   "options": {
