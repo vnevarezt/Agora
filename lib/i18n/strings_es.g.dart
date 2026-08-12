@@ -46,6 +46,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$security$es security = Translations$security$es.internal(_root);
 	late final Translations$cloudSync$es cloudSync = Translations$cloudSync$es.internal(_root);
 	late final Translations$account$es account = Translations$account$es.internal(_root);
+	late final Translations$accountMode$es accountMode = Translations$accountMode$es.internal(_root);
 	late final Translations$nav$es nav = Translations$nav$es.internal(_root);
 	late final Translations$userMenu$es userMenu = Translations$userMenu$es.internal(_root);
 	late final Translations$common$es common = Translations$common$es.internal(_root);
@@ -281,8 +282,8 @@ class Translations$account$es {
 	/// es: 'Cuenta en la nube'
 	String get title => 'Cuenta en la nube';
 
-	/// es: 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.'
-	String get desc => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.';
+	/// es: 'Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.'
+	String get desc => 'Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.';
 
 	/// es: 'Nube no configurada'
 	String get notConfigured => 'Nube no configurada';
@@ -320,9 +321,6 @@ class Translations$account$es {
 	/// es: 'Cerrar sesión'
 	String get signOut => 'Cerrar sesión';
 
-	/// es: 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.'
-	String get localGateNote => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.';
-
 	/// es: 'Zona de peligro'
 	String get dangerZone => 'Zona de peligro';
 
@@ -354,6 +352,96 @@ class Translations$account$es {
 	String get deleteError => 'No se pudo borrar la cuenta. Inténtalo de nuevo.';
 
 	late final Translations$account$errors$es errors = Translations$account$errors$es.internal(_root);
+}
+
+// Path: accountMode
+class Translations$accountMode$es {
+	Translations$accountMode$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Guardar en tu cuenta'
+	String get toCloudTitle => 'Guardar en tu cuenta';
+
+	/// es: 'Podrás abrir tu información desde otro dispositivo y compartir congregaciones con otras personas.'
+	String get toCloudDesc => 'Podrás abrir tu información desde otro dispositivo y compartir congregaciones con otras personas.';
+
+	/// es: 'Empezar'
+	String get toCloudAction => 'Empezar';
+
+	/// es: 'Inicia sesión o crea tu cuenta. Todavía no se envía nada.'
+	String get signInStep => 'Inicia sesión o crea tu cuenta. Todavía no se envía nada.';
+
+	/// es: 'Esta cuenta ya tiene congregaciones guardadas: {count}. Las de este dispositivo se sumarán a esas, sin mezclarse.'
+	String existingData({required Object count}) => 'Esta cuenta ya tiene congregaciones guardadas: ${count}. Las de este dispositivo se sumarán a esas, sin mezclarse.';
+
+	/// es: 'Qué se va a guardar en tu cuenta'
+	String get consentTitle => 'Qué se va a guardar en tu cuenta';
+
+	/// es: 'Tus congregaciones, participantes, ausencias, proyectos, programas y asignaciones. Todo viaja protegido: solo tú y las personas que invites pueden leerlo.'
+	String get consentBody => 'Tus congregaciones, participantes, ausencias, proyectos, programas y asignaciones. Todo viaja protegido: solo tú y las personas que invites pueden leerlo.';
+
+	/// es: 'No tendrás que recordar ningún código: tu cuenta se encarga. A cambio, quien mantiene el servicio podría llegar a ver tu información; si prefieres que eso no sea posible, guarda todo solo en este dispositivo.'
+	String get consentCustody => 'No tendrás que recordar ningún código: tu cuenta se encarga. A cambio, quien mantiene el servicio podría llegar a ver tu información; si prefieres que eso no sea posible, guarda todo solo en este dispositivo.';
+
+	/// es: 'Guardar en mi cuenta'
+	String get consentConfirm => 'Guardar en mi cuenta';
+
+	/// es: 'Guardando tu información…'
+	String get uploading => 'Guardando tu información…';
+
+	/// es: '{done} de {total} congregaciones'
+	String uploadingProgress({required Object done, required Object total}) => '${done} de ${total} congregaciones';
+
+	/// es: 'Ya está todo listo. Lo que falta se guardará solo cuando vuelvas a tener conexión.'
+	String get uploadPending => 'Ya está todo listo. Lo que falta se guardará solo cuando vuelvas a tener conexión.';
+
+	/// es: 'Listo: tu información ya está en tu cuenta.'
+	String get uploadDone => 'Listo: tu información ya está en tu cuenta.';
+
+	/// es: 'Guardar solo en este dispositivo'
+	String get toLocalTitle => 'Guardar solo en este dispositivo';
+
+	/// es: 'Deja de usar tu cuenta y protege tu información con una contraseña en este dispositivo.'
+	String get toLocalDesc => 'Deja de usar tu cuenta y protege tu información con una contraseña en este dispositivo.';
+
+	/// es: 'Cambiar'
+	String get toLocalAction => 'Cambiar';
+
+	/// es: 'Primero se traerá todo lo que falte y después se borrará tu información de la cuenta: las congregaciones donde eres la única persona se eliminarán, y de las demás saldrás. Lo que tienes en este dispositivo se conserva.'
+	String get toLocalWarning => 'Primero se traerá todo lo que falte y después se borrará tu información de la cuenta: las congregaciones donde eres la única persona se eliminarán, y de las demás saldrás. Lo que tienes en este dispositivo se conserva.';
+
+	/// es: 'Guarda una copia de seguridad antes de continuar (recomendado).'
+	String get backupHint => 'Guarda una copia de seguridad antes de continuar (recomendado).';
+
+	/// es: 'Elige tu nombre y la contraseña con la que abrirás la app en este dispositivo.'
+	String get toLocalPassword => 'Elige tu nombre y la contraseña con la que abrirás la app en este dispositivo.';
+
+	/// es: 'Guardar solo aquí'
+	String get toLocalConfirm => 'Guardar solo aquí';
+
+	/// es: 'Comprobando tus congregaciones…'
+	String get checking => 'Comprobando tus congregaciones…';
+
+	/// es: 'Trayendo todo lo que falta…'
+	String get draining => 'Trayendo todo lo que falta…';
+
+	/// es: 'No se pudo terminar de traer tu información, así que no se ha borrado nada. Inténtalo cuando tengas conexión.'
+	String get errorOffline => 'No se pudo terminar de traer tu información, así que no se ha borrado nada. Inténtalo cuando tengas conexión.';
+
+	/// es: 'Hay una sincronización en curso. Espera unos segundos e inténtalo otra vez.'
+	String get errorSyncBusy => 'Hay una sincronización en curso. Espera unos segundos e inténtalo otra vez.';
+
+	/// es: 'No se pudo traer todo tu contenido, así que no se ha borrado nada. Si continúas de todos modos, puede que falten los cambios más recientes de alguna congregación.'
+	String get errorIncomplete => 'No se pudo traer todo tu contenido, así que no se ha borrado nada. Si continúas de todos modos, puede que falten los cambios más recientes de alguna congregación.';
+
+	/// es: 'Continuar de todos modos'
+	String get forceConfirm => 'Continuar de todos modos';
+
+	/// es: 'No se pudo completar el cambio. Inténtalo de nuevo.'
+	String get errorUnknown => 'No se pudo completar el cambio. Inténtalo de nuevo.';
 }
 
 // Path: nav
@@ -2055,7 +2143,7 @@ extension on Translations {
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
 			'cloudSync.restoreOffline' => 'Sin conexión. Tus datos se recuperarán al reconectar.',
 			'account.title' => 'Cuenta en la nube',
-			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
+			'account.desc' => 'Abre tu información desde otro dispositivo y comparte congregaciones con otras personas.',
 			'account.notConfigured' => 'Nube no configurada',
 			'account.notConfiguredDesc' => 'Esta instalación no tiene proyecto de Firebase: la app funciona 100 % local.',
 			'account.signIn' => 'Iniciar sesión',
@@ -2068,7 +2156,6 @@ extension on Translations {
 			'account.resetSent' => 'Te enviamos un correo para restablecer la contraseña.',
 			'account.signedInAs' => 'Sesión iniciada',
 			'account.signOut' => 'Cerrar sesión',
-			'account.localGateNote' => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.',
 			'account.dangerZone' => 'Zona de peligro',
 			'account.deleteAccount' => 'Borrar mi cuenta',
 			'account.deleteAccountDesc' => 'Elimina tu cuenta de la nube y todos los datos de este dispositivo.',
@@ -2087,6 +2174,33 @@ extension on Translations {
 			'account.errors.network' => 'Sin conexión. Inténtalo de nuevo.',
 			'account.errors.requiresRecentLogin' => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.',
 			'account.errors.unknown' => 'No se pudo completar la operación. Inténtalo de nuevo.',
+			'accountMode.toCloudTitle' => 'Guardar en tu cuenta',
+			'accountMode.toCloudDesc' => 'Podrás abrir tu información desde otro dispositivo y compartir congregaciones con otras personas.',
+			'accountMode.toCloudAction' => 'Empezar',
+			'accountMode.signInStep' => 'Inicia sesión o crea tu cuenta. Todavía no se envía nada.',
+			'accountMode.existingData' => ({required Object count}) => 'Esta cuenta ya tiene congregaciones guardadas: ${count}. Las de este dispositivo se sumarán a esas, sin mezclarse.',
+			'accountMode.consentTitle' => 'Qué se va a guardar en tu cuenta',
+			'accountMode.consentBody' => 'Tus congregaciones, participantes, ausencias, proyectos, programas y asignaciones. Todo viaja protegido: solo tú y las personas que invites pueden leerlo.',
+			'accountMode.consentCustody' => 'No tendrás que recordar ningún código: tu cuenta se encarga. A cambio, quien mantiene el servicio podría llegar a ver tu información; si prefieres que eso no sea posible, guarda todo solo en este dispositivo.',
+			'accountMode.consentConfirm' => 'Guardar en mi cuenta',
+			'accountMode.uploading' => 'Guardando tu información…',
+			'accountMode.uploadingProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
+			'accountMode.uploadPending' => 'Ya está todo listo. Lo que falta se guardará solo cuando vuelvas a tener conexión.',
+			'accountMode.uploadDone' => 'Listo: tu información ya está en tu cuenta.',
+			'accountMode.toLocalTitle' => 'Guardar solo en este dispositivo',
+			'accountMode.toLocalDesc' => 'Deja de usar tu cuenta y protege tu información con una contraseña en este dispositivo.',
+			'accountMode.toLocalAction' => 'Cambiar',
+			'accountMode.toLocalWarning' => 'Primero se traerá todo lo que falte y después se borrará tu información de la cuenta: las congregaciones donde eres la única persona se eliminarán, y de las demás saldrás. Lo que tienes en este dispositivo se conserva.',
+			'accountMode.backupHint' => 'Guarda una copia de seguridad antes de continuar (recomendado).',
+			'accountMode.toLocalPassword' => 'Elige tu nombre y la contraseña con la que abrirás la app en este dispositivo.',
+			'accountMode.toLocalConfirm' => 'Guardar solo aquí',
+			'accountMode.checking' => 'Comprobando tus congregaciones…',
+			'accountMode.draining' => 'Trayendo todo lo que falta…',
+			'accountMode.errorOffline' => 'No se pudo terminar de traer tu información, así que no se ha borrado nada. Inténtalo cuando tengas conexión.',
+			'accountMode.errorSyncBusy' => 'Hay una sincronización en curso. Espera unos segundos e inténtalo otra vez.',
+			'accountMode.errorIncomplete' => 'No se pudo traer todo tu contenido, así que no se ha borrado nada. Si continúas de todos modos, puede que falten los cambios más recientes de alguna congregación.',
+			'accountMode.forceConfirm' => 'Continuar de todos modos',
+			'accountMode.errorUnknown' => 'No se pudo completar el cambio. Inténtalo de nuevo.',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
 			'nav.settings' => 'Configuración',
@@ -2430,6 +2544,8 @@ extension on Translations {
 			'program.roleStudentAssistant' => 'Estudiante/Ayudante:',
 			'program.roleConductorReader' => 'Conductor/Lector:',
 			'program.rolePrayer' => 'Oración:',
+			_ => null,
+		} ?? switch (path) {
 			'program.roleSpeaker' => 'Orador:',
 			'program.title' => 'Programa para la reunión de entre semana',
 			'program.chairman' => 'Presidente: ',

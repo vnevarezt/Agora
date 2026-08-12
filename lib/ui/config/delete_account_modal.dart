@@ -119,7 +119,7 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (blocked.isNotEmpty)
-            _BlockedNotice(congregationIds: blocked)
+            BlockedCongregationsNotice(congregationIds: blocked)
           else if (_isGoogle)
             Text(
               tr.account.deleteReauthGoogle,
@@ -150,9 +150,10 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
   }
 }
 
-/// Lists the congregations the user must hand over or empty before deleting.
-class _BlockedNotice extends ConsumerWidget {
-  const _BlockedNotice({required this.congregationIds});
+/// Lists the congregations the user must hand over or empty first — the same
+/// blocker stops deleting the account and going back to local mode.
+class BlockedCongregationsNotice extends ConsumerWidget {
+  const BlockedCongregationsNotice({super.key, required this.congregationIds});
 
   final List<String> congregationIds;
 

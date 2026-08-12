@@ -4,20 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/backup/backup_crypto.dart';
 import '../../data/device_auth.dart';
-import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/app_settings.dart';
 import '../../state/auth_session.dart';
 import '../../state/backup_provider.dart';
-import '../../state/cloud_auth.dart' show cloudUserProvider;
 import '../../state/locale_boot.dart' show shippedLocales;
-import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
-import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
 import 'account_card.dart';
+import 'backup_actions.dart';
 import 'security_card.dart';
 import 'settings_card.dart';
 import 'sync_card.dart';
@@ -90,124 +87,21 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
         (s) => s is SessionUnlocked && s.mode == AccountMode.local));
     final deviceAuthOk =
         ref.watch(deviceAuthSupportedProvider).value ?? false;
-    // Cloud sync card: only once the cloud is configured and signed in.
-    final signedIn = ref.watch(cloudUserProvider).value != null;
     return SettingsColumns(
       left: [_appearance(), _general(), _notificationsCard()],
       right: [
         _datos(),
         if (localMode || deviceAuthOk) const SecurityCard(),
         const AccountCard(),
-        if (signedIn) const SyncCard(),
+        if (!localMode) const SyncCard(),
       ],
     );
   }
 
-  /// Password prompt for export (with confirmation) / import.
-  Future<String?> _askBackupPassword({required bool confirm}) {
-    final tr = context.t;
-    var password = '';
-    var repeat = '';
-    String? error;
-    return showDialog<String>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(tr.settings.backupPasswordTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                confirm
-                    ? tr.settings.backupPasswordDesc
-                    : tr.settings.backupImportPasswordDesc,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                autofocus: true,
-                obscureText: true,
-                onChanged: (v) => password = v,
-              ),
-              if (confirm) ...[
-                const SizedBox(height: 10),
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      hintText: tr.settings.backupPasswordRepeat),
-                  onChanged: (v) => repeat = v,
-                ),
-              ],
-              if (error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    error!,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: AppText.small),
-                  ),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(null),
-              child: Text(tr.common.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                if (password.isEmpty) return;
-                if (confirm && password != repeat) {
-                  setState(
-                      () => error = tr.settings.backupPasswordMismatch);
-                  return;
-                }
-                Navigator.of(context).pop(password);
-              },
-              child: Text(
-                  confirm ? tr.settings.export : tr.settings.import),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _exportBackup() async {
-    final tr = context.t;
-    final messenger = ScaffoldMessenger.of(context);
-    final password = await _askBackupPassword(confirm: true);
-    if (password == null || password.isEmpty) return;
     setState(() => _backupBusy = true);
     try {
-      final bytes = await ref.read(backupServiceProvider).export(password);
-      final date =
-          DateTime.now().toIso8601String().substring(0, 10);
-      final outcome = await ref.read(fileSaverProvider).saveAs(
-            bytes: bytes,
-            suggestedName: 'agora-$date.agora',
-            extension: 'agora',
-            mimeType: 'application/octet-stream',
-            typeLabel: 'Agora',
-          );
-      switch (outcome) {
-        case SaveDone(:final path):
-          ref.read(appSettingsProvider.notifier).markBackupNow();
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.settings.backupSaved(path: path))));
-        case SaveShared():
-          // saveAs never shares, but the sealed switch must stay exhaustive.
-          ref.read(appSettingsProvider.notifier).markBackupNow();
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.settings.backupSharedMsg)));
-        case SaveCanceled():
-          break;
-      }
-    } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+      await exportBackup(context, ref);
     } finally {
       if (mounted) setState(() => _backupBusy = false);
     }
@@ -220,7 +114,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
       const XTypeGroup(label: 'Agora', extensions: ['agora']),
     ]);
     if (file == null || !mounted) return;
-    final password = await _askBackupPassword(confirm: false);
+    final password = await askBackupPassword(context, confirm: false);
     if (password == null || password.isEmpty) return;
     setState(() => _backupBusy = true);
     try {

@@ -196,44 +196,45 @@ class DbKeyManager {
   /// Cloud mode: DEK generated once per device, kept plaintext in the
   /// keychain. Reuses the verify-read-back defense against silent writes.
   Future<String> getOrCreateCloudKeyHex() async {
+    final String? existing;
     try {
-      final existing = await _store.read(cloudKeyName);
-      if (existing != null && existing.length == 64) return existing;
-
-      final hex = _randomHex(32);
-      await _store.write(cloudKeyName, hex);
-      final verified = await _store.read(cloudKeyName);
-      if (verified != hex) {
-        throw const DbKeyException(
-          'The system keychain did not persist the database key. '
-          'The local database cannot be protected.',
-        );
-      }
-      return hex;
-    } on DbKeyException {
-      rethrow;
+      existing = await _store.read(cloudKeyName);
     } catch (e) {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }
+    if (existing != null && existing.length == 64) return existing;
+
+    final hex = _randomHex(32);
+    await adoptCloudKey(hex);
+    return hex;
   }
+
+  /// Mode migration (local → cloud): take over the DEK the database is ALREADY
+  /// encrypted with, instead of minting one. Anything else leaves `agora.db`
+  /// sealed under a key cloud mode never reads.
+  Future<void> adoptCloudKey(String dekHex) => _writeVerified(
+        cloudKeyName,
+        dekHex,
+        'The system keychain did not persist the database key. '
+            'The local database cannot be protected.',
+      );
+
+  /// Mode migration (cloud → local): wrap the current DEK under a freshly
+  /// chosen password, same envelope the local wizard writes.
+  Future<void> adoptLocalPassword(String dekHex, String password) =>
+      _writeWrapped(dekHex, password);
+
+  Future<void> forgetCloudKey() => _delete(cloudKeyName);
+
+  Future<void> forgetLocalPassword() => _delete(wrappedKeyName);
 
   /// Local mode: persist the DEK copy that device auth releases. Reuses the
   /// verify-read-back defense against silent keychain writes.
-  Future<void> enableDeviceUnlock(String dekHex) async {
-    try {
-      await _store.write(deviceUnlockKeyName, dekHex);
-      final verified = await _store.read(deviceUnlockKeyName);
-      if (verified != dekHex) {
-        throw const DbKeyException(
-          'The system keychain did not persist the device-unlock key.',
-        );
-      }
-    } on DbKeyException {
-      rethrow;
-    } catch (e) {
-      throw DbKeyException('Could not access the system keychain. ($e)', e);
-    }
-  }
+  Future<void> enableDeviceUnlock(String dekHex) => _writeVerified(
+        deviceUnlockKeyName,
+        dekHex,
+        'The system keychain did not persist the device-unlock key.',
+      );
 
   /// DEK hex behind device unlock, or null when the copy is gone (disabled,
   /// or the keychain lost it): callers fall back to the password.
@@ -246,9 +247,25 @@ class DbKeyManager {
     }
   }
 
-  Future<void> disableDeviceUnlock() async {
+  Future<void> disableDeviceUnlock() => _delete(deviceUnlockKeyName);
+
+  /// Some platforms fail keychain writes SILENTLY (e.g. macOS signed wrong),
+  /// so every plaintext key entry is read back before anything trusts it.
+  Future<void> _writeVerified(
+      String name, String hex, String failure) async {
     try {
-      await _store.delete(deviceUnlockKeyName);
+      await _store.write(name, hex);
+      if (await _store.read(name) != hex) throw DbKeyException(failure);
+    } on DbKeyException {
+      rethrow;
+    } catch (e) {
+      throw DbKeyException('Could not access the system keychain. ($e)', e);
+    }
+  }
+
+  Future<void> _delete(String name) async {
+    try {
+      await _store.delete(name);
     } catch (e) {
       throw DbKeyException('Could not access the system keychain. ($e)', e);
     }

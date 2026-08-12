@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dashboard_provider.dart';
+import 'sync_controller.dart';
 import 'sync_provider.dart';
 
 /// Progress of the first-time data restore on a freshly signed-in device.
@@ -40,4 +41,24 @@ final initialRestoreProvider = Provider<InitialRestore?>((ref) {
   if (pending.isEmpty) return null;
   final total = cloudCids.length;
   return (done: total - pending.length, total: total);
+});
+
+/// The same idea for the opposite direction: how far a device that just moved
+/// from local to cloud mode has got uploading, or null when nothing is left.
+/// The outbox has to drain too — a congregation's cloud space exists long
+/// before its contents land in it.
+final cloudUploadProgressProvider = Provider<InitialRestore?>((ref) {
+  if (ref.watch(syncUidProvider) == null) return null;
+
+  final congregations = ref.watch(congregationsStreamProvider);
+  if (!congregations.hasValue) return null;
+  final localCids = {for (final c in congregations.requireValue) c.id};
+  if (localCids.isEmpty) return null;
+
+  final shared = ref.watch(sharedCongregationIdsProvider).value ?? const {};
+  final done = localCids.intersection(shared).length;
+  final pending =
+      ref.watch(syncControllerProvider.select((s) => s.pendingOutbox));
+  if (done == localCids.length && pending == 0) return null;
+  return (done: done, total: localCids.length);
 });

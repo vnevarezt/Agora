@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/app_database.dart';
-import '../data/db/db_key_manager.dart' show KeychainKeyStore;
+import '../data/db/db_key_manager.dart' show KeychainKeyStore, SecureKeyStore;
 import '../data/sync/cck_service.dart';
 import '../data/sync/congregation_teardown.dart';
 import '../data/sync/content_crypto.dart';
@@ -34,7 +34,7 @@ import 'sync_keys.dart' show syncOwnerUidKey;
 
 /// The OS keychain for sync key material (same store DbKeyManager uses).
 final syncKeyStoreProvider =
-    Provider((ref) => const KeychainKeyStore());
+    Provider<SecureKeyStore>((ref) => const KeychainKeyStore());
 
 /// Firestore instance, or null when the cloud is unconfigured. Own cache
 /// disabled: this app IS the offline layer (a second cache only creates
@@ -47,9 +47,15 @@ final firestoreProvider = Provider<FirebaseFirestore?>((ref) {
   return fs;
 });
 
-/// Signed-in uid (null while signed out / cloud disabled).
-final syncUidProvider = Provider<String?>(
-    (ref) => ref.watch(cloudUserProvider).value?.uid);
+/// Signed-in uid (null while signed out / cloud disabled), and THE gate that
+/// makes "local mode uploads nothing" structural: every service below hangs off
+/// this, so a local-mode session cannot reach Firestore even with a live
+/// Firebase user (which only the mode-migration wizard ever produces).
+final syncUidProvider = Provider<String?>((ref) {
+  final cloudMode = ref.watch(authSessionProvider
+      .select((s) => s is SessionUnlocked && s.mode == AccountMode.cloud));
+  return cloudMode ? ref.watch(cloudUserProvider).value?.uid : null;
+});
 
 final keyDocsProvider = Provider<KeyDocsGateway?>((ref) {
   final fs = ref.watch(firestoreProvider);
@@ -97,6 +103,14 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
 final syncSeederProvider = Provider<SyncSeeder>(
     (ref) => SyncSeeder(ref.watch(dbProvider), ref.watch(syncScribeProvider)));
 
+Query<Map<String, dynamic>> _membershipQuery(FirebaseFirestore fs, String uid) =>
+    fs.collectionGroup('members').where('uid', isEqualTo: uid);
+
+List<Membership> _membershipsOf(QuerySnapshot<Map<String, dynamic>> snap) => [
+      for (final d in snap.docs)
+        Membership.fromDoc(d.reference.parent.parent!.id, d.data()),
+    ];
+
 /// "My congregations": the collection-group membership stream. Drives the
 /// pull target list, capability gating and the members UI. Empty when the
 /// cloud is down or signed out.
@@ -104,24 +118,27 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
   final fs = ref.watch(firestoreProvider);
   final uid = ref.watch(syncUidProvider);
   if (fs == null || uid == null) return Stream.value(const []);
-  return fs
-      .collectionGroup('members')
-      .where('uid', isEqualTo: uid)
-      .snapshots()
-      .map((snap) => [
-            for (final d in snap.docs)
-              Membership.fromDoc(d.reference.parent.parent!.id, d.data()),
-          ]);
+  return _membershipQuery(fs, uid).snapshots().map(_membershipsOf);
+});
+
+/// One-shot membership read for a uid the sync stack is not serving yet — the
+/// upgrade wizard signs in while still in local mode, where [syncUidProvider]
+/// (and therefore [myMembershipsProvider]) is deliberately null.
+final membershipsOnceProvider =
+    FutureProvider.autoDispose.family<List<Membership>, String>((ref, uid) async {
+  final fs = ref.watch(firestoreProvider);
+  if (fs == null) return const [];
+  return _membershipsOf(await _membershipQuery(fs, uid).get());
 });
 
 /// What this user may PUSH in [congregationId] — the sync engine's write
 /// filter, with the three-state resolution the raw membership can't express:
 ///
-///  - no cloud session at all → null ("don't filter"): signed out, or Firebase
-///    down. Without this the empty membership list reads as a revocation and
-///    locks the user out of their OWN data;
-///  - never shared / not shared here → null ("don't filter": a local
-///    congregation has no keyring, so the engine leaves its outbox queued);
+///  - no cloud session at all → null ("don't filter"): signed out, back in
+///    local mode or Firebase down. Without this the empty membership list
+///    reads as a revocation and locks the user out of their OWN data;
+///  - never shared / not shared here → null (a local congregation has no
+///    keyring, so the engine leaves its outbox queued);
 ///  - shared, membership still loading or errored → null (same "don't
 ///    filter": dropping outbox rows on a stale read would lose the user's
 ///    edits);
@@ -201,32 +218,46 @@ final isCongregationSyncedProvider =
   return memberships.any((m) => m.congregationId == congregationId);
 });
 
-/// THE sign-out path. Signing out unlinks this device: the E2E identity seed
-/// and every cached congregation key are wiped from the keychain, so a
-/// resold or lent device keeps nothing. Coming back means linking this
-/// device again from one that still syncs.
+/// Unlinks this device from the account: the E2E identity seed and every
+/// cached congregation key leave the keychain, so a resold or lent device
+/// keeps nothing. Best-effort throughout — a keychain hiccup must never trap
+/// the user signed in.
+///
+/// Separate from the sign-out itself because the cloud → local migration has
+/// to run it BEFORE the mode flips: every service below reads
+/// [syncUidProvider], which local mode pins to null.
+Future<void> _forgetSyncKeys(Ref ref, {Iterable<String>? congregationIds}) async {
+  final cck = ref.read(cckServiceProvider);
+  if (cck != null) {
+    // A teardown has already deleted the member docs by the time it calls
+    // this, so the live stream may have emitted an empty list: callers that
+    // know which congregations were theirs must say so, or the keyrings stay
+    // behind on the device.
+    final cids = congregationIds ??
+        <String>[
+          for (final m in ref.read(myMembershipsProvider).value ?? const [])
+            m.congregationId,
+        ];
+    try {
+      await cck.forget(cids);
+    } catch (_) {}
+  }
+  try {
+    await ref.read(userKeyServiceProvider)?.forget();
+  } catch (_) {}
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(syncOwnerUidKey);
+  } catch (_) {}
+}
+
+/// THE sign-out path. Coming back means linking this device again from one
+/// that still syncs.
 ///
 /// Every sign-out affordance must call this — never `CloudAuthService.signOut`
 /// directly, or the keys stay behind.
 final cloudSignOutProvider = Provider((ref) => () async {
-      final cck = ref.read(cckServiceProvider);
-      if (cck != null) {
-        final cids = <String>[
-          for (final m in ref.read(myMembershipsProvider).value ?? const [])
-            m.congregationId,
-        ];
-        // Best-effort: a keychain hiccup must never trap the user signed in.
-        try {
-          await cck.forget(cids);
-        } catch (_) {}
-      }
-      try {
-        await ref.read(userKeyServiceProvider)?.forget();
-      } catch (_) {}
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(syncOwnerUidKey);
-      } catch (_) {}
+      await _forgetSyncKeys(ref);
       await (await ref.read(cloudAuthProvider.future))?.signOut();
     });
 
@@ -446,3 +477,78 @@ final deleteMyAccountProvider = Provider((ref) => () async {
       // Everything cloud-side is gone: wipe local and return to the Portada.
       await ref.read(authSessionProvider.notifier).resetAllData();
     });
+
+// ---- account mode migration ------------------------------------------------
+
+/// Cloud → local. Brings every congregation down BEFORE destroying the cloud
+/// copy, so the local database is complete when the cord is cut, then hands the
+/// session over to a password gate.
+///
+/// Throws [AccountDeletionBlocked] before touching anything when the user is
+/// the sole admin of a congregation others still belong to, and a
+/// [SharingException] when the final pull could not be confirmed — tearing the
+/// cloud down on a half-synced device is how data goes missing.
+///
+/// [force] overrides only `syncIncomplete`, and exists so a congregation that
+/// fails to pull forever cannot trap the user in cloud mode. `offline` and
+/// `syncBusy` ignore it: the teardown itself needs the network, and a sync in
+/// flight only needs a moment.
+final downgradeToLocalProvider = Provider((ref) =>
+    (String name, String password, {bool force = false}) async {
+          final teardown = ref.read(congregationTeardownProvider);
+          final cck = ref.read(cckServiceProvider);
+          final uid = ref.read(syncUidProvider);
+          if (teardown == null || cck == null || uid == null) {
+            throw const SharingException(
+                'keysUnavailable', 'Cloud sync is not available.');
+          }
+
+          final memberships = await _awaitMemberships(ref);
+          final plan = await _accountDeletionPlan(cck, uid, memberships);
+          if (plan.blocked.isNotEmpty) throw AccountDeletionBlocked(plan.blocked);
+
+          final sync = ref.read(syncControllerProvider.notifier);
+          await sync.syncNow();
+          // Anything but idle means the drain is unconfirmed, and `syncing` is
+          // the dangerous one: `syncNow` returns immediately when a debounced
+          // push or a heartbeat pull is already in flight, so treating it as
+          // success would destroy the cloud copy mid-transfer.
+          final status = ref.read(syncControllerProvider);
+          if (status.phase != SyncPhase.idle) {
+            final reason = switch (status.phase) {
+              SyncPhase.syncing => 'syncBusy',
+              SyncPhase.offline => 'offline',
+              _ => status.errorKey == 'offline' ? 'offline' : 'syncIncomplete',
+            };
+            if (!force || reason != 'syncIncomplete') {
+              throw SharingException(
+                  reason, 'The last sync did not complete; nothing was deleted.');
+            }
+          }
+
+          sync.pause();
+          try {
+            for (final cid in plan.wipe) {
+              await teardown.wipe(cid);
+            }
+            for (final cid in plan.leave) {
+              await teardown.leave(cid);
+            }
+            await _forgetSyncKeys(ref,
+                congregationIds: [...plan.wipe, ...plan.leave]);
+          } catch (_) {
+            sync.resume();
+            rethrow;
+          }
+
+          final db = ref.read(dbProvider);
+          await db.delete(db.syncState).go();
+          await db.delete(db.outbox).go();
+
+          // Before the sign-out: `_onCloudUser(null)` would otherwise route a
+          // still-cloud session to the sign-in screen and unmount the caller.
+          await ref
+              .read(authSessionProvider.notifier)
+              .downgradeToLocal(name, password);
+          await (await ref.read(cloudAuthProvider.future))?.signOut();
+        });
