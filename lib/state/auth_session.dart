@@ -257,6 +257,58 @@ class SessionController extends Notifier<SessionState> {
     }
   }
 
+  /// Mode migration, local → cloud. The database is NOT re-encrypted: the DEK
+  /// this session already holds is handed over to the cloud-mode entry, so the
+  /// same `agora.db` opens on the other side.
+  ///
+  /// The step order is what survives a crash: the destination key is written
+  /// and verified BEFORE the preference moves, and the origin key is dropped
+  /// only after. An interrupted run therefore always boots into one working
+  /// mode, at worst with a spare key entry that the next migration overwrites.
+  Future<void> upgradeToCloud() async {
+    final s = state;
+    if (s is! SessionUnlocked || s.mode != AccountMode.local) return;
+    await _keys.adoptCloudKey(s.dekHex);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_modeKey, 'cloud');
+    _mode = AccountMode.cloud;
+    await prefs.remove(_nameKey);
+    _profileName = null;
+    // Past the preference the migration has happened; the leftovers are
+    // hygiene, and a keychain hiccup here must not report a failure the user
+    // would retry against an account that already moved.
+    try {
+      await _keys.forgetLocalPassword();
+      // Cloud mode releases the DEK from `cloudKeyName`, so the local copy is
+      // one more plaintext key with nothing left to unlock.
+      if (_deviceUnlockPref) await _keys.disableDeviceUnlock();
+    } catch (_) {}
+    state = SessionUnlocked(s.dekHex, AccountMode.cloud,
+        deviceUnlockEnabled: _deviceUnlock);
+    await _startCloudWatch();
+  }
+
+  /// Mode migration, cloud → local. Mirror of [upgradeToCloud], same ordering
+  /// guarantee. The caller is responsible for having torn the cloud presence
+  /// down first (see `downgradeToLocalProvider`).
+  Future<void> downgradeToLocal(String name, String password) async {
+    final s = state;
+    if (s is! SessionUnlocked || s.mode != AccountMode.cloud) return;
+    await _keys.adoptLocalPassword(s.dekHex, password);
+    await _persistLocalMode(name);
+    await _cloudSub?.cancel();
+    _cloudSub = null;
+    try {
+      await _keys.forgetCloudKey();
+      // Local mode reads device unlock from its own entry, which cloud mode
+      // never wrote. Losing this one is survivable: the unlock screen falls
+      // back to the password when the copy is missing.
+      if (_deviceUnlockPref) await _keys.enableDeviceUnlock(s.dekHex);
+    } catch (_) {}
+    state = SessionUnlocked(s.dekHex, AccountMode.local,
+        profileName: name, deviceUnlockEnabled: _deviceUnlock);
+  }
+
   /// The data is unrecoverable by design: delete the DB file plus every key
   /// and start over from the Portada.
   Future<void> resetAllData() async {
@@ -301,7 +353,10 @@ class SessionController extends Notifier<SessionState> {
   Future<void> _startCloudWatch() async {
     final app = await ref.read(firebaseAppProvider.future);
     if (app == null) {
-      state = const SessionCloudSignedOut();
+      // Only boot routes an unavailable cloud to the sign-in screen. Reached
+      // from a sign-in or a mode migration the session is already unlocked and
+      // the DEK in hand, so throwing it away would lose a live session.
+      if (state is! SessionUnlocked) state = const SessionCloudSignedOut();
       return;
     }
     await _cloudSub?.cancel();

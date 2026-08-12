@@ -45,6 +45,7 @@ class TranslationsEn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$security$en security = _Translations$security$en._(_root);
 	@override late final _Translations$cloudSync$en cloudSync = _Translations$cloudSync$en._(_root);
 	@override late final _Translations$account$en account = _Translations$account$en._(_root);
+	@override late final _Translations$accountMode$en accountMode = _Translations$accountMode$en._(_root);
 	@override late final _Translations$nav$en nav = _Translations$nav$en._(_root);
 	@override late final _Translations$userMenu$en userMenu = _Translations$userMenu$en._(_root);
 	@override late final _Translations$common$en common = _Translations$common$en._(_root);
@@ -180,7 +181,7 @@ class _Translations$account$en extends Translations$account$es {
 
 	// Translations
 	@override String get title => 'Cloud account';
-	@override String get desc => 'Optional identity for future sync. It does not replace the local password.';
+	@override String get desc => 'Open your information from another device and share congregations with other people.';
 	@override String get notConfigured => 'Cloud not configured';
 	@override String get notConfiguredDesc => 'This install has no Firebase project: the app runs 100% locally.';
 	@override String get signIn => 'Sign in';
@@ -193,7 +194,6 @@ class _Translations$account$en extends Translations$account$es {
 	@override String get resetSent => 'We sent you a password reset email.';
 	@override String get signedInAs => 'Signed in';
 	@override String get signOut => 'Sign out';
-	@override String get localGateNote => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.';
 	@override String get dangerZone => 'Danger zone';
 	@override String get deleteAccount => 'Delete my account';
 	@override String get deleteAccountDesc => 'Removes your cloud account and all data on this device.';
@@ -205,6 +205,42 @@ class _Translations$account$en extends Translations$account$es {
 	@override String get deleteConfirm => 'Delete my account';
 	@override String get deleteError => 'Could not delete the account. Try again.';
 	@override late final _Translations$account$errors$en errors = _Translations$account$errors$en._(_root);
+}
+
+// Path: accountMode
+class _Translations$accountMode$en extends Translations$accountMode$es {
+	_Translations$accountMode$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get toCloudTitle => 'Keep it in your account';
+	@override String get toCloudDesc => 'You\'ll be able to open your information from another device and share congregations with other people.';
+	@override String get toCloudAction => 'Get started';
+	@override String get signInStep => 'Sign in or create your account. Nothing is sent yet.';
+	@override String existingData({required Object count}) => 'This account already has congregations saved: ${count}. The ones on this device will be added to those, not merged.';
+	@override String get consentTitle => 'What will be kept in your account';
+	@override String get consentBody => 'Your congregations, participants, absences, projects, programs and assignments. Everything travels protected: only you and the people you invite can read it.';
+	@override String get consentCustody => 'You won\'t have to remember any code — your account takes care of it. In exchange, whoever runs the service could end up seeing your information; if you\'d rather that were impossible, keep everything on this device only.';
+	@override String get consentConfirm => 'Keep it in my account';
+	@override String get uploading => 'Saving your information…';
+	@override String uploadingProgress({required Object done, required Object total}) => '${done} of ${total} congregations';
+	@override String get uploadPending => 'You\'re all set. Whatever is left is saved on its own once you\'re back online.';
+	@override String get uploadDone => 'Done: your information is in your account.';
+	@override String get toLocalTitle => 'Keep it on this device only';
+	@override String get toLocalDesc => 'Stop using your account and protect your information with a password on this device.';
+	@override String get toLocalAction => 'Switch';
+	@override String get toLocalWarning => 'Everything missing is brought over first, then your information is deleted from the account: congregations where you are the only person are removed, and you leave the rest. What you have on this device is kept.';
+	@override String get backupHint => 'Save a backup before continuing (recommended).';
+	@override String get toLocalPassword => 'Pick your name and the password you\'ll use to open the app on this device.';
+	@override String get toLocalConfirm => 'Keep it here only';
+	@override String get checking => 'Checking your congregations…';
+	@override String get draining => 'Bringing over what\'s missing…';
+	@override String get errorOffline => 'Your information could not be fully brought over, so nothing was deleted. Try again when you have a connection.';
+	@override String get errorSyncBusy => 'A sync is running right now. Wait a few seconds and try again.';
+	@override String get errorIncomplete => 'Not everything could be brought over, so nothing was deleted. If you continue anyway, the most recent changes of some congregation may be missing.';
+	@override String get forceConfirm => 'Continue anyway';
+	@override String get errorUnknown => 'The change could not be completed. Try again.';
 }
 
 // Path: nav
@@ -1063,7 +1099,7 @@ extension on TranslationsEn {
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
 			'cloudSync.restoreOffline' => 'Offline. Your data will be restored when you reconnect.',
 			'account.title' => 'Cloud account',
-			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
+			'account.desc' => 'Open your information from another device and share congregations with other people.',
 			'account.notConfigured' => 'Cloud not configured',
 			'account.notConfiguredDesc' => 'This install has no Firebase project: the app runs 100% locally.',
 			'account.signIn' => 'Sign in',
@@ -1076,7 +1112,6 @@ extension on TranslationsEn {
 			'account.resetSent' => 'We sent you a password reset email.',
 			'account.signedInAs' => 'Signed in',
 			'account.signOut' => 'Sign out',
-			'account.localGateNote' => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.',
 			'account.dangerZone' => 'Danger zone',
 			'account.deleteAccount' => 'Delete my account',
 			'account.deleteAccountDesc' => 'Removes your cloud account and all data on this device.',
@@ -1095,6 +1130,33 @@ extension on TranslationsEn {
 			'account.errors.network' => 'No connection. Try again.',
 			'account.errors.requiresRecentLogin' => 'For your security, sign in again and retry.',
 			'account.errors.unknown' => 'The operation could not be completed. Try again.',
+			'accountMode.toCloudTitle' => 'Keep it in your account',
+			'accountMode.toCloudDesc' => 'You\'ll be able to open your information from another device and share congregations with other people.',
+			'accountMode.toCloudAction' => 'Get started',
+			'accountMode.signInStep' => 'Sign in or create your account. Nothing is sent yet.',
+			'accountMode.existingData' => ({required Object count}) => 'This account already has congregations saved: ${count}. The ones on this device will be added to those, not merged.',
+			'accountMode.consentTitle' => 'What will be kept in your account',
+			'accountMode.consentBody' => 'Your congregations, participants, absences, projects, programs and assignments. Everything travels protected: only you and the people you invite can read it.',
+			'accountMode.consentCustody' => 'You won\'t have to remember any code — your account takes care of it. In exchange, whoever runs the service could end up seeing your information; if you\'d rather that were impossible, keep everything on this device only.',
+			'accountMode.consentConfirm' => 'Keep it in my account',
+			'accountMode.uploading' => 'Saving your information…',
+			'accountMode.uploadingProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
+			'accountMode.uploadPending' => 'You\'re all set. Whatever is left is saved on its own once you\'re back online.',
+			'accountMode.uploadDone' => 'Done: your information is in your account.',
+			'accountMode.toLocalTitle' => 'Keep it on this device only',
+			'accountMode.toLocalDesc' => 'Stop using your account and protect your information with a password on this device.',
+			'accountMode.toLocalAction' => 'Switch',
+			'accountMode.toLocalWarning' => 'Everything missing is brought over first, then your information is deleted from the account: congregations where you are the only person are removed, and you leave the rest. What you have on this device is kept.',
+			'accountMode.backupHint' => 'Save a backup before continuing (recommended).',
+			'accountMode.toLocalPassword' => 'Pick your name and the password you\'ll use to open the app on this device.',
+			'accountMode.toLocalConfirm' => 'Keep it here only',
+			'accountMode.checking' => 'Checking your congregations…',
+			'accountMode.draining' => 'Bringing over what\'s missing…',
+			'accountMode.errorOffline' => 'Your information could not be fully brought over, so nothing was deleted. Try again when you have a connection.',
+			'accountMode.errorSyncBusy' => 'A sync is running right now. Wait a few seconds and try again.',
+			'accountMode.errorIncomplete' => 'Not everything could be brought over, so nothing was deleted. If you continue anyway, the most recent changes of some congregation may be missing.',
+			'accountMode.forceConfirm' => 'Continue anyway',
+			'accountMode.errorUnknown' => 'The change could not be completed. Try again.',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
 			'nav.settings' => 'Settings',
@@ -1438,6 +1500,8 @@ extension on TranslationsEn {
 			'program.roleStudentAssistant' => 'Student/Assistant:',
 			'program.roleConductorReader' => 'Conductor/Reader:',
 			'program.rolePrayer' => 'Prayer:',
+			_ => null,
+		} ?? switch (path) {
 			'program.roleSpeaker' => 'Speaker:',
 			'program.title' => 'Midweek Meeting Program',
 			'program.chairman' => 'Chairman: ',

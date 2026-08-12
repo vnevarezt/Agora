@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,16 +6,19 @@ import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../../state/cloud_auth.dart';
 import '../../state/sync_provider.dart';
-import '../auth/cloud_sign_in_modal.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/danger_button.dart';
 import 'delete_account_modal.dart';
+import 'downgrade_to_local_modal.dart';
 import 'settings_card.dart';
+import 'upgrade_to_cloud_modal.dart';
 
-/// Settings card for the optional Firebase identity. Degrades to a
-/// "cloud not configured" row when firebase_options.dart is a placeholder or
-/// initialization failed; the rest of the app never depends on it.
+/// Settings card for the account mode. A local account has no cloud identity
+/// at all — the only thing on offer is the migration wizard — and a cloud
+/// account gets the identity, the way back to local and the danger zone.
+/// Degrades to a "cloud not configured" row when firebase_options.dart is a
+/// placeholder or initialization failed.
 class AccountCard extends ConsumerWidget {
   const AccountCard({super.key});
 
@@ -23,18 +27,13 @@ class AccountCard extends ConsumerWidget {
     final tr = context.t;
     final available = ref.watch(firebaseAvailableProvider);
     final cloudOk = ref.watch(cloudAuthSupportedProvider).value ?? true;
+    final localMode = ref.watch(authSessionProvider
+        .select((s) => s is SessionUnlocked && s.mode == AccountMode.local));
     final user = ref.watch(cloudUserProvider).value;
-    final session = ref.watch(authSessionProvider);
-    // In cloud mode signing out DOES close the session (it is the gate); the
-    // "your local data stays open" note only applies to local-mode users.
-    final localMode =
-        session is SessionUnlocked && session.mode == AccountMode.local;
 
     return SettingsCard(
       title: tr.account.title,
-      desc: available && user != null && localMode
-          ? tr.account.localGateNote
-          : tr.account.desc,
+      desc: tr.account.desc,
       children: [
         if (!available || !cloudOk)
           SettingRow(
@@ -44,18 +43,18 @@ class AccountCard extends ConsumerWidget {
                 ? tr.portada.cloudUnsupported
                 : tr.account.notConfiguredDesc,
           )
-        else if (user == null)
+        else if (localMode)
           SettingRow(
             first: true,
-            title: tr.account.signIn,
-            subtitle: tr.account.desc,
+            title: tr.accountMode.toCloudTitle,
+            subtitle: tr.accountMode.toCloudDesc,
             trailing: AppButton(
-              icon: Icons.cloud_outlined,
-              label: tr.account.signIn,
+              icon: Icons.cloud_upload_outlined,
+              label: tr.accountMode.toCloudAction,
               onPressed: () => showAppModal<void>(
                 context,
                 builder: (ctx, sheet, close) =>
-                    CloudSignInModal(sheet: sheet, onClose: close),
+                    UpgradeToCloudModal(sheet: sheet, onClose: close),
               ),
             ),
           )
@@ -63,7 +62,7 @@ class AccountCard extends ConsumerWidget {
           SettingRow(
             first: true,
             title: tr.account.signedInAs,
-            subtitle: user.email ?? user.uid,
+            subtitle: user?.email ?? user?.uid ?? '',
             trailing: AppButton(
               variant: AppButtonVariant.ghost,
               icon: Icons.logout,
@@ -71,6 +70,23 @@ class AccountCard extends ConsumerWidget {
               onPressed: () => ref.read(cloudSignOutProvider)(),
             ),
           ),
+          // Local mode wraps the DB key with a password and leaves it in the OS
+          // keychain, which a browser does not have.
+          if (!kIsWeb)
+            SettingRow(
+              title: tr.accountMode.toLocalTitle,
+              subtitle: tr.accountMode.toLocalDesc,
+              trailing: AppButton(
+                variant: AppButtonVariant.ghost,
+                icon: Icons.smartphone,
+                label: tr.accountMode.toLocalAction,
+                onPressed: () => showAppModal<void>(
+                  context,
+                  builder: (ctx, sheet, close) =>
+                      DowngradeToLocalModal(sheet: sheet, onClose: close),
+                ),
+              ),
+            ),
           SettingRow(
             title: tr.account.deleteAccount,
             subtitle: tr.account.deleteAccountDesc,

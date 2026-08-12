@@ -238,9 +238,20 @@ client-side; the realistic threat model here is misclicks, not attacks).
 - Cloud mode: the DB file and keychain entries become **per-uid**
   (`agora_{uid}.db`, `db_key.cloud.{uid}`), so switching Firebase accounts on
   one device cannot mix tenants. Local mode keeps the single account.
-- **Local → cloud upgrade** (future wizard): UUIDs make it collision-free —
-  create congregation spaces in the cloud, push everything as fresh writes.
-  Designed for, not built now.
+- **Account mode is exclusive**: a local account has no Firebase session at
+  all. `syncUidProvider` is pinned to null outside cloud mode, so every sync
+  service below it stays null and local data cannot reach the cloud even by
+  accident.
+- **Local ↔ cloud migration** (Settings → Cuenta): both directions hand the
+  SAME DEK from one keychain entry to the other — the database is never
+  re-encrypted. Going up adopts the current key as `db_key.cloud`, flips the
+  mode and lets auto-enable push everything as fresh writes (UUIDs make it
+  collision-free; congregations are never merged). Going down pulls everything
+  first, tears the cloud space down with `planAccountDeletion`'s wipe/leave/
+  blocked decision, then re-wraps the key under a new password. Each direction
+  writes and verifies the destination key before touching `account_mode` and
+  drops the origin key only after, so an interrupted migration always boots
+  into one working mode.
 - `.jwpp` export grows into a full versioned backup (all entities), remaining
   the escape hatch for local-mode users.
 

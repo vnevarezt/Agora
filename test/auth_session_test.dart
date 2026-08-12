@@ -339,4 +339,113 @@ void main() {
     expect(prefs.getString('account_mode'), isNull);
     expect(prefs.getString('local_profile_name'), isNull);
   });
+
+  // The database is never re-encrypted across a mode change: the same DEK is
+  // handed from one keychain entry to the other. Minting a new one instead
+  // would leave agora.db sealed forever.
+  group('account mode migration', () {
+    Future<(ProviderContainer, SessionController, String)> localSession(
+      MapKeyStore store, {
+      DeviceAuth? deviceAuth,
+    }) async {
+      final container = containerWith(store, deviceAuth: deviceAuth);
+      await settled(container);
+      final session = container.read(authSessionProvider.notifier);
+      await session.createLocalProfile('Ana', 'pw-123456');
+      final dek =
+          (container.read(authSessionProvider) as SessionUnlocked).dekHex;
+      return (container, session, dek);
+    }
+
+    test('upgradeToCloud adopts the current dek instead of minting one',
+        () async {
+      final store = MapKeyStore();
+      final (container, session, dek) = await localSession(store);
+      await session.upgradeToCloud();
+
+      expect(store.data[DbKeyManager.cloudKeyName], dek);
+      expect(
+          await DbKeyManager(store: store, params: testKdfParams)
+              .getOrCreateCloudKeyHex(),
+          dek);
+      final state = container.read(authSessionProvider) as SessionUnlocked;
+      expect(state.mode, AccountMode.cloud);
+      expect(state.dekHex, dek);
+    });
+
+    test('upgradeToCloud drops the password blob and the profile name',
+        () async {
+      final store = MapKeyStore();
+      final (_, session, _) = await localSession(store);
+      await session.upgradeToCloud();
+
+      expect(store.data.containsKey(DbKeyManager.wrappedKeyName), isFalse);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('account_mode'), 'cloud');
+      expect(prefs.getString('local_profile_name'), isNull);
+    });
+
+    test('downgradeToLocal re-wraps the same dek under the new password',
+        () async {
+      final store = MapKeyStore();
+      final (container, session, dek) = await localSession(store);
+      await session.upgradeToCloud();
+      await session.downgradeToLocal('Beto', 'pw-abcdefg');
+
+      expect(store.data.containsKey(DbKeyManager.cloudKeyName), isFalse);
+      expect(
+          await DbKeyManager(store: store, params: testKdfParams)
+              .unlock('pw-abcdefg'),
+          dek);
+      final state = container.read(authSessionProvider) as SessionUnlocked;
+      expect(state.mode, AccountMode.local);
+      expect(state.profileName, 'Beto');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('account_mode'), 'local');
+    });
+
+    test('the device-unlock copy follows the mode', () async {
+      final store = MapKeyStore();
+      final (_, session, dek) =
+          await localSession(store, deviceAuth: FakeDeviceAuth());
+      await session.setDeviceUnlock(true, 'reason');
+      expect(store.data[DbKeyManager.deviceUnlockKeyName], dek);
+
+      // Cloud mode releases the DEK from its own entry, so the copy is dead
+      // weight until the session comes back to local.
+      await session.upgradeToCloud();
+      expect(
+          store.data.containsKey(DbKeyManager.deviceUnlockKeyName), isFalse);
+
+      await session.downgradeToLocal('Beto', 'pw-abcdefg');
+      expect(store.data[DbKeyManager.deviceUnlockKeyName], dek);
+    });
+
+    test('an upgrade interrupted before the pref still boots local', () async {
+      final store = MapKeyStore();
+      final (_, _, dek) = await localSession(store);
+      await DbKeyManager(store: store, params: testKdfParams)
+          .adoptCloudKey(dek);
+
+      final state = await settled(containerWith(store));
+      expect(state, isA<SessionLocalLocked>());
+      expect(
+          await DbKeyManager(store: store, params: testKdfParams)
+              .unlock('pw-123456'),
+          dek);
+    });
+
+    test('a downgrade interrupted before the pref still boots cloud',
+        () async {
+      final store = MapKeyStore();
+      final (_, session, dek) = await localSession(store);
+      await session.upgradeToCloud();
+      await DbKeyManager(store: store, params: testKdfParams)
+          .adoptLocalPassword(dek, 'pw-abcdefg');
+
+      SharedPreferences.setMockInitialValues({'account_mode': 'cloud'});
+      expect(await settled(containerWith(store)), isA<SessionCloudSignedOut>());
+      expect(store.data[DbKeyManager.cloudKeyName], dek);
+    });
+  });
 }
