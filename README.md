@@ -85,6 +85,20 @@ flutter pub get
 flutter run          # pick your device: macOS, Windows, Android, iOS
 ```
 
+**Windows prerequisite** — on top of the usual "Desktop development with C++" workload, the build needs the
+**C++ ATL for latest v143 build tools** component: `flutter_secure_storage_windows` includes `<atlstr.h>`, which
+ships only with ATL. Without it the build stops at `error C1083: Cannot open include file: 'atlstr.h'`. Add it from
+the Visual Studio Installer, or from the command line:
+
+```powershell
+& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify `
+  --installPath "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" `
+  --add Microsoft.VisualStudio.Component.VC.ATL --quiet --norestart
+```
+
+Do not work around this by swapping `flutter_secure_storage` for a non-native implementation: that store holds the
+database encryption key, and a pure-Dart fallback would leave it in plaintext on disk (see `lib/data/db/db_key_manager.dart`).
+
 To enable the optional cloud sign-in with your own Firebase project, follow [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
 
 Useful commands:

@@ -30,6 +30,20 @@
       "args": ["-d", "macos", "--dart-define=FLAVOR=prod"]
     },
     {
+      "name": "Agora dev (Windows)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["-d", "windows", "--dart-define=FLAVOR=dev"]
+    },
+    {
+      "name": "Agora prod (Windows)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["-d", "windows", "--dart-define=FLAVOR=prod"]
+    },
+    {
       "name": "Agora dev (web)",
       "request": "launch",
       "type": "dart",
