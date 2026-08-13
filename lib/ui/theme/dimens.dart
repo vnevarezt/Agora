@@ -69,6 +69,15 @@ abstract final class Elevation {
     BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2)),
   ];
 
+  /// Halo around the card the editor is working on. Not a shadow — it has no
+  /// blur, it is a ring — but it belongs here so it stops being a one-off
+  /// `BoxShadow` at the call site. Takes the accent so it reads on both
+  /// grounds: the accentSoft it used to use sits at 1.5:1 on the dark
+  /// surface, which made the active card look no different from the rest.
+  static List<BoxShadow> selectionHalo(Color accent) => [
+        BoxShadow(color: accent.withValues(alpha: 0.30), spreadRadius: 3),
+      ];
+
   /// Scrim behind an anchored panel.
   static const Color scrim = Color(0x47000000);
 

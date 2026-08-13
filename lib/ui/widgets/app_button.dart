@@ -20,12 +20,18 @@ class Pressable extends StatefulWidget {
     this.onTap,
     this.tooltip,
     this.semanticLabel,
+    this.focusRadius = Dimens.rControl,
   });
 
   final Widget Function(BuildContext context, bool hovered, bool pressed)
   builder;
   final VoidCallback? onTap;
   final String? tooltip;
+
+  /// Corner radius of the keyboard focus ring, so it traces the control it
+  /// belongs to instead of a generic rounded rect. Pass the same radius the
+  /// builder paints.
+  final double focusRadius;
 
   /// What VoiceOver / TalkBack announces. Required in practice for controls
   /// whose only content is an icon: a bare [GestureDetector] exposes the tap
@@ -41,15 +47,35 @@ class Pressable extends StatefulWidget {
 class _PressableState extends State<Pressable> {
   bool _hovered = false;
   bool _pressed = false;
+  bool _focused = false;
+
+  void _activate() {
+    // Keyboard activation has no press phase of its own; flash the pressed
+    // state so Space/Enter reads like a tap instead of firing invisibly.
+    if (widget.onTap == null) return;
+    setState(() => _pressed = true);
+    widget.onTap!();
+    Future.delayed(Motion.instant, () {
+      if (mounted) setState(() => _pressed = false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget child = MouseRegion(
-      cursor: widget.onTap != null
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+    final enabled = widget.onTap != null;
+
+    Widget child = FocusableActionDetector(
+      enabled: enabled,
+      mouseCursor:
+          enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onShowHoverHighlight: (v) => setState(() => _hovered = v),
+      // Only true when the focus arrived by keyboard, so a mouse click never
+      // leaves a ring behind.
+      onShowFocusHighlight: (v) => setState(() => _focused = v),
+      actions: {
+        ActivateIntent:
+            CallbackAction<ActivateIntent>(onInvoke: (_) => _activate()),
+      },
       child: GestureDetector(
         // opaque: with the default deferToChild only PAINTED pixels react,
         // so controls without a background (bottom-nav items, text links)
@@ -62,12 +88,27 @@ class _PressableState extends State<Pressable> {
         child: widget.builder(context, _hovered || _pressed, _pressed),
       ),
     );
+
+    // Foreground decoration, so the ring paints over the control without
+    // taking part in layout — a focus state that resized the button would
+    // shift everything next to it.
+    child = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.focusRadius),
+        border: _focused
+            ? Border.all(color: context.tokens.accent, width: 2)
+            : null,
+      ),
+      child: child,
+    );
+
     if (widget.tooltip != null) {
       child = Tooltip(message: widget.tooltip!, child: child);
     }
     return Semantics(
       button: true,
-      enabled: widget.onTap != null,
+      enabled: enabled,
       label: widget.semanticLabel,
       child: child,
     );

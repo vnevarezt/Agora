@@ -40,9 +40,7 @@ class PartCard extends ConsumerWidget {
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rCard),
         border: Border.all(color: active ? t.accent : t.border),
-        boxShadow: active
-            ? [BoxShadow(color: t.accentSoft, spreadRadius: 3)]
-            : null,
+        boxShadow: active ? Elevation.selectionHalo(t.accent) : null,
       ),
       child: view.kind == PartKind.fixedLine
           ? _FixedLineBody(view: view)
