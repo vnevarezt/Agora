@@ -83,7 +83,7 @@ class MiniChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (_kind == _ChipKind.aux) ...[
-            Icon(Icons.apartment_outlined, size: 12, color: fg),
+            Icon(Icons.apartment_outlined, size: AppIcon.inline, color: fg),
             const SizedBox(width: 5),
           ],
           Text(

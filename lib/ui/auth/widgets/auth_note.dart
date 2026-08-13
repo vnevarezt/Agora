@@ -26,7 +26,7 @@ class AuthNote extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1),
-            child: Icon(icon, size: 15, color: t.accentStrong),
+            child: Icon(icon, size: AppIcon.control, color: t.accentStrong),
           ),
           const SizedBox(width: 10),
           Expanded(

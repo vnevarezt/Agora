@@ -33,7 +33,7 @@ class PdfPreviewView extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.description_outlined, size: 40, color: t.textMute),
+            Icon(Icons.description_outlined, size: AppIcon.hero, color: t.textMute),
             const SizedBox(height: 12),
             Text(
               context.t.preview.emptyHint,

@@ -145,7 +145,7 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
             children: [
               if (widget.segments[i].icon != null) ...[
                 Icon(widget.segments[i].icon,
-                    size: 15, color: activo ? t.text : t.textDim),
+                    size: AppIcon.control, color: activo ? t.text : t.textDim),
                 const SizedBox(width: 6),
               ],
               Text(

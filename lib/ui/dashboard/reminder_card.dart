@@ -46,7 +46,7 @@ class ReminderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: iconBorde != null ? Border.all(color: iconBorde) : null,
             ),
-            child: Icon(icono, size: 16, color: iconFg),
+            child: Icon(icono, size: AppIcon.control, color: iconFg),
           ),
           const SizedBox(width: 11),
           Expanded(

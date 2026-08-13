@@ -189,7 +189,7 @@ class AppButton extends StatelessWidget {
               if (busy)
                 AppSpinner(size: 15, color: fg)
               else if (icon != null)
-                Icon(icon, size: 17, color: fg),
+                Icon(icon, size: AppIcon.control, color: fg),
               if (label != null) ...[
                 if (icon != null || busy) const SizedBox(width: 8),
                 // Flexible: a label longer than the button ellipsizes instead
@@ -263,7 +263,7 @@ class AppIconButton extends StatelessWidget {
             border: bordered || elevated ? Border.all(color: t.border) : null,
             boxShadow: elevated ? Elevation.raised : null,
           ),
-          child: Icon(icon, size: 19, color: hovered ? t.text : t.textDim),
+          child: Icon(icon, size: AppIcon.control, color: hovered ? t.text : t.textDim),
         );
         // The paint stays [size]; the tap area never shrinks below the
         // platform touch-target floor. Callers positioning this precisely

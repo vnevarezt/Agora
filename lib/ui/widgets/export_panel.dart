@@ -193,7 +193,7 @@ class _Segment extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  size: 15, color: selected ? t.accentStrong : t.textMute),
+                  size: AppIcon.control, color: selected ? t.accentStrong : t.textMute),
               const SizedBox(width: 6),
               Text(
                 label,

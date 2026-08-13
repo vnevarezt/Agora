@@ -75,7 +75,7 @@ class _NavIcon extends StatelessWidget {
       child: Icon(
         active ? activeIcon : icon,
         key: ValueKey(active),
-        size: 21,
+        size: AppIcon.nav,
         color: color,
       ),
     );
@@ -434,7 +434,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Icon(Icons.unfold_more, size: 16, color: t.textMute),
+                  Icon(Icons.unfold_more, size: AppIcon.control, color: t.textMute),
                 ],
               ),
             );
@@ -496,7 +496,7 @@ class _UserMenu extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(it.icon, size: 17, color: t.textMute),
+                    Icon(it.icon, size: AppIcon.control, color: t.textMute),
                     const SizedBox(width: 11),
                     Expanded(
                       child: Text(
@@ -548,7 +548,7 @@ class BottomNav extends ConsumerWidget {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           iconTheme: WidgetStateProperty.resolveWith(
             (states) => IconThemeData(
-              size: 24,
+              size: AppIcon.nav,
               color: states.contains(WidgetState.selected)
                   ? t.accentOnSoft
                   : t.textMute,

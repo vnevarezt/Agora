@@ -22,7 +22,7 @@ class ModePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: t.accentStrong),
+          Icon(icon, size: AppIcon.inline, color: t.accentStrong),
           const SizedBox(width: 7),
           Text(
             label.toUpperCase(),

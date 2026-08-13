@@ -195,7 +195,7 @@ class _EditTitleButton extends StatelessWidget {
         child: Tooltip(
           message: context.t.workspace.editTitle,
           child: Icon(Icons.edit_outlined,
-              size: 15, color: hovered ? t.accentStrong : t.textMute),
+              size: AppIcon.control, color: hovered ? t.accentStrong : t.textMute),
         ),
       ),
     );

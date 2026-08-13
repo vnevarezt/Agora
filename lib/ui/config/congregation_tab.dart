@@ -512,7 +512,7 @@ class _PendingInvite extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(Icons.mail_outline, size: 16, color: t.textMute),
+          Icon(Icons.mail_outline, size: AppIcon.control, color: t.textMute),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -626,7 +626,7 @@ class _AddChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.add, size: 15, color: fg),
+                Icon(Icons.add, size: AppIcon.control, color: fg),
                 const SizedBox(width: 6),
                 Text(
                   context.t.congregation.newCongregation,

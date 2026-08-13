@@ -258,7 +258,7 @@ class _SyncIndicator extends StatelessWidget {
             height: 16,
             child: CircularProgressIndicator(strokeWidth: 2, color: color),
           )
-        : Icon(icon, size: 17, color: color);
+        : Icon(icon, size: AppIcon.control, color: color);
 
     return Tooltip(
       message: tip,
@@ -337,7 +337,7 @@ class _CloudSyncIndicator extends ConsumerWidget {
             borderRadius: BorderRadius.circular(Dimens.rControl),
             border: Border.all(color: t.border),
           ),
-          child: Icon(shown.$1, size: 17, color: shown.$2),
+          child: Icon(shown.$1, size: AppIcon.control, color: shown.$2),
         ),
       ),
     );
@@ -362,11 +362,11 @@ class _RestoreBanner extends StatelessWidget {
 
     final (Widget leading, String label) = switch (phase) {
       SyncPhase.offline => (
-          Icon(Icons.cloud_off_rounded, size: 17, color: amber),
+          Icon(Icons.cloud_off_rounded, size: AppIcon.control, color: amber),
           tr.cloudSync.restoreOffline,
         ),
       SyncPhase.error => (
-          Icon(Icons.error_outline_rounded, size: 17, color: amber),
+          Icon(Icons.error_outline_rounded, size: AppIcon.control, color: amber),
           tr.cloudSync.errorUnknown,
         ),
       _ => (

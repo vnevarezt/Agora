@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../../state/sync_provider.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import 'auth_card_layout.dart';
@@ -93,7 +94,7 @@ class _CloudLockScreenState extends ConsumerState<CloudLockScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: t.border),
                 ),
-                child: Icon(Icons.lock_outline, size: 26, color: t.textMute),
+                child: Icon(Icons.lock_outline, size: AppIcon.feature, color: t.textMute),
               ),
               const SizedBox(height: 12),
               AuthTitle(tr.auth.cloudLock.title),

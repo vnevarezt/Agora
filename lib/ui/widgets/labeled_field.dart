@@ -58,7 +58,7 @@ class AppDropdown<T> extends StatelessWidget {
         value: value,
         isExpanded: true,
         underline: const SizedBox.shrink(),
-        icon: Icon(Icons.expand_more, size: 18, color: t.textMute),
+        icon: Icon(Icons.expand_more, size: AppIcon.control, color: t.textMute),
         borderRadius: BorderRadius.circular(Dimens.rControl),
         dropdownColor: t.surface,
         style: TextStyle(

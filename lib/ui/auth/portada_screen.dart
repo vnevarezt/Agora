@@ -225,7 +225,7 @@ class _PortadaButton extends StatelessWidget {
                 AnimatedSlide(
                   duration: Motion.of(context, Motion.instant),
                   offset: hovered ? const Offset(0.18, 0) : Offset.zero,
-                  child: Icon(Icons.arrow_forward, size: 17, color: fg),
+                  child: Icon(Icons.arrow_forward, size: AppIcon.control, color: fg),
                 ),
               ],
             ],
@@ -258,7 +258,7 @@ class _LocalEntryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.smartphone, size: 18, color: t.accentStrong),
+            Icon(Icons.smartphone, size: AppIcon.control, color: t.accentStrong),
             const SizedBox(width: 11),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

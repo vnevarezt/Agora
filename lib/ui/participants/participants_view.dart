@@ -174,7 +174,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
         decoration: InputDecoration(
           hintText: context.t.common.searchParticipant,
-          prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
+          prefixIcon: Icon(Icons.search, size: AppIcon.control, color: t.textMute),
           prefixIconConstraints:
               const BoxConstraints(minWidth: 36, minHeight: 16),
         ),

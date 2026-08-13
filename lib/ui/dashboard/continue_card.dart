@@ -226,7 +226,7 @@ class _WeekChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 13, color: fg),
+            Icon(icon, size: AppIcon.inline, color: fg),
             const SizedBox(width: 5),
           ],
           Text(

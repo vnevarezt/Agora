@@ -308,7 +308,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
                     duration: Motion.of(context, Motion.instant),
-                    child: Icon(Icons.expand_more, size: 16, color: t.textMute),
+                    child: Icon(Icons.expand_more, size: AppIcon.control, color: t.textMute),
                   ),
                 ],
               ),
@@ -391,7 +391,7 @@ class _PctBadge extends StatelessWidget {
         border: done ? null : Border.all(color: t.border2),
       ),
       child: done
-          ? Icon(Icons.check, size: 13, color: t.accentInk)
+          ? Icon(Icons.check, size: AppIcon.inline, color: t.accentInk)
           : Text(
               label,
               style: AppText.mono(
@@ -513,7 +513,7 @@ class _WeekMenu extends ConsumerWidget {
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(Icons.check,
-                                      size: 12, color: t.accentInk),
+                                      size: AppIcon.inline, color: t.accentInk),
                                 ),
                               )
                             : Text(
@@ -575,7 +575,7 @@ class _AuxToggle extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.apartment_outlined,
-                size: 16, color: auxRoom ? t.accentStrong : t.textMute),
+                size: AppIcon.control, color: auxRoom ? t.accentStrong : t.textMute),
             const SizedBox(width: 11),
             Expanded(
               child: Column(
@@ -630,7 +630,7 @@ class _TwoPerSheetToggle extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.splitscreen_outlined,
-                size: 16, color: twoPerSheet ? t.accentStrong : t.textMute),
+                size: AppIcon.control, color: twoPerSheet ? t.accentStrong : t.textMute),
             const SizedBox(width: 11),
             Expanded(
               child: Column(
@@ -685,7 +685,7 @@ class _CircuitOverseerToggle extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.record_voice_over_outlined,
-                size: 16, color: active ? t.accentStrong : t.textMute),
+                size: AppIcon.control, color: active ? t.accentStrong : t.textMute),
             const SizedBox(width: 11),
             Expanded(
               child: Column(
@@ -804,7 +804,7 @@ class _ExportCard extends StatelessWidget {
                     twoPerSheet
                         ? Icons.splitscreen_outlined
                         : Icons.description_outlined,
-                    size: 17,
+                    size: AppIcon.control,
                     color: t.textMute),
                 const SizedBox(width: 11),
                 Expanded(
@@ -889,7 +889,7 @@ class _ExportItem extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 17, color: t.textMute),
+              Icon(icon, size: AppIcon.control, color: t.textMute),
               const SizedBox(width: 11),
               Expanded(
                 child: Column(

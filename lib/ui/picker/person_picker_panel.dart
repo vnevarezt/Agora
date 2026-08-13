@@ -177,7 +177,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             decoration: InputDecoration(
               counterText: '',
               hintText: context.t.common.searchParticipant,
-              prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
+              prefixIcon: Icon(Icons.search, size: AppIcon.control, color: t.textMute),
               prefixIconConstraints:
                   const BoxConstraints(minWidth: 36, minHeight: 16),
             ),
@@ -228,7 +228,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             ),
             child: Row(
               children: [
-                Icon(Icons.add, size: 17, color: color),
+                Icon(Icons.add, size: AppIcon.control, color: color),
                 const SizedBox(width: 9),
                 Text(label,
                     style: TextStyle(
@@ -324,7 +324,7 @@ class PersonPickerRow extends StatelessWidget {
               ],
               if (selected && !avatarVacio) ...[
                 const SizedBox(width: 8),
-                Icon(Icons.check, size: 18, color: t.accent),
+                Icon(Icons.check, size: AppIcon.control, color: t.accent),
               ],
             ],
           ),

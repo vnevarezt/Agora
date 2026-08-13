@@ -23,7 +23,7 @@ class BackLink extends StatelessWidget {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.arrow_back, size: 15, color: color),
+              Icon(Icons.arrow_back, size: AppIcon.control, color: color),
               const SizedBox(width: 7),
               Text(
                 label,
