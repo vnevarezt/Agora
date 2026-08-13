@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -92,7 +93,7 @@ class _NewCongregationModalState
 
         return Wrap(
           spacing: gap,
-          runSpacing: 14,
+          runSpacing: Space.s14,
           children: [
             box(
               c.maxWidth,

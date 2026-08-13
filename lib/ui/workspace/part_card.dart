@@ -60,7 +60,7 @@ class _FixedLineBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s10),
       child: Row(
         children: [
           SizedBox(
@@ -71,7 +71,7 @@ class _FixedLineBody extends StatelessWidget {
               style: AppText.mono(size: 13, color: t.textMute),
             ),
           ),
-          const SizedBox(width: 13),
+          const SizedBox(width: Space.s14),
           Expanded(
             child: Text.rich(
               TextSpan(
@@ -100,7 +100,7 @@ class _FixedLineBody extends StatelessWidget {
             ),
           ),
           if (view.fixedTag != null) ...[
-            const SizedBox(width: 13),
+            const SizedBox(width: Space.s14),
             MiniChip.tag(view.fixedTag!),
           ],
         ],
@@ -124,13 +124,13 @@ class _RoleBody extends ConsumerWidget {
     final editable = view.id != 'presidente' &&
         ref.watch(canEditOpenProgramProvider);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s14, Space.s14, Space.s14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: 8,
-            runSpacing: 6,
+            spacing: Space.s8,
+            runSpacing: Space.s6,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (view.allMeetingBadge)
@@ -143,7 +143,7 @@ class _RoleBody extends ConsumerWidget {
               if (view.auxFlag) MiniChip.aux(context.t.workspace.auxRoom),
             ],
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: Space.s10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -159,14 +159,14 @@ class _RoleBody extends ConsumerWidget {
                 ),
               ),
               if (editable) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: Space.s8),
                 _EditTitleButton(
                   onTap: () => _showEditTitleDialog(context, ref, view),
                 ),
               ],
             ],
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: Space.s12),
           _Slots(slots: view.slots),
         ],
       ),
@@ -187,7 +187,7 @@ class _EditTitleButton extends StatelessWidget {
       onTap: onTap,
       semanticLabel: context.t.workspace.editTitle,
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(Space.s4),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
@@ -215,7 +215,7 @@ void _showEditTitleDialog(BuildContext context, WidgetRef ref, PartView view) {
       onClose: close,
       title: ctx.t.workspace.editTitle,
       body: Padding(
-        padding: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.only(top: Space.s8),
         child: BoundTextField(
           initial: view.title,
           label: ctx.t.workspace.editTitleHint,
@@ -261,7 +261,7 @@ class _Slots extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (var i = 0; i < slots.length; i++) ...[
-                if (i > 0) const SizedBox(height: 8),
+                if (i > 0) const SizedBox(height: Space.s8),
                 SlotField(spec: slots[i]),
               ],
             ],
@@ -270,12 +270,12 @@ class _Slots extends StatelessWidget {
         return Column(
           children: [
             for (var row = 0; row * perRow < slots.length; row++) ...[
-              if (row > 0) const SizedBox(height: 8),
+              if (row > 0) const SizedBox(height: Space.s8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   for (var j = 0; j < perRow; j++) ...[
-                    if (j > 0) const SizedBox(width: 8),
+                    if (j > 0) const SizedBox(width: Space.s8),
                     Expanded(
                       child: row * perRow + j < slots.length
                           ? SlotField(spec: slots[row * perRow + j])

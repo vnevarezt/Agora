@@ -88,7 +88,7 @@ class _ExportSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+        padding: const EdgeInsets.fromLTRB(Space.s18, Space.s18, Space.s18, Space.s18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,7 +101,7 @@ class _ExportSheet extends StatelessWidget {
                         : Icons.description_outlined,
                     size: 20,
                     color: t.textMute),
-                const SizedBox(width: 12),
+                const SizedBox(width: Space.s12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +127,7 @@ class _ExportSheet extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: Space.s18),
             ExportPanel(enabled: haySemana, onExport: onExport),
           ],
         ),

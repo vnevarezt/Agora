@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -24,7 +25,7 @@ class BlockTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: Space.s12),
       child: Row(
         children: [
           Flexible(
@@ -41,7 +42,7 @@ class BlockTitle extends StatelessWidget {
             ),
           ),
           if (count != null) ...[
-            const SizedBox(width: 7),
+            const SizedBox(width: Space.s8),
             Text(
               '· $count',
               style: TextStyle(

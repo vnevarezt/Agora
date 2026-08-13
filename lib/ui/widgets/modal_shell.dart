@@ -52,7 +52,7 @@ class ModalShell extends StatelessWidget {
         _header(context, t),
         Flexible(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
+            padding: const EdgeInsets.fromLTRB(Space.s18, Space.s4, Space.s18, Space.s18),
             child: body,
           ),
         ),
@@ -75,7 +75,7 @@ class ModalShell extends StatelessWidget {
   }
 
   Widget _handle(AppTokens t) => Padding(
-        padding: const EdgeInsets.only(top: 9),
+        padding: const EdgeInsets.only(top: Space.s10),
         child: Center(
           child: Container(
             width: 40,
@@ -89,7 +89,7 @@ class ModalShell extends StatelessWidget {
       );
 
   Widget _header(BuildContext context, AppTokens t) => Padding(
-        padding: EdgeInsets.fromLTRB(18, sheet ? 12 : 18, 12, 4),
+        padding: EdgeInsets.fromLTRB(Space.s18, sheet ? Space.s12 : Space.s18, Space.s12, Space.s4),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -108,7 +108,7 @@ class ModalShell extends StatelessWidget {
                     ),
                   ),
                   if (desc != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: Space.s2),
                     Text(
                       desc!,
                       style: TextStyle(
@@ -122,7 +122,7 @@ class ModalShell extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: Space.s12),
             AppIconButton(
               icon: Icons.close,
               bordered: true,
@@ -144,7 +144,7 @@ class ModalShell extends StatelessWidget {
               height: Dimens.hExportMobile,
               onPressed: onPrimary,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Space.s8),
             Row(
               children: [
                 Expanded(
@@ -156,7 +156,7 @@ class ModalShell extends StatelessWidget {
                   ),
                 ),
                 if (onDanger != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: Space.s8),
                   DangerButton(
                       onTap: onDanger!,
                       label: dangerLabel ?? context.t.common.delete),
@@ -177,7 +177,7 @@ class ModalShell extends StatelessWidget {
                   label: context.t.common.cancel,
                   onPressed: onClose,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Space.s8),
                 AppButton(
                   label: primaryLabel,
                   busy: primaryBusy,

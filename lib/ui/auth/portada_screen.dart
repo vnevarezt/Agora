@@ -41,7 +41,7 @@ class PortadaScreen extends ConsumerWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(28, 40, 28, 40),
+            padding: const EdgeInsets.fromLTRB(Space.s24, 40, Space.s24, 40),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
@@ -77,7 +77,7 @@ class PortadaScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: Space.s18),
                   EnterUp(
                     delay: const Duration(milliseconds: 50),
                     child: Text(
@@ -91,7 +91,7 @@ class PortadaScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 9),
+                  const SizedBox(height: Space.s10),
                   EnterUp(
                     delay: const Duration(milliseconds: 100),
                     child: ConstrainedBox(
@@ -108,7 +108,7 @@ class PortadaScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 26),
+                  const SizedBox(height: Space.s24),
                   EnterUp(
                     delay: const Duration(milliseconds: 180),
                     child: Column(
@@ -119,7 +119,7 @@ class PortadaScreen extends ConsumerWidget {
                             label: tr.portada.createAccount,
                             onTap: onCreateAccount,
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: Space.s10),
                           _PortadaButton.ghost(
                             label: tr.portada.signIn,
                             onTap: onSignIn,
@@ -140,13 +140,13 @@ class PortadaScreen extends ConsumerWidget {
                         // no keychain, so offering it here would walk the user
                         // into a gate with nothing behind it.
                         if (!kIsWeb) ...[
-                          const SizedBox(height: 14),
+                          const SizedBox(height: Space.s14),
                           _LocalEntryCard(onTap: onLocal),
                         ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: Space.s24),
                   EnterUp(
                     delay: const Duration(milliseconds: 280),
                     child: ConstrainedBox(
@@ -221,7 +221,7 @@ class _PortadaButton extends StatelessWidget {
                 ),
               ),
               if (primary) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: Space.s8),
                 AnimatedSlide(
                   duration: Motion.of(context, Motion.instant),
                   offset: hovered ? const Offset(0.18, 0) : Offset.zero,
@@ -250,7 +250,7 @@ class _LocalEntryCard extends StatelessWidget {
       onTap: onTap,
       builder: (context, hovered, _) => AnimatedContainer(
         duration: Motion.of(context, Motion.instant),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
         decoration: BoxDecoration(
           color: hovered ? t.accentTint : t.surface2,
           borderRadius: BorderRadius.circular(12),
@@ -259,7 +259,7 @@ class _LocalEntryCard extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.smartphone, size: AppIcon.control, color: t.accentStrong),
-            const SizedBox(width: 11),
+            const SizedBox(width: Space.s12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

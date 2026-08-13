@@ -42,7 +42,7 @@ class ProjectBar extends ConsumerWidget {
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 12 : 16, vertical: isMobile ? 8 : 10),
+            horizontal: isMobile ? Space.s12 : 16, vertical: isMobile ? Space.s8 : Space.s10),
         child: isMobile ? _mobile(context, ref, t) : _desktop(context, ref, t),
       ),
     );
@@ -67,7 +67,7 @@ class ProjectBar extends ConsumerWidget {
         ),
         const SizedBox(width: 20),
         const _WeekNav(),
-        const SizedBox(width: 12),
+        const SizedBox(width: Space.s12),
         const _ExportMenu(),
       ],
     );
@@ -80,13 +80,13 @@ class ProjectBar extends ConsumerWidget {
         Row(
           children: [
             _back(context),
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
             Expanded(child: _ProjectId(project: project)),
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
             const _ExportMenu(compact: true),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Space.s8),
         const _WeekNav(expand: true),
       ],
     );
@@ -232,7 +232,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
             final open = controller.isOpen;
             return Container(
               height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: Space.s12),
               decoration: BoxDecoration(
                 color: t.surface,
                 borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -325,9 +325,9 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
             icon: Icons.chevron_left,
             label: context.t.projectBar.prevWeek,
             onTap: active == 0 ? null : () => go(-1)),
-        const SizedBox(width: 6),
+        const SizedBox(width: Space.s6),
         widget.expand ? Expanded(child: current) : current,
-        const SizedBox(width: 6),
+        const SizedBox(width: Space.s6),
         _Arrow(
             icon: Icons.chevron_right,
             label: context.t.projectBar.nextWeek,
@@ -383,8 +383,8 @@ class _PctBadge extends StatelessWidget {
     final t = context.tokens;
     return Container(
       padding: done
-          ? const EdgeInsets.all(3)
-          : const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          ? const EdgeInsets.all(Space.s4)
+          : const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s4),
       decoration: BoxDecoration(
         color: done ? t.accent : t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rPill),
@@ -424,8 +424,8 @@ class _WeekMenu extends ConsumerWidget {
 
     return Container(
       width: 280,
-      margin: const EdgeInsets.only(top: 6),
-      padding: const EdgeInsets.all(6),
+      margin: const EdgeInsets.only(top: Space.s6),
+      padding: const EdgeInsets.all(Space.s6),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
@@ -437,7 +437,7 @@ class _WeekMenu extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 5, 8, 8),
+            padding: const EdgeInsets.fromLTRB(Space.s8, Space.s6, Space.s8, Space.s8),
             child: Text(
               context.t.projectBar.goToWeek.toUpperCase(),
               style: TextStyle(
@@ -458,7 +458,7 @@ class _WeekMenu extends ConsumerWidget {
                 onTap: () => onPick(i),
                 builder: (context, hovered, _) => Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                      const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
                   decoration: BoxDecoration(
                     color: i == active
                         ? t.accentTint
@@ -491,14 +491,14 @@ class _WeekMenu extends ConsumerWidget {
                               color: t.text),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: Space.s8),
                       Expanded(
                         child: ProgressMeter(
                           value: pr.total == 0 ? 0 : pr.done / pr.total,
                           height: 4,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: Space.s8),
                       SizedBox(
                         width: 30,
                         child: completo
@@ -532,7 +532,7 @@ class _WeekMenu extends ConsumerWidget {
             }),
           Container(
             height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            margin: const EdgeInsets.symmetric(horizontal: Space.s6, vertical: Space.s4),
             color: t.border2,
           ),
           _AuxToggle(
@@ -567,7 +567,7 @@ class _AuxToggle extends StatelessWidget {
     return Pressable(
       onTap: () => onChanged(!auxRoom),
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
@@ -576,7 +576,7 @@ class _AuxToggle extends StatelessWidget {
           children: [
             Icon(Icons.apartment_outlined,
                 size: AppIcon.control, color: auxRoom ? t.accentStrong : t.textMute),
-            const SizedBox(width: 11),
+            const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,7 +622,7 @@ class _TwoPerSheetToggle extends StatelessWidget {
     return Pressable(
       onTap: () => onChanged(!twoPerSheet),
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
@@ -631,7 +631,7 @@ class _TwoPerSheetToggle extends StatelessWidget {
           children: [
             Icon(Icons.splitscreen_outlined,
                 size: AppIcon.control, color: twoPerSheet ? t.accentStrong : t.textMute),
-            const SizedBox(width: 11),
+            const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,7 +677,7 @@ class _CircuitOverseerToggle extends StatelessWidget {
     return Pressable(
       onTap: () => onChanged(!active),
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
@@ -686,7 +686,7 @@ class _CircuitOverseerToggle extends StatelessWidget {
           children: [
             Icon(Icons.record_voice_over_outlined,
                 size: AppIcon.control, color: active ? t.accentStrong : t.textMute),
-            const SizedBox(width: 11),
+            const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -784,8 +784,8 @@ class _ExportCard extends StatelessWidget {
     final tr = context.t;
     return Container(
       width: 300,
-      margin: const EdgeInsets.only(top: 6),
-      padding: const EdgeInsets.all(6),
+      margin: const EdgeInsets.only(top: Space.s6),
+      padding: const EdgeInsets.all(Space.s6),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
@@ -797,7 +797,7 @@ class _ExportCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+            padding: const EdgeInsets.fromLTRB(Space.s12, Space.s8, Space.s12, Space.s8),
             child: Row(
               children: [
                 Icon(
@@ -806,7 +806,7 @@ class _ExportCard extends StatelessWidget {
                         : Icons.description_outlined,
                     size: AppIcon.control,
                     color: t.textMute),
-                const SizedBox(width: 11),
+                const SizedBox(width: Space.s12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -834,12 +834,12 @@ class _ExportCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+            padding: const EdgeInsets.fromLTRB(Space.s8, 0, Space.s8, Space.s4),
             child: ExportPanel(enabled: haySemana, onExport: onExport),
           ),
           Container(
             height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            margin: const EdgeInsets.symmetric(horizontal: Space.s6, vertical: Space.s4),
             color: t.border2,
           ),
           _ExportItem(
@@ -882,7 +882,7 @@ class _ExportItem extends StatelessWidget {
       builder: (context, hovered, _) => Opacity(
         opacity: enabled ? 1 : 0.45,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s10),
           decoration: BoxDecoration(
             color: hovered && enabled ? t.surface2 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
@@ -890,7 +890,7 @@ class _ExportItem extends StatelessWidget {
           child: Row(
             children: [
               Icon(icon, size: AppIcon.control, color: t.textMute),
-              const SizedBox(width: 11),
+              const SizedBox(width: Space.s12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

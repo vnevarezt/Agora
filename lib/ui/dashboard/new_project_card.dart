@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
@@ -81,7 +82,7 @@ class _NewProjectCardState extends State<NewProjectCard> {
                         child: Icon(Icons.add, size: AppIcon.control, color: fg),
                       ),
                     ),
-                    const SizedBox(height: 9),
+                    const SizedBox(height: Space.s10),
                     Text(
                       context.t.dashboard.newProject,
                       style: TextStyle(

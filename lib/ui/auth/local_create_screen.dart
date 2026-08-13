@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -90,22 +91,22 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
         children: [
           if (widget.onBack != null) ...[
             BackLink(label: tr.auth.chooseOther, onTap: widget.onBack!),
-            const SizedBox(height: 16),
+            const SizedBox(height: Space.s18),
           ],
           ModePill(icon: Icons.smartphone, label: tr.auth.local.pill),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           AuthTitle(
             widget.migration
                 ? tr.auth.local.migrateTitle
                 : tr.auth.local.createTitle,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: Space.s6),
           AuthSub(
             widget.migration
                 ? tr.auth.local.migrateSub
                 : tr.auth.local.createSub,
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: Space.s24),
           LabeledField(
             label: tr.auth.local.name,
             child: BoundTextField(
@@ -118,7 +119,7 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
               autofocus: true,
             ),
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           LabeledField(
             label: tr.auth.local.password,
             child: BoundTextField(
@@ -131,7 +132,7 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
               obscureText: true,
             ),
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           LabeledField(
             label: tr.auth.local.confirm,
             child: BoundTextField(
@@ -146,7 +147,7 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
             ),
           ),
           AuthErrorText(_error),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           AuthNote(
             icon: Icons.shield_outlined,
             spans: [
@@ -158,7 +159,7 @@ class _LocalCreateScreenState extends ConsumerState<LocalCreateScreen> {
               TextSpan(text: tr.auth.local.note2),
             ],
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           AppButton(
             label: _busy ? tr.auth.local.working : tr.auth.local.createButton,
             height: 46,

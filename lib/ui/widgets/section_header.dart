@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -23,7 +24,7 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.only(left: 2, right: 2, bottom: 12),
+      padding: const EdgeInsets.only(left: Space.s2, right: Space.s2, bottom: Space.s12),
       child: Row(
         children: [
           if (dotColor != null) ...[
@@ -35,7 +36,7 @@ class SectionHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
           ],
           Expanded(
             child: Text(

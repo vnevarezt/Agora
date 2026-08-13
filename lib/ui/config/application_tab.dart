@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -125,14 +126,14 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
                     : tr.settings.backupImportPasswordDesc,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: Space.s12),
               TextField(
                 autofocus: true,
                 obscureText: true,
                 onChanged: (v) => password = v,
               ),
               if (confirm) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: Space.s10),
                 TextField(
                   obscureText: true,
                   decoration: InputDecoration(
@@ -142,7 +143,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
               ],
               if (error != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: Space.s8),
                   child: Text(
                     error!,
                     style: TextStyle(

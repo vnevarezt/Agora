@@ -157,7 +157,7 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
       filled: true,
       fillColor: t.surface2,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      contentPadding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s12),
       hintStyle: TextStyle(
           color: t.textMute,
           fontWeight: FontWeight.w600,

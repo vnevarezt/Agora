@@ -1,3 +1,4 @@
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -15,7 +16,7 @@ class AuthNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
+      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12),
       decoration: BoxDecoration(
         color: t.accentTint,
         borderRadius: BorderRadius.circular(12),
@@ -28,7 +29,7 @@ class AuthNote extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: Icon(icon, size: AppIcon.control, color: t.accentStrong),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: Space.s10),
           Expanded(
             child: Text.rich(
               TextSpan(children: spans),

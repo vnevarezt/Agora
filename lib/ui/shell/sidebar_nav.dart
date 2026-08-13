@@ -103,12 +103,12 @@ class Sidebar extends ConsumerWidget {
         color: t.surface,
         border: Border(right: BorderSide(color: t.border)),
       ),
-      padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: compact ? Space.s8 : Space.s10, vertical: Space.s14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _Brand(compact: compact),
-          const SizedBox(height: 6),
+          const SizedBox(height: Space.s6),
           for (final it in items) ...[
             _NavItem(
               section: it.section,
@@ -119,7 +119,7 @@ class Sidebar extends ConsumerWidget {
               active: section == it.section,
               badge: it.section == AppSection.home ? alerts : 0,
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: Space.s2),
           ],
           const Spacer(),
           _UserCard(user: user, compact: compact),
@@ -156,14 +156,14 @@ class _Brand extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(compact ? 0 : 4, 4, 4, 10),
+      padding: EdgeInsets.fromLTRB(compact ? 0 : Space.s4, Space.s4, Space.s4, Space.s10),
       child: Row(
         mainAxisAlignment:
             compact ? MainAxisAlignment.center : MainAxisAlignment.start,
         children: [
           mark,
           if (!compact) ...[
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
             Text(
               context.t.app.brand,
               style: TextStyle(
@@ -224,7 +224,7 @@ class _NavItem extends ConsumerWidget {
         : Row(
             children: [
               navIcon,
-              const SizedBox(width: 11),
+              const SizedBox(width: Space.s12),
               Expanded(
                 child: Text(
                   label,
@@ -260,8 +260,8 @@ class _NavItem extends ConsumerWidget {
         }),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 0 : 12,
-            vertical: compact ? 11 : 10,
+            horizontal: compact ? 0 : Space.s12,
+            vertical: compact ? 11 : Space.s10,
           ),
           child: content,
         ),
@@ -275,7 +275,7 @@ class _NavItem extends ConsumerWidget {
   Widget _badge(AppTokens t) => Container(
         constraints: const BoxConstraints(minWidth: 19),
         height: 19,
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s6),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: t.accent,
@@ -392,7 +392,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
           builder: (context, hovered, _) {
             final open = controller.isOpen;
             return Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(Space.s10),
               decoration: BoxDecoration(
                 color: t.surface2,
                 borderRadius: BorderRadius.circular(12),
@@ -403,7 +403,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
               child: Row(
                 children: [
                   PersonAvatar(name: user.name, size: 32),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: Space.s10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,7 +433,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: Space.s6),
                   Icon(Icons.unfold_more, size: AppIcon.control, color: t.textMute),
                 ],
               ),
@@ -464,7 +464,7 @@ class _UserMenu extends StatelessWidget {
     final t = context.tokens;
     return Container(
       width: 210,
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(Space.s6),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
@@ -479,7 +479,7 @@ class _UserMenu extends StatelessWidget {
             if (it.divider)
               Container(
                 height: 1,
-                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                margin: const EdgeInsets.symmetric(horizontal: Space.s6, vertical: Space.s4),
                 color: t.border2,
               ),
             Pressable(
@@ -489,7 +489,7 @@ class _UserMenu extends StatelessWidget {
               },
               builder: (context, hovered, _) => Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+                    const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s10),
                 decoration: BoxDecoration(
                   color: hovered ? t.surface2 : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
@@ -497,7 +497,7 @@ class _UserMenu extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(it.icon, size: AppIcon.control, color: t.textMute),
-                    const SizedBox(width: 11),
+                    const SizedBox(width: Space.s12),
                     Expanded(
                       child: Text(
                         it.label,

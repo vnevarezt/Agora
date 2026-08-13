@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
@@ -25,17 +26,17 @@ class AuthCardLayout extends StatelessWidget {
           alignment: mobile ? Alignment.topCenter : Alignment.center,
           child: SingleChildScrollView(
             padding: mobile
-                ? const EdgeInsets.fromLTRB(20, 34, 20, 34)
-                : const EdgeInsets.all(28),
+                ? const EdgeInsets.fromLTRB(Space.s18, 34, Space.s18, 34)
+                : const EdgeInsets.all(Space.s24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Center(child: BrandLockup()),
-                  SizedBox(height: mobile ? 24 : 22),
+                  SizedBox(height: mobile ? Space.s24 : 22),
                   child,
-                  const SizedBox(height: 26),
+                  const SizedBox(height: Space.s24),
                   Text(
                     context.t.portada.legal,
                     textAlign: TextAlign.center,
@@ -83,7 +84,7 @@ class BrandLockup extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: Space.s10),
         Text(
           context.t.app.brand,
           style: TextStyle(

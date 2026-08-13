@@ -40,7 +40,7 @@ class AssigneeButton extends StatelessWidget {
         final content = AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
           height: Dimens.hAssignee,
-          padding: const EdgeInsets.only(left: 8, right: 10),
+          padding: const EdgeInsets.only(left: Space.s8, right: Space.s10),
           decoration: BoxDecoration(
             color: _filled ? t.surface : t.surface2,
             borderRadius: BorderRadius.circular(Dimens.rAssignee),
@@ -52,7 +52,7 @@ class AssigneeButton extends StatelessWidget {
           child: Row(
             children: [
               PersonAvatar(name: _filled ? name : null),
-              const SizedBox(width: 9),
+              const SizedBox(width: Space.s10),
               Expanded(
                 child: _filled
                     ? Text(

@@ -23,7 +23,7 @@ class Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s2),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(Dimens.rPill),

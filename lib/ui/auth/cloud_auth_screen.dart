@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -268,12 +269,12 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                   : () =>
                       _run((auth) => auth.signInWithGoogle(), google: true),
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: Space.s14),
             Row(
               children: [
                 Expanded(child: Divider(color: t.border)),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: Space.s12),
                   child: Text(
                     tr.auth.cloud.orEmail.toUpperCase(),
                     style: TextStyle(
@@ -287,7 +288,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                 Expanded(child: Divider(color: t.border)),
               ],
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: Space.s14),
           ],
           if (!_login) ...[
             LabeledField(
@@ -301,7 +302,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                 hint: tr.auth.cloud.nameHint,
               ),
             ),
-            const SizedBox(height: 13),
+            const SizedBox(height: Space.s14),
           ],
           LabeledField(
             label: tr.auth.cloud.email,
@@ -316,7 +317,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               autofocus: true,
             ),
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           LabeledField(
             label: tr.auth.cloud.password,
             child: BoundTextField(
@@ -336,7 +337,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: Space.s8),
                 child: Pressable(
                   onTap:
                       _busy ? null : () => widget.onForgotPassword(_email.trim()),
@@ -354,7 +355,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               ),
             ),
           if (!_login) ...[
-            const SizedBox(height: 13),
+            const SizedBox(height: Space.s14),
             LabeledField(
               label: tr.auth.cloud.confirm,
               child: BoundTextField(
@@ -370,7 +371,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
             ),
           ],
           AuthErrorText(_error),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           AppButton(
             label: _login
                 ? tr.auth.cloud.loginButton

@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,11 +26,11 @@ class KeyErrorScreen extends ConsumerWidget {
             size: 34,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           Center(child: AuthTitle(tr.auth.keyError.title)),
-          const SizedBox(height: 6),
+          const SizedBox(height: Space.s6),
           Center(child: AuthSub(message)),
-          const SizedBox(height: 22),
+          const SizedBox(height: Space.s24),
           AppButton(
             label: tr.auth.keyError.retry,
             height: 46,

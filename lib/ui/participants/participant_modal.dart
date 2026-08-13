@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -202,7 +203,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             onChanged: (v) => setState(() => _displayName = v),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: Space.s14),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -216,7 +217,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
             Expanded(
               child: LabeledField(
                 label: tr.participantModal.lastName,
@@ -229,7 +230,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: Space.s14),
         LabeledField(
           label: tr.participantModal.congregation,
           child: BoundTextField(
@@ -242,10 +243,10 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         ),
         if (suggestions.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: Space.s6),
             child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
+              spacing: Space.s6,
+              runSpacing: Space.s6,
               children: [
                 for (final c in suggestions)
                   Pressable(
@@ -258,7 +259,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
               ],
             ),
           ),
-        const SizedBox(height: 14),
+        const SizedBox(height: Space.s14),
         LabeledField(
           label: tr.participantModal.isLabel,
           child: SegmentedTabs(
@@ -271,13 +272,13 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             onChanged: (i) => _setGender(i == 0 ? Gender.male : Gender.female),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: Space.s14),
         LabeledField(
           label: tr.participantModal.privilege,
           child: Column(
             children: [
               for (final p in availableRoles) ...[
-                if (p != availableRoles.first) const SizedBox(height: 8),
+                if (p != availableRoles.first) const SizedBox(height: Space.s8),
                 _RoleOption(
                   role: p,
                   selected: _privilege == p,
@@ -287,7 +288,7 @@ class _PersonModalState extends ConsumerState<PersonModal> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: Space.s18),
         _AvailableRow(
           active: _active,
           onChanged: (v) => setState(() => _active = v),
@@ -318,7 +319,7 @@ class _RoleOption extends StatelessWidget {
       builder: (context, hovered, _) {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
           decoration: BoxDecoration(
             color: selected ? t.accentTint : t.surface,
             borderRadius: BorderRadius.circular(12),
@@ -353,7 +354,7 @@ class _RoleOption extends StatelessWidget {
                       )
                     : null,
               ),
-              const SizedBox(width: 11),
+              const SizedBox(width: Space.s12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

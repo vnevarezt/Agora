@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../responsive.dart';
@@ -14,7 +15,7 @@ class SettingsColumns extends StatelessWidget {
 
   static List<Widget> _conSeparacion(List<Widget> cards) => [
         for (var i = 0; i < cards.length; i++) ...[
-          if (i > 0) const SizedBox(height: 16),
+          if (i > 0) const SizedBox(height: Space.s18),
           cards[i],
         ],
       ];
@@ -38,7 +39,7 @@ class SettingsColumns extends StatelessWidget {
                 children: _conSeparacion(left),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: Space.s18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,7 +69,7 @@ class SettingsGrid extends StatelessWidget {
         final colW = (c.maxWidth - (cols - 1) * gapX) / cols;
         return Wrap(
           spacing: gapX,
-          runSpacing: 14,
+          runSpacing: Space.s14,
           children: [
             for (final child in children) SizedBox(width: colW, child: child),
           ],
@@ -96,7 +97,7 @@ class SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(Space.s18),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(16),
@@ -115,7 +116,7 @@ class SettingsCard extends StatelessWidget {
             ),
           ),
           if (desc != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: Space.s4),
             Text(
               desc!,
               style: TextStyle(
@@ -126,7 +127,7 @@ class SettingsCard extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: Space.s18),
           ...children,
         ],
       ),
@@ -154,7 +155,7 @@ class SettingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 11),
+      padding: const EdgeInsets.symmetric(vertical: Space.s12),
       decoration: first
           ? null
           : BoxDecoration(
@@ -188,7 +189,7 @@ class SettingRow extends StatelessWidget {
             ),
           ),
           if (trailing != null) ...[
-            const SizedBox(width: 14),
+            const SizedBox(width: Space.s14),
             trailing!,
           ],
         ],

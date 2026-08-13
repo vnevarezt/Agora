@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../../models/week.dart';
 
+/// The spacing scale: padding, gaps and insets. **A bare number for a gap is
+/// drift**, the same rule the type and icon scales already carry.
+///
+/// Named by magnitude rather than by role, because spacing has no roles — only
+/// distances. The nine steps are the values the UI already leaned on (6, 8, 10,
+/// 12 and 14 alone covered 208 of 434 uses); what they replace is the 28-value
+/// spread around them, half of it odd, where 9, 11 and 13 sat between the real
+/// steps for no reason anyone could name.
+///
+/// 1px is deliberately absent: a hairline is a border, not a gap.
+abstract final class Space {
+  static const double s2 = 2;
+  static const double s4 = 4;
+  static const double s6 = 6;
+  static const double s8 = 8;
+  static const double s10 = 10;
+  static const double s12 = 12;
+  static const double s14 = 14;
+  static const double s18 = 18;
+  static const double s24 = 24;
+}
+
 /// Visual dimensions and constants (mirror of the mock CSS).
 abstract final class Dimens {
   // Border radii.

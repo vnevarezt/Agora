@@ -42,12 +42,12 @@ class DashboardView extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
+          padding: EdgeInsets.fromLTRB(pad, Space.s14, pad, 0),
           child: const _TopBar(),
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(pad, 16, pad, 120),
+            padding: EdgeInsets.fromLTRB(pad, Space.s18, pad, 120),
             child: Consumer(builder: (context, ref, _) {
               final stacked = size != ScreenSize.desktop;
               final restore = ref.watch(initialRestoreProvider);
@@ -72,7 +72,7 @@ class DashboardView extends ConsumerWidget {
                             width: double.infinity)
                         : Padding(
                             key: const ValueKey('restore'),
-                            padding: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.only(bottom: Space.s18),
                             child: _RestoreBanner(
                                 restore: restore, phase: phase),
                           ),
@@ -143,7 +143,7 @@ class _TopBar extends ConsumerWidget {
                   color: t.text,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Space.s2),
               if (drafts == 0)
                 Text(
                   tr.dashboard.subtitle,
@@ -181,20 +181,20 @@ class _TopBar extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: Space.s12),
         _SyncIndicator(
           state: _catalogState(ref.watch(mwbSyncProvider)),
           compact: isMobile,
         ),
         const _CloudSyncIndicator(),
-        const SizedBox(width: 8),
+        const SizedBox(width: Space.s8),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
           tooltip: tr.common.reminders,
           onPressed: () {},
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: Space.s8),
         AppButton(
           icon: Icons.add,
           label: isMobile ? null : tr.dashboard.newProject,
@@ -254,7 +254,7 @@ class _SyncIndicator extends StatelessWidget {
 
     final leading = icon == null
         ? SizedBox(
-            width: 16,
+            width: Space.s18,
             height: 16,
             child: CircularProgressIndicator(strokeWidth: 2, color: color),
           )
@@ -265,7 +265,7 @@ class _SyncIndicator extends StatelessWidget {
       child: Container(
         height: Dimens.hControl,
         width: compact ? Dimens.hControl : null,
-        padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 12),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
         decoration: BoxDecoration(
           color: t.surface,
           borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -277,7 +277,7 @@ class _SyncIndicator extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   leading,
-                  const SizedBox(width: 10),
+                  const SizedBox(width: Space.s10),
                   Text(
                     label,
                     style: TextStyle(
@@ -326,7 +326,7 @@ class _CloudSyncIndicator extends ConsumerWidget {
     if (shown == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.only(left: Space.s8),
       child: Tooltip(
         message: shown.$3,
         child: Container(
@@ -379,7 +379,7 @@ class _RestoreBanner extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -388,7 +388,7 @@ class _RestoreBanner extends StatelessWidget {
       child: Row(
         children: [
           leading,
-          const SizedBox(width: 12),
+          const SizedBox(width: Space.s12),
           Expanded(
             child: Text(
               label,
@@ -419,7 +419,7 @@ class _HeroSection extends ConsumerWidget {
       if (c.id == hero.congregationId) congregation = c;
     }
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: Space.s18),
       child: ContinueCard(
         project: hero,
         congregation: congregation,
@@ -445,10 +445,10 @@ class _CongregationFilter extends ConsumerWidget {
     final notifier = ref.read(dashboardFiltersProvider.notifier);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: Space.s12),
       child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: Space.s8,
+        runSpacing: Space.s8,
         children: [
           FilterPill(
             label: context.t.common.allFeminine,
@@ -485,7 +485,7 @@ class _HomeGrid extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
           projects,
-          SizedBox(height: 24),
+          SizedBox(height: Space.s24),
           reminders,
         ],
       );
@@ -495,7 +495,7 @@ class _HomeGrid extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
         Expanded(child: projects),
-        SizedBox(width: 22),
+        SizedBox(width: Space.s24),
         SizedBox(width: 312, child: reminders),
       ],
     );
@@ -527,16 +527,16 @@ class _ProjectsSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: Space.s12),
           child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: Space.s8,
+            runSpacing: Space.s8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               BlockTitle(
                   title: context.t.dashboard.projects,
                   count: allProjects.length),
-              const SizedBox(width: 6),
+              const SizedBox(width: Space.s6),
               FilterPill(
                 label: context.t.common.allMasculine,
                 active: filters.status == null,
@@ -630,7 +630,7 @@ class _RemindersSection extends ConsumerWidget {
             ),
           ),
         for (var i = 0; i < reminders.length; i++) ...[
-          if (i > 0) const SizedBox(height: 9),
+          if (i > 0) const SizedBox(height: Space.s10),
           ReminderCard(
             recordatorio: reminders[i],
             onCta: () =>
@@ -638,7 +638,7 @@ class _RemindersSection extends ConsumerWidget {
           ),
         ],
         if (reminders.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: Space.s12),
           SizedBox(
             width: double.infinity,
             child: AppButton(
@@ -696,7 +696,7 @@ class _DashboardSkeleton extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BlockTitle(title: context.t.dashboard.projects, count: 0),
-        const SizedBox(height: 12),
+        const SizedBox(height: Space.s12),
         LayoutBuilder(builder: (context, c) {
           const gap = 14.0;
           final cols = (c.maxWidth / 264).floor().clamp(1, 4);
@@ -726,7 +726,7 @@ class _DashboardSkeleton extends StatelessWidget {
       children: [
         BlockTitle(title: context.t.dashboard.pending, count: 0),
         const ReminderCard(recordatorio: _reminder),
-        const SizedBox(height: 9),
+        const SizedBox(height: Space.s10),
         const ReminderCard(recordatorio: _reminder),
       ],
     );
@@ -740,17 +740,17 @@ class _DashboardSkeleton extends StatelessWidget {
             congregation: _congregation,
             onContinue: () {},
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: Space.s18),
           if (stacked) ...[
             projects,
-            const SizedBox(height: 24),
+            const SizedBox(height: Space.s24),
             reminders,
           ] else
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: projects),
-                const SizedBox(width: 22),
+                const SizedBox(width: Space.s24),
                 SizedBox(width: 312, child: reminders),
               ],
             ),

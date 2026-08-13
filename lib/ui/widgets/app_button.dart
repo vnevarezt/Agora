@@ -171,7 +171,7 @@ class AppButton extends StatelessWidget {
           constraints: BoxConstraints(minHeight: height),
           padding: EdgeInsets.symmetric(
             horizontal: label != null ? 16 : (height - 17) / 2,
-            vertical: 4,
+            vertical: Space.s4,
           ),
           transform: pressed
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
@@ -191,7 +191,7 @@ class AppButton extends StatelessWidget {
               else if (icon != null)
                 Icon(icon, size: AppIcon.control, color: fg),
               if (label != null) ...[
-                if (icon != null || busy) const SizedBox(width: 8),
+                if (icon != null || busy) const SizedBox(width: Space.s8),
                 // Flexible: a label longer than the button ellipsizes instead
                 // of overflowing the Row.
                 Flexible(

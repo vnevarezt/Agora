@@ -41,7 +41,7 @@ class WorkspacePanel extends ConsumerWidget {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(side, side, side, 22),
+          padding: EdgeInsets.fromLTRB(side, side, side, Space.s24),
           sliver: SliverToBoxAdapter(child: PartCard(view: chairmanView(tr))),
         ),
         for (final section in [
@@ -73,11 +73,11 @@ class WorkspacePanel extends ConsumerWidget {
             ),
           ),
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(side, 0, side, 22),
+            padding: EdgeInsets.fromLTRB(side, 0, side, Space.s24),
             sliver: SliverList.builder(
               itemCount: section.rows.length,
               itemBuilder: (context, i) => Padding(
-                padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                padding: EdgeInsets.only(top: i == 0 ? 0 : Space.s10),
                 child: PartCard(
                     view: mapRow(section.rows[i], auxActive: aux, tr: tr)),
               ),
@@ -145,7 +145,7 @@ class _WorkspaceSkeleton extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(side, side, side, 120),
         children: [
           for (var i = 0; i < 6; i++) ...[
-            if (i > 0) const SizedBox(height: 10),
+            if (i > 0) const SizedBox(height: Space.s10),
             PartCard(view: chairmanView(context.t)),
           ],
         ],

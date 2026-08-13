@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +42,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
+          padding: EdgeInsets.fromLTRB(pad, Space.s14, pad, 0),
           child: _topBar(context, isMobile),
         ),
         Expanded(
@@ -52,13 +53,13 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           child: CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(pad, 16, pad, 0),
+                padding: EdgeInsets.fromLTRB(pad, Space.s18, pad, 0),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _filters(context),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: Space.s18),
                     ],
                   ),
                 ),
@@ -82,7 +83,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             tooltip: context.t.common.back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: Space.s12),
         ],
         Expanded(
           child: Column(
@@ -99,7 +100,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
                   color: t.text,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Space.s2),
               Text(
                 context.t.participants.subtitle,
                 style: TextStyle(
@@ -111,14 +112,14 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: Space.s12),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
           tooltip: context.t.common.reminders,
           onPressed: () {},
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: Space.s8),
         AppButton(
           icon: Icons.person_add_alt,
           label: isMobile ? null : context.t.participants.add,
@@ -133,8 +134,8 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     final congregaciones = ref.watch(originCongregationsProvider);
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: Space.s8,
+      runSpacing: Space.s8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         SizedBox(width: 280, child: _searchBox(context)),

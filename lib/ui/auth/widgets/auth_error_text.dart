@@ -1,3 +1,4 @@
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -19,7 +20,7 @@ class AuthErrorText extends StatelessWidget {
       child: message == null
           ? const SizedBox(width: double.infinity)
           : Padding(
-              padding: const EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.only(top: Space.s10),
               child: Text(
                 message!,
                 style: TextStyle(

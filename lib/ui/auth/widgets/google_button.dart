@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -45,7 +46,7 @@ class GoogleButton extends StatelessWidget {
                 size: Size(18, 18),
                 painter: _GoogleLogoPainter(),
               ),
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
             Text(
               label,
               style: TextStyle(

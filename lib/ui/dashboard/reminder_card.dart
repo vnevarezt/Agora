@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/reminder.dart';
@@ -28,7 +29,7 @@ class ReminderCard extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
+      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
@@ -48,7 +49,7 @@ class ReminderCard extends StatelessWidget {
             ),
             child: Icon(icono, size: AppIcon.control, color: iconFg),
           ),
-          const SizedBox(width: 11),
+          const SizedBox(width: Space.s12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +63,7 @@ class ReminderCard extends StatelessWidget {
                     color: t.text,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: Space.s2),
                 Text(
                   r.meta,
                   style: TextStyle(
@@ -71,7 +72,7 @@ class ReminderCard extends StatelessWidget {
                     color: t.textMute,
                   ),
                 ),
-                const SizedBox(height: 7),
+                const SizedBox(height: Space.s8),
                 Pressable(
                   onTap: onCta,
                   builder: (context, hovered, _) => Text(

@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
@@ -30,12 +31,12 @@ class _SettingsViewState extends State<SettingsView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
+          padding: EdgeInsets.fromLTRB(pad, Space.s14, pad, 0),
           child: _topBar(context, isMobile),
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(pad, 16, pad, 120),
+            padding: EdgeInsets.fromLTRB(pad, Space.s18, pad, 120),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -50,7 +51,7 @@ class _SettingsViewState extends State<SettingsView> {
                     onChanged: (i) => setState(() => _tab = i),
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: Space.s18),
                 _tab == 0 ? const ApplicationTab() : const CongregationTab(),
               ],
             ),
@@ -71,7 +72,7 @@ class _SettingsViewState extends State<SettingsView> {
             tooltip: context.t.common.back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: Space.s12),
         ],
         Expanded(
           child: Column(
@@ -88,7 +89,7 @@ class _SettingsViewState extends State<SettingsView> {
                   color: t.text,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Space.s2),
               Text(
                 context.t.settings.subtitle,
                 style: TextStyle(
@@ -100,7 +101,7 @@ class _SettingsViewState extends State<SettingsView> {
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: Space.s12),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,

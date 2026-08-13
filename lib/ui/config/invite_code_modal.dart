@@ -65,7 +65,7 @@ class _InviteCodeModalState extends State<InviteCodeModal> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(Space.s12),
             decoration: BoxDecoration(
               color: t.surface2,
               borderRadius: BorderRadius.circular(Dimens.rCard),
@@ -76,7 +76,7 @@ class _InviteCodeModalState extends State<InviteCodeModal> {
               style: AppText.mono(size: 12.5, color: t.text),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           Row(
             children: [
               AppButton(
@@ -85,7 +85,7 @@ class _InviteCodeModalState extends State<InviteCodeModal> {
                 label: _copied ? tr.invite.copied : tr.invite.copy,
                 onPressed: _copy,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: Space.s8),
               AppButton(
                 variant: AppButtonVariant.ghost,
                 icon: Icons.ios_share,

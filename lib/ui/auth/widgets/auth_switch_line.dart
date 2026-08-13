@@ -1,3 +1,4 @@
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -37,7 +38,7 @@ class AuthSwitchLine extends StatelessWidget {
         Pressable(
           onTap: onTap,
           builder: (context, hovered, _) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: const EdgeInsets.symmetric(horizontal: Space.s4),
             child: Text(
               actionLabel,
               style: TextStyle(

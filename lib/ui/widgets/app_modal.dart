@@ -59,7 +59,7 @@ Future<T?> showAppModal<T>(
     pageBuilder: (ctx, _, _) => Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      insetPadding: const EdgeInsets.all(24),
+      insetPadding: const EdgeInsets.all(Space.s24),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: maxWidth,

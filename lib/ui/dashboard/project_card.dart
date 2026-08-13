@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
@@ -44,7 +45,7 @@ class ProjectCard extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+              padding: const EdgeInsets.fromLTRB(Space.s18, Space.s18, Space.s18, Space.s14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -65,7 +66,7 @@ class ProjectCard extends StatelessWidget {
                                 color: t.text,
                               ),
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: Space.s4),
                             Row(
                               children: [
                                 if (congregation != null) ...[
@@ -77,7 +78,7 @@ class ProjectCard extends StatelessWidget {
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: Space.s6),
                                 ],
                                 Flexible(
                                   child: Text(
@@ -96,23 +97,23 @@ class ProjectCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: Space.s10),
                       StatusBadge(status: p.status),
                       // Space for the overlaid kebab (keep clear of the badge).
-                      const SizedBox(width: 22),
+                      const SizedBox(width: Space.s24),
                     ],
                   ),
-                  const SizedBox(height: 13),
+                  const SizedBox(height: Space.s14),
                   Wrap(
-                    spacing: 5,
-                    runSpacing: 5,
+                    spacing: Space.s6,
+                    runSpacing: Space.s6,
                     children: [for (final w in p.weeks) MiniChip.week(w)],
                   ),
-                  const SizedBox(height: 13),
+                  const SizedBox(height: Space.s14),
                   Row(
                     children: [
                       Expanded(child: ProgressMeter(value: p.progress)),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: Space.s10),
                       Text(
                         '${p.done}/${p.total}',
                         style: TextStyle(
@@ -123,7 +124,7 @@ class ProjectCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 9),
+                  const SizedBox(height: Space.s10),
                   Text(
                     context.t.projectCard.edited(label: p.editedLabel),
                     style: TextStyle(

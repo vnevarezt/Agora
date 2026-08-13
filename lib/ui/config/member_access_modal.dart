@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -154,8 +155,8 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: Space.s8,
+            runSpacing: Space.s8,
             children: [
               FilterPill(
                 label: tr.invite.capAdmin,
@@ -176,7 +177,7 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
             ],
           ),
           if (_isLastAdmin) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: Space.s14),
             Text(
               tr.congregation.lastAdmin,
               style: TextStyle(
@@ -186,7 +187,7 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
             ),
           ],
           if (_error != null) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: Space.s14),
             Text(
               _error!,
               style: TextStyle(

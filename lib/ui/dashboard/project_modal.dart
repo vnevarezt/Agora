@@ -1,5 +1,6 @@
 import 'dart:async' show unawaited;
 
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/mwb_calendar.dart';
@@ -231,7 +232,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         congField,
-        const SizedBox(height: 14),
+        const SizedBox(height: Space.s14),
         LabeledField(
           label: tr.projectModal.weeksToInclude(n: _weeks.length),
           child: Column(
@@ -242,8 +243,8 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
               // the end).
               if (notebooks.length > 1) ...[
                 Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                  spacing: Space.s6,
+                  runSpacing: Space.s6,
                   children: [
                     for (final c in notebooks)
                       FilterPill(
@@ -253,11 +254,11 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: Space.s10),
               ],
               Wrap(
-                spacing: 6,
-                runSpacing: 6,
+                spacing: Space.s6,
+                runSpacing: Space.s6,
                 children: [
                   for (final w in notebook.weeks)
                     _WeekToggle(
@@ -277,7 +278,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
             ],
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: Space.s14),
         LabeledField(
           label: tr.projectModal.projectName,
           child: BoundTextField(
@@ -318,7 +319,7 @@ class _WeekToggle extends StatelessWidget {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s8),
           decoration: BoxDecoration(
             color: active ? t.accent : t.surface,
             borderRadius: BorderRadius.circular(9),

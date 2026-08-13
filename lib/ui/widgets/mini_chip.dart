@@ -65,11 +65,11 @@ class MiniChip extends StatelessWidget {
     };
 
     final padding = switch (_kind) {
-      _ChipKind.duration => const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+      _ChipKind.duration => const EdgeInsets.symmetric(horizontal: Space.s8, vertical: 1.5),
       _ChipKind.tag || _ChipKind.aux =>
-        const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-      _ChipKind.week => const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      _ => const EdgeInsets.symmetric(horizontal: 9, vertical: 2.5),
+        const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s2),
+      _ChipKind.week => const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s4),
+      _ => const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s2),
     };
 
     return Container(
@@ -84,7 +84,7 @@ class MiniChip extends StatelessWidget {
         children: [
           if (_kind == _ChipKind.aux) ...[
             Icon(Icons.apartment_outlined, size: AppIcon.inline, color: fg),
-            const SizedBox(width: 5),
+            const SizedBox(width: Space.s6),
           ],
           Text(
             _kind == _ChipKind.allMeeting ? texto.toUpperCase() : texto,

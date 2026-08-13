@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +22,7 @@ class MobileTabs extends ConsumerWidget {
     final tab = ref.watch(mobileTabProvider);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s8),
       decoration: BoxDecoration(
         color: t.surface,
         border: Border(bottom: BorderSide(color: t.border)),
@@ -60,7 +61,7 @@ class MobileBottomBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: EdgeInsets.fromLTRB(14, 12, 14, 12 + safeBottom),
+          padding: EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12 + safeBottom),
           decoration: BoxDecoration(
             color: t.surface.withValues(alpha: 0.88),
             border: Border(top: BorderSide(color: t.border)),
@@ -68,7 +69,7 @@ class MobileBottomBar extends StatelessWidget {
           child: const Row(
             children: [
               RepaintBoundary(child: _BottomBarProgress()),
-              SizedBox(width: 12),
+              SizedBox(width: Space.s12),
               Expanded(child: ExportButton(variant: ExportVariant.full)),
             ],
           ),

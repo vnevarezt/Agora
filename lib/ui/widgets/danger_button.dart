@@ -25,7 +25,7 @@ class DangerButton extends StatelessWidget {
       builder: (context, hovered, _) => AnimatedContainer(
         duration: Motion.of(context, Motion.instant),
         height: Dimens.hControl,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s14),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: hovered ? err.withValues(alpha: 0.10) : Colors.transparent,
