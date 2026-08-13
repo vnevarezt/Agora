@@ -11,6 +11,13 @@ class AppTokens extends ThemeExtension<AppTokens> {
   final Color surface2;
   final Color border;
   final Color border2;
+
+  /// Outline of an interactive control (inputs, ghost buttons). Separate from
+  /// [border] because WCAG 1.4.11 asks 3:1 of anything that identifies a
+  /// control, while a decorative divider has no such floor — holding both to
+  /// 3:1 would turn every hairline into a rule.
+  final Color borderControl;
+
   final Color text;
   final Color textDim;
   final Color textMute;
@@ -19,6 +26,11 @@ class AppTokens extends ThemeExtension<AppTokens> {
   final Color accentInk;
   final Color accentSoft;
   final Color accentTint;
+
+  /// Ink that sits ON [accentSoft]/[accentTint]. In light mode that is
+  /// [accentStrong]; dark mode needs a lighter tone to clear 4.5:1, which is
+  /// why this is its own token rather than a reuse.
+  final Color accentOnSoft;
 
   // Status roles. Each family is a soft tint used as a background plus the ink
   // that sits on it; `*Strong` is the solid version for marks that sit
@@ -40,6 +52,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.surface2,
     required this.border,
     required this.border2,
+    required this.borderControl,
     required this.text,
     required this.textDim,
     required this.textMute,
@@ -48,6 +61,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.accentInk,
     required this.accentSoft,
     required this.accentTint,
+    required this.accentOnSoft,
     required this.success,
     required this.successSoft,
     required this.successStrong,
@@ -65,6 +79,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? surface2,
     Color? border,
     Color? border2,
+    Color? borderControl,
     Color? text,
     Color? textDim,
     Color? textMute,
@@ -73,6 +88,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? accentInk,
     Color? accentSoft,
     Color? accentTint,
+    Color? accentOnSoft,
     Color? success,
     Color? successSoft,
     Color? successStrong,
@@ -88,6 +104,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       surface2: surface2 ?? this.surface2,
       border: border ?? this.border,
       border2: border2 ?? this.border2,
+      borderControl: borderControl ?? this.borderControl,
       text: text ?? this.text,
       textDim: textDim ?? this.textDim,
       textMute: textMute ?? this.textMute,
@@ -96,6 +113,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accentInk: accentInk ?? this.accentInk,
       accentSoft: accentSoft ?? this.accentSoft,
       accentTint: accentTint ?? this.accentTint,
+      accentOnSoft: accentOnSoft ?? this.accentOnSoft,
       success: success ?? this.success,
       successSoft: successSoft ?? this.successSoft,
       successStrong: successStrong ?? this.successStrong,
@@ -116,6 +134,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       surface2: Color.lerp(surface2, other.surface2, t)!,
       border: Color.lerp(border, other.border, t)!,
       border2: Color.lerp(border2, other.border2, t)!,
+      borderControl: Color.lerp(borderControl, other.borderControl, t)!,
       text: Color.lerp(text, other.text, t)!,
       textDim: Color.lerp(textDim, other.textDim, t)!,
       textMute: Color.lerp(textMute, other.textMute, t)!,
@@ -124,6 +143,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accentInk: Color.lerp(accentInk, other.accentInk, t)!,
       accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
       accentTint: Color.lerp(accentTint, other.accentTint, t)!,
+      accentOnSoft: Color.lerp(accentOnSoft, other.accentOnSoft, t)!,
       success: Color.lerp(success, other.success, t)!,
       successSoft: Color.lerp(successSoft, other.successSoft, t)!,
       successStrong: Color.lerp(successStrong, other.successStrong, t)!,
@@ -154,23 +174,27 @@ const pizarra = AppPalette(
     surface2: Color(0xFFF4F7FB),
     border: Color(0xFFDEE2E7),
     border2: Color(0xFFECEFF2),
+    borderControl: Color(0xFF878F9B),
     text: Color(0xFF1F242D),
     textDim: Color(0xFF5D646F),
-    // 4.6:1 against bg, 4.8:1 against surface — was 3.2:1/3.4:1 (fails WCAG
-    // AA's 4.5:1 floor at the caption/label sizes this token is used for).
-    textMute: Color(0xFF6B7280),
+    // 4.8:1 on bg, 5.0:1 on surface, 4.6:1 on surface2. surface2 is the one
+    // that decides: it is the darkest of the three grounds this ink lands on,
+    // and a value tuned against bg alone lands at 4.5 there — on the line,
+    // which is not the same as over it.
+    textMute: Color(0xFF6B7079),
     accent: Color(0xFF41629F),
     accentStrong: Color(0xFF2E5091),
     accentInk: Color(0xFFF8FCFF),
     accentSoft: Color(0xFFE7F1FF),
     accentTint: Color(0xFFF2F7FF),
+    accentOnSoft: Color(0xFF2E5091),
     success: Color(0xFF2E6A3E),
     successSoft: Color(0xFFDCF0E0),
     successStrong: Color(0xFF4FA06A),
     warning: Color(0xFF7A6512),
     warningSoft: Color(0xFFF3ECD2),
     warningStrong: Color(0xFFB9890F),
-    alert: Color(0xFFB5562F),
+    alert: Color(0xFFA94F2B),
     alertSoft: Color(0xFFFBE7DF),
   ),
   dark: AppTokens(
@@ -179,15 +203,19 @@ const pizarra = AppPalette(
     surface2: Color(0xFF191F26),
     border: Color(0xFF282E36),
     border2: Color(0xFF21262C),
+    borderControl: Color(0xFF626D7D),
     text: Color(0xFFECEFF2),
     textDim: Color(0xFFA6ABB2),
-    // Was 4.5:1 against bg — right at the AA line with no margin. 5.0:1 now.
-    textMute: Color(0xFF7E8389),
+    // 5.6:1 on bg, 5.2:1 on surface, 4.8:1 on surface2. Same reasoning as the
+    // light scheme inverted: surface2 is the lightest ground here, so it is
+    // the one the ink has to clear.
+    textMute: Color(0xFF868B92),
     accent: Color(0xFF6F97E2),
     accentStrong: Color(0xFF5A84D4),
     accentInk: Color(0xFF060D1A),
     accentSoft: Color(0xFF21344C),
     accentTint: Color(0xFF192431),
+    accentOnSoft: Color(0xFF7FA3E8),
     success: Color(0xFFA9D8B8),
     successSoft: Color(0xFF1E3A2A),
     successStrong: Color(0xFF4FA06A),

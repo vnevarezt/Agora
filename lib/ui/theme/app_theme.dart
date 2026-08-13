@@ -134,9 +134,12 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       hintStyle: TextStyle(
-          color: t.textMute, fontWeight: FontWeight.w600, fontSize: 13.5),
-      border: border(t.border),
-      enabledBorder: border(t.border),
+          color: t.textMute,
+          fontWeight: FontWeight.w600,
+          fontSize: AppText.body),
+      // borderControl, not border: the outline is what identifies the field.
+      border: border(t.borderControl),
+      enabledBorder: border(t.borderControl),
       focusedBorder: border(t.accent, 1.5),
     ),
     textSelectionTheme: TextSelectionThemeData(
@@ -159,7 +162,7 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     ),
     tooltipTheme: TooltipThemeData(
       textStyle: TextStyle(
-          color: t.surface, fontSize: 12, fontWeight: FontWeight.w600),
+          color: t.surface, fontSize: AppText.small, fontWeight: FontWeight.w600),
       decoration: BoxDecoration(
         color: t.text,
         borderRadius: BorderRadius.circular(8),
@@ -168,7 +171,7 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     snackBarTheme: SnackBarThemeData(
       backgroundColor: t.text,
       contentTextStyle: TextStyle(
-          color: t.surface, fontSize: 13.5, fontWeight: FontWeight.w600),
+          color: t.surface, fontSize: AppText.body, fontWeight: FontWeight.w600),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Dimens.rControl)),

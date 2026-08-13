@@ -205,7 +205,7 @@ class _NavItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final fg = active ? t.accentStrong : t.textDim;
+    final fg = active ? t.accentOnSoft : t.textDim;
     final radius = BorderRadius.circular(12);
 
     final navIcon =
@@ -550,7 +550,7 @@ class BottomNav extends ConsumerWidget {
             (states) => IconThemeData(
               size: 24,
               color: states.contains(WidgetState.selected)
-                  ? t.accentStrong
+                  ? t.accentOnSoft
                   : t.textMute,
             ),
           ),
@@ -559,7 +559,7 @@ class BottomNav extends ConsumerWidget {
               fontSize: AppText.caption,
               fontWeight: FontWeight.w700,
               color: states.contains(WidgetState.selected)
-                  ? t.accentStrong
+                  ? t.accentOnSoft
                   : t.textMute,
             ),
           ),

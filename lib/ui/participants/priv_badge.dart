@@ -17,7 +17,7 @@ class PrivBadge extends StatelessWidget {
     final t = context.tokens;
 
     final (Color bg, Color fg, Color? border) = switch (role) {
-      Role.elder => (t.accentSoft, t.accentStrong, null),
+      Role.elder => (t.accentSoft, t.accentOnSoft, null),
       Role.ministerialServant => (t.warningSoft, t.warning, null),
       Role.publisher => (t.surface2, t.textDim, t.border2),
     };

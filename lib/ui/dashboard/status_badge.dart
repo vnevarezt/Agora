@@ -18,7 +18,7 @@ class StatusBadge extends StatelessWidget {
     final t = context.tokens;
 
     final (Color bg, Color fg, Color? border) = switch (status) {
-      ProjectStatus.draft => (t.accentSoft, t.accentStrong, null),
+      ProjectStatus.draft => (t.accentSoft, t.accentOnSoft, null),
       ProjectStatus.complete => (t.successSoft, t.success, null),
       ProjectStatus.exported => (t.surface2, t.textMute, t.border2),
     };

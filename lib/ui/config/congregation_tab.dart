@@ -611,7 +611,7 @@ class _AddChip extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) {
-        final fg = t.accentStrong;
+        final fg = t.accentOnSoft;
         return DashedBorder(
           color: hovered ? t.accent : t.border,
           radius: Dimens.rPill,
