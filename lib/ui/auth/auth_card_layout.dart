@@ -34,7 +34,7 @@ class AuthCardLayout extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Center(child: BrandLockup()),
-                  SizedBox(height: mobile ? Space.s24 : 22),
+                  SizedBox(height: mobile ? Space.s24 : Space.s24),
                   child,
                   const SizedBox(height: Space.s24),
                   Text(

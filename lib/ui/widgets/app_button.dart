@@ -170,7 +170,7 @@ class AppButton extends StatelessWidget {
           duration: Motion.of(context, Motion.instant),
           constraints: BoxConstraints(minHeight: height),
           padding: EdgeInsets.symmetric(
-            horizontal: label != null ? 16 : (height - 17) / 2,
+            horizontal: label != null ? Space.s18 : (height - Space.s18) / 2,
             vertical: Space.s4,
           ),
           transform: pressed

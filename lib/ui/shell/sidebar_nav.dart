@@ -261,7 +261,7 @@ class _NavItem extends ConsumerWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: compact ? 0 : Space.s12,
-            vertical: compact ? 11 : Space.s10,
+            vertical: compact ? Space.s12 : Space.s10,
           ),
           child: content,
         ),

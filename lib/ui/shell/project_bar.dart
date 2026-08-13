@@ -42,7 +42,7 @@ class ProjectBar extends ConsumerWidget {
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? Space.s12 : 16, vertical: isMobile ? Space.s8 : Space.s10),
+            horizontal: isMobile ? Space.s12 : Space.s18, vertical: isMobile ? Space.s8 : Space.s10),
         child: isMobile ? _mobile(context, ref, t) : _desktop(context, ref, t),
       ),
     );
@@ -837,81 +837,9 @@ class _ExportCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(Space.s8, 0, Space.s8, Space.s4),
             child: ExportPanel(enabled: haySemana, onExport: onExport),
           ),
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: Space.s6, vertical: Space.s4),
-            color: t.border2,
-          ),
-          _ExportItem(
-            icon: Icons.layers_outlined,
-            title: tr.export.fullProject,
-            sub: tr.export.fullProjectSub,
-            onTap: null, // próximamente
-          ),
-          _ExportItem(
-            icon: Icons.list_alt_outlined,
-            title: tr.export.sheets,
-            sub: tr.export.sheetsSub,
-            onTap: null, // próximamente
-          ),
         ],
       ),
     );
   }
 }
 
-class _ExportItem extends StatelessWidget {
-  const _ExportItem({
-    required this.icon,
-    required this.title,
-    required this.sub,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String sub;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final enabled = onTap != null;
-    return Pressable(
-      onTap: onTap,
-      builder: (context, hovered, _) => Opacity(
-        opacity: enabled ? 1 : 0.45,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s10),
-          decoration: BoxDecoration(
-            color: hovered && enabled ? t.surface2 : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: AppIcon.control, color: t.textMute),
-              const SizedBox(width: Space.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: TextStyle(
-                            fontSize: AppText.body,
-                            fontWeight: FontWeight.w700,
-                            color: t.text)),
-                    Text(sub,
-                        style: TextStyle(
-                            fontSize: AppText.caption,
-                            fontWeight: FontWeight.w600,
-                            color: t.textMute)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
