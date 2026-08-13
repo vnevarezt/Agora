@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_spinner.dart';
@@ -162,11 +163,15 @@ class AppButton extends StatelessWidget {
         // The width is always intrinsic: going from fixed width to null
         // breaks the AnimatedContainer interpolation (finite <-> infinite). The
         // icon-only button is made square with symmetric padding.
+        // minHeight, not height: at the largest system text size a fixed box
+        // clips its own label. The button keeps its designed height at normal
+        // scale and grows only when the text needs the room.
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
-          height: height,
+          constraints: BoxConstraints(minHeight: height),
           padding: EdgeInsets.symmetric(
             horizontal: label != null ? 16 : (height - 17) / 2,
+            vertical: 4,
           ),
           transform: pressed
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
@@ -195,7 +200,9 @@ class AppButton extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: height >= Dimens.hExportMobile ? 15 : 13.5,
+                      fontSize: height >= Dimens.hExportMobile
+                          ? AppText.bodyLarge
+                          : AppText.body,
                       fontWeight: FontWeight.w700,
                       color: fg,
                     ),
