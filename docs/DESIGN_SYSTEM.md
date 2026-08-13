@@ -223,9 +223,22 @@ destinations had drifted to 21 on the desktop rail and 24 in the mobile bar;
 
 Other: `avatar` 30 · `ring` 34 · `pickerW` 340 · `pickerMaxH` 460.
 
-**Spacing is not tokenised.** Padding and gaps are literals at the call site
-(commonly 6/8/10/14/18/22). This is the system's least formalised axis — see
-§13.
+### 5.1 Spacing
+
+`Space`, in the same file. Nine steps, named by magnitude because spacing has no
+roles — only distances: **2 · 4 · 6 · 8 · 10 · 12 · 14 · 18 · 24**.
+
+They are the values the UI already leaned on; 6, 8, 10, 12 and 14 alone covered
+208 of 434 uses. What they replace is the 28-value spread around them, half of
+it odd, where 9, 11 and 13 sat between the real steps for no reason anyone could
+name. Ties round up, so 16 joins 18 rather than crowding the dense middle.
+
+**1px is deliberately not a step:** a hairline is a border, not a gap.
+
+Two layout predictors — `participantCardHeight` and `personPickerRowHeight` —
+derive their padding from `Space` rather than restating it. They used to hold
+their own copy of the number, which is how one of them silently drifted from
+the widget it predicts.
 
 ## 6. Elevation
 
@@ -430,27 +443,22 @@ Stated rather than papered over:
 1. **The mock is gone.** Dozens of doc-comments cite CSS selectors from a source
    that is not in the repo. New contributors cannot resolve those references.
    Either vendor the mock into `docs/` or strip the citations.
-2. **Spacing is not tokenised.** Every other axis now has a named scale; padding
-   and gaps are still literals, and they have already drifted: 16 distinct
-   `SizedBox` gaps (`1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 22`,
-   half of them odd) and 11 distinct symmetric horizontal paddings. A `Space`
-   scale of roughly six steps would absorb almost all of them within a pixel.
-   **This is the largest open item.**
-3. **One palette.** `AppPalette` is built for several; `pizarra` is the only one,
+2. **One palette.** `AppPalette` is built for several; `pizarra` is the only one,
    so the abstraction is currently unexercised.
-4. **Default theme is `light`, not `system`.** A deliberate-looking choice with
+3. **Default theme is `light`, not `system`.** A deliberate-looking choice with
    no recorded rationale; the Settings option offers all three.
-5. **No component gallery.** There is no storybook screen and no visual
+4. **No component gallery.** There is no storybook screen and no visual
    regression test, so the catalog's *appearance* is verified only by reading
    it — its behaviour is now covered (§12), its looks are not.
-6. **Touch targets are unverified.** `hControl` is 38, below the 44pt/48dp
+5. **Touch targets are unverified.** `hControl` is 38, below the 44pt/48dp
    platform minimum. On a pointer that is fine and deliberate; on touch it
    needs either a larger control or an expanded hit area, and nothing currently
-   distinguishes the two cases.
-7. **Screen and print section colors differ** (§3.4) with the rationale recorded
+   distinguishes the two cases. Fixing it is a visible density decision on
+   mobile, not a mechanical change.
+6. **Screen and print section colors differ** (§3.4) with the rationale recorded
    here for the first time. If that was accidental rather than intentional, this
    is the place to fix it.
-8. **Two dead menu items.** The export menu renders "Proyecto completo" and
-   "Hojas de participación" permanently disabled. Correctly disabled — the
-   screen reader is told — but a disabled state says "not now", and these say
-   "not ever yet". A product call, not a design defect.
+7. **Nothing enforces the scales.** `AppText`, `AppIcon` and `Space` are
+   conventions a reviewer has to spot. A custom lint, or a test that greps
+   `lib/ui` for bare numbers in the constructs each scale owns, would make the
+   rule self-defending — the same way `contrast_test` now defends §12.

@@ -139,7 +139,7 @@ PartView mapRow(
     title: title,
     durationLabel: duration,
     // The opening/closing song carries the prayer slot in the model: it shows
-    // as a role card with the ssong chip.
+    // as a role card with the "Cántico" chip.
     fixedTag: isSong ? tr.workspace.songTag : null,
     auxFlag: withAux,
     slots: [
