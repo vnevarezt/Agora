@@ -308,12 +308,6 @@ class Translations$account$es {
 	/// es: 'Contraseña'
 	String get password => 'Contraseña';
 
-	/// es: '¿Olvidaste tu contraseña?'
-	String get forgotPassword => '¿Olvidaste tu contraseña?';
-
-	/// es: 'Te enviamos un correo para restablecer la contraseña.'
-	String get resetSent => 'Te enviamos un correo para restablecer la contraseña.';
-
 	/// es: 'Sesión iniciada'
 	String get signedInAs => 'Sesión iniciada';
 
@@ -1806,6 +1800,30 @@ class Translations$auth$cloud$es {
 	/// es: '¿Olvidaste tu contraseña?'
 	String get forgot => '¿Olvidaste tu contraseña?';
 
+	/// es: 'Volver a iniciar sesión'
+	String get backToLogin => 'Volver a iniciar sesión';
+
+	/// es: 'Restablece tu contraseña'
+	String get resetTitle => 'Restablece tu contraseña';
+
+	/// es: 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.'
+	String get resetSub => 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.';
+
+	/// es: 'Enviar enlace'
+	String get resetButton => 'Enviar enlace';
+
+	/// es: 'Revisa tu correo'
+	String get resetSentTitle => 'Revisa tu correo';
+
+	/// es: 'Si existe una cuenta con {email}, te enviamos un enlace para restablecer tu contraseña.'
+	String resetSentDesc({required Object email}) => 'Si existe una cuenta con ${email}, te enviamos un enlace para restablecer tu contraseña.';
+
+	/// es: 'Reenviar enlace'
+	String get resetResend => 'Reenviar enlace';
+
+	/// es: 'Reenviar en {seconds}s'
+	String resetResendIn({required Object seconds}) => 'Reenviar en ${seconds}s';
+
 	/// es: 'Iniciar sesión'
 	String get loginButton => 'Iniciar sesión';
 
@@ -1898,6 +1916,9 @@ class Translations$account$errors$es {
 
 	/// es: 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.'
 	String get requiresRecentLogin => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.';
+
+	/// es: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
+	String get tooManyRequests => 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
 
 	/// es: 'No se pudo completar la operación. Inténtalo de nuevo.'
 	String get unknown => 'No se pudo completar la operación. Inténtalo de nuevo.';
@@ -2002,6 +2023,14 @@ extension on Translations {
 			'auth.cloud.confirm' => 'Confirmar contraseña',
 			'auth.cloud.confirmHint' => 'Repite la contraseña',
 			'auth.cloud.forgot' => '¿Olvidaste tu contraseña?',
+			'auth.cloud.backToLogin' => 'Volver a iniciar sesión',
+			'auth.cloud.resetTitle' => 'Restablece tu contraseña',
+			'auth.cloud.resetSub' => 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.',
+			'auth.cloud.resetButton' => 'Enviar enlace',
+			'auth.cloud.resetSentTitle' => 'Revisa tu correo',
+			'auth.cloud.resetSentDesc' => ({required Object email}) => 'Si existe una cuenta con ${email}, te enviamos un enlace para restablecer tu contraseña.',
+			'auth.cloud.resetResend' => 'Reenviar enlace',
+			'auth.cloud.resetResendIn' => ({required Object seconds}) => 'Reenviar en ${seconds}s',
 			'auth.cloud.loginButton' => 'Iniciar sesión',
 			'auth.cloud.registerButton' => 'Crear cuenta',
 			'auth.cloud.noAccount' => '¿No tienes cuenta?',
@@ -2064,8 +2093,6 @@ extension on Translations {
 			'account.or' => 'o',
 			'account.email' => 'Correo electrónico',
 			'account.password' => 'Contraseña',
-			'account.forgotPassword' => '¿Olvidaste tu contraseña?',
-			'account.resetSent' => 'Te enviamos un correo para restablecer la contraseña.',
 			'account.signedInAs' => 'Sesión iniciada',
 			'account.signOut' => 'Cerrar sesión',
 			'account.localGateNote' => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.',
@@ -2086,6 +2113,7 @@ extension on Translations {
 			'account.errors.weakPassword' => 'La contraseña es demasiado débil (mínimo 6 caracteres).',
 			'account.errors.network' => 'Sin conexión. Inténtalo de nuevo.',
 			'account.errors.requiresRecentLogin' => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.',
+			'account.errors.tooManyRequests' => 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
 			'account.errors.unknown' => 'No se pudo completar la operación. Inténtalo de nuevo.',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',
