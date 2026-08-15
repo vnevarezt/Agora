@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +12,7 @@ import 'auth_error_mapping.dart';
 import 'auth_validation.dart';
 import 'widgets/auth_error_text.dart';
 import 'widgets/back_link.dart';
+import 'widgets/resend_cooldown.dart';
 
 class PasswordResetPanel extends ConsumerStatefulWidget {
   const PasswordResetPanel({
@@ -30,34 +29,12 @@ class PasswordResetPanel extends ConsumerStatefulWidget {
       _PasswordResetPanelState();
 }
 
-class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel> {
-  static const _resendCooldown = Duration(seconds: 30);
-
+class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>
+    with ResendCooldown {
   late String _email = widget.initialEmail;
   bool _busy = false;
   bool _sent = false;
   String? _error;
-  Timer? _cooldownTimer;
-  int _cooldownLeft = 0;
-
-  @override
-  void dispose() {
-    _cooldownTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startCooldown() {
-    _cooldownTimer?.cancel();
-    setState(() => _cooldownLeft = _resendCooldown.inSeconds);
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      setState(() => _cooldownLeft--);
-      if (_cooldownLeft <= 0) timer.cancel();
-    });
-  }
 
   Future<void> _submit() async {
     final tr = context.t;
@@ -85,7 +62,7 @@ class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel> {
         _busy = false;
         _sent = true;
       });
-      _startCooldown();
+      startCooldown();
     } on CloudAuthException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -156,13 +133,13 @@ class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel> {
           const SizedBox(height: 10),
           AppButton(
             variant: AppButtonVariant.ghost,
-            label: _cooldownLeft > 0
-                ? tr.auth.cloud.resetResendIn(seconds: _cooldownLeft)
+            label: cooldownLeft > 0
+                ? tr.auth.cloud.resetResendIn(seconds: cooldownLeft)
                 : tr.auth.cloud.resetResend,
             height: 46,
             expand: true,
             busy: _busy,
-            onPressed: _busy || _cooldownLeft > 0 ? null : _submit,
+            onPressed: _busy || cooldownLeft > 0 ? null : _submit,
           ),
         ] else ...[
           LabeledField(
