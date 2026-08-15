@@ -43,10 +43,22 @@ class _EmailVerificationScreenState
 
   Future<void> _check({bool manual = false}) async {
     if (manual && _busy) return;
-    if (manual) setState(() => _busy = true);
+    final tr = context.t;
+    if (manual) {
+      setState(() {
+        _busy = true;
+        _error = null;
+      });
+    }
     final auth = await ref.read(cloudAuthProvider.future);
-    if (!mounted || auth == null) {
-      if (manual && mounted) setState(() => _busy = false);
+    if (!mounted) return;
+    if (auth == null) {
+      if (manual) {
+        setState(() {
+          _busy = false;
+          _error = tr.auth.cloud.unavailableDesc;
+        });
+      }
       return;
     }
     final verified = await auth.refreshEmailVerified();
@@ -56,7 +68,12 @@ class _EmailVerificationScreenState
       await ref.read(authSessionProvider.notifier).completeEmailVerification();
       return;
     }
-    if (manual) setState(() => _busy = false);
+    if (manual) {
+      setState(() {
+        _busy = false;
+        _error = tr.auth.cloudVerify.notYetVerified;
+      });
+    }
   }
 
   Future<void> _resend() async {

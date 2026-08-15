@@ -1759,6 +1759,9 @@ class Translations$auth$cloudVerify$es {
 	/// es: 'Ya lo verifiqué'
 	String get checkNow => 'Ya lo verifiqué';
 
+	/// es: 'Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.'
+	String get notYetVerified => 'Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.';
+
 	/// es: 'Reenviar correo'
 	String get resend => 'Reenviar correo';
 
@@ -2040,6 +2043,7 @@ extension on Translations {
 			'auth.cloudVerify.title' => 'Verifica tu correo',
 			'auth.cloudVerify.caption' => ({required Object email}) => 'Te enviamos un enlace a ${email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.',
 			'auth.cloudVerify.checkNow' => 'Ya lo verifiqué',
+			'auth.cloudVerify.notYetVerified' => 'Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.',
 			'auth.cloudVerify.resend' => 'Reenviar correo',
 			'auth.cloudVerify.resendIn' => ({required Object seconds}) => 'Reenviar en ${seconds}s',
 			'auth.cloudVerify.signOutQuestion' => '¿No es tu correo?',

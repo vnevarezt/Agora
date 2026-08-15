@@ -860,6 +860,7 @@ class _Translations$auth$cloudVerify$en extends Translations$auth$cloudVerify$es
 	@override String get title => 'Verify your email';
 	@override String caption({required Object email}) => 'We sent a link to ${email}. Open it to activate your account — this screen continues on its own once you do.';
 	@override String get checkNow => 'I verified it';
+	@override String get notYetVerified => 'We still haven\'t confirmed your email. Check your inbox (and spam) and try again.';
 	@override String get resend => 'Resend email';
 	@override String resendIn({required Object seconds}) => 'Resend in ${seconds}s';
 	@override String get signOutQuestion => 'Not your email?';
@@ -1020,6 +1021,7 @@ extension on TranslationsEn {
 			'auth.cloudVerify.title' => 'Verify your email',
 			'auth.cloudVerify.caption' => ({required Object email}) => 'We sent a link to ${email}. Open it to activate your account — this screen continues on its own once you do.',
 			'auth.cloudVerify.checkNow' => 'I verified it',
+			'auth.cloudVerify.notYetVerified' => 'We still haven\'t confirmed your email. Check your inbox (and spam) and try again.',
 			'auth.cloudVerify.resend' => 'Resend email',
 			'auth.cloudVerify.resendIn' => ({required Object seconds}) => 'Resend in ${seconds}s',
 			'auth.cloudVerify.signOutQuestion' => 'Not your email?',

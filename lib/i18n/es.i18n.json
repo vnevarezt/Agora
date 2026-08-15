@@ -53,6 +53,7 @@
       "title": "Verifica tu correo",
       "caption": "Te enviamos un enlace a {email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.",
       "checkNow": "Ya lo verifiqué",
+      "notYetVerified": "Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.",
       "resend": "Reenviar correo",
       "resendIn": "Reenviar en {seconds}s",
       "signOutQuestion": "¿No es tu correo?",

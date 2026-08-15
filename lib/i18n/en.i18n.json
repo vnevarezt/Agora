@@ -53,6 +53,7 @@
       "title": "Verify your email",
       "caption": "We sent a link to {email}. Open it to activate your account — this screen continues on its own once you do.",
       "checkNow": "I verified it",
+      "notYetVerified": "We still haven't confirmed your email. Check your inbox (and spam) and try again.",
       "resend": "Resend email",
       "resendIn": "Resend in {seconds}s",
       "signOutQuestion": "Not your email?",
