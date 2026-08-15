@@ -365,6 +365,11 @@ class CloudAuthService {
         'invalid-credential' ||
         'INVALID_LOGIN_CREDENTIALS' =>
           CloudAuthErrorCode.wrongPassword,
+        // Windows' firebase_auth plugin doesn't recognize
+        // INVALID_LOGIN_CREDENTIALS (email enumeration protection) and falls
+        // back to this generic code instead of invalid-credential.
+        'unknown-error' when defaultTargetPlatform == TargetPlatform.windows =>
+          CloudAuthErrorCode.wrongPassword,
         'email-already-in-use' => CloudAuthErrorCode.emailInUse,
         'weak-password' => CloudAuthErrorCode.weakPassword,
         'network-request-failed' => CloudAuthErrorCode.network,
