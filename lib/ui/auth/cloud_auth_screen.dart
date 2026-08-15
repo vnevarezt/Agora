@@ -12,7 +12,9 @@ import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/motion.dart';
 import 'auth_card_layout.dart';
+import 'auth_error_mapping.dart';
 import 'auth_validation.dart';
+import 'password_reset_screen.dart';
 import 'widgets/auth_error_text.dart';
 import 'widgets/auth_switch_line.dart';
 import 'widgets/back_link.dart';
@@ -40,6 +42,8 @@ class CloudAuthScreen extends ConsumerStatefulWidget {
 
 class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
   late CloudFormMode _mode = widget.initialMode;
+  bool _resetting = false;
+  String _email = '';
 
   @override
   Widget build(BuildContext context) {
@@ -47,49 +51,73 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
     final login = _mode == CloudFormMode.login;
 
     return AuthCardLayout(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.onBack != null) ...[
-            BackLink(label: tr.auth.chooseOther, onTap: widget.onBack!),
-            const SizedBox(height: 16),
-          ],
-          ModePill(icon: Icons.cloud_outlined, label: tr.auth.cloud.pill),
-          const SizedBox(height: 14),
-          FadeThroughSwitcher(
-            duration: Motion.of(context, Motion.fast),
-            child: Column(
-              key: ValueKey(_mode),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AuthTitle(
-                  login
-                      ? tr.auth.cloud.loginTitle
-                      : tr.auth.cloud.registerTitle,
-                ),
-                const SizedBox(height: 6),
-                AuthSub(
-                  login ? tr.auth.cloud.loginSub : tr.auth.cloud.registerSub,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 22),
-          CloudAuthForm(
-            mode: _mode,
-            onSuccess: () =>
-                ref.read(authSessionProvider.notifier).completeCloudSignIn(),
-          ),
-          const SizedBox(height: 16),
-          AuthSwitchLine(
-            text: login ? tr.auth.cloud.noAccount : tr.auth.cloud.hasAccount,
-            actionLabel: login ? tr.auth.cloud.register : tr.auth.cloud.login,
-            onTap: () => setState(
-              () =>
-                  _mode = login ? CloudFormMode.register : CloudFormMode.login,
-            ),
-          ),
-        ],
+      child: FadeThroughSwitcher(
+        duration: Motion.of(context, Motion.fast),
+        child: _resetting
+            ? PasswordResetPanel(
+                key: const ValueKey('reset'),
+                initialEmail: _email,
+                onBack: (email) => setState(() {
+                  _email = email;
+                  _resetting = false;
+                }),
+              )
+            : Column(
+                key: const ValueKey('login-register'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.onBack != null) ...[
+                    BackLink(label: tr.auth.chooseOther, onTap: widget.onBack!),
+                    const SizedBox(height: 16),
+                  ],
+                  ModePill(icon: Icons.cloud_outlined, label: tr.auth.cloud.pill),
+                  const SizedBox(height: 14),
+                  FadeThroughSwitcher(
+                    duration: Motion.of(context, Motion.fast),
+                    child: Column(
+                      key: ValueKey(_mode),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AuthTitle(
+                          login
+                              ? tr.auth.cloud.loginTitle
+                              : tr.auth.cloud.registerTitle,
+                        ),
+                        const SizedBox(height: 6),
+                        AuthSub(
+                          login
+                              ? tr.auth.cloud.loginSub
+                              : tr.auth.cloud.registerSub,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  CloudAuthForm(
+                    mode: _mode,
+                    initialEmail: _email,
+                    onSuccess: () => ref
+                        .read(authSessionProvider.notifier)
+                        .completeCloudSignIn(),
+                    onForgotPassword: (email) => setState(() {
+                      _email = email;
+                      _resetting = true;
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  AuthSwitchLine(
+                    text: login
+                        ? tr.auth.cloud.noAccount
+                        : tr.auth.cloud.hasAccount,
+                    actionLabel:
+                        login ? tr.auth.cloud.register : tr.auth.cloud.login,
+                    onTap: () => setState(
+                      () => _mode =
+                          login ? CloudFormMode.register : CloudFormMode.login,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -98,10 +126,18 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
 /// Google + email form, shared between the gate screen and the Settings
 /// modal. [onSuccess] runs after Firebase confirms the sign-in.
 class CloudAuthForm extends ConsumerStatefulWidget {
-  const CloudAuthForm({super.key, required this.mode, required this.onSuccess});
+  const CloudAuthForm({
+    super.key,
+    required this.mode,
+    required this.onSuccess,
+    required this.onForgotPassword,
+    this.initialEmail = '',
+  });
 
   final CloudFormMode mode;
   final VoidCallback onSuccess;
+  final ValueChanged<String> onForgotPassword;
+  final String initialEmail;
 
   @override
   ConsumerState<CloudAuthForm> createState() => _CloudAuthFormState();
@@ -111,7 +147,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
   static const _minLength = 8;
 
   String _name = '';
-  String _email = '';
+  late String _email = widget.initialEmail;
   String _password = '';
   String _confirm = '';
   bool _busy = false;
@@ -124,24 +160,6 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
     if (_busy || _email.trim().isEmpty || _password.isEmpty) return false;
     if (_login) return true;
     return _name.trim().isNotEmpty && _confirm.isNotEmpty;
-  }
-
-  String _errorText(CloudAuthErrorCode code) {
-    final e = context.t.account.errors;
-    return switch (code) {
-      CloudAuthErrorCode.invalidEmail => e.invalidEmail,
-      CloudAuthErrorCode.userNotFound => e.userNotFound,
-      CloudAuthErrorCode.wrongPassword => e.wrongPassword,
-      CloudAuthErrorCode.emailInUse => e.emailInUse,
-      CloudAuthErrorCode.weakPassword => e.weakPassword,
-      CloudAuthErrorCode.network => e.network,
-      // requiresRecentLogin can't arise on sign-in/register (only on delete);
-      // fold it into the generic message here.
-      CloudAuthErrorCode.canceled ||
-      CloudAuthErrorCode.requiresRecentLogin ||
-      CloudAuthErrorCode.unknown =>
-        e.unknown,
-    };
   }
 
   Future<void> _run(
@@ -176,7 +194,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
         // A canceled Google flow is not an error the user needs explained.
         _error = e.code == CloudAuthErrorCode.canceled
             ? null
-            : _errorText(e.code);
+            : cloudAuthErrorText(context, e.code);
       });
     } catch (e) {
       // Never strand the form busy on an unexpected (non-Firebase) failure.
@@ -215,47 +233,6 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               displayName: _name.trim(),
             ),
     );
-  }
-
-  Future<void> _sendReset() async {
-    final tr = context.t;
-    final messenger = ScaffoldMessenger.of(context);
-    if (!isValidEmail(_email)) {
-      setState(() => _error = tr.account.errors.invalidEmail);
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    final auth = await ref.read(cloudAuthProvider.future);
-    if (!mounted) return;
-    if (auth == null) {
-      setState(() {
-        _busy = false;
-        _error = tr.auth.cloud.unavailableDesc;
-      });
-      return;
-    }
-    try {
-      await auth.sendPasswordReset(_email.trim());
-      if (!mounted) return;
-      setState(() => _busy = false);
-      messenger.showSnackBar(SnackBar(content: Text(tr.account.resetSent)));
-    } on CloudAuthException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _error = _errorText(e.code);
-      });
-    } catch (e) {
-      debugPrint('Password reset unexpected error: $e');
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _error = tr.account.errors.unknown;
-      });
-    }
   }
 
   @override
@@ -329,7 +306,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
           LabeledField(
             label: tr.auth.cloud.email,
             child: BoundTextField(
-              initial: '',
+              initial: _email,
               onChanged: (v) => setState(() {
                 _email = v;
                 _error = null;
@@ -361,7 +338,8 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Pressable(
-                  onTap: _busy ? null : _sendReset,
+                  onTap:
+                      _busy ? null : () => widget.onForgotPassword(_email.trim()),
                   builder: (context, hovered, _) => Text(
                     tr.auth.cloud.forgot,
                     style: TextStyle(

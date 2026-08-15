@@ -24,6 +24,7 @@ enum CloudAuthErrorCode {
   emailInUse,
   weakPassword,
   network,
+  tooManyRequests,
   canceled,
   /// The session is too old for a sensitive op (delete): reauthenticate first.
   requiresRecentLogin,
@@ -216,6 +217,22 @@ class CloudAuthService {
         await _auth.sendPasswordResetEmail(email: email);
       });
 
+  Future<void> resendEmailVerification() => _mapAuthErrors(() async {
+        final user = _auth.currentUser;
+        if (user == null) {
+          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+        }
+        await _syncEmailLanguage();
+        await user.sendEmailVerification();
+      });
+
+  Future<bool> refreshEmailVerified() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    await user.reload();
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
   Future<void> signInWithGoogle() async {
     // google_sign_in leaves authenticate() unimplemented on the web: Google
     // Identity Services only starts the flow from its own rendered button.
@@ -373,6 +390,7 @@ class CloudAuthService {
         'email-already-in-use' => CloudAuthErrorCode.emailInUse,
         'weak-password' => CloudAuthErrorCode.weakPassword,
         'network-request-failed' => CloudAuthErrorCode.network,
+        'too-many-requests' => CloudAuthErrorCode.tooManyRequests,
         // Web popup flow: dismissing the window is a cancel, not a failure —
         // the native path reports the same thing from GoogleSignInException.
         'popup-closed-by-user' ||

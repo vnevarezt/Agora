@@ -49,6 +49,16 @@
       "signOutQuestion": "Not you?",
       "signOut": "Sign out"
     },
+    "cloudVerify": {
+      "title": "Verify your email",
+      "caption": "We sent a link to {email}. Open it to activate your account — this screen continues on its own once you do.",
+      "checkNow": "I verified it",
+      "notYetVerified": "We still haven't confirmed your email. Check your inbox (and spam) and try again.",
+      "resend": "Resend email",
+      "resendIn": "Resend in {seconds}s",
+      "signOutQuestion": "Not your email?",
+      "signOut": "Sign out"
+    },
     "cloud": {
       "pill": "Cloud mode",
       "loginTitle": "Sign in",
@@ -67,6 +77,14 @@
       "confirm": "Confirm password",
       "confirmHint": "Repeat the password",
       "forgot": "Forgot your password?",
+      "backToLogin": "Back to sign in",
+      "resetTitle": "Reset your password",
+      "resetSub": "Enter your email and we'll send you a link to create a new password.",
+      "resetButton": "Send link",
+      "resetSentTitle": "Check your email",
+      "resetSentDesc": "If an account exists for {email}, we sent a link to reset your password.",
+      "resetResend": "Resend link",
+      "resetResendIn": "Resend in {seconds}s",
       "loginButton": "Sign in",
       "registerButton": "Create account",
       "noAccount": "No account yet?",
@@ -140,8 +158,6 @@
     "or": "or",
     "email": "Email",
     "password": "Password",
-    "forgotPassword": "Forgot your password?",
-    "resetSent": "We sent you a password reset email.",
     "signedInAs": "Signed in",
     "signOut": "Sign out",
     "localGateNote": "Signing out of the cloud does not lock your local data; use Security → Lock now for that.",
@@ -163,6 +179,7 @@
       "weakPassword": "The password is too weak (minimum 6 characters).",
       "network": "No connection. Try again.",
       "requiresRecentLogin": "For your security, sign in again and retry.",
+      "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
       "unknown": "The operation could not be completed. Try again."
     }
   },

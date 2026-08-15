@@ -136,6 +136,7 @@ class Translations$auth$es {
 
 	late final Translations$auth$local$es local = Translations$auth$local$es.internal(_root);
 	late final Translations$auth$cloudLock$es cloudLock = Translations$auth$cloudLock$es.internal(_root);
+	late final Translations$auth$cloudVerify$es cloudVerify = Translations$auth$cloudVerify$es.internal(_root);
 	late final Translations$auth$cloud$es cloud = Translations$auth$cloud$es.internal(_root);
 	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
 	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
@@ -307,12 +308,6 @@ class Translations$account$es {
 
 	/// es: 'Contraseña'
 	String get password => 'Contraseña';
-
-	/// es: '¿Olvidaste tu contraseña?'
-	String get forgotPassword => '¿Olvidaste tu contraseña?';
-
-	/// es: 'Te enviamos un correo para restablecer la contraseña.'
-	String get resetSent => 'Te enviamos un correo para restablecer la contraseña.';
 
 	/// es: 'Sesión iniciada'
 	String get signedInAs => 'Sesión iniciada';
@@ -1747,6 +1742,39 @@ class Translations$auth$cloudLock$es {
 	String get signOut => 'Cerrar sesión';
 }
 
+// Path: auth.cloudVerify
+class Translations$auth$cloudVerify$es {
+	Translations$auth$cloudVerify$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Verifica tu correo'
+	String get title => 'Verifica tu correo';
+
+	/// es: 'Te enviamos un enlace a {email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.'
+	String caption({required Object email}) => 'Te enviamos un enlace a ${email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.';
+
+	/// es: 'Ya lo verifiqué'
+	String get checkNow => 'Ya lo verifiqué';
+
+	/// es: 'Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.'
+	String get notYetVerified => 'Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.';
+
+	/// es: 'Reenviar correo'
+	String get resend => 'Reenviar correo';
+
+	/// es: 'Reenviar en {seconds}s'
+	String resendIn({required Object seconds}) => 'Reenviar en ${seconds}s';
+
+	/// es: '¿No es tu correo?'
+	String get signOutQuestion => '¿No es tu correo?';
+
+	/// es: 'Cerrar sesión'
+	String get signOut => 'Cerrar sesión';
+}
+
 // Path: auth.cloud
 class Translations$auth$cloud$es {
 	Translations$auth$cloud$es.internal(this._root);
@@ -1805,6 +1833,30 @@ class Translations$auth$cloud$es {
 
 	/// es: '¿Olvidaste tu contraseña?'
 	String get forgot => '¿Olvidaste tu contraseña?';
+
+	/// es: 'Volver a iniciar sesión'
+	String get backToLogin => 'Volver a iniciar sesión';
+
+	/// es: 'Restablece tu contraseña'
+	String get resetTitle => 'Restablece tu contraseña';
+
+	/// es: 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.'
+	String get resetSub => 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.';
+
+	/// es: 'Enviar enlace'
+	String get resetButton => 'Enviar enlace';
+
+	/// es: 'Revisa tu correo'
+	String get resetSentTitle => 'Revisa tu correo';
+
+	/// es: 'Si existe una cuenta con {email}, te enviamos un enlace para restablecer tu contraseña.'
+	String resetSentDesc({required Object email}) => 'Si existe una cuenta con ${email}, te enviamos un enlace para restablecer tu contraseña.';
+
+	/// es: 'Reenviar enlace'
+	String get resetResend => 'Reenviar enlace';
+
+	/// es: 'Reenviar en {seconds}s'
+	String resetResendIn({required Object seconds}) => 'Reenviar en ${seconds}s';
 
 	/// es: 'Iniciar sesión'
 	String get loginButton => 'Iniciar sesión';
@@ -1899,6 +1951,9 @@ class Translations$account$errors$es {
 	/// es: 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.'
 	String get requiresRecentLogin => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.';
 
+	/// es: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
+	String get tooManyRequests => 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
+
 	/// es: 'No se pudo completar la operación. Inténtalo de nuevo.'
 	String get unknown => 'No se pudo completar la operación. Inténtalo de nuevo.';
 }
@@ -1985,6 +2040,14 @@ extension on Translations {
 			'auth.cloudLock.unlock' => 'Desbloquear',
 			'auth.cloudLock.signOutQuestion' => '¿No eres tú?',
 			'auth.cloudLock.signOut' => 'Cerrar sesión',
+			'auth.cloudVerify.title' => 'Verifica tu correo',
+			'auth.cloudVerify.caption' => ({required Object email}) => 'Te enviamos un enlace a ${email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.',
+			'auth.cloudVerify.checkNow' => 'Ya lo verifiqué',
+			'auth.cloudVerify.notYetVerified' => 'Todavía no confirmamos tu correo. Revisa tu bandeja de entrada (y spam) y vuelve a intentar.',
+			'auth.cloudVerify.resend' => 'Reenviar correo',
+			'auth.cloudVerify.resendIn' => ({required Object seconds}) => 'Reenviar en ${seconds}s',
+			'auth.cloudVerify.signOutQuestion' => '¿No es tu correo?',
+			'auth.cloudVerify.signOut' => 'Cerrar sesión',
 			'auth.cloud.pill' => 'Modo nube',
 			'auth.cloud.loginTitle' => 'Inicia sesión',
 			'auth.cloud.loginSub' => 'Tus congregaciones y proyectos te esperan.',
@@ -2002,6 +2065,14 @@ extension on Translations {
 			'auth.cloud.confirm' => 'Confirmar contraseña',
 			'auth.cloud.confirmHint' => 'Repite la contraseña',
 			'auth.cloud.forgot' => '¿Olvidaste tu contraseña?',
+			'auth.cloud.backToLogin' => 'Volver a iniciar sesión',
+			'auth.cloud.resetTitle' => 'Restablece tu contraseña',
+			'auth.cloud.resetSub' => 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.',
+			'auth.cloud.resetButton' => 'Enviar enlace',
+			'auth.cloud.resetSentTitle' => 'Revisa tu correo',
+			'auth.cloud.resetSentDesc' => ({required Object email}) => 'Si existe una cuenta con ${email}, te enviamos un enlace para restablecer tu contraseña.',
+			'auth.cloud.resetResend' => 'Reenviar enlace',
+			'auth.cloud.resetResendIn' => ({required Object seconds}) => 'Reenviar en ${seconds}s',
 			'auth.cloud.loginButton' => 'Iniciar sesión',
 			'auth.cloud.registerButton' => 'Crear cuenta',
 			'auth.cloud.noAccount' => '¿No tienes cuenta?',
@@ -2064,8 +2135,6 @@ extension on Translations {
 			'account.or' => 'o',
 			'account.email' => 'Correo electrónico',
 			'account.password' => 'Contraseña',
-			'account.forgotPassword' => '¿Olvidaste tu contraseña?',
-			'account.resetSent' => 'Te enviamos un correo para restablecer la contraseña.',
 			'account.signedInAs' => 'Sesión iniciada',
 			'account.signOut' => 'Cerrar sesión',
 			'account.localGateNote' => 'Cerrar la sesión de nube no bloquea tus datos locales; para eso usa Seguridad → Bloquear ahora.',
@@ -2086,6 +2155,7 @@ extension on Translations {
 			'account.errors.weakPassword' => 'La contraseña es demasiado débil (mínimo 6 caracteres).',
 			'account.errors.network' => 'Sin conexión. Inténtalo de nuevo.',
 			'account.errors.requiresRecentLogin' => 'Por seguridad, vuelve a iniciar sesión e inténtalo de nuevo.',
+			'account.errors.tooManyRequests' => 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
 			'account.errors.unknown' => 'No se pudo completar la operación. Inténtalo de nuevo.',
 			'nav.home' => 'Inicio',
 			'nav.participants' => 'Participantes',

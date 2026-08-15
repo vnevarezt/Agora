@@ -8,6 +8,7 @@ import '../widgets/app_spinner.dart';
 import '../widgets/motion.dart';
 import 'cloud_auth_screen.dart';
 import 'cloud_lock_screen.dart';
+import 'email_verification_screen.dart';
 import 'key_error_screen.dart';
 import 'local_create_screen.dart';
 import 'portada_screen.dart';
@@ -39,6 +40,7 @@ class AuthGate extends ConsumerWidget {
             UnlockScreen(profileName: profileName, deviceUnlock: deviceUnlock),
           SessionCloudSignedOut() => const CloudAuthScreen(),
           SessionCloudLocked() => const CloudLockScreen(),
+          SessionCloudUnverified() => const EmailVerificationScreen(),
           SessionKeyError(:final message) => KeyErrorScreen(message: message),
           SessionUnlocked() => child,
         },

@@ -70,6 +70,10 @@ class SessionCloudLocked extends SessionState {
   const SessionCloudLocked();
 }
 
+class SessionCloudUnverified extends SessionState {
+  const SessionCloudUnverified();
+}
+
 class SessionUnlocked extends SessionState {
   const SessionUnlocked(this.dekHex, this.mode,
       {this.profileName, this.deviceUnlockEnabled = false});
@@ -245,16 +249,25 @@ class SessionController extends Notifier<SessionState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_modeKey, 'cloud');
       _mode = AccountMode.cloud;
-      // Fresh sign-in counts as proving identity: no device-unlock gate here.
-      state = SessionUnlocked(
-          await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud,
-          deviceUnlockEnabled: _deviceUnlock);
+      final app = await ref.read(firebaseAppProvider.future);
+      final user =
+          app == null ? null : FirebaseAuth.instanceFor(app: app).currentUser;
+      state = user != null && _needsEmailVerification(user)
+          ? const SessionCloudUnverified()
+          : SessionUnlocked(
+              await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud,
+              deviceUnlockEnabled: _deviceUnlock);
       await _startCloudWatch();
     } on DbKeyException catch (e) {
       state = SessionKeyError(e.message);
     } catch (e) {
       state = SessionKeyError('$e');
     }
+  }
+
+  Future<void> completeEmailVerification() async {
+    if (state is! SessionCloudUnverified) return;
+    await _unlockCloud();
   }
 
   /// The data is unrecoverable by design: delete the DB file plus every key
@@ -315,9 +328,24 @@ class SessionController extends Notifier<SessionState> {
       state = const SessionCloudSignedOut();
       return;
     }
-    if (state is SessionUnlocked || state is SessionCloudLocked) return;
+    if (state is SessionUnlocked ||
+        state is SessionCloudLocked ||
+        state is SessionCloudUnverified) {
+      return;
+    }
+    if (_needsEmailVerification(user)) {
+      state = const SessionCloudUnverified();
+      return;
+    }
+    await _unlockCloud();
+  }
+
+  bool _needsEmailVerification(User user) =>
+      !user.emailVerified &&
+      user.providerData.firstOrNull?.providerId == 'password';
+
+  Future<void> _unlockCloud() async {
     if (_deviceUnlock) {
-      // Session restored from disk (app relaunch): arm the gate.
       state = const SessionCloudLocked();
       return;
     }

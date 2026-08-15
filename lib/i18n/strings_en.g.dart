@@ -112,6 +112,7 @@ class _Translations$auth$en extends Translations$auth$es {
 	@override String get chooseOther => 'Choose another mode';
 	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
 	@override late final _Translations$auth$cloudLock$en cloudLock = _Translations$auth$cloudLock$en._(_root);
+	@override late final _Translations$auth$cloudVerify$en cloudVerify = _Translations$auth$cloudVerify$en._(_root);
 	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
 	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
 	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
@@ -189,8 +190,6 @@ class _Translations$account$en extends Translations$account$es {
 	@override String get or => 'or';
 	@override String get email => 'Email';
 	@override String get password => 'Password';
-	@override String get forgotPassword => 'Forgot your password?';
-	@override String get resetSent => 'We sent you a password reset email.';
 	@override String get signedInAs => 'Signed in';
 	@override String get signOut => 'Sign out';
 	@override String get localGateNote => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.';
@@ -851,6 +850,23 @@ class _Translations$auth$cloudLock$en extends Translations$auth$cloudLock$es {
 	@override String get signOut => 'Sign out';
 }
 
+// Path: auth.cloudVerify
+class _Translations$auth$cloudVerify$en extends Translations$auth$cloudVerify$es {
+	_Translations$auth$cloudVerify$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Verify your email';
+	@override String caption({required Object email}) => 'We sent a link to ${email}. Open it to activate your account — this screen continues on its own once you do.';
+	@override String get checkNow => 'I verified it';
+	@override String get notYetVerified => 'We still haven\'t confirmed your email. Check your inbox (and spam) and try again.';
+	@override String get resend => 'Resend email';
+	@override String resendIn({required Object seconds}) => 'Resend in ${seconds}s';
+	@override String get signOutQuestion => 'Not your email?';
+	@override String get signOut => 'Sign out';
+}
+
 // Path: auth.cloud
 class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
 	_Translations$auth$cloud$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -875,6 +891,14 @@ class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
 	@override String get confirm => 'Confirm password';
 	@override String get confirmHint => 'Repeat the password';
 	@override String get forgot => 'Forgot your password?';
+	@override String get backToLogin => 'Back to sign in';
+	@override String get resetTitle => 'Reset your password';
+	@override String get resetSub => 'Enter your email and we\'ll send you a link to create a new password.';
+	@override String get resetButton => 'Send link';
+	@override String get resetSentTitle => 'Check your email';
+	@override String resetSentDesc({required Object email}) => 'If an account exists for ${email}, we sent a link to reset your password.';
+	@override String get resetResend => 'Resend link';
+	@override String resetResendIn({required Object seconds}) => 'Resend in ${seconds}s';
 	@override String get loginButton => 'Sign in';
 	@override String get registerButton => 'Create account';
 	@override String get noAccount => 'No account yet?';
@@ -924,6 +948,7 @@ class _Translations$account$errors$en extends Translations$account$errors$es {
 	@override String get weakPassword => 'The password is too weak (minimum 6 characters).';
 	@override String get network => 'No connection. Try again.';
 	@override String get requiresRecentLogin => 'For your security, sign in again and retry.';
+	@override String get tooManyRequests => 'Too many attempts. Wait a few minutes and try again.';
 	@override String get unknown => 'The operation could not be completed. Try again.';
 }
 
@@ -993,6 +1018,14 @@ extension on TranslationsEn {
 			'auth.cloudLock.unlock' => 'Unlock',
 			'auth.cloudLock.signOutQuestion' => 'Not you?',
 			'auth.cloudLock.signOut' => 'Sign out',
+			'auth.cloudVerify.title' => 'Verify your email',
+			'auth.cloudVerify.caption' => ({required Object email}) => 'We sent a link to ${email}. Open it to activate your account — this screen continues on its own once you do.',
+			'auth.cloudVerify.checkNow' => 'I verified it',
+			'auth.cloudVerify.notYetVerified' => 'We still haven\'t confirmed your email. Check your inbox (and spam) and try again.',
+			'auth.cloudVerify.resend' => 'Resend email',
+			'auth.cloudVerify.resendIn' => ({required Object seconds}) => 'Resend in ${seconds}s',
+			'auth.cloudVerify.signOutQuestion' => 'Not your email?',
+			'auth.cloudVerify.signOut' => 'Sign out',
 			'auth.cloud.pill' => 'Cloud mode',
 			'auth.cloud.loginTitle' => 'Sign in',
 			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',
@@ -1010,6 +1043,14 @@ extension on TranslationsEn {
 			'auth.cloud.confirm' => 'Confirm password',
 			'auth.cloud.confirmHint' => 'Repeat the password',
 			'auth.cloud.forgot' => 'Forgot your password?',
+			'auth.cloud.backToLogin' => 'Back to sign in',
+			'auth.cloud.resetTitle' => 'Reset your password',
+			'auth.cloud.resetSub' => 'Enter your email and we\'ll send you a link to create a new password.',
+			'auth.cloud.resetButton' => 'Send link',
+			'auth.cloud.resetSentTitle' => 'Check your email',
+			'auth.cloud.resetSentDesc' => ({required Object email}) => 'If an account exists for ${email}, we sent a link to reset your password.',
+			'auth.cloud.resetResend' => 'Resend link',
+			'auth.cloud.resetResendIn' => ({required Object seconds}) => 'Resend in ${seconds}s',
 			'auth.cloud.loginButton' => 'Sign in',
 			'auth.cloud.registerButton' => 'Create account',
 			'auth.cloud.noAccount' => 'No account yet?',
@@ -1072,8 +1113,6 @@ extension on TranslationsEn {
 			'account.or' => 'or',
 			'account.email' => 'Email',
 			'account.password' => 'Password',
-			'account.forgotPassword' => 'Forgot your password?',
-			'account.resetSent' => 'We sent you a password reset email.',
 			'account.signedInAs' => 'Signed in',
 			'account.signOut' => 'Sign out',
 			'account.localGateNote' => 'Signing out of the cloud does not lock your local data; use Security → Lock now for that.',
@@ -1094,6 +1133,7 @@ extension on TranslationsEn {
 			'account.errors.weakPassword' => 'The password is too weak (minimum 6 characters).',
 			'account.errors.network' => 'No connection. Try again.',
 			'account.errors.requiresRecentLogin' => 'For your security, sign in again and retry.',
+			'account.errors.tooManyRequests' => 'Too many attempts. Wait a few minutes and try again.',
 			'account.errors.unknown' => 'The operation could not be completed. Try again.',
 			'nav.home' => 'Home',
 			'nav.participants' => 'Participants',
