@@ -217,6 +217,22 @@ class CloudAuthService {
         await _auth.sendPasswordResetEmail(email: email);
       });
 
+  Future<void> resendEmailVerification() => _mapAuthErrors(() async {
+        final user = _auth.currentUser;
+        if (user == null) {
+          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+        }
+        await _syncEmailLanguage();
+        await user.sendEmailVerification();
+      });
+
+  Future<bool> refreshEmailVerified() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    await user.reload();
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
   Future<void> signInWithGoogle() async {
     // google_sign_in leaves authenticate() unimplemented on the web: Google
     // Identity Services only starts the flow from its own rendered button.
