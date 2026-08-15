@@ -24,6 +24,7 @@ enum CloudAuthErrorCode {
   emailInUse,
   weakPassword,
   network,
+  tooManyRequests,
   canceled,
   /// The session is too old for a sensitive op (delete): reauthenticate first.
   requiresRecentLogin,
@@ -373,6 +374,7 @@ class CloudAuthService {
         'email-already-in-use' => CloudAuthErrorCode.emailInUse,
         'weak-password' => CloudAuthErrorCode.weakPassword,
         'network-request-failed' => CloudAuthErrorCode.network,
+        'too-many-requests' => CloudAuthErrorCode.tooManyRequests,
         // Web popup flow: dismissing the window is a cancel, not a failure —
         // the native path reports the same thing from GoogleSignInException.
         'popup-closed-by-user' ||
