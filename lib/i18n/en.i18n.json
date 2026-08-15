@@ -49,6 +49,15 @@
       "signOutQuestion": "Not you?",
       "signOut": "Sign out"
     },
+    "cloudVerify": {
+      "title": "Verify your email",
+      "caption": "We sent a link to {email}. Open it to activate your account — this screen continues on its own once you do.",
+      "checkNow": "I verified it",
+      "resend": "Resend email",
+      "resendIn": "Resend in {seconds}s",
+      "signOutQuestion": "Not your email?",
+      "signOut": "Sign out"
+    },
     "cloud": {
       "pill": "Cloud mode",
       "loginTitle": "Sign in",

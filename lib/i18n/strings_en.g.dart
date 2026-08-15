@@ -112,6 +112,7 @@ class _Translations$auth$en extends Translations$auth$es {
 	@override String get chooseOther => 'Choose another mode';
 	@override late final _Translations$auth$local$en local = _Translations$auth$local$en._(_root);
 	@override late final _Translations$auth$cloudLock$en cloudLock = _Translations$auth$cloudLock$en._(_root);
+	@override late final _Translations$auth$cloudVerify$en cloudVerify = _Translations$auth$cloudVerify$en._(_root);
 	@override late final _Translations$auth$cloud$en cloud = _Translations$auth$cloud$en._(_root);
 	@override late final _Translations$auth$reset$en reset = _Translations$auth$reset$en._(_root);
 	@override late final _Translations$auth$keyError$en keyError = _Translations$auth$keyError$en._(_root);
@@ -849,6 +850,22 @@ class _Translations$auth$cloudLock$en extends Translations$auth$cloudLock$es {
 	@override String get signOut => 'Sign out';
 }
 
+// Path: auth.cloudVerify
+class _Translations$auth$cloudVerify$en extends Translations$auth$cloudVerify$es {
+	_Translations$auth$cloudVerify$en._(TranslationsEn root) : this._root = root, super.internal(root);
+
+	final TranslationsEn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Verify your email';
+	@override String caption({required Object email}) => 'We sent a link to ${email}. Open it to activate your account — this screen continues on its own once you do.';
+	@override String get checkNow => 'I verified it';
+	@override String get resend => 'Resend email';
+	@override String resendIn({required Object seconds}) => 'Resend in ${seconds}s';
+	@override String get signOutQuestion => 'Not your email?';
+	@override String get signOut => 'Sign out';
+}
+
 // Path: auth.cloud
 class _Translations$auth$cloud$en extends Translations$auth$cloud$es {
 	_Translations$auth$cloud$en._(TranslationsEn root) : this._root = root, super.internal(root);
@@ -1000,6 +1017,13 @@ extension on TranslationsEn {
 			'auth.cloudLock.unlock' => 'Unlock',
 			'auth.cloudLock.signOutQuestion' => 'Not you?',
 			'auth.cloudLock.signOut' => 'Sign out',
+			'auth.cloudVerify.title' => 'Verify your email',
+			'auth.cloudVerify.caption' => ({required Object email}) => 'We sent a link to ${email}. Open it to activate your account — this screen continues on its own once you do.',
+			'auth.cloudVerify.checkNow' => 'I verified it',
+			'auth.cloudVerify.resend' => 'Resend email',
+			'auth.cloudVerify.resendIn' => ({required Object seconds}) => 'Resend in ${seconds}s',
+			'auth.cloudVerify.signOutQuestion' => 'Not your email?',
+			'auth.cloudVerify.signOut' => 'Sign out',
 			'auth.cloud.pill' => 'Cloud mode',
 			'auth.cloud.loginTitle' => 'Sign in',
 			'auth.cloud.loginSub' => 'Your congregations and projects are waiting.',

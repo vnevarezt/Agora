@@ -136,6 +136,7 @@ class Translations$auth$es {
 
 	late final Translations$auth$local$es local = Translations$auth$local$es.internal(_root);
 	late final Translations$auth$cloudLock$es cloudLock = Translations$auth$cloudLock$es.internal(_root);
+	late final Translations$auth$cloudVerify$es cloudVerify = Translations$auth$cloudVerify$es.internal(_root);
 	late final Translations$auth$cloud$es cloud = Translations$auth$cloud$es.internal(_root);
 	late final Translations$auth$reset$es reset = Translations$auth$reset$es.internal(_root);
 	late final Translations$auth$keyError$es keyError = Translations$auth$keyError$es.internal(_root);
@@ -1741,6 +1742,36 @@ class Translations$auth$cloudLock$es {
 	String get signOut => 'Cerrar sesión';
 }
 
+// Path: auth.cloudVerify
+class Translations$auth$cloudVerify$es {
+	Translations$auth$cloudVerify$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Verifica tu correo'
+	String get title => 'Verifica tu correo';
+
+	/// es: 'Te enviamos un enlace a {email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.'
+	String caption({required Object email}) => 'Te enviamos un enlace a ${email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.';
+
+	/// es: 'Ya lo verifiqué'
+	String get checkNow => 'Ya lo verifiqué';
+
+	/// es: 'Reenviar correo'
+	String get resend => 'Reenviar correo';
+
+	/// es: 'Reenviar en {seconds}s'
+	String resendIn({required Object seconds}) => 'Reenviar en ${seconds}s';
+
+	/// es: '¿No es tu correo?'
+	String get signOutQuestion => '¿No es tu correo?';
+
+	/// es: 'Cerrar sesión'
+	String get signOut => 'Cerrar sesión';
+}
+
 // Path: auth.cloud
 class Translations$auth$cloud$es {
 	Translations$auth$cloud$es.internal(this._root);
@@ -2006,6 +2037,13 @@ extension on Translations {
 			'auth.cloudLock.unlock' => 'Desbloquear',
 			'auth.cloudLock.signOutQuestion' => '¿No eres tú?',
 			'auth.cloudLock.signOut' => 'Cerrar sesión',
+			'auth.cloudVerify.title' => 'Verifica tu correo',
+			'auth.cloudVerify.caption' => ({required Object email}) => 'Te enviamos un enlace a ${email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.',
+			'auth.cloudVerify.checkNow' => 'Ya lo verifiqué',
+			'auth.cloudVerify.resend' => 'Reenviar correo',
+			'auth.cloudVerify.resendIn' => ({required Object seconds}) => 'Reenviar en ${seconds}s',
+			'auth.cloudVerify.signOutQuestion' => '¿No es tu correo?',
+			'auth.cloudVerify.signOut' => 'Cerrar sesión',
 			'auth.cloud.pill' => 'Modo nube',
 			'auth.cloud.loginTitle' => 'Inicia sesión',
 			'auth.cloud.loginSub' => 'Tus congregaciones y proyectos te esperan.',

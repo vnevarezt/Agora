@@ -49,6 +49,15 @@
       "signOutQuestion": "¿No eres tú?",
       "signOut": "Cerrar sesión"
     },
+    "cloudVerify": {
+      "title": "Verifica tu correo",
+      "caption": "Te enviamos un enlace a {email}. Ábrelo para activar tu cuenta — esta pantalla continúa sola en cuanto lo confirmes.",
+      "checkNow": "Ya lo verifiqué",
+      "resend": "Reenviar correo",
+      "resendIn": "Reenviar en {seconds}s",
+      "signOutQuestion": "¿No es tu correo?",
+      "signOut": "Cerrar sesión"
+    },
     "cloud": {
       "pill": "Modo nube",
       "loginTitle": "Inicia sesión",
