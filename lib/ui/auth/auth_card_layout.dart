@@ -120,14 +120,16 @@ class AuthTitle extends StatelessWidget {
 
 /// `.auth__sub`.
 class AuthSub extends StatelessWidget {
-  const AuthSub(this.text, {super.key});
+  const AuthSub(this.text, {super.key, this.textAlign});
 
   final String text;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
+      textAlign: textAlign,
       style: TextStyle(
         fontSize: AppText.body,
         fontWeight: FontWeight.w600,
