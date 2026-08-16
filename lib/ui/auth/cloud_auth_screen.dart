@@ -253,9 +253,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
         (defaultTargetPlatform != TargetPlatform.windows &&
             defaultTargetPlatform != TargetPlatform.macOS);
 
-    return AnimatedSize(
-      duration: Motion.of(context, Motion.med),
-      curve: Motion.curve,
+    return MotionSize(
       alignment: Alignment.topCenter,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -6,6 +6,7 @@ import 'package:agora/ui/theme/tokens.dart';
 import 'package:agora/ui/widgets/app_button.dart';
 import 'package:agora/ui/widgets/app_modal.dart';
 import 'package:agora/ui/widgets/filter_pill.dart';
+import 'package:agora/ui/widgets/motion.dart';
 
 // Every animated surface has to go through Motion.of, which zeroes the
 // duration when the OS asks for reduced motion. A raw duration handed to an
@@ -96,4 +97,43 @@ void main() {
       });
     }
   }
+
+  Future<void> pumpMotionSize(
+    WidgetTester tester,
+    bool disableAnimations,
+    double height,
+  ) {
+    return tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: Scaffold(
+          body: Center(child: MotionSize(child: SizedBox(height: height))),
+        ),
+      ),
+    ));
+  }
+
+  testWidgets('MotionSize eases a size change by default', (tester) async {
+    await pumpMotionSize(tester, false, 20);
+    await tester.pump();
+    await pumpMotionSize(tester, false, 60);
+    await tester.pump();
+    expect(find.byType(AnimatedSize), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  // A zero-duration AnimatedSize restarts its controller from inside
+  // performLayout and, because the forward() completes synchronously, marks
+  // itself dirty mid-layout — which asserts. Under reduced motion the child
+  // has to be sized directly instead.
+  testWidgets('MotionSize resizes under reduced motion without asserting',
+      (tester) async {
+    await pumpMotionSize(tester, true, 20);
+    await tester.pump();
+    await pumpMotionSize(tester, true, 60);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AnimatedSize), findsNothing);
+  });
 }

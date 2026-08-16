@@ -13,9 +13,8 @@ class AuthErrorText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: Motion.of(context, Motion.fast),
-      curve: Motion.curve,
+    return MotionSize(
+      duration: Motion.fast,
       alignment: Alignment.topCenter,
       child: message == null
           ? const SizedBox(width: double.infinity)

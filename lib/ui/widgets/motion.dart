@@ -90,6 +90,38 @@ abstract final class Motion {
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : d;
 }
 
+/// [AnimatedSize] that honours Reduce Motion without asserting.
+///
+/// `AnimatedSize(duration: Motion.of(context, ...))` looks like the obvious
+/// spelling and is a crash: `RenderAnimatedSize` restarts its controller from
+/// inside `performLayout`, and a zero-length `forward()` notifies its listeners
+/// synchronously rather than on the next tick — so the render object marks
+/// itself dirty in the middle of its own layout and Flutter throws. Under
+/// Reduce Motion there is no resize to ease, so the child is sized directly.
+class MotionSize extends StatelessWidget {
+  const MotionSize({
+    super.key,
+    this.duration = Motion.med,
+    this.alignment = Alignment.center,
+    required this.child,
+  });
+
+  final Duration duration;
+  final AlignmentGeometry alignment;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return AnimatedSize(
+      duration: duration,
+      curve: Motion.curve,
+      alignment: alignment,
+      child: child,
+    );
+  }
+}
+
 /// Material Design 3 "fade through": the outgoing surface fades out over the
 /// first ~30% while the incoming one fades in and scales up from 92% over the
 /// rest — the two never sit at full opacity at once, so it stays smooth on
