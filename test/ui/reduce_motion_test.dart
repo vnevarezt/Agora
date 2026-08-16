@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:agora/ui/landing/landing_motion.dart';
 import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/tokens.dart';
 import 'package:agora/ui/widgets/app_button.dart';
@@ -97,6 +98,102 @@ void main() {
       });
     }
   }
+
+  Future<void> pumpEnterUp(WidgetTester tester, bool disableAnimations) {
+    return tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: const Scaffold(
+          body: Center(child: EnterUp(child: Text('Hero'))),
+        ),
+      ),
+    ));
+  }
+
+  Finder enterUpFade() => find.descendant(
+        of: find.byType(EnterUp),
+        matching: find.byType(FadeTransition),
+      );
+
+  testWidgets('EnterUp fades in by default', (tester) async {
+    await pumpEnterUp(tester, false);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(enterUpFade(), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('EnterUp skips the fade under reduced motion', (tester) async {
+    await pumpEnterUp(tester, true);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('Hero'), findsOneWidget);
+    expect(enterUpFade(), findsNothing);
+  });
+
+  Future<void> pumpReveal(WidgetTester tester, bool disableAnimations) {
+    return tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: const Scaffold(
+          body: Center(child: Reveal(child: Text('Section'))),
+        ),
+      ),
+    ));
+  }
+
+  Finder revealFade() => find.descendant(
+        of: find.byType(Reveal),
+        matching: find.byType(FadeTransition),
+      );
+
+  testWidgets('Reveal fades in when it comes into view', (tester) async {
+    await pumpReveal(tester, false);
+    await tester.pump();
+    expect(revealFade(), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Reveal skips the fade under reduced motion', (tester) async {
+    await pumpReveal(tester, true);
+    await tester.pump();
+    expect(find.text('Section'), findsOneWidget);
+    expect(revealFade(), findsNothing);
+  });
+
+  Future<Duration?> inkDuration(WidgetTester tester, bool disable) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disable),
+        child: Scaffold(
+          body: Center(
+            child: AnimatedInk(
+              color: const Color(0xFF123456),
+              builder: (context, color) =>
+                  Text('Link', style: TextStyle(color: color)),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    return tester
+        .widget<TweenAnimationBuilder<Color?>>(
+          find.byType(TweenAnimationBuilder<Color?>),
+        )
+        .duration;
+  }
+
+  testWidgets('AnimatedInk animates normally by default', (tester) async {
+    expect(await inkDuration(tester, false), isNot(Duration.zero));
+  });
+
+  testWidgets('AnimatedInk honours reduced motion', (tester) async {
+    expect(await inkDuration(tester, true), Duration.zero);
+  });
 
   Future<void> pumpMotionSize(
     WidgetTester tester,

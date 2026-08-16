@@ -72,6 +72,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$projectBar$es projectBar = Translations$projectBar$es.internal(_root);
 	late final Translations$workspace$es workspace = Translations$workspace$es.internal(_root);
 	late final Translations$relativeTime$es relativeTime = Translations$relativeTime$es.internal(_root);
+	late final Translations$landing$es landing = Translations$landing$es.internal(_root);
 	late final Translations$program$es program = Translations$program$es.internal(_root);
 }
 
@@ -1559,6 +1560,37 @@ class Translations$relativeTime$es {
 	String days({required Object n}) => 'hace ${n} d';
 }
 
+// Path: landing
+class Translations$landing$es {
+	Translations$landing$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$landing$nav$es nav = Translations$landing$nav$es.internal(_root);
+
+	/// es: 'Iniciar sesión'
+	String get signIn => 'Iniciar sesión';
+
+	/// es: 'Abrir Agora'
+	String get openApp => 'Abrir Agora';
+
+	/// es: 'En pruebas'
+	String get betaBadge => 'En pruebas';
+
+	/// es: 'Volver arriba'
+	String get backToTop => 'Volver arriba';
+
+	late final Translations$landing$hero$es hero = Translations$landing$hero$es.internal(_root);
+	late final Translations$landing$howItWorks$es howItWorks = Translations$landing$howItWorks$es.internal(_root);
+	late final Translations$landing$schedules$es schedules = Translations$landing$schedules$es.internal(_root);
+	late final Translations$landing$preview$es preview = Translations$landing$preview$es.internal(_root);
+	late final Translations$landing$features$es features = Translations$landing$features$es.internal(_root);
+	late final Translations$landing$privacy$es privacy = Translations$landing$privacy$es.internal(_root);
+	late final Translations$landing$downloads$es downloads = Translations$landing$downloads$es.internal(_root);
+	late final Translations$landing$footer$es footer = Translations$landing$footer$es.internal(_root);
+}
+
 // Path: program
 class Translations$program$es {
 	Translations$program$es.internal(this._root);
@@ -1977,6 +2009,333 @@ class Translations$settings$notif$es {
 
 	/// es: 'Recordar exportar el programa antes del fin de semana'
 	String get exportsDesc => 'Recordar exportar el programa antes del fin de semana';
+}
+
+// Path: landing.nav
+class Translations$landing$nav$es {
+	Translations$landing$nav$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Cómo funciona'
+	String get howItWorks => 'Cómo funciona';
+
+	/// es: 'Horarios'
+	String get schedules => 'Horarios';
+
+	/// es: 'Tus datos'
+	String get privacy => 'Tus datos';
+
+	/// es: 'Descargas'
+	String get downloads => 'Descargas';
+}
+
+// Path: landing.hero
+class Translations$landing$hero$es {
+	Translations$landing$hero$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Tú pones los nombres. Ya está.'
+	String get title => 'Tú pones los nombres. Ya está.';
+
+	/// es: 'Agora calcula las horas y te deja el PDF listo para imprimir.'
+	String get subtitle => 'Agora calcula las horas y te deja el PDF listo para imprimir.';
+
+	/// es: 'Probar ahora'
+	String get cta => 'Probar ahora';
+
+	/// es: 'Sin cuenta. Sin instalar nada.'
+	String get note => 'Sin cuenta. Sin instalar nada.';
+}
+
+// Path: landing.howItWorks
+class Translations$landing$howItWorks$es {
+	Translations$landing$howItWorks$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Son tres pasos.'
+	String get title => 'Son tres pasos.';
+
+	/// es: 'Eliges las semanas'
+	String get step1Title => 'Eliges las semanas';
+
+	/// es: 'La guía ya está descargada, con sus partes y canciones.'
+	String get step1Body => 'La guía ya está descargada, con sus partes y canciones.';
+
+	/// es: 'Pones los nombres'
+	String get step2Title => 'Pones los nombres';
+
+	/// es: 'Escribes las primeras letras y eliges.'
+	String get step2Body => 'Escribes las primeras letras y eliges.';
+
+	/// es: 'Lo imprimes'
+	String get step3Title => 'Lo imprimes';
+
+	/// es: 'Guardas el PDF o lo compartes.'
+	String get step3Body => 'Guardas el PDF o lo compartes.';
+}
+
+// Path: landing.schedules
+class Translations$landing$schedules$es {
+	Translations$landing$schedules$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'No vuelvas a sumar minutos a mano.'
+	String get title => 'No vuelvas a sumar minutos a mano.';
+
+	/// es: 'Cambia una parte y todas las horas de abajo se mueven solas.'
+	String get body => 'Cambia una parte y todas las horas de abajo se mueven solas.';
+
+	/// es: '¿Viene el superintendente? Lo marcas y el programa se reordena.'
+	String get circuit => '¿Viene el superintendente? Lo marcas y el programa se reordena.';
+
+	/// es: 'Sobran 26 min · 8·8·10 a las canciones'
+	String get slack => 'Sobran 26 min · 8·8·10 a las canciones';
+
+	/// es: 'Semana normal · inicio 18:00'
+	String get sampleLabel => 'Semana normal · inicio 18:00';
+
+	/// es: '19:45'
+	String get sampleTargetEnd => '19:45';
+
+	/// es: 'Canción y oración'
+	String get sampleOpeningSong => 'Canción y oración';
+
+	/// es: 'Palabras de introducción'
+	String get sampleIntro => 'Palabras de introducción';
+
+	/// es: 'Tesoros de la Biblia'
+	String get sampleTreasures => 'Tesoros de la Biblia';
+
+	/// es: '25 min'
+	String get sampleTreasuresDuration => '25 min';
+
+	/// es: 'Seamos mejores maestros'
+	String get sampleMinistry => 'Seamos mejores maestros';
+
+	/// es: '15 min fijos'
+	String get sampleMinistryDuration => '15 min fijos';
+
+	/// es: 'Canción'
+	String get sampleSong2 => 'Canción';
+
+	/// es: 'Nuestra vida cristiana'
+	String get sampleChristianLife => 'Nuestra vida cristiana';
+
+	/// es: '5 min'
+	String get sampleChristianLifeDuration => '5 min';
+
+	/// es: 'Estudio bíblico de la congregación'
+	String get sampleBibleStudy => 'Estudio bíblico de la congregación';
+
+	/// es: 'Palabras de conclusión'
+	String get sampleClosingWords => 'Palabras de conclusión';
+
+	/// es: 'Canción y oración'
+	String get sampleClosingSong => 'Canción y oración';
+}
+
+// Path: landing.preview
+class Translations$landing$preview$es {
+	Translations$landing$preview$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'La vista previa no se parece al PDF. Es el PDF.'
+	String get title => 'La vista previa no se parece al PDF. Es el PDF.';
+
+	/// es: 'Los nombres largos caben'
+	String get point1Title => 'Los nombres largos caben';
+
+	/// es: 'La columna se ensancha sola.'
+	String get point1Body => 'La columna se ensancha sola.';
+
+	/// es: 'Dos semanas en una hoja'
+	String get point2Title => 'Dos semanas en una hoja';
+
+	/// es: 'Sin encoger la letra.'
+	String get point2Body => 'Sin encoger la letra.';
+
+	/// es: 'La sala auxiliar, al lado'
+	String get point3Title => 'La sala auxiliar, al lado';
+
+	/// es: 'En la misma hoja.'
+	String get point3Body => 'En la misma hoja.';
+}
+
+// Path: landing.features
+class Translations$landing$features$es {
+	Translations$landing$features$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Sala auxiliar'
+	String get auxRoomTitle => 'Sala auxiliar';
+
+	/// es: 'Se queda puesta.'
+	String get auxRoomBody => 'Se queda puesta.';
+
+	/// es: 'Visita del circuito'
+	String get circuitTitle => 'Visita del circuito';
+
+	/// es: 'Se reordena solo.'
+	String get circuitBody => 'Se reordena solo.';
+
+	/// es: 'Cambia lo que quieras'
+	String get editTitle => 'Cambia lo que quieras';
+
+	/// es: 'Escribes encima y listo.'
+	String get editBody => 'Escribes encima y listo.';
+
+	/// es: 'Te avisa de los huecos'
+	String get gapsTitle => 'Te avisa de los huecos';
+
+	/// es: 'Si una semana quedó a medias.'
+	String get gapsBody => 'Si una semana quedó a medias.';
+}
+
+// Path: landing.privacy
+class Translations$landing$privacy$es {
+	Translations$landing$privacy$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Tus datos, donde tú digas.'
+	String get title => 'Tus datos, donde tú digas.';
+
+	/// es: 'Tú solo'
+	String get modeSolo => 'Tú solo';
+
+	/// es: 'En equipo'
+	String get modeTeam => 'En equipo';
+
+	/// es: 'Cuenta'
+	String get accountLabel => 'Cuenta';
+
+	/// es: 'No hace falta'
+	String get accountSolo => 'No hace falta';
+
+	/// es: 'Una por congregación'
+	String get accountTeam => 'Una por congregación';
+
+	/// es: 'Dónde están'
+	String get whereLabel => 'Dónde están';
+
+	/// es: 'Solo en este dispositivo'
+	String get whereSolo => 'Solo en este dispositivo';
+
+	/// es: 'Aquí y en la nube'
+	String get whereTeam => 'Aquí y en la nube';
+
+	/// es: 'Quién los ve'
+	String get whoSeesLabel => 'Quién los ve';
+
+	/// es: 'Solo tú'
+	String get whoSeesSolo => 'Solo tú';
+
+	/// es: 'Tú y los que invites'
+	String get whoSeesTeam => 'Tú y los que invites';
+
+	/// es: 'Sin internet'
+	String get offlineLabel => 'Sin internet';
+
+	/// es: 'Funciona igual'
+	String get offlineSolo => 'Funciona igual';
+
+	/// es: 'Se pone al día al volver'
+	String get offlineTeam => 'Se pone al día al volver';
+
+	/// es: 'La contraseña no se puede recuperar. Si la pierdes, se pierde lo que haya en este dispositivo. Haz copias de vez en cuando.'
+	String get soloWarning => 'La contraseña no se puede recuperar. Si la pierdes, se pierde lo que haya en este dispositivo. Haz copias de vez en cuando.';
+
+	/// es: 'En la nube va todo cifrado. Pero una copia de la llave se queda en el servidor para que puedas entrar desde otro dispositivo.'
+	String get teamNote => 'En la nube va todo cifrado. Pero una copia de la llave se queda en el servidor para que puedas entrar desde otro dispositivo.';
+}
+
+// Path: landing.downloads
+class Translations$landing$downloads$es {
+	Translations$landing$downloads$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Pruébala ahora. Las apps van de camino.'
+	String get title => 'Pruébala ahora. Las apps van de camino.';
+
+	/// es: 'La versión de navegador ya funciona.'
+	String get body => 'La versión de navegador ya funciona.';
+
+	/// es: 'Abrir Agora ahora'
+	String get cta => 'Abrir Agora ahora';
+
+	/// es: 'Próximamente'
+	String get comingSoonBadge => 'Próximamente';
+
+	/// es: 'Android, iPhone, iPad, Mac y Windows.'
+	String get comingSoonBody => 'Android, iPhone, iPad, Mac y Windows.';
+
+	/// es: 'Google Play'
+	String get storeGooglePlayName => 'Google Play';
+
+	/// es: 'Android'
+	String get storeGooglePlayPlatforms => 'Android';
+
+	/// es: 'App Store'
+	String get storeAppStoreName => 'App Store';
+
+	/// es: 'iPhone y iPad'
+	String get storeAppStorePlatforms => 'iPhone y iPad';
+
+	/// es: 'Mac App Store'
+	String get storeMacAppStoreName => 'Mac App Store';
+
+	/// es: 'macOS'
+	String get storeMacAppStorePlatforms => 'macOS';
+
+	/// es: 'Microsoft Store'
+	String get storeMicrosoftStoreName => 'Microsoft Store';
+
+	/// es: 'Windows'
+	String get storeMicrosoftStorePlatforms => 'Windows';
+}
+
+// Path: landing.footer
+class Translations$landing$footer$es {
+	Translations$landing$footer$es.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// es: 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a ninguna entidad relacionada, y no las representa.'
+	String get legal => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a ninguna entidad relacionada, y no las representa.';
+
+	/// es: 'El código está a la vista en GitHub, pero no es software libre: se puede mirar y usar sin ánimo de lucro (PolyForm Noncommercial 1.0.0). Hecho por Vicente Nevárez Treviño.'
+	String get license => 'El código está a la vista en GitHub, pero no es software libre: se puede mirar y usar sin ánimo de lucro (PolyForm Noncommercial 1.0.0). Hecho por Vicente Nevárez Treviño.';
+
+	/// es: 'Enlaces'
+	String get linksLabel => 'Enlaces';
+
+	/// es: 'Repositorio en GitHub'
+	String get linkRepo => 'Repositorio en GitHub';
 }
 
 /// The flat map containing all translations for locale <es>.
@@ -2474,6 +2833,94 @@ extension on Translations {
 			'relativeTime.minutes' => ({required Object n}) => 'hace ${n} min',
 			'relativeTime.hours' => ({required Object n}) => 'hace ${n} h',
 			'relativeTime.days' => ({required Object n}) => 'hace ${n} d',
+			'landing.nav.howItWorks' => 'Cómo funciona',
+			'landing.nav.schedules' => 'Horarios',
+			'landing.nav.privacy' => 'Tus datos',
+			'landing.nav.downloads' => 'Descargas',
+			'landing.signIn' => 'Iniciar sesión',
+			'landing.openApp' => 'Abrir Agora',
+			'landing.betaBadge' => 'En pruebas',
+			'landing.backToTop' => 'Volver arriba',
+			'landing.hero.title' => 'Tú pones los nombres. Ya está.',
+			'landing.hero.subtitle' => 'Agora calcula las horas y te deja el PDF listo para imprimir.',
+			'landing.hero.cta' => 'Probar ahora',
+			'landing.hero.note' => 'Sin cuenta. Sin instalar nada.',
+			'landing.howItWorks.title' => 'Son tres pasos.',
+			'landing.howItWorks.step1Title' => 'Eliges las semanas',
+			'landing.howItWorks.step1Body' => 'La guía ya está descargada, con sus partes y canciones.',
+			'landing.howItWorks.step2Title' => 'Pones los nombres',
+			'landing.howItWorks.step2Body' => 'Escribes las primeras letras y eliges.',
+			'landing.howItWorks.step3Title' => 'Lo imprimes',
+			'landing.howItWorks.step3Body' => 'Guardas el PDF o lo compartes.',
+			'landing.schedules.title' => 'No vuelvas a sumar minutos a mano.',
+			'landing.schedules.body' => 'Cambia una parte y todas las horas de abajo se mueven solas.',
+			'landing.schedules.circuit' => '¿Viene el superintendente? Lo marcas y el programa se reordena.',
+			'landing.schedules.slack' => 'Sobran 26 min · 8·8·10 a las canciones',
+			'landing.schedules.sampleLabel' => 'Semana normal · inicio 18:00',
+			'landing.schedules.sampleTargetEnd' => '19:45',
+			_ => null,
+		} ?? switch (path) {
+			'landing.schedules.sampleOpeningSong' => 'Canción y oración',
+			'landing.schedules.sampleIntro' => 'Palabras de introducción',
+			'landing.schedules.sampleTreasures' => 'Tesoros de la Biblia',
+			'landing.schedules.sampleTreasuresDuration' => '25 min',
+			'landing.schedules.sampleMinistry' => 'Seamos mejores maestros',
+			'landing.schedules.sampleMinistryDuration' => '15 min fijos',
+			'landing.schedules.sampleSong2' => 'Canción',
+			'landing.schedules.sampleChristianLife' => 'Nuestra vida cristiana',
+			'landing.schedules.sampleChristianLifeDuration' => '5 min',
+			'landing.schedules.sampleBibleStudy' => 'Estudio bíblico de la congregación',
+			'landing.schedules.sampleClosingWords' => 'Palabras de conclusión',
+			'landing.schedules.sampleClosingSong' => 'Canción y oración',
+			'landing.preview.title' => 'La vista previa no se parece al PDF. Es el PDF.',
+			'landing.preview.point1Title' => 'Los nombres largos caben',
+			'landing.preview.point1Body' => 'La columna se ensancha sola.',
+			'landing.preview.point2Title' => 'Dos semanas en una hoja',
+			'landing.preview.point2Body' => 'Sin encoger la letra.',
+			'landing.preview.point3Title' => 'La sala auxiliar, al lado',
+			'landing.preview.point3Body' => 'En la misma hoja.',
+			'landing.features.auxRoomTitle' => 'Sala auxiliar',
+			'landing.features.auxRoomBody' => 'Se queda puesta.',
+			'landing.features.circuitTitle' => 'Visita del circuito',
+			'landing.features.circuitBody' => 'Se reordena solo.',
+			'landing.features.editTitle' => 'Cambia lo que quieras',
+			'landing.features.editBody' => 'Escribes encima y listo.',
+			'landing.features.gapsTitle' => 'Te avisa de los huecos',
+			'landing.features.gapsBody' => 'Si una semana quedó a medias.',
+			'landing.privacy.title' => 'Tus datos, donde tú digas.',
+			'landing.privacy.modeSolo' => 'Tú solo',
+			'landing.privacy.modeTeam' => 'En equipo',
+			'landing.privacy.accountLabel' => 'Cuenta',
+			'landing.privacy.accountSolo' => 'No hace falta',
+			'landing.privacy.accountTeam' => 'Una por congregación',
+			'landing.privacy.whereLabel' => 'Dónde están',
+			'landing.privacy.whereSolo' => 'Solo en este dispositivo',
+			'landing.privacy.whereTeam' => 'Aquí y en la nube',
+			'landing.privacy.whoSeesLabel' => 'Quién los ve',
+			'landing.privacy.whoSeesSolo' => 'Solo tú',
+			'landing.privacy.whoSeesTeam' => 'Tú y los que invites',
+			'landing.privacy.offlineLabel' => 'Sin internet',
+			'landing.privacy.offlineSolo' => 'Funciona igual',
+			'landing.privacy.offlineTeam' => 'Se pone al día al volver',
+			'landing.privacy.soloWarning' => 'La contraseña no se puede recuperar. Si la pierdes, se pierde lo que haya en este dispositivo. Haz copias de vez en cuando.',
+			'landing.privacy.teamNote' => 'En la nube va todo cifrado. Pero una copia de la llave se queda en el servidor para que puedas entrar desde otro dispositivo.',
+			'landing.downloads.title' => 'Pruébala ahora. Las apps van de camino.',
+			'landing.downloads.body' => 'La versión de navegador ya funciona.',
+			'landing.downloads.cta' => 'Abrir Agora ahora',
+			'landing.downloads.comingSoonBadge' => 'Próximamente',
+			'landing.downloads.comingSoonBody' => 'Android, iPhone, iPad, Mac y Windows.',
+			'landing.downloads.storeGooglePlayName' => 'Google Play',
+			'landing.downloads.storeGooglePlayPlatforms' => 'Android',
+			'landing.downloads.storeAppStoreName' => 'App Store',
+			'landing.downloads.storeAppStorePlatforms' => 'iPhone y iPad',
+			'landing.downloads.storeMacAppStoreName' => 'Mac App Store',
+			'landing.downloads.storeMacAppStorePlatforms' => 'macOS',
+			'landing.downloads.storeMicrosoftStoreName' => 'Microsoft Store',
+			'landing.downloads.storeMicrosoftStorePlatforms' => 'Windows',
+			'landing.footer.legal' => 'Herramienta independiente. No está afiliada a la Watch Tower Bible and Tract Society of Pennsylvania ni a ninguna entidad relacionada, y no las representa.',
+			'landing.footer.license' => 'El código está a la vista en GitHub, pero no es software libre: se puede mirar y usar sin ánimo de lucro (PolyForm Noncommercial 1.0.0). Hecho por Vicente Nevárez Treviño.',
+			'landing.footer.linksLabel' => 'Enlaces',
+			'landing.footer.linkRepo' => 'Repositorio en GitHub',
 			'program.song' => ({required Object n}) => 'Canción ${n}',
 			'program.openingWords' => 'Palabras de introducción',
 			'program.closingWords' => 'Palabras de conclusión',

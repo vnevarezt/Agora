@@ -72,6 +72,10 @@ dependencies:
   firebase_app_check: ^0.4.6
   firebase_crashlytics: ^5.2.7
   firebase_analytics: ^12.4.6
+  go_router: ^17.5.0
+  flutter_web_plugins:
+    sdk: flutter
+  url_launcher: ^6.3.2
 hooks:
   user_defines:
     sqlite3:
