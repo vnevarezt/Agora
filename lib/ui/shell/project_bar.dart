@@ -16,6 +16,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_switch.dart';
 import '../widgets/export_actions.dart';
 import '../widgets/export_panel.dart';
 import '../widgets/motion.dart';
@@ -53,20 +54,18 @@ class ProjectBar extends ConsumerWidget {
       children: [
         _back(context),
         const SizedBox(width: 14),
+        // Identity: what document this is. No stats here — they live in the
+        // work-state cluster on the right, next to the week that owns them.
         Flexible(child: _ProjectId(project: project)),
-        const SizedBox(width: 14),
-        Container(
-          padding: const EdgeInsets.only(left: 14),
-          decoration: BoxDecoration(
-            border: Border(left: BorderSide(color: t.border2)),
-          ),
-          child: ProgressRing(
-            done: progress.done,
-            total: progress.total,
-            showLabel: true,
-          ),
-        ),
         const Spacer(),
+        // Work state: overall progress, current week, and the action that
+        // ships it — grouped because they're all "how's it going".
+        ProgressRing(
+          done: progress.done,
+          total: progress.total,
+          showLabel: true,
+        ),
+        const SizedBox(width: 20),
         const _WeekNav(),
         const SizedBox(width: 12),
         const _ExportMenu(),
@@ -111,7 +110,6 @@ class _ProjectId extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final congregations = ref.watch(congregationsProvider);
-    final weekCount = ref.watch(weeksProvider).asData?.value.length ?? 0;
 
     final Congregation? cong = project == null
         ? null
@@ -137,60 +135,31 @@ class _ProjectId extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 2),
+        // Congregation only — the week count already lives in the "Week
+        // X/N" selector; repeating it here was the same fact twice.
         Row(
           children: [
-            Flexible(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: congColor,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      congName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: AppText.small,
-                        fontWeight: FontWeight.w600,
-                        color: t.textMute,
-                      ),
-                    ),
-                  ),
-                ],
+            Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: congColor,
+                borderRadius: BorderRadius.circular(3),
               ),
             ),
-            if (weekCount > 0) ...[
-              const SizedBox(width: 9),
-              Container(
-                padding: const EdgeInsets.only(left: 9),
-                decoration: BoxDecoration(
-                  border: Border(left: BorderSide(color: t.border2)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.layers_outlined, size: 13, color: t.textMute),
-                    const SizedBox(width: 4),
-                    Text(
-                      context.t.projectBar.weeks(n: weekCount),
-                      style: TextStyle(
-                        fontSize: AppText.small,
-                        fontWeight: FontWeight.w600,
-                        color: t.textMute,
-                      ),
-                    ),
-                  ],
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                congName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppText.small,
+                  fontWeight: FontWeight.w600,
+                  color: t.textMute,
                 ),
               ),
-            ],
+            ),
           ],
         ),
       ],
@@ -232,6 +201,11 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
 
     final current = MenuAnchor(
       controller: _menu,
+      // MenuAnchor's open/close animation is opt-in and defaults to off;
+      // MediaQuery's reduce-motion flag isn't wired to it internally, so it
+      // needs the same manual gate every other animation in this app goes
+      // through.
+      animated: !MediaQuery.disableAnimationsOf(context),
       style: MenuStyle(
         backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
         elevation: const WidgetStatePropertyAll(0),
@@ -279,41 +253,57 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                 children: [
                   Expanded(
                     flex: widget.expand ? 1 : 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            text: context.t.projectBar
-                                .weekN(n: n == 0 ? '—' : active + 1),
-                            style: TextStyle(
-                              fontSize: AppText.micro,
-                              fontWeight: FontWeight.w700,
-                              color: t.textMute,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: ' / $n',
-                                style: TextStyle(
-                                    color: t.textMute.withValues(alpha: 0.7)),
+                    // Keyed by the active week so stepping through with the
+                    // arrows or the dropdown crossfades the date instead of
+                    // snapping to it.
+                    child: FadeThroughSwitcher(
+                      duration: Motion.fast,
+                      child: Column(
+                        key: ValueKey(active),
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              text: context.t.projectBar
+                                  .weekN(n: n == 0 ? '—' : active + 1),
+                              style: TextStyle(
+                                fontSize: AppText.micro,
+                                fontWeight: FontWeight.w700,
+                                color: t.textMute,
                               ),
-                            ],
+                              children: [
+                                TextSpan(
+                                  text: ' / $n',
+                                  style: TextStyle(
+                                      color:
+                                          t.textMute.withValues(alpha: 0.7)),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          date,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.mono(
-                              size: 14, weight: FontWeight.w800, color: t.text),
-                        ),
-                      ],
+                          Text(
+                            date,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.mono(
+                                size: 14,
+                                weight: FontWeight.w800,
+                                color: t.text),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  _PctBadge(
-                      done: done, label: '${progress.done}/${progress.total}'),
+                  FadeThroughSwitcher(
+                    duration: Motion.fast,
+                    child: _PctBadge(
+                      key: ValueKey(active),
+                      done: done,
+                      label: '${progress.done}/${progress.total}',
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
@@ -383,7 +373,7 @@ class _Arrow extends StatelessWidget {
 }
 
 class _PctBadge extends StatelessWidget {
-  const _PctBadge({required this.done, required this.label});
+  const _PctBadge({super.key, required this.done, required this.label});
 
   final bool done;
   final String label;
@@ -604,9 +594,11 @@ class _AuxToggle extends StatelessWidget {
                 ],
               ),
             ),
-            Transform.scale(
+            AppSwitch(
+              value: auxRoom,
+              onChanged: onChanged,
               scale: 0.8,
-              child: Switch(value: auxRoom, onChanged: onChanged),
+              interactive: false,
             ),
           ],
         ),
@@ -657,9 +649,11 @@ class _TwoPerSheetToggle extends StatelessWidget {
                 ],
               ),
             ),
-            Transform.scale(
+            AppSwitch(
+              value: twoPerSheet,
+              onChanged: onChanged,
               scale: 0.8,
-              child: Switch(value: twoPerSheet, onChanged: onChanged),
+              interactive: false,
             ),
           ],
         ),
@@ -710,9 +704,11 @@ class _CircuitOverseerToggle extends StatelessWidget {
                 ],
               ),
             ),
-            Transform.scale(
+            AppSwitch(
+              value: active,
+              onChanged: onChanged,
               scale: 0.8,
-              child: Switch(value: active, onChanged: onChanged),
+              interactive: false,
             ),
           ],
         ),
@@ -737,6 +733,7 @@ class _ExportMenu extends ConsumerWidget {
 
     return MenuAnchor(
       controller: menu,
+      animated: !MediaQuery.disableAnimationsOf(context),
       alignmentOffset: const Offset(0, 6),
       style: MenuStyle(
         backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
