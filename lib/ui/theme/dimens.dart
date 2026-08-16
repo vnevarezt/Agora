@@ -23,6 +23,11 @@ abstract final class Dimens {
   static const double hPreviewBar = 46;
   static const double hExportMobile = 48;
 
+  /// Minimum tap-target side (48dp Android / 44pt iOS — 48 is the stricter
+  /// floor). Controls that paint smaller than this still need a hit area at
+  /// least this big; see [AppIconButton] and `AppSwitch`.
+  static const double hTouchMin = 48;
+
   // Other sizes.
   static const double avatar = 30;
   static const double ring = 34; // anillo de progreso

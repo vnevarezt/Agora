@@ -15,6 +15,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_switch.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/danger_button.dart';
 import '../widgets/dashed_border.dart';
@@ -313,17 +314,14 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
         SettingRow(
           title: tr.congregation.auxRoom,
           subtitle: tr.congregation.auxRoomDesc,
-          trailing: Transform.scale(
-            scale: 0.85,
-            child: Switch(
-              value: _auxRoom,
-              onChanged: !editable
-                  ? null
-                  : (v) {
-                      setState(() => _auxRoom = v);
-                      _scheduleSave();
-                    },
-            ),
+          trailing: AppSwitch(
+            value: _auxRoom,
+            onChanged: !editable
+                ? null
+                : (v) {
+                    setState(() => _auxRoom = v);
+                    _scheduleSave();
+                  },
           ),
         ),
       ],
