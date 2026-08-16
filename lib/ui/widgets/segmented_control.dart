@@ -144,17 +144,29 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.segments[i].icon != null) ...[
-                Icon(widget.segments[i].icon,
-                    size: AppIcon.control, color: activo ? t.text : t.textDim),
-                const SizedBox(width: Space.s6),
-              ],
-              Text(
-                widget.segments[i].label,
-                style: TextStyle(
-                  fontSize: AppText.small,
-                  fontWeight: FontWeight.w700,
-                  color: activo ? t.text : t.textDim,
+              // The indicator slides but the ink used to snap, so the two
+              // arrived at different times for the same tap. Matched to the
+              // indicator's own duration.
+              AnimatedInk(
+                duration: Motion.fast,
+                color: activo ? t.text : t.textDim,
+                builder: (context, color) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.segments[i].icon != null) ...[
+                      Icon(widget.segments[i].icon,
+                          size: AppIcon.control, color: color),
+                      const SizedBox(width: Space.s6),
+                    ],
+                    Text(
+                      widget.segments[i].label,
+                      style: TextStyle(
+                        fontSize: AppText.small,
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

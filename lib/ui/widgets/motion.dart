@@ -31,6 +31,16 @@ abstract final class Motion {
   /// the screen the same way it eased in.
   static final Curve curveOut = curve.flipped;
 
+  /// The arrival curve, for content travelling a visible distance on its way
+  /// in. [curve] decelerates gently, which is right for a control settling
+  /// into a new state a few pixels away; over 14px or more it reads as drift.
+  /// This one dumps almost all its speed in the first third, so the element
+  /// looks like it was placed rather than floated into position.
+  ///
+  /// Use it for entrances and content swaps. State and press feedback stay on
+  /// [curve] — the two are not interchangeable.
+  static const Curve arrive = Cubic(.16, 1, .3, 1);
+
   /// Micro-interactions: hover and press feedback on a control. Short enough
   /// to read as a direct response to the finger rather than an animation.
   static const Duration instant = Duration(milliseconds: 150);
@@ -66,6 +76,11 @@ abstract final class Motion {
   /// list into a queue by handing this a large index.
   static Duration stagger(int step) =>
       Duration(milliseconds: 30 * step.clamp(0, 8));
+
+  /// One authored entrance per surface, long enough to be watched rather than
+  /// merely noticed. Deliberately the only duration above [slow]: if a second
+  /// element on the same screen wants this, one of them is not focal.
+  static const Duration focal = Duration(milliseconds: 720);
 
   /// [d] unless the user has asked the OS to reduce motion, in which case
   /// zero — the state change still happens, it just arrives immediately.
@@ -151,6 +166,40 @@ class SlideSwitcher extends StatelessWidget {
   }
 }
 
+/// Eases text or an icon between two inks instead of cutting between them.
+///
+/// The gap this closes: a control whose background animates on hover while
+/// its label changes colour in a single frame reads as two controls answering
+/// at different speeds. [AnimatedDefaultTextStyle] would also do it, but it
+/// *replaces* the ambient text style rather than merging into it, which
+/// silently drops the app's font family — hence the tween on the colour alone.
+class AnimatedInk extends StatelessWidget {
+  const AnimatedInk({
+    super.key,
+    required this.color,
+    this.duration = Motion.instant,
+    required this.builder,
+  });
+
+  final Color color;
+  final Duration duration;
+
+  /// Receives the interpolated colour; hand it to a [Text] style or [Icon].
+  final Widget Function(BuildContext context, Color color) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<Color?>(
+      duration: Motion.of(context, duration),
+      curve: Motion.curve,
+      // No begin: the first build settles on the current colour rather than
+      // animating in from nothing.
+      tween: ColorTween(end: color),
+      builder: (context, value, _) => builder(context, value ?? color),
+    );
+  }
+}
+
 /// Fade + slide-up entrance, played once on mount; [delay] staggers items
 /// (the mock's `portUp` keyframes).
 class EnterUp extends StatefulWidget {
@@ -176,24 +225,32 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
   );
   late final CurvedAnimation _anim = CurvedAnimation(
     parent: _controller,
-    curve: Motion.curve,
+    curve: Motion.arrive,
   );
 
-  Timer? _start;
+  /// Held so it can be cancelled. `Future.delayed` keeps running after the
+  /// widget goes away — harmless in the app, where the callback checks
+  /// `mounted`, but a leak all the same, and it reaches a disposed controller
+  /// whenever the widget leaves before its own entrance starts, which is
+  /// exactly what a fast route change is.
+  Timer? _pending;
 
   @override
   void initState() {
     super.initState();
-    // A cancellable Timer, not Future.delayed: the future keeps running after
-    // the widget goes away — harmless in the app (the callback checks
-    // `mounted`) but a leak all the same, and it fails any widget test that
-    // tears the tree down before a staggered item has had its turn.
-    _start = Timer(widget.delay, _controller.forward);
+    // A cancellable Timer rather than Future.delayed, which fails any widget
+    // test that tears the tree down before a staggered item has had its turn.
+    if (widget.delay == Duration.zero) {
+      _controller.forward();
+    } else {
+      _pending = Timer(widget.delay, _controller.forward);
+    }
   }
 
   @override
   void dispose() {
-    _start?.cancel();
+    _pending?.cancel();
+    _anim.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -209,6 +266,11 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
     // widget-level saveLayer, unlike an Opacity built inside a builder).
     return FadeTransition(
       opacity: _anim,
+      // A fully transparent RenderOpacity drops its subtree from the semantics
+      // tree, so without this the content is missing for a screen reader for
+      // as long as the entrance runs — and permanently for anything whose
+      // entrance never fires.
+      alwaysIncludeSemantics: true,
       child: AnimatedBuilder(
         animation: _anim,
         builder: (context, child) => Transform.translate(

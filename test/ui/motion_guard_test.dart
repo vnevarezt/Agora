@@ -2,6 +2,37 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+/// Widgets of ours whose name matches the AnimatedFoo shape but which hand
+/// [Motion.curve] to the implicit animation inside them. Adding one here is a
+/// claim that the widget cannot animate linearly, not that the rule is
+/// inconvenient.
+const _ownsItsCurve = {'AnimatedInk('};
+
+/// Blanks out `//` comments and `/* */` blocks, keeping the source's length
+/// and line structure so offsets still line up.
+String _withoutComments(String src) {
+  final buffer = StringBuffer();
+  var i = 0;
+  while (i < src.length) {
+    if (src.startsWith('//', i)) {
+      while (i < src.length && src[i] != '\n') {
+        buffer.write(' ');
+        i++;
+      }
+    } else if (src.startsWith('/*', i)) {
+      final end = src.indexOf('*/', i + 2);
+      final stop = end == -1 ? src.length : end + 2;
+      for (; i < stop; i++) {
+        buffer.write(src[i] == '\n' ? '\n' : ' ');
+      }
+    } else {
+      buffer.write(src[i]);
+      i++;
+    }
+  }
+  return buffer.toString();
+}
+
 /// Guards the three rules that keep the app's motion homogeneous. They are
 /// easy to state and easy to forget, and nothing in the analyzer catches them
 /// — every violation still compiles and still animates, just not like the rest
@@ -25,7 +56,11 @@ void main() {
     final violations = <String>[];
 
     for (final file in files) {
-      final src = file.readAsStringSync();
+      // Comments are stripped first. A doc comment quoting the spelling it
+      // exists to warn against — which is exactly what MotionSize's does —
+      // reads to the regex as a violation, and rewording good prose to get
+      // past a lint is the wrong end to fix it from.
+      final src = _withoutComments(file.readAsStringSync());
       for (final m in ctor.allMatches(src)) {
         final args = _arguments(src, m.end - 1);
         if (args == null) continue;
@@ -35,6 +70,11 @@ void main() {
         if (!args.contains('duration:')) continue;
         if (args.contains('switchInCurve')) continue;
         if (args.contains('curve:')) continue;
+        // Our own animated widgets fix Motion.curve internally and take no
+        // curve, on purpose: the point of wrapping is that the call site
+        // cannot get it wrong. Only widgets that would otherwise run linear
+        // are in scope here.
+        if (_ownsItsCurve.contains(m.group(0))) continue;
         violations.add('${file.path}: ${m.group(0)}');
       }
     }
