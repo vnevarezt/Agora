@@ -14,6 +14,12 @@ analyzer:
     # Firebase's SwiftPM checkout copies its Dart examples/tests under build/,
     # flooding `flutter analyze` with hundreds of third-party issues.
     - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   # The lint rules applied to this project can be customized in the
