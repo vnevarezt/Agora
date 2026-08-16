@@ -75,3 +75,6 @@ tool/rules-test/node_modules/
 # Byproducts of `sh tool/build_web_assets.sh`; the .js itself is committed.
 web/drift_worker.js.deps
 web/drift_worker.js.map
+
+# FVM's per-machine SDK symlink/cache; .fvmrc is what's shared.
+.fvm/
