@@ -156,7 +156,9 @@ const pizarra = AppPalette(
     border2: Color(0xFFECEFF2),
     text: Color(0xFF1F242D),
     textDim: Color(0xFF5D646F),
-    textMute: Color(0xFF878C96),
+    // 4.6:1 against bg, 4.8:1 against surface — was 3.2:1/3.4:1 (fails WCAG
+    // AA's 4.5:1 floor at the caption/label sizes this token is used for).
+    textMute: Color(0xFF6B7280),
     accent: Color(0xFF41629F),
     accentStrong: Color(0xFF2E5091),
     accentInk: Color(0xFFF8FCFF),
@@ -179,7 +181,8 @@ const pizarra = AppPalette(
     border2: Color(0xFF21262C),
     text: Color(0xFFECEFF2),
     textDim: Color(0xFFA6ABB2),
-    textMute: Color(0xFF767B81),
+    // Was 4.5:1 against bg — right at the AA line with no margin. 5.0:1 now.
+    textMute: Color(0xFF7E8389),
     accent: Color(0xFF6F97E2),
     accentStrong: Color(0xFF5A84D4),
     accentInk: Color(0xFF060D1A),

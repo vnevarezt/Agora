@@ -15,6 +15,7 @@ import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_switch.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/segmented_control.dart';
 import 'account_card.dart';
@@ -385,12 +386,9 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
             first: i == 0,
             title: items[i].title,
             subtitle: items[i].desc,
-            trailing: Transform.scale(
-              scale: 0.85,
-              child: Switch(
-                value: settings.notifications[items[i].pref] ?? true,
-                onChanged: (v) => controller.setNotification(items[i].pref, v),
-              ),
+            trailing: AppSwitch(
+              value: settings.notifications[items[i].pref] ?? true,
+              onChanged: (v) => controller.setNotification(items[i].pref, v),
             ),
           ),
       ],

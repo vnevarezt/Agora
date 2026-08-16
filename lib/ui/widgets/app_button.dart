@@ -203,7 +203,7 @@ class AppIconButton extends StatelessWidget {
       tooltip: tooltip,
       semanticLabel: semanticLabel ?? tooltip,
       builder: (context, hovered, pressed) {
-        return AnimatedContainer(
+        final visual = AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
           width: size,
           height: size,
@@ -216,6 +216,16 @@ class AppIconButton extends StatelessWidget {
             boxShadow: elevated ? Elevation.raised : null,
           ),
           child: Icon(icon, size: 19, color: hovered ? t.text : t.textDim),
+        );
+        // The paint stays [size]; the tap area never shrinks below the
+        // platform touch-target floor. Callers positioning this precisely
+        // (e.g. Positioned in a Stack) must compensate by (hTouchMin -
+        // size) / 2 to keep the visible control's position unchanged.
+        if (size >= Dimens.hTouchMin) return visual;
+        return SizedBox(
+          width: Dimens.hTouchMin,
+          height: Dimens.hTouchMin,
+          child: Center(child: visual),
         );
       },
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
 import '../theme/app_theme.dart';
+import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'export_actions.dart';
@@ -89,6 +90,7 @@ class _FormatSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final tr = context.t;
+    final selectedIndex = value == ExportFormat.pdf ? 0 : 1;
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -96,19 +98,61 @@ class _FormatSelector extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: t.border),
       ),
-      child: Row(
+      // One pill that slides between slots, instead of each segment
+      // independently flipping its own background — that's what read as
+      // abrupt: two unrelated fades landing in the same 150ms window
+      // instead of one piece of UI moving.
+      //
+      // Alignment + a fractional width, not LayoutBuilder: this panel is
+      // measured inside MenuAnchor's IntrinsicWidth pass, which never calls
+      // layout() on a LayoutBuilder — it only asks for intrinsic size, so
+      // the builder never fires and the render tree comes up sizeless.
+      //
+      // The pill is Positioned.fill, not a plain Stack child: a Stack sizes
+      // itself from its non-positioned children only (the Row here), so a
+      // non-positioned sibling asking to fill "the rest" has no finite
+      // height to fill in this unbounded-height context and demands an
+      // infinite one instead. A positioned child is excluded from that
+      // sizing pass and is laid out afterwards, against the Stack's already
+      // finite resolved size.
+      child: Stack(
         children: [
-          _Segment(
-            icon: Icons.picture_as_pdf_outlined,
-            label: tr.export.formatPdf,
-            selected: value == ExportFormat.pdf,
-            onTap: () => onChanged(ExportFormat.pdf),
+          Positioned.fill(
+            child: AnimatedAlign(
+              duration: Motion.of(context, Motion.fast),
+              curve: Motion.curve,
+              alignment: selectedIndex == 0
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: 0.5,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: t.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: t.border),
+                    boxShadow: Elevation.control,
+                  ),
+                ),
+              ),
+            ),
           ),
-          _Segment(
-            icon: Icons.image_outlined,
-            label: tr.export.formatImage,
-            selected: value == ExportFormat.png,
-            onTap: () => onChanged(ExportFormat.png),
+          Row(
+            children: [
+              _Segment(
+                icon: Icons.picture_as_pdf_outlined,
+                label: tr.export.formatPdf,
+                selected: value == ExportFormat.pdf,
+                onTap: () => onChanged(ExportFormat.pdf),
+              ),
+              _Segment(
+                icon: Icons.image_outlined,
+                label: tr.export.formatImage,
+                selected: value == ExportFormat.png,
+                onTap: () => onChanged(ExportFormat.png),
+              ),
+            ],
           ),
         ],
       ),
@@ -139,11 +183,11 @@ class _Segment extends StatelessWidget {
           duration: Motion.of(context, Motion.instant),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: selected
-                ? t.surface
-                : (hovered ? t.surface : Colors.transparent),
+            // The sliding pill already carries the selected look; hover
+            // only needs to read on the *other* segment, and as an outline
+            // rather than a fill so it never reads as "also selected".
+            border: !selected && hovered ? Border.all(color: t.border) : null,
             borderRadius: BorderRadius.circular(8),
-            border: selected ? Border.all(color: t.border) : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

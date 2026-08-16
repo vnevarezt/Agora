@@ -12,6 +12,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
+import '../widgets/app_switch.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/mini_chip.dart';
@@ -422,10 +423,7 @@ class _AvailableRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Transform.scale(
-          scale: 0.85,
-          child: Switch(value: active, onChanged: onChanged),
-        ),
+        AppSwitch(value: active, onChanged: onChanged),
       ],
     );
   }

@@ -8,6 +8,7 @@ import '../../state/auth_session.dart';
 import '../auth/widgets/auth_error_text.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
+import '../widgets/app_switch.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
@@ -74,12 +75,9 @@ class SecurityCard extends ConsumerWidget {
             subtitle: localMode
                 ? tr.security.deviceUnlockDesc
                 : tr.security.deviceUnlockDescCloud,
-            trailing: Transform.scale(
-              scale: 0.85,
-              child: Switch(
-                value: deviceUnlockOn,
-                onChanged: (v) => _toggleDeviceUnlock(context, ref, v),
-              ),
+            trailing: AppSwitch(
+              value: deviceUnlockOn,
+              onChanged: (v) => _toggleDeviceUnlock(context, ref, v),
             ),
           ),
         // Locking a cloud session only means something while the gate is on;

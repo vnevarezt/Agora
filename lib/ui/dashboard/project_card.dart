@@ -137,8 +137,11 @@ class ProjectCard extends StatelessWidget {
             ),
             if (mostrarKebab)
               Positioned(
-                top: 8,
-                right: 8,
+                // AppIconButton pads its tap area to Dimens.hTouchMin (48)
+                // around the 30px paint; -9 keeps the visible icon exactly
+                // where an 8/8 inset would put a 30px control.
+                top: -1,
+                right: -1,
                 child: AppIconButton(
                   icon: Icons.more_vert,
                   size: 30,
