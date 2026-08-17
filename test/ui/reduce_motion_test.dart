@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:agora/ui/landing/landing_motion.dart';
 import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/tokens.dart';
 import 'package:agora/ui/widgets/app_button.dart';
@@ -130,37 +129,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.text('Hero'), findsOneWidget);
     expect(enterUpFade(), findsNothing);
-  });
-
-  Future<void> pumpReveal(WidgetTester tester, bool disableAnimations) {
-    return tester.pumpWidget(MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(disableAnimations: disableAnimations),
-        child: const Scaffold(
-          body: Center(child: Reveal(child: Text('Section'))),
-        ),
-      ),
-    ));
-  }
-
-  Finder revealFade() => find.descendant(
-        of: find.byType(Reveal),
-        matching: find.byType(FadeTransition),
-      );
-
-  testWidgets('Reveal fades in when it comes into view', (tester) async {
-    await pumpReveal(tester, false);
-    await tester.pump();
-    expect(revealFade(), findsOneWidget);
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('Reveal skips the fade under reduced motion', (tester) async {
-    await pumpReveal(tester, true);
-    await tester.pump();
-    expect(find.text('Section'), findsOneWidget);
-    expect(revealFade(), findsNothing);
   });
 
   Future<Duration?> inkDuration(WidgetTester tester, bool disable) async {

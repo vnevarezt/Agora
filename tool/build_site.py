@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Renders site/template.html into build/site/ for every shipped locale.
 
-The copy comes from lib/i18n/*.i18n.json — the same files the Flutter app is
-translated from. That is the point: the landing sells the product, and a
-marketing page with its own private copy of the wording drifts from the thing
-it describes within a release or two.
+The copy lives in site/copy/*.json, beside the page it belongs to. It started
+out inside the app's own lib/i18n so the two could not drift, which stopped
+being true the moment the Flutter landing was deleted: nothing in the app reads
+a word of it, and leaving it there shipped 86 strings per locale inside
+main.dart.wasm for a page the app does not draw.
 
 Run through tool/build_site.sh, which also builds the app into build/site/app.
 """
@@ -21,31 +22,6 @@ SITE = ROOT / "site"
 OUT = ROOT / "build/site"
 
 SLOT = re.compile(r"\{\{([a-zA-Z0-9_.]+)\}\}")
-
-# The site's own chrome: not in the app's i18n because the app has no use for
-# it, and adding it there would ship these strings inside main.dart.wasm.
-CHROME = {
-    "es": {
-        "meta.title": "Agora — Programa de la reunión de entresemana",
-        "meta.description": (
-            "Escribe los nombres y Agora calcula los tiempos y te deja un PDF "
-            "listo para imprimir. Sin cuenta y sin instalar nada."
-        ),
-        "meta.ogLocale": "es_ES",
-        "a11y.skipToContent": "Ir al contenido",
-        "a11y.sections": "Secciones",
-    },
-    "en": {
-        "meta.title": "Agora — Midweek meeting program",
-        "meta.description": (
-            "Type the names and Agora works out the timing and leaves you a "
-            "print-ready PDF. No account, nothing to install."
-        ),
-        "meta.ogLocale": "en_US",
-        "a11y.skipToContent": "Skip to content",
-        "a11y.sections": "Sections",
-    },
-}
 
 # Default locale is served at /, the rest under /<code>/.
 LOCALES = ["es", "en"]
@@ -122,12 +98,8 @@ def alternates(locale: str) -> str:
 
 
 def build(locale: str, template: str, sheet: str) -> None:
-    src = ROOT / f"lib/i18n/{locale}.i18n.json"
-    strings = flatten(json.loads(src.read_text()))
-    strings = {k: esc(v) for k, v in strings.items()}
-    strings.update(CHROME[locale])
-    strings["meta.description"] = esc(strings["meta.description"])
-    strings["meta.title"] = esc(strings["meta.title"])
+    src = SITE / f"copy/{locale}.json"
+    strings = {k: esc(v) for k, v in flatten(json.loads(src.read_text())).items()}
     strings["lang"] = locale
     strings["sheet"] = sheet
     strings["meta.canonical"] = ORIGIN + (
