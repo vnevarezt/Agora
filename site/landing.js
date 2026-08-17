@@ -86,16 +86,28 @@
   /* ---- warming the app -------------------------------------------------
    * The app is still Flutter, so it still has an engine to download. The point
    * of this page loading in milliseconds is lost if pressing the button then
-   * costs the visitor the wait we just removed — so the engine is fetched
-   * while they read, and by the time they click it is in the HTTP cache.
+   * hands the visitor back the wait we just removed.
    *
-   * Which files to fetch depends on the renderer the browser will be handed,
-   * and Flutter's own bootstrap decides that from these two tests: WasmGC
-   * support, and whether the engine is Blink (its default wasm allow-list is
-   * Blink-only). Guessing wrong here would waste megabytes, so the same two
-   * questions are asked rather than assumed. If Flutter's rule changes, the
-   * cost is a speculative fetch of the wrong pair — never a broken page, since
-   * nothing here is on the app's critical path.
+   * But the two halves of that download are three orders of magnitude apart,
+   * so they are not fetched on the same terms:
+   *
+   *   the entry pair   5.7 KB   /app/ and its bootstrap
+   *   the engine       3.3 MB   the wasm
+   *
+   * The entry pair goes to everyone once the page settles. It costs about 5%
+   * on top of this page and it is the half that decides which renderer the
+   * browser gets, so having it cached starts the engine request a round trip
+   * sooner. The engine itself only goes to someone who has reached for the
+   * button, because most visitors read the page and leave — and serving 3.3 MB
+   * to each of them would cost thirty times the bandwidth of the site itself,
+   * against a daily free tier, to warm a cache nobody uses.
+   *
+   * Which engine files depends on the renderer the browser will be handed, and
+   * Flutter's own bootstrap decides that from two tests: WasmGC support, and
+   * whether the engine is Blink (its default wasm allow-list is Blink-only).
+   * The same two questions are asked here rather than assumed. If Flutter's
+   * rule changes the cost is a speculative fetch of the wrong pair — never a
+   * broken page, since nothing here is on the app's critical path.
    */
   var wantsData = navigator.connection && (navigator.connection.saveData ||
     /2g/.test(navigator.connection.effectiveType || ''));
@@ -111,16 +123,16 @@
     var blink = navigator.vendor === 'Google Inc.' ||
       navigator.userAgent.indexOf('Edg/') !== -1;
 
-    var payload = ['/app/', '/app/flutter_bootstrap.js'].concat(
-      wasmGC && blink
-        ? ['/app/main.dart.mjs', '/app/main.dart.wasm', '/app/canvaskit/skwasm.wasm']
-        : ['/app/main.dart.js', '/app/canvaskit/canvaskit.wasm']);
+    var entry = ['/app/', '/app/flutter_bootstrap.js'];
+    var engine = wasmGC && blink
+      ? ['/app/main.dart.mjs', '/app/main.dart.wasm', '/app/canvaskit/skwasm.wasm']
+      : ['/app/main.dart.js', '/app/canvaskit/canvaskit.wasm'];
 
-    var warmed = false;
-    var warm = function () {
-      if (warmed) return;
-      warmed = true;
-      payload.forEach(function (href) {
+    var asked = {};
+    var prefetch = function (hrefs) {
+      hrefs.forEach(function (href) {
+        if (asked[href]) return;
+        asked[href] = true;
         var link = document.createElement('link');
         link.rel = 'prefetch';
         link.href = href;
@@ -128,20 +140,23 @@
       });
     };
 
-    // Intent first — a visitor reaching for the button gets the head start
-    // whether or not the page has been idle long enough for the timer below.
+    // Reaching for any way into the app is the signal. pointerenter covers the
+    // mouse, focus the keyboard, and touchstart buys a phone the ~100ms between
+    // finger down and finger up — small, but it is the only warning a touch
+    // screen ever gives.
+    var full = function () { prefetch(entry.concat(engine)); };
     document.querySelectorAll('a[href^="/app/"]').forEach(function (a) {
       ['pointerenter', 'focus', 'touchstart'].forEach(function (evt) {
-        a.addEventListener(evt, warm, { once: true, passive: true });
+        a.addEventListener(evt, full, { once: true, passive: true });
       });
     });
 
-    // And speculatively once the page has settled, so the common case of
-    // reading down and then clicking has nothing left to wait for.
+    // The cheap half, for everyone, once the page has settled.
+    var warmEntry = function () { prefetch(entry); };
     if ('requestIdleCallback' in window) {
-      requestIdleCallback(warm, { timeout: 4000 });
+      requestIdleCallback(warmEntry, { timeout: 4000 });
     } else {
-      addEventListener('load', function () { setTimeout(warm, 1500); });
+      addEventListener('load', function () { setTimeout(warmEntry, 1500); });
     }
   }
 })();
