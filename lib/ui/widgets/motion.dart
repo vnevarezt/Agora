@@ -296,6 +296,13 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
 
     // FadeTransition animates the layer's opacity (no per-frame rebuild nor
     // widget-level saveLayer, unlike an Opacity built inside a builder).
+    //
+    // The OpacityLayer it pushes is only half the saving though: without a
+    // repaint boundary under it the subtree is re-recorded and re-rasterised
+    // into that layer on every frame of the entrance. With one, the content is
+    // painted once and the animation just varies alpha on the finished layer —
+    // which is the same thing ListView does for its children by default, and
+    // the reason a page whose sections all animate at once stays smooth.
     return FadeTransition(
       opacity: _anim,
       // A fully transparent RenderOpacity drops its subtree from the semantics
@@ -309,7 +316,7 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
           offset: Offset(0, 14 * (1 - _anim.value)),
           child: child,
         ),
-        child: widget.child,
+        child: RepaintBoundary(child: widget.child),
       ),
     );
   }

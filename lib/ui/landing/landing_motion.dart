@@ -141,7 +141,13 @@ class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
           offset: Offset(0, Reveal._rise * (1 - _anim.value)),
           child: child,
         ),
-        child: widget.child,
+        // The section is painted once and then only re-composited as the
+        // opacity and offset move. Without this the whole subtree is
+        // re-rasterised every frame of the reveal — thirteen of these fire as
+        // the page is scrolled for the first time, under a header that is
+        // already re-rasterising its own backdrop, and that overlap is what
+        // the first scroll down feels like.
+        child: RepaintBoundary(child: widget.child),
       ),
     );
   }
