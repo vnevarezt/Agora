@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import '../widgets/motion.dart';
 
 /// Distribuye tarjetas en dos columnas (`.settings__cols`) en escritorio y en
 /// a single column on narrow screens.
@@ -13,10 +14,14 @@ class SettingsColumns extends StatelessWidget {
   final List<Widget> left;
   final List<Widget> right;
 
+  /// Separates the cards and staggers their entrance, the same way the
+  /// dashboard grid does. The step counts from the top of each column, so on
+  /// desktop the two columns come in side by side instead of the right one
+  /// waiting out the whole left one.
   static List<Widget> _conSeparacion(List<Widget> cards) => [
         for (var i = 0; i < cards.length; i++) ...[
           if (i > 0) const SizedBox(height: Space.s18),
-          cards[i],
+          EnterUp(delay: Motion.stagger(i), child: cards[i]),
         ],
       ];
 

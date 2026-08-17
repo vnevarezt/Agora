@@ -266,13 +266,36 @@ behind a full modal, which must dim more of the app.
 
 One curve, one duration scale (`lib/ui/widgets/motion.dart`).
 
-- **Curve:** `Cubic(.2, .8, .3, 1)` — a single ease-out, everywhere.
+- **Curve:** `Cubic(.2, .8, .3, 1)` — a single ease-out, everywhere. It is the
+  shape a critically damped spring draws: leaves fast, settles slowly, never
+  overshoots. Overshoot belongs to motion that inherited momentum from a
+  gesture, and nothing here is dragged or flicked, so `Motion.curve` is the
+  only curve in the app. `Motion.curveOut` is it mirrored, for the return leg
+  of a reversible transition.
 - **`instant` 150 ms** — hover and press feedback. Short enough to read as a
   direct response to the finger rather than an animation.
 - **`fast` 180 ms** — a single element changing state or position.
 - **`med` 300 ms** — a surface entering or leaving: sheets, page transitions.
-- **`slow` 500 ms** — staggered entrances, where the delay between items carries
-  the meaning.
+- **`stagger(step)` 30 ms × step, capped at 8 steps** — the delay of the
+  *step*-th item of an entrance, so the rhythm survives someone inserting a
+  row. The stagger should be felt as the screen settling into place, not
+  watched item by item; the cap is inside the function, so no caller can turn
+  a long list into a queue.
+
+There is deliberately no step above `med`. Entrances used to run at 500 ms,
+which is long enough that the user waits on them instead of reading them.
+- **`pressScale` .97 / `pressScaleSurface` .99** — how far a control gives
+  while held. The scale is a ratio, so a card needs the smaller factor: the
+  edge of a 264px card travels ten times further than the edge of a chip at the
+  same value. `Pressable` and `InkSurface` apply it, which covers every
+  tappable surface in the app; it is also the only press feedback a touch
+  device gets, since it has no hover state to fall back on.
+
+**Every duration travels with the curve.** `AnimatedContainer` and every other
+implicit animation default to `Curves.linear` — constant speed from a standing
+start to a dead stop, the one shape nothing physical moves in. Twenty controls
+were animating that way; passing `curve: Motion.curve` next to the duration is
+what makes the press and hover states feel soft rather than mechanical.
 
 **Every duration goes through `Motion.of(context, d)`**, which returns
 `Duration.zero` when the OS asks for reduced motion. A raw duration handed to an
@@ -284,6 +307,14 @@ takes `transitionDuration`, the mobile sheet takes `sheetAnimationStyle`.
 `test/ui/reduce_motion_test.dart` covers both in both states.
 `EnterUp` goes further and skips its transform entirely under Reduce Motion:
 the entrance is decorative, so the content is simply already there.
+The person-picker popover is the third: a `PopupRoute`'s `transitionDuration`
+is a getter with no context, so the route reads the setting from the anchor
+when it is pushed.
+
+`test/ui/motion_guard_test.dart` enforces all three rules — curve alongside
+duration, curves only from `Motion`, timings only from the scale — because
+every violation still compiles and still animates, just not like the rest of
+the app.
 
 Three shared transitions:
 
@@ -291,7 +322,7 @@ Three shared transitions:
 |---|---|---|
 | `FadeThroughSwitcher` | MD3 fade-through, transparent fill | top-level section changes |
 | `SlideSwitcher` | push/pop, ±0.22 offset + fade | steps inside a flow (auth) |
-| `EnterUp` | fade + 14px rise, staggered by `delay` | first paint of the welcome screen |
+| `EnterUp` | fade + 14px rise, staggered by `delay` | welcome screen, and the first cards of every list view: dashboard, participants, settings |
 
 ## 8. Layout and responsiveness
 

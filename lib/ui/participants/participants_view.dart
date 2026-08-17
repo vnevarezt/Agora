@@ -14,6 +14,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
+import '../widgets/motion.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
 import '../theme/app_theme.dart';
@@ -32,6 +33,18 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   String _query = '';
   Role? _role;
   String? _congregation;
+
+  /// When this view opened. The grid is virtualised, so "which cards get the
+  /// entrance" cannot be an index cutoff — that leaves a visible seam where
+  /// card 8 rises and card 9 does not. What actually distinguishes them is
+  /// *when* they are built: the ones on screen at open, versus the ones built
+  /// later because the user scrolled to them.
+  final _openedAt = DateTime.now();
+
+  /// How long after opening a card still counts as part of the first paint.
+  /// Long enough to cover the frames the grid needs to fill the viewport,
+  /// short enough that no scroll can beat it.
+  static const _entranceWindow = Duration(milliseconds: 350);
 
   @override
   Widget build(BuildContext context) {
@@ -270,10 +283,17 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           delegate: SliverChildBuilderDelegate(
             (context, i) {
               final h = participants[i];
-              return ParticipantCard(
+              final card = ParticipantCard(
                 participant: h,
                 onTap: () => showParticipantModal(context, original: h),
               );
+              // A card built after the window is one the user scrolled to,
+              // and an entrance played on scroll reads as lag rather than as
+              // an entrance.
+              if (DateTime.now().difference(_openedAt) > _entranceWindow) {
+                return card;
+              }
+              return EnterUp(delay: Motion.stagger(i), child: card);
             },
             childCount: participants.length,
           ),

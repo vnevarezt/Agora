@@ -557,25 +557,31 @@ class _ProjectsSection extends ConsumerWidget {
             const gap = 14.0;
             final cols = (c.maxWidth / 264).floor().clamp(1, 4);
             final colW = (c.maxWidth - (cols - 1) * gap) / cols;
+            // The grid is the first thing the eye lands on, so the cards
+            // arrive in reading order instead of all at once.
+            var step = 0;
+            Widget enter(Widget child) =>
+                EnterUp(delay: Motion.stagger(step++), child: child);
+
             return Wrap(
               spacing: gap,
               runSpacing: gap,
               children: [
                 SizedBox(
                   width: colW,
-                  child: NewProjectCard(
+                  child: enter(NewProjectCard(
                     // A new project lands in the first congregation, the
                     // same one the modal defaults to. Null onTap renders the
                     // card disabled.
                     onTap: _canCreateProjects(ref, congregations)
                         ? () => showProjectModal(context)
                         : null,
-                  ),
+                  )),
                 ),
                 for (final p in projects)
                   SizedBox(
                     width: colW,
-                    child: ProjectCard(
+                    child: enter(ProjectCard(
                       project: p,
                       congregation: porId[p.congregationId],
                       // The editor session hydrates the form (congregation
@@ -585,7 +591,7 @@ class _ProjectsSection extends ConsumerWidget {
                             builder: (_) => ProgramShell(project: p)),
                       ),
                       onEdit: () => showProjectModal(context, project: p),
-                    ),
+                    )),
                   ),
               ],
             );
