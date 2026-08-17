@@ -118,7 +118,17 @@ flutter:
     - assets/fonts/Carlito-Italic.ttf
     - assets/fonts/Carlito-BoldItalic.ttf
 
-  # Fuentes de la UI (rediseño): Manrope (texto) + JetBrains Mono (horas/códigos).
+  # UI fonts: Manrope (text) + JetBrains Mono (times, codes, percentages).
+  #
+  # Every family listed here is downloaded and parsed before web can paint its
+  # first frame — the engine awaits the whole manifest, not the faces a screen
+  # actually asks for (flutter#108660). So a weight nothing selects is not dead
+  # weight in the bundle, it is dead weight on the critical path: JetBrains Mono
+  # ships SemiBold only because AppText.mono defaults to w600 and its callers
+  # ask for w600/w700/w800, all of which resolve to it.
+  #
+  # The faces themselves are subset to Latin + Latin-ext; see
+  # tool/subset_fonts.sh before replacing any of them.
   fonts:
     - family: Manrope
       fonts:
@@ -134,7 +144,5 @@ flutter:
           weight: 800
     - family: JetBrainsMono
       fonts:
-        - asset: assets/fonts/JetBrainsMono-Medium.ttf
-          weight: 500
         - asset: assets/fonts/JetBrainsMono-SemiBold.ttf
           weight: 600
