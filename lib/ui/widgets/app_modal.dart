@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import 'motion.dart';
 
 const _scrim = Elevation.scrimStrong;
 
@@ -17,11 +18,20 @@ Future<T?> showAppModal<T>(
 }) {
   if (context.isMobile) {
     final t = context.tokens;
+    final sheetMotion = Motion.of(context, Motion.med);
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
       backgroundColor: t.surface,
       barrierColor: _scrim,
+      // Without this the sheet keeps Material's own 250 ms and ignores the
+      // reduced-motion setting, which is the mobile half of the same defect.
+      sheetAnimationStyle: AnimationStyle(
+        duration: sheetMotion,
+        reverseDuration: sheetMotion,
+        curve: Motion.curve,
+        reverseCurve: Motion.curve.flipped,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(Dimens.rSheet)),
@@ -45,11 +55,11 @@ Future<T?> showAppModal<T>(
     barrierColor: _scrim,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    transitionDuration: const Duration(milliseconds: 240),
+    transitionDuration: Motion.of(context, Motion.med),
     pageBuilder: (ctx, _, _) => Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      insetPadding: const EdgeInsets.all(24),
+      insetPadding: const EdgeInsets.all(Space.s24),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: maxWidth,
@@ -61,8 +71,8 @@ Future<T?> showAppModal<T>(
     transitionBuilder: (ctx, anim, _, child) {
       final curved = CurvedAnimation(
         parent: anim,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
+        curve: Motion.curve,
+        reverseCurve: Motion.curve.flipped,
       );
       return FadeTransition(
         opacity: curved,

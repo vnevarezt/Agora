@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import 'app.dart';
@@ -10,6 +11,7 @@ import 'state/locale_boot.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy();
   // Precalentamiento de pdfium para que el primer preview no espere. Sólo en
   // escritorio: en web esto inyecta pdfium_client.js y arranca un worker que
   // baja 5 MB de wasm compitiendo con los primeros frames.

@@ -1,3 +1,4 @@
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -14,7 +15,7 @@ class ModePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s4),
       decoration: BoxDecoration(
         color: t.accentSoft,
         borderRadius: BorderRadius.circular(999),
@@ -22,8 +23,8 @@ class ModePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: t.accentStrong),
-          const SizedBox(width: 7),
+          Icon(icon, size: AppIcon.inline, color: t.accentStrong),
+          const SizedBox(width: Space.s8),
           Text(
             label.toUpperCase(),
             style: TextStyle(

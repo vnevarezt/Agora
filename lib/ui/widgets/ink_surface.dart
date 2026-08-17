@@ -49,6 +49,7 @@ class InkSurface extends StatefulWidget {
 
 class _InkSurfaceState extends State<InkSurface> {
   bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -60,35 +61,46 @@ class _InkSurfaceState extends State<InkSurface> {
     final hoverBorder = widget.hoverBorderColor ?? t.accent;
     final radius = BorderRadius.circular(widget.borderRadius);
 
-    // Material animates color / elevation / shape over animationDuration, so
-    // the lift, the shadow and the border tint all ease in together.
-    return Material(
-      animationDuration: Motion.med,
-      color: base,
-      elevation: lifted ? widget.hoverElevation : 0,
-      shadowColor: Elevation.materialShadow,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: radius,
-        side: BorderSide(color: lifted ? hoverBorder : border),
-      ),
-      clipBehavior: widget.clipBehavior,
-      child: InkWell(
-        onTap: widget.onTap,
-        onHover: enabled ? (h) => setState(() => _hovered = h) : null,
-        borderRadius: radius,
-        overlayColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.pressed)) {
-            return t.accent.withValues(alpha: 0.11);
-          }
-          if (states.contains(WidgetState.hovered)) {
-            return t.accent.withValues(alpha: 0.05);
-          }
-          return null;
-        }),
-        child: Padding(
-          padding: widget.padding,
-          child: widget.builder(context, _hovered),
+    // The whole surface gives under the finger — shadow and border included,
+    // since a card that shrank while its shadow stayed put would read as a
+    // picture of a card rather than the card itself.
+    return AnimatedScale(
+      scale: _pressed ? Motion.pressScaleSurface : 1,
+      duration: Motion.of(context, Motion.instant),
+      curve: Motion.curve,
+      // Material animates color / elevation / shape over animationDuration, so
+      // the lift, the shadow and the border tint all ease in together.
+      child: Material(
+        animationDuration: Motion.of(context, Motion.fast),
+        color: base,
+        elevation: lifted ? widget.hoverElevation : 0,
+        shadowColor: Elevation.materialShadow,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: lifted ? hoverBorder : border),
+        ),
+        clipBehavior: widget.clipBehavior,
+        child: InkWell(
+          onTap: widget.onTap,
+          onHover: enabled ? (h) => setState(() => _hovered = h) : null,
+          onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          borderRadius: radius,
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return t.accent.withValues(alpha: 0.11);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return t.accent.withValues(alpha: 0.05);
+            }
+            return null;
+          }),
+          child: Padding(
+            padding: widget.padding,
+            child: widget.builder(context, _hovered),
+          ),
         ),
       ),
     );

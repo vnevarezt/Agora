@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -95,12 +96,12 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
             style: TextStyle(
                 fontSize: AppText.small, fontWeight: FontWeight.w600, color: t.textMute),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Space.s12),
           // Toggling FilterPills rather than a new multi-select primitive:
           // three independent switches don't warrant one.
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: Space.s8,
+            runSpacing: Space.s8,
             children: [
               FilterPill(
                 label: tr.invite.capAdmin,
@@ -135,10 +136,10 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           _CapabilityHint(capabilities: _capabilities),
           if (_error != null) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: Space.s14),
             Text(
               _error!,
               style: TextStyle(
@@ -175,7 +176,7 @@ class _CapabilityHint extends StatelessWidget {
       children: [
         for (final line in lines)
           Padding(
-            padding: const EdgeInsets.only(bottom: 4),
+            padding: const EdgeInsets.only(bottom: Space.s4),
             child: Text(
               '· $line',
               style: TextStyle(

@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -198,7 +199,7 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
               autofocus: true,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           LabeledField(
             label: tr.security.newPassword,
             child: BoundTextField(
@@ -210,7 +211,7 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
               obscureText: true,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           LabeledField(
             label: tr.security.confirmNew,
             child: BoundTextField(

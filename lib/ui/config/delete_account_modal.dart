@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -115,7 +116,7 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
         children: [
           if (loading)
             const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: Space.s12),
               child: Center(child: CircularProgressIndicator()),
             )
           else if (blocked.isNotEmpty)

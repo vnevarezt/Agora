@@ -1,9 +1,11 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../../state/sync_provider.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import 'auth_card_layout.dart';
@@ -93,15 +95,15 @@ class _CloudLockScreenState extends ConsumerState<CloudLockScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: t.border),
                 ),
-                child: Icon(Icons.lock_outline, size: 26, color: t.textMute),
+                child: Icon(Icons.lock_outline, size: AppIcon.feature, color: t.textMute),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: Space.s12),
               AuthTitle(tr.auth.cloudLock.title),
-              const SizedBox(height: 4),
+              const SizedBox(height: Space.s4),
               AuthSub(tr.auth.cloudLock.caption),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: Space.s18),
           AppButton(
             icon: Icons.fingerprint,
             label: tr.auth.cloudLock.unlock,
@@ -111,7 +113,7 @@ class _CloudLockScreenState extends ConsumerState<CloudLockScreen> {
             onPressed: _busy ? null : _unlock,
           ),
           AuthErrorText(_error),
-          const SizedBox(height: 16),
+          const SizedBox(height: Space.s18),
           AuthSwitchLine(
             text: tr.auth.cloudLock.signOutQuestion,
             actionLabel: tr.auth.cloudLock.signOut,

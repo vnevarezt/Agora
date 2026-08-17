@@ -42,7 +42,7 @@ class _ExportPanelState extends State<ExportPanel> {
           value: _format,
           onChanged: (f) => setState(() => _format = f),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: Space.s10),
         Row(
           children: [
             Expanded(
@@ -57,7 +57,7 @@ class _ExportPanelState extends State<ExportPanel> {
                     : null,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: Space.s8),
             Expanded(
               // Builder so the share button has its own context → global rect
               // to anchor the iPad/macOS share popover.
@@ -92,7 +92,7 @@ class _FormatSelector extends StatelessWidget {
     final tr = context.t;
     final selectedIndex = value == ExportFormat.pdf ? 0 : 1;
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(Space.s4),
       decoration: BoxDecoration(
         color: t.surface2,
         borderRadius: BorderRadius.circular(10),
@@ -179,9 +179,12 @@ class _Segment extends StatelessWidget {
     return Expanded(
       child: Pressable(
         onTap: onTap,
+        // A full-width row: the card factor, not the control one.
+        pressScale: Motion.pressScaleSurface,
         builder: (context, hovered, _) => AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          curve: Motion.curve,
+          padding: const EdgeInsets.symmetric(vertical: Space.s8),
           decoration: BoxDecoration(
             // The sliding pill already carries the selected look; hover
             // only needs to read on the *other* segment, and as an outline
@@ -193,8 +196,8 @@ class _Segment extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  size: 15, color: selected ? t.accentStrong : t.textMute),
-              const SizedBox(width: 6),
+                  size: AppIcon.control, color: selected ? t.accentStrong : t.textMute),
+              const SizedBox(width: Space.s6),
               Text(
                 label,
                 style: TextStyle(

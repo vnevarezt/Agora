@@ -523,10 +523,6 @@
     "currentWeekSub": "Una semana",
     "currentSheet": "Hoja actual",
     "currentSheetSub": "Dos semanas en una hoja",
-    "fullProject": "Proyecto completo",
-    "fullProjectSub": "Todas las semanas en un PDF",
-    "sheets": "Hojas de participación",
-    "sheetsSub": "Una por participante asignado",
     "noWeeks": "Descarga un cuaderno y elige una semana primero."
   },
   "projectBar": {

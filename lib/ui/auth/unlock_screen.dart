@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -139,7 +140,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
           Column(
             children: [
               PersonAvatar(name: name, size: 62),
-              const SizedBox(height: 10),
+              const SizedBox(height: Space.s10),
               if (name != null && name.isNotEmpty)
                 Text(
                   name,
@@ -149,7 +150,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
                     color: t.text,
                   ),
                 ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Space.s2),
               Text(
                 tr.auth.local.profileCaption,
                 style: TextStyle(
@@ -160,7 +161,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: Space.s18),
           LabeledField(
             label: tr.auth.local.password,
             child: BoundTextField(
@@ -176,7 +177,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
             ),
           ),
           AuthErrorText(_error),
-          const SizedBox(height: 13),
+          const SizedBox(height: Space.s14),
           AppButton(
             label: _busy ? tr.auth.local.unlocking : tr.auth.local.unlockButton,
             height: 46,
@@ -185,7 +186,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
             onPressed: _canSubmit ? _unlock : null,
           ),
           if (_deviceUnlockOn) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: Space.s10),
             AppButton(
               variant: AppButtonVariant.ghost,
               icon: Icons.fingerprint,
@@ -195,7 +196,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
               onPressed: _busy ? null : _deviceAuthUnlock,
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: Space.s18),
           AuthSwitchLine(
             text: tr.auth.local.startOver,
             actionLabel: tr.auth.local.createAnother,

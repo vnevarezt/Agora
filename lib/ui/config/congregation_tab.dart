@@ -140,7 +140,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _congregationSelector(congregations),
-        const SizedBox(height: 16),
+        const SizedBox(height: Space.s18),
         if (congregations.isEmpty)
           _empty(context)
         else
@@ -161,8 +161,8 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
   Widget _congregationSelector(List<Congregation> congregations) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: Space.s8,
+      runSpacing: Space.s8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         for (final c in congregations)
@@ -383,7 +383,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           _ => _hint(t, tr.congregation.noUsers),
         },
         if ((invites.value ?? const []).isNotEmpty) ...[
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           _hint(t, tr.congregation.pendingLabel),
           for (final invite in invites.value!)
             _PendingInvite(
@@ -394,13 +394,13 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
         ],
         if (!isAdmin && cid != null && synced) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: Space.s10),
           _hint(t, tr.congregation.readOnly),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: Space.s12),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: Space.s8,
+          runSpacing: Space.s8,
           children: [
             AppButton(
               variant: AppButtonVariant.ghost,
@@ -417,7 +417,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           ],
         ),
         if (isAdmin) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: Space.s6),
           Align(
             alignment: Alignment.centerLeft,
             child: DangerButton(
@@ -463,7 +463,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   }
 
   Widget _hint(AppTokens t, String text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: Space.s6),
         child: Text(
           text,
           style: TextStyle(
@@ -509,11 +509,11 @@ class _PendingInvite extends StatelessWidget {
                 date: MaterialLocalizations.of(context)
                     .formatShortDate(expiresAt.toLocal()));
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: Space.s6),
       child: Row(
         children: [
-          Icon(Icons.mail_outline, size: 16, color: t.textMute),
-          const SizedBox(width: 8),
+          Icon(Icons.mail_outline, size: AppIcon.control, color: t.textMute),
+          const SizedBox(width: Space.s8),
           Expanded(
             child: Text(
               label,
@@ -558,8 +558,9 @@ class _CongregationChip extends StatelessWidget {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           height: 34,
-          padding: const EdgeInsets.symmetric(horizontal: 13),
+          padding: const EdgeInsets.symmetric(horizontal: Space.s14),
           decoration: BoxDecoration(
             color: active ? t.accent : t.surface,
             borderRadius: BorderRadius.circular(Dimens.rPill),
@@ -578,7 +579,7 @@ class _CongregationChip extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 7),
+              const SizedBox(width: Space.s8),
               Text(
                 congregation.name,
                 style: TextStyle(
@@ -588,7 +589,7 @@ class _CongregationChip extends StatelessWidget {
                 ),
               ),
               if (acceso.isNotEmpty) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: Space.s8),
                 RolePill(role: acceso),
               ],
             ],
@@ -611,14 +612,15 @@ class _AddChip extends StatelessWidget {
     return Pressable(
       onTap: onTap,
       builder: (context, hovered, _) {
-        final fg = t.accentStrong;
+        final fg = t.accentOnSoft;
         return DashedBorder(
           color: hovered ? t.accent : t.border,
           radius: Dimens.rPill,
           child: AnimatedContainer(
             duration: Motion.of(context, Motion.instant),
+            curve: Motion.curve,
             height: 34,
-            padding: const EdgeInsets.symmetric(horizontal: 13),
+            padding: const EdgeInsets.symmetric(horizontal: Space.s14),
             decoration: BoxDecoration(
               color: hovered ? t.accentTint : Colors.transparent,
               borderRadius: BorderRadius.circular(Dimens.rPill),
@@ -626,8 +628,8 @@ class _AddChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.add, size: 15, color: fg),
-                const SizedBox(width: 6),
+                Icon(Icons.add, size: AppIcon.control, color: fg),
+                const SizedBox(width: Space.s6),
                 Text(
                   context.t.congregation.newCongregation,
                   style: TextStyle(

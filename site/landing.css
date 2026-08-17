@@ -1,0 +1,635 @@
+/* Agora landing page.
+ *
+ * A port of lib/ui/landing/, which drew this same page into a WebGL canvas.
+ * The scales below are that design system transcribed, not reinvented — the
+ * spacing steps come from LandingSpace, the type from LandingText, the radii
+ * from Dimens, and the colours are generated into tokens.css from tokens.dart.
+ * Keeping the names aligned is what lets a change land in both places.
+ */
+
+/* ---- reset ------------------------------------------------------------ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body, h1, h2, h3, p, dl, dd, ol, ul, figure { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; }
+
+/* ---- fonts ------------------------------------------------------------ */
+/* Subset to Latin + Latin-ext by tool/subset_fonts.sh. Declared per weight so
+ * the browser fetches only the faces the page actually renders in — Manrope
+ * Regular, for instance, never downloads unless something falls back to it. */
+
+@font-face { font-family: Manrope; font-weight: 400; font-display: swap; src: url(/fonts/Manrope-Regular.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 500; font-display: swap; src: url(/fonts/Manrope-Medium.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 600; font-display: swap; src: url(/fonts/Manrope-SemiBold.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 700; font-display: swap; src: url(/fonts/Manrope-Bold.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 800; font-display: swap; src: url(/fonts/Manrope-ExtraBold.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 600; font-display: swap; src: url(/fonts/JetBrainsMono-SemiBold.woff2) format('woff2'); }
+
+/* ---- scales ----------------------------------------------------------- */
+/* LandingSpace / LandingText / Dimens. The type steps up at each breakpoint
+ * together with --shell, so the measure stays put while the page grows. */
+
+:root {
+  --s4: 4px;   --s8: 8px;   --s12: 12px; --s16: 16px; --s20: 20px;
+  --s24: 24px; --s32: 32px; --s40: 40px; --s48: 48px; --s56: 56px; --s64: 64px;
+
+  --r-chip: 7px;
+  --r-control: 10px;
+  --r-card: 14px;
+
+  --bar-h: 64px;          /* LandingHeader.height */
+  --touch: 48px;          /* Dimens.hTouchMin */
+
+  --shell: 1160px;
+  --gutter: var(--s20);
+  --section: 72px;
+
+  --t-display: 40px;
+  --t-heading: 28px;
+  --t-lead: 17px;
+  --t-tile: 19px;
+  --t-tile-body: 15px;
+  --t-body: 13.5px;
+  --t-caption: 11.5px;
+  --t-micro: 10.5px;
+
+  --ease: cubic-bezier(.2, 0, 0, 1);
+}
+
+@media (min-width: 721px) {
+  :root {
+    --gutter: 28px; --section: 96px;
+    --t-display: 54px; --t-heading: 36px; --t-lead: 19px; --t-tile: 21px;
+  }
+}
+
+@media (min-width: 1081px) {
+  :root { --gutter: var(--s32); --section: 120px; --t-display: 66px; --t-heading: 42px; }
+}
+
+@media (min-width: 1601px) {
+  :root {
+    --shell: 1320px; --section: 144px;
+    --t-display: 78px; --t-heading: 50px; --t-lead: 21px; --t-tile: 23px;
+    --t-tile-body: 16.5px;
+  }
+}
+
+/* ---- page ------------------------------------------------------------- */
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+  /* The bar is glass and the page travels under it, so an anchor jump has to
+   * stop below it rather than behind it. */
+  scroll-padding-top: calc(var(--bar-h) + var(--s24));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { scroll-behavior: auto; }
+}
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section { padding-top: var(--section); }
+.hero { padding-top: calc(var(--bar-h) + var(--section)); }
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--s8);
+  padding: var(--s8) var(--s16);
+  background: var(--surface);
+  border-radius: var(--r-control);
+  z-index: 10;
+}
+.skip-link:focus { left: var(--s16); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-chip);
+}
+
+/* ---- type ------------------------------------------------------------- */
+/* LandingText.tracking(size) is size * -0.028, which is -0.028em. */
+
+.display {
+  font-size: var(--t-display);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.heading {
+  font-size: var(--t-heading);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+/* 520 is the measure a lead paragraph gets on its own; the hero narrows it to
+ * 440 below so the subtitle breaks under the display type rather than running
+ * past it. Both are the widths the Flutter original used. */
+.lead {
+  max-width: 520px;
+  margin-top: var(--s24);
+  font-size: var(--t-lead);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  color: var(--text-dim);
+}
+
+.tile-title {
+  font-size: var(--t-tile);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+}
+
+.tile-body {
+  margin-top: var(--s4);
+  font-size: var(--t-tile-body);
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.tile-body.strong { font-weight: 700; color: var(--text); }
+.muted { color: var(--text-mute); }
+
+.note {
+  margin-top: var(--s16);
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--text-mute);
+}
+
+/* The hero's vertical rhythm, which is 24 / 32 / 16 between its four blocks.
+ * The reset zeroes every <p> margin, so the button's own step has to be said
+ * out loud — without it the CTA sits straight under the subtitle and the whole
+ * stack reads as one crowded lump. */
+.hero .lead { max-width: 440px; }
+.hero-cta { margin-top: var(--s32); }
+
+/* ---- controls --------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s8);
+  height: var(--touch);
+  padding-inline: var(--s24);
+  border-radius: var(--r-control);
+  font-size: var(--t-tile-body);
+  font-weight: 700;
+  letter-spacing: -0.15px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .12s var(--ease), transform .12s var(--ease);
+}
+.btn:active { transform: translateY(1px); }
+.btn-arrow {
+  width: 18px; height: 18px;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .12s var(--ease);
+}
+.btn:hover .btn-arrow { transform: translateX(3px); }
+
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: var(--accent-strong); }
+
+.btn-ghost { color: var(--text-dim); }
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+.btn-inverted { background: var(--accent-ink); color: var(--accent-strong); }
+.btn-inverted:hover { background: var(--accent-soft); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: var(--s20);
+  padding-inline: var(--s8);
+  border-radius: var(--r-chip);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge-beta { background: var(--warning-soft); color: var(--warning); }
+.badge-soft { background: var(--accent-soft); color: var(--accent-strong); text-transform: none; letter-spacing: 0; }
+.badge-onaccent { background: rgb(255 255 255 / .18); color: var(--accent-ink); }
+
+/* ---- glass ------------------------------------------------------------ */
+/* The effect the Flutter build could not afford. There it was a BackdropFilter
+ * re-rasterising every frame with no cache (flutter#71246), which capped the
+ * blur at 12 and still cost frames; here it is composited by the browser, so
+ * the sigma is back at the 28 the design asked for and costs nothing. */
+
+[data-glass] {
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+}
+
+@media (prefers-contrast: more) {
+  [data-glass] {
+    background: var(--bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ---- header ----------------------------------------------------------- */
+
+.bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 5;
+  height: var(--bar-h);
+  border-bottom: 1px solid var(--border2);
+}
+
+.bar-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--s16);
+  height: 100%;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s8);
+  text-decoration: none;
+  color: inherit;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 26px; height: 26px;
+  border-radius: var(--r-chip);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--t-tile-body);
+  font-weight: 800;
+}
+.brand-name { font-size: var(--t-tile); font-weight: 800; letter-spacing: -0.4px; }
+
+/* The brand and the nav share one flexible cell so the free width collects
+ * between the nav and the actions. As two flex children they split it evenly
+ * and stranded half of it past the last button. */
+.nav {
+  display: none;
+  flex: 1;
+  gap: var(--s24);
+  margin-left: var(--s32);
+}
+.nav a {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.nav a:hover { color: var(--text); }
+
+.bar-actions { display: flex; align-items: center; gap: var(--s8); margin-left: auto; }
+.bar-actions .btn { height: 38px; padding-inline: var(--s16); }
+
+@media (min-width: 940px) { .nav { display: flex; } }
+@media (max-width: 560px) { .bar-actions .btn-ghost { display: none; } }
+
+/* ---- bento ------------------------------------------------------------ */
+
+.bento { display: grid; gap: var(--s12); }
+.bento-middle { align-items: center; }
+.cell { min-width: 0; }
+
+/* One ratio for every split on the page, so the hero sheet and every panel
+ * below it share a left edge.
+ *
+ * The Flutter original carried two — 4:6 where the left column held only a
+ * heading, 5:6 where it also held copy — and the comment defending them said
+ * they existed so the page would not read as "40% under one heading and 45%
+ * under the next, close enough to look like a mistake rather than a decision".
+ * 4:6 is 40% and 5:6 is 45.5%: naming the two values made them deliberate
+ * without making them look it. The wider left column wins because it is the
+ * one the copy sections actually need; a lone heading is happy in it. */
+@media (min-width: 721px) {
+  .bento-hero,
+  .bento-heading,
+  .bento-copy { grid-template-columns: 5fr 6fr; }
+  .bento-hero { gap: var(--s32); }
+  .bento-heading > .cell:first-child,
+  .bento-copy > .cell:first-child { padding-right: var(--s20); }
+}
+
+.grid-3, .grid-4 { display: grid; gap: var(--s12); }
+@media (min-width: 721px) {
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1081px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+.tile {
+  padding: var(--s24);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+}
+
+/* ---- steps ------------------------------------------------------------ */
+
+.tile-steps { padding-block: var(--s8); }
+.step { display: flex; gap: var(--s8); padding-block: var(--s20); }
+.step + .step { border-top: 1px solid var(--border2); }
+.step-n {
+  flex: 0 0 var(--s40);
+  padding-top: 2px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--t-caption);
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ---- run of show ------------------------------------------------------ */
+
+.run-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s12);
+  padding-bottom: var(--s16);
+  border-bottom: 1px solid var(--border2);
+}
+.run { margin-top: var(--s8); }
+.run li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s12);
+  padding-block: var(--s8);
+  font-size: var(--t-tile-body);
+  font-weight: 500;
+  color: var(--text-dim);
+}
+.run li + li { border-top: 1px solid var(--border2); }
+.run .t { flex: 0 0 auto; font-size: var(--t-caption); color: var(--text-mute); }
+.run .p { flex: 1; min-width: 0; }
+.run .d { flex: 0 0 auto; font-size: var(--t-caption); color: var(--text-mute); }
+.run .major { font-weight: 700; color: var(--text); }
+.slack {
+  margin-top: var(--s16);
+  padding-top: var(--s16);
+  border-top: 1px solid var(--border2);
+  font-size: var(--t-caption);
+  color: var(--accent);
+}
+
+/* ---- segmented + comparison ------------------------------------------- */
+
+.segmented {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: var(--s4);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+}
+.segmented button {
+  position: relative;
+  z-index: 1;
+  padding: var(--s8) var(--s20);
+  border-radius: var(--r-chip);
+  font-size: var(--t-tile-body);
+  font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color .18s var(--ease);
+}
+.segmented button[aria-selected="true"] { color: var(--text); }
+.segmented-thumb {
+  position: absolute;
+  z-index: 0;
+  top: var(--s4);
+  bottom: var(--s4);
+  left: var(--s4);
+  width: calc(50% - var(--s4));
+  background: var(--surface);
+  border-radius: var(--r-chip);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+  transition: transform .28s var(--ease);
+}
+.segmented[data-mode="team"] .segmented-thumb { transform: translateX(100%); }
+
+.compare { margin-top: var(--s24); }
+.compare-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s16);
+  padding-block: var(--s16);
+}
+.compare-row + .compare-row { border-top: 1px solid var(--border2); }
+.compare dt {
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.compare dd {
+  font-size: var(--t-tile);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  text-align: right;
+}
+.compare-note {
+  margin-top: var(--s16);
+  padding-top: var(--s16);
+  border-top: 1px solid var(--border2);
+  font-size: var(--t-tile-body);
+  font-weight: 500;
+  color: var(--text-mute);
+}
+
+/* The sweep: each row clears its old value before the new one arrives from the
+ * side the indicator just travelled towards, a beat after the row above it. */
+.compare [data-swap] {
+  animation: swap .34s var(--ease) both;
+  animation-delay: calc(var(--row) * 60ms);
+}
+@keyframes swap {
+  0%   { opacity: 0; transform: translateX(var(--swap-from, 12px)); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ---- downloads -------------------------------------------------------- */
+
+.cta-card {
+  padding: var(--s48);
+  background: var(--accent);
+  border-radius: var(--r-card);
+  color: var(--accent-ink);
+}
+.cta-card .heading { max-width: 640px; }
+.cta-card .lead { color: color-mix(in srgb, var(--accent-ink) 86%, transparent); }
+.cta-card p + p { margin-top: var(--s32); }
+.soon { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s12); font-weight: 600; }
+@media (max-width: 720px) { .cta-card { padding: var(--s24); } }
+
+/* ---- footer ----------------------------------------------------------- */
+
+.footer { padding-bottom: var(--s64); }
+.footer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s32);
+  justify-content: space-between;
+  padding-top: var(--s32);
+  border-top: 1px solid var(--border2);
+}
+.footer-label {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.footer-links { margin-top: var(--s8); }
+.footer-links a { font-size: var(--t-tile-body); color: var(--text-dim); text-decoration: none; }
+.footer-links a:hover { color: var(--text); }
+.fine {
+  margin-top: var(--s24);
+  max-width: 70ch;
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--text-mute);
+}
+
+/* ---- back to top ------------------------------------------------------ */
+
+.to-top {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+}
+.to-top[hidden] { display: none; }
+.to-top.on { opacity: 1; transform: none; }
+.to-top svg {
+  width: 20px; height: 20px;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ---- motion ----------------------------------------------------------- */
+/* Everything below the fold mounts at once, so an on-load entrance would play
+ * to nobody. Those reveal on scroll; only the hero animates on arrival. */
+
+.enter {
+  animation: rise .5s var(--ease) both;
+  animation-delay: var(--enter-delay, 0ms);
+}
+.reveal { opacity: 0; }
+.reveal.seen {
+  animation: rise .5s var(--ease) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Already there, rather than arriving faster. */
+  .enter, .reveal, .reveal.seen, .compare [data-swap] { animation: none; opacity: 1; }
+  .btn, .btn-arrow, .segmented-thumb, .to-top { transition: none; }
+}
+
+/* ---- program sheet ---------------------------------------------------- */
+/* Paper. It keeps its own light palette in dark mode for the same reason a
+ * photograph of a document does: it is a picture of the printout. */
+
+.sheet {
+  aspect-ratio: 612 / 792;
+  padding: 5.5%;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 12px 32px rgb(0 0 0 / .10);
+  color: #1f242d;
+  font-size: clamp(6px, .85vw, 10px);
+  line-height: 1.5;
+  container-type: inline-size;
+}
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: .6em;
+  border-bottom: 1px solid #1f242d;
+  font-size: .95em;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.sheet-band {
+  margin-top: 1.4em;
+  padding: .35em .7em;
+  font-size: .85em;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.sheet-band.treasures { background: #5c5c5c; }
+.sheet-band.ministry { background: #b9890f; }
+.sheet-band.life { background: #8c1b2e; }
+.sheet-row {
+  display: flex;
+  gap: .8em;
+  padding: .42em 0;
+  border-bottom: 1px solid #e4e8ec;
+}
+.sheet-row .sheet-t {
+  flex: 0 0 3.4em;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #5d646f;
+}
+.sheet-row .sheet-p { flex: 1; min-width: 0; }
+.sheet-row .sheet-n { flex: 0 0 auto; color: #5d646f; }
+.sheet-gap { height: 1.2em; }

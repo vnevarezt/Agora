@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "title": "Agora — Midweek meeting program",
+    "description": "Type the names and Agora works out the timing and leaves you a print-ready PDF. No account, nothing to install.",
+    "ogLocale": "en_US"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "sections": "Sections"
+  },
+  "landing": {
+    "nav": {
+      "howItWorks": "How it works",
+      "schedules": "Timing",
+      "privacy": "Your data",
+      "downloads": "Downloads"
+    },
+    "signIn": "Sign in",
+    "openApp": "Open Agora",
+    "betaBadge": "In testing",
+    "backToTop": "Back to top",
+    "hero": {
+      "title": "You type the names. That's it.",
+      "subtitle": "Agora works out the timing and leaves you a print-ready PDF.",
+      "cta": "Try it now",
+      "note": "No account. Nothing to install."
+    },
+    "howItWorks": {
+      "title": "Three steps.",
+      "step1Title": "Pick the weeks",
+      "step1Body": "The workbook is already downloaded, parts and songs included.",
+      "step2Title": "Type the names",
+      "step2Body": "Type the first letters and pick.",
+      "step3Title": "Print it",
+      "step3Body": "Save the PDF or share it."
+    },
+    "schedules": {
+      "title": "Stop adding up minutes by hand.",
+      "body": "Change one part and every time below shifts on its own.",
+      "circuit": "Circuit overseer visiting? Mark it and the program reorders.",
+      "slack": "26 min left over · 8·8·10 to the songs",
+      "sampleLabel": "Normal week · starts 6:00 p.m.",
+      "sampleTargetEnd": "19:45",
+      "sampleOpeningSong": "Song and prayer",
+      "sampleIntro": "Opening comments",
+      "sampleTreasures": "Treasures From God's Word",
+      "sampleTreasuresDuration": "25 min",
+      "sampleMinistry": "Apply Yourself to the Field Ministry",
+      "sampleMinistryDuration": "15 min fixed",
+      "sampleSong2": "Song",
+      "sampleChristianLife": "Living as Christians",
+      "sampleChristianLifeDuration": "5 min",
+      "sampleBibleStudy": "Congregation Bible study",
+      "sampleClosingWords": "Concluding comments",
+      "sampleClosingSong": "Song and prayer"
+    },
+    "preview": {
+      "title": "The preview doesn't look like the PDF. It is the PDF.",
+      "point1Title": "Long names fit",
+      "point1Body": "The column widens on its own.",
+      "point2Title": "Two weeks on one sheet",
+      "point2Body": "Without shrinking the type.",
+      "point3Title": "The auxiliary classroom, alongside",
+      "point3Body": "On the same sheet."
+    },
+    "features": {
+      "auxRoomTitle": "Auxiliary classroom",
+      "auxRoomBody": "It stays set.",
+      "circuitTitle": "Circuit overseer visit",
+      "circuitBody": "It reorders itself.",
+      "editTitle": "Change whatever you like",
+      "editBody": "Type over it and you're done.",
+      "gapsTitle": "It flags the gaps",
+      "gapsBody": "If a week was left half-done."
+    },
+    "privacy": {
+      "title": "Your data, wherever you say.",
+      "modeSolo": "On your own",
+      "modeTeam": "As a team",
+      "accountLabel": "Account",
+      "accountSolo": "Not needed",
+      "accountTeam": "One per congregation",
+      "whereLabel": "Where it lives",
+      "whereSolo": "Only on this device",
+      "whereTeam": "Here and in the cloud",
+      "whoSeesLabel": "Who sees it",
+      "whoSeesSolo": "Only you",
+      "whoSeesTeam": "You and whoever you invite",
+      "offlineLabel": "Without internet",
+      "offlineSolo": "Works the same",
+      "offlineTeam": "Catches up when you're back",
+      "soloWarning": "The password can't be recovered. If you lose it, whatever's on this device is lost with it. Back up now and then.",
+      "teamNote": "Everything in the cloud is encrypted. But a copy of the key stays on the server so you can sign in from another device."
+    },
+    "downloads": {
+      "title": "Try it now. The apps are on their way.",
+      "body": "The browser version already works.",
+      "cta": "Open Agora now",
+      "comingSoonBadge": "Coming soon",
+      "comingSoonBody": "Android, iPhone, iPad, Mac and Windows.",
+      "storeGooglePlayName": "Google Play",
+      "storeGooglePlayPlatforms": "Android",
+      "storeAppStoreName": "App Store",
+      "storeAppStorePlatforms": "iPhone and iPad",
+      "storeMacAppStoreName": "Mac App Store",
+      "storeMacAppStorePlatforms": "macOS",
+      "storeMicrosoftStoreName": "Microsoft Store",
+      "storeMicrosoftStorePlatforms": "Windows"
+    },
+    "footer": {
+      "legal": "Independent tool. Not affiliated with the Watch Tower Bible and Tract Society of Pennsylvania or any related entity, and does not represent them.",
+      "license": "The code is visible on GitHub, but it isn't free software: it can be viewed and used for noncommercial purposes (PolyForm Noncommercial 1.0.0). Made by Vicente Nevárez Treviño.",
+      "linksLabel": "Links",
+      "linkRepo": "Repository on GitHub"
+    }
+  }
+}

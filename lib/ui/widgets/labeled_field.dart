@@ -21,7 +21,7 @@ class LabeledField extends StatelessWidget {
       children: [
         Text(label.toUpperCase(),
             style: AppText.label(size: 11, color: t.textMute)),
-        const SizedBox(height: 6),
+        const SizedBox(height: Space.s6),
         child,
       ],
     );
@@ -48,7 +48,7 @@ class AppDropdown<T> extends StatelessWidget {
     final t = context.tokens;
     return Container(
       height: Dimens.hField,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s12),
       decoration: BoxDecoration(
         color: t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -58,7 +58,7 @@ class AppDropdown<T> extends StatelessWidget {
         value: value,
         isExpanded: true,
         underline: const SizedBox.shrink(),
-        icon: Icon(Icons.expand_more, size: 18, color: t.textMute),
+        icon: Icon(Icons.expand_more, size: AppIcon.control, color: t.textMute),
         borderRadius: BorderRadius.circular(Dimens.rControl),
         dropdownColor: t.surface,
         style: TextStyle(
@@ -93,7 +93,7 @@ class ReadonlyField extends StatelessWidget {
     final t = context.tokens;
     return Container(
       height: Dimens.hField,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s12),
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: t.surface2,

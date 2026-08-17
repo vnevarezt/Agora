@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +107,7 @@ class _JoinCongregationModalState
               }),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: Space.s10),
           Align(
             alignment: Alignment.centerLeft,
             child: AppButton(
@@ -117,7 +118,7 @@ class _JoinCongregationModalState
             ),
           ),
           if (_error != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: Space.s12),
             Text(
               _error!,
               style: TextStyle(

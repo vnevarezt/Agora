@@ -33,8 +33,8 @@ class PdfPreviewView extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.description_outlined, size: 40, color: t.textMute),
-            const SizedBox(height: 12),
+            Icon(Icons.description_outlined, size: AppIcon.hero, color: t.textMute),
+            const SizedBox(height: Space.s12),
             Text(
               context.t.preview.emptyHint,
               style: TextStyle(
@@ -53,7 +53,7 @@ class PdfPreviewView extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(Space.s24),
           child: Text(
             context.t.preview.error(error: e),
             textAlign: TextAlign.center,
@@ -154,19 +154,19 @@ class _Vista extends ConsumerWidget {
                       elevated: true,
                       tooltip: context.t.preview.zoomIn,
                       onPressed: () => zoom(1.3)),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: Space.s6),
                   AppIconButton(
                       icon: Icons.remove,
                       elevated: true,
                       tooltip: context.t.preview.zoomOut,
                       onPressed: () => zoom(1 / 1.3)),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: Space.s6),
                   AppIconButton(
                       icon: Icons.fit_screen_outlined,
                       elevated: true,
                       tooltip: context.t.preview.fitPage,
                       onPressed: () => escalaCentrada(fitPage)),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: Space.s6),
                   AppIconButton(
                       icon: Icons.width_normal_outlined,
                       elevated: true,

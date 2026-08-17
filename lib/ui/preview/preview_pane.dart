@@ -41,7 +41,7 @@ class _PreviewPaneState extends State<PreviewPane> {
         children: [
           Container(
             height: Dimens.hPreviewBar,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(horizontal: Space.s14),
             decoration: BoxDecoration(
               color: t.surface,
               border: Border(bottom: BorderSide(color: t.border)),

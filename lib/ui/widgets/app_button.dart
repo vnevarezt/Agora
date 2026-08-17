@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_spinner.dart';
@@ -20,12 +21,19 @@ class Pressable extends StatefulWidget {
     this.onTap,
     this.tooltip,
     this.semanticLabel,
+    this.focusRadius = Dimens.rControl,
+    this.pressScale = Motion.pressScale,
   });
 
   final Widget Function(BuildContext context, bool hovered, bool pressed)
   builder;
   final VoidCallback? onTap;
   final String? tooltip;
+
+  /// Corner radius of the keyboard focus ring, so it traces the control it
+  /// belongs to instead of a generic rounded rect. Pass the same radius the
+  /// builder paints.
+  final double focusRadius;
 
   /// What VoiceOver / TalkBack announces. Required in practice for controls
   /// whose only content is an icon: a bare [GestureDetector] exposes the tap
@@ -34,6 +42,11 @@ class Pressable extends StatefulWidget {
   /// text is already the name.
   final String? semanticLabel;
 
+  /// How far the control shrinks while held. [Motion.pressScaleSurface] for
+  /// anything card-sized; 1 to opt out where the scale would fight the
+  /// layout.
+  final double pressScale;
+
   @override
   State<Pressable> createState() => _PressableState();
 }
@@ -41,15 +54,35 @@ class Pressable extends StatefulWidget {
 class _PressableState extends State<Pressable> {
   bool _hovered = false;
   bool _pressed = false;
+  bool _focused = false;
+
+  void _activate() {
+    // Keyboard activation has no press phase of its own; flash the pressed
+    // state so Space/Enter reads like a tap instead of firing invisibly.
+    if (widget.onTap == null) return;
+    setState(() => _pressed = true);
+    widget.onTap!();
+    Future.delayed(Motion.instant, () {
+      if (mounted) setState(() => _pressed = false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget child = MouseRegion(
-      cursor: widget.onTap != null
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+    final enabled = widget.onTap != null;
+
+    Widget child = FocusableActionDetector(
+      enabled: enabled,
+      mouseCursor:
+          enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onShowHoverHighlight: (v) => setState(() => _hovered = v),
+      // Only true when the focus arrived by keyboard, so a mouse click never
+      // leaves a ring behind.
+      onShowFocusHighlight: (v) => setState(() => _focused = v),
+      actions: {
+        ActivateIntent:
+            CallbackAction<ActivateIntent>(onInvoke: (_) => _activate()),
+      },
       child: GestureDetector(
         // opaque: with the default deferToChild only PAINTED pixels react,
         // so controls without a background (bottom-nav items, text links)
@@ -59,15 +92,39 @@ class _PressableState extends State<Pressable> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
-        child: widget.builder(context, _hovered || _pressed, _pressed),
+        // The give under the finger, and the only press feedback a touch
+        // device gets — it has no hover state to fall back on. AnimatedScale
+        // animates a transform on the layer, so nothing below rebuilds or
+        // relayouts while it runs.
+        child: AnimatedScale(
+          scale: _pressed ? widget.pressScale : 1,
+          duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
+          child: widget.builder(context, _hovered || _pressed, _pressed),
+        ),
       ),
     );
+
+    // Foreground decoration, so the ring paints over the control without
+    // taking part in layout — a focus state that resized the button would
+    // shift everything next to it.
+    child = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.focusRadius),
+        border: _focused
+            ? Border.all(color: context.tokens.accent, width: 2)
+            : null,
+      ),
+      child: child,
+    );
+
     if (widget.tooltip != null) {
       child = Tooltip(message: widget.tooltip!, child: child);
     }
     return Semantics(
       button: true,
-      enabled: widget.onTap != null,
+      enabled: enabled,
       label: widget.semanticLabel,
       child: child,
     );
@@ -121,11 +178,16 @@ class AppButton extends StatelessWidget {
         // The width is always intrinsic: going from fixed width to null
         // breaks the AnimatedContainer interpolation (finite <-> infinite). The
         // icon-only button is made square with symmetric padding.
+        // minHeight, not height: at the largest system text size a fixed box
+        // clips its own label. The button keeps its designed height at normal
+        // scale and grows only when the text needs the room.
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
-          height: height,
+          curve: Motion.curve,
+          constraints: BoxConstraints(minHeight: height),
           padding: EdgeInsets.symmetric(
-            horizontal: label != null ? 16 : (height - 17) / 2,
+            horizontal: label != null ? Space.s18 : (height - Space.s18) / 2,
+            vertical: Space.s4,
           ),
           transform: pressed
               ? (Matrix4.identity()..translateByDouble(0, 1, 0, 1))
@@ -143,9 +205,9 @@ class AppButton extends StatelessWidget {
               if (busy)
                 AppSpinner(size: 15, color: fg)
               else if (icon != null)
-                Icon(icon, size: 17, color: fg),
+                Icon(icon, size: AppIcon.control, color: fg),
               if (label != null) ...[
-                if (icon != null || busy) const SizedBox(width: 8),
+                if (icon != null || busy) const SizedBox(width: Space.s8),
                 // Flexible: a label longer than the button ellipsizes instead
                 // of overflowing the Row.
                 Flexible(
@@ -154,7 +216,9 @@ class AppButton extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: height >= Dimens.hExportMobile ? 15 : 13.5,
+                      fontSize: height >= Dimens.hExportMobile
+                          ? AppText.bodyLarge
+                          : AppText.body,
                       fontWeight: FontWeight.w700,
                       color: fg,
                     ),
@@ -205,6 +269,7 @@ class AppIconButton extends StatelessWidget {
       builder: (context, hovered, pressed) {
         final visual = AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           width: size,
           height: size,
           decoration: BoxDecoration(
@@ -215,7 +280,7 @@ class AppIconButton extends StatelessWidget {
             border: bordered || elevated ? Border.all(color: t.border) : null,
             boxShadow: elevated ? Elevation.raised : null,
           ),
-          child: Icon(icon, size: 19, color: hovered ? t.text : t.textDim),
+          child: Icon(icon, size: AppIcon.control, color: hovered ? t.text : t.textDim),
         );
         // The paint stays [size]; the tap area never shrinks below the
         // platform touch-target floor. Callers positioning this precisely

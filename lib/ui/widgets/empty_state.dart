@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -26,12 +27,12 @@ class EmptyState extends StatelessWidget {
     final t = context.tokens;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(Space.s24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: t.textMute),
-            const SizedBox(height: 12),
+            Icon(icon, size: AppIcon.hero, color: t.textMute),
+            const SizedBox(height: Space.s12),
             if (title != null) ...[
               Text(
                 title!,
@@ -39,7 +40,7 @@ class EmptyState extends StatelessWidget {
                 style: TextStyle(
                     fontSize: AppText.bodyLarge, fontWeight: FontWeight.w700, color: t.text),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: Space.s4),
             ],
             Text(
               message,
@@ -48,11 +49,11 @@ class EmptyState extends StatelessWidget {
                   fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
             ),
             if (action != null) ...[
-              const SizedBox(height: 18),
+              const SizedBox(height: Space.s18),
               action!,
             ],
             if (error != null) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: Space.s14),
               Text(
                 error!,
                 textAlign: TextAlign.center,

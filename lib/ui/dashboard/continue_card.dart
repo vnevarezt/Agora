@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
@@ -31,7 +32,7 @@ class ContinueCard extends StatelessWidget {
     final pct = (p.progress * 100).round();
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 18, 22, 20),
+      padding: const EdgeInsets.fromLTRB(Space.s24, Space.s18, Space.s24, Space.s18),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(18),
@@ -44,7 +45,7 @@ class ContinueCard extends StatelessWidget {
             tr.dashboard.continueWhere.toUpperCase(),
             style: AppText.label(size: 11, color: t.textMute),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Space.s14),
           LayoutBuilder(builder: (context, c) {
             final narrow = c.maxWidth < ContainerWidth.continueRow;
             final ring = _ProgressRing(value: p.progress, label: '$pct%');
@@ -60,10 +61,10 @@ class ContinueCard extends StatelessWidget {
                 children: [
                   Row(children: [
                     ring,
-                    const SizedBox(width: 16),
+                    const SizedBox(width: Space.s18),
                     Expanded(child: body),
                   ]),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: Space.s14),
                   Align(alignment: Alignment.centerRight, child: cta),
                 ],
               );
@@ -72,9 +73,9 @@ class ContinueCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ring,
-                const SizedBox(width: 18),
+                const SizedBox(width: Space.s18),
                 Expanded(child: body),
-                const SizedBox(width: 18),
+                const SizedBox(width: Space.s18),
                 cta,
               ],
             );
@@ -102,10 +103,10 @@ class ContinueCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: Space.s10),
           StatusBadge(status: p.status),
         ]),
-        const SizedBox(height: 5),
+        const SizedBox(height: Space.s6),
         Row(children: [
           if (congregation != null) ...[
             Container(
@@ -116,7 +117,7 @@ class ContinueCard extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: Space.s6),
             Flexible(
               child: Text(
                 congregation!.name,
@@ -129,7 +130,7 @@ class ContinueCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: Space.s8),
           ],
           Flexible(
             child: Text(
@@ -145,10 +146,10 @@ class ContinueCard extends StatelessWidget {
             ),
           ),
         ]),
-        const SizedBox(height: 12),
+        const SizedBox(height: Space.s12),
         Wrap(
-          spacing: 6,
-          runSpacing: 6,
+          spacing: Space.s6,
+          runSpacing: Space.s6,
           children: [
             for (final w in p.weekProgress) _WeekChip(progress: w),
           ],
@@ -216,7 +217,7 @@ class _WeekChip extends StatelessWidget {
             : (null, t.surface2, t.textDim);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s6),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(8),
@@ -226,8 +227,8 @@ class _WeekChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 13, color: fg),
-            const SizedBox(width: 5),
+            Icon(icon, size: AppIcon.inline, color: fg),
+            const SizedBox(width: Space.s6),
           ],
           Text(
             progress.label,

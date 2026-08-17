@@ -697,10 +697,6 @@ class _Translations$export$en extends Translations$export$es {
 	@override String get currentWeekSub => 'One week';
 	@override String get currentSheet => 'Current sheet';
 	@override String get currentSheetSub => 'Two weeks on one sheet';
-	@override String get fullProject => 'Full project';
-	@override String get fullProjectSub => 'All weeks in one PDF';
-	@override String get sheets => 'Assignment slips';
-	@override String get sheetsSub => 'One per assigned participant';
 	@override String get noWeeks => 'Download a workbook and pick a week first.';
 }
 
@@ -1422,10 +1418,6 @@ extension on TranslationsEn {
 			'export.currentWeekSub' => 'One week',
 			'export.currentSheet' => 'Current sheet',
 			'export.currentSheetSub' => 'Two weeks on one sheet',
-			'export.fullProject' => 'Full project',
-			'export.fullProjectSub' => 'All weeks in one PDF',
-			'export.sheets' => 'Assignment slips',
-			'export.sheetsSub' => 'One per assigned participant',
 			'export.noWeeks' => 'Download a workbook and pick a week first.',
 			'projectBar.weeks' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} week', other: '${n} weeks', ), 
 			'projectBar.weekN' => ({required Object n}) => 'Week ${n}',

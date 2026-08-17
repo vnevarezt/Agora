@@ -1,3 +1,4 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import '../widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/block_title.dart';
 import '../widgets/filter_pill.dart';
+import '../widgets/motion.dart';
 import 'participant_card.dart';
 import 'participant_modal.dart';
 import '../theme/app_theme.dart';
@@ -32,6 +34,18 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   Role? _role;
   String? _congregation;
 
+  /// When this view opened. The grid is virtualised, so "which cards get the
+  /// entrance" cannot be an index cutoff — that leaves a visible seam where
+  /// card 8 rises and card 9 does not. What actually distinguishes them is
+  /// *when* they are built: the ones on screen at open, versus the ones built
+  /// later because the user scrolled to them.
+  final _openedAt = DateTime.now();
+
+  /// How long after opening a card still counts as part of the first paint.
+  /// Long enough to cover the frames the grid needs to fill the viewport,
+  /// short enough that no scroll can beat it.
+  static const _entranceWindow = Duration(milliseconds: 350);
+
   @override
   Widget build(BuildContext context) {
     final isMobile = context.isMobile;
@@ -41,7 +55,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(pad, 14, pad, 0),
+          padding: EdgeInsets.fromLTRB(pad, Space.s14, pad, 0),
           child: _topBar(context, isMobile),
         ),
         Expanded(
@@ -52,13 +66,13 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           child: CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(pad, 16, pad, 0),
+                padding: EdgeInsets.fromLTRB(pad, Space.s18, pad, 0),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _filters(context),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: Space.s18),
                     ],
                   ),
                 ),
@@ -82,7 +96,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             tooltip: context.t.common.back,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: Space.s12),
         ],
         Expanded(
           child: Column(
@@ -99,7 +113,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
                   color: t.text,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Space.s2),
               Text(
                 context.t.participants.subtitle,
                 style: TextStyle(
@@ -111,14 +125,14 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: Space.s12),
         AppIconButton(
           icon: Icons.notifications_none_rounded,
           bordered: true,
           tooltip: context.t.common.reminders,
           onPressed: () {},
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: Space.s8),
         AppButton(
           icon: Icons.person_add_alt,
           label: isMobile ? null : context.t.participants.add,
@@ -133,8 +147,8 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
     final congregaciones = ref.watch(originCongregationsProvider);
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: Space.s8,
+      runSpacing: Space.s8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         SizedBox(width: 280, child: _searchBox(context)),
@@ -174,7 +188,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
         decoration: InputDecoration(
           hintText: context.t.common.searchParticipant,
-          prefixIcon: Icon(Icons.search, size: 16, color: t.textMute),
+          prefixIcon: Icon(Icons.search, size: AppIcon.control, color: t.textMute),
           prefixIconConstraints:
               const BoxConstraints(minWidth: 36, minHeight: 16),
         ),
@@ -269,10 +283,17 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           delegate: SliverChildBuilderDelegate(
             (context, i) {
               final h = participants[i];
-              return ParticipantCard(
+              final card = ParticipantCard(
                 participant: h,
                 onTap: () => showParticipantModal(context, original: h),
               );
+              // A card built after the window is one the user scrolled to,
+              // and an entrance played on scroll reads as lag rather than as
+              // an entrance.
+              if (DateTime.now().difference(_openedAt) > _entranceWindow) {
+                return card;
+              }
+              return EnterUp(delay: Motion.stagger(i), child: card);
             },
             childCount: participants.length,
           ),

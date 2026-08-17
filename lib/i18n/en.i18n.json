@@ -523,10 +523,6 @@
     "currentWeekSub": "One week",
     "currentSheet": "Current sheet",
     "currentSheetSub": "Two weeks on one sheet",
-    "fullProject": "Full project",
-    "fullProjectSub": "All weeks in one PDF",
-    "sheets": "Assignment slips",
-    "sheetsSub": "One per assigned participant",
     "noWeeks": "Download a workbook and pick a week first."
   },
   "projectBar": {

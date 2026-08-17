@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/tokens.dart';
 import 'package:agora/ui/widgets/app_button.dart';
+import 'package:agora/ui/widgets/app_modal.dart';
 import 'package:agora/ui/widgets/filter_pill.dart';
+import 'package:agora/ui/widgets/motion.dart';
 
 // Every animated surface has to go through Motion.of, which zeroes the
 // duration when the OS asks for reduced motion. A raw duration handed to an
@@ -45,4 +47,193 @@ void main() {
       expect(durations, everyElement(Duration.zero));
     });
   }
+
+  // Both modal presentations build their own route, so they carry the only
+  // transition durations in the app that Motion.of cannot reach by
+  // construction — each has to be handed the duration explicitly.
+  for (final form in [
+    (label: 'desktop dialog', size: const Size(1400, 900)),
+    (label: 'mobile sheet', size: const Size(390, 844)),
+  ]) {
+    for (final reduced in [false, true]) {
+      testWidgets(
+          '${form.label} ${reduced ? 'honours' : 'animates without'} '
+          'reduced motion', (tester) async {
+        tester.view.physicalSize = form.size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(MaterialApp(
+          theme: buildAppTheme(pizarra.light, Brightness.light),
+          // copyWith, not a fresh MediaQueryData: replacing it wholesale
+          // zeroes the size and every screen reads as mobile.
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
+            child: child!,
+          ),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: AppButton(
+                  label: 'Abrir',
+                  onPressed: () => showAppModal<void>(
+                    context,
+                    builder: (_, _, _) => const Text('contenido'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ));
+
+        await tester.tap(find.text('Abrir'));
+        await tester.pump();
+
+        final route =
+            ModalRoute.of(tester.element(find.text('contenido')))
+                as TransitionRoute;
+        expect(route.transitionDuration,
+            reduced ? Duration.zero : isNot(Duration.zero));
+      });
+    }
+  }
+
+  Future<void> pumpEnterUp(WidgetTester tester, bool disableAnimations) {
+    return tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: const Scaffold(
+          body: Center(child: EnterUp(child: Text('Hero'))),
+        ),
+      ),
+    ));
+  }
+
+  Finder enterUpFade() => find.descendant(
+        of: find.byType(EnterUp),
+        matching: find.byType(FadeTransition),
+      );
+
+  testWidgets('EnterUp fades in by default', (tester) async {
+    await pumpEnterUp(tester, false);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(enterUpFade(), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('EnterUp skips the fade under reduced motion', (tester) async {
+    await pumpEnterUp(tester, true);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('Hero'), findsOneWidget);
+    expect(enterUpFade(), findsNothing);
+  });
+
+  // The shape that broke Reveal, which shared this widget's structure: a
+  // lazily built controller, a build() that returns the child untouched when
+  // animations are off, and a dispose() that releases the controller
+  // unconditionally. Nothing ever built it, so disposing constructed one
+  // instead — and an AnimationController asks its element for a TickerMode,
+  // which is not a question a deactivated element can answer.
+  //
+  // EnterUp survives it because initState forces the controller down both
+  // delay branches: the second reads `_controller.forward` as a tear-off,
+  // which evaluates the field just as calling it would. That is a subtle thing
+  // to rely on and an easy one to refactor away, so it is pinned here rather
+  // than left as a comment.
+  testWidgets('EnterUp with a delay tears down cleanly under reduced motion',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: const MediaQuery(
+        data: MediaQueryData(disableAnimations: true),
+        child: Scaffold(
+          body: EnterUp(
+            delay: Duration(milliseconds: 200),
+            child: Text('Hero'),
+          ),
+        ),
+      ),
+    ));
+
+    // Gone before its own entrance was due, which is what a fast route change
+    // looks like from the widget's side.
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  Future<Duration?> inkDuration(WidgetTester tester, bool disable) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disable),
+        child: Scaffold(
+          body: Center(
+            child: AnimatedInk(
+              color: const Color(0xFF123456),
+              builder: (context, color) =>
+                  Text('Link', style: TextStyle(color: color)),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    return tester
+        .widget<TweenAnimationBuilder<Color?>>(
+          find.byType(TweenAnimationBuilder<Color?>),
+        )
+        .duration;
+  }
+
+  testWidgets('AnimatedInk animates normally by default', (tester) async {
+    expect(await inkDuration(tester, false), isNot(Duration.zero));
+  });
+
+  testWidgets('AnimatedInk honours reduced motion', (tester) async {
+    expect(await inkDuration(tester, true), Duration.zero);
+  });
+
+  Future<void> pumpMotionSize(
+    WidgetTester tester,
+    bool disableAnimations,
+    double height,
+  ) {
+    return tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: Scaffold(
+          body: Center(child: MotionSize(child: SizedBox(height: height))),
+        ),
+      ),
+    ));
+  }
+
+  testWidgets('MotionSize eases a size change by default', (tester) async {
+    await pumpMotionSize(tester, false, 20);
+    await tester.pump();
+    await pumpMotionSize(tester, false, 60);
+    await tester.pump();
+    expect(find.byType(AnimatedSize), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  // A zero-duration AnimatedSize restarts its controller from inside
+  // performLayout and, because the forward() completes synchronously, marks
+  // itself dirty mid-layout — which asserts. Under reduced motion the child
+  // has to be sized directly instead.
+  testWidgets('MotionSize resizes under reduced motion without asserting',
+      (tester) async {
+    await pumpMotionSize(tester, true, 20);
+    await tester.pump();
+    await pumpMotionSize(tester, true, 60);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AnimatedSize), findsNothing);
+  });
 }

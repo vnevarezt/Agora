@@ -1402,18 +1402,6 @@ class Translations$export$es {
 	/// es: 'Dos semanas en una hoja'
 	String get currentSheetSub => 'Dos semanas en una hoja';
 
-	/// es: 'Proyecto completo'
-	String get fullProject => 'Proyecto completo';
-
-	/// es: 'Todas las semanas en un PDF'
-	String get fullProjectSub => 'Todas las semanas en un PDF';
-
-	/// es: 'Hojas de participación'
-	String get sheets => 'Hojas de participación';
-
-	/// es: 'Una por participante asignado'
-	String get sheetsSub => 'Una por participante asignado';
-
 	/// es: 'Descarga un cuaderno y elige una semana primero.'
 	String get noWeeks => 'Descarga un cuaderno y elige una semana primero.';
 }
@@ -2444,10 +2432,6 @@ extension on Translations {
 			'export.currentWeekSub' => 'Una semana',
 			'export.currentSheet' => 'Hoja actual',
 			'export.currentSheetSub' => 'Dos semanas en una hoja',
-			'export.fullProject' => 'Proyecto completo',
-			'export.fullProjectSub' => 'Todas las semanas en un PDF',
-			'export.sheets' => 'Hojas de participación',
-			'export.sheetsSub' => 'Una por participante asignado',
 			'export.noWeeks' => 'Descarga un cuaderno y elige una semana primero.',
 			'projectBar.weeks' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(n, one: '${n} semana', other: '${n} semanas', ), 
 			'projectBar.weekN' => ({required Object n}) => 'Semana ${n}',

@@ -57,7 +57,7 @@ class ProgressRing extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         anillo,
-        const SizedBox(width: 10),
+        const SizedBox(width: Space.s10),
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

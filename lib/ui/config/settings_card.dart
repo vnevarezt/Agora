@@ -1,8 +1,10 @@
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import '../widgets/motion.dart';
 
 /// Distribuye tarjetas en dos columnas (`.settings__cols`) en escritorio y en
 /// a single column on narrow screens.
@@ -12,10 +14,14 @@ class SettingsColumns extends StatelessWidget {
   final List<Widget> left;
   final List<Widget> right;
 
+  /// Separates the cards and staggers their entrance, the same way the
+  /// dashboard grid does. The step counts from the top of each column, so on
+  /// desktop the two columns come in side by side instead of the right one
+  /// waiting out the whole left one.
   static List<Widget> _conSeparacion(List<Widget> cards) => [
         for (var i = 0; i < cards.length; i++) ...[
-          if (i > 0) const SizedBox(height: 16),
-          cards[i],
+          if (i > 0) const SizedBox(height: Space.s18),
+          EnterUp(delay: Motion.stagger(i), child: cards[i]),
         ],
       ];
 
@@ -38,7 +44,7 @@ class SettingsColumns extends StatelessWidget {
                 children: _conSeparacion(left),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: Space.s18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,7 +74,7 @@ class SettingsGrid extends StatelessWidget {
         final colW = (c.maxWidth - (cols - 1) * gapX) / cols;
         return Wrap(
           spacing: gapX,
-          runSpacing: 14,
+          runSpacing: Space.s14,
           children: [
             for (final child in children) SizedBox(width: colW, child: child),
           ],
@@ -96,7 +102,7 @@ class SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(Space.s18),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(16),
@@ -115,7 +121,7 @@ class SettingsCard extends StatelessWidget {
             ),
           ),
           if (desc != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: Space.s4),
             Text(
               desc!,
               style: TextStyle(
@@ -126,7 +132,7 @@ class SettingsCard extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: Space.s18),
           ...children,
         ],
       ),
@@ -154,7 +160,7 @@ class SettingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 11),
+      padding: const EdgeInsets.symmetric(vertical: Space.s12),
       decoration: first
           ? null
           : BoxDecoration(
@@ -188,7 +194,7 @@ class SettingRow extends StatelessWidget {
             ),
           ),
           if (trailing != null) ...[
-            const SizedBox(width: 14),
+            const SizedBox(width: Space.s14),
             trailing!,
           ],
         ],

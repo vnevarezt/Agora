@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../../models/week.dart';
 
+/// The spacing scale: padding, gaps and insets. **A bare number for a gap is
+/// drift**, the same rule the type and icon scales already carry.
+///
+/// Named by magnitude rather than by role, because spacing has no roles — only
+/// distances. The nine steps are the values the UI already leaned on (6, 8, 10,
+/// 12 and 14 alone covered 208 of 434 uses); what they replace is the 28-value
+/// spread around them, half of it odd, where 9, 11 and 13 sat between the real
+/// steps for no reason anyone could name.
+///
+/// 1px is deliberately absent: a hairline is a border, not a gap.
+abstract final class Space {
+  static const double s2 = 2;
+  static const double s4 = 4;
+  static const double s6 = 6;
+  static const double s8 = 8;
+  static const double s10 = 10;
+  static const double s12 = 12;
+  static const double s14 = 14;
+  static const double s18 = 18;
+  static const double s24 = 24;
+}
+
 /// Visual dimensions and constants (mirror of the mock CSS).
 abstract final class Dimens {
   // Border radii.
@@ -68,6 +90,15 @@ abstract final class Elevation {
     BoxShadow(color: Color(0x24000000), blurRadius: 30, offset: Offset(0, 8)),
     BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2)),
   ];
+
+  /// Halo around the card the editor is working on. Not a shadow — it has no
+  /// blur, it is a ring — but it belongs here so it stops being a one-off
+  /// `BoxShadow` at the call site. Takes the accent so it reads on both
+  /// grounds: the accentSoft it used to use sits at 1.5:1 on the dark
+  /// surface, which made the active card look no different from the rest.
+  static List<BoxShadow> selectionHalo(Color accent) => [
+        BoxShadow(color: accent.withValues(alpha: 0.30), spreadRadius: 3),
+      ];
 
   /// Scrim behind an anchored panel.
   static const Color scrim = Color(0x47000000);

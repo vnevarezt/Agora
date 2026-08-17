@@ -82,7 +82,7 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
 
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(Space.s4),
       decoration: BoxDecoration(
         color: t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -131,7 +131,8 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
       builder: (context, hovered, _) {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          curve: Motion.curve,
+          padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s6),
           decoration: BoxDecoration(
             // The sliding indicator behind already carries the selected
             // look; hover only needs to read on an unselected segment, and
@@ -143,17 +144,29 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.segments[i].icon != null) ...[
-                Icon(widget.segments[i].icon,
-                    size: 15, color: activo ? t.text : t.textDim),
-                const SizedBox(width: 6),
-              ],
-              Text(
-                widget.segments[i].label,
-                style: TextStyle(
-                  fontSize: AppText.small,
-                  fontWeight: FontWeight.w700,
-                  color: activo ? t.text : t.textDim,
+              // The indicator slides but the ink used to snap, so the two
+              // arrived at different times for the same tap. Matched to the
+              // indicator's own duration.
+              AnimatedInk(
+                duration: Motion.fast,
+                color: activo ? t.text : t.textDim,
+                builder: (context, color) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.segments[i].icon != null) ...[
+                      Icon(widget.segments[i].icon,
+                          size: AppIcon.control, color: color),
+                      const SizedBox(width: Space.s6),
+                    ],
+                    Text(
+                      widget.segments[i].label,
+                      style: TextStyle(
+                        fontSize: AppText.small,
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

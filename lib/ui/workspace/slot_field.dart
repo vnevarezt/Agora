@@ -1,5 +1,6 @@
 import 'dart:async' show unawaited;
 
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +59,7 @@ class SlotField extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 2, bottom: 5),
+          padding: const EdgeInsets.only(left: Space.s2, bottom: Space.s6),
           child: Text(
             spec.label.toUpperCase(),
             style: AppText.label(

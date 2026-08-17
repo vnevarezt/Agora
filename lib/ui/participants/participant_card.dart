@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import '../widgets/pill.dart';
 
@@ -25,7 +26,7 @@ import '../theme/app_theme.dart';
 double participantCardHeight(BuildContext context) {
   final scaler = MediaQuery.textScalerOf(context);
   const avatar = 38.0;
-  const verticalPadding = 12.0 * 2;
+  const verticalPadding = Space.s12 * 2;
   const lineHeight = 1.44;
   final textColumn = scaler.scale(AppText.bodyLarge) * lineHeight +
       1 +
@@ -60,12 +61,12 @@ class ParticipantCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: 14,
       hoverElevation: 4,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
       builder: (context, hovered) {
         return Row(
           children: [
             PersonAvatar(name: h.displayName, size: 38),
-            const SizedBox(width: 12),
+            const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -85,7 +86,7 @@ class ParticipantCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 7),
+                      const SizedBox(width: Space.s8),
                       _AvailabilityDot(active: h.active),
                     ],
                   ),
@@ -103,7 +104,7 @@ class ParticipantCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: Space.s10),
             if (h.isIncomplete)
               const _IncompleteBadge()
             else

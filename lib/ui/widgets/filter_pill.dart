@@ -33,8 +33,9 @@ class FilterPill extends StatelessWidget {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           height: 34,
-          padding: const EdgeInsets.symmetric(horizontal: 13),
+          padding: const EdgeInsets.symmetric(horizontal: Space.s14),
           decoration: BoxDecoration(
             color: active ? t.accent : t.surface,
             borderRadius: BorderRadius.circular(Dimens.rPill),
@@ -52,7 +53,7 @@ class FilterPill extends StatelessWidget {
                   decoration:
                       BoxDecoration(color: dotColor, shape: BoxShape.circle),
                 ),
-                const SizedBox(width: 7),
+                const SizedBox(width: Space.s8),
               ],
               Text(
                 label,
@@ -63,7 +64,7 @@ class FilterPill extends StatelessWidget {
                 ),
               ),
               if (count != null) ...[
-                const SizedBox(width: 7),
+                const SizedBox(width: Space.s8),
                 Text(
                   '$count',
                   style: TextStyle(

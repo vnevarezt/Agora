@@ -63,6 +63,31 @@ abstract final class AppText {
   }
 }
 
+/// Icon sizes, named by the role the icon plays rather than by its number.
+///
+/// Same reasoning as the type scale above, and the same history: nine sizes
+/// were in use, five of them between 15 and 19 — a spread nobody can tell
+/// apart at a glance but which leaves equivalent icons misaligned from one
+/// screen to the next.
+abstract final class AppIcon {
+  /// Inside a chip, badge or pill, set against small text.
+  static const double inline = 13;
+
+  /// The default: buttons, list rows, toolbars.
+  static const double control = 17;
+
+  /// A navigation destination. Its own step because the rail and the bottom
+  /// bar had drifted apart (21 on desktop, 24 on mobile) for the same three
+  /// destinations; 24 is Material's own value for a bar destination.
+  static const double nav = 24;
+
+  /// Carries a section or an empty state on its own.
+  static const double feature = 26;
+
+  /// Brand marks and the icon of a full-screen empty state.
+  static const double hero = 40;
+}
+
 /// Builds the app [ThemeData] from a palette tokens.
 ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
   final esClaro = brightness == Brightness.light;
@@ -132,11 +157,14 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
       filled: true,
       fillColor: t.surface2,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      contentPadding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s12),
       hintStyle: TextStyle(
-          color: t.textMute, fontWeight: FontWeight.w600, fontSize: 13.5),
-      border: border(t.border),
-      enabledBorder: border(t.border),
+          color: t.textMute,
+          fontWeight: FontWeight.w600,
+          fontSize: AppText.body),
+      // borderControl, not border: the outline is what identifies the field.
+      border: border(t.borderControl),
+      enabledBorder: border(t.borderControl),
       focusedBorder: border(t.accent, 1.5),
     ),
     textSelectionTheme: TextSelectionThemeData(
@@ -159,7 +187,7 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     ),
     tooltipTheme: TooltipThemeData(
       textStyle: TextStyle(
-          color: t.surface, fontSize: 12, fontWeight: FontWeight.w600),
+          color: t.surface, fontSize: AppText.small, fontWeight: FontWeight.w600),
       decoration: BoxDecoration(
         color: t.text,
         borderRadius: BorderRadius.circular(8),
@@ -168,7 +196,7 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     snackBarTheme: SnackBarThemeData(
       backgroundColor: t.text,
       contentTextStyle: TextStyle(
-          color: t.surface, fontSize: 13.5, fontWeight: FontWeight.w600),
+          color: t.surface, fontSize: AppText.body, fontWeight: FontWeight.w600),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Dimens.rControl)),

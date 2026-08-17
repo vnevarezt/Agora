@@ -39,6 +39,33 @@
   <link rel="manifest" href="manifest.json">
 
   <!--
+    The engine awaits every font in FontManifest.json before it will paint, and
+    it only learns the manifest exists once the app is already running — so
+    without these the eight requests below are the *last* thing on the critical
+    path, queued after megabytes of wasm have downloaded and compiled. Starting
+    them at parse time overlaps them with that download instead.
+
+    fetchpriority is low on purpose: these are not needed until the end of boot,
+    and at the default priority they would compete with the wasm that has to
+    land first.
+
+    `as="fetch"` + `crossorigin` is not decoration — it has to match the mode
+    and credentials of the engine's own `fetch()` (cors / same-origin) or the
+    browser downloads each file twice, which is worse than not preloading. If
+    this list drifts from the `fonts:` block in pubspec.yaml, that is the
+    failure it causes.
+  -->
+  <link rel="preload" href="assets/FontManifest.json" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/fonts/MaterialIcons-Regular.otf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/assets/fonts/Manrope-Regular.ttf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/assets/fonts/Manrope-Medium.ttf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/assets/fonts/Manrope-SemiBold.ttf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/assets/fonts/Manrope-Bold.ttf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/assets/fonts/Manrope-ExtraBold.ttf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/assets/fonts/JetBrainsMono-SemiBold.ttf" as="fetch" crossorigin fetchpriority="low">
+  <link rel="preload" href="assets/packages/cupertino_icons/assets/CupertinoIcons.ttf" as="fetch" crossorigin fetchpriority="low">
+
+  <!--
     Boot screen. The engine needs roughly a second to download and start, and
     without this the page is blank white for all of it — long enough to read as
     broken. Inline on purpose: an external stylesheet would be one more request

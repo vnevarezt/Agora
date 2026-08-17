@@ -30,7 +30,7 @@ class UserRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final row = Container(
-      padding: const EdgeInsets.symmetric(vertical: 11),
+      padding: const EdgeInsets.symmetric(vertical: Space.s12),
       decoration: first
           ? null
           : BoxDecoration(
@@ -39,7 +39,7 @@ class UserRow extends StatelessWidget {
       child: Row(
         children: [
           PersonAvatar(name: name, size: 34),
-          const SizedBox(width: 12),
+          const SizedBox(width: Space.s12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +68,7 @@ class UserRow extends StatelessWidget {
             ),
           ),
           if (trailing != null) ...[
-            const SizedBox(width: 12),
+            const SizedBox(width: Space.s12),
             trailing!,
           ],
         ],
@@ -90,7 +90,7 @@ class RolePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s4),
       decoration: BoxDecoration(
         color: t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rPill),

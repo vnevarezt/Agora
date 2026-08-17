@@ -1,3 +1,4 @@
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -12,14 +13,13 @@ class AuthErrorText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: Motion.of(context, Motion.fast),
-      curve: Motion.curve,
+    return MotionSize(
+      duration: Motion.fast,
       alignment: Alignment.topCenter,
       child: message == null
           ? const SizedBox(width: double.infinity)
           : Padding(
-              padding: const EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.only(top: Space.s10),
               child: Text(
                 message!,
                 style: TextStyle(

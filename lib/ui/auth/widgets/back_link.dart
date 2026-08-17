@@ -1,3 +1,4 @@
+import '../../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -23,8 +24,8 @@ class BackLink extends StatelessWidget {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.arrow_back, size: 15, color: color),
-              const SizedBox(width: 7),
+              Icon(Icons.arrow_back, size: AppIcon.control, color: color),
+              const SizedBox(width: Space.s8),
               Text(
                 label,
                 style: TextStyle(
