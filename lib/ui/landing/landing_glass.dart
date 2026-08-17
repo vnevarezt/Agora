@@ -30,7 +30,16 @@ class LiquidGlass extends StatelessWidget {
   /// recognisable smear of the content behind it. That is what keeps text on
   /// the glass legible over anything the page happens to scroll under it, and
   /// it is the number to raise if a section ever reads through too strongly.
-  static const double _blur = 28;
+  ///
+  /// It also has a ceiling, which is why this is 12 and not the 28 it wants to
+  /// be. A [BackdropFilter] re-rasterises everything behind it on every frame
+  /// and cannot be cached — `BackdropFilterLayer` has no RasterCache, open
+  /// since flutter#71246 — so its cost is paid 60 times a second while the
+  /// page scrolls, and that cost scales with this number. Past roughly 10 it
+  /// is the single most expensive thing on the page. In CSS this would be one
+  /// hardware-composited declaration and the ceiling would not exist; here the
+  /// effect is drawn by hand into a canvas.
+  static const double _blur = 12;
 
   /// Blur desaturates as it averages, which is what makes a naive frosted
   /// panel look like grey plastic. Pushing saturation back past 1 is the step
