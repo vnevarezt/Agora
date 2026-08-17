@@ -39,6 +39,7 @@ class AssigneeButton extends StatelessWidget {
       builder: (context, hovered, _) {
         final content = AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           height: Dimens.hAssignee,
           padding: const EdgeInsets.only(left: Space.s8, right: Space.s10),
           decoration: BoxDecoration(
@@ -77,6 +78,7 @@ class AssigneeButton extends StatelessWidget {
               if (_filled && onClear != null)
                 AnimatedOpacity(
                   duration: Motion.of(context, Motion.instant),
+                  curve: Motion.curve,
                   opacity: hovered || alwaysShowClear ? 1 : 0,
                   child: _ClearButton(onClear: onClear!),
                 ),

@@ -22,6 +22,7 @@ class Pressable extends StatefulWidget {
     this.tooltip,
     this.semanticLabel,
     this.focusRadius = Dimens.rControl,
+    this.pressScale = Motion.pressScale,
   });
 
   final Widget Function(BuildContext context, bool hovered, bool pressed)
@@ -40,6 +41,11 @@ class Pressable extends StatefulWidget {
   /// element. Controls that render their own text can leave this null — the
   /// text is already the name.
   final String? semanticLabel;
+
+  /// How far the control shrinks while held. [Motion.pressScaleSurface] for
+  /// anything card-sized; 1 to opt out where the scale would fight the
+  /// layout.
+  final double pressScale;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -86,7 +92,16 @@ class _PressableState extends State<Pressable> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
-        child: widget.builder(context, _hovered || _pressed, _pressed),
+        // The give under the finger, and the only press feedback a touch
+        // device gets — it has no hover state to fall back on. AnimatedScale
+        // animates a transform on the layer, so nothing below rebuilds or
+        // relayouts while it runs.
+        child: AnimatedScale(
+          scale: _pressed ? widget.pressScale : 1,
+          duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
+          child: widget.builder(context, _hovered || _pressed, _pressed),
+        ),
       ),
     );
 
@@ -168,6 +183,7 @@ class AppButton extends StatelessWidget {
         // scale and grows only when the text needs the room.
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           constraints: BoxConstraints(minHeight: height),
           padding: EdgeInsets.symmetric(
             horizontal: label != null ? Space.s18 : (height - Space.s18) / 2,
@@ -253,6 +269,7 @@ class AppIconButton extends StatelessWidget {
       builder: (context, hovered, pressed) {
         final visual = AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           width: size,
           height: size,
           decoration: BoxDecoration(

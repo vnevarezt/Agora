@@ -179,8 +179,11 @@ class _Segment extends StatelessWidget {
     return Expanded(
       child: Pressable(
         onTap: onTap,
+        // A full-width row: the card factor, not the control one.
+        pressScale: Motion.pressScaleSurface,
         builder: (context, hovered, _) => AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           padding: const EdgeInsets.symmetric(vertical: Space.s8),
           decoration: BoxDecoration(
             // The sliding pill already carries the selected look; hover

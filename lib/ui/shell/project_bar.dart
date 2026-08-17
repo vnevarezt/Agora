@@ -308,6 +308,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                   AnimatedRotation(
                     turns: open ? 0.5 : 0,
                     duration: Motion.of(context, Motion.instant),
+                    curve: Motion.curve,
                     child: Icon(Icons.expand_more, size: AppIcon.control, color: t.textMute),
                   ),
                 ],

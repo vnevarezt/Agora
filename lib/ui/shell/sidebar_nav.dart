@@ -65,6 +65,7 @@ class _NavIcon extends StatelessWidget {
     return AnimatedSwitcher(
       duration: Motion.of(context, Motion.fast),
       switchInCurve: Motion.curve,
+      switchOutCurve: Motion.curve.flipped,
       transitionBuilder: (child, anim) => FadeTransition(
         opacity: anim,
         child: ScaleTransition(
@@ -243,7 +244,7 @@ class _NavItem extends ConsumerWidget {
     // the InkWell overlay is a proper MD3 state layer tinted with the accent.
     Widget item = Material(
       color: active ? t.accentSoft : Colors.transparent,
-      animationDuration: Motion.med,
+      animationDuration: Motion.of(context, Motion.fast),
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
       child: InkWell(

@@ -24,6 +24,7 @@ class DangerButton extends StatelessWidget {
       onTap: onTap,
       builder: (context, hovered, _) => AnimatedContainer(
         duration: Motion.of(context, Motion.instant),
+        curve: Motion.curve,
         height: Dimens.hControl,
         padding: const EdgeInsets.symmetric(horizontal: Space.s14),
         alignment: Alignment.center,

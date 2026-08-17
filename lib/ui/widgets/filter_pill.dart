@@ -33,6 +33,7 @@ class FilterPill extends StatelessWidget {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           height: 34,
           padding: const EdgeInsets.symmetric(horizontal: Space.s14),
           decoration: BoxDecoration(

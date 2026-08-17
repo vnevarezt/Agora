@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
@@ -7,8 +9,27 @@ import 'package:flutter/material.dart';
 /// This is the only duration scale. Timings used to be split between here and
 /// `Dimens`, where `dSlide` (180ms) duplicated [fast] under another name and
 /// `dSheet` was never used at all.
+///
+/// Two rules, both checked by `test/ui/motion_guard_test.dart`:
+///
+/// * a duration always travels with [curve]. `AnimatedContainer` and every
+///   other implicit animation default to `Curves.linear`, which starts and
+///   stops at full speed — the one shape nothing physical moves in, and the
+///   reason the hover and press states used to feel mechanical.
+/// * a duration always goes through [of]. A raw duration handed to an
+///   animated widget ignores Reduce Motion.
 abstract final class Motion {
+  /// Ease-out: leaves fast, settles slowly, no overshoot — the shape a
+  /// critically damped spring draws, which is what iOS uses for anything the
+  /// user did not throw. Overshoot (`easeOutBack` and friends) is reserved for
+  /// motion that inherited momentum from a gesture; we have none, so this is
+  /// the only curve in the app.
   static const Curve curve = Cubic(.2, .8, .3, 1);
+
+  /// [curve] mirrored, for the return leg of a reversible transition: a
+  /// surface should retrace the path it arrived on rather than ease out of
+  /// the screen the same way it eased in.
+  static final Curve curveOut = curve.flipped;
 
   /// Micro-interactions: hover and press feedback on a control. Short enough
   /// to read as a direct response to the finger rather than an animation.
@@ -20,8 +41,31 @@ abstract final class Motion {
   /// A surface entering or leaving: sheets, page transitions.
   static const Duration med = Duration(milliseconds: 300);
 
-  /// Staggered entrances, where the delay between items carries the meaning.
-  static const Duration slow = Duration(milliseconds: 500);
+  // There is deliberately no step above `med`. A 500ms entrance was the one
+  // timing here that the user waited on rather than read, and waiting is not
+  // a style.
+
+  /// How far a control shrinks while held. The give under the finger is what
+  /// makes a control feel like an object instead of a painted rectangle, and
+  /// it is the one piece of feedback that reaches touch devices — they have no
+  /// hover state at all.
+  static const double pressScale = .97;
+
+  /// The same idea on a card. Large surfaces need a much smaller factor: the
+  /// scale is a ratio, so the edge of a 264px card travels ten times further
+  /// than the edge of a chip at the same value, and .97 reads as a lurch.
+  static const double pressScaleSurface = .99;
+
+  /// Delay for the [step]-th item (0-based) of a staggered entrance. One
+  /// constant step instead of delays picked by hand per screen, which drift
+  /// out of rhythm as soon as someone inserts a row.
+  ///
+  /// Small on purpose, and capped. The stagger is meant to be felt as the
+  /// screen settling into place, not watched item by item: at 30ms a capped
+  /// run is over in under a third of a second, and no caller can turn a long
+  /// list into a queue by handing this a large index.
+  static Duration stagger(int step) =>
+      Duration(milliseconds: 30 * step.clamp(0, 8));
 
   /// [d] unless the user has asked the OS to reduce motion, in which case
   /// zero — the state change still happens, it just arrives immediately.
@@ -113,7 +157,7 @@ class EnterUp extends StatefulWidget {
   const EnterUp({
     super.key,
     this.delay = Duration.zero,
-    this.duration = Motion.slow,
+    this.duration = Motion.fast,
     required this.child,
   });
 
@@ -135,16 +179,21 @@ class _EnterUpState extends State<EnterUp> with SingleTickerProviderStateMixin {
     curve: Motion.curve,
   );
 
+  Timer? _start;
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(widget.delay, () {
-      if (mounted) _controller.forward();
-    });
+    // A cancellable Timer, not Future.delayed: the future keeps running after
+    // the widget goes away — harmless in the app (the callback checks
+    // `mounted`) but a leak all the same, and it fails any widget test that
+    // tears the tree down before a staggered item has had its turn.
+    _start = Timer(widget.delay, _controller.forward);
   }
 
   @override
   void dispose() {
+    _start?.cancel();
     _controller.dispose();
     super.dispose();
   }

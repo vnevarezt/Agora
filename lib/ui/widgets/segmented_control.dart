@@ -131,6 +131,7 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
       builder: (context, hovered, _) {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s6),
           decoration: BoxDecoration(
             // The sliding indicator behind already carries the selected

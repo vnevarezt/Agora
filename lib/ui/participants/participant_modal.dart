@@ -316,9 +316,12 @@ class _RoleOption extends StatelessWidget {
     final t = context.tokens;
     return Pressable(
       onTap: onTap,
+      // A full-width row: the card factor, not the control one.
+      pressScale: Motion.pressScaleSurface,
       builder: (context, hovered, _) {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
           decoration: BoxDecoration(
             color: selected ? t.accentTint : t.surface,

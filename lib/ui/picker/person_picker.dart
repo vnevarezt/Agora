@@ -74,17 +74,30 @@ Future<PickResult?> showPersonPicker(
   final box = anchorContext.findRenderObject() as RenderBox;
   final anchor = box.localToGlobal(Offset.zero) & box.size;
   return Navigator.of(anchorContext).push(
-    _PickerPopupRoute(anchor: anchor, panel: panel),
+    _PickerPopupRoute(
+      anchor: anchor,
+      panel: panel,
+      reduceMotion: MediaQuery.disableAnimationsOf(anchorContext),
+    ),
   );
 }
 
 /// Desktop popover: soft scrim + panel anchored to the button with the
-/// "pop" animation (scale 0.96 -> 1 over 160 ms).
+/// "pop" animation (scale 0.96 -> 1 over [Motion.instant]).
 class _PickerPopupRoute extends PopupRoute<PickResult> {
-  _PickerPopupRoute({required this.anchor, required this.panel});
+  _PickerPopupRoute({
+    required this.anchor,
+    required this.panel,
+    required this.reduceMotion,
+  });
 
   final Rect anchor;
   final PersonPickerPanel panel;
+
+  /// Read from the anchor's context at push time: [transitionDuration] is a
+  /// route getter with no BuildContext of its own, so it cannot ask
+  /// `Motion.of` itself.
+  final bool reduceMotion;
 
   @override
   Color get barrierColor => _scrim;
@@ -99,7 +112,8 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   String get barrierLabel => t.picker.closeSelector;
 
   @override
-  Duration get transitionDuration => Motion.instant;
+  Duration get transitionDuration =>
+      reduceMotion ? Duration.zero : Motion.instant;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
@@ -124,10 +138,16 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
-    final curva =
-        CurvedAnimation(parent: animation, curve: Curves.easeOutBack);
+    // Plain ease-out, not the overshoot this used to have: the popover just
+    // appears, it was not thrown by a gesture, so a bounce reads as decoration
+    // rather than as physics — and it was the one curve outside the scale.
+    final curva = CurvedAnimation(
+      parent: animation,
+      curve: Motion.curve,
+      reverseCurve: Motion.curve.flipped,
+    );
     return FadeTransition(
-      opacity: animation,
+      opacity: curva,
       child: ScaleTransition(
         scale: Tween<double>(begin: 0.96, end: 1).animate(curva),
         alignment: Alignment.topCenter,

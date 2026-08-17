@@ -26,9 +26,14 @@ class NewProjectCard extends StatefulWidget {
 
 class _NewProjectCardState extends State<NewProjectCard> {
   bool _hovered = false;
+  bool _pressed = false;
 
   void _setHover(bool v) {
     if (_hovered != v) setState(() => _hovered = v);
+  }
+
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
   }
 
   @override
@@ -43,59 +48,69 @@ class _NewProjectCardState extends State<NewProjectCard> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(end: _hovered && enabled ? 1.0 : 0.0),
-          duration: Motion.of(context, Motion.med),
+        onTapDown: enabled ? (_) => _setPressed(true) : null,
+        onTapUp: (_) => _setPressed(false),
+        onTapCancel: () => _setPressed(false),
+        // The same give as its neighbours in the grid, which get it from
+        // InkSurface; this card draws its own dashed border instead.
+        child: AnimatedScale(
+          scale: _pressed ? Motion.pressScaleSurface : 1,
+          duration: Motion.of(context, Motion.instant),
           curve: Motion.curve,
-          builder: (context, a, _) {
-            final border = Color.lerp(t.border, t.accent, a)!;
-            final fg = Color.lerp(t.textMute, t.accentStrong, a)!;
-            final fill = Color.lerp(Colors.transparent, t.accentTint, a)!;
-            final ringFill = Color.lerp(Colors.transparent, t.accentSoft, a)!;
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(end: _hovered && enabled ? 1.0 : 0.0),
+            duration: Motion.of(context, Motion.med),
+            curve: Motion.curve,
+            builder: (context, a, _) {
+              final border = Color.lerp(t.border, t.accent, a)!;
+              final fg = Color.lerp(t.textMute, t.accentStrong, a)!;
+              final fill = Color.lerp(Colors.transparent, t.accentTint, a)!;
+              final ringFill = Color.lerp(Colors.transparent, t.accentSoft, a)!;
 
-            return DashedBorder(
-              color: border,
-              radius: 16,
-              strokeWidth: 1.5,
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 158),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: fill,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DashedBorder(
-                      color: border,
-                      radius: 20,
-                      strokeWidth: 1.5,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: ringFill,
-                          shape: BoxShape.circle,
+              return DashedBorder(
+                color: border,
+                radius: 16,
+                strokeWidth: 1.5,
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 158),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: fill,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DashedBorder(
+                        color: border,
+                        radius: 20,
+                        strokeWidth: 1.5,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: ringFill,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.add, size: AppIcon.control, color: fg),
                         ),
-                        child: Icon(Icons.add, size: AppIcon.control, color: fg),
                       ),
-                    ),
-                    const SizedBox(height: Space.s10),
-                    Text(
-                      context.t.dashboard.newProject,
-                      style: TextStyle(
-                        fontSize: AppText.body,
-                        fontWeight: FontWeight.w700,
-                        color: fg,
+                      const SizedBox(height: Space.s10),
+                      Text(
+                        context.t.dashboard.newProject,
+                        style: TextStyle(
+                          fontSize: AppText.body,
+                          fontWeight: FontWeight.w700,
+                          color: fg,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

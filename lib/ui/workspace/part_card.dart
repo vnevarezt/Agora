@@ -36,6 +36,7 @@ class PartCard extends ConsumerWidget {
 
     return AnimatedContainer(
       duration: Motion.of(context, Motion.instant),
+      curve: Motion.curve,
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rCard),

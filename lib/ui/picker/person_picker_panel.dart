@@ -219,6 +219,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
           final color = enabled ? t.accentStrong : t.textMute;
           return AnimatedContainer(
             duration: Motion.of(context, Motion.instant),
+            curve: Motion.curve,
             padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
             decoration: BoxDecoration(
               color: hovered && enabled
@@ -286,6 +287,7 @@ class PersonPickerRow extends StatelessWidget {
       builder: (context, hovered, _) {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
+          curve: Motion.curve,
           padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s8),
           decoration: BoxDecoration(
             color: selected
