@@ -6,29 +6,49 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 
 abstract final class LandingText {
-  static double hero(BuildContext context) => switch (context.screenSize) {
-    ScreenSize.mobile => 40,
-    ScreenSize.tablet => 54,
-    ScreenSize.desktop => 66,
-  };
+  /// The scale carries a fourth step the app's own screens do not, because
+  /// [ScreenSize.desktop] has no ceiling: everything from 1081px up got the
+  /// same 66px hero inside the same measure, and past roughly a laptop's width
+  /// that stops reading as a page and starts reading as an island. The wide
+  /// column in [LandingSection.maxWidth] grows with these, so the number of
+  /// characters on a line stays where it was.
+  static double _scale(
+    BuildContext context, {
+    required double mobile,
+    required double tablet,
+    required double desktop,
+    required double wide,
+  }) => context.isWide
+      ? wide
+      : switch (context.screenSize) {
+          ScreenSize.mobile => mobile,
+          ScreenSize.tablet => tablet,
+          ScreenSize.desktop => desktop,
+        };
 
-  static double section(BuildContext context) => switch (context.screenSize) {
-    ScreenSize.mobile => 28,
-    ScreenSize.tablet => 36,
-    ScreenSize.desktop => 42,
-  };
+  static double hero(BuildContext context) =>
+      _scale(context, mobile: 40, tablet: 54, desktop: 66, wide: 78);
+
+  static double section(BuildContext context) =>
+      _scale(context, mobile: 28, tablet: 36, desktop: 42, wide: 50);
 
   static double lead(BuildContext context) =>
-      context.screenSize == ScreenSize.mobile ? 17 : 19;
+      _scale(context, mobile: 17, tablet: 19, desktop: 19, wide: 21);
 
   static double tile(BuildContext context) =>
-      context.screenSize == ScreenSize.mobile ? 19 : 21;
+      _scale(context, mobile: 19, tablet: 21, desktop: 21, wide: 23);
 
   /// Supporting text under a tile title. One step above the app's dense
   /// default on purpose: the app's [AppText.body] is tuned for a working
   /// screen full of rows, and this page is read once, at leisure, often by
   /// people for whom legibility is not a preference.
-  static const double tileBody = AppText.bodyLarge;
+  static double tileBody(BuildContext context) => _scale(
+    context,
+    mobile: AppText.bodyLarge,
+    tablet: AppText.bodyLarge,
+    desktop: AppText.bodyLarge,
+    wide: AppText.title,
+  );
 
   /// Display tracking as a ratio of the size, not a fixed number of pixels.
   /// A single value cannot serve both ends of a scale that runs 28→66: the
@@ -72,11 +92,15 @@ abstract final class LandingSpace {
 
   /// Above a section's first element. Sections carry no bottom padding, so
   /// this alone is the gap between any two of them.
-  static double section(BuildContext context) => switch (context.screenSize) {
-    ScreenSize.mobile => 72,
-    ScreenSize.tablet => 96,
-    ScreenSize.desktop => 120,
-  };
+  /// Air between sections. Grows with the type it separates: held at 120 while
+  /// the headings went to 50, the sections would start to crowd each other.
+  static double section(BuildContext context) => context.isWide
+      ? 144
+      : switch (context.screenSize) {
+          ScreenSize.mobile => 72,
+          ScreenSize.tablet => 96,
+          ScreenSize.desktop => 120,
+        };
 
   static double gutter(BuildContext context) => switch (context.screenSize) {
     ScreenSize.mobile => s20,
@@ -112,14 +136,18 @@ class LandingSection extends StatelessWidget {
   final double? top;
   final double bottom;
 
-  static const double maxWidth = 1160;
+  /// The page's measure. It grows on a wide display in step with
+  /// [LandingText], so the extra width buys bigger type rather than longer
+  /// lines — a 1160px column of 19px copy on a 1700px screen is not too narrow
+  /// to read, it is too small for how far away the reader is sitting.
+  static double maxWidth(BuildContext context) => context.isWide ? 1320 : 1160;
 
   @override
   Widget build(BuildContext context) {
     final gutter = LandingSpace.gutter(context);
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: maxWidth),
+        constraints: BoxConstraints(maxWidth: maxWidth(context)),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             gutter,
@@ -418,7 +446,7 @@ class TileBody extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: LandingText.tileBody,
+        fontSize: LandingText.tileBody(context),
         fontWeight: FontWeight.w500,
         height: 1.5,
         color: t.textDim,

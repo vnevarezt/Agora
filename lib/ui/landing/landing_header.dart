@@ -89,7 +89,7 @@ class _LandingHeaderState extends State<LandingHeader> {
 
     final content = Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: LandingSection.maxWidth),
+        constraints: BoxConstraints(maxWidth: LandingSection.maxWidth(context)),
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: LandingSpace.gutter(context),

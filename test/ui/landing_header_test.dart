@@ -32,8 +32,15 @@ Future<void> _pumpLanding(WidgetTester tester, {required Size size}) async {
 
 /// Where the page's content column ends, which is the line every section below
 /// the header is already ruled to.
-double _contentRightEdge(Size size, double gutter) =>
-    (size.width + LandingSection.maxWidth.clamp(0, size.width)) / 2 - gutter;
+///
+/// Read from a live context rather than a constant: the column steps up past
+/// [kWideBreakpoint], so hardcoding it here would pass at 1440 and quietly stop
+/// describing the page at 1920.
+double _contentRightEdge(WidgetTester tester, Size size, double gutter) {
+  final context = tester.element(find.byType(LandingHeader));
+  final maxWidth = LandingSection.maxWidth(context);
+  return (size.width + maxWidth.clamp(0, size.width)) / 2 - gutter;
+}
 
 void main() {
   // The header's own right edge has to be the same line the sections below it
@@ -61,7 +68,7 @@ void main() {
 
       expect(
         button.right,
-        moreOrLessEquals(_contentRightEdge(size, gutter), epsilon: 1),
+        moreOrLessEquals(_contentRightEdge(tester, size, gutter), epsilon: 1),
         reason: 'the header CTA is not flush with the content column, so it '
             'floats short of the edge every section below it lines up with',
       );
@@ -180,8 +187,9 @@ void main() {
     await _pumpLanding(tester, size: size);
 
     final brand = tester.getRect(find.byType(BrandMark).first);
+    final context = tester.element(find.byType(LandingHeader));
     final expected =
-        (size.width - LandingSection.maxWidth) / 2 + LandingSpace.s32;
+        (size.width - LandingSection.maxWidth(context)) / 2 + LandingSpace.s32;
 
     expect(brand.left, moreOrLessEquals(expected, epsilon: 1));
   });
