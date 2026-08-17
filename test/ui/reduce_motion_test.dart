@@ -131,6 +131,41 @@ void main() {
     expect(enterUpFade(), findsNothing);
   });
 
+  // The shape that broke Reveal, which shared this widget's structure: a
+  // lazily built controller, a build() that returns the child untouched when
+  // animations are off, and a dispose() that releases the controller
+  // unconditionally. Nothing ever built it, so disposing constructed one
+  // instead — and an AnimationController asks its element for a TickerMode,
+  // which is not a question a deactivated element can answer.
+  //
+  // EnterUp survives it because initState forces the controller down both
+  // delay branches: the second reads `_controller.forward` as a tear-off,
+  // which evaluates the field just as calling it would. That is a subtle thing
+  // to rely on and an easy one to refactor away, so it is pinned here rather
+  // than left as a comment.
+  testWidgets('EnterUp with a delay tears down cleanly under reduced motion',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: const MediaQuery(
+        data: MediaQueryData(disableAnimations: true),
+        child: Scaffold(
+          body: EnterUp(
+            delay: Duration(milliseconds: 200),
+            child: Text('Hero'),
+          ),
+        ),
+      ),
+    ));
+
+    // Gone before its own entrance was due, which is what a fast route change
+    // looks like from the widget's side.
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(tester.takeException(), isNull);
+  });
+
   Future<Duration?> inkDuration(WidgetTester tester, bool disable) async {
     await tester.pumpWidget(MaterialApp(
       theme: buildAppTheme(pizarra.light, Brightness.light),
