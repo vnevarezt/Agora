@@ -1,135 +1,7 @@
-/* Agora landing page.
+/* Landing page furniture: type, controls, glass, header, bento, tiles.
  *
- * A port of lib/ui/landing/, which drew this same page into a WebGL canvas.
- * The scales below are that design system transcribed, not reinvented — the
- * spacing steps come from LandingSpace, the type from LandingText, the radii
- * from Dimens, and the colours are generated into tokens.css from tokens.dart.
- * Keeping the names aligned is what lets a change land in both places.
+ * The foundation this builds on lives in base.css, which the build prepends.
  */
-
-/* ---- reset ------------------------------------------------------------ */
-
-*, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body, h1, h2, h3, p, dl, dd, ol, ul, figure { margin: 0; }
-ol, ul { padding: 0; list-style: none; }
-img, svg { display: block; max-width: 100%; }
-button { font: inherit; color: inherit; background: none; border: 0; }
-
-/* ---- fonts ------------------------------------------------------------ */
-/* Subset to Latin + Latin-ext by tool/subset_fonts.sh. Declared per weight so
- * the browser fetches only the faces the page actually renders in — Manrope
- * Regular, for instance, never downloads unless something falls back to it. */
-
-@font-face { font-family: Manrope; font-weight: 400; font-display: swap; src: url(/fonts/Manrope-Regular.woff2) format('woff2'); }
-@font-face { font-family: Manrope; font-weight: 500; font-display: swap; src: url(/fonts/Manrope-Medium.woff2) format('woff2'); }
-@font-face { font-family: Manrope; font-weight: 600; font-display: swap; src: url(/fonts/Manrope-SemiBold.woff2) format('woff2'); }
-@font-face { font-family: Manrope; font-weight: 700; font-display: swap; src: url(/fonts/Manrope-Bold.woff2) format('woff2'); }
-@font-face { font-family: Manrope; font-weight: 800; font-display: swap; src: url(/fonts/Manrope-ExtraBold.woff2) format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-weight: 600; font-display: swap; src: url(/fonts/JetBrainsMono-SemiBold.woff2) format('woff2'); }
-
-/* ---- scales ----------------------------------------------------------- */
-/* LandingSpace / LandingText / Dimens. The type steps up at each breakpoint
- * together with --shell, so the measure stays put while the page grows. */
-
-:root {
-  --s4: 4px;   --s8: 8px;   --s12: 12px; --s16: 16px; --s20: 20px;
-  --s24: 24px; --s32: 32px; --s40: 40px; --s48: 48px; --s56: 56px; --s64: 64px;
-
-  --r-chip: 7px;
-  --r-control: 10px;
-  --r-card: 14px;
-
-  --bar-h: 64px;          /* LandingHeader.height */
-  --touch: 48px;          /* Dimens.hTouchMin */
-
-  --shell: 1160px;
-  --gutter: var(--s20);
-  --section: 72px;
-
-  --t-display: 40px;
-  --t-heading: 28px;
-  --t-lead: 17px;
-  --t-tile: 19px;
-  --t-tile-body: 15px;
-  --t-body: 13.5px;
-  --t-caption: 11.5px;
-  --t-micro: 10.5px;
-
-  --ease: cubic-bezier(.2, 0, 0, 1);
-}
-
-@media (min-width: 721px) {
-  :root {
-    --gutter: 28px; --section: 96px;
-    --t-display: 54px; --t-heading: 36px; --t-lead: 19px; --t-tile: 21px;
-  }
-}
-
-@media (min-width: 1081px) {
-  :root { --gutter: var(--s32); --section: 120px; --t-display: 66px; --t-heading: 42px; }
-}
-
-@media (min-width: 1601px) {
-  :root {
-    --shell: 1320px; --section: 144px;
-    --t-display: 78px; --t-heading: 50px; --t-lead: 21px; --t-tile: 23px;
-    --t-tile-body: 16.5px;
-  }
-}
-
-/* ---- page ------------------------------------------------------------- */
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: var(--t-body);
-  font-weight: 600;
-  line-height: 1.5;
-  scroll-behavior: smooth;
-  /* The bar is glass and the page travels under it, so an anchor jump has to
-   * stop below it rather than behind it. */
-  scroll-padding-top: calc(var(--bar-h) + var(--s24));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body { scroll-behavior: auto; }
-}
-
-.mono {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.shell {
-  width: 100%;
-  max-width: var(--shell);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-
-.section { padding-top: var(--section); }
-.hero { padding-top: calc(var(--bar-h) + var(--section)); }
-
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: var(--s8);
-  padding: var(--s8) var(--s16);
-  background: var(--surface);
-  border-radius: var(--r-control);
-  z-index: 10;
-}
-.skip-link:focus { left: var(--s16); }
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: var(--r-chip);
-}
 
 /* ---- type ------------------------------------------------------------- */
 /* LandingText.tracking(size) is size * -0.028, which is -0.028em. */
@@ -163,21 +35,21 @@ body {
   color: var(--text-dim);
 }
 
-.tile-title {
+.item-title {
   font-size: var(--t-tile);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.4px;
 }
 
-.tile-body {
+.item-body {
   margin-top: var(--s4);
-  font-size: var(--t-tile-body);
+  font-size: var(--t-item-body);
   font-weight: 500;
   color: var(--text-dim);
 }
 
-.tile-body.strong { font-weight: 700; color: var(--text); }
+.item-body.strong { font-weight: 700; color: var(--text); }
 .muted { color: var(--text-mute); }
 
 .note {
@@ -203,7 +75,7 @@ body {
   height: var(--touch);
   padding-inline: var(--s24);
   border-radius: var(--r-control);
-  font-size: var(--t-tile-body);
+  font-size: var(--t-item-body);
   font-weight: 700;
   letter-spacing: -0.15px;
   text-decoration: none;
@@ -240,9 +112,50 @@ body {
   text-transform: uppercase;
   white-space: nowrap;
 }
-.badge-beta { background: var(--warning-soft); color: var(--warning); }
+/* Neutral, not warning. `warning` means "pending, attention" (§3.3) and a beta
+ * badge means neither; borrowing a status colour for decoration is exactly how
+ * a page ends up with three accent colours and no way to tell which ones carry
+ * meaning. The only coloured things left on this page are the accent and the
+ * statuses inside the comparison, where they do carry it. */
+.badge-beta { background: var(--surface2); color: var(--text-mute); }
 .badge-soft { background: var(--accent-soft); color: var(--accent-strong); text-transform: none; letter-spacing: 0; }
 .badge-onaccent { background: rgb(255 255 255 / .18); color: var(--accent-ink); }
+
+/* ---- theme toggle ------------------------------------------------------ */
+/* Three states rather than two: the app's own settings offer system, light and
+ * dark (DESIGN_SYSTEM §13.3), and a two-way switch would strand anyone who
+ * wants the page to keep following the OS after touching it once. */
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-control);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background var(--d-instant) var(--ease), color var(--d-instant) var(--ease);
+}
+
+.theme-toggle:hover { background: var(--surface2); color: var(--text); }
+
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Only the face for the current state is drawn. */
+.theme-toggle svg { display: none; }
+.theme-toggle[data-state="system"] .i-system,
+.theme-toggle[data-state="light"] .i-light,
+.theme-toggle[data-state="dark"] .i-dark { display: block; }
+
+@media (prefers-reduced-motion: reduce) { .theme-toggle { transition: none; } }
 
 /* ---- glass ------------------------------------------------------------ */
 /* The effect the Flutter build could not afford. There it was a BackdropFilter
@@ -250,8 +163,14 @@ body {
  * blur at 12 and still cost frames; here it is composited by the browser, so
  * the sigma is back at the 28 the design asked for and costs nothing. */
 
+/* 90%, not the 72% this carried before the page grew inverted bands. The bar is
+ * fixed, so a dark band scrolls underneath it and shows through: at 72% the nav
+ * links landed at 3.07:1 against that mix, under the 4.5 §12 commits to. 90%
+ * puts the worst case at 4.64 and costs little — the 28px blur and the
+ * saturation are what read as material, not the last 18% of transparency.
+ * Dark theme was never at risk: there the band lifts rather than darkens. */
 [data-glass] {
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: blur(28px) saturate(1.7);
   -webkit-backdrop-filter: blur(28px) saturate(1.7);
 }
@@ -295,7 +214,7 @@ body {
   border-radius: var(--r-chip);
   background: var(--accent);
   color: var(--accent-ink);
-  font-size: var(--t-tile-body);
+  font-size: var(--t-item-body);
   font-weight: 800;
 }
 .brand-name { font-size: var(--t-tile); font-weight: 800; letter-spacing: -0.4px; }
@@ -323,6 +242,31 @@ body {
 @media (min-width: 940px) { .nav { display: flex; } }
 @media (max-width: 560px) { .bar-actions .btn-ghost { display: none; } }
 
+/* ---- section eyebrow --------------------------------------------------- */
+/* AppText.label: 10.5 / 700 / +0.45, uppercase, in textMute — whose documented
+ * role in §3.1 is exactly "hints, placeholders, uppercase labels". It buys a
+ * second step of hierarchy above the heading and, with the nav below, answers
+ * the question every screen owes the reader: where am I. */
+
+.eyebrow {
+  margin-bottom: var(--s8);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* ---- nav: current section ---------------------------------------------- */
+/* Set from an IntersectionObserver in landing.js. aria-current carries it, so
+ * the state is announced rather than only drawn — colour alone would leave a
+ * screen reader with four identical links. */
+
+/* The ink change alone carries it. The accent underline this used to add was a
+ * second signal for a fact already stated, and it spent the accent in the one
+ * place the reader is not being asked to act. */
+.nav a[aria-current] { color: var(--text); font-weight: 700; }
+
 /* ---- bento ------------------------------------------------------------ */
 
 .bento { display: grid; gap: var(--s12); }
@@ -346,25 +290,115 @@ body {
   .bento-hero { gap: var(--s32); }
   .bento-heading > .cell:first-child,
   .bento-copy > .cell:first-child { padding-right: var(--s20); }
+
+  /* Mirrored on desktop only. Source order stays text-then-artifact so the
+   * narrow layout still reads in the order the argument is made; flipping with
+   * `order` is what keeps the page from putting the same column on the same
+   * side five times running. */
+  .bento-mirror { grid-template-columns: 6fr 5fr; }
+  .bento-mirror > .cell:first-child {
+    order: 2;
+    padding-right: 0;
+    padding-left: var(--s20);
+  }
+  .bento-mirror > .cell:last-child { order: 1; }
 }
 
-.grid-3, .grid-4 { display: grid; gap: var(--s12); }
+/* ---- the section header, used by every section ------------------------- */
+/* Eyebrow, heading, optional lead — in that order, at that rhythm, with no
+ * exceptions. The page reads as one thing because the frame never changes; only
+ * what sits under it does. There was previously no shared header at all, which
+ * is how five sections ended up with five slightly different openings. */
+
+.section-head .lead { margin-top: var(--s16); }
+
+/* ---- inverted band ----------------------------------------------------- */
+/* The tone change is the divider, so the band itself needs no border, no radius
+ * and no shadow. The token swap lives in tokens.css, generated per theme; all
+ * that belongs here is the one thing the swap cannot express: the glass header
+ * has to stop matching the page when a dark band passes under it. */
+
+.section--invert .btn-ghost:hover { background: var(--surface2); }
+
+/* ---- facts: term and its consequence, on one line ---------------------- */
+/* These items are not paragraphs. The copy is a two-word term answered by a
+ * four-word consequence ("Sala auxiliar" / "Se queda puesta."), so the editorial
+ * row this replaced — 24px of air above and below, a 58ch measure — framed three
+ * words in an empty field and read as a layout mistake. Density is the point:
+ * one line per fact, a hairline between, and the eye can take the whole set in
+ * at once. A card would be worse still; none of these is an object.
+ */
+
+.facts { display: grid; }
+
+.fact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s4) var(--s8);
+  padding-block: var(--s12);
+  border-top: 1px solid var(--border2);
+}
+
+.fact:first-child { border-top: 0; }
+
+.fact-mark {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  align-self: center;
+  /* textMute, not accent. Its job is to mark rhythm down the list, not to call
+   * for attention, and the accent buys more by being scarce: with it spent on
+   * seven checkmarks the closing band stops reading as the one thing on the
+   * page worth pressing. */
+  color: var(--text-mute);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fact-term {
+  font-size: var(--t-item-body);
+  font-weight: 700;
+  letter-spacing: -0.15px;
+  color: var(--text);
+}
+
+.fact-note {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--text-mute);
+}
+
+/* Four facts pair up on a wide screen; the hairline has to follow the visual
+ * rows, so the first two lose their border rather than only the first. */
 @media (min-width: 721px) {
-  .grid-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .facts-split { grid-template-columns: 1fr 1fr; column-gap: var(--s40); }
+  .facts-split .fact:nth-child(-n + 2) { border-top: 0; }
 }
-@media (min-width: 1081px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
 
-.tile {
-  padding: var(--s24);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
+/* ---- comparison head --------------------------------------------------- */
+/* The mode switch lives inside the panel it drives. It used to sit up in the
+ * heading row, far right, with the table below: two related things placed as if
+ * unrelated. Proximity is what tells the reader the control belongs to the
+ * content, and no label can substitute for getting that wrong. */
+
+.compare-head {
+  padding-bottom: var(--s16);
+  margin-bottom: var(--s4);
+  border-bottom: 1px solid var(--border2);
 }
 
 /* ---- steps ------------------------------------------------------------ */
 
-.tile-steps { padding-block: var(--s8); }
+/* No container: a process is not an object Agora produces, so it gets the same
+ * hairline-and-air treatment as the rest of the prose. The rule for the whole
+ * page is that a surface stands for output — the printed sheet and the computed
+ * run of show — and nothing else earns one. */
+.steps .step:first-child { padding-top: 0; }
+.steps .step:last-child { padding-bottom: 0; }
 .step { display: flex; gap: var(--s8); padding-block: var(--s20); }
 .step + .step { border-top: 1px solid var(--border2); }
 .step-n {
@@ -392,7 +426,7 @@ body {
   align-items: baseline;
   gap: var(--s12);
   padding-block: var(--s8);
-  font-size: var(--t-tile-body);
+  font-size: var(--t-item-body);
   font-weight: 500;
   color: var(--text-dim);
 }
@@ -426,7 +460,7 @@ body {
   z-index: 1;
   padding: var(--s8) var(--s20);
   border-radius: var(--r-chip);
-  font-size: var(--t-tile-body);
+  font-size: var(--t-item-body);
   font-weight: 700;
   color: var(--text-dim);
   cursor: pointer;
@@ -447,7 +481,10 @@ body {
 }
 .segmented[data-mode="team"] .segmented-thumb { transform: translateX(100%); }
 
+/* Same rule: this is a table, which is what NN/g names as the alternative to a
+ * card for exactly this content. The rows already carry their own hairlines. */
 .compare { margin-top: var(--s24); }
+.compare .compare-row:last-of-type { padding-bottom: 0; }
 .compare-row {
   display: flex;
   align-items: baseline;
@@ -473,7 +510,7 @@ body {
   margin-top: var(--s16);
   padding-top: var(--s16);
   border-top: 1px solid var(--border2);
-  font-size: var(--t-tile-body);
+  font-size: var(--t-item-body);
   font-weight: 500;
   color: var(--text-mute);
 }
@@ -491,17 +528,34 @@ body {
 
 /* ---- downloads -------------------------------------------------------- */
 
-.cta-card {
-  padding: var(--s48);
+/* The closing band. It used to be a rounded card floating on the page, which
+ * made it one more container in a page full of them; as a full-bleed band it is
+ * the same device as every other section, just carrying the accent. That is
+ * also the whole of the page's decorative colour — everything else that is not
+ * ink or ground is a status meaning something inside the comparison. */
+
+.section--accent {
   background: var(--accent);
-  border-radius: var(--r-card);
   color: var(--accent-ink);
+  text-align: center;
 }
-.cta-card .heading { max-width: 640px; }
-.cta-card .lead { color: color-mix(in srgb, var(--accent-ink) 86%, transparent); }
-.cta-card p + p { margin-top: var(--s32); }
-.soon { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s12); font-weight: 600; }
-@media (max-width: 720px) { .cta-card { padding: var(--s24); } }
+.section--accent .heading { max-width: 640px; margin-inline: auto; }
+.section--accent .eyebrow { color: color-mix(in srgb, var(--accent-ink) 72%, transparent); }
+.section--accent .lead {
+  max-width: 560px;
+  margin-inline: auto;
+  color: color-mix(in srgb, var(--accent-ink) 86%, transparent);
+}
+.section--accent p + p { margin-top: var(--s32); }
+
+.soon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s12);
+  font-weight: 600;
+}
 
 /* ---- footer ----------------------------------------------------------- */
 
@@ -522,7 +576,7 @@ body {
   color: var(--text-mute);
 }
 .footer-links { margin-top: var(--s8); }
-.footer-links a { font-size: var(--t-tile-body); color: var(--text-dim); text-decoration: none; }
+.footer-links a { font-size: var(--t-item-body); color: var(--text-dim); text-decoration: none; }
 .footer-links a:hover { color: var(--text); }
 .fine {
   margin-top: var(--s24);
@@ -568,7 +622,9 @@ body {
 }
 .reveal { opacity: 0; }
 .reveal.seen {
-  animation: rise .5s var(--ease) both;
+  /* --d-med, not the .5s this used to run at: DESIGN_SYSTEM §7 dropped that
+   * step because an entrance that long is waited on instead of read. */
+  animation: rise var(--d-med) var(--ease) both;
   animation-delay: var(--reveal-delay, 0ms);
 }
 @keyframes rise {

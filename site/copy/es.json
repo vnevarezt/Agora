@@ -6,7 +6,11 @@
   },
   "a11y": {
     "skipToContent": "Ir al contenido",
-    "sections": "Secciones"
+    "sections": "Secciones",
+    "themeLabel": "Tema",
+    "themeSystem": "Tema: el del sistema",
+    "themeLight": "Tema: claro",
+    "themeDark": "Tema: oscuro"
   },
   "landing": {
     "nav": {
@@ -112,6 +116,52 @@
       "license": "El código está a la vista en GitHub, pero no es software libre: se puede mirar y usar sin ánimo de lucro (PolyForm Noncommercial 1.0.0). Hecho por Vicente Nevárez Treviño.",
       "linksLabel": "Enlaces",
       "linkRepo": "Repositorio en GitHub"
+    },
+    "eyebrow": {
+      "howItWorks": "Cómo funciona",
+      "schedules": "Tiempos",
+      "privacy": "Tus datos",
+      "downloads": "Empezar",
+      "whatYouGet": "Lo que obtienes"
+    },
+    "whatYouGet": {
+      "title": "Lo demás ya está resuelto."
+    }
+  },
+  "action": {
+    "meta": {
+      "title": "Agora — Tu cuenta"
+    },
+    "checking": "Comprobando el enlace…",
+    "openApp": "Abrir Agora",
+    "legal": "Agora — programas de la reunión de entresemana.",
+    "errors": {
+      "generic": "No se pudo completar. Inténtalo otra vez en un momento."
+    },
+    "reset": {
+      "title": "Elige una contraseña nueva",
+      "sub": "Para la cuenta",
+      "passwordLabel": "CONTRASEÑA NUEVA",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "confirmLabel": "REPÍTELA",
+      "hint": "Usa algo que no uses en otro sitio.",
+      "cta": "Guardar contraseña",
+      "mismatch": "Las dos contraseñas no coinciden.",
+      "weak": "La contraseña necesita al menos 6 caracteres.",
+      "done": {
+        "title": "Contraseña cambiada",
+        "sub": "Ya puedes entrar en Agora con tu contraseña nueva."
+      }
+    },
+    "verify": {
+      "done": {
+        "title": "Correo confirmado",
+        "sub": "Gracias. Tu dirección quedó verificada."
+      }
+    },
+    "invalid": {
+      "title": "Este enlace ya no sirve",
+      "sub": "Los enlaces caducan en una hora y solo se pueden usar una vez. Pide uno nuevo desde la app."
     }
   }
 }
