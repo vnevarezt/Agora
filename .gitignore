@@ -58,6 +58,8 @@ lib/cloud_secrets.dart
 **/GoogleService-Info.plist
 firebase.json
 .firebaserc
+# Deploy cache written by the Firebase CLI.
+.firebase/
 ios/Flutter/FirebaseSecrets.xcconfig
 ios/Flutter/FirebaseSecrets-dev.xcconfig
 macos/Runner/Configs/FirebaseSecrets.xcconfig
