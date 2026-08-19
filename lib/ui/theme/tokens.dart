@@ -198,18 +198,18 @@ const pizarra = AppPalette(
     alertSoft: Color(0xFFFBE7DF),
   ),
   dark: AppTokens(
-    bg: Color(0xFF0B0F14),
-    surface: Color(0xFF13181E),
-    surface2: Color(0xFF191F26),
-    border: Color(0xFF282E36),
-    border2: Color(0xFF21262C),
-    borderControl: Color(0xFF626D7D),
+    bg: Color(0xFF12161B),
+    surface: Color(0xFF1A1F26),
+    surface2: Color(0xFF21272F),
+    border: Color(0xFF2F3742),
+    border2: Color(0xFF272E37),
+    borderControl: Color(0xFF6B7686),
     text: Color(0xFFECEFF2),
     textDim: Color(0xFFA6ABB2),
     // 5.6:1 on bg, 5.2:1 on surface, 4.8:1 on surface2. Same reasoning as the
     // light scheme inverted: surface2 is the lightest ground here, so it is
     // the one the ink has to clear.
-    textMute: Color(0xFF868B92),
+    textMute: Color(0xFF979CA4),
     accent: Color(0xFF6F97E2),
     accentStrong: Color(0xFF5A84D4),
     accentInk: Color(0xFF060D1A),
