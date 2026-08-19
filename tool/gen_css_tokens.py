@@ -39,6 +39,31 @@ def block(colors: dict[str, str], indent: str) -> str:
     return "\n".join(f"{indent}--{kebab(k)}: {v};" for k, v in colors.items())
 
 
+def band(dark: dict[str, str], for_dark: bool) -> dict[str, str]:
+    """The ground for an inverted section band.
+
+    It is the dark palette with one substitution: the band sits on `accentTint`
+    rather than `bg`. `bg` is only 33% saturated, which the eye reads as neutral
+    slate — a night-mode block dropped into a light page. accentTint is the same
+    hue at 49%, so the band reads as this product's blue instead of as black,
+    and it costs nothing architecturally because it is already a token.
+
+    Which wash depends on the theme the band sits in, because the band has to
+    step away from the page ground and the page ground moves. On light the page
+    is near-white, so accentTint at 13.60:1 lands as a deep blue block. On dark
+    the page is already accentTint's neighbour — that pairing measures 1.16,
+    which is not a step anyone sees — so the band takes accentSoft instead and
+    the separation becomes 1.44. Inverting to white was never an option: at
+    night that is hostile to someone who chose dark on purpose.
+
+    accentSoft costs margin, not compliance: textMute over it is 4.58 against
+    the 4.5 floor. Worth watching if the mute tokens ever move.
+    """
+    out = dict(dark)
+    out["bg"] = dark["accentSoft"] if for_dark else dark["accentTint"]
+    return out
+
+
 def main() -> None:
     text = SRC.read_text()
     # Slice the two AppTokens literals out of the `pizarra` palette rather than
@@ -61,19 +86,58 @@ def main() -> None:
    Do not edit: change the Dart and re-run, or the page and the app it is
    selling stop being the same colour. */
 
+/* Three states, because the reader can override the OS.
+   Bare :root is the light palette and the fallback for everything.
+   The media query is the OS preference, guarded so an explicit "light" wins
+   over a dark OS; [data-theme="dark"] is the explicit choice, and it comes
+   last so it also wins on a light OS. Only the tokens change — no rule may
+   define a colour solely inside one of these blocks, or the other two states
+   inherit a hole. */
+
 :root {{
 {block(light, "  ")}
   color-scheme: light dark;
 }}
 
 @media (prefers-color-scheme: dark) {{
-  :root {{
+  :root:not([data-theme="light"]) {{
 {block(dark, "    ")}
   }}
 }}
+
+:root[data-theme="dark"] {{
+{block(dark, "  ")}
+}}
+
+:root[data-theme="light"] {{ color-scheme: light; }}
+:root[data-theme="dark"] {{ color-scheme: dark; }}
+
+/* The inverted band, which is how sections separate: the tone change IS the
+   divider, so nothing else has to draw one. It re-declares the token set rather
+   than introducing colours, which is what lets every component inside keep
+   using var(--text) and var(--border) without knowing where it sits. The values
+   are the ones test/ui/contrast_test.dart already proves at AA. The wash
+   differs per theme so the step away from the page ground survives — see
+   band(). */
+
+.section--invert {{
+{block(band(dark, False), "  ")}
+  background: var(--bg);
+  color: var(--text);
+}}
+
+@media (prefers-color-scheme: dark) {{
+  :root:not([data-theme="light"]) .section--invert {{
+{block(band(dark, True), "    ")}
+  }}
+}}
+
+:root[data-theme="dark"] .section--invert {{
+{block(band(dark, True), "  ")}
+}}
 """
     )
-    print(f"wrote {OUT.relative_to(ROOT)} ({len(light)} tokens x2)")
+    print(f"wrote {OUT.relative_to(ROOT)} ({len(light)} tokens x3 states)")
 
 
 if __name__ == "__main__":

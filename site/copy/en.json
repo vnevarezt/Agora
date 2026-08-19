@@ -6,7 +6,11 @@
   },
   "a11y": {
     "skipToContent": "Skip to content",
-    "sections": "Sections"
+    "sections": "Sections",
+    "themeLabel": "Theme",
+    "themeSystem": "Theme: match the system",
+    "themeLight": "Theme: light",
+    "themeDark": "Theme: dark"
   },
   "landing": {
     "nav": {
@@ -112,6 +116,52 @@
       "license": "The code is visible on GitHub, but it isn't free software: it can be viewed and used for noncommercial purposes (PolyForm Noncommercial 1.0.0). Made by Vicente Nevárez Treviño.",
       "linksLabel": "Links",
       "linkRepo": "Repository on GitHub"
+    },
+    "eyebrow": {
+      "howItWorks": "How it works",
+      "schedules": "Timing",
+      "privacy": "Your data",
+      "downloads": "Get started",
+      "whatYouGet": "What you get"
+    },
+    "whatYouGet": {
+      "title": "The rest is already handled."
+    }
+  },
+  "action": {
+    "meta": {
+      "title": "Agora — Your account"
+    },
+    "checking": "Checking the link…",
+    "openApp": "Open Agora",
+    "legal": "Agora — midweek meeting programs.",
+    "errors": {
+      "generic": "That did not go through. Try again in a moment."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "sub": "For the account",
+      "passwordLabel": "NEW PASSWORD",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmLabel": "REPEAT IT",
+      "hint": "Use something you do not use anywhere else.",
+      "cta": "Save password",
+      "mismatch": "The two passwords do not match.",
+      "weak": "The password needs at least 6 characters.",
+      "done": {
+        "title": "Password changed",
+        "sub": "You can sign in to Agora with your new password now."
+      }
+    },
+    "verify": {
+      "done": {
+        "title": "Email confirmed",
+        "sub": "Thank you. Your address is verified."
+      }
+    },
+    "invalid": {
+      "title": "This link no longer works",
+      "sub": "Links expire after an hour and can only be used once. Ask for a new one from the app."
     }
   }
 }
