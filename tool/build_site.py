@@ -25,6 +25,23 @@ SLOT = re.compile(r"\{\{([a-zA-Z0-9_.]+)\}\}")
 
 # Default locale is served at /, the rest under /<code>/.
 LOCALES = ["es", "en"]
+
+# (template, subdirectory under the locale root). The landing sits at the root;
+# the action page is what the reset and verification emails link to, so its path
+# is part of the contract with functions/src/index.ts — moving it here without
+# moving it there sends every link in the wild to a 404.
+PAGES = [
+    ("template.html", ""),
+    ("action.html", "auth/action"),
+]
+
+# Each page ships one stylesheet: the shared base plus its own rules. Two files
+# would cost a second blocking request for a page whose whole point is to be
+# cheap to open.
+SHEETS = {
+    "landing.css": ("base.css", "landing.css"),
+    "action.css": ("base.css", "action.css"),
+}
 ORIGIN = "https://agora-vnevarezt.web.app"
 
 # The sample program. Hardcoded, and in Spanish in every locale, for the same
@@ -97,7 +114,7 @@ def alternates(locale: str) -> str:
     return "\n".join(links)
 
 
-def build(locale: str, template: str, sheet: str) -> None:
+def build(locale: str, subdir: str, template: str, sheet: str) -> None:
     src = SITE / f"copy/{locale}.json"
     strings = {k: esc(v) for k, v in flatten(json.loads(src.read_text())).items()}
     strings["lang"] = locale
@@ -120,27 +137,33 @@ def build(locale: str, template: str, sheet: str) -> None:
     if missing:
         sys.exit(f"{locale}: template asks for keys that do not exist: {sorted(set(missing))}")
 
-    target = OUT / ("index.html" if locale == LOCALES[0] else f"{locale}/index.html")
+    parts = [p for p in ("" if locale == LOCALES[0] else locale, subdir) if p]
+    target = OUT.joinpath(*parts, "index.html")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(page)
     print(f"  {target.relative_to(ROOT)}  ({len(page) // 1024} KB)")
 
 
 def main() -> None:
-    template = (SITE / "template.html").read_text()
     sheet = render_sheet()
     OUT.mkdir(parents=True, exist_ok=True)
 
-    for name in ("landing.css", "tokens.css", "landing.js"):
+    for name in ("tokens.css", "landing.js", "action.js"):
         shutil.copy2(SITE / name, OUT / name)
+    for out_name, sources in SHEETS.items():
+        (OUT / out_name).write_text(
+            "".join((SITE / src).read_text() for src in sources)
+        )
     shutil.copytree(SITE / "fonts", OUT / "fonts", dirs_exist_ok=True)
 
     # Shared with the app shell so a bookmark of either shows the same icon.
     shutil.copy2(ROOT / "web/favicon.png", OUT / "favicon.png")
     shutil.copytree(ROOT / "web/icons", OUT / "icons", dirs_exist_ok=True)
 
-    for locale in LOCALES:
-        build(locale, template, sheet)
+    for name, subdir in PAGES:
+        template = (SITE / name).read_text()
+        for locale in LOCALES:
+            build(locale, subdir, template, sheet)
 
 
 if __name__ == "__main__":
