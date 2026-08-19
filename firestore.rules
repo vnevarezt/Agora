@@ -5,9 +5,11 @@ rules_version = '2';
 // gating per entity kind. Content-level enforcement happens client-side at
 // decrypt/apply time — blobs are opaque here by design.
 //
-// No Cloud Functions (Spark plan): invite redemption is a client batch
-// [create member, delete invite] proven atomic single-use via
-// exists()/existsAfter().
+// Invite redemption is a client batch [create member, delete invite], proven
+// atomic and single-use via exists()/existsAfter(). It was written that way
+// because the project had no Cloud Functions; functions/ now exists, but it
+// carries transactional mail only, and this rule keeps working without it.
+// Moving redemption server-side is a separate decision, not a leftover.
 service cloud.firestore {
   match /databases/{database}/documents {
 

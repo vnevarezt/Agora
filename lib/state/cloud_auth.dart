@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -184,12 +185,24 @@ class CloudAuthService {
   /// google_sign_in v7 requires a single initialize() per process.
   static bool _googleInitialized = false;
 
-  /// Firebase-sent emails (reset, verification) follow the app language.
-  /// Best-effort: a failure must never block the auth action itself.
+  /// Firebase still sends a few messages itself (an address change, for one),
+  /// and those follow the app language. Best-effort: a failure must never block
+  /// the auth action itself.
   Future<void> _syncEmailLanguage() async {
     try {
       await _auth.setLanguageCode(LocaleSettings.currentLocale.languageCode);
     } catch (_) {}
+  }
+
+  /// The mail callables live in functions/src/index.ts. Locale travels in the
+  /// payload because the link they build is locale-scoped: tool/build_site.py
+  /// renders the action page per language, and the wrong one would hand a
+  /// Spanish reader an English form.
+  Future<void> _callMail(String name, Map<String, Object?> data) async {
+    await FirebaseFunctions.instance.httpsCallable(name).call<void>({
+      ...data,
+      'lang': LocaleSettings.currentLocale.languageCode,
+    });
   }
 
   Future<void> registerWithEmail(String email, String password,
@@ -204,7 +217,7 @@ class CloudAuthService {
         // Informative only (access is never gated on it), so a failure to
         // send must not fail the registration.
         try {
-          await cred.user?.sendEmailVerification();
+          await _callMail('requestEmailVerification', const {});
         } catch (_) {}
       });
 
@@ -212,18 +225,23 @@ class CloudAuthService {
       _mapAuthErrors(() =>
           _auth.signInWithEmailAndPassword(email: email, password: password));
 
-  Future<void> sendPasswordReset(String email) => _mapAuthErrors(() async {
-        await _syncEmailLanguage();
-        await _auth.sendPasswordResetEmail(email: email);
-      });
+  /// Sends the reset mail through functions/ rather than firebase_auth, so the
+  /// message is Agora's own rather than the stock Firebase template.
+  ///
+  /// The callable answers the same way whether or not the address has an
+  /// account: it cannot report userNotFound without becoming an oracle that
+  /// tells anyone which addresses are registered. The screen therefore always
+  /// reaches its "check your inbox" state, which is what it should have done
+  /// all along.
+  Future<void> sendPasswordReset(String email) => _mapAuthErrors(
+        () => _callMail('requestPasswordReset', {'email': email}),
+      );
 
   Future<void> resendEmailVerification() => _mapAuthErrors(() async {
-        final user = _auth.currentUser;
-        if (user == null) {
+        if (_auth.currentUser == null) {
           throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
         }
-        await _syncEmailLanguage();
-        await user.sendEmailVerification();
+        await _callMail('requestEmailVerification', const {});
       });
 
   Future<bool> refreshEmailVerified() async {
