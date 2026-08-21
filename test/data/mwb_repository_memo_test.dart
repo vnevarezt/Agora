@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 import 'package:agora/data/mwb_cache.dart';
 import 'package:agora/data/mwb_repository.dart';
@@ -17,11 +20,11 @@ Uint8List _fakeEpub() {
 }
 
 /// In-memory store that counts EPUB reads, so a test can tell a memo hit from
-/// a re-parse.
+/// a re-parse. A null [bytes] stands for an empty cache (every read misses).
 class _CountingStore implements MwbStore {
   _CountingStore(this.bytes);
 
-  final Uint8List bytes;
+  final Uint8List? bytes;
   final Map<String, String> strings = {};
   int epubReads = 0;
 
@@ -79,5 +82,57 @@ void main() {
     await repo.weeks('202606');
     await repo.weeks('202606', lang: 'E');
     expect(store.epubReads, 2);
+  });
+
+  test('callers that start together share one download', () async {
+    // The memo is only written once a download finishes, so it cannot help
+    // here. Without the in-flight map each caller goes to the network for the
+    // same file — which is what two sync passes racing on a fresh install do.
+    var lookups = 0;
+    final client = MockClient((req) async {
+      if (req.url.host != 'app.jw-cdn.org') {
+        return http.Response.bytes(_fakeEpub(), 200);
+      }
+      lookups++;
+      return http.Response(
+        jsonEncode({
+          'files': {
+            'S': {
+              'EPUB': [
+                {
+                  'file': {'url': 'https://ex.test/202606.epub'}
+                }
+              ]
+            }
+          },
+          'formattedDate': 'x',
+        }),
+        200,
+      );
+    });
+    final repo =
+        MwbRepository(MwbCache(store: _CountingStore(null)), client: client);
+
+    await Future.wait([
+      repo.ensureCached('202606'),
+      repo.ensureCached('202606'),
+      repo.weeks('202606'),
+    ]);
+
+    expect(lookups, 1, reason: 'three concurrent callers, one download');
+  });
+
+  test('a failed load is not remembered, so the next caller retries', () async {
+    var attempts = 0;
+    final client = MockClient((req) async {
+      attempts++;
+      return http.Response('not found', 404);
+    });
+    final repo =
+        MwbRepository(MwbCache(store: _CountingStore(null)), client: client);
+
+    await expectLater(repo.ensureCached('202606'), throwsA(isA<Exception>()));
+    await expectLater(repo.ensureCached('202606'), throwsA(isA<Exception>()));
+    expect(attempts, 2, reason: 'a dead future must not be handed out again');
   });
 }
