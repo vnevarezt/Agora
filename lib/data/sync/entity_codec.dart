@@ -104,9 +104,11 @@ class EntityCodec {
           'programTypeId': r.programTypeId,
           'weekType': r.weekType.name,
           'date': r.date,
+          'weekStart': r.weekStart,
           'sortIndex': r.sortIndex,
           'label': r.label,
           'contentJson': r.contentJson,
+          'contentLang': r.contentLang,
           'titleOverridesJson': r.titleOverridesJson,
           'startTime': r.startTime,
           'durationMinutes': r.durationMinutes,
@@ -214,9 +216,14 @@ class EntityCodec {
                 weekType:
                     WeekType.values.byName(payload['weekType'] as String),
                 date: payload['date'] as String,
+                // Nullable and read by name, so a peer still on v5 sends a
+                // payload without them, they arrive null, and the reconciler
+                // resolves them locally. No `v` bump, no coordinated rollout.
+                weekStart: payload['weekStart'] as String?,
                 sortIndex: payload['sortIndex'] as int,
                 label: payload['label'] as String,
                 contentJson: payload['contentJson'] as String?,
+                contentLang: payload['contentLang'] as String?,
                 titleOverridesJson: payload['titleOverridesJson'] as String,
                 startTime: payload['startTime'] as String?,
                 durationMinutes: payload['durationMinutes'] as int?,
