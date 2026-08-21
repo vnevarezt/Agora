@@ -19,9 +19,16 @@ class Programs extends Table with SyncColumns {
   TextColumn get weekType =>
       textEnum<WeekType>().withDefault(Constant(WeekType.normal.name))();
 
-  /// Week identifier as the notebook catalog exposes it (the parsed week
-  /// heading, e.g. "7-13 DE JULIO"). TEXT label, NOT sortable — display
-  /// order lives in [sortIndex].
+  /// ISO Monday the week starts on ('2026-07-06') — THE identity, and the
+  /// only one that survives a change of meeting language. Null on rows
+  /// written before v6 and on any week whose heading could not be resolved;
+  /// the reconciler fills those from the catalog.
+  TextColumn get weekStart => text().nullable()();
+
+  /// Week heading as the workbook prints it, e.g. "7-13 DE JULIO". Kept as
+  /// the display label and as the fallback the reconciler matches on while
+  /// [weekStart] is still null. It is language-dependent, which is exactly
+  /// why it stopped being the join key.
   TextColumn get date => text()();
 
   /// Position within the project (notebook order picked in the modal).
@@ -31,8 +38,14 @@ class Programs extends Table with SyncColumns {
   TextColumn get label => text().withDefault(const Constant(''))();
 
   /// Parsed MWB week snapshotted from the notebook cache (Week.toJson).
-  /// Null until the snapshot service fills it (phase-1 skeleton rows).
+  /// Null until the reconciler fills it (phase-1 skeleton rows).
   TextColumn get contentJson => text().nullable()();
+
+  /// Workbook language [contentJson] was taken from ('S' | 'E'). Without it
+  /// a snapshot is anonymous and nobody can tell it went stale when the
+  /// congregation changed language; with it, stale is just
+  /// `contentLang != workbookLangFor(meetingLanguage)`.
+  TextColumn get contentLang => text().nullable()();
 
   /// Per-row title edits, JSON map slotKey → title (coarse: they ride the
   /// program row; assignments are the fine-grained ones).
