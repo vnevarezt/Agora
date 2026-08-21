@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android composes its own launcher icon: the foreground is the mark alone
+     and the background is the brand ground, so the OS can mask, shadow and
+     animate the two layers independently. The flat mipmap PNGs beside this
+     file are the fallback for anything older than API 26. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>

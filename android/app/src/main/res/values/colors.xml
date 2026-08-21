@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The icon ground from tool/gen_brand_assets.py (ICON_GROUND). -->
+    <color name="ic_launcher_background">#14208f</color>
+</resources>
