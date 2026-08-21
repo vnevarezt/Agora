@@ -30,6 +30,22 @@ class EditorProjectController extends Notifier<String?> {
   void set(String? id) => state = id;
 }
 
+/// Congregation the open project belongs to; empty while the editor is closed
+/// or before the project list lands.
+///
+/// The form's `congregationId` holds the printed congregation NAME, so anything
+/// that needs the real id has to come back through the project.
+final editorCongregationIdProvider = Provider<String>((ref) {
+  final projectId = ref.watch(editorProjectProvider);
+  if (projectId == null) return '';
+  return ref
+          .watch(projectsProvider)
+          .where((p) => p.id == projectId)
+          .firstOrNull
+          ?.congregationId ??
+      '';
+});
+
 /// The open project's alive programs, reactive: content snapshots filled
 /// in the background show up here (and re-derive the editor's weeks).
 final editorProgramsProvider = StreamProvider<List<ProgramRecord>>((ref) {
