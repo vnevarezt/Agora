@@ -244,3 +244,55 @@ final congregationWorkbookStatusProvider =
       ? WorkbookStatus.downloading
       : WorkbookStatus.unavailable;
 });
+
+/// Pulls the coverage window down again even though it is cached, then pushes
+/// the result through to the programs.
+///
+/// The one thing the cache cannot decide for itself: jw.org republishes
+/// corrected workbooks, and a cached issue is never fetched twice, so without
+/// this a correction would never arrive. Manual rather than automatic — there
+/// is no cheap way to know a workbook changed short of downloading it.
+final catalogRefreshProvider =
+    Provider<CatalogRefresher>(CatalogRefresher.new);
+
+class CatalogRefresher {
+  CatalogRefresher(this._ref);
+
+  final Ref _ref;
+
+  /// Returns how many issues were replaced. A language that fails is skipped,
+  /// not fatal: what is on disk stays, so a partial refresh never costs the
+  /// user a workbook they already had.
+  Future<int> run({DateTime? now, int monthsAhead = 2}) async {
+    final langs = _ref.read(requiredWorkbookLangsProvider) ?? '';
+    if (langs.isEmpty) return 0;
+    final cache = _ref.read(cacheProvider);
+    final repository = _ref.read(repositoryProvider);
+
+    var replaced = 0;
+    for (final lang in langs.split(',')) {
+      for (final issue
+          in requiredIssues(now ?? DateTime.now(), monthsAhead: monthsAhead)) {
+        try {
+          await repository.refresh(issue, lang);
+          replaced++;
+        } catch (_) {
+          // Offline, or the issue is not published yet. Both are fine.
+        }
+      }
+    }
+    if (replaced == 0) return 0;
+
+    _ref
+        .read(notebooksByLangProvider.notifier)
+        .setFrom(await buildCatalog(cache, repository));
+
+    // A corrected workbook has to reach the snapshots too, and those are
+    // already in the right language — so this pass has to be forced.
+    final reconciler = _ref.read(programReconcilerProvider);
+    for (final congregation in _ref.read(congregationsProvider)) {
+      await reconciler.reconcileCongregation(congregation.id, force: true);
+    }
+    return replaced;
+  }
+}

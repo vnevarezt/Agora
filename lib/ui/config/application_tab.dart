@@ -12,6 +12,7 @@ import '../../state/auth_session.dart';
 import '../../state/backup_provider.dart';
 import '../../state/cloud_auth.dart' show cloudUserProvider;
 import '../../state/locale_boot.dart' show shippedLocales;
+import '../../state/mwb_sync.dart' show catalogRefreshProvider;
 import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
@@ -82,6 +83,7 @@ class ApplicationTab extends ConsumerStatefulWidget {
 
 class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   bool _backupBusy = false;
+  bool _catalogBusy = false;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +97,7 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     // Cloud sync card: only once the cloud is configured and signed in.
     final signedIn = ref.watch(cloudUserProvider).value != null;
     return SettingsColumns(
-      left: [_appearance(), _general(), _notificationsCard()],
+      left: [_appearance(), _general(), _notificationsCard(), _catalogCard()],
       right: [
         _datos(),
         if (localMode || deviceAuthOk) const SecurityCard(),
@@ -283,6 +285,45 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
         SettingRow(title: tr.settings.lastBackup, subtitle: lastLabel),
       ],
     );
+  }
+
+  Widget _catalogCard() {
+    final tr = context.t;
+    return SettingsCard(
+      title: tr.settings.catalogTitle,
+      desc: tr.settings.catalogDesc,
+      children: [
+        SettingRow(
+          first: true,
+          title: tr.settings.catalogTitle,
+          subtitle: tr.settings.catalogDesc,
+          trailing: AppButton(
+            variant: AppButtonVariant.ghost,
+            icon: Icons.refresh,
+            label: tr.settings.catalogRefresh,
+            busy: _catalogBusy,
+            onPressed: _catalogBusy ? null : _refreshCatalog,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _refreshCatalog() async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _catalogBusy = true);
+    try {
+      final replaced = await ref.read(catalogRefreshProvider).run();
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(
+        content: Text(replaced == 0
+            ? tr.settings.catalogRefreshFailed
+            : tr.settings.catalogRefreshed(n: replaced)),
+      ));
+    } finally {
+      if (mounted) setState(() => _catalogBusy = false);
+    }
   }
 
   Widget _appearance() {

@@ -468,6 +468,11 @@ class _Translations$settings$en extends Translations$settings$es {
 	@override String get import => 'Import';
 	@override String get lastBackup => 'Last backup';
 	@override String get noBackupsYet => 'No backups yet';
+	@override String get catalogTitle => 'Meeting workbooks';
+	@override String get catalogDesc => 'These download on their own. Refresh by hand if jw.org published a correction.';
+	@override String get catalogRefresh => 'Refresh';
+	@override String catalogRefreshed({required Object n}) => 'Catalog refreshed (${n} workbooks).';
+	@override String get catalogRefreshFailed => 'Could not refresh. What you had is still there.';
 	@override String get backupPasswordTitle => 'Backup password';
 	@override String get backupPasswordDesc => 'Protects the file: it cannot be restored without it.';
 	@override String get backupPasswordRepeat => 'Repeat the password';
@@ -1274,6 +1279,11 @@ extension on TranslationsEn {
 			'settings.import' => 'Import',
 			'settings.lastBackup' => 'Last backup',
 			'settings.noBackupsYet' => 'No backups yet',
+			'settings.catalogTitle' => 'Meeting workbooks',
+			'settings.catalogDesc' => 'These download on their own. Refresh by hand if jw.org published a correction.',
+			'settings.catalogRefresh' => 'Refresh',
+			'settings.catalogRefreshed' => ({required Object n}) => 'Catalog refreshed (${n} workbooks).',
+			'settings.catalogRefreshFailed' => 'Could not refresh. What you had is still there.',
 			'settings.backupPasswordTitle' => 'Backup password',
 			'settings.backupPasswordDesc' => 'Protects the file: it cannot be restored without it.',
 			'settings.backupPasswordRepeat' => 'Repeat the password',
@@ -1484,6 +1494,8 @@ extension on TranslationsEn {
 			'program.mainHall' => 'Main Hall',
 			'program.auxRoom' => 'Auxiliary Classroom',
 			'program.sectionTreasures' => 'TREASURES FROM GOD\'S WORD',
+			_ => null,
+		} ?? switch (path) {
 			'program.sectionMinistry' => 'APPLY YOURSELF TO THE FIELD MINISTRY',
 			'program.sectionChristianLife' => 'LIVING AS CHRISTIANS',
 			_ => null,
