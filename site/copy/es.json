@@ -27,7 +27,8 @@
       "title": "Tú pones los nombres. Ya está.",
       "subtitle": "Agora calcula las horas y te deja el PDF listo para imprimir.",
       "cta": "Probar ahora",
-      "note": "Sin cuenta. Sin instalar nada."
+      "note": "Sin cuenta. Sin instalar nada.",
+      "shotAlt": "Agora en pantalla, con el programa de la semana asignado"
     },
     "howItWorks": {
       "title": "Son tres pasos.",
@@ -43,20 +44,7 @@
       "body": "Cambia una parte y todas las horas de abajo se mueven solas.",
       "circuit": "¿Viene el superintendente? Lo marcas y el programa se reordena.",
       "slack": "Sobran 26 min · 8·8·10 a las canciones",
-      "sampleLabel": "Semana normal · inicio 18:00",
-      "sampleTargetEnd": "19:45",
-      "sampleOpeningSong": "Canción y oración",
-      "sampleIntro": "Palabras de introducción",
-      "sampleTreasures": "Tesoros de la Biblia",
-      "sampleTreasuresDuration": "25 min",
-      "sampleMinistry": "Seamos mejores maestros",
-      "sampleMinistryDuration": "15 min fijos",
-      "sampleSong2": "Canción",
-      "sampleChristianLife": "Nuestra vida cristiana",
-      "sampleChristianLifeDuration": "5 min",
-      "sampleBibleStudy": "Estudio bíblico de la congregación",
-      "sampleClosingWords": "Palabras de conclusión",
-      "sampleClosingSong": "Canción y oración"
+      "shotAlt": "Agora en un iPhone, con el programa de la semana en la vista previa"
     },
     "preview": {
       "title": "La vista previa no se parece al PDF. Es el PDF.",

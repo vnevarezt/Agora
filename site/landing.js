@@ -18,14 +18,25 @@
   if (!('IntersectionObserver' in window) || reduced.matches) {
     reveals.forEach(function (el) { el.classList.add('seen'); });
   } else {
-    var seen = new IntersectionObserver(function (entries, obs) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('seen');
-        obs.unobserve(entry.target);
-      });
-    }, { rootMargin: '0px 0px -64px 0px' });
-    reveals.forEach(function (el) { seen.observe(el); });
+    var watch = function (margin) {
+      return new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('seen');
+          obs.unobserve(entry.target);
+        });
+      }, { rootMargin: '0px 0px ' + margin + ' 0px' });
+    };
+    // 64px in from the bottom is right for anything about as tall as a
+    // paragraph: the element is on screen when it moves. It is wrong for
+    // something the height of a phone, which trips the observer with only its
+    // top edge showing and has finished rising before the reader can see it.
+    // Those wait until they are a third of the way up the window.
+    var near = watch('-64px');
+    var tall = watch('-30%');
+    reveals.forEach(function (el) {
+      (el.classList.contains('reveal-tall') ? tall : near).observe(el);
+    });
   }
 
   /* ---- solo / team comparison ------------------------------------------

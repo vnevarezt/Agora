@@ -44,29 +44,19 @@ SHEETS = {
 }
 ORIGIN = "https://agora-vnevarezt.web.app"
 
-# The sample program. Hardcoded, and in Spanish in every locale, for the same
-# reason a screenshot in a manual is not retranslated: it is a picture of one
-# congregation's printout, not interface text.
-SHEET = [
-    ("row", "18:00", "Canción 42 y oración", "R. Cano"),
-    ("row", "18:05", "Palabras de introducción", "M. Salas"),
-    ("band treasures", "Tesoros de la Biblia", None, None),
-    ("row", "18:09", "Discurso", "M. Salas"),
-    ("row", "18:19", "Busquemos perlas escondidas", "A. Beltrán"),
-    ("row", "18:29", "Lectura de la Biblia", "J. Ríos"),
-    ("band ministry", "Seamos mejores maestros", None, None),
-    ("row", "18:34", "Empiece conversaciones", "D. Puga"),
-    ("row", "18:39", "Haga revisitas", "R. Ledesma"),
-    ("row", "18:44", "Discurso", "C. Vega"),
-    ("gap", None, None, None),
-    ("row", "18:49", "Canción 108", None),
-    ("band life", "Nuestra vida cristiana", None, None),
-    ("row", "18:57", "Necesidades de la congregación", "L. Ordaz"),
-    ("row", "19:02", "Estudio bíblico de la congregación", "H. Mena"),
-    ("gap", None, None, None),
-    ("row", "19:32", "Palabras de conclusión", "M. Salas"),
-    ("row", "19:35", "Canción 55 y oración", "T. Ibarra"),
-]
+# The hero art: one montage per device class, at two densities, rendered into
+# site/media/ by tool/demo/site_shots.py. Named here rather than in the
+# stylesheet because the shot has interface text in it, so it differs per
+# locale, and there is one landing.css for every locale.
+#
+# The widths are the ones landing.css switches on, and the preload below has to
+# repeat them: a preload that disagreed with the stylesheet by one pixel would
+# fetch a montage the page then declines to use.
+SHOT_SLOTS = {
+    "phone": "(max-width: 720px)",
+    "tablet": "(min-width: 721px) and (max-width: 1080px)",
+    "desk": "(min-width: 1081px)",
+}
 
 
 def esc(value: str) -> str:
@@ -113,25 +103,74 @@ def wordmark_ink() -> str:
     )
 
 
-def render_sheet() -> str:
-    parts = [
-        '<div class="sheet" role="img" aria-label="Ejemplo de programa impreso">',
-        '<div class="sheet-head"><span>Reunión de entresemana</span>'
-        "<span>6-12 abr</span></div>",
-    ]
-    for kind, a, b, c in SHEET:
-        if kind == "gap":
-            parts.append('<div class="sheet-gap"></div>')
-        elif kind.startswith("band"):
-            parts.append(f'<div class="sheet-{kind}">{esc(a)}</div>')
-        else:
-            name = f'<span class="sheet-n">{esc(c)}</span>' if c else ""
-            parts.append(
-                f'<div class="sheet-row"><span class="sheet-t">{esc(a)}</span>'
-                f'<span class="sheet-p">{esc(b)}</span>{name}</div>'
+def shot_url(slot: str, locale: str, theme: str, density: int) -> str:
+    at = "" if density == 1 else f"@{density}x"
+    return f"/media/hero-{slot}-{locale}-{theme}{at}.webp"
+
+
+def render_shot(locale: str, alt: str) -> str:
+    """The hero montage, as the candidates landing.css picks one of.
+
+    A background image rather than a <picture>, because the theme here is a
+    data-theme attribute as often as it is prefers-color-scheme and a source
+    media query cannot see the attribute. Only the rule that wins is ever
+    fetched, so the reader pays for one of these, not twelve.
+    """
+    props = "".join(
+        f"--shot-{slot}-{theme}{'' if d == 1 else f'-{d}x'}:"
+        f"url({shot_url(slot, locale, theme, d)});"
+        for slot in SHOT_SLOTS
+        for theme in ("light", "dark")
+        for d in (1, 2)
+    )
+    return f'<div class="shot" role="img" aria-label="{alt}" style="{props}"></div>'
+
+
+def render_program(locale: str, alt: str) -> str:
+    """One iPad with the preview panel open, under the timing section.
+
+    Same mechanism as the hero and for the same reasons — locale in the URL,
+    theme in the cascade — but one composition rather than three: the argument
+    there is the program, not the hardware, so nothing is gained by handing a
+    phone reader a phone.
+    """
+    props = "".join(
+        f"--program-{theme}{'' if d == 1 else f'-{d}x'}:"
+        f"url(/media/program-{locale}-{theme}{'' if d == 1 else f'@{d}x'}.webp);"
+        for theme in ("light", "dark")
+        for d in (1, 2, 3)
+    )
+    return (f'<div class="program" role="img" aria-label="{alt}" '
+            f'style="{props}"></div>')
+
+
+def shot_preload(locale: str) -> str:
+    """Start the hero fetching with the stylesheet, not after it.
+
+    A background image is not visible to the preload scanner: the browser has
+    to parse the CSS, build the box and resolve the custom property before it
+    learns there is an image at all, which on the largest thing on the page is
+    the difference between the hero arriving with the text and arriving after
+    it. Each link carries the same width the stylesheet switches on plus the
+    theme, so exactly one of the six matches.
+
+    The one it can get wrong is a reader whose stored theme contradicts their
+    system: the media query only knows the system, so that reader fetches one
+    montage they will not see. One wasted image against a hero that lands late
+    for everyone else is the trade.
+    """
+    links = []
+    for slot, width in SHOT_SLOTS.items():
+        for theme in ("light", "dark"):
+            srcset = ", ".join(
+                f"{shot_url(slot, locale, theme, d)} {d}x" for d in (1, 2)
             )
-    parts.append("</div>")
-    return "\n".join(parts)
+            links.append(
+                f'<link rel="preload" as="image" fetchpriority="high" '
+                f'imagesrcset="{srcset}" '
+                f'media="{width} and (prefers-color-scheme: {theme})">'
+            )
+    return "\n".join(links)
 
 
 def flatten(node, prefix="", out=None):
@@ -154,12 +193,16 @@ def alternates(locale: str) -> str:
     return "\n".join(links)
 
 
-def build(locale: str, subdir: str, template: str, sheet: str) -> None:
+def build(locale: str, subdir: str, template: str) -> None:
     src = SITE / f"copy/{locale}.json"
     strings = {k: esc(v) for k, v in flatten(json.loads(src.read_text())).items()}
     strings["lang"] = locale
     strings["brand.mark"] = mark()
-    strings["sheet"] = sheet
+    strings["shot"] = render_shot(locale, strings["landing.hero.shotAlt"])
+    strings["shot.preload"] = shot_preload(locale)
+    strings["programShot"] = render_program(
+        locale, strings["landing.schedules.shotAlt"]
+    )
     strings["meta.canonical"] = ORIGIN + (
         "/" if locale == LOCALES[0] else f"/{locale}/"
     )
@@ -186,7 +229,6 @@ def build(locale: str, subdir: str, template: str, sheet: str) -> None:
 
 
 def main() -> None:
-    sheet = render_sheet()
     OUT.mkdir(parents=True, exist_ok=True)
 
     for name in ("tokens.css", "landing.js", "action.js"):
@@ -197,6 +239,7 @@ def main() -> None:
             ink + "".join((SITE / src).read_text() for src in sources)
         )
     shutil.copytree(SITE / "fonts", OUT / "fonts", dirs_exist_ok=True)
+    shutil.copytree(SITE / "media", OUT / "media", dirs_exist_ok=True)
 
     # Shared with the app shell so a bookmark of either shows the same icon.
     shutil.copy2(ROOT / "web/favicon.png", OUT / "favicon.png")
@@ -205,7 +248,7 @@ def main() -> None:
     for name, subdir in PAGES:
         template = (SITE / name).read_text()
         for locale in LOCALES:
-            build(locale, subdir, template, sheet)
+            build(locale, subdir, template)
 
 
 if __name__ == "__main__":
