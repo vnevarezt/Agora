@@ -48,51 +48,59 @@ class DashboardView extends ConsumerWidget {
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(pad, Space.s18, pad, 120),
-            child: Consumer(builder: (context, ref, _) {
-              final stacked = size != ScreenSize.desktop;
-              final restore = ref.watch(initialRestoreProvider);
-              final phase = ref.watch(syncControllerProvider).phase;
-              // Offline/error stall the restore: show the real (empty)
-              // dashboard with the banner explaining it, never a forever
-              // skeleton.
-              final stalled =
-                  phase == SyncPhase.offline || phase == SyncPhase.error;
-              final showSkeleton = ref.watch(dashboardLoadingProvider) ||
-                  (restore != null &&
-                      ref.watch(congregationsProvider).isEmpty &&
-                      !stalled);
+            child: Consumer(
+              builder: (context, ref, _) {
+                final stacked = size != ScreenSize.desktop;
+                final restore = ref.watch(initialRestoreProvider);
+                final phase = ref.watch(syncControllerProvider).phase;
+                // Offline/error stall the restore: show the real (empty)
+                // dashboard with the banner explaining it, never a forever
+                // skeleton.
+                final stalled =
+                    phase == SyncPhase.offline || phase == SyncPhase.error;
+                final showSkeleton =
+                    ref.watch(dashboardLoadingProvider) ||
+                    (restore != null &&
+                        ref.watch(congregationsProvider).isEmpty &&
+                        !stalled);
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FadeThroughSwitcher(
-                    child: restore == null
-                        ? const SizedBox(
-                            key: ValueKey('no-restore'),
-                            width: double.infinity)
-                        : Padding(
-                            key: const ValueKey('restore'),
-                            padding: const EdgeInsets.only(bottom: Space.s18),
-                            child: _RestoreBanner(
-                                restore: restore, phase: phase),
-                          ),
-                  ),
-                  FadeThroughSwitcher(
-                    child: showSkeleton
-                        ? _DashboardSkeleton(
-                            key: const ValueKey('skeleton'), stacked: stacked)
-                        : Column(
-                            key: const ValueKey('content'),
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const _HeroSection(),
-                              _HomeGrid(stacked: stacked),
-                            ],
-                          ),
-                  ),
-                ],
-              );
-            }),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FadeThroughSwitcher(
+                      child: restore == null
+                          ? const SizedBox(
+                              key: ValueKey('no-restore'),
+                              width: double.infinity,
+                            )
+                          : Padding(
+                              key: const ValueKey('restore'),
+                              padding: const EdgeInsets.only(bottom: Space.s18),
+                              child: _RestoreBanner(
+                                restore: restore,
+                                phase: phase,
+                              ),
+                            ),
+                    ),
+                    FadeThroughSwitcher(
+                      child: showSkeleton
+                          ? _DashboardSkeleton(
+                              key: const ValueKey('skeleton'),
+                              stacked: stacked,
+                            )
+                          : Column(
+                              key: const ValueKey('content'),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _HeroSection(),
+                                _HomeGrid(stacked: stacked),
+                              ],
+                            ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -171,8 +179,8 @@ class _TopBar extends ConsumerWidget {
                         ),
                       ),
                       TextSpan(
-                          text:
-                              ' · ${tr.dashboard.pendingItem(n: pending)}'),
+                        text: ' · ${tr.dashboard.pendingItem(n: pending)}',
+                      ),
                     ],
                   ),
                   maxLines: 1,
@@ -230,26 +238,30 @@ class _SyncIndicator extends StatelessWidget {
     final tr = context.t;
     final amber = t.warningStrong;
 
-    final (IconData? icon, String label, Color color, String tip) =
-        switch (state) {
+    final (
+      IconData? icon,
+      String label,
+      Color color,
+      String tip,
+    ) = switch (state) {
       _CatalogState.busy => (
-          null,
-          tr.sync.updating,
-          t.accent,
-          tr.sync.updatingTip,
-        ),
+        null,
+        tr.sync.updating,
+        t.accent,
+        tr.sync.updatingTip,
+      ),
       _CatalogState.ok => (
-          Icons.check_circle_rounded,
-          tr.sync.upToDate,
-          t.accent,
-          tr.sync.upToDateTip,
-        ),
+        Icons.check_circle_rounded,
+        tr.sync.upToDate,
+        t.accent,
+        tr.sync.upToDateTip,
+      ),
       _CatalogState.incomplete => (
-          Icons.error_outline_rounded,
-          tr.sync.missing,
-          amber,
-          tr.sync.missingTip,
-        ),
+        Icons.error_outline_rounded,
+        tr.sync.missing,
+        amber,
+        tr.sync.missingTip,
+      ),
     };
 
     final leading = icon == null
@@ -310,17 +322,17 @@ class _CloudSyncIndicator extends ConsumerWidget {
         status.phase == SyncPhase.offline && status.pendingOutbox > 0;
     final (IconData icon, Color color, String tip)? shown = switch (status) {
       _ when offlinePending => (
-          Icons.cloud_off_rounded,
-          amber,
-          tr.cloudSync.errorOffline,
-        ),
+        Icons.cloud_off_rounded,
+        amber,
+        tr.cloudSync.errorOffline,
+      ),
       SyncStatus(phase: SyncPhase.error, :final errorKey) => (
-          Icons.cloud_off_rounded,
-          amber,
-          errorKey == 'permissionDenied'
-              ? tr.cloudSync.errorPermission
-              : tr.cloudSync.errorUnknown,
-        ),
+        Icons.cloud_off_rounded,
+        amber,
+        errorKey == 'permissionDenied'
+            ? tr.cloudSync.errorPermission
+            : tr.cloudSync.errorUnknown,
+      ),
       _ => null,
     };
     if (shown == null) return const SizedBox.shrink();
@@ -362,24 +374,27 @@ class _RestoreBanner extends StatelessWidget {
 
     final (Widget leading, String label) = switch (phase) {
       SyncPhase.offline => (
-          Icon(Icons.cloud_off_rounded, size: AppIcon.control, color: amber),
-          tr.cloudSync.restoreOffline,
-        ),
+        Icon(Icons.cloud_off_rounded, size: AppIcon.control, color: amber),
+        tr.cloudSync.restoreOffline,
+      ),
       SyncPhase.error => (
-          Icon(Icons.error_outline_rounded, size: AppIcon.control, color: amber),
-          tr.cloudSync.errorUnknown,
-        ),
+        Icon(Icons.error_outline_rounded, size: AppIcon.control, color: amber),
+        tr.cloudSync.errorUnknown,
+      ),
       _ => (
-          const AppSpinner(size: 16),
-          restore.total > 1
-              ? '${tr.cloudSync.restoring} · '
+        const AppSpinner(size: 16),
+        restore.total > 1
+            ? '${tr.cloudSync.restoring} · '
                   '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
-              : tr.cloudSync.restoring,
-        ),
+            : tr.cloudSync.restoring,
+      ),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s14,
+        vertical: Space.s12,
+      ),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -424,8 +439,7 @@ class _HeroSection extends ConsumerWidget {
         project: hero,
         congregation: congregation,
         onContinue: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-              builder: (_) => ProgramShell(project: hero)),
+          MaterialPageRoute<void>(builder: (_) => ProgramShell(project: hero)),
         ),
       ),
     );
@@ -534,8 +548,9 @@ class _ProjectsSection extends ConsumerWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               BlockTitle(
-                  title: context.t.dashboard.projects,
-                  count: allProjects.length),
+                title: context.t.dashboard.projects,
+                count: allProjects.length,
+              ),
               const SizedBox(width: Space.s6),
               FilterPill(
                 label: context.t.common.allMasculine,
@@ -569,29 +584,34 @@ class _ProjectsSection extends ConsumerWidget {
               children: [
                 SizedBox(
                   width: colW,
-                  child: enter(NewProjectCard(
-                    // A new project lands in the first congregation, the
-                    // same one the modal defaults to. Null onTap renders the
-                    // card disabled.
-                    onTap: _canCreateProjects(ref, congregations)
-                        ? () => showProjectModal(context)
-                        : null,
-                  )),
+                  child: enter(
+                    NewProjectCard(
+                      // A new project lands in the first congregation, the
+                      // same one the modal defaults to. Null onTap renders the
+                      // card disabled.
+                      onTap: _canCreateProjects(ref, congregations)
+                          ? () => showProjectModal(context)
+                          : null,
+                    ),
+                  ),
                 ),
                 for (final p in projects)
                   SizedBox(
                     width: colW,
-                    child: enter(ProjectCard(
-                      project: p,
-                      congregation: porId[p.congregationId],
-                      // The editor session hydrates the form (congregation
-                      // name included) from the DB on open.
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                            builder: (_) => ProgramShell(project: p)),
+                    child: enter(
+                      ProjectCard(
+                        project: p,
+                        congregation: porId[p.congregationId],
+                        // The editor session hydrates the form (congregation
+                        // name included) from the DB on open.
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => ProgramShell(project: p),
+                          ),
+                        ),
+                        onEdit: () => showProjectModal(context, project: p),
                       ),
-                      onEdit: () => showProjectModal(context, project: p),
-                    )),
+                    ),
                   ),
               ],
             );
@@ -612,8 +632,9 @@ class _RemindersSection extends ConsumerWidget {
       if (p.id == projectId) project = p;
     }
     if (project == null) return;
-    Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => ProgramShell(project: project)));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => ProgramShell(project: project)),
+    );
   }
 
   @override
@@ -624,8 +645,7 @@ class _RemindersSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(
-            title: context.t.dashboard.pending, count: reminders.length),
+        BlockTitle(title: context.t.dashboard.pending, count: reminders.length),
         if (reminders.isEmpty)
           Text(
             context.t.dashboard.allDone,
@@ -639,8 +659,7 @@ class _RemindersSection extends ConsumerWidget {
           if (i > 0) const SizedBox(height: Space.s10),
           ReminderCard(
             recordatorio: reminders[i],
-            onCta: () =>
-                _openProject(context, ref, reminders[i].projectId),
+            onCta: () => _openProject(context, ref, reminders[i].projectId),
           ),
         ],
         if (reminders.isNotEmpty) ...[
@@ -686,7 +705,11 @@ class _DashboardSkeleton extends StatelessWidget {
   );
 
   static const _congregation = Congregation(
-      id: 'skeleton', name: 'Congregación', number: '', color: 0xFF7A2230);
+    id: 'skeleton',
+    name: 'Congregación',
+    number: '',
+    color: 0xFF7A2230,
+  );
 
   static const _reminder = Reminder(
     id: 'skeleton',
@@ -703,27 +726,29 @@ class _DashboardSkeleton extends StatelessWidget {
       children: [
         BlockTitle(title: context.t.dashboard.projects, count: 0),
         const SizedBox(height: Space.s12),
-        LayoutBuilder(builder: (context, c) {
-          const gap = 14.0;
-          final cols = (c.maxWidth / 264).floor().clamp(1, 4);
-          final colW = (c.maxWidth - (cols - 1) * gap) / cols;
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [
-              for (var i = 0; i < 4; i++)
-                SizedBox(
-                  width: colW,
-                  child: ProjectCard(
-                    project: _project,
-                    congregation: _congregation,
-                    onTap: () {},
-                    onEdit: () {},
+        LayoutBuilder(
+          builder: (context, c) {
+            const gap = 14.0;
+            final cols = (c.maxWidth / 264).floor().clamp(1, 4);
+            final colW = (c.maxWidth - (cols - 1) * gap) / cols;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (var i = 0; i < 4; i++)
+                  SizedBox(
+                    width: colW,
+                    child: ProjectCard(
+                      project: _project,
+                      congregation: _congregation,
+                      onTap: () {},
+                      onEdit: () {},
+                    ),
                   ),
-                ),
-            ],
-          );
-        }),
+              ],
+            );
+          },
+        ),
       ],
     );
 
