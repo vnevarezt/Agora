@@ -180,6 +180,37 @@ class MwbCache {
     ));
   }
 
+  /// Drops every cached workbook whose issue is not in [issues], whatever its
+  /// language, and forgets their failures. Returns what it removed.
+  ///
+  /// The unit is the ISSUE, not the issue-and-language pair, and that is
+  /// deliberate. A program written before v6 is identified by matching its
+  /// printed heading against whichever cached workbook happens to list it, so
+  /// purging the language a congregation stopped meeting in would take away
+  /// the only thing that can still repair those rows.
+  Future<List<CacheEntry>> retainIssues(Set<String> issues) async {
+    final m = await readManifest();
+    final dropped = [
+      for (final e in m.entries)
+        if (!issues.contains(e.issue)) e,
+    ];
+    if (dropped.isEmpty) return const [];
+    for (final e in dropped) {
+      await _store.delete(e.fileName);
+    }
+    await _writeManifest(CacheManifest(
+      entries: [
+        for (final e in m.entries)
+          if (issues.contains(e.issue)) e,
+      ],
+      failures: [
+        for (final f in m.failures)
+          if (issues.contains(f.issue)) f,
+      ],
+    ));
+    return dropped;
+  }
+
   /// True if [issue] failed less than [backoff] ago (so it should be skipped).
   /// [now] is injectable for deterministic tests.
   bool inBackoff(CacheManifest m, String issue, String lang,

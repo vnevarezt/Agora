@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/mwb_cache.dart';
 import '../data/mwb_repository.dart';
+import '../data/repos/programs_repository.dart';
 import '../domain/meeting_language.dart';
 import '../domain/mwb_calendar.dart';
 import '../models/notebook.dart';
 import 'dashboard_provider.dart';
+import 'program_reconciler.dart';
 import 'weeks_provider.dart';
 
 /// Outcome of one sync cycle (for the UI/diagnostics).
@@ -121,6 +123,32 @@ Future<Map<String, List<Notebook>>> buildCatalog(
   return byLang;
 }
 
+/// Drops the workbooks nothing needs any more: neither inside the coverage
+/// window nor referenced by an alive program. Returns how many were removed.
+///
+/// Nothing evicted these before, so a long-running install accumulated every
+/// issue it had ever seen — several megabytes each — and the project modal
+/// grew a tab for each of them.
+///
+/// Skipped entirely while any alive program is still unidentified. Such a
+/// program is matched by its printed heading against whatever workbook happens
+/// to list it, so there is no way to know which one it needs; the reconciler
+/// clears that state, and the next pass purges.
+Future<int> purgeUnneededIssues({
+  required MwbCache cache,
+  required ProgramsRepository programs,
+  DateTime? now,
+  int monthsAhead = 2,
+}) async {
+  final alive = await programs.aliveWeekStarts();
+  if (alive.anyUnidentified) return 0;
+  final keep = {
+    ...requiredIssues(now ?? DateTime.now(), monthsAhead: monthsAhead),
+    for (final weekStart in alive.weekStarts) ...issuesForWeekStart(weekStart),
+  };
+  return (await cache.retainIssues(keep)).length;
+}
+
 /// Workbook languages the sync has to cover, as a canonical `'E,S'` string.
 /// `null` while the congregation stream has not landed, `''` when there are no
 /// congregations to serve.
@@ -175,6 +203,11 @@ class MwbSyncController extends AsyncNotifier<SyncReport> {
         lang: lang,
       ));
     }
+    // Before publishing, not after: the catalog must describe what survived.
+    await purgeUnneededIssues(
+      cache: cache,
+      programs: ref.read(programsRepositoryProvider),
+    );
     ref
         .read(notebooksByLangProvider.notifier)
         .setFrom(await buildCatalog(cache, repository));

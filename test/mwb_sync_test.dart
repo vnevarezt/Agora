@@ -9,7 +9,14 @@ import 'package:http/testing.dart';
 import 'package:agora/data/mwb_cache.dart';
 import 'package:agora/data/mwb_store_native.dart';
 import 'package:agora/data/mwb_repository.dart';
+import 'package:agora/data/db/app_database.dart';
+import 'package:agora/data/repos/programs_repository.dart';
+import 'package:agora/data/sync/hlc.dart';
+import 'package:agora/data/sync/sync_scribe.dart';
+import 'package:agora/models/notebook.dart';
 import 'package:agora/state/mwb_sync.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
 
 /// Minimal but valid mwb EPUB: one weekly XHTML with one numbered part, so
 /// [parseEpub] returns a single week.
@@ -163,5 +170,98 @@ void main() {
     expect(catalog.keys, containsAll(['S', 'E']));
     expect(catalog['S']!.map((n) => n.id), ['202605']);
     expect(catalog['E']!.map((n) => n.id), ['202605', '202607']);
+  });
+
+  group('purgeUnneededIssues', () {
+    late AppDatabase db;
+    late ProgramsRepository programs;
+
+    setUp(() {
+      db = AppDatabase(NativeDatabase.memory());
+      programs = ProgramsRepository(db, SyncScribe(db, HlcClock('test0000')));
+    });
+    tearDown(() => db.close());
+
+    /// A project with one program, so the purge has something to protect.
+    Future<void> seedProgram(WeekRef week) async {
+      final now = DateTime.utc(2026, 1, 10);
+      await db.into(db.congregations).insert(CongregationsCompanion.insert(
+          id: 'c1', name: 'N', color: 1, createdAt: now, updatedAt: now));
+      await db.into(db.projects).insert(ProjectsCompanion.insert(
+          id: 'pr1',
+          congregationId: 'c1',
+          name: 'P',
+          createdAt: now,
+          updatedAt: now));
+      await db.into(db.programs).insert(ProgramsCompanion.insert(
+            id: 'pg1',
+            projectId: 'pr1',
+            programTypeId: 'mwb-s140',
+            date: week.label,
+            weekStart:
+                week.start.isEmpty ? const Value.absent() : Value(week.start),
+            createdAt: now,
+            updatedAt: now,
+          ));
+    }
+
+    Future<Set<String>> cachedIssues() async =>
+        {for (final e in (await cache.readManifest()).entries) e.issue};
+
+    test('drops an issue nothing needs any more', () async {
+      final now = DateTime(2026, 6, 14);
+      await cache.putEpub('202601', 'S', fakeBytes, 1); // long past
+      await cache.putEpub('202605', 'S', fakeBytes, 1); // in the window
+
+      final removed = await purgeUnneededIssues(
+          cache: cache, programs: programs, now: now, monthsAhead: 2);
+
+      expect(removed, 1);
+      expect(await cachedIssues(), {'202605'});
+      expect(await cache.readEpub('202601', 'S'), isNull,
+          reason: 'the bytes go too, not just the manifest entry');
+    });
+
+    test('keeps an out-of-window issue an alive program still needs',
+        () async {
+      final now = DateTime(2026, 6, 14);
+      await cache.putEpub('202601', 'S', fakeBytes, 1);
+      await seedProgram((start: '2026-02-02', label: '2-8 DE FEBRERO'));
+
+      final removed = await purgeUnneededIssues(
+          cache: cache, programs: programs, now: now, monthsAhead: 2);
+
+      expect(removed, 0);
+      expect(await cachedIssues(), contains('202601'));
+    });
+
+    test('keeps every language of an issue, not just the one in use',
+        () async {
+      // The Spanish workbook is what identifies a pre-v6 row even for a
+      // congregation that now meets in English, so it must survive.
+      final now = DateTime(2026, 6, 14);
+      await cache.putEpub('202605', 'S', fakeBytes, 1);
+      await cache.putEpub('202605', 'E', fakeBytes, 1);
+
+      await purgeUnneededIssues(
+          cache: cache, programs: programs, now: now, monthsAhead: 2);
+
+      final manifest = await cache.readManifest();
+      expect({for (final e in manifest.entries) e.lang}, {'S', 'E'});
+    });
+
+    test('does not run at all while a program is still unidentified',
+        () async {
+      final now = DateTime(2026, 6, 14);
+      await cache.putEpub('202601', 'S', fakeBytes, 1);
+      await seedProgram((start: '', label: '2-8 DE FEBRERO'));
+
+      final removed = await purgeUnneededIssues(
+          cache: cache, programs: programs, now: now, monthsAhead: 2);
+
+      expect(removed, 0,
+          reason: 'there is no telling which workbook that row needs');
+      expect(await cachedIssues(), contains('202601'));
+    });
   });
 }
