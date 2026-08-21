@@ -73,6 +73,46 @@ def esc(value: str) -> str:
     return html.escape(str(value), quote=True)
 
 
+def mark() -> str:
+    """The brand mark, inlined from the files gen_brand_assets.py renders.
+
+    Read at build time rather than copied into the CSS, so the page can never
+    hold a stale version of a drawing whose source of truth is a script two
+    directories away. Both variants ship because only the back plane changes
+    between them, and it has to: the brand navy drowns on a dark ground.
+
+    Inline rather than <img>: it is 200 bytes against a request, on a page
+    whose whole point is to be cheap to open.
+    """
+    out = []
+    for theme, name in (("light", "agora-mark.svg"), ("dark", "agora-mark-dark.svg")):
+        svg = (ROOT / "assets/brand" / name).read_text().strip()
+        # Drop the intrinsic size; the height comes from CSS and the width
+        # follows the viewBox, or the mark cannot be reused at two sizes.
+        svg = re.sub(r'\s(width|height)="[^"]*"', "", svg, count=2)
+        out.append(svg.replace("<svg ", f'<svg class="mark-on-{theme}" ', 1))
+    return "".join(out)
+
+
+def wordmark_ink() -> str:
+    """The lockup's word colour, per theme, as custom properties.
+
+    Same source as the mark: gen_brand_assets.py holds it, the app reads its
+    own copy (guarded by test/ui/agora_mark_test.dart), and this pulls it out
+    of the generator so the page cannot be the one that drifts.
+    """
+    src = (ROOT / "tool/gen_brand_assets.py").read_text()
+    line = re.search(r"^WORDMARK_INK = (.*)$", src, re.M).group(1)
+    light, dark = re.findall(r"#[0-9a-f]{6}", line)
+    return (
+        f":root {{ --brand-word: {light}; }}\n"
+        "@media (prefers-color-scheme: dark) {\n"
+        f'  :root:not([data-theme="light"]) {{ --brand-word: {dark}; }}\n'
+        "}\n"
+        f':root[data-theme="dark"] {{ --brand-word: {dark}; }}\n'
+    )
+
+
 def render_sheet() -> str:
     parts = [
         '<div class="sheet" role="img" aria-label="Ejemplo de programa impreso">',
@@ -118,6 +158,7 @@ def build(locale: str, subdir: str, template: str, sheet: str) -> None:
     src = SITE / f"copy/{locale}.json"
     strings = {k: esc(v) for k, v in flatten(json.loads(src.read_text())).items()}
     strings["lang"] = locale
+    strings["brand.mark"] = mark()
     strings["sheet"] = sheet
     strings["meta.canonical"] = ORIGIN + (
         "/" if locale == LOCALES[0] else f"/{locale}/"
@@ -150,9 +191,10 @@ def main() -> None:
 
     for name in ("tokens.css", "landing.js", "action.js"):
         shutil.copy2(SITE / name, OUT / name)
+    ink = wordmark_ink()
     for out_name, sources in SHEETS.items():
         (OUT / out_name).write_text(
-            "".join((SITE / src).read_text() for src in sources)
+            ink + "".join((SITE / src).read_text() for src in sources)
         )
     shutil.copytree(SITE / "fonts", OUT / "fonts", dirs_exist_ok=True)
 

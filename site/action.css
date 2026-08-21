@@ -30,23 +30,13 @@
   margin-bottom: var(--s24);
 }
 
-.lockup-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-size: var(--t-body);
-  font-weight: 800;
-  display: grid;
-  place-items: center;
-}
+.lockup-mark { display: block; height: 30px; }
 
 .lockup-name {
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.3px;
-  color: var(--text);
+  color: var(--brand-word);
 }
 
 /* ---- card -------------------------------------------------------------- */
