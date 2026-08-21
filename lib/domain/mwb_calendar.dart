@@ -71,3 +71,78 @@ int issueMonth(String issue) => _month(issue);
 
 /// The year of an issue.
 int issueYear(String issue) => _year(issue);
+
+/// ISO Monday (`yyyy-MM-dd`) a workbook week starts on, or null when the
+/// heading does not fit the issue.
+///
+/// Derived from the DIGITS of the week heading, which are language-invariant
+/// where the words are not: Spanish `6-12 DE JULIO` and English `JULY 6-12`
+/// both open with 6, and a week spanning two months reads `29 DE JUNIO A 5 DE
+/// JULIO` / `JUNE 29–JULY 5` — same numbers, same order. [startDay] is that
+/// first number.
+///
+/// Resolution is two-pass, and the order matters. Mondays inside the issue's
+/// own two months come first; only if none has that day of month does the
+/// search widen by a week on each side, which is where the crossover week that
+/// opens a workbook lives (`202605` can start on 27 April). Widening first
+/// would be wrong: two Mondays share a day of month exactly when they are 28
+/// or 56 days apart, and the one pair of consecutive months that can manage it
+/// is February→March in a common year — so a Jan–Feb issue asked for day 2 in
+/// 2026 sees both 2 February and 2 March, and only the period tells them apart.
+///
+/// [previous] is the ISO Monday of the preceding week of the same workbook.
+/// Weeks are exactly seven days apart, so passing it turns the search into an
+/// equality check: an unexpected heading is then rejected rather than guessed.
+String? weekStartFor(String issue, int startDay, {String? previous}) {
+  final prior = _parseIsoDate(previous);
+  if (prior != null) {
+    final next = prior.add(const Duration(days: 7));
+    return next.day == startDay ? _isoDate(next) : null;
+  }
+
+  final periodStart = DateTime.utc(_year(issue), _month(issue), 1);
+  final periodEnd = DateTime.utc(_year(issue), _month(issue) + 2, 1);
+  return _mondayWithDay(periodStart, periodEnd, startDay) ??
+      _mondayWithDay(periodStart.subtract(const Duration(days: 7)), periodStart,
+          startDay) ??
+      _mondayWithDay(
+          periodEnd, periodEnd.add(const Duration(days: 7)), startDay);
+}
+
+/// First Monday in `[from, to)` whose day of month is [day], as ISO text.
+String? _mondayWithDay(DateTime from, DateTime to, int day) {
+  for (var d = from; d.isBefore(to); d = d.add(const Duration(days: 1))) {
+    if (d.weekday == DateTime.monday && d.day == day) return _isoDate(d);
+  }
+  return null;
+}
+
+/// UTC on purpose: adding days to a local DateTime can cross a DST boundary
+/// and land on 23:00 the day before, which would corrupt the day of month.
+DateTime? _parseIsoDate(String? iso) {
+  if (iso == null || iso.isEmpty) return null;
+  final parts = iso.split('-');
+  if (parts.length != 3) return null;
+  final year = int.tryParse(parts[0]);
+  final month = int.tryParse(parts[1]);
+  final day = int.tryParse(parts[2]);
+  if (year == null || month == null || day == null) return null;
+  return DateTime.utc(year, month, day);
+}
+
+String _isoDate(DateTime d) =>
+    '${_pad4(d.year)}-${_pad2(d.month)}-${_pad2(d.day)}';
+
+/// Issue (`YYYYMM`) whose workbook carries the week starting on [weekStart].
+///
+/// [issueForDate] alone is not enough: a workbook opens with the week that
+/// starts up to six days BEFORE its period, so 2026-04-27 belongs to `202605`
+/// while its date says `202603`. Reading a week out of the wrong issue is a
+/// silent miss, so both candidates are offered and the caller takes the first
+/// that actually contains the week.
+List<String> issuesForWeekStart(String weekStart) {
+  final date = _parseIsoDate(weekStart);
+  if (date == null) return const [];
+  final own = issueForDate(date);
+  return [own, nextIssue(own)];
+}
