@@ -790,6 +790,7 @@ class _Translations$program$en extends Translations$program$es {
 	@override String get rolePrayer => 'Prayer:';
 	@override String get roleSpeaker => 'Speaker:';
 	@override String get title => 'Midweek Meeting Program';
+	@override String get weeklyReading => 'WEEKLY BIBLE READING';
 	@override String get chairman => 'Chairman: ';
 	@override String get mainHall => 'Main Hall';
 	@override String get auxRoom => 'Auxiliary Classroom';
@@ -1472,6 +1473,7 @@ extension on TranslationsEn {
 			'program.rolePrayer' => 'Prayer:',
 			'program.roleSpeaker' => 'Speaker:',
 			'program.title' => 'Midweek Meeting Program',
+			'program.weeklyReading' => 'WEEKLY BIBLE READING',
 			'program.chairman' => 'Chairman: ',
 			'program.mainHall' => 'Main Hall',
 			'program.auxRoom' => 'Auxiliary Classroom',
