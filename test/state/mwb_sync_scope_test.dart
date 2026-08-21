@@ -63,10 +63,22 @@ void main() {
     if (await tmp.exists()) await tmp.delete(recursive: true);
   });
 
+  /// Fixed wait, for the assertions that are about something NOT happening.
   Future<void> settle() async {
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < 25; i++) {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
+  }
+
+  /// Polls instead of guessing a duration: the whole suite runs in parallel,
+  /// so a fixed wait long enough on an idle machine is not long enough on a
+  /// busy one.
+  Future<void> waitFor(bool Function() done, String what) async {
+    for (var i = 0; i < 400; i++) {
+      if (done()) return;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    fail('timed out waiting for $what');
   }
 
   test('fetches nothing while there is no congregation', () async {
@@ -83,9 +95,8 @@ void main() {
           number: '104772',
           settings: const CongregationSettings(meetingLanguage: 'english'),
         );
-    await settle();
+    await waitFor(() => repo.requested.isNotEmpty, 'the first fetch');
 
-    expect(repo.requested, isNotEmpty);
     expect(repo.requested, everyElement(endsWith('.E')));
   });
 
@@ -99,9 +110,9 @@ void main() {
       number: '1',
       settings: const CongregationSettings(meetingLanguage: 'english'),
     );
+    await waitFor(() => repo.requested.isNotEmpty, 'the first pass');
     await settle();
     final before = repo.requested.length;
-    expect(before, greaterThan(0));
 
     await congregations.update(
       cong.id,
@@ -122,7 +133,7 @@ void main() {
       number: '1',
       settings: const CongregationSettings(meetingLanguage: 'english'),
     );
-    await settle();
+    await waitFor(() => repo.requested.isNotEmpty, 'the English pass');
     expect(repo.requested, everyElement(endsWith('.E')));
 
     await congregations.update(
@@ -131,9 +142,9 @@ void main() {
       number: '1',
       settings: const CongregationSettings(meetingLanguage: 'spanish'),
     );
-    await settle();
 
-    expect(repo.requested.where((r) => r.endsWith('.S')), isNotEmpty);
+    await waitFor(() => repo.requested.any((r) => r.endsWith('.S')),
+        'the Spanish pass');
   });
 
   test('a congregation in each language pulls both workbooks', () async {
@@ -148,9 +159,9 @@ void main() {
       number: '2',
       settings: const CongregationSettings(meetingLanguage: 'spanish'),
     );
-    await settle();
+    Set<String> langs() => {for (final r in repo.requested) r.split('.').last};
+    await waitFor(() => langs().length == 2, 'both languages');
 
-    final langs = {for (final r in repo.requested) r.split('.').last};
-    expect(langs, {'S', 'E'});
+    expect(langs(), {'S', 'E'});
   });
 }
