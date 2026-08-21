@@ -207,17 +207,13 @@
   text-decoration: none;
   color: inherit;
 }
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 26px; height: 26px;
-  border-radius: var(--r-chip);
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-size: var(--t-item-body);
+.brand-mark { display: block; height: 26px; }
+.brand-name {
+  font-size: var(--t-tile);
   font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--brand-word);
 }
-.brand-name { font-size: var(--t-tile); font-weight: 800; letter-spacing: -0.4px; }
 
 /* The brand and the nav share one flexible cell so the free width collects
  * between the nav and the actions. As two flex children they split it evenly
