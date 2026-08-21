@@ -7,7 +7,6 @@ import '../data/repos/programs_repository.dart';
 import '../domain/meeting_language.dart';
 import '../models/congregation.dart';
 import '../models/congregation_settings.dart';
-import '../models/week.dart';
 import 'dashboard_provider.dart';
 import 'db_provider.dart';
 import 'weeks_provider.dart';
@@ -111,7 +110,7 @@ class ProgramReconciler {
 
     // (1) Identity, for rows written before it existed.
     if (weekStart == null || weekStart.isEmpty) {
-      weekStart = await _identityFromLabel(program.date);
+      weekStart = _identityFromLabel(program.date);
       if (weekStart == null) return const ReconcileReport(pending: 1);
     }
 
@@ -142,23 +141,12 @@ class ProgramReconciler {
   /// already a mix: the label was written in one language and the congregation
   /// may now meet in another, so insisting on the current one would find
   /// nothing and leave the program broken forever.
-  Future<String?> _identityFromLabel(String label) async {
+  String? _identityFromLabel(String label) {
     if (label.isEmpty) return null;
-    final catalog = _ref.read(notebooksByLangProvider);
-    final repository = _ref.read(repositoryProvider);
-    for (final entry in catalog.entries) {
-      for (final notebook in entry.value) {
-        if (!notebook.weeks.contains(label)) continue;
-        final List<Week> weeks;
-        try {
-          weeks = await repository.weeks(notebook.id, lang: entry.key);
-        } catch (_) {
-          continue; // an unreadable notebook must not stop the search
-        }
-        for (final week in weeks) {
-          if (week.date == label && week.weekStart.isNotEmpty) {
-            return week.weekStart;
-          }
+    for (final notebooks in _ref.read(notebooksByLangProvider).values) {
+      for (final notebook in notebooks) {
+        for (final week in notebook.weeks) {
+          if (week.label == label && week.start.isNotEmpty) return week.start;
         }
       }
     }

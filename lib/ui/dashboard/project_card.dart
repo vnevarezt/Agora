@@ -107,7 +107,7 @@ class ProjectCard extends StatelessWidget {
                   Wrap(
                     spacing: Space.s6,
                     runSpacing: Space.s6,
-                    children: [for (final w in p.weeks) MiniChip.week(w)],
+                    children: [for (final w in p.weeks) MiniChip.week(w.label)],
                   ),
                   const SizedBox(height: Space.s14),
                   Row(

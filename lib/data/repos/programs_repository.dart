@@ -40,6 +40,11 @@ class ProgramsRepository {
   /// so writing the snapshot is what backfills [Programs.weekStart] on rows
   /// that predate v6 — an empty one is left alone rather than overwriting a
   /// good identity with nothing.
+  ///
+  /// [Programs.date] moves with the snapshot too. It is the week heading as
+  /// this workbook prints it, so a program re-snapshotted into another
+  /// language must carry that language's heading; leaving it behind is what
+  /// used to show a Spanish week chip over an English program.
   Future<void> setContent(String programId, Week week, String lang) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
@@ -47,6 +52,7 @@ class ProgramsRepository {
           .write(ProgramsCompanion(
         contentJson: Value(jsonEncode(week.toJson())),
         contentLang: Value(lang),
+        date: week.date.isEmpty ? const Value.absent() : Value(week.date),
         weekStart: week.weekStart.isEmpty
             ? const Value.absent()
             : Value(week.weekStart),

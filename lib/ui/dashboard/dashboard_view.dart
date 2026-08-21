@@ -687,7 +687,11 @@ class _DashboardSkeleton extends StatelessWidget {
     id: 'skeleton',
     name: 'Programa de ejemplo',
     congregationId: 'skeleton',
-    weeks: const ['SEMANA UNO', 'SEMANA DOS', 'SEMANA TRES'],
+    weeks: const [
+      (start: '', label: 'SEMANA UNO'),
+      (start: '', label: 'SEMANA DOS'),
+      (start: '', label: 'SEMANA TRES'),
+    ],
     done: 12,
     total: 59,
     status: ProjectStatus.draft,

@@ -57,7 +57,10 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   late String _name = widget.original?.name ?? '';
   late String _congregationId;
   late String _notebookId;
-  late List<String> _weeks = List.of(widget.original?.weeks ?? const []);
+  /// Picked weeks, identity and label together. Keyed on the identity, so
+  /// editing a project after its congregation changed language matches the
+  /// existing programs instead of replacing them (and their assignments).
+  late List<WeekRef> _weeks = List.of(widget.original?.weeks ?? const []);
 
   bool get _isNew => widget.original == null;
 
@@ -87,25 +90,36 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
         : (notebooks.isNotEmpty ? notebooks.first.id : '');
   }
 
+  /// Two weeks are the same week when their identities match; a week with no
+  /// identity (an unresolved heading) falls back to its label.
+  static bool _same(WeekRef a, WeekRef b) => a.start.isEmpty || b.start.isEmpty
+      ? a.label == b.label
+      : a.start == b.start;
+
+  bool _picked(WeekRef w) => _weeks.any((x) => _same(x, w));
+
+  bool _inNotebook(Notebook notebook, WeekRef w) =>
+      notebook.weeks.any((x) => _same(x, w));
+
   /// Toggles a notebook week, preserving the notebook order and the "extra"
   /// weeks (from other notebooks) at the end.
-  void _toggle(String w, Notebook notebook) {
+  void _toggle(WeekRef w, Notebook notebook) {
     setState(() {
-      if (_weeks.contains(w)) {
-        _weeks = _weeks.where((x) => x != w).toList();
+      if (_picked(w)) {
+        _weeks = _weeks.where((x) => !_same(x, w)).toList();
       } else {
         final extra =
-            _weeks.where((x) => !notebook.weeks.contains(x)).toList();
+            _weeks.where((x) => !_inNotebook(notebook, x)).toList();
         _weeks = [
-          ...notebook.weeks.where((x) => _weeks.contains(x) || x == w),
+          ...notebook.weeks.where((x) => _picked(x) || _same(x, w)),
           ...extra,
         ];
       }
     });
   }
 
-  void _remove(String w) =>
-      setState(() => _weeks = _weeks.where((x) => x != w).toList());
+  void _remove(WeekRef w) =>
+      setState(() => _weeks = _weeks.where((x) => !_same(x, w)).toList());
 
   /// Default name when the field is empty. Built from the notebook's starting
   /// month in the CURRENT app language and then persisted as plain text — the
@@ -189,7 +203,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
 
     final notebook = notebooks.firstWhere((c) => c.id == _notebookId,
         orElse: () => notebooks.first);
-    final extra = _weeks.where((x) => !notebook.weeks.contains(x)).toList();
+    final extra = _weeks.where((x) => !_inNotebook(notebook, x)).toList();
     final autoName = _autoName(notebook, tr);
 
     return ModalShell(
@@ -213,7 +227,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     List<Congregation> congregations,
     List<Notebook> notebooks,
     Notebook notebook,
-    List<String> extra,
+    List<WeekRef> extra,
     String autoName,
   ) {
     final congField = LabeledField(
@@ -260,13 +274,13 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
                 children: [
                   for (final w in notebook.weeks)
                     _WeekToggle(
-                      label: w,
-                      active: _weeks.contains(w),
+                      label: w.label,
+                      active: _picked(w),
                       onTap: () => _toggle(w, notebook),
                     ),
                   for (final w in extra)
                     _WeekToggle(
-                      label: w,
+                      label: w.label,
                       active: true,
                       extra: true,
                       onTap: () => _remove(w),
