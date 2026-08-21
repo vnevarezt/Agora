@@ -69,6 +69,16 @@
             "value": "public, max-age=2592000"
           }
         ]
+      },
+      {
+        "//": "The hero art, on the same bet as the fonts above: tool/demo/site_shots.py is run about as often as the fonts are subset, and the names are just as stable. A week rather than a month because the art is the thing most likely to be redrawn, and a stale hero is a visible wrong where a stale font subset is not. The default no-cache would otherwise spend a conditional request per visit on a ~90 KB image, which is most of what this page weighs.",
+        "source": "/media/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800"
+          }
+        ]
       }
     ]
   },

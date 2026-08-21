@@ -25,6 +25,11 @@
 <link rel="preload" href="/fonts/Manrope-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Manrope-Medium.woff2" as="font" type="font/woff2" crossorigin>
 
+<!-- The hero montage, whichever of the six this reader's window and theme ask
+     for. It is a CSS background, so without this it is not discovered until
+     the stylesheet has been parsed and the box laid out. -->
+{{shot.preload}}
+
 <script>
   /* Before first paint: a deferred script would let the OS theme flash first. */
   (function () {
@@ -88,7 +93,7 @@
         <p class="note enter" style="--enter-delay: 270ms">{{landing.hero.note}}</p>
       </div>
       <div class="cell enter" style="--enter-delay: 120ms">
-        {{sheet}}
+        {{shot}}
       </div>
     </div>
   </section>
@@ -130,32 +135,16 @@
 
   <!-- Timing ----------------------------------------------------------- -->
   <section class="section" id="schedules">
-    <div class="shell bento bento-copy bento-mirror">
+    <div class="shell bento bento-copy bento-mirror bento-middle">
       <div class="cell section-head reveal">
         <p class="eyebrow">{{landing.eyebrow.schedules}}</p>
         <h2 class="heading">{{landing.schedules.title}}</h2>
         <p class="lead">{{landing.schedules.body}}</p>
         <p class="item-body muted">{{landing.schedules.circuit}}</p>
+        <p class="slack mono">{{landing.schedules.slack}}</p>
       </div>
-      <div class="cell reveal" style="--reveal-delay: 70ms">
-        <div>
-          <div class="run-head">
-            <span class="item-body strong">{{landing.schedules.sampleLabel}}</span>
-            <span class="badge badge-soft mono">{{landing.schedules.sampleTargetEnd}}</span>
-          </div>
-          <ol class="run">
-            <li><span class="mono t">18:00</span><span class="p">{{landing.schedules.sampleOpeningSong}}</span></li>
-            <li><span class="mono t">18:05</span><span class="p">{{landing.schedules.sampleIntro}}</span></li>
-            <li class="major"><span class="mono t">18:09</span><span class="p">{{landing.schedules.sampleTreasures}}</span><span class="d mono">{{landing.schedules.sampleTreasuresDuration}}</span></li>
-            <li class="major"><span class="mono t">18:34</span><span class="p">{{landing.schedules.sampleMinistry}}</span><span class="d mono">{{landing.schedules.sampleMinistryDuration}}</span></li>
-            <li><span class="mono t">18:49</span><span class="p">{{landing.schedules.sampleSong2}}</span></li>
-            <li class="major"><span class="mono t">18:57</span><span class="p">{{landing.schedules.sampleChristianLife}}</span><span class="d mono">{{landing.schedules.sampleChristianLifeDuration}}</span></li>
-            <li><span class="mono t">19:02</span><span class="p">{{landing.schedules.sampleBibleStudy}}</span></li>
-            <li><span class="mono t">19:32</span><span class="p">{{landing.schedules.sampleClosingWords}}</span></li>
-            <li><span class="mono t">19:35</span><span class="p">{{landing.schedules.sampleClosingSong}}</span></li>
-          </ol>
-          <p class="slack mono">{{landing.schedules.slack}}</p>
-        </div>
+      <div class="cell reveal reveal-tall" style="--reveal-delay: 70ms">
+        {{programShot}}
       </div>
     </div>
   </section>

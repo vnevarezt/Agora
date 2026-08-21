@@ -269,7 +269,7 @@
 .bento-middle { align-items: center; }
 .cell { min-width: 0; }
 
-/* One ratio for every split on the page, so the hero sheet and every panel
+/* One ratio for every split on the page, so the hero shot and every panel
  * below it share a left edge.
  *
  * The Flutter original carried two — 4:6 where the left column held only a
@@ -298,6 +298,16 @@
     padding-left: var(--s20);
   }
   .bento-mirror > .cell:last-child { order: 1; }
+}
+
+/* The hero is the one split that widens, and only once there is room to widen
+ * into. Everything below it argues in prose and needs the measure; the hero
+ * argues with a picture of the product, and at 5fr the montage is a stamp next
+ * to display type at 66px. It costs the hero's left edge — the sections below
+ * still share theirs with each other — and buys the fold. The right edge, the
+ * one every section and the header line up on, does not move. */
+@media (min-width: 1081px) {
+  .bento-hero { grid-template-columns: 4fr 6fr; }
 }
 
 /* ---- the section header, used by every section ------------------------- */
@@ -391,8 +401,8 @@
 
 /* No container: a process is not an object Agora produces, so it gets the same
  * hairline-and-air treatment as the rest of the prose. The rule for the whole
- * page is that a surface stands for output — the printed sheet and the computed
- * run of show — and nothing else earns one. */
+ * page is that a surface stands for output — the computed run of show — and
+ * nothing else earns one. */
 .steps .step:first-child { padding-top: 0; }
 .steps .step:last-child { padding-bottom: 0; }
 .step { display: flex; gap: var(--s8); padding-block: var(--s20); }
@@ -406,35 +416,13 @@
   color: var(--accent);
 }
 
-/* ---- run of show ------------------------------------------------------ */
+/* ---- the timing claim ------------------------------------------------- */
+/* What is left of the run of show: the list that used to stand here was a
+   hand-built replica of the program, and the section now shows the real one.
+   The line it ended on is the argument, so it moved up under the copy. */
 
-.run-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s12);
-  padding-bottom: var(--s16);
-  border-bottom: 1px solid var(--border2);
-}
-.run { margin-top: var(--s8); }
-.run li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s12);
-  padding-block: var(--s8);
-  font-size: var(--t-item-body);
-  font-weight: 500;
-  color: var(--text-dim);
-}
-.run li + li { border-top: 1px solid var(--border2); }
-.run .t { flex: 0 0 auto; font-size: var(--t-caption); color: var(--text-mute); }
-.run .p { flex: 1; min-width: 0; }
-.run .d { flex: 0 0 auto; font-size: var(--t-caption); color: var(--text-mute); }
-.run .major { font-weight: 700; color: var(--text); }
 .slack {
   margin-top: var(--s16);
-  padding-top: var(--s16);
-  border-top: 1px solid var(--border2);
   font-size: var(--t-caption);
   color: var(--accent);
 }
@@ -634,54 +622,146 @@
   .btn, .btn-arrow, .segmented-thumb, .to-top { transition: none; }
 }
 
-/* ---- program sheet ---------------------------------------------------- */
-/* Paper. It keeps its own light palette in dark mode for the same reason a
- * photograph of a document does: it is a picture of the printout. */
+/* ---- hero shot -------------------------------------------------------- */
+/* The app itself, framed, on the hardware the reader is most likely holding
+ * and in the theme they are reading in. Both switches happen here because
+ * neither can happen in the markup: the file names differ per locale, and this
+ * page has one stylesheet for both, so build_site.py hands the element its
+ * candidates as custom properties and the cascade picks one. A background
+ * rather than a <picture> because the theme is a data-theme attribute as often
+ * as it is prefers-color-scheme, and a <source media> cannot read an
+ * attribute — and because only the winning rule is ever fetched, so a reader
+ * pays for one montage, not twelve.
+ *
+ * Everything below sets --pick, never background-image: the theme rules at the
+ * end outrank a bare .shot in a later media query, so a width or a density
+ * that reassigned the image directly would be ignored the moment the page went
+ * dark.
+ *
+ * It fills its column and not a pixel more. Bleeding it to the window edge
+ * bought a bigger device and cost the page its right margin — the one edge
+ * every other section, and the header above it, line up on.
+ *
+ * The ratios are each montage's own after site_shots.py trims the transparent
+ * margin off it, which is over half the canvas for the two phones. It prints
+ * the values; they belong nowhere else. */
 
-.sheet {
-  aspect-ratio: 612 / 792;
-  padding: 5.5%;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 12px 32px rgb(0 0 0 / .10);
-  color: #1f242d;
-  font-size: clamp(6px, .85vw, 10px);
-  line-height: 1.5;
-  container-type: inline-size;
+.shot {
+  --pick: var(--shot-phone-light);
+  --pick-dark: var(--shot-phone-dark);
+  aspect-ratio: 620 / 730;
+  width: 100%;
+  background-image: var(--pick);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
-.sheet-head {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: .6em;
-  border-bottom: 1px solid #1f242d;
-  font-size: .95em;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+
+@media (min-width: 721px) {
+  .shot {
+    --pick: var(--shot-tablet-light);
+    --pick-dark: var(--shot-tablet-dark);
+    aspect-ratio: 560 / 326;
+  }
+  /* The art is shorter than the copy beside it once the columns split, and a
+   * device sitting on the headline's baseline reads as a caption to it. */
+  .bento-hero > .cell:last-child { align-self: center; }
 }
-.sheet-band {
-  margin-top: 1.4em;
-  padding: .35em .7em;
-  font-size: .85em;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: #fff;
+
+@media (min-width: 1081px) {
+  .shot {
+    --pick: var(--shot-desk-light);
+    --pick-dark: var(--shot-desk-dark);
+    aspect-ratio: 740 / 465;
+  }
 }
-.sheet-band.treasures { background: #5c5c5c; }
-.sheet-band.ministry { background: #b9890f; }
-.sheet-band.life { background: #8c1b2e; }
-.sheet-row {
-  display: flex;
-  gap: .8em;
-  padding: .42em 0;
-  border-bottom: 1px solid #e4e8ec;
+
+/* The same three, at twice the pixels, for the screens that can resolve them.
+ * Density is a separate axis from width, so it nests rather than multiplying
+ * the blocks above by two. Not image-set(): its argument would arrive through
+ * var(), and a browser that does not know the function drops the whole
+ * declaration at computed-value time — leaving no image at all rather than
+ * falling back to the 1x line above it. */
+@media (min-resolution: 2dppx), (-webkit-min-device-pixel-ratio: 2) {
+  .shot {
+    --pick: var(--shot-phone-light-2x);
+    --pick-dark: var(--shot-phone-dark-2x);
+  }
+
+  @media (min-width: 721px) {
+    .shot {
+      --pick: var(--shot-tablet-light-2x);
+      --pick-dark: var(--shot-tablet-dark-2x);
+    }
+  }
+
+  @media (min-width: 1081px) {
+    .shot {
+      --pick: var(--shot-desk-light-2x);
+      --pick-dark: var(--shot-desk-dark-2x);
+    }
+  }
 }
-.sheet-row .sheet-t {
-  flex: 0 0 3.4em;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  color: #5d646f;
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shot { background-image: var(--pick-dark); }
 }
-.sheet-row .sheet-p { flex: 1; min-width: 0; }
-.sheet-row .sheet-n { flex: 0 0 auto; color: #5d646f; }
-.sheet-gap { height: 1.2em; }
+:root[data-theme="dark"] .shot { background-image: var(--pick-dark); }
+
+/* ---- the program, on an iPad ------------------------------------------ */
+/* The timing section's artifact: the real editor with the preview panel open,
+ * rather than the CSS replica of a printout that used to stand there. One
+ * composition at every width — the section argues about the program, not about
+ * what you are holding — so this only switches on theme and density.
+ *
+ * A phone rather than the tablet it started as, for one measurement: on the
+ * phone the sheet is 91% of the screen's width, where the tablet spends half
+ * its screen on the editor and leaves the sheet 45%. Same device width on the
+ * page, twice the program.
+ *
+ * Capped well under the column: it is a portrait phone, so every pixel of
+ * width costs two of height, and at the full 6/11 of the measure it would
+ * stand 1300px tall beside four lines of copy. What the cap leaves over
+ * goes on the inside, so the phone keeps the page's left edge — the one the
+ * header and every section below it start on — and the slack falls into the
+ * gutter between the two columns instead of splitting in two around it. */
+
+.program {
+  --pick: var(--program-light);
+  --pick-dark: var(--program-dark);
+  aspect-ratio: 400 / 782;
+  width: min(100%, 400px);
+  margin-inline: auto;
+  background-image: var(--pick);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+@media (min-width: 721px) {
+  .program { margin-inline: 0 auto; }
+}
+
+@media (min-resolution: 2dppx), (-webkit-min-device-pixel-ratio: 2) {
+  .program {
+    --pick: var(--program-light-2x);
+    --pick-dark: var(--program-dark-2x);
+  }
+}
+
+/* The one asset on the page that goes to 3x. The rows of the program land at
+ * about five CSS pixels: nothing can make that large, but it can be made
+ * sharp, and sharp is the difference between reading the times and seeing
+ * grey. Only phones ask for this file, and a phone is where this section is
+ * read closest. */
+@media (min-resolution: 3dppx), (-webkit-min-device-pixel-ratio: 3) {
+  .program {
+    --pick: var(--program-light-3x);
+    --pick-dark: var(--program-dark-3x);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .program { background-image: var(--pick-dark); }
+}
+:root[data-theme="dark"] .program { background-image: var(--pick-dark); }
