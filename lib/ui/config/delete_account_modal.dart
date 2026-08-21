@@ -9,6 +9,7 @@ import '../../state/sync_provider.dart';
 import '../auth/widgets/auth_error_text.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import '../widgets/app_spinner.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/labeled_field.dart';
 import '../widgets/modal_shell.dart';
@@ -118,7 +119,7 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
           if (loading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: Space.s12),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: AppSpinner(size: 20)),
             )
           else if (blocked.isNotEmpty)
             _BlockedNotice(congregationIds: blocked)

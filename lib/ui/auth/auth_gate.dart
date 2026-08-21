@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/auth_session.dart';
 import '../../state/cloud_auth.dart';
+import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/agora_mark.dart';
 import '../widgets/app_spinner.dart';
 import '../widgets/motion.dart';
 import 'cloud_auth_screen.dart';
@@ -99,15 +101,47 @@ class _AuthFlowState extends State<_AuthFlow> {
   }
 }
 
-class _AuthSplash extends StatelessWidget {
+/// The mark plays its entrance, and the spinner only joins it once that has
+/// finished. Most boots resolve inside the animation, and a spinner that
+/// flashes for a fifth of a second reads as a stutter rather than as progress
+/// — but a boot that outlasts the mark still has to say it is working.
+class _AuthSplash extends StatefulWidget {
   const _AuthSplash();
+
+  @override
+  State<_AuthSplash> createState() => _AuthSplashState();
+}
+
+class _AuthSplashState extends State<_AuthSplash> {
+  bool _settled = false;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Scaffold(
       backgroundColor: t.bg,
-      body: const Center(child: AppSpinner(size: 26)),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Well above AppIcon.hero: this is the one surface where the mark
+            // carries the screen on its own.
+            AgoraMarkEntrance(
+              size: 64,
+              onEnd: () => setState(() => _settled = true),
+            ),
+            // The spinner keeps its space from the first frame, so arriving
+            // does not shunt the mark upwards.
+            const SizedBox(height: Space.s24),
+            AnimatedOpacity(
+              opacity: _settled ? 1 : 0,
+              duration: Motion.of(context, Motion.med),
+              curve: Motion.curve,
+              child: const AppSpinner(size: 20),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
