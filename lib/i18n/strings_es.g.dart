@@ -877,6 +877,21 @@ class Translations$settings$es {
 	/// es: 'Sin copias todavía'
 	String get noBackupsYet => 'Sin copias todavía';
 
+	/// es: 'Cuadernos de reunión'
+	String get catalogTitle => 'Cuadernos de reunión';
+
+	/// es: 'Se descargan solos. Actualiza a mano si jw.org publicó una corrección.'
+	String get catalogDesc => 'Se descargan solos. Actualiza a mano si jw.org publicó una corrección.';
+
+	/// es: 'Actualizar'
+	String get catalogRefresh => 'Actualizar';
+
+	/// es: 'Catálogo actualizado ({n} cuadernos).'
+	String catalogRefreshed({required Object n}) => 'Catálogo actualizado (${n} cuadernos).';
+
+	/// es: 'No se ha podido actualizar. Se conserva lo que ya tenías.'
+	String get catalogRefreshFailed => 'No se ha podido actualizar. Se conserva lo que ya tenías.';
+
 	/// es: 'Contraseña de la copia'
 	String get backupPasswordTitle => 'Contraseña de la copia';
 
@@ -2296,6 +2311,11 @@ extension on Translations {
 			'settings.import' => 'Importar',
 			'settings.lastBackup' => 'Última copia',
 			'settings.noBackupsYet' => 'Sin copias todavía',
+			'settings.catalogTitle' => 'Cuadernos de reunión',
+			'settings.catalogDesc' => 'Se descargan solos. Actualiza a mano si jw.org publicó una corrección.',
+			'settings.catalogRefresh' => 'Actualizar',
+			'settings.catalogRefreshed' => ({required Object n}) => 'Catálogo actualizado (${n} cuadernos).',
+			'settings.catalogRefreshFailed' => 'No se ha podido actualizar. Se conserva lo que ya tenías.',
 			'settings.backupPasswordTitle' => 'Contraseña de la copia',
 			'settings.backupPasswordDesc' => 'Protege el archivo: sin ella no se puede restaurar.',
 			'settings.backupPasswordRepeat' => 'Repite la contraseña',
@@ -2506,6 +2526,8 @@ extension on Translations {
 			'program.mainHall' => 'Auditorio principal',
 			'program.auxRoom' => 'Sala Auxiliar',
 			'program.sectionTreasures' => 'TESOROS DE LA BIBLIA',
+			_ => null,
+		} ?? switch (path) {
 			'program.sectionMinistry' => 'SEAMOS MEJORES MAESTROS',
 			'program.sectionChristianLife' => 'NUESTRA VIDA CRISTIANA',
 			_ => null,

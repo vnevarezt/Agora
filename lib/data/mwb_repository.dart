@@ -81,6 +81,23 @@ class MwbRepository {
     return null;
   }
 
+  /// Re-downloads [issue]/[lang] even though it is cached, replacing what is
+  /// on disk only once the fetch and the parse have both succeeded.
+  ///
+  /// Nothing else here would ever notice a correction: a cached issue is never
+  /// fetched twice, by design. Deliberately not delete-then-download — a user
+  /// who asks for this offline must not end up with less than they started
+  /// with.
+  Future<void> refresh(String issue, String lang) async {
+    final bytes = await MwbApi.downloadEpub(issue, lang: lang, client: _client);
+    final weeks = await _parseEpubInBackground(bytes, lang, issue);
+    if (weeks.isEmpty) {
+      throw Exception('No se encontraron semanas en el notebook $issue.');
+    }
+    await _cache.putEpub(issue, lang, bytes, weeks.length);
+    _parsed['$issue.$lang'] = weeks;
+  }
+
   /// The one path to a notebook's weeks: memo, then in-flight load, then disk,
   /// then the network. A failure drops the in-flight entry so the next caller
   /// retries rather than awaiting a dead future.

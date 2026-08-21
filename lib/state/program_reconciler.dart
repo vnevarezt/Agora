@@ -62,8 +62,10 @@ class ProgramReconciler {
   final Ref _ref;
 
   /// Reconciles one project. Idempotent: a project already in step writes
-  /// nothing.
-  Future<ReconcileReport> reconcileProject(String projectId) async {
+  /// nothing, unless [force] is set — which is how a refreshed workbook
+  /// reaches snapshots that are already in the right language.
+  Future<ReconcileReport> reconcileProject(String projectId,
+      {bool force = false}) async {
     final repo = _ref.read(programsRepositoryProvider);
     final programs = await repo.byProject(projectId);
     if (programs.isEmpty) return const ReconcileReport();
@@ -83,20 +85,21 @@ class ProgramReconciler {
 
     var report = const ReconcileReport();
     for (final program in programs) {
-      report = report + await _reconcileProgram(program, lang, repo);
+      report = report + await _reconcileProgram(program, lang, repo, force);
     }
     return report;
   }
 
   /// Reconciles every project of one congregation — the pass a change of
   /// meeting language needs, since that setting moves for all of them at once.
-  Future<ReconcileReport> reconcileCongregation(String congregationId) async {
+  Future<ReconcileReport> reconcileCongregation(String congregationId,
+      {bool force = false}) async {
     final projectIds = await _ref
         .read(projectsRepositoryProvider)
         .idsByCongregation(congregationId);
     var report = const ReconcileReport();
     for (final projectId in projectIds) {
-      report = report + await reconcileProject(projectId);
+      report = report + await reconcileProject(projectId, force: force);
     }
     return report;
   }
@@ -105,6 +108,7 @@ class ProgramReconciler {
     ProgramRecord program,
     String lang,
     ProgramsRepository repo,
+    bool force,
   ) async {
     var weekStart = program.weekStart;
 
@@ -115,7 +119,7 @@ class ProgramReconciler {
     }
 
     // (2) Already in the right language: nothing to do.
-    if (program.contentJson != null && program.contentLang == lang) {
+    if (!force && program.contentJson != null && program.contentLang == lang) {
       return const ReconcileReport();
     }
 
