@@ -249,6 +249,82 @@ void main() {
     expect(after.weekStart, isNull);
     expect(after.contentJson, isNull);
   });
+
+  group('congregationLanguageWatcher', () {
+    /// The watcher only reacts while something holds it, exactly as
+    /// `_SyncBootstrap` does in the app.
+    void mount() =>
+        container.listen(congregationLanguageWatcherProvider, (_, _) {});
+
+    /// Polls rather than guessing a delay: the watcher fires through a stream
+    /// tick and a fire-and-forget future, and the suite runs in parallel.
+    Future<void> waitForLang(String projectId, String lang) async {
+      for (var i = 0; i < 400; i++) {
+        if ((await onlyProgram(projectId)).contentLang == lang) return;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      fail('timed out waiting for the content to become $lang');
+    }
+
+    test('switching the language rewrites the programs with no prompting',
+        () async {
+      await cacheWorkbooks(spanish: true, english: true);
+      mount();
+      final cong = await congregation('spanish');
+      final projectId = await container.read(projectsRepositoryProvider).create(
+          name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+      await container
+          .read(programReconcilerProvider)
+          .reconcileProject(projectId);
+
+      await switchLanguageTo(cong, 'english');
+
+      await waitForLang(projectId, 'E');
+    });
+
+    test('a switch made before the workbook lands is retried when it does',
+        () async {
+      await cacheWorkbooks(spanish: true);
+      mount();
+      final cong = await congregation('spanish');
+      final projectId = await container.read(projectsRepositoryProvider).create(
+          name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+      await container
+          .read(programReconcilerProvider)
+          .reconcileProject(projectId);
+
+      await switchLanguageTo(cong, 'english');
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect((await onlyProgram(projectId)).contentLang, 'S',
+          reason: 'nothing to switch to yet, so nothing is lost');
+
+      // The sync finishes and republishes the catalog.
+      await cacheWorkbooks(english: true);
+
+      await waitForLang(projectId, 'E');
+    });
+
+    test('renaming a congregation reconciles nothing', () async {
+      await cacheWorkbooks(spanish: true, english: true);
+      mount();
+      final cong = await congregation('spanish');
+      final projectId = await container.read(projectsRepositoryProvider).create(
+          name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+      await container
+          .read(programReconcilerProvider)
+          .reconcileProject(projectId);
+
+      await container.read(congregationsRepositoryProvider).update(
+            cong.id,
+            name: 'Ribera',
+            number: cong.number,
+            settings: const CongregationSettings(meetingLanguage: 'spanish'),
+          );
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect((await onlyProgram(projectId)).contentLang, 'S');
+    });
+  });
 }
 
 Map<String, dynamic> _decode(String json) =>
