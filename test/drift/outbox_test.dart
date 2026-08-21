@@ -12,7 +12,7 @@ import 'package:agora/models/week_type.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
 import 'package:agora/state/people_provider.dart';
-import 'package:agora/state/program_content.dart';
+import 'package:agora/state/program_reconciler.dart';
 
 void main() {
   late AppDatabase db;

@@ -9,8 +9,8 @@ import '../models/hall.dart';
 import '../models/project.dart';
 import '../models/week_type.dart';
 import 'dashboard_provider.dart';
-import 'program_content.dart';
 import 'program_form.dart';
+import 'program_reconciler.dart';
 import 'sync_provider.dart';
 
 /// Editor session (phase 2, docs/PHASE2_PROGRAMS_IN_DB.md): which project
@@ -58,15 +58,15 @@ final editorProgramsProvider = StreamProvider<List<ProgramRecord>>((ref) {
 /// notebook catalog, leaving pre-snapshot programs without content and no
 /// retry (seen in the wild: empty titles/assignments until the project was
 /// re-saved). Watching the catalog re-runs the fill the moment it lands;
-/// `ensureProjectContent` is idempotent, so extra runs are no-ops.
+/// `reconcileProject` is idempotent, so extra runs are no-ops.
 final editorContentFillProvider = Provider<void>((ref) {
   final projectId = ref.watch(editorProjectProvider);
-  // Any language's catalog landing is worth a retry — the service picks the
-  // right one from the project's congregation.
+  // Any language's catalog landing is worth a retry — the reconciler picks
+  // the right one from the project's congregation.
   final notebooks = ref.watch(notebooksByLangProvider);
   if (projectId == null || notebooks.isEmpty) return;
-  final service = ref.read(programContentServiceProvider);
-  Future.microtask(() => service.ensureProjectContent(projectId));
+  final reconciler = ref.read(programReconcilerProvider);
+  Future.microtask(() => reconciler.reconcileProject(projectId));
 });
 
 /// Whether this user may edit what the editor currently has open.
@@ -105,9 +105,8 @@ class EditorOpener {
   /// hydrates the form with the stored assignments/flags/config.
   Future<void> open(Project project) async {
     _ref.read(editorProjectProvider.notifier).set(project.id);
-    unawaited(_ref
-        .read(programContentServiceProvider)
-        .ensureProjectContent(project.id));
+    unawaited(
+        _ref.read(programReconcilerProvider).reconcileProject(project.id));
 
     final repo = _ref.read(programsRepositoryProvider);
     final programs = await repo.byProject(project.id);

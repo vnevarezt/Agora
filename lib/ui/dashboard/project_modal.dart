@@ -9,7 +9,7 @@ import '../../models/congregation.dart';
 import '../../models/notebook.dart';
 import '../../models/project.dart';
 import '../../state/dashboard_provider.dart';
-import '../../state/program_content.dart';
+import '../../state/program_reconciler.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
 import '../theme/app_theme.dart';
@@ -131,9 +131,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     }
     // Fire-and-forget: snapshots the picked weeks' content onto the
     // programs (retried on editor open if a notebook wasn't cached yet).
-    unawaited(ref
-        .read(programContentServiceProvider)
-        .ensureProjectContent(projectId));
+    unawaited(ref.read(programReconcilerProvider).reconcileProject(projectId));
     widget.onClose();
   }
 
