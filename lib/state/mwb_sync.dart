@@ -217,3 +217,30 @@ class MwbSyncController extends AsyncNotifier<SyncReport> {
 
 final mwbSyncProvider =
     AsyncNotifierProvider<MwbSyncController, SyncReport>(MwbSyncController.new);
+
+/// Whether the workbook a congregation needs is on hand.
+enum WorkbookStatus {
+  /// The catalog holds notebooks in that meeting language.
+  ready,
+
+  /// Nothing yet, but a pass is running — the usual state for the seconds
+  /// right after a language is switched.
+  downloading,
+
+  /// Nothing, and no pass is running: offline, or the issue is not published.
+  unavailable,
+}
+
+/// Reads off the catalog rather than off the sync report, because the catalog
+/// is the thing the rest of the app actually uses. Whatever the last pass
+/// reported, a congregation whose language has notebooks can work.
+final congregationWorkbookStatusProvider =
+    Provider.family<WorkbookStatus, String>((ref, congregationId) {
+  final lang = ref.watch(congregationLangProvider(congregationId));
+  if (ref.watch(notebooksForLangProvider(lang)).isNotEmpty) {
+    return WorkbookStatus.ready;
+  }
+  return ref.watch(mwbSyncProvider).isLoading
+      ? WorkbookStatus.downloading
+      : WorkbookStatus.unavailable;
+});

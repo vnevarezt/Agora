@@ -14,6 +14,7 @@ import 'package:agora/data/mwb_cache.dart';
 import 'package:agora/data/mwb_repository.dart';
 import 'package:agora/data/mwb_store_native.dart';
 import 'package:agora/models/congregation_settings.dart';
+import 'package:agora/models/notebook.dart';
 import 'package:agora/models/week.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
@@ -163,5 +164,53 @@ void main() {
     await waitFor(() => langs().length == 2, 'both languages');
 
     expect(langs(), {'S', 'E'});
+  });
+
+  group('congregationWorkbookStatus', () {
+    test('follows the catalog for the congregation own language', () async {
+      final cong = await container.read(congregationsRepositoryProvider).create(
+            name: 'Riverside',
+            number: '1',
+            settings: const CongregationSettings(meetingLanguage: 'english'),
+          );
+      await waitFor(() => repo.requested.isNotEmpty, 'the first pass');
+
+      // Nothing cached and no pass running: the honest answer is "not yet".
+      await settle();
+      expect(container.read(congregationWorkbookStatusProvider(cong.id)),
+          WorkbookStatus.unavailable);
+
+      container.read(notebooksByLangProvider.notifier).setFrom({
+        'E': [
+          const Notebook(
+              id: '202605', weeks: [(start: '2026-06-01', label: 'JUNE 1-7')]),
+        ],
+      });
+
+      expect(container.read(congregationWorkbookStatusProvider(cong.id)),
+          WorkbookStatus.ready);
+    });
+
+    test('a Spanish catalog does not make an English congregation ready',
+        () async {
+      final cong = await container.read(congregationsRepositoryProvider).create(
+            name: 'Riverside',
+            number: '1',
+            settings: const CongregationSettings(meetingLanguage: 'english'),
+          );
+      await waitFor(() => repo.requested.isNotEmpty, 'the first pass');
+      await settle();
+
+      container.read(notebooksByLangProvider.notifier).setFrom({
+        'S': [
+          const Notebook(
+              id: '202605',
+              weeks: [(start: '2026-06-01', label: '1-7 DE JUNIO')]),
+        ],
+      });
+
+      expect(container.read(congregationWorkbookStatusProvider(cong.id)),
+          WorkbookStatus.unavailable);
+    });
   });
 }
