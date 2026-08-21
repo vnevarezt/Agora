@@ -15,7 +15,7 @@ import 'package:agora/models/person.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
 import 'package:agora/state/people_provider.dart';
-import 'package:agora/state/program_content.dart';
+import 'package:agora/state/program_reconciler.dart';
 
 import '../helpers/in_memory_transport.dart';
 

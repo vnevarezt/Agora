@@ -13,7 +13,7 @@ import 'package:agora/models/hall.dart';
 import 'package:agora/state/backup_provider.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
-import 'package:agora/state/program_content.dart';
+import 'package:agora/state/program_reconciler.dart';
 
 ProviderContainer containerFor(AppDatabase db) {
   final c = ProviderContainer(overrides: [dbProvider.overrideWithValue(db)]);

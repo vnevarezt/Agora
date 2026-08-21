@@ -32,6 +32,20 @@ class ProjectsRepository {
     return row?.congregationId;
   }
 
+  /// Alive project ids of one congregation, oldest first. Same reasoning as
+  /// [congregationIdOf]: the reconciler runs in the background and must not
+  /// subscribe to the dashboard's derived project stream just to learn which
+  /// projects a language change touches.
+  Future<List<String>> idsByCongregation(String congregationId) async {
+    final rows = await (_db.selectOnly(_db.projects)
+          ..addColumns([_db.projects.id])
+          ..where(_db.projects.congregationId.equals(congregationId) &
+              _db.projects.deletedAt.isNull())
+          ..orderBy([OrderingTerm.asc(_db.projects.createdAt)]))
+        .get();
+    return [for (final r in rows) r.read(_db.projects.id)!];
+  }
+
   /// Newest project first (the old controller prepended new ones).
   Stream<List<ProjectData>> watchAll() {
     final query = _db.select(_db.projects).join([

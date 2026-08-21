@@ -10,7 +10,7 @@ import '../models/week.dart';
 import '../models/week_type.dart';
 import '../pdf/program_document.dart' show WeekEntry;
 import 'app_settings.dart';
-import 'program_content.dart';
+import 'program_reconciler.dart';
 import 'weeks_provider.dart';
 
 /// Editable form state (immutable). Assignments are stored **per week** (index
