@@ -44,6 +44,9 @@ class _CountingStore implements MwbStore {
   Future<void> writeString(String name, String data) async {
     strings[name] = data;
   }
+
+  @override
+  Future<void> delete(String name) async => strings.remove(name);
 }
 
 void main() {

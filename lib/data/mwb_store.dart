@@ -16,4 +16,9 @@ abstract interface class MwbStore {
   Future<Uint8List?> readBytes(String name);
 
   Future<void> writeBytes(String name, Uint8List bytes);
+
+  /// Removes [name]. A name that was never written is not an error — the
+  /// manifest and the store can disagree after a crash, and the purge must
+  /// tolerate that rather than abort halfway.
+  Future<void> delete(String name);
 }

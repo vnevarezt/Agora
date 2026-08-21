@@ -140,6 +140,29 @@ class ProgramsRepository {
     });
   }
 
+  /// The identity of every alive program, plus whether any of them is still
+  /// missing one. Feeds the cache purge, which must not drop a workbook a
+  /// program still needs — and must not run at all while a program's week is
+  /// unidentified, because then there is no telling which workbook that is.
+  Future<({Set<String> weekStarts, bool anyUnidentified})>
+      aliveWeekStarts() async {
+    final rows = await (_db.selectOnly(_db.programs)
+          ..addColumns([_db.programs.weekStart])
+          ..where(_db.programs.deletedAt.isNull()))
+        .get();
+    final weekStarts = <String>{};
+    var anyUnidentified = false;
+    for (final row in rows) {
+      final weekStart = row.read(_db.programs.weekStart);
+      if (weekStart == null || weekStart.isEmpty) {
+        anyUnidentified = true;
+      } else {
+        weekStarts.add(weekStart);
+      }
+    }
+    return (weekStarts: weekStarts, anyUnidentified: anyUnidentified);
+  }
+
   Future<List<AssignmentRecord>> assignmentsByPrograms(
       List<String> programIds) {
     if (programIds.isEmpty) return Future.value(const []);

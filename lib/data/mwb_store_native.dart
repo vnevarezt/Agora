@@ -51,6 +51,12 @@ class DirectoryMwbStore implements MwbStore {
   Future<void> writeBytes(String name, Uint8List bytes) async {
     await (await _file(name)).writeAsBytes(bytes, flush: true);
   }
+
+  @override
+  Future<void> delete(String name) async {
+    final f = await _file(name);
+    if (await f.exists()) await f.delete();
+  }
 }
 
 MwbStore defaultMwbStore() => DirectoryMwbStore();
