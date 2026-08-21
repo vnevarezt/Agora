@@ -1,6 +1,7 @@
 import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/reminder.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -55,7 +56,7 @@ class ReminderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  r.title,
+                  r.title(context.t),
                   style: TextStyle(
                     fontSize: AppText.body,
                     fontWeight: FontWeight.w700,
@@ -76,7 +77,7 @@ class ReminderCard extends StatelessWidget {
                 Pressable(
                   onTap: onCta,
                   builder: (context, hovered, _) => Text(
-                    '${r.cta} →',
+                    '${context.t.dashboard.openProject} →',
                     style: TextStyle(
                       fontSize: AppText.small,
                       fontWeight: FontWeight.w800,

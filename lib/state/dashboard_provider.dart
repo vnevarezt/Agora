@@ -53,7 +53,10 @@ final sessionUserProvider =
 final congregationsRepositoryProvider = Provider<CongregationsRepository>(
     (ref) => CongregationsRepository(
         ref.watch(dbProvider), ref.watch(syncScribeProvider),
-        defaultName: t.congregation.defaultName));
+        // A callback, not a value: this provider has no reason to rebuild on a
+        // language switch, so a String captured here would name a congregation
+        // created afterwards in whatever language the app started in.
+        defaultName: () => t.congregation.defaultName));
 
 final congregationsStreamProvider = StreamProvider<List<Congregation>>(
     (ref) => ref.watch(congregationsRepositoryProvider).watchAll());
@@ -149,9 +152,8 @@ final remindersProvider = Provider<List<Reminder>>((ref) {
       reminders.add(Reminder(
         id: '${p.id}/${w.label}',
         type: w.done == 0 ? ReminderType.alert : ReminderType.task,
-        title: t.dashboard.pendingItem(n: missing),
+        missing: missing,
         meta: '${w.label} · ${p.name}',
-        cta: t.dashboard.openProject,
         projectId: p.id,
       ));
       if (reminders.length >= 4) return reminders;
