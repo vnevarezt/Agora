@@ -551,6 +551,9 @@ class _Translations$congregation$en extends Translations$congregation$es {
 	@override String get number => 'Number';
 	@override String get defaultName => 'My congregation';
 	@override String get meetingLanguage => 'Meeting language';
+	@override String workbookReady({required Object language}) => 'Workbook available in ${language}.';
+	@override String workbookDownloading({required Object language}) => 'Downloading the ${language} workbook…';
+	@override String workbookUnavailable({required Object language}) => 'No ${language} workbook yet. It will be retried once you are online.';
 	@override String get scheduleTitle => 'Meeting schedule';
 	@override String get scheduleDesc => 'Each part\'s time is calculated from here.';
 	@override String get weekdayDay => 'Midweek · day';
@@ -1318,6 +1321,9 @@ extension on TranslationsEn {
 			'congregation.number' => 'Number',
 			'congregation.defaultName' => 'My congregation',
 			'congregation.meetingLanguage' => 'Meeting language',
+			'congregation.workbookReady' => ({required Object language}) => 'Workbook available in ${language}.',
+			'congregation.workbookDownloading' => ({required Object language}) => 'Downloading the ${language} workbook…',
+			'congregation.workbookUnavailable' => ({required Object language}) => 'No ${language} workbook yet. It will be retried once you are online.',
 			'congregation.scheduleTitle' => 'Meeting schedule',
 			'congregation.scheduleDesc' => 'Each part\'s time is calculated from here.',
 			'congregation.weekdayDay' => 'Midweek · day',

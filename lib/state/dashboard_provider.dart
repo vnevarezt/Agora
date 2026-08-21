@@ -122,6 +122,16 @@ final notebooksByLangProvider =
 final notebooksForLangProvider = Provider.family<List<Notebook>, String>(
     (ref, lang) => ref.watch(notebooksByLangProvider)[lang] ?? const []);
 
+/// A congregation's stored meeting language code ('spanish' | 'sign' |
+/// 'english'). Falls back to the schema default for an unknown id.
+final congregationMeetingLanguageProvider =
+    Provider.family<String, String>((ref, id) {
+  for (final c in ref.watch(congregationsProvider)) {
+    if (c.id == id) return c.settings.meetingLanguage;
+  }
+  return const CongregationSettings().meetingLanguage;
+});
+
 /// Workbook language a congregation's programs are built from. Falls back to
 /// Spanish for an unknown id, which is also the schema default.
 final congregationLangProvider = Provider.family<String, String>((ref, id) {

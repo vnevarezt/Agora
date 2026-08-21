@@ -1054,6 +1054,15 @@ class Translations$congregation$es {
 	/// es: 'Idioma de la reunión'
 	String get meetingLanguage => 'Idioma de la reunión';
 
+	/// es: 'Cuaderno disponible en {language}.'
+	String workbookReady({required Object language}) => 'Cuaderno disponible en ${language}.';
+
+	/// es: 'Descargando el cuaderno en {language}…'
+	String workbookDownloading({required Object language}) => 'Descargando el cuaderno en ${language}…';
+
+	/// es: 'Aún no hay cuaderno en {language}. Se reintentará cuando haya conexión.'
+	String workbookUnavailable({required Object language}) => 'Aún no hay cuaderno en ${language}. Se reintentará cuando haya conexión.';
+
 	/// es: 'Horarios de reunión'
 	String get scheduleTitle => 'Horarios de reunión';
 
@@ -2334,6 +2343,9 @@ extension on Translations {
 			'congregation.number' => 'Número',
 			'congregation.defaultName' => 'Mi congregación',
 			'congregation.meetingLanguage' => 'Idioma de la reunión',
+			'congregation.workbookReady' => ({required Object language}) => 'Cuaderno disponible en ${language}.',
+			'congregation.workbookDownloading' => ({required Object language}) => 'Descargando el cuaderno en ${language}…',
+			'congregation.workbookUnavailable' => ({required Object language}) => 'Aún no hay cuaderno en ${language}. Se reintentará cuando haya conexión.',
 			'congregation.scheduleTitle' => 'Horarios de reunión',
 			'congregation.scheduleDesc' => 'Las horas de cada parte se calculan a partir de aquí.',
 			'congregation.weekdayDay' => 'Entre semana · día',

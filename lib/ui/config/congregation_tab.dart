@@ -10,6 +10,7 @@ import '../../models/congregation_member.dart';
 import '../../models/congregation_settings.dart';
 import '../../models/member_capabilities.dart';
 import '../../state/dashboard_provider.dart';
+import '../../state/mwb_sync.dart';
 import '../../state/sync_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
@@ -225,16 +226,31 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
             LabeledField(
               label: tr.congregation.meetingLanguage,
-              child: AppDropdown<int>(
-                value: _language,
-                items: [for (var i = 0; i < meetingLanguages.length; i++) i],
-                itemLabel: (i) => meetingLanguages[i],
-                onChanged: !editable
-                    ? null
-                    : (v) {
-                        setState(() => _language = v);
-                        _scheduleSave();
-                      },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppDropdown<int>(
+                    value: _language,
+                    items: [
+                      for (var i = 0; i < meetingLanguages.length; i++) i,
+                    ],
+                    itemLabel: (i) => meetingLanguages[i],
+                    onChanged: !editable
+                        ? null
+                        : (v) {
+                            setState(() => _language = v);
+                            _scheduleSave();
+                          },
+                  ),
+                  // Right under the control that causes it, rather than in the
+                  // dashboard's global indicator: switching language can mean
+                  // a download, and the person who just switched is the one
+                  // who needs to know it is happening.
+                  if (_congregationId != null) ...[
+                    const SizedBox(height: Space.s6),
+                    _WorkbookStatusLine(congregationId: _congregationId!),
+                  ],
+                ],
               ),
             ),
           ],
@@ -643,6 +659,50 @@ class _AddChip extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// One quiet line telling the person who just switched the meeting language
+/// whether the workbook for it is on hand. Text only, no spinner: the states
+/// are slow and the card is already dense.
+class _WorkbookStatusLine extends ConsumerWidget {
+  const _WorkbookStatusLine({required this.congregationId});
+
+  final String congregationId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.tokens;
+    final tr = context.t;
+    final status =
+        ref.watch(congregationWorkbookStatusProvider(congregationId));
+    final language = meetingLanguages[congregationLanguageCodes
+        .indexOf(ref.watch(congregationMeetingLanguageProvider(congregationId)))
+        .clamp(0, meetingLanguages.length - 1)];
+
+    final (String message, Color color) = switch (status) {
+      WorkbookStatus.ready => (
+          tr.congregation.workbookReady(language: language),
+          t.textMute,
+        ),
+      WorkbookStatus.downloading => (
+          tr.congregation.workbookDownloading(language: language),
+          t.accentStrong,
+        ),
+      WorkbookStatus.unavailable => (
+          tr.congregation.workbookUnavailable(language: language),
+          t.warning,
+        ),
+    };
+
+    return Text(
+      message,
+      style: TextStyle(
+        fontSize: AppText.small,
+        fontWeight: FontWeight.w600,
+        color: color,
+      ),
     );
   }
 }
