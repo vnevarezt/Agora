@@ -93,12 +93,47 @@ void main() {
           minutes: 3),
     ]);
 
-    await repo.setContent(before.id, week);
+    await repo.setContent(before.id, week, 'S');
 
     final after = (await repo.byProject(projectId)).first;
     expect(after.contentJson, isNotNull);
     expect(after.updatedAt, before.updatedAt,
         reason: 'snapshotting is bookkeeping, not an edit');
+  });
+
+  test('setContent records the language and backfills the identity', () async {
+    final program = (await repo.byProject(projectId)).first;
+    expect(program.weekStart, isNull, reason: 'a v6 row starts without one');
+
+    await repo.setContent(
+        program.id,
+        Week(date: 'JULY 6-12', weekStart: '2026-07-06', parts: [
+          const Part(
+              section: Section.treasures, number: 1, title: 'T', minutes: 10),
+        ]),
+        'E');
+
+    final after = (await repo.byProject(projectId)).first;
+    expect(after.contentLang, 'E');
+    expect(after.weekStart, '2026-07-06');
+  });
+
+  test('a snapshot with no date of its own leaves the identity alone',
+      () async {
+    final program = (await repo.byProject(projectId)).first;
+    await repo.setWeekStart(program.id, '2026-07-06');
+
+    // An old snapshot, decoded from JSON written before weekStart existed.
+    await repo.setContent(
+        program.id,
+        Week(date: '6-12 DE JULIO', parts: [
+          const Part(
+              section: Section.treasures, number: 1, title: 'T', minutes: 10),
+        ]),
+        'S');
+
+    expect((await repo.byProject(projectId)).first.weekStart, '2026-07-06',
+        reason: 'never trade a good identity for an empty one');
   });
 
   test('setProjectConfig writes every program; setWeekType only one',

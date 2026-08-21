@@ -68,7 +68,7 @@ class ProgramContentService {
           await _ref.read(repositoryProvider).weeks(notebook.id, lang: lang);
       for (final week in weeks) {
         if (week.date == program.date) {
-          await repo.setContent(program.id, week);
+          await repo.setContent(program.id, week, lang);
           break;
         }
       }

@@ -34,12 +34,40 @@ class ProgramsRepository {
   /// merely opening a project never moves the dashboard "edited" label.
   /// Still stamped + enqueued: the content must replicate (self-contained
   /// programs, DATA_ARCHITECTURE.md §2).
-  Future<void> setContent(String programId, Week week) async {
+  ///
+  /// [lang] is the workbook language [week] came from, and recording it is what
+  /// makes staleness detectable later. The week also knows its own real date,
+  /// so writing the snapshot is what backfills [Programs.weekStart] on rows
+  /// that predate v6 — an empty one is left alone rather than overwriting a
+  /// good identity with nothing.
+  Future<void> setContent(String programId, Week week, String lang) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
       await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
           .write(ProgramsCompanion(
         contentJson: Value(jsonEncode(week.toJson())),
+        contentLang: Value(lang),
+        weekStart: week.weekStart.isEmpty
+            ? const Value.absent()
+            : Value(week.weekStart),
+        hlc: Value(hlc),
+      ));
+      await _scribe.enqueue(SyncEntity.program, programId, hlc);
+    });
+  }
+
+  /// Records the week's real date without touching the snapshot.
+  ///
+  /// For the case where the identity can be resolved — some cached workbook
+  /// lists this week — but the one the congregation now meets in is not on
+  /// disk yet. The program keeps the content it has, and the reconciler
+  /// finishes the job once the right workbook lands.
+  Future<void> setWeekStart(String programId, String weekStart) async {
+    final hlc = await _scribe.nextHlc();
+    await _db.transaction(() async {
+      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
+          .write(ProgramsCompanion(
+        weekStart: Value(weekStart),
         hlc: Value(hlc),
       ));
       await _scribe.enqueue(SyncEntity.program, programId, hlc);
