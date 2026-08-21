@@ -265,11 +265,7 @@ class _SyncIndicator extends StatelessWidget {
     };
 
     final leading = icon == null
-        ? SizedBox(
-            width: Space.s18,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2, color: color),
-          )
+        ? AppSpinner(size: 16, color: color)
         : Icon(icon, size: AppIcon.control, color: color);
 
     return Tooltip(

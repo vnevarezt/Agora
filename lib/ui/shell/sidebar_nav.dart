@@ -10,6 +10,7 @@ import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/agora_mark.dart';
 import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import '../widgets/motion.dart';
@@ -142,25 +143,6 @@ class _Brand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    final mark = Container(
-      width: 30,
-      height: 30,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: t.accent,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Text(
-        'JW',
-        style: TextStyle(
-          fontSize: AppText.body,
-          fontWeight: FontWeight.w800,
-          color: t.accentInk,
-        ),
-      ),
-    );
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         compact ? 0 : Space.s4,
@@ -173,19 +155,8 @@ class _Brand extends StatelessWidget {
             ? MainAxisAlignment.center
             : MainAxisAlignment.start,
         children: [
-          mark,
-          if (!compact) ...[
-            const SizedBox(width: Space.s10),
-            Text(
-              context.t.app.brand,
-              style: TextStyle(
-                fontSize: AppText.bodyLarge,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: t.text,
-              ),
-            ),
-          ],
+          // The rail collapses to icons only, and the word is what goes.
+          if (compact) const AgoraMark(size: 30) else const AgoraLockup(),
         ],
       ),
     );

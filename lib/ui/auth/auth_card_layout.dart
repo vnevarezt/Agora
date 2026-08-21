@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
 import '../responsive.dart';
+import '../widgets/agora_mark.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
@@ -57,46 +58,12 @@ class AuthCardLayout extends StatelessWidget {
   }
 }
 
-/// `.brand`: the same mark + name lockup as the dashboard sidebar.
+/// `.brand`: the same lockup the dashboard sidebar carries.
 class BrandLockup extends StatelessWidget {
   const BrandLockup({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 30,
-          height: 30,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: t.accent,
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Text(
-            'JW',
-            style: TextStyle(
-              fontSize: AppText.body,
-              fontWeight: FontWeight.w800,
-              color: t.accentInk,
-            ),
-          ),
-        ),
-        const SizedBox(width: Space.s10),
-        Text(
-          context.t.app.brand,
-          style: TextStyle(
-            fontSize: AppText.bodyLarge,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.3,
-            color: t.text,
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => const AgoraLockup();
 }
 
 /// `.auth__title` (22px desktop / 20px mobile).
