@@ -33,7 +33,7 @@ void main() {
     final projects = container.read(projectsRepositoryProvider);
     final programs = container.read(programsRepositoryProvider);
     await projects.create(
-        name: 'P', congregationId: '', weeks: ['7-13 DE JULIO']);
+        name: 'P', congregationId: '', weeks: [(start: '', label: '7-13 DE JULIO')]);
     final program = (await projects.watchAll().first).single.programs.single;
 
     // One Bible-reading part → schedule slots: chairman (1) + student (1).
@@ -93,7 +93,7 @@ void main() {
     final projects = container.read(projectsRepositoryProvider);
     final programs = container.read(programsRepositoryProvider);
     await projects.create(
-        name: 'P', congregationId: '', weeks: ['7-13 DE JULIO']);
+        name: 'P', congregationId: '', weeks: [(start: '', label: '7-13 DE JULIO')]);
     final program = (await projects.watchAll().first).single.programs.single;
 
     Week weekWith({required bool withStudy}) => Week(

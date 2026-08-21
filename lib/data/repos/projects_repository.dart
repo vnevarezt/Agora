@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/hall.dart';
+import '../../models/notebook.dart';
 import '../../models/program_type_ids.dart';
 import '../db/app_database.dart';
 import '../sync/sync_scribe.dart';
@@ -81,7 +82,7 @@ class ProjectsRepository {
   Future<String> create({
     required String name,
     required String congregationId,
-    required List<String> weeks,
+    required List<WeekRef> weeks,
   }) async {
     final congId = congregationId.isEmpty
         ? await _congregations.ensureDefault()
@@ -111,7 +112,7 @@ class ProjectsRepository {
     String id, {
     required String name,
     required String congregationId,
-    required List<String> weeks,
+    required List<WeekRef> weeks,
   }) async {
     final congId = congregationId.isEmpty
         ? await _congregations.ensureDefault()
@@ -132,8 +133,42 @@ class ProjectsRepository {
       final existing = await (_db.select(_db.programs)
             ..where((t) => t.projectId.equals(id) & t.deletedAt.isNull()))
           .get();
-      final wanted = weeks.toSet();
-      final removed = [for (final p in existing) if (!wanted.contains(p.date)) p.id];
+
+      // Match on the language-free identity first and fall back to the printed
+      // label. Both halves are load-bearing: matching only on the label loses
+      // every program the moment the congregation changes language (the modal
+      // offers English headings while the rows hold Spanish ones, so all of
+      // them look removed and their assignments go with them), while matching
+      // only on weekStart loses the rows written before v6, which have none.
+      final claimed = <String>{};
+      ProgramRecord? matchOf(WeekRef wanted) {
+        for (final p in existing) {
+          if (claimed.contains(p.id)) continue;
+          final start = p.weekStart;
+          if (start != null && start.isNotEmpty && start == wanted.start) {
+            claimed.add(p.id);
+            return p;
+          }
+        }
+        for (final p in existing) {
+          if (claimed.contains(p.id)) continue;
+          if (p.date == wanted.label) {
+            claimed.add(p.id);
+            return p;
+          }
+        }
+        return null;
+      }
+
+      final matched = {for (final w in weeks) w: matchOf(w)};
+      final kept = {
+        for (final p in matched.values)
+          if (p != null) p.id,
+      };
+      final removed = [
+        for (final p in existing)
+          if (!kept.contains(p.id)) p.id,
+      ];
       if (removed.isNotEmpty) {
         await (_db.update(_db.programs)..where((t) => t.id.isIn(removed)))
             .write(ProgramsCompanion(
@@ -147,15 +182,25 @@ class ProjectsRepository {
       }
       // Survivors keep their id (phase 2 hangs assignments off it) but get
       // their position reassigned; new weeks are inserted at theirs.
-      final byDate = {for (final p in existing) p.date: p};
       for (var i = 0; i < weeks.length; i++) {
-        final current = byDate[weeks[i]];
+        final current = matched[weeks[i]];
         if (current == null) {
           await _insertProgram(id, weeks[i], i, now, hlc);
-        } else if (current.sortIndex != i) {
+          continue;
+        }
+        // A survivor matched by label alone has no identity yet: record it, so
+        // the next edit matches on the identity and this repair happens once.
+        final needsIdentity = weeks[i].start.isNotEmpty &&
+            (current.weekStart == null || current.weekStart!.isEmpty);
+        if (current.sortIndex != i || needsIdentity) {
           await (_db.update(_db.programs)
                 ..where((t) => t.id.equals(current.id)))
-              .write(ProgramsCompanion(sortIndex: Value(i), hlc: Value(hlc)));
+              .write(ProgramsCompanion(
+            sortIndex: Value(i),
+            weekStart:
+                needsIdentity ? Value(weeks[i].start) : const Value.absent(),
+            hlc: Value(hlc),
+          ));
           await _scribe.enqueue(SyncEntity.program, current.id, hlc);
         }
       }
@@ -229,20 +274,22 @@ class ProjectsRepository {
   }
 
   Future<void> _insertPrograms(
-      String projectId, List<String> weeks, DateTime now, String hlc) async {
+      String projectId, List<WeekRef> weeks, DateTime now, String hlc) async {
     for (var i = 0; i < weeks.length; i++) {
       await _insertProgram(projectId, weeks[i], i, now, hlc);
     }
   }
 
-  Future<void> _insertProgram(String projectId, String week, int sortIndex,
+  Future<void> _insertProgram(String projectId, WeekRef week, int sortIndex,
       DateTime now, String hlc) async {
     final programId = const Uuid().v4();
     await _db.into(_db.programs).insert(ProgramsCompanion.insert(
           id: programId,
           projectId: projectId,
           programTypeId: ProgramTypeIds.mwbS140,
-          date: week,
+          date: week.label,
+          weekStart:
+              week.start.isEmpty ? const Value.absent() : Value(week.start),
           sortIndex: Value(sortIndex),
           createdAt: now,
           updatedAt: now,

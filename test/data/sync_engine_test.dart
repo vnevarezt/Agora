@@ -101,7 +101,7 @@ void main() {
         .save(person('p1', 'Ana', cong.id));
     await a.container
         .read(projectsRepositoryProvider)
-        .create(name: 'Julio', congregationId: cong.id, weeks: ['W1']);
+        .create(name: 'Julio', congregationId: cong.id, weeks: [(start: '', label: 'W1')]);
     final program = (await a.container
             .read(projectsRepositoryProvider)
             .watchAll()

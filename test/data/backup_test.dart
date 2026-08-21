@@ -40,7 +40,7 @@ void main() {
         .create(name: 'Norte', number: '7');
     await a
         .read(projectsRepositoryProvider)
-        .create(name: 'Julio', congregationId: cong.id, weeks: ['W1']);
+        .create(name: 'Julio', congregationId: cong.id, weeks: [(start: '', label: 'W1')]);
     final program =
         (await a.read(projectsRepositoryProvider).watchAll().first)
             .single

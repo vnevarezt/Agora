@@ -258,7 +258,9 @@ Project _toCard(
   CongregationSettings? congregationSettings,
   _SlotTotals slotTotals,
 ) {
-  final weeks = [for (final p in d.programs) p.date];
+  final weeks = [
+    for (final p in d.programs) (start: p.weekStart ?? '', label: p.date),
+  ];
   final weekProgress = <WeekProgress>[];
   var done = 0;
   var total = 0;
@@ -346,7 +348,7 @@ class ProjectActions {
   Future<String> create({
     required String name,
     required String congregationId,
-    required List<String> weeks,
+    required List<WeekRef> weeks,
   }) =>
       _repo.create(name: name, congregationId: congregationId, weeks: weeks);
 
@@ -354,7 +356,7 @@ class ProjectActions {
     String id, {
     required String name,
     required String congregationId,
-    required List<String> weeks,
+    required List<WeekRef> weeks,
   }) =>
       _repo.update(id,
           name: name, congregationId: congregationId, weeks: weeks);

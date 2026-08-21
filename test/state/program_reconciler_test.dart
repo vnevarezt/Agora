@@ -43,6 +43,8 @@ Uint8List _epub(String heading, String talkMarker) {
 const _spanishLabel = '1-7 DE JUNIO';
 const _englishLabel = 'JUNE 1-7';
 const _monday = '2026-06-01';
+const _spanishWeek = (start: _monday, label: _spanishLabel);
+const _englishWeek = (start: _monday, label: _englishLabel);
 
 void main() {
   late Directory tmp;
@@ -109,7 +111,7 @@ void main() {
     final cong = await congregation('english');
     final projectId = await container
         .read(projectsRepositoryProvider)
-        .create(name: 'June', congregationId: cong.id, weeks: [_englishLabel]);
+        .create(name: 'June', congregationId: cong.id, weeks: [_englishWeek]);
 
     final report =
         await container.read(programReconcilerProvider).reconcileProject(projectId);
@@ -126,7 +128,7 @@ void main() {
     final cong = await congregation('spanish');
     final projectId = await container
         .read(projectsRepositoryProvider)
-        .create(name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+        .create(name: 'Junio', congregationId: cong.id, weeks: [_spanishWeek]);
     final reconciler = container.read(programReconcilerProvider);
     await reconciler.reconcileProject(projectId);
 
@@ -162,7 +164,7 @@ void main() {
     final cong = await congregation('spanish');
     final projectId = await container
         .read(projectsRepositoryProvider)
-        .create(name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+        .create(name: 'Junio', congregationId: cong.id, weeks: [_spanishWeek]);
     final reconciler = container.read(programReconcilerProvider);
     await reconciler.reconcileProject(projectId);
 
@@ -183,9 +185,10 @@ void main() {
     // language — under a congregation that now meets in English.
     await cacheWorkbooks(spanish: true, english: true);
     final cong = await congregation('english');
-    final projectId = await container
-        .read(projectsRepositoryProvider)
-        .create(name: 'June', congregationId: cong.id, weeks: [_spanishLabel]);
+    final projectId = await container.read(projectsRepositoryProvider).create(
+        name: 'June',
+        congregationId: cong.id,
+        weeks: const [(start: '', label: _spanishLabel)]);
     final program = await onlyProgram(projectId);
     expect(program.weekStart, isNull);
     expect(program.contentLang, isNull);
@@ -206,9 +209,10 @@ void main() {
     // English: the week can be identified, just not filled.
     await cacheWorkbooks(spanish: true);
     final cong = await congregation('english');
-    final projectId = await container
-        .read(projectsRepositoryProvider)
-        .create(name: 'June', congregationId: cong.id, weeks: [_spanishLabel]);
+    final projectId = await container.read(projectsRepositoryProvider).create(
+        name: 'June',
+        congregationId: cong.id,
+        weeks: const [(start: '', label: _spanishLabel)]);
 
     final report =
         await container.read(programReconcilerProvider).reconcileProject(projectId);
@@ -226,7 +230,7 @@ void main() {
     final cong = await congregation('spanish');
     final projectId = await container
         .read(projectsRepositoryProvider)
-        .create(name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+        .create(name: 'Junio', congregationId: cong.id, weeks: [_spanishWeek]);
     final reconciler = container.read(programReconcilerProvider);
 
     expect((await reconciler.reconcileProject(projectId)).filled, 1);
@@ -239,7 +243,7 @@ void main() {
     final cong = await congregation('spanish');
     final projectId = await container
         .read(projectsRepositoryProvider)
-        .create(name: 'Junio', congregationId: cong.id, weeks: ['8-14 DE JUNIO']);
+        .create(name: 'Junio', congregationId: cong.id, weeks: [(start: '', label: '8-14 DE JUNIO')]);
 
     final report =
         await container.read(programReconcilerProvider).reconcileProject(projectId);
@@ -272,7 +276,7 @@ void main() {
       mount();
       final cong = await congregation('spanish');
       final projectId = await container.read(projectsRepositoryProvider).create(
-          name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+          name: 'Junio', congregationId: cong.id, weeks: [_spanishWeek]);
       await container
           .read(programReconcilerProvider)
           .reconcileProject(projectId);
@@ -288,7 +292,7 @@ void main() {
       mount();
       final cong = await congregation('spanish');
       final projectId = await container.read(projectsRepositoryProvider).create(
-          name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+          name: 'Junio', congregationId: cong.id, weeks: [_spanishWeek]);
       await container
           .read(programReconcilerProvider)
           .reconcileProject(projectId);
@@ -309,7 +313,7 @@ void main() {
       mount();
       final cong = await congregation('spanish');
       final projectId = await container.read(projectsRepositoryProvider).create(
-          name: 'Junio', congregationId: cong.id, weeks: [_spanishLabel]);
+          name: 'Junio', congregationId: cong.id, weeks: [_spanishWeek]);
       await container
           .read(programReconcilerProvider)
           .reconcileProject(projectId);

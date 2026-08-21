@@ -73,7 +73,7 @@ void main() {
   test('project lifecycle enqueues project + cascaded programs', () async {
     final projects = container.read(projectsRepositoryProvider);
     final id = await projects.create(
-        name: 'P', congregationId: '', weeks: ['W1', 'W2']);
+        name: 'P', congregationId: '', weeks: [(start: '', label: 'W1'), (start: '', label: 'W2')]);
     // congregation (default) + project + 2 programs
     expect(await outbox(), hasLength(4));
 
@@ -90,7 +90,7 @@ void main() {
   test('slot writes enqueue one entry per touched assignment row', () async {
     final projects = container.read(projectsRepositoryProvider);
     final programs = container.read(programsRepositoryProvider);
-    await projects.create(name: 'P', congregationId: '', weeks: ['W1']);
+    await projects.create(name: 'P', congregationId: '', weeks: [(start: '', label: 'W1')]);
     final program =
         (await projects.watchAll().first).single.programs.single;
 

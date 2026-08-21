@@ -1,4 +1,5 @@
 import '../i18n/strings.g.dart';
+import 'notebook.dart';
 
 /// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
@@ -31,7 +32,11 @@ class Project {
   final String id;
   final String name;
   final String congregationId;
-  final List<String> weeks;
+
+  /// The project's weeks, identity and printed label together — the modal
+  /// needs the first to diff safely across a language change, the cards need
+  /// the second to show anything.
+  final List<WeekRef> weeks;
   final int done;
   final int total;
   final ProjectStatus status;

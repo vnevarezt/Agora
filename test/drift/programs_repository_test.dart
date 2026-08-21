@@ -29,7 +29,7 @@ void main() {
     projectId = await container.read(projectsRepositoryProvider).create(
       name: 'P',
       congregationId: '',
-      weeks: ['7-13 DE JULIO', '14-20 DE JULIO'],
+      weeks: [(start: '', label: '7-13 DE JULIO'), (start: '', label: '14-20 DE JULIO')],
     );
     repo = container.read(programsRepositoryProvider);
   });

@@ -38,7 +38,7 @@ void main() {
     projectId = await container.read(projectsRepositoryProvider).create(
       name: 'Julio',
       congregationId: cong.id,
-      weeks: ['7-13 DE JULIO', '14-20 DE JULIO'],
+      weeks: [(start: '', label: '7-13 DE JULIO'), (start: '', label: '14-20 DE JULIO')],
     );
     // Riverpod 3 pauses unlistened providers: keep the streams active for
     // the whole test (the app's widgets do this by watching them).

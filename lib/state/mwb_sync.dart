@@ -104,10 +104,10 @@ Future<Map<String, List<Notebook>>> buildCatalog(
   final manifest = await cache.readManifest();
   final byLang = <String, List<Notebook>>{};
   for (final e in manifest.entries) {
-    List<String> weeks;
+    List<WeekRef> weeks;
     try {
       final parsed = await repository.weeks(e.issue, lang: e.lang);
-      weeks = [for (final w in parsed) w.date];
+      weeks = [for (final w in parsed) (start: w.weekStart, label: w.date)];
     } catch (_) {
       weeks = const [];
     }

@@ -47,7 +47,7 @@ void main() {
     final projectId = await container.read(projectsRepositoryProvider).create(
       name: 'July',
       congregationId: cong.id,
-      weeks: ['JULY 6-12'],
+      weeks: [(start: '', label: 'JULY 6-12')],
     );
     await settle();
     await container.read(editorOpenerProvider).open(Project(
