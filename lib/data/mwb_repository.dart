@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'background.dart';
 
+import '../domain/mwb_calendar.dart';
 import '../models/week.dart';
 import 'epub_parser.dart';
 import 'mwb_api.dart';
@@ -59,6 +60,26 @@ class MwbRepository {
   /// back-off policy), kept separate from the UI-facing [weeks].
   Future<int> ensureCached(String issue, {String lang = 'S'}) async =>
       (await _load(issue, lang)).length;
+
+  /// The week starting on [weekStart] in workbook language [lang], or null
+  /// when no cached workbook of that language holds it.
+  ///
+  /// Never goes to the network: downloading is the sync's job, and a caller
+  /// that cannot find a week must leave what the program already has alone
+  /// rather than block on a fetch. Presence is checked against the manifest
+  /// rather than by reading the EPUB, which would pull megabytes off disk just
+  /// to answer a yes/no.
+  Future<Week?> weekFor(String weekStart, String lang) async {
+    if (weekStart.isEmpty) return null;
+    final manifest = await _cache.readManifest();
+    for (final issue in issuesForWeekStart(weekStart)) {
+      if (!_cache.has(manifest, issue, lang)) continue;
+      for (final week in await _load(issue, lang)) {
+        if (week.weekStart == weekStart) return week;
+      }
+    }
+    return null;
+  }
 
   /// The one path to a notebook's weeks: memo, then in-flight load, then disk,
   /// then the network. A failure drops the in-flight entry so the next caller
