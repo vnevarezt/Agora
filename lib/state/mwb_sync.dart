@@ -112,26 +112,48 @@ Future<List<Notebook>> _buildCatalog(
 }
 
 /// Runs [runMwbSync] once on first watch (app startup), in the background. The
+/// Workbook languages the sync has to cover, as a canonical `'E,S'` string.
+/// `null` while the congregation stream has not landed, `''` when there are no
+/// congregations to serve.
+///
+/// A String rather than the `Set` [workbookLangsFor] returns, because Riverpod
+/// compares with `==` and collections compare by identity: handing back a Set
+/// re-ran the whole sync on every congregation write — including the settings
+/// tab's 400 ms debounce, so roughly once per keystroke in the name field —
+/// which relaunched every pass and blinked the dashboard's catalog indicator.
+final requiredWorkbookLangsProvider = Provider<String?>((ref) {
+  final congregations = ref.watch(congregationsStreamProvider);
+  if (!congregations.hasValue) return null;
+  final langs = workbookLangsFor(
+    congregations.requireValue.map((c) => c.settings.meetingLanguage),
+  );
+  return (langs.toList()..sort()).join(',');
+});
+
 /// dashboard reads the resulting [SyncReport] (loading / complete / incomplete)
 /// to show a persistent catalog-status card.
 class MwbSyncController extends AsyncNotifier<SyncReport> {
   @override
   Future<SyncReport> build() async {
-    // One pass per workbook language actually in use. Watching the
-    // congregations means adding one that meets in another language pulls its
-    // workbook down without a restart; passes whose issues are already cached
-    // make no network request, so re-running is cheap.
-    //
-    // Awaiting the stream rather than reading its synchronous view is what
-    // keeps "still loading" apart from "none": guessing Spanish in that window
-    // cost an English-only user a multi-megabyte download of a workbook they
-    // never meet in, which then sat on disk forever. `ensureDefault()` creates
-    // a congregation on the first real write, so waiting is short.
-    final congregations = await ref.watch(congregationsStreamProvider.future);
-    final targets = workbookLangsFor(
-      congregations.map((c) => c.settings.meetingLanguage),
-    );
-    if (targets.isEmpty) return const SyncReport();
+    // One pass per workbook language actually in use. Watching the languages
+    // (not the congregations) means adding one that meets in another language
+    // pulls its workbook down without a restart, while renaming one does
+    // nothing at all.
+    final langs = ref.watch(requiredWorkbookLangsProvider);
+    if (langs == null) {
+      // The congregation stream has not landed, so there is nothing to guess
+      // from — and guessing Spanish here cost an English-only user a
+      // multi-megabyte download of a workbook they never meet in, kept
+      // forever. Await it so the dashboard holds its "syncing" state instead
+      // of flashing "up to date" before anything was checked; its arrival
+      // re-runs this build with a real answer.
+      await ref.watch(congregationsStreamProvider.future);
+      return const SyncReport();
+    }
+    // No congregations yet: ensureDefault() creates one on the first real
+    // write, so this resolves itself shortly.
+    if (langs.isEmpty) return const SyncReport();
+    final targets = langs.split(',');
 
     final cache = ref.read(cacheProvider);
     final repository = ref.read(repositoryProvider);

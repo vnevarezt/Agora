@@ -89,6 +89,53 @@ void main() {
     expect(repo.requested, everyElement(endsWith('.E')));
   });
 
+  test('renaming a congregation does not re-run a single pass', () async {
+    // The settings tab saves on a 400 ms debounce, so a rename is roughly one
+    // write per keystroke. Each one used to relaunch every pass and blink the
+    // dashboard's catalog indicator.
+    final congregations = container.read(congregationsRepositoryProvider);
+    final cong = await congregations.create(
+      name: 'Riverside',
+      number: '1',
+      settings: const CongregationSettings(meetingLanguage: 'english'),
+    );
+    await settle();
+    final before = repo.requested.length;
+    expect(before, greaterThan(0));
+
+    await congregations.update(
+      cong.id,
+      name: 'Riverside Park',
+      number: '1',
+      settings: const CongregationSettings(meetingLanguage: 'english'),
+    );
+    await settle();
+
+    expect(repo.requested, hasLength(before),
+        reason: 'only a change of language may relaunch a pass');
+  });
+
+  test('switching the meeting language does re-run the sync', () async {
+    final congregations = container.read(congregationsRepositoryProvider);
+    final cong = await congregations.create(
+      name: 'Riverside',
+      number: '1',
+      settings: const CongregationSettings(meetingLanguage: 'english'),
+    );
+    await settle();
+    expect(repo.requested, everyElement(endsWith('.E')));
+
+    await congregations.update(
+      cong.id,
+      name: 'Riverside',
+      number: '1',
+      settings: const CongregationSettings(meetingLanguage: 'spanish'),
+    );
+    await settle();
+
+    expect(repo.requested.where((r) => r.endsWith('.S')), isNotEmpty);
+  });
+
   test('a congregation in each language pulls both workbooks', () async {
     final repository = container.read(congregationsRepositoryProvider);
     await repository.create(
