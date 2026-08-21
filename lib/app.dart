@@ -7,6 +7,7 @@ import 'i18n/strings.g.dart';
 import 'state/app_settings.dart';
 import 'state/locale_boot.dart';
 import 'state/mwb_sync.dart';
+import 'state/program_reconciler.dart';
 import 'state/sync_controller.dart';
 import 'ui/auth/auth_gate.dart';
 import 'ui/shell/app_shell.dart';
@@ -61,6 +62,7 @@ class _SyncBootstrap extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(mwbSyncProvider);
+    ref.watch(congregationLanguageWatcherProvider);
     ref.watch(syncControllerProvider);
     return child;
   }

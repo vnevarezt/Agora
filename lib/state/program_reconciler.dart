@@ -1,8 +1,11 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/db/app_database.dart';
 import '../data/repos/programs_repository.dart';
 import '../domain/meeting_language.dart';
+import '../models/congregation.dart';
 import '../models/congregation_settings.dart';
 import '../models/week.dart';
 import 'dashboard_provider.dart';
@@ -162,3 +165,48 @@ class ProgramReconciler {
     return null;
   }
 }
+
+/// Rewrites a congregation's programs when its meeting language changes.
+///
+/// Mounted next to the sync in `_SyncBootstrap`. The two halves of a language
+/// switch are deliberately separate: the sync notices the new language and
+/// downloads its workbook, this notices it and rewrites the programs. They
+/// meet here — a pass that ran before the download finishes reports pending,
+/// and the catalog landing retries it.
+///
+/// Scope is bounded on purpose. Only a congregation whose language actually
+/// moved is reconciled, and only one that came back pending is retried; every
+/// other project heals when it is next opened.
+final congregationLanguageWatcherProvider = Provider<void>((ref) {
+  final pending = <String>{};
+
+  Future<void> reconcile(String congregationId) async {
+    final report = await ref
+        .read(programReconcilerProvider)
+        .reconcileCongregation(congregationId);
+    if (report.complete) {
+      pending.remove(congregationId);
+    } else {
+      pending.add(congregationId);
+    }
+  }
+
+  ref.listen<List<Congregation>>(congregationsProvider, (previous, next) {
+    if (previous == null || previous.isEmpty) return;
+    final before = {
+      for (final c in previous) c.id: c.settings.meetingLanguage,
+    };
+    for (final congregation in next) {
+      final was = before[congregation.id];
+      if (was != null && was != congregation.settings.meetingLanguage) {
+        unawaited(reconcile(congregation.id));
+      }
+    }
+  });
+
+  ref.listen(notebooksByLangProvider, (_, _) {
+    for (final congregationId in pending.toList()) {
+      unawaited(reconcile(congregationId));
+    }
+  });
+});
