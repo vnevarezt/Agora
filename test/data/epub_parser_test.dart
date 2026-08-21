@@ -4,9 +4,11 @@
 // exception is the ministry talk marker. See test/fixtures/mwb/README.md.
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:agora/data/epub_parser.dart';
 import 'package:agora/models/week.dart';
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Week _fixture(String name, String lang) =>
@@ -112,5 +114,48 @@ void main() {
     // A snapshot written before the field existed.
     final legacy = Map<String, dynamic>.from(talk.toJson())..remove('isTalk');
     expect(Part.fromJson(legacy).isTalk, isFalse);
+  });
+
+  group('weekStart is the same in both languages', () {
+    /// Wraps a fixture as a one-week EPUB, which is what carries the issue and
+    /// therefore the only path that can resolve a Monday.
+    Uint8List epubOf(String name) {
+      final archive = Archive()
+        ..addFile(ArchiveFile.string('OEBPS/000000001.xhtml',
+            File('test/fixtures/mwb/$name').readAsStringSync()));
+      return Uint8List.fromList(ZipEncoder().encode(archive));
+    }
+
+    test('the fixtures agree on the Monday and disagree on the label', () {
+      // 'JULY 6-12' and '6-12 DE JULIO' are the same week of mwb_202607.
+      final spanish =
+          parseEpub(epubOf('es_week.xhtml'), lang: 'S', issue: '202607');
+      final english =
+          parseEpub(epubOf('en_week.xhtml'), lang: 'E', issue: '202607');
+
+      expect(spanish.single.weekStart, '2026-07-06');
+      expect(english.single.weekStart, spanish.single.weekStart,
+          reason: 'this is the whole point: one identity, two languages');
+      expect(english.single.date, isNot(spanish.single.date),
+          reason: 'the printed label still differs, and must');
+    });
+
+    test('without an issue there is nothing to resolve against', () {
+      expect(parseEpub(epubOf('es_week.xhtml'), lang: 'S').single.weekStart,
+          isEmpty);
+    });
+  });
+
+  group('weekStartDayOf', () {
+    test('reads the opening day in either language', () {
+      expect(weekStartDayOf('6-12 DE JULIO'), 6);
+      expect(weekStartDayOf('JULY 6-12'), 6);
+      expect(weekStartDayOf('29 DE JUNIO A 5 DE JULIO'), 29);
+      expect(weekStartDayOf('JUNE 29-JULY 5'), 29);
+    });
+
+    test('a heading with no digits yields nothing', () {
+      expect(weekStartDayOf('SEMANA'), isNull);
+    });
   });
 }
