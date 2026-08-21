@@ -710,9 +710,8 @@ class _DashboardSkeleton extends StatelessWidget {
   static const _reminder = Reminder(
     id: 'skeleton',
     type: ReminderType.task,
-    title: 'Asignaciones pendientes',
+    missing: 3,
     meta: 'Semana · Proyecto',
-    cta: 'Abrir proyecto',
   );
 
   @override

@@ -26,7 +26,7 @@ class CongregationsRepository {
 
   /// Localized fallback used by [ensureDefault] on fresh installs (the
   /// v1→v2 migration covers upgrades).
-  final String defaultName;
+  final String Function() defaultName;
 
   SimpleSelectStatement<$CongregationsTable, CongregationRecord> _alive() =>
       _db.select(_db.congregations)
@@ -105,7 +105,7 @@ class CongregationsRepository {
   Future<String> ensureDefault() async {
     final existing = await (_alive()..limit(1)).getSingleOrNull();
     if (existing != null) return existing.id;
-    return (await create(name: defaultName, number: '')).id;
+    return (await create(name: defaultName(), number: '')).id;
   }
 
   Congregation _toModel(CongregationRecord r) => Congregation(
