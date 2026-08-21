@@ -70,6 +70,47 @@ void main() {
     );
   });
 
+  /// The printed sheet is built outside the widget tree, from a `Translations`
+  /// picked per congregation — a Spanish string typed straight into the layout
+  /// ignores that and prints Spanish on an English sheet. That was the weekly
+  /// reading label.
+  test('lib/pdf/ prints no catalog text of its own', () {
+    final catalog = jsonDecode(
+      File('lib/i18n/es.i18n.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    // Placeholders ({n}, {title}) never appear verbatim in source anyway.
+    final printed = (catalog['program'] as Map<String, dynamic>)
+        .values
+        .whereType<String>()
+        .where((v) => !v.contains('{'))
+        .map((v) => v.trim())
+        .where((v) => v.length > 3)
+        .toList();
+
+    final violations = <String>[];
+    final files = Directory('lib/pdf')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'));
+
+    for (final file in files) {
+      final lines = file.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].trimLeft().startsWith('//')) continue;
+        for (final text in printed) {
+          if (lines[i].contains(text)) {
+            violations.add('${file.path}:${i + 1}: $text');
+          }
+        }
+      }
+    }
+
+    expect(violations, isEmpty,
+        reason: 'Read these from the `Translations` the document was built '
+            'with (`tr.program.*`), so the sheet follows the congregation\'s '
+            'meeting language.\n${violations.join('\n')}');
+  });
+
   test('every allowlisted file still exists', () {
     for (final path in allowed.keys) {
       expect(File(path).existsSync(), isTrue,

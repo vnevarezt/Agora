@@ -274,7 +274,7 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
       children: [
         pw.Expanded(
           child: pw.Text(
-              '${week.date}   |   LECTURA SEMANAL DE LA BIBLIA:  ${week.reading}',
+              '${week.date}   |   ${tr.program.weeklyReading}:  ${week.reading}',
               style: weekStyle),
         ),
         ...chairmanCell,
@@ -288,7 +288,7 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Expanded(
-            child: pw.Text('${week.date}   |   LECTURA SEMANAL DE LA BIBLIA',
+            child: pw.Text('${week.date}   |   ${tr.program.weeklyReading}',
                 style: weekStyle),
           ),
           ...chairmanCell,

@@ -1603,6 +1603,9 @@ class Translations$program$es {
 	/// es: 'Programa para la reunión de entre semana'
 	String get title => 'Programa para la reunión de entre semana';
 
+	/// es: 'LECTURA SEMANAL DE LA BIBLIA'
+	String get weeklyReading => 'LECTURA SEMANAL DE LA BIBLIA';
+
 	/// es: 'Presidente: '
 	String get chairman => 'Presidente: ';
 
@@ -2486,6 +2489,7 @@ extension on Translations {
 			'program.rolePrayer' => 'Oración:',
 			'program.roleSpeaker' => 'Orador:',
 			'program.title' => 'Programa para la reunión de entre semana',
+			'program.weeklyReading' => 'LECTURA SEMANAL DE LA BIBLIA',
 			'program.chairman' => 'Presidente: ',
 			'program.mainHall' => 'Auditorio principal',
 			'program.auxRoom' => 'Sala Auxiliar',
