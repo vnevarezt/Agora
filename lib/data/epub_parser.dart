@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:html/parser.dart' as html_parser;
 
+import '../domain/mwb_calendar.dart';
 import '../models/week.dart';
 
 /// Parsing of the mwb notebook EPUB -> list of weeks.
@@ -165,8 +166,20 @@ Week parseWeek(String xhtml, {String lang = 'S'}) {
   return week;
 }
 
+/// Day of the month a week heading opens with, language-independently:
+/// '6-12 DE JULIO' and 'JULY 6-12' both answer 6. Null when there is no digit.
+int? weekStartDayOf(String heading) {
+  final match = _reNumber.firstMatch(heading);
+  return match == null ? null : int.tryParse(match.group(0)!);
+}
+
 /// Parses the whole EPUB (bytes) and returns the weeks with parts.
-List<Week> parseEpub(Uint8List bytes, {String lang = 'S'}) {
+///
+/// [issue] (`YYYYMM`) is what lets each week carry its [Week.weekStart]; the
+/// files are already in order, so each resolved Monday anchors the next one.
+/// Omit it and the weeks come back with an empty `weekStart` — every caller in
+/// the app passes it.
+List<Week> parseEpub(Uint8List bytes, {String lang = 'S', String? issue}) {
   final archive = ZipDecoder().decodeBytes(bytes);
   // Weekly files are OEBPS/NNNNNNNNN.xhtml (without '-extracted').
   final names = archive.files
@@ -175,11 +188,26 @@ List<Week> parseEpub(Uint8List bytes, {String lang = 'S'}) {
       .toList()
     ..sort();
   final weeks = <Week>[];
+  String? previous;
   for (final n in names) {
     final f = archive.findFile(n)!;
     final xhtml = utf8.decode(f.content as List<int>);
     final week = parseWeek(xhtml, lang: lang);
-    if (week.parts.isNotEmpty) weeks.add(week); // ignore cover/index
+    if (week.parts.isEmpty) continue; // cover / index
+    if (issue != null) {
+      final day = weekStartDayOf(week.date);
+      if (day != null) {
+        // Chain off the previous week first (exact), and fall back to the
+        // period search so one unreadable heading cannot derail the rest.
+        final start = weekStartFor(issue, day, previous: previous) ??
+            weekStartFor(issue, day);
+        if (start != null) week.weekStart = start;
+        previous = start;
+      } else {
+        previous = null;
+      }
+    }
+    weeks.add(week);
   }
   return weeks;
 }

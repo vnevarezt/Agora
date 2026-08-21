@@ -11,8 +11,9 @@ import 'mwb_cache.dart';
 
 /// Unzip + HTML parsing are tens-of-ms of pure CPU per notebook: run them off
 /// the UI isolate (they hit it on editor open and during the startup sync).
-Future<List<Week>> _parseEpubInBackground(Uint8List bytes, String lang) =>
-    runInBackground(() => parseEpub(bytes, lang: lang));
+Future<List<Week>> _parseEpubInBackground(
+        Uint8List bytes, String lang, String issue) =>
+    runInBackground(() => parseEpub(bytes, lang: lang, issue: issue));
 
 /// Data facade: serves the mwb notebook from the on-disk cache, downloading it
 /// from jw.org only the first time (then re-parsing the cached EPUB).
@@ -78,7 +79,7 @@ class MwbRepository {
     final cached = await _cache.readEpub(issue, lang);
     final bytes =
         cached ?? await MwbApi.downloadEpub(issue, lang: lang, client: _client);
-    final weeks = await _parseEpubInBackground(bytes, lang);
+    final weeks = await _parseEpubInBackground(bytes, lang, issue);
     // A freshly downloaded notebook with no weeks is a failed download, not an
     // empty notebook: it must not be cached, and the sync has to see it fail so
     // its back-off kicks in. A cached one that parses empty is left to the
