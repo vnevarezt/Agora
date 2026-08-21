@@ -98,7 +98,8 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
     final blocked = blockers.value ?? const <String>[];
     final loading = blockers.isLoading;
 
-    final canDelete = !_busy &&
+    final canDelete =
+        !_busy &&
         !loading &&
         blocked.isEmpty &&
         (_isGoogle || _password.isNotEmpty);
@@ -163,9 +164,9 @@ class _BlockedNotice extends ConsumerWidget {
     final names = [
       for (final cid in congregationIds)
         congregations
-            .where((c) => c.id == cid)
-            .map((c) => c.name)
-            .firstOrNull ??
+                .where((c) => c.id == cid)
+                .map((c) => c.name)
+                .firstOrNull ??
             cid,
     ].join(', ');
     return Text(

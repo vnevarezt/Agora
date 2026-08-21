@@ -227,7 +227,11 @@ class _PortadaButton extends StatelessWidget {
                   duration: Motion.of(context, Motion.instant),
                   curve: Motion.curve,
                   offset: hovered ? const Offset(0.18, 0) : Offset.zero,
-                  child: Icon(Icons.arrow_forward, size: AppIcon.control, color: fg),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    size: AppIcon.control,
+                    color: fg,
+                  ),
                 ),
               ],
             ],
@@ -253,7 +257,10 @@ class _LocalEntryCard extends StatelessWidget {
       builder: (context, hovered, _) => AnimatedContainer(
         duration: Motion.of(context, Motion.instant),
         curve: Motion.curve,
-        padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Space.s14,
+          vertical: Space.s12,
+        ),
         decoration: BoxDecoration(
           color: hovered ? t.accentTint : t.surface2,
           borderRadius: BorderRadius.circular(12),
@@ -261,7 +268,11 @@ class _LocalEntryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.smartphone, size: AppIcon.control, color: t.accentStrong),
+            Icon(
+              Icons.smartphone,
+              size: AppIcon.control,
+              color: t.accentStrong,
+            ),
             const SizedBox(width: Space.s12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
