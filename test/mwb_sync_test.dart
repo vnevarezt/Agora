@@ -9,7 +9,6 @@ import 'package:http/testing.dart';
 import 'package:agora/data/mwb_cache.dart';
 import 'package:agora/data/mwb_store_native.dart';
 import 'package:agora/data/mwb_repository.dart';
-import 'package:agora/models/notebook.dart';
 import 'package:agora/state/mwb_sync.dart';
 
 /// Minimal but valid mwb EPUB: one weekly XHTML with one numbered part, so
@@ -73,11 +72,9 @@ void main() {
     final log = <String>[];
     final repo = MwbRepository(cache, client: client(log, const {}));
 
-    var catalog = <Notebook>[];
     final report = await runMwbSync(
       cache: cache,
       repository: repo,
-      onCatalog: (n) => catalog = n,
       now: now,
       monthsAhead: 2,
     );
@@ -85,7 +82,9 @@ void main() {
     expect(log, isEmpty, reason: 'no debe tocar la red si ya hay cobertura');
     expect(report.skippedCached, ['202605', '202607']);
     expect(report.downloaded, isEmpty);
-    expect(catalog.map((n) => n.id), ['202605', '202607']);
+
+    final catalog = await buildCatalog(cache, repo);
+    expect(catalog['S']!.map((n) => n.id), ['202605', '202607']);
   });
 
   test('downloads only the missing issue', () async {
@@ -97,7 +96,6 @@ void main() {
     final report = await runMwbSync(
       cache: cache,
       repository: repo,
-      onCatalog: (_) {},
       now: now,
       monthsAhead: 2,
     );
@@ -115,7 +113,7 @@ void main() {
     }
     final repo = MwbRepository(cache, client: client([], const {}));
     final ok = await runMwbSync(
-        cache: cache, repository: repo, onCatalog: (_) {}, now: now);
+        cache: cache, repository: repo, now: now);
     expect(ok.complete, isTrue);
   });
 
@@ -126,14 +124,14 @@ void main() {
     final repo = MwbRepository(cache, client: client(log, const {}));
 
     final r1 = await runMwbSync(
-        cache: cache, repository: repo, onCatalog: (_) {}, now: now);
+        cache: cache, repository: repo, now: now);
     expect(r1.failed.keys, ['202607']);
     expect(r1.complete, isFalse, reason: 'falta un cuaderno -> incompleto');
     expect(log, ['202607']);
 
     // Same day: skipped by back-off, no new request.
     final r2 = await runMwbSync(
-        cache: cache, repository: repo, onCatalog: (_) {}, now: now);
+        cache: cache, repository: repo, now: now);
     expect(r2.skippedBackoff, ['202607']);
     expect(log, ['202607']);
 
@@ -141,9 +139,29 @@ void main() {
     final r3 = await runMwbSync(
         cache: cache,
         repository: repo,
-        onCatalog: (_) {},
-        now: now.add(const Duration(days: 2)));
+          now: now.add(const Duration(days: 2)));
     expect(log, ['202607', '202607']);
     expect(r3.failed.keys, ['202607']);
+  });
+
+  test('the catalog keeps every cached language, not just the synced one',
+      () async {
+    // A congregation switching from Spanish to English used to make the
+    // Spanish catalog vanish: the sync rebuilt the whole map from the
+    // languages of that pass alone, while the EPUBs stayed on disk and the
+    // projects built from them still needed their weeks.
+    final now = DateTime(2026, 6, 14);
+    await cache.putEpub('202605', 'S', fakeBytes, 1);
+    await cache.putEpub('202605', 'E', fakeBytes, 1);
+    await cache.putEpub('202607', 'E', fakeBytes, 1);
+    final repo = MwbRepository(cache, client: client([], const {}));
+
+    await runMwbSync(
+        cache: cache, repository: repo, lang: 'E', now: now, monthsAhead: 2);
+    final catalog = await buildCatalog(cache, repo);
+
+    expect(catalog.keys, containsAll(['S', 'E']));
+    expect(catalog['S']!.map((n) => n.id), ['202605']);
+    expect(catalog['E']!.map((n) => n.id), ['202605', '202607']);
   });
 }

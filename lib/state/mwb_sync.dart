@@ -43,13 +43,14 @@ class SyncReport {
 /// 2. For each, skip if already cached or within back-off (no network);
 ///    otherwise download + cache it. A failure (e.g. a future issue not yet
 ///    published) is recorded for back-off, not rethrown.
-/// 3. Rebuild the notebook catalog from the cache and hand it to [onCatalog].
+///
+/// Fetching only — the catalog is [buildCatalog]'s job, because it spans every
+/// cached language while a pass covers exactly one.
 ///
 /// When everything needed is already cached, **no network request is made**.
 Future<SyncReport> runMwbSync({
   required MwbCache cache,
   required MwbRepository repository,
-  required void Function(List<Notebook>) onCatalog,
   DateTime? now,
   int monthsAhead = 2,
   String lang = 'S',
@@ -81,8 +82,6 @@ Future<SyncReport> runMwbSync({
     }
   }
 
-  onCatalog(await _buildCatalog(cache, repository, lang));
-
   return SyncReport(
     downloaded: downloaded,
     skippedCached: skippedCached,
@@ -91,27 +90,37 @@ Future<SyncReport> runMwbSync({
   );
 }
 
-/// Builds one [Notebook] per cached issue. A parse failure for an issue is
-/// tolerated (the notebook is listed with no weeks) so it never breaks the sync.
-Future<List<Notebook>> _buildCatalog(
-    MwbCache cache, MwbRepository repository, String lang) async {
+/// One [Notebook] per cached issue, keyed by workbook language.
+///
+/// Reads the WHOLE manifest, not just the languages the caller happens to have
+/// fetched: a congregation switching from Spanish to English must not make the
+/// Spanish catalog vanish. Those EPUBs are still on disk and the projects built
+/// from them still need their weeks.
+///
+/// A parse failure for an issue is tolerated (the notebook is listed with no
+/// weeks) so one bad file never empties the catalog.
+Future<Map<String, List<Notebook>>> buildCatalog(
+    MwbCache cache, MwbRepository repository) async {
   final manifest = await cache.readManifest();
-  final notebooks = <Notebook>[];
-  for (final e in manifest.entries.where((e) => e.lang == lang)) {
+  final byLang = <String, List<Notebook>>{};
+  for (final e in manifest.entries) {
+    List<String> weeks;
     try {
-      final weeks = await repository.weeks(e.issue, lang: lang);
-      notebooks.add(Notebook(
-        id: e.issue,
-        weeks: [for (final w in weeks) w.date],
-      ));
+      final parsed = await repository.weeks(e.issue, lang: e.lang);
+      weeks = [for (final w in parsed) w.date];
     } catch (_) {
-      notebooks.add(Notebook(id: e.issue, weeks: const []));
+      weeks = const [];
     }
+    (byLang[e.lang] ??= []).add(Notebook(id: e.issue, weeks: weeks));
   }
-  return notebooks;
+  // Manifest order is write order (a re-download moves an issue to the end), so
+  // sort: the project modal picks `notebooks.first` as its fallback tab.
+  for (final notebooks in byLang.values) {
+    notebooks.sort((a, b) => a.id.compareTo(b.id));
+  }
+  return byLang;
 }
 
-/// Runs [runMwbSync] once on first watch (app startup), in the background. The
 /// Workbook languages the sync has to cover, as a canonical `'E,S'` string.
 /// `null` while the congregation stream has not landed, `''` when there are no
 /// congregations to serve.
@@ -130,6 +139,7 @@ final requiredWorkbookLangsProvider = Provider<String?>((ref) {
   return (langs.toList()..sort()).join(',');
 });
 
+/// Runs [runMwbSync] once on first watch (app startup), in the background. The
 /// dashboard reads the resulting [SyncReport] (loading / complete / incomplete)
 /// to show a persistent catalog-status card.
 class MwbSyncController extends AsyncNotifier<SyncReport> {
@@ -157,17 +167,17 @@ class MwbSyncController extends AsyncNotifier<SyncReport> {
 
     final cache = ref.read(cacheProvider);
     final repository = ref.read(repositoryProvider);
-    final catalog = <String, List<Notebook>>{};
     final reports = <SyncReport>[];
     for (final lang in targets) {
       reports.add(await runMwbSync(
         cache: cache,
         repository: repository,
         lang: lang,
-        onCatalog: (ns) => catalog[lang] = ns,
       ));
     }
-    ref.read(notebooksByLangProvider.notifier).setFrom(catalog);
+    ref
+        .read(notebooksByLangProvider.notifier)
+        .setFrom(await buildCatalog(cache, repository));
     return SyncReport.merge(reports);
   }
 }
