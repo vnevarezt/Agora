@@ -11,6 +11,7 @@ import '../pdf/pdf_rasterizer.dart';
 import '../pdf/program_document.dart';
 import 'app_settings.dart';
 import 'dashboard_provider.dart';
+import 'editor_session.dart';
 import 'program_form.dart';
 import 'weeks_provider.dart';
 
@@ -37,8 +38,7 @@ final fileSaverProvider = Provider<FileSaver>((ref) => FileSaver());
 /// meeting is actually held. Running the UI in English while printing a
 /// Spanish program is the normal case, not an edge one.
 final programLocaleProvider = Provider<AppLocale>((ref) {
-  final congregationId =
-      ref.watch(formProvider.select((f) => f.congregationId));
+  final congregationId = ref.watch(editorCongregationIdProvider);
   for (final c in ref.watch(congregationsProvider)) {
     if (c.id == congregationId) {
       return programLocaleFor(c.settings.meetingLanguage);
