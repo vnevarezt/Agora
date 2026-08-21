@@ -1,0 +1,118 @@
+/* Device frames drawn in CSS — no image assets, so a frame is a handful of
+   measurements rather than a licensed PNG per device, and it renders at
+   whatever resolution a store demands.
+ 
+   Three layers, which is what actually makes a frame read as a device:
+   a metal rail at the very edge, black glass inside it, then the screen.
+   Skipping the glass is why a one-layer frame looks like a coloured border. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: var(--canvas-w);
+  height: var(--canvas-h);
+  overflow: hidden;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  font-family: -apple-system, system-ui, sans-serif;
+}
+
+.device {
+  position: relative;
+  border-radius: var(--r-outer);
+  padding: var(--rail-w);
+  background: var(--rail);
+  /* Elevation, in three layers: the contact shadow where the device meets the
+     ground, the key shadow that says how high it is held, and a wide ambient
+     one for the room. One wide blur alone, at an alpha strong enough to be
+     seen, is not depth — it is a grey cloud, and on a light page it reads as
+     dirt around the device rather than as air under it. Each layer is a
+     fraction of --shadow-a so a theme still sets the whole thing with one
+     number. */
+  box-shadow:
+    0 calc(var(--shadow) * 0.05) calc(var(--shadow) * 0.10) rgba(10, 14, 30, calc(var(--shadow-a) * 0.55)),
+    0 calc(var(--shadow) * 0.16) calc(var(--shadow) * 0.34) rgba(10, 14, 30, calc(var(--shadow-a) * 0.38)),
+    0 calc(var(--shadow) * 0.34) calc(var(--shadow) * 0.72) rgba(10, 14, 30, calc(var(--shadow-a) * 0.20));
+}
+
+/* The black glass the screen is printed under, and the bezel it leaves. */
+.glass {
+  border-radius: calc(var(--r-outer) - var(--rail-w));
+  padding: var(--bezel-w);
+  background: #05060a;
+  position: relative;
+}
+
+.screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: calc(var(--r-outer) - var(--rail-w) - var(--bezel-w));
+  display: block;
+  background: #000;
+}
+
+/* The lit edge of the glass over the panel. Without it a dark-theme capture
+   is the same black as the bezel, the boundary disappears, and the whole
+   thing reads as one enormous border instead of a screen. */
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 var(--edge-w) rgba(255, 255, 255, .10),
+    inset 0 0 calc(var(--edge-w) * 6) rgba(255, 255, 255, .05);
+}
+
+.screen img { display: block; width: 100%; height: 100%; }
+
+/* Dynamic Island. Sized from the screen width so it holds at any scale. */
+.island {
+  position: absolute;
+  top: calc(var(--screen-w) * 0.028);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(var(--screen-w) * 0.284);
+  height: calc(var(--screen-w) * 0.082);
+  border-radius: 999px;
+  background: #000;
+}
+
+/* A single soft diagonal highlight. Overdo this and it stops looking like
+   glass and starts looking like a scratch. */
+.glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, .10) 0%,
+    rgba(255, 255, 255, .04) 18%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* Buttons sit proud of the rail and catch the same light it does. */
+.btn {
+  position: absolute;
+  background: var(--rail);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .28);
+}
+.btn.right { right: calc(var(--rail-w) * -0.55); border-radius: 0 var(--btn-r) var(--btn-r) 0; }
+.btn.left  { left:  calc(var(--rail-w) * -0.55); border-radius: var(--btn-r) 0 0 var(--btn-r); }
+
+/* Hero stage: two devices in perspective, the way a product page shows them. */
+.stage {
+  position: relative;
+  width: var(--canvas-w);
+  height: var(--canvas-h);
+  perspective: 2600px;
+  display: grid;
+  place-items: center;
+}
+
+.stage .slot { position: absolute; transform-style: preserve-3d; }
