@@ -45,7 +45,8 @@ void main() {
               number: 1,
               title: 'Lectura de la Biblia',
               minutes: 4),
-        ]));
+        ]),
+        'S');
 
     // Riverpod 3 pauses unlistened providers: keep the card provider live.
     final sub = container.listen(projectsProvider, (_, _) {});
@@ -112,7 +113,7 @@ void main() {
           ],
         );
 
-    await programs.setContent(program.id, weekWith(withStudy: false));
+    await programs.setContent(program.id, weekWith(withStudy: false), 'S');
 
     final sub = container.listen(projectsProvider, (_, _) {});
     addTearDown(sub.close);
@@ -128,7 +129,7 @@ void main() {
     expect((await settled()).total, 2);
 
     // A new snapshot adds the study: conductor + reader.
-    await programs.setContent(program.id, weekWith(withStudy: true));
+    await programs.setContent(program.id, weekWith(withStudy: true), 'S');
     expect((await settled()).total, 4);
 
     // On a circuit overseer visit the study becomes a single speaker.
