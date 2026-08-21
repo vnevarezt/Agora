@@ -121,12 +121,17 @@ class MwbSyncController extends AsyncNotifier<SyncReport> {
     // congregations means adding one that meets in another language pulls its
     // workbook down without a restart; passes whose issues are already cached
     // make no network request, so re-running is cheap.
-    final langs = workbookLangsFor(
-      ref.watch(congregationsProvider).map((c) => c.settings.meetingLanguage),
+    //
+    // Awaiting the stream rather than reading its synchronous view is what
+    // keeps "still loading" apart from "none": guessing Spanish in that window
+    // cost an English-only user a multi-megabyte download of a workbook they
+    // never meet in, which then sat on disk forever. `ensureDefault()` creates
+    // a congregation on the first real write, so waiting is short.
+    final congregations = await ref.watch(congregationsStreamProvider.future);
+    final targets = workbookLangsFor(
+      congregations.map((c) => c.settings.meetingLanguage),
     );
-    // Before the congregation stream emits, fall back to the schema default so
-    // the very first launch still fills a catalog.
-    final targets = langs.isEmpty ? {workbookLangFor('spanish')} : langs;
+    if (targets.isEmpty) return const SyncReport();
 
     final cache = ref.read(cacheProvider);
     final repository = ref.read(repositoryProvider);
