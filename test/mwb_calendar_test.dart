@@ -87,4 +87,65 @@ void main() {
     expect(issueMonth('202701'), 1);
     expect(issueYear('202701'), 2027);
   });
+
+  group('weekStartFor', () {
+    test('both languages of one week resolve to the same Monday', () {
+      // The fixtures: 'JULY 6-12' and '6-12 DE JULIO'. Different words, same
+      // leading digit — which is the whole point.
+      expect(weekStartFor('202607', 6), '2026-07-06');
+    });
+
+    test('a week spanning two months lands on its own Monday', () {
+      // '29 DE JUNIO A 5 DE JULIO' / 'JUNE 29-JULY 5'.
+      expect(weekStartFor('202605', 29), '2026-06-29');
+    });
+
+    test('a workbook may open before its own period', () {
+      // 202605 covers May-June, but its first week starts 27 April.
+      expect(weekStartFor('202605', 27), '2026-04-27');
+    });
+
+    test('the period wins over the margin when both hold a candidate', () {
+      // February 2026 has 28 days, so 2 February and 2 March are BOTH Mondays
+      // and both fall inside a Jan-Feb issue widened by a week. Only the
+      // period tells them apart, which is why it is searched first.
+      expect(weekStartFor('202601', 2), '2026-02-02');
+      // And the March one is the Mar-Apr issue's, resolved from its own period.
+      expect(weekStartFor('202603', 2), '2026-03-02');
+    });
+
+    test('crosses the year boundary', () {
+      expect(weekStartFor('202511', 29), '2025-12-29');
+      expect(weekStartFor('202601', 5), '2026-01-05');
+    });
+
+    test('a previous week turns the search into an equality check', () {
+      expect(weekStartFor('202607', 13, previous: '2026-07-06'),
+          '2026-07-13');
+      expect(weekStartFor('202607', 20, previous: '2026-07-13'),
+          '2026-07-20');
+    });
+
+    test('a heading that does not fit is rejected, never guessed', () {
+      // Day 7 of a week following 2026-07-06 would have to be 2026-07-13.
+      expect(weekStartFor('202607', 7, previous: '2026-07-06'), isNull);
+      // No Monday in or around Jul-Aug 2026 falls on a 9th.
+      expect(weekStartFor('202607', 9), isNull);
+    });
+  });
+
+  group('issuesForWeekStart', () {
+    test('offers the week\'s own issue first', () {
+      expect(issuesForWeekStart('2026-07-06').first, '202607');
+    });
+
+    test('offers the next issue too, for a workbook opening early', () {
+      // 2026-04-27 reads as 202603 by date, but it opens the 202605 workbook.
+      expect(issuesForWeekStart('2026-04-27'), ['202603', '202605']);
+    });
+
+    test('malformed input yields nothing rather than a wrong issue', () {
+      expect(issuesForWeekStart('7-13 DE JULIO'), isEmpty);
+    });
+  });
 }
