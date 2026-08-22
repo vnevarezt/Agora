@@ -265,7 +265,10 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
       color: S140.labelColor);
   final chairmanCell = [
     pw.Text(tr.program.chairman, style: roleStyle),
-    pw.Text(chairman, style: pw.TextStyle(fontSize: m.week)),
+    // A participant name like any other on the sheet, so it takes the body
+    // size. At m.week it matched the week heading instead — the largest plain
+    // text on the page, and half again the size of every name below it.
+    pw.Text(chairman, style: pw.TextStyle(fontSize: m.base)),
   ];
   if (m.inlineWeekLine) {
     // Compact sheets: date + reading merged on one line.
@@ -371,28 +374,28 @@ pw.Widget _table(S140Metrics m, Translations tr, List<ProgramRow> rows,
 // Names cell (Main Hall or Auxiliary Room). Ministry rule: if the
 // Estudiante/Ayudante pair doesn't fit on one line, it ALWAYS stacks: line 1
 // Assistant, line 2 Student. Returns the widget and whether it stacked.
+/// Renders whatever [nameLines] decided. The ordering lives there, where a
+/// test can reach it.
 ({pw.Widget widget, bool stacked}) _namesCell(SlotRole role,
     List<String> names, double width, double Function(String) measure,
     pw.TextStyle style) {
-  final joined = joinedNames(names);
-  final isStudentAssistant = role.isStudentPair && names.length == 2;
-  if (isStudentAssistant && measure(joined) > width) {
+  final layout = nameLines(role, names, width, measure);
+  if (!layout.stacked) {
     return (
-      widget: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.end,
-        children: [
-          pw.Text(names[1],
-              textAlign: pw.TextAlign.right, style: style), // Assistant
-          pw.Text(names[0],
-              textAlign: pw.TextAlign.right, style: style), // Student
-        ],
-      ),
-      stacked: true,
+      widget:
+          pw.Text(layout.lines.single, textAlign: pw.TextAlign.right, style: style),
+      stacked: false,
     );
   }
   return (
-    widget: pw.Text(joined, textAlign: pw.TextAlign.right, style: style),
-    stacked: false,
+    widget: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.end,
+      children: [
+        for (final name in layout.lines)
+          pw.Text(name, textAlign: pw.TextAlign.right, style: style),
+      ],
+    ),
+    stacked: true,
   );
 }
 

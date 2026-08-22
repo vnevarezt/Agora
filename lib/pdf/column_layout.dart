@@ -31,6 +31,29 @@ double namesWidth(
   return measure(joinedNames(names));
 }
 
+/// How a slot's names are laid out in the names column: one line when the
+/// joined form fits, otherwise one name per line.
+///
+/// The order is the same either way, and that is the whole point of this being
+/// one function. It has to match [joinedNames] and the role label the cell sits
+/// next to ("Estudiante/Ayudante:"), so the student comes first. The renderer
+/// used to decide this inline with hand-written indices and had them backwards
+/// in the stacked branch, so a pair read one way when it fitted on a line and
+/// the other way when it did not — which two-per-sheet, with its narrow names
+/// column, hit almost every time.
+({List<String> lines, bool stacked}) nameLines(
+  SlotRole role,
+  List<String> names,
+  double width,
+  double Function(String) measure,
+) {
+  final joined = joinedNames(names);
+  if (role.isStudentPair && names.length == 2 && measure(joined) > width) {
+    return (lines: names, stacked: true);
+  }
+  return (lines: [joined], stacked: false);
+}
+
 /// Computes the widths adaptively: if the names carry a lot of text, it widens
 /// the names column(s) taking space from the title (with a floor). In auxRoom
 /// mode it splits between two names columns. Measured with Carlito at the
