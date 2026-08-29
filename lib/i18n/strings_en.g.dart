@@ -487,6 +487,7 @@ class _Translations$settings$en extends Translations$settings$es {
 	@override String get sessionDesc => 'You are using the app in local mode on this device.';
 	@override String get localMode => 'Local mode';
 	@override String get localModeDesc => 'Data lives only on this device';
+	@override String get catalogDescWeb => 'The browser cannot download them by itself. Load them from jw.org in two steps.';
 }
 
 // Path: options
@@ -750,6 +751,23 @@ class _Translations$workspace$en extends Translations$workspace$es {
 	@override String get emptyTitle => 'The workbook downloads automatically.';
 	@override String get emptyMessage => 'It is usually ready automatically. If it still doesn\'t appear, look for it manually.';
 	@override String searchNotebook({required Object issue}) => 'Look for workbook ${issue}';
+	@override String get importNotebook => 'Import notebook (.epub)';
+	@override String get importWebMessage => 'In the browser the notebook cannot download itself: jw.org serves the file from a server that does not allow it. Download it from jw.org and open it here.';
+	@override String importDone({required Object issue, required Object n}) => 'Notebook ${issue} imported (${n} weeks).';
+	@override String get importNotWorkbook => 'That file is not a Life and Ministry workbook. Look for the .epub from jw.org.';
+	@override String get importTitle => 'Load notebook';
+	@override String get importIntro => 'The browser cannot download it by itself. Two steps:';
+	@override String get importStepDownload => 'Download the notebook from jw.org';
+	@override String get importStepOpen => 'Open it here';
+	@override String get importPick => 'Choose .epub file';
+	@override String get importDownload => 'Download';
+	@override String get importLoaded => 'Already loaded';
+	@override String get importMissing => 'Not loaded yet';
+	@override String get importUnavailable => 'jw.org hasn\'t published it yet';
+	@override String get importStepOpenHint => 'Choose the .epub you just downloaded.';
+	@override String get importDropHere => 'Drop the .epub you downloaded here';
+	@override String get importDropOr => 'or choose it with the button below';
+	@override String get importCta => 'Load notebook';
 	@override String get assignee => 'Assign…';
 	@override String duration({required Object n}) => '${n} min';
 	@override String get songTag => 'Song';
@@ -1298,6 +1316,7 @@ extension on TranslationsEn {
 			'settings.sessionDesc' => 'You are using the app in local mode on this device.',
 			'settings.localMode' => 'Local mode',
 			'settings.localModeDesc' => 'Data lives only on this device',
+			'settings.catalogDescWeb' => 'The browser cannot download them by itself. Load them from jw.org in two steps.',
 			'options.timeFormat24' => '24-hour (18:00)',
 			'options.timeFormat12' => '12-hour (6:00 p.m.)',
 			'options.pdfNameFull' => 'First and last name',
@@ -1459,6 +1478,23 @@ extension on TranslationsEn {
 			'workspace.emptyTitle' => 'The workbook downloads automatically.',
 			'workspace.emptyMessage' => 'It is usually ready automatically. If it still doesn\'t appear, look for it manually.',
 			'workspace.searchNotebook' => ({required Object issue}) => 'Look for workbook ${issue}',
+			'workspace.importNotebook' => 'Import notebook (.epub)',
+			'workspace.importWebMessage' => 'In the browser the notebook cannot download itself: jw.org serves the file from a server that does not allow it. Download it from jw.org and open it here.',
+			'workspace.importDone' => ({required Object issue, required Object n}) => 'Notebook ${issue} imported (${n} weeks).',
+			'workspace.importNotWorkbook' => 'That file is not a Life and Ministry workbook. Look for the .epub from jw.org.',
+			'workspace.importTitle' => 'Load notebook',
+			'workspace.importIntro' => 'The browser cannot download it by itself. Two steps:',
+			'workspace.importStepDownload' => 'Download the notebook from jw.org',
+			'workspace.importStepOpen' => 'Open it here',
+			'workspace.importPick' => 'Choose .epub file',
+			'workspace.importDownload' => 'Download',
+			'workspace.importLoaded' => 'Already loaded',
+			'workspace.importMissing' => 'Not loaded yet',
+			'workspace.importUnavailable' => 'jw.org hasn\'t published it yet',
+			'workspace.importStepOpenHint' => 'Choose the .epub you just downloaded.',
+			'workspace.importDropHere' => 'Drop the .epub you downloaded here',
+			'workspace.importDropOr' => 'or choose it with the button below',
+			'workspace.importCta' => 'Load notebook',
 			'workspace.assignee' => 'Assign…',
 			'workspace.duration' => ({required Object n}) => '${n} min',
 			'workspace.songTag' => 'Song',
@@ -1476,6 +1512,8 @@ extension on TranslationsEn {
 			'relativeTime.now' => 'just now',
 			'relativeTime.minutes' => ({required Object n}) => '${n} min ago',
 			'relativeTime.hours' => ({required Object n}) => '${n} h ago',
+			_ => null,
+		} ?? switch (path) {
 			'relativeTime.days' => ({required Object n}) => '${n} d ago',
 			'program.song' => ({required Object n}) => 'Song ${n}',
 			'program.openingWords' => 'Opening Comments',
@@ -1494,8 +1532,6 @@ extension on TranslationsEn {
 			'program.mainHall' => 'Main Hall',
 			'program.auxRoom' => 'Auxiliary Classroom',
 			'program.sectionTreasures' => 'TREASURES FROM GOD\'S WORD',
-			_ => null,
-		} ?? switch (path) {
 			'program.sectionMinistry' => 'APPLY YOURSELF TO THE FIELD MINISTRY',
 			'program.sectionChristianLife' => 'LIVING AS CHRISTIANS',
 			_ => null,
