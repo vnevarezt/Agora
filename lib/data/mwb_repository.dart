@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 import 'background.dart';
@@ -15,6 +16,15 @@ import 'mwb_cache.dart';
 Future<List<Week>> _parseEpubInBackground(
         Uint8List bytes, String lang, String issue) =>
     runInBackground(() => parseEpub(bytes, lang: lang, issue: issue));
+
+/// A notebook is missing and this platform cannot fetch it — web, where the
+/// workbook file is behind a host that serves no CORS header. Carries no
+/// message: the UI has one, and it is an instruction, not a diagnosis.
+class NotebookNotDownloadable implements Exception {
+  const NotebookNotDownloadable();
+  @override
+  String toString() => 'NotebookNotDownloadable';
+}
 
 /// Data facade: serves the mwb notebook from the on-disk cache, downloading it
 /// from jw.org only the first time (then re-parsing the cached EPUB).
@@ -81,6 +91,32 @@ class MwbRepository {
     return null;
   }
 
+  /// Files a workbook the user picked off their own disk exactly as a download
+  /// would have, under whatever issue and language the FILE says it is.
+  ///
+  /// This is the only way a notebook gets in on web. jw.org's lookup API sends
+  /// `access-control-allow-origin: *`, but every file it points at — EPUB,
+  /// JWPUB, PDF alike — is served from a host that sends no CORS header at all
+  /// and answers 403 to a preflight, so no page policy makes it readable from a
+  /// browser. See docs/RELEASE.md.
+  ///
+  /// Throws [FormatException] when the file is not a meeting workbook, so the
+  /// caller can say which of the two went wrong without parsing a message.
+  Future<({String issue, String lang, int weeks})> importEpub(
+      Uint8List bytes) async {
+    final parsed = await runInBackground(() => parseWorkbookEpub(bytes));
+    if (parsed == null) {
+      throw const FormatException('Not a meeting workbook EPUB.');
+    }
+    if (parsed.weeks.isEmpty) {
+      throw const FormatException('The workbook holds no weeks.');
+    }
+    await _cache.putEpub(
+        parsed.issue, parsed.lang, bytes, parsed.weeks.length);
+    _parsed['${parsed.issue}.${parsed.lang}'] = parsed.weeks;
+    return (issue: parsed.issue, lang: parsed.lang, weeks: parsed.weeks.length);
+  }
+
   /// Re-downloads [issue]/[lang] even though it is cached, replacing what is
   /// on disk only once the fetch and the parse have both succeeded.
   ///
@@ -88,7 +124,16 @@ class MwbRepository {
   /// fetched twice, by design. Deliberately not delete-then-download — a user
   /// who asks for this offline must not end up with less than they started
   /// with.
+  ///
+  /// Refused outright on web, for the same reason [_read] refuses there. Left
+  /// unguarded this was the one path that still asked the browser for the file
+  /// itself: every attempt died, the caller reported "could not refresh", and
+  /// on the deployed site — where a Content-Security-Policy names the hosts the
+  /// page may reach — each one also logged a violation for a button that could
+  /// never have worked. Widening that policy would not have helped: the file's
+  /// host sends no CORS header, so the fetch fails one step later regardless.
   Future<void> refresh(String issue, String lang) async {
+    if (kIsWeb) throw const NotebookNotDownloadable();
     final bytes = await MwbApi.downloadEpub(issue, lang: lang, client: _client);
     final weeks = await _parseEpubInBackground(bytes, lang, issue);
     if (weeks.isEmpty) {
@@ -115,6 +160,13 @@ class MwbRepository {
 
   Future<List<Week>> _read(String issue, String lang) async {
     final cached = await _cache.readEpub(issue, lang);
+    if (cached == null && kIsWeb) {
+      // Not attempted rather than attempted-and-failed: the browser cannot
+      // read the file at any policy (see [importEpub]), so the sync would
+      // spend its back-off on a request that can never succeed and the user
+      // would be shown a CORS error instead of the thing to do about it.
+      throw const NotebookNotDownloadable();
+    }
     final bytes =
         cached ?? await MwbApi.downloadEpub(issue, lang: lang, client: _client);
     final weeks = await _parseEpubInBackground(bytes, lang, issue);
