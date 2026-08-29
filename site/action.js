@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var API_KEY = 'AIzaSyDrXSk6H-p7rcnynnoTuUcoKi5jS-FPlqE';
+  var API_KEY = 'AIzaSyBqoNhQKK9tJp-WNvq5a-3zemrfD66QF-A';
   var ENDPOINT = 'https://identitytoolkit.googleapis.com/v1/accounts:';
 
   var params = new URLSearchParams(location.search);
