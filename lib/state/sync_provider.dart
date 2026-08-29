@@ -239,9 +239,17 @@ final enableCongregationSyncProvider =
           final cck = ref.read(cckServiceProvider);
           if (cck == null) return false;
           await cck.createCongregationSpace(congregationId);
+          // Seed BEFORE marking it shared, never after. The mark is the local
+          // fact that tells auto-enable to leave this congregation alone from
+          // here on, so writing it first meant a seed that failed — or simply
+          // never reached the outbox — left a cloud space holding a member doc
+          // and nothing else, excluded from every later attempt on every
+          // device, with no error recorded anywhere. What its owner sees is a
+          // congregation that restores empty, for ever. Marked last, a failure
+          // leaves the congregation unmarked and the next pass retries it.
+          await ref.read(syncSeederProvider).seedCongregation(congregationId);
           await markCongregationShared(
               ref.read(dbProvider), congregationId);
-          await ref.read(syncSeederProvider).seedCongregation(congregationId);
           return true;
         });
 
