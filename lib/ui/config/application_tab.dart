@@ -19,6 +19,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
 import '../widgets/labeled_field.dart';
+import '../widgets/notebook_import.dart';
 import '../widgets/segmented_control.dart';
 import 'account_card.dart';
 import 'security_card.dart';
@@ -289,20 +290,34 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
 
   Widget _catalogCard() {
     final tr = context.t;
+    // Refreshing means re-downloading, which a browser cannot do here — the
+    // file's host sends no CORS header. Offering it anyway spent every press
+    // on a request that died, and answered with "could not refresh" as though
+    // the network had been unlucky. Where the workbook has to be handed over,
+    // the honest version of "get a newer one" is the loader.
+    final handOver = notebooksMustBeImported;
+    final desc =
+        handOver ? tr.settings.catalogDescWeb : tr.settings.catalogDesc;
     return SettingsCard(
       title: tr.settings.catalogTitle,
-      desc: tr.settings.catalogDesc,
+      desc: desc,
       children: [
         SettingRow(
           first: true,
           title: tr.settings.catalogTitle,
-          subtitle: tr.settings.catalogDesc,
+          subtitle: desc,
           trailing: AppButton(
             variant: AppButtonVariant.ghost,
-            icon: Icons.refresh,
-            label: tr.settings.catalogRefresh,
+            icon: handOver ? Icons.file_open_outlined : Icons.refresh,
+            label: handOver
+                ? tr.workspace.importCta
+                : tr.settings.catalogRefresh,
             busy: _catalogBusy,
-            onPressed: _catalogBusy ? null : _refreshCatalog,
+            onPressed: _catalogBusy
+                ? null
+                : handOver
+                    ? () => showNotebookImportDialog(context)
+                    : _refreshCatalog,
           ),
         ),
       ],
