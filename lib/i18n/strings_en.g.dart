@@ -160,6 +160,7 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get signedOut => 'Sign in to the cloud to enable syncing.';
 	@override String get unknownError => 'Couldn\'t complete. Please try again.';
 	@override String get ready => 'Sync is on';
+	@override String get syncNow => 'Sync now';
 	@override String get statusSyncing => 'Syncing…';
 	@override String get statusOffline => 'Offline';
 	@override String get statusError => 'Sync error';
@@ -171,6 +172,7 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get restoring => 'Restoring your data…';
 	@override String restoringProgress({required Object done, required Object total}) => '${done} of ${total} congregations';
 	@override String get restoreOffline => 'Offline. Your data will be restored when you reconnect.';
+	@override String get restoreFailed => 'We couldn\'t read your congregations. Check your connection or sign in again.';
 }
 
 // Path: account
@@ -264,6 +266,7 @@ class _Translations$sync$en extends Translations$sync$es {
 	@override String get upToDateTip => 'Your workbooks are up to date.';
 	@override String get missing => 'A workbook is missing';
 	@override String get missingTip => 'The next workbook isn\'t available yet; it will be retried.';
+	@override String get missingImportTip => 'A workbook is missing and the browser can\'t download it by itself. Tap to load it.';
 }
 
 // Path: dashboard
@@ -278,6 +281,9 @@ class _Translations$dashboard$en extends Translations$dashboard$es {
 	@override String get greetingEvening => 'Good evening';
 	@override String greetingNamed({required Object greeting, required Object name}) => '${greeting}, ${name}';
 	@override String get subtitle => 'Your projects and to-dos';
+	@override String get noCongregationTitle => 'No congregation yet';
+	@override String get noCongregationMessage => 'Agora files programs, people and projects under a congregation. Create yours to get started.';
+	@override String get noCongregationCta => 'Create congregation';
 	@override String get youHave => 'You have';
 	@override String get draftsOne => '1 project in progress';
 	@override String draftsMany({required Object n}) => '${n} projects in progress';
@@ -1115,6 +1121,7 @@ extension on TranslationsEn {
 			'cloudSync.signedOut' => 'Sign in to the cloud to enable syncing.',
 			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
 			'cloudSync.ready' => 'Sync is on',
+			'cloudSync.syncNow' => 'Sync now',
 			'cloudSync.statusSyncing' => 'Syncing…',
 			'cloudSync.statusOffline' => 'Offline',
 			'cloudSync.statusError' => 'Sync error',
@@ -1126,6 +1133,7 @@ extension on TranslationsEn {
 			'cloudSync.restoring' => 'Restoring your data…',
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
 			'cloudSync.restoreOffline' => 'Offline. Your data will be restored when you reconnect.',
+			'cloudSync.restoreFailed' => 'We couldn\'t read your congregations. Check your connection or sign in again.',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',
@@ -1182,11 +1190,15 @@ extension on TranslationsEn {
 			'sync.upToDateTip' => 'Your workbooks are up to date.',
 			'sync.missing' => 'A workbook is missing',
 			'sync.missingTip' => 'The next workbook isn\'t available yet; it will be retried.',
+			'sync.missingImportTip' => 'A workbook is missing and the browser can\'t download it by itself. Tap to load it.',
 			'dashboard.greetingMorning' => 'Good morning',
 			'dashboard.greetingAfternoon' => 'Good afternoon',
 			'dashboard.greetingEvening' => 'Good evening',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Your projects and to-dos',
+			'dashboard.noCongregationTitle' => 'No congregation yet',
+			'dashboard.noCongregationMessage' => 'Agora files programs, people and projects under a congregation. Create yours to get started.',
+			'dashboard.noCongregationCta' => 'Create congregation',
 			'dashboard.youHave' => 'You have',
 			'dashboard.draftsOne' => '1 project in progress',
 			'dashboard.draftsMany' => ({required Object n}) => '${n} projects in progress',
@@ -1506,14 +1518,14 @@ extension on TranslationsEn {
 			'workspace.slotInCharge' => 'In charge',
 			'workspace.slotSpeaker' => 'Speaker',
 			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
+			_ => null,
+		} ?? switch (path) {
 			'workspace.editTitle' => 'Edit title',
 			'workspace.editTitleHint' => 'Assignment title',
 			'workspace.restoreTitle' => 'Reset',
 			'relativeTime.now' => 'just now',
 			'relativeTime.minutes' => ({required Object n}) => '${n} min ago',
 			'relativeTime.hours' => ({required Object n}) => '${n} h ago',
-			_ => null,
-		} ?? switch (path) {
 			'relativeTime.days' => ({required Object n}) => '${n} d ago',
 			'program.song' => ({required Object n}) => 'Song ${n}',
 			'program.openingWords' => 'Opening Comments',
