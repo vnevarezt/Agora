@@ -119,6 +119,14 @@ void main() {
     expect(await a.engine.pushOnce(), 0);
     expect(await a.outboxCount(), greaterThan(0));
 
+    // A pull with no keyring says so, instead of passing for an empty page.
+    // The two are identical on the wire — zero docs — and reading the second
+    // as the first is how a freshly signed-in device reported a clean,
+    // successful restore having fetched nothing at all, for ever.
+    final blind = await a.engine.pullOnce(cong.id);
+    expect(blind.keyringMissing, isTrue);
+    expect(blind.fetched, 0);
+
     // --- Enable sync for the congregation and push.
     keyrings[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
     final pushed = await a.engine.pushOnce();
