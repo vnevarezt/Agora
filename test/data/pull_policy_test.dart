@@ -61,8 +61,16 @@ void main() {
     expect(decide(scopes: {'p2': '1'}), PullUrgency.immediate);
   });
 
-  test('own-device heartbeat never pulls, even with a null cursor', () {
-    expect(decide(scopes: {'p1': '1'}, fromOwnDevice: true), PullUrgency.none);
+  test('own-device heartbeat holds off only once we have pulled once', () {
+    // Deliberately the opposite of what this asserted before. The two facts
+    // are independent: the device id is persisted, so "the last push was
+    // mine" can be true on a device that has never read the congregation
+    // back — a browser profile that pushed once and then lost its local rows
+    // was told there was nothing to fetch, permanently.
+    expect(decide(scopes: {'p1': '1'}, fromOwnDevice: true),
+        PullUrgency.immediate);
+    expect(decide(scopes: {'p1': '9'}, fromOwnDevice: true, cursor: '5'),
+        PullUrgency.none);
   });
 
   test('missing heartbeat doc: first-ever sync pulls, an already-synced '
