@@ -17,6 +17,7 @@ import 'db_provider.dart';
 import 'editor_session.dart';
 import 'sync_keys.dart';
 import 'sync_provider.dart';
+import 'sync_trace.dart';
 import 'ui_state.dart';
 
 /// What the sync engine is doing right now (drives the Settings status row
@@ -87,6 +88,19 @@ class SyncController extends Notifier<SyncStatus> {
   AppLifecycleListener? _lifecycle;
   final _heartbeatSubs = <String, StreamSubscription<void>>{};
   final _staleCids = <String>{};
+
+  /// Pull requests that arrived while a pass was already running, or before
+  /// the engine existed. Held rather than dropped — see [_pull].
+  final _queuedCids = <String>{};
+
+  /// The congregations heartbeats SHOULD be attached for, so a listener that
+  /// died can be put back without waiting for the memberships to change.
+  var _watchedCids = <String>{};
+
+  /// Congregations whose heartbeat was refused. Re-attaching one only earns
+  /// the same refusal, so they are skipped until the memberships arrive
+  /// again — which is what a re-granted membership looks like.
+  final _deniedCids = <String>{};
 
   /// Congregations this session already tried to put in the cloud.
   final _autoEnabled = <String>{};
@@ -169,6 +183,9 @@ class SyncController extends Notifier<SyncStatus> {
     }
     _heartbeatSubs.clear();
     _staleCids.clear();
+    _queuedCids.clear();
+    _watchedCids = {};
+    _deniedCids.clear();
     _autoEnabled.clear();
     _pushTimer = _lazyTimer = _retryTimer = null;
     _outboxSub = null;
@@ -246,6 +263,9 @@ class SyncController extends Notifier<SyncStatus> {
   ///    snapshot is never read as "revoked everywhere".
   Future<void> _onMemberships(AsyncValue<List<Membership>> memberships) async {
     final live = memberships.value ?? const <Membership>[];
+    // Memberships landing again is the one event that can undo a refusal, so
+    // the denied set does not outlive it.
+    _deniedCids.clear();
     _attachHeartbeats({for (final m in live) m.congregationId});
     _autoEnable();
 
@@ -331,21 +351,47 @@ class SyncController extends Notifier<SyncStatus> {
         _staleCids.remove(cid);
       }
     }
+    _watchedCids = cids;
+    syncTrace('watching ${cids.length} congregations: ${cids.join(', ')}');
     for (final cid in cids) {
-      _heartbeatSubs.putIfAbsent(
-        cid,
-        () => fs
-            .collection('congregations')
-            .doc(cid)
-            .collection('meta')
-            .doc('activity')
-            .snapshots()
-            .listen((snap) => _onHeartbeat(cid, snap), onError: (_) {
-          // Listener errors (revocation, network) are non-fatal: pushes and
-          // manual sync surface their own status.
-        }),
-      );
+      if (_deniedCids.contains(cid)) continue;
+      _heartbeatSubs.putIfAbsent(cid, () => _listenHeartbeat(fs, cid));
     }
+  }
+
+  StreamSubscription<void> _listenHeartbeat(FirebaseFirestore fs, String cid) =>
+      fs
+          .collection('congregations')
+          .doc(cid)
+          .collection('meta')
+          .doc('activity')
+          .snapshots()
+          .listen((snap) => _onHeartbeat(cid, snap),
+              onError: (Object e) => _onHeartbeatError(cid, e));
+
+  /// A heartbeat listener that dies takes its congregation's syncing with it.
+  ///
+  /// Every pull in this controller is triggered by a heartbeat delivery, and
+  /// Firestore does not resume a listener it ended — while the dead
+  /// subscription stayed in [_heartbeatSubs], so nothing re-attached it
+  /// either. Swallowing the error therefore did not mean "non-fatal", it
+  /// meant that congregation never synced again: an initial restore could sit
+  /// at "1 of 3" indefinitely, with a healthy-looking status and not one line
+  /// written anywhere to say why.
+  void _onHeartbeatError(String cid, Object error) {
+    syncTrace('heartbeat $cid FAILED: $error');
+    _heartbeatSubs.remove(cid)?.cancel();
+    final kind = syncErrorKindOf(error);
+    // Revoked: keep the local data and stop asking. Anything else deserves
+    // another go — [_scheduleRetry] re-attaches and drains what went stale.
+    if (kind == SyncTransportErrorKind.permissionDenied) {
+      _deniedCids.add(cid);
+      _staleCids.remove(cid);
+    } else {
+      _staleCids.add(cid);
+    }
+    _onTransportError(SyncTransportException(
+        kind, 'Heartbeat listener for $cid failed: $error'));
   }
 
   Future<void> _onHeartbeat(
@@ -367,6 +413,8 @@ class SyncController extends Notifier<SyncStatus> {
       fromOwnDevice: data?['srcDevice'] == deviceId(),
       heartbeatExists: snap.exists,
     );
+    syncTrace('heartbeat $cid exists=${snap.exists} '
+        'scopes=${scopes.length} cursor=${await _cursorOf(cid)} -> $urgency');
     switch (urgency) {
       case PullUrgency.none:
         // Nothing newer than our cursor IS the confirmation that we're up to
@@ -433,30 +481,59 @@ class SyncController extends Notifier<SyncStatus> {
   // ---- pull ----------------------------------------------------------------
 
   Future<void> _pull(Set<String> cids) async {
+    if (_paused || cids.isEmpty) return;
     final engine = _engine;
-    if (_paused || _pulling || engine == null) return;
+    // A pull that cannot run right now has to WAIT, never vanish. Returning
+    // here used to drop the request on the floor with nothing recorded, and
+    // on a fresh device that is the whole restore: every congregation's first
+    // heartbeat lands within the same few milliseconds, the first one to
+    // arrive won this flag, and the rest were discarded — no retry, no error,
+    // no trace. Which is precisely a restore that sits at "1 of 4" for ever.
+    if (_pulling || engine == null) {
+      syncTrace('queued ${cids.join(', ')} '
+          '(pulling=$_pulling engine=${engine != null})');
+      _queuedCids.addAll(cids);
+      // Nothing will bring us back on its own while the engine is missing:
+      // the heartbeats that would have are already spent.
+      if (engine == null) _scheduleRetry();
+      return;
+    }
+
+    syncTrace('pulling ${cids.join(', ')}');
     _pulling = true;
     state = state.copyWith(phase: SyncPhase.syncing, clearError: true);
     var failed = false;
-    for (final cid in cids) {
-      try {
-        await _drain(engine, cid);
-        _staleCids.remove(cid);
-      } on SyncTransportException catch (e) {
-        failed = true;
-        // A failing congregation must not starve the rest.
-        if (e.kind == SyncTransportErrorKind.permissionDenied) {
-          // Revoked: keep local data, stop retrying this one.
+    try {
+      for (final cid in cids) {
+        try {
+          await _drain(engine, cid);
           _staleCids.remove(cid);
+        } on SyncTransportException catch (e) {
+          failed = true;
+          syncTrace('pull $cid transport error ${e.kind}: ${e.message}');
+          // A failing congregation must not starve the rest.
+          if (e.kind == SyncTransportErrorKind.permissionDenied) {
+            // Revoked: keep local data, stop retrying this one.
+            _staleCids.remove(cid);
+          }
+          _onTransportError(e);
+        } catch (e) {
+          failed = true;
+          syncTrace('pull $cid threw: $e');
+          state = state.copyWith(phase: SyncPhase.error, errorKey: 'unknown');
         }
-        _onTransportError(e);
-      } catch (_) {
-        failed = true;
-        state = state.copyWith(phase: SyncPhase.error, errorKey: 'unknown');
       }
+      if (!failed) _onSuccess();
+    } finally {
+      _pulling = false;
     }
-    if (!failed) _onSuccess();
-    _pulling = false;
+
+    // Whatever asked while this pass held the flag, run now — once each, and
+    // only what actually queued, so a congregation that just failed waits for
+    // the back-off instead of spinning here.
+    final queued = _queuedCids.toSet();
+    _queuedCids.clear();
+    if (queued.isNotEmpty) await _pull(queued);
   }
 
   /// Pages through one congregation until it runs dry.
@@ -472,6 +549,23 @@ class SyncController extends Notifier<SyncStatus> {
     PullResult page;
     do {
       page = await engine.pullOnce(cid);
+      syncTrace('page $cid fetched=${page.fetched} applied=${page.applied} '
+          'undecryptable=${page.undecryptable} '
+          'keyringMissing=${page.keyringMissing} held=${page.cursorHeld}');
+      if (page.keyringMissing) {
+        // Nothing was read, so there is nothing to report as done. The key
+        // is fetched and sealed per congregation, and a device that has just
+        // signed in may reach here before it holds one — the same recovery
+        // the rotation path gets, for the same reason.
+        await ref.read(cckServiceProvider)?.refresh(cid);
+        page = await engine.pullOnce(cid);
+        if (page.keyringMissing) {
+          throw SyncTransportException(
+            SyncTransportErrorKind.unknown,
+            'No keyring for $cid: its data cannot be read on this device yet.',
+          );
+        }
+      }
       if (page.cursorHeld) {
         await ref.read(cckServiceProvider)?.refresh(cid);
         page = await engine.pullOnce(cid);
@@ -486,6 +580,17 @@ class SyncController extends Notifier<SyncStatus> {
         }
       }
     } while (page.fetched >= FirestoreTransport.pageSize);
+
+    // The one thing the page counts cannot say: whether the CONGREGATION
+    // entity itself came down. Everything measures the restore against that
+    // row, so a congregation whose cloud space holds people and projects but
+    // no congregation doc pulls perfectly and never finishes restoring.
+    final db = ref.read(dbProvider);
+    final row = await (db.select(db.congregations)
+          ..where((t) => t.id.equals(cid)))
+        .getSingleOrNull();
+    syncTrace('drained $cid -> congregation row '
+        '${row == null ? "STILL MISSING" : "present (${row.name})"}');
   }
 
   // ---- outcomes ------------------------------------------------------------
@@ -519,6 +624,9 @@ class SyncController extends Notifier<SyncStatus> {
     _failures++;
     _retryTimer = Timer(delay, () {
       _retryTimer = null;
+      // Before anything else: a pull only ever follows a heartbeat, so a
+      // listener that died has to be back before draining is worth trying.
+      _attachHeartbeats(_watchedCids);
       if (state.pendingOutbox > 0) _push();
       _flushStale();
     });
