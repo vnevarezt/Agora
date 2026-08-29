@@ -9,6 +9,7 @@ import '../models/program_row.dart';
 import '../models/week.dart';
 import 'column_layout.dart';
 import 'pdf_theme.dart';
+import 'sheet_fit.dart';
 
 /// One week's worth of data for the sheet: the structure ([schedule]/[week])
 /// kept apart from the participant names ([assignments]) and the chairman.
@@ -111,22 +112,27 @@ List<pw.Widget> _weekBlock(pw.Context ctx, Carlito carlito, S140Metrics m,
     Translations tr, WeekEntry e, bool auxRoom) {
   // Adaptive widths based on the real content (getFont needs the ctx).
   final regularFont = carlito.regular.getFont(ctx);
-  final cols = computeColumns(m, e.schedule, e.assignments, regularFont, auxRoom);
+  final cols = computeColumns(m, tr, e.schedule, e.assignments, regularFont,
+      carlito.bold.getFont(ctx), auxRoom);
+  // Auxiliary Room may be on for the project and still have nothing to show
+  // for THIS week; [computeColumns] collapses the column when so, and the rest
+  // of the block follows it rather than the project-wide flag.
+  final auxCol = cols.auxRoom > 0;
   double measure(String s) =>
       regularFont.stringMetrics(s).advanceWidth * m.base;
   return [
     _weekLine(m, tr, e.week, e.chairman),
     pw.SizedBox(height: m.gapAfterWeekLine),
-    if (auxRoom) ...[_roomsHeader(m, tr, cols), pw.SizedBox(height: 2)],
-    _table(m, tr, e.schedule.opening, e.assignments, cols, measure, auxRoom),
+    if (auxCol) ...[_roomsHeader(m, tr, cols), pw.SizedBox(height: 2)],
+    _table(m, tr, e.schedule.opening, e.assignments, cols, measure, auxCol),
     _band(m, S140.treasures, tr.program.sectionTreasures, tr.program.mainHall,
-        cols, auxRoom),
-    _table(m, tr, e.schedule.treasures, e.assignments, cols, measure, auxRoom),
+        cols, auxCol),
+    _table(m, tr, e.schedule.treasures, e.assignments, cols, measure, auxCol),
     _band(m, S140.ministryColor, tr.program.sectionMinistry,
-        tr.program.mainHall, cols, auxRoom),
-    _table(m, tr, e.schedule.ministry, e.assignments, cols, measure, auxRoom),
-    _band(m, S140.christianLife, tr.program.sectionChristianLife, '', cols, auxRoom),
-    _table(m, tr, e.schedule.christianLife, e.assignments, cols, measure, auxRoom),
+        tr.program.mainHall, cols, auxCol),
+    _table(m, tr, e.schedule.ministry, e.assignments, cols, measure, auxCol),
+    _band(m, S140.christianLife, tr.program.sectionChristianLife, '', cols, auxCol),
+    _table(m, tr, e.schedule.christianLife, e.assignments, cols, measure, auxCol),
     pw.SizedBox(height: m.gapSectionEnd),
     _thinThickRule(m),
   ];
@@ -135,10 +141,102 @@ List<pw.Widget> _weekBlock(pw.Context ctx, Carlito carlito, S140Metrics m,
 pw.Widget _footer(S140Metrics m) => pw.Text('S-140-S    11/23',
     style: pw.TextStyle(fontSize: m.footnote));
 
+/// Everything printed on one sheet above the footer: the shared header and
+/// then one block per week. Both sheet kinds go through here, so the fit
+/// measures exactly what the page will draw.
+List<pw.Widget> _sheetBody(pw.Context ctx, Carlito carlito, S140Metrics m,
+        Translations tr, String congregation, List<WeekEntry> entries,
+        bool auxRoom) =>
+    [
+      ..._headerBlock(m, tr, congregation),
+      pw.SizedBox(height: m.gapAfterRule),
+      for (var i = 0; i < entries.length; i++) ...[
+        if (i > 0) pw.SizedBox(height: m.weekGap),
+        ..._weekBlock(ctx, carlito, m, tr, entries[i], auxRoom),
+      ],
+    ];
+
+/// Gap between the stacked block and its footer, kept out of [_sheetBody] so
+/// the one-week sheet can leave it to [pw.MultiPage].
+const double _stackedFooterGap = 3;
+
+/// The metrics this sheet actually prints at: [base] opened up as far as the
+/// page allows, measured rather than estimated — [pw.Widget.measure] runs the
+/// real layout pass without drawing anything, so what the fit weighs is what
+/// the page will print. See [fitSheet] for the rule it applies.
+S140Metrics _fitted(
+  pw.Context ctx,
+  Carlito carlito,
+  Translations tr,
+  S140Metrics base,
+  String congregation,
+  List<WeekEntry> entries,
+  bool auxRoom,
+  double available,
+) {
+  final regularFont = carlito.regular.getFont(ctx);
+  final boldFont = carlito.bold.getFont(ctx);
+  SheetProbe probe(SheetFit f) {
+    final m = base.scaled(f.type, air: f.air);
+    final sheet = pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      mainAxisSize: pw.MainAxisSize.min,
+      children: [
+        ..._sheetBody(ctx, carlito, m, tr, congregation, entries, auxRoom),
+        _footer(m),
+      ],
+    );
+    final size = pw.Widget.measure(sheet,
+        context: ctx, constraints: pw.BoxConstraints(maxWidth: m.contentWidth));
+    var titleBreaks = 0, nameBreaks = 0;
+    for (final e in entries) {
+      final cols = computeColumns(
+          m, tr, e.schedule, e.assignments, regularFont, boldFont, auxRoom);
+      titleBreaks += cols.titleBreaks;
+      nameBreaks += cols.nameBreaks;
+    }
+    return (
+      height: size.y,
+      titleBreaks: titleBreaks,
+      nameBreaks: nameBreaks,
+    );
+  }
+
+  final fit = fitSheet(
+    probe: probe,
+    available: available,
+    metrics: base,
+    // Only the auxiliary-room sheet trades stacked pairs for a size — it is
+    // the only one short of width. See [S140.auxNameTolerance].
+    nameTolerance: auxRoom ? S140.auxNameTolerance : 0,
+  );
+  return base.scaled(fit.type, air: fit.air);
+}
+
+/// A layout context with no page behind it: enough to resolve fonts and run
+/// the layout pass, which is all the fit needs.
+pw.Context _probeContext(pw.Document doc, Carlito carlito) =>
+    pw.Context(document: doc.document)
+        .inheritFromAll(<pw.Inherited>[carlito.theme]);
+
+/// The official one-week page.
 void _addSinglePage(pw.Document doc, Carlito carlito, Translations tr, String congregation,
     WeekEntry entry, bool auxRoom) {
-  const m = S140Metrics.standard;
+  final entries = [entry];
+  final m = _fitted(
+    _probeContext(doc, carlito),
+    carlito,
+    tr,
+    S140Metrics.standard,
+    congregation,
+    entries,
+    auxRoom,
+    S140.pageHeight - S140.marginTop - S140.marginBottom,
+  );
   doc.addPage(
+    // Still a MultiPage: a week too heavy to fit even at the official size
+    // flows onto a second sheet, as it always has. The fit only ever grows
+    // the block, so it can never be the reason a page overflows.
     pw.MultiPage(
       pageTheme: pw.PageTheme(
         theme: carlito.theme,
@@ -154,11 +252,8 @@ void _addSinglePage(pw.Document doc, Carlito carlito, Translations tr, String co
       // Footer on every page: "S-140-S   11/23" (tex:40).
       footer: (ctx) => pw.Container(
           alignment: pw.Alignment.centerLeft, child: _footer(m)),
-      build: (ctx) => [
-        ..._headerBlock(m, tr, congregation),
-        pw.SizedBox(height: m.gapAfterRule), // \par\smallskip
-        ..._weekBlock(ctx, carlito, m, tr, entry, auxRoom),
-      ],
+      build: (ctx) =>
+          _sheetBody(ctx, carlito, m, tr, congregation, entries, auxRoom),
     ),
   );
 }
@@ -167,10 +262,22 @@ void _addSinglePage(pw.Document doc, Carlito carlito, Translations tr, String co
 /// compact metrics (the pinned-board layout). The content is laid out at the
 /// page's real width — titles and names reflow to use the space — and a
 /// [pw.BoxFit.scaleDown] wrapper shrinks it uniformly ONLY if an unusually
-/// tall program would overflow the sheet.
+/// tall program would overflow the sheet even at the official size.
 void _addStackedPage(pw.Document doc, Carlito carlito, Translations tr, String congregation,
     List<WeekEntry> entries, bool auxRoom) {
-  const m = S140Metrics.compact;
+  // Measured against a FULL sheet even when only one week is left over, so the
+  // odd last sheet of a run prints at the same size as the pairs before it.
+  final probe = entries.length > 1 ? entries : [entries.first, entries.first];
+  final m = _fitted(
+    _probeContext(doc, carlito),
+    carlito,
+    tr,
+    S140Metrics.compact,
+    congregation,
+    probe,
+    auxRoom,
+    S140.pageHeight - 2 * S140.stackedMarginV - _stackedFooterGap,
+  );
   doc.addPage(
     pw.Page(
       pageTheme: pw.PageTheme(
@@ -188,29 +295,32 @@ void _addStackedPage(pw.Document doc, Carlito carlito, Translations tr, String c
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Expanded(
-            child: pw.FittedBox(
-              fit: pw.BoxFit.scaleDown,
-              // Centered so a scaled-down heavy week keeps symmetric margins.
-              alignment: pw.Alignment.topCenter,
-              child: pw.SizedBox(
-                width: m.contentWidth,
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  mainAxisSize: pw.MainAxisSize.min,
-                  children: [
-                    ..._headerBlock(m, tr, congregation),
-                    pw.SizedBox(height: m.gapAfterRule),
-                    ..._weekBlock(ctx, carlito, m, tr, entries[0], auxRoom),
-                    if (entries.length > 1) ...[
-                      pw.SizedBox(height: S140.stackedWeekGap),
-                      ..._weekBlock(ctx, carlito, m, tr, entries[1], auxRoom),
-                    ],
-                  ],
+            // The full width is handed TO the FittedBox rather than left for
+            // it to shrink to. A FittedBox sizes itself to its scaled child,
+            // so inside a start-aligned Column its own alignment has nothing
+            // to align within, and a reduced sheet hugged the left edge with
+            // the whole reduction piled up in the right margin.
+            child: pw.SizedBox(
+              width: m.contentWidth,
+              child: pw.FittedBox(
+                fit: pw.BoxFit.scaleDown,
+                // Centred, so if it ever does come to this the margins stay
+                // even. The fit shrinks the type first (minTypeScale), which
+                // keeps the full measure; this is the last resort.
+                alignment: pw.Alignment.topCenter,
+                child: pw.SizedBox(
+                  width: m.contentWidth,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    mainAxisSize: pw.MainAxisSize.min,
+                    children: _sheetBody(
+                        ctx, carlito, m, tr, congregation, entries, auxRoom),
+                  ),
                 ),
               ),
             ),
           ),
-          pw.SizedBox(height: 3),
+          pw.SizedBox(height: _stackedFooterGap),
           _footer(m),
         ],
       ),
@@ -225,23 +335,35 @@ pw.Widget _header(S140Metrics m, Translations tr, String congregation) {
     children: [
       pw.SizedBox(
         width: 0.34 * m.contentWidth,
-        child: pw.Text(congregation,
-            style: pw.TextStyle(
-                fontSize: m.large, fontWeight: pw.FontWeight.bold)),
+        child: _oneLine(
+            pw.Alignment.bottomLeft,
+            pw.Text(congregation,
+                style: pw.TextStyle(
+                    fontSize: m.large, fontWeight: pw.FontWeight.bold))),
       ),
       pw.Spacer(), // \hfill
       pw.SizedBox(
         width: 0.64 * m.contentWidth,
-        child: pw.Text(
-          tr.program.title,
-          textAlign: pw.TextAlign.right,
-          style:
-              pw.TextStyle(fontSize: m.title, fontWeight: pw.FontWeight.bold),
+        child: _oneLine(
+          pw.Alignment.bottomRight,
+          pw.Text(
+            tr.program.title,
+            textAlign: pw.TextAlign.right,
+            style:
+                pw.TextStyle(fontSize: m.title, fontWeight: pw.FontWeight.bold),
+          ),
         ),
       ),
     ],
   );
 }
+
+/// A heading that gives up size rather than break in two. The congregation
+/// name, the sheet title and the week heading are single lines by design, and
+/// once the fit starts growing the type they are the first things to run out of
+/// width — a hair smaller reads as typography, a second line reads as a bug.
+pw.Widget _oneLine(pw.Alignment alignment, pw.Widget child) => pw.FittedBox(
+    fit: pw.BoxFit.scaleDown, alignment: alignment, child: child);
 
 // ---- Thin + thick rule (tex:161-163) ----
 pw.Widget _thinThickRule(S140Metrics m) {
@@ -276,10 +398,13 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
         pw.Expanded(
-          child: pw.Text(
-              '${week.date}   |   ${tr.program.weeklyReading}:  ${week.reading}',
-              style: weekStyle),
+          child: _oneLine(
+              pw.Alignment.bottomLeft,
+              pw.Text(
+                  '${week.date}   |   ${tr.program.weeklyReading}:  ${week.reading}',
+                  style: weekStyle)),
         ),
+        pw.SizedBox(width: m.colGap),
         ...chairmanCell,
       ],
     );
@@ -291,13 +416,17 @@ pw.Widget _weekLine(S140Metrics m, Translations tr, Week week, String chairman) 
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
           pw.Expanded(
-            child: pw.Text('${week.date}   |   ${tr.program.weeklyReading}',
-                style: weekStyle),
+            child: _oneLine(
+                pw.Alignment.bottomLeft,
+                pw.Text('${week.date}   |   ${tr.program.weeklyReading}',
+                    style: weekStyle)),
           ),
+          pw.SizedBox(width: m.colGap),
           ...chairmanCell,
         ],
       ),
-      pw.Text(week.reading, style: weekStyle),
+      _oneLine(pw.Alignment.bottomLeft,
+          pw.Text(week.reading, style: weekStyle)),
     ],
   );
 }
@@ -412,11 +541,18 @@ pw.Widget _row(S140Metrics m, Translations tr, ProgramRow r,
       color: S140.labelColor);
   final nameStyle = pw.TextStyle(fontSize: m.base);
 
+  final auxNames = auxRoom ? assignments.auxiliary(r) : const <String>[];
   final main =
       _namesCell(r.role, assignments.main(r), cols.mainNames, measure, nameStyle);
   final auxCell = auxRoom
-      ? _namesCell(r.role, assignments.auxiliary(r), cols.auxRoom, measure, nameStyle)
+      ? _namesCell(r.role, auxNames, cols.auxRoom, measure, nameStyle)
       : null;
+  // Columns this row leaves empty go to the title instead of printing blank.
+  final roleLabel = r.role.label(tr);
+  final borrow = borrowedColumns(
+      hasRole: roleLabel.isNotEmpty,
+      hasAux: joinedNames(auxNames).isNotEmpty,
+      auxRoom: auxRoom);
   // The title is centered vertically if any of the columns stacked.
   final stacked = main.stacked || (auxCell?.stacked ?? false);
 
@@ -425,7 +561,7 @@ pw.Widget _row(S140Metrics m, Translations tr, ProgramRow r,
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
       pw.SizedBox(
-        width: m.hourWidth,
+        width: cols.hour,
         child: r.bullet
             ? pw.Row(
                 children: [
@@ -461,12 +597,15 @@ pw.Widget _row(S140Metrics m, Translations tr, ProgramRow r,
           stacked ? pw.CrossAxisAlignment.center : pw.CrossAxisAlignment.start,
       children: [
         pw.Expanded(child: xCell),
-        pw.SizedBox(width: m.colGap),
-        pw.SizedBox(
-          width: cols.role,
-          child: pw.Text(r.role.label(tr), textAlign: pw.TextAlign.right, style: roleStyle),
-        ),
-        if (auxRoom) ...[
+        if (borrow < 1) ...[
+          pw.SizedBox(width: m.colGap),
+          pw.SizedBox(
+            width: cols.role,
+            child: pw.Text(roleLabel,
+                textAlign: pw.TextAlign.right, style: roleStyle),
+          ),
+        ],
+        if (auxRoom && borrow < 2) ...[
           pw.SizedBox(width: m.colGap),
           pw.SizedBox(width: cols.auxRoom, child: auxCell!.widget),
         ],
