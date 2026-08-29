@@ -1,7 +1,9 @@
 import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../state/ui_state.dart';
 import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -12,18 +14,12 @@ import 'congregation_tab.dart';
 
 /// Settings view (`SettingsView`): topbar + Application / Congregation
 /// tabs. Lives inside the shell.
-class SettingsView extends StatefulWidget {
+class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
 
   @override
-  State<SettingsView> createState() => _SettingsViewState();
-}
-
-class _SettingsViewState extends State<SettingsView> {
-  int _tab = 0;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tab = ref.watch(settingsTabProvider);
     final isMobile = context.isMobile;
     final pad = isMobile ? 16.0 : 26.0;
 
@@ -47,12 +43,16 @@ class _SettingsViewState extends State<SettingsView> {
                       (icon: null, label: context.t.settings.tabApp),
                       (icon: null, label: context.t.settings.tabCongregation),
                     ],
-                    index: _tab,
-                    onChanged: (i) => setState(() => _tab = i),
+                    index: tab.index,
+                    onChanged: (i) => ref
+                        .read(settingsTabProvider.notifier)
+                        .select(SettingsTab.values[i]),
                   ),
                 ),
                 const SizedBox(height: Space.s18),
-                _tab == 0 ? const ApplicationTab() : const CongregationTab(),
+                tab == SettingsTab.app
+                    ? const ApplicationTab()
+                    : const CongregationTab(),
               ],
             ),
           ),
