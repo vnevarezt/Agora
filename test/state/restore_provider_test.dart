@@ -33,11 +33,14 @@ void main() {
     String? uid = 'u1',
     List<Congregation>? congregations = const [],
     List<Membership>? memberships = const [],
+    bool membershipsFail = false,
   }) async {
     final c = ProviderContainer(overrides: [
       syncUidProvider.overrideWithValue(uid),
       congregationsStreamProvider.overrideWith((ref) => streamOf(congregations)),
-      myMembershipsProvider.overrideWith((ref) => streamOf(memberships)),
+      myMembershipsProvider.overrideWith((ref) => membershipsFail
+          ? Stream<List<Membership>>.error(StateError('denied'))
+          : streamOf(memberships)),
     ]);
     addTearDown(c.dispose);
     final sub = c.listen(initialRestoreProvider, (_, _) {});
@@ -56,7 +59,18 @@ void main() {
   test('memberships loading + empty device → indeterminate', () async {
     expect(
       await compute(congregations: const [], memberships: null),
-      (done: 0, total: 0),
+      (done: 0, total: 0, failed: false),
+    );
+  });
+
+  test('a membership read that FAILED is not one still arriving', () async {
+    // Both used to be the same (0, 0), so a device that could not read its
+    // memberships at all sat on "restoring your data" for ever — and the
+    // dashboard held a skeleton behind it, hiding the one thing its owner
+    // needed to be told.
+    expect(
+      await compute(congregations: const [], membershipsFail: true),
+      (done: 0, total: 0, failed: true),
     );
   });
 
@@ -80,7 +94,7 @@ void main() {
         congregations: [cong('a')],
         memberships: [mem('a'), mem('b'), mem('c')],
       ),
-      (done: 1, total: 3),
+      (done: 1, total: 3, failed: false),
     );
   });
 
