@@ -97,10 +97,21 @@ things there are deliberate and easy to "fix" into breakage:
 The allowed third-party origins are not optional and were each confirmed
 against a real page load: `www.gstatic.com` serves the Firebase JS SDK that
 `firebase_core` loads at runtime, `accounts.google.com` is the GSI client that
-`google_sign_in_web` injects when it registers, and `fonts.gstatic.com` is
-CanvasKit fetching its Roboto fallback. After changing the policy, load the app
-and check the console: a CSP that blocks the engine looks exactly like one that
-works until someone opens the page.
+`google_sign_in_web` injects when it registers, `apis.google.com` is the gapi
+loader `firebase_auth` injects for its auth iframe, `www.googletagmanager.com`
+is `gtag.js` for `firebase_analytics` (with `*.google-analytics.com` and
+`*.analytics.google.com` taking the events), `app.jw-cdn.org` is the workbook
+lookup, and `fonts.gstatic.com` is CanvasKit fetching its Roboto fallback.
+After changing the policy, load the app and check the console: a CSP that
+blocks the engine looks exactly like one that works until someone opens the
+page.
+
+The workbook EPUB itself is the one thing the policy cannot buy. The lookup at
+`app.jw-cdn.org` answers `access-control-allow-origin: *`, but the file it
+points at lives on `cfp2.jw-cdn.org`, which sends no CORS header and answers
+`403` to a preflight. No CSP makes that readable from a browser: on web the
+download has to come through an origin we control. Until it does, the app
+cannot fetch a notebook on web — it can only work from one already cached.
 
 `web/sqlite3.wasm` and `web/drift_worker.js` are committed but version-coupled
 to `pubspec.lock`. Re-run `sh tool/build_web_assets.sh` after bumping `drift`
