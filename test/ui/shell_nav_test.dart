@@ -11,10 +11,11 @@ import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/mwb_sync.dart';
 import 'package:agora/state/people_provider.dart';
 
-/// Startup sync stubbed out (no network/disk), the session forced unlocked
-/// and the people directory overridden (so no drift stream touches the real
-/// encrypted DB), so the shell renders straight into the dashboard — same
-/// pattern as widget_test.
+/// Startup sync stubbed out (no network/disk), the session forced unlocked,
+/// and the people and congregation STREAMS overridden — not the synchronous
+/// views hanging off them — so no drift stream touches the real encrypted DB.
+/// The shell then renders straight into the dashboard, same pattern as
+/// widget_test.
 class _NoopSyncController extends MwbSyncController {
   @override
   Future<SyncReport> build() async => const SyncReport();
@@ -36,7 +37,8 @@ Future<void> _pumpShell(WidgetTester tester, Size size) async {
         mwbSyncProvider.overrideWith(_NoopSyncController.new),
         authSessionProvider.overrideWith(_UnlockedSessionController.new),
         peopleProvider.overrideWithValue(const <Person>[]),
-        congregationsProvider.overrideWithValue(const <Congregation>[]),
+        congregationsStreamProvider
+            .overrideWith((ref) => Stream.value(const <Congregation>[])),
         projectsProvider.overrideWithValue(const <Project>[]),
         dashboardLoadingProvider.overrideWithValue(false),
         peopleLoadingProvider.overrideWithValue(false),

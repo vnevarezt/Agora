@@ -40,9 +40,12 @@ void main() {
         overrides: [
           mwbSyncProvider.overrideWith(_NoopSyncController.new),
           authSessionProvider.overrideWith(_UnlockedSessionController.new),
-          // Directorio y dashboard sin BD: los providers síncronos se
-          // sobreescriben para no abrir la BD cifrada real en el test.
-          congregationsProvider.overrideWithValue(const <Congregation>[]),
+          // Directorio y dashboard sin BD: se sobreescribe el STREAM, no la
+          // vista síncrona que cuelga de él, para que nada abra la BD cifrada
+          // real — la tarjeta de catálogo de la cabecera lee las
+          // congregaciones para saber qué cuadernos hacen falta.
+          congregationsStreamProvider
+              .overrideWith((ref) => Stream.value(const <Congregation>[])),
           projectsProvider.overrideWithValue(const <Project>[]),
           dashboardLoadingProvider.overrideWithValue(false),
         ],

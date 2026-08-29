@@ -37,6 +37,23 @@ class AppSectionController extends Notifier<AppSection> {
   void select(AppSection section) => state = section;
 }
 
+enum SettingsTab { app, congregation }
+
+/// Which Settings tab is showing. Shared state rather than the view's own,
+/// so another screen can land somebody on the right one: the dashboard tells
+/// a new account to create a congregation, and that has to arrive at the tab
+/// holding the button rather than drop them in Settings to hunt for it.
+final settingsTabProvider =
+    NotifierProvider<SettingsTabController, SettingsTab>(
+        SettingsTabController.new);
+
+class SettingsTabController extends Notifier<SettingsTab> {
+  @override
+  SettingsTab build() => SettingsTab.app;
+
+  void select(SettingsTab tab) => state = tab;
+}
+
 // themeModeProvider moved to app_settings.dart (persisted now).
 
 /// Active tab in the mobile layout.

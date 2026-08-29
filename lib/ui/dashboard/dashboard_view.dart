@@ -9,6 +9,7 @@ import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
 import '../../state/restore_provider.dart';
+import '../../state/ui_state.dart';
 import '../../state/sync_controller.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
@@ -17,8 +18,10 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/notebook_import.dart';
 import '../widgets/app_spinner.dart';
 import '../widgets/block_title.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/filter_pill.dart';
 import '../widgets/motion.dart';
 import 'continue_card.dart';
@@ -58,10 +61,17 @@ class DashboardView extends ConsumerWidget {
                 // skeleton.
                 final stalled =
                     phase == SyncPhase.offline || phase == SyncPhase.error;
+                final noCongregation =
+                    ref.watch(congregationsProvider).isEmpty;
+                // A restore that FAILED is not one still arriving: it never
+                // stops, so a skeleton waiting on it never stops either. That
+                // is the forever-skeleton this build shipped with, and behind
+                // it sat the one thing the person needed to be told.
                 final showSkeleton =
                     ref.watch(dashboardLoadingProvider) ||
                     (restore != null &&
-                        ref.watch(congregationsProvider).isEmpty &&
+                        !restore.failed &&
+                        noCongregation &&
                         !stalled);
 
                 return Column(
@@ -88,14 +98,23 @@ class DashboardView extends ConsumerWidget {
                               key: const ValueKey('skeleton'),
                               stacked: stacked,
                             )
-                          : Column(
-                              key: const ValueKey('content'),
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const _HeroSection(),
-                                _HomeGrid(stacked: stacked),
-                              ],
-                            ),
+                          // Everything here is filed under a congregation, so
+                          // with none there is no dashboard to draw — and the
+                          // app never said so. It created one silently on the
+                          // first save, which a browser never reaches, leaving
+                          // an empty screen nobody could act on.
+                          : noCongregation
+                              ? const _NoCongregation(
+                                  key: ValueKey('no-congregation'))
+                              : Column(
+                                  key: const ValueKey('content'),
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    const _HeroSection(),
+                                    _HomeGrid(stacked: stacked),
+                                  ],
+                                ),
                     ),
                   ],
                 );
@@ -104,6 +123,35 @@ class DashboardView extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Shown in place of the dashboard when no congregation exists yet, which is
+/// where every project, person and program hangs off.
+class _NoCongregation extends ConsumerWidget {
+  const _NoCongregation({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tr = context.t;
+    return Padding(
+      padding: const EdgeInsets.only(top: Space.s24),
+      child: EmptyState(
+        icon: Icons.groups_outlined,
+        title: tr.dashboard.noCongregationTitle,
+        message: tr.dashboard.noCongregationMessage,
+        action: AppButton(
+          icon: Icons.add,
+          label: tr.dashboard.noCongregationCta,
+          onPressed: () {
+            ref.read(settingsTabProvider.notifier).select(
+                  SettingsTab.congregation,
+                );
+            ref.read(appSectionProvider.notifier).select(AppSection.settings);
+          },
+        ),
+      ),
     );
   }
 }
@@ -191,8 +239,15 @@ class _TopBar extends ConsumerWidget {
         ),
         const SizedBox(width: Space.s12),
         _SyncIndicator(
-          state: _catalogState(ref.watch(mwbSyncProvider)),
+          state: ref.watch(catalogStatusProvider),
           compact: isMobile,
+          // On a build that cannot fetch its own notebooks, this card is where
+          // someone finds out one is missing — so it is also where the way out
+          // has to be. Without it the only import button lived inside a project
+          // nobody can open until a notebook exists.
+          onImport: notebooksMustBeImported
+              ? () => showNotebookImportDialog(context)
+              : null,
         ),
         const _CloudSyncIndicator(),
         const SizedBox(width: Space.s8),
@@ -213,24 +268,21 @@ class _TopBar extends ConsumerWidget {
   }
 }
 
-/// Persistent state of the notebook catalog, shown in the header.
-enum _CatalogState { busy, ok, incomplete }
-
-_CatalogState _catalogState(AsyncValue<SyncReport> sync) {
-  if (sync.isLoading) return _CatalogState.busy;
-  final report = sync.asData?.value;
-  if (report == null) return _CatalogState.incomplete; // sync error
-  return report.complete ? _CatalogState.ok : _CatalogState.incomplete;
-}
-
 /// Persistent card next to the notifications button: spinner while syncing,
 /// a check when everything is up to date, a warning when a notebook is missing.
 /// On mobile it collapses to an icon-only square to save space.
 class _SyncIndicator extends StatelessWidget {
-  const _SyncIndicator({required this.state, this.compact = false});
+  const _SyncIndicator({
+    required this.state,
+    this.compact = false,
+    this.onImport,
+  });
 
-  final _CatalogState state;
+  final CatalogStatus state;
   final bool compact;
+
+  /// Offers to take a notebook file, on builds that cannot download one.
+  final VoidCallback? onImport;
 
   @override
   Widget build(BuildContext context) {
@@ -244,23 +296,25 @@ class _SyncIndicator extends StatelessWidget {
       Color color,
       String tip,
     ) = switch (state) {
-      _CatalogState.busy => (
+      CatalogStatus.syncing => (
         null,
         tr.sync.updating,
         t.accent,
         tr.sync.updatingTip,
       ),
-      _CatalogState.ok => (
+      CatalogStatus.ready => (
         Icons.check_circle_rounded,
         tr.sync.upToDate,
         t.accent,
         tr.sync.upToDateTip,
       ),
-      _CatalogState.incomplete => (
+      CatalogStatus.incomplete => (
         Icons.error_outline_rounded,
         tr.sync.missing,
         amber,
-        tr.sync.missingTip,
+        // A build that cannot fetch its own workbooks will not retry its way
+        // out of this one; the way out is the modal this card opens.
+        onImport == null ? tr.sync.missingTip : tr.sync.missingImportTip,
       ),
     };
 
@@ -268,35 +322,50 @@ class _SyncIndicator extends StatelessWidget {
         ? AppSpinner(size: 16, color: color)
         : Icon(icon, size: AppIcon.control, color: color);
 
-    return Tooltip(
-      message: tip,
-      child: Container(
-        height: Dimens.hControl,
-        width: compact ? Dimens.hControl : null,
-        padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
-        decoration: BoxDecoration(
-          color: t.surface,
-          borderRadius: BorderRadius.circular(Dimens.rControl),
-          border: Border.all(color: t.border),
-        ),
-        child: compact
-            ? Center(child: leading)
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  leading,
-                  const SizedBox(width: Space.s10),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: AppText.body,
-                      fontWeight: FontWeight.w600,
-                      color: t.textDim,
+    Widget card(bool hovered) => Container(
+          height: Dimens.hControl,
+          width: compact ? Dimens.hControl : null,
+          padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
+          decoration: BoxDecoration(
+            color: hovered ? t.surface2 : t.surface,
+            borderRadius: BorderRadius.circular(Dimens.rControl),
+            border: Border.all(color: t.border),
+          ),
+          child: compact
+              ? Center(child: leading)
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    leading,
+                    const SizedBox(width: Space.s10),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: AppText.body,
+                        fontWeight: FontWeight.w600,
+                        color: t.textDim,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-      ),
+                    // Where the card is a button it has to look like one:
+                    // styled as a status chip it read as a read-out, and the
+                    // only way to load a workbook sat behind a tap nobody
+                    // knew was there.
+                    if (onImport != null) ...[
+                      const SizedBox(width: Space.s8),
+                      Icon(Icons.file_open_outlined,
+                          size: AppIcon.inline, color: t.textMute),
+                    ],
+                  ],
+                ),
+        );
+
+    if (onImport == null) return Tooltip(message: tip, child: card(false));
+
+    return Pressable(
+      onTap: onImport,
+      tooltip: [tip, tr.workspace.importCta].join('\n'),
+      semanticLabel: '$label · ${tr.workspace.importCta}',
+      builder: (context, hovered, _) => card(hovered),
     );
   }
 }
@@ -368,7 +437,15 @@ class _RestoreBanner extends StatelessWidget {
     final tr = context.t;
     final amber = t.warningStrong;
 
-    final (Widget leading, String label) = switch (phase) {
+    // The failed read comes first: it outranks the sync phase, which can read
+    // perfectly healthy while the membership query is the thing that broke.
+    final (Widget leading, String label) = restore.failed
+        ? (
+            Icon(Icons.error_outline_rounded,
+                size: AppIcon.control, color: amber),
+            tr.cloudSync.restoreFailed,
+          )
+        : switch (phase) {
       SyncPhase.offline => (
         Icon(Icons.cloud_off_rounded, size: AppIcon.control, color: amber),
         tr.cloudSync.restoreOffline,
