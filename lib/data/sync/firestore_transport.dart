@@ -9,6 +9,19 @@ import 'sync_transport.dart';
 /// (back off and retry).
 enum SyncTransportErrorKind { permissionDenied, offline, unknown }
 
+/// What a Firestore failure means to the sync, for the two places that have to
+/// answer it: a request that threw, and a snapshot listener that died. Shared
+/// so a listener error is classified exactly as the equivalent read would be —
+/// they carry the same codes and deserve the same verdict.
+SyncTransportErrorKind syncErrorKindOf(Object error) =>
+    error is FirebaseException
+        ? switch (error.code) {
+            'permission-denied' => SyncTransportErrorKind.permissionDenied,
+            'unavailable' => SyncTransportErrorKind.offline,
+            _ => SyncTransportErrorKind.unknown,
+          }
+        : SyncTransportErrorKind.unknown;
+
 class SyncTransportException implements Exception {
   const SyncTransportException(this.kind, this.message, [this.cause]);
 
@@ -167,11 +180,7 @@ class FirestoreTransport implements SyncTransport {
       return await op();
     } on FirebaseException catch (e) {
       throw SyncTransportException(
-        switch (e.code) {
-          'permission-denied' => SyncTransportErrorKind.permissionDenied,
-          'unavailable' => SyncTransportErrorKind.offline,
-          _ => SyncTransportErrorKind.unknown,
-        },
+        syncErrorKindOf(e),
         'Firestore ${e.code}: ${e.message}',
         e,
       );

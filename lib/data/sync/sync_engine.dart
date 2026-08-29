@@ -17,6 +17,7 @@ class PullResult {
     this.undecryptable = 0,
     this.unknownKeyVersions = const {},
     this.cursorHeld = false,
+    this.keyringMissing = false,
   });
 
   final int fetched;
@@ -34,6 +35,16 @@ class PullResult {
   /// because of [unknownKeyVersions]. The caller must refresh the keyring
   /// and retry the SAME page — draining on would spin forever.
   final bool cursorHeld;
+
+  /// True when there is no keyring for this congregation AT ALL, so nothing
+  /// was even attempted. Distinct from [cursorHeld], which is about versions
+  /// missing from a page that was read.
+  ///
+  /// Without this the caller could not tell "I hold no key here" from "there
+  /// is nothing new", because both arrive as a page of zero — so a device
+  /// that had not yet unsealed a congregation's key reported a clean, empty,
+  /// successful pull and never came back to it.
+  final bool keyringMissing;
 }
 
 /// Push/pull engine (phase 4a, docs/PHASE4_CLOUD_SYNC.md). Cloud-agnostic:
@@ -201,7 +212,9 @@ class SyncEngine {
   }) async {
     const empty = PullResult(fetched: 0, applied: 0);
     final keyring = await keyringFor(congregationId);
-    if (keyring == null) return empty;
+    if (keyring == null) {
+      return const PullResult(fetched: 0, applied: 0, keyringMissing: true);
+    }
 
     var state = await (_db.select(_db.syncState)
           ..where((t) => t.congregationId.equals(congregationId)))
