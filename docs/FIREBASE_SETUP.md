@@ -28,6 +28,20 @@ locations. The app now builds and runs fully local; Settings shows
 `GoogleService-Info.plist` are gitignored too: the app never reads them
 (Firebase initializes from Dart only), they are just CLI byproducts.
 
+The landing's auth action page needs the web API key too — it calls Identity
+Toolkit directly, so the reset and verification links cannot work without it.
+It is **not** committed: `site/action.js` holds `__FIREBASE_API_KEY__` and
+`tool/build_site.py` substitutes it from the gitignored config of the flavor
+being built. Never paste a real key into that file. It is a browser key and
+public by design once deployed, but a key in the repository is a key in the
+history, and GitHub's secret scanning will (correctly) keep saying so.
+
+Web and Windows deliberately use **different** keys. A browser key can be
+restricted to the hosting origins; a desktop app sends no `Referer`, so a
+shared key could never carry that restriction without shutting Windows out.
+`flutterfire configure` does not know this — after re-running it, check that
+`web` is still its own block and not an alias of `windows`.
+
 ## Flavors: `dev` vs `prod` (two Firebase projects)
 
 Two projects keep testing off real users: **`prod`** (the project with your

@@ -38,7 +38,7 @@ mkdir -p "$out"
 mv build/web "$out/app"
 
 echo "rendering the landing"
-python3 tool/build_site.py
+FLAVOR="$flavor" python3 tool/build_site.py
 
 echo
 echo "built $out"

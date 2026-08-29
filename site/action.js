@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var API_KEY = 'AIzaSyBqoNhQKK9tJp-WNvq5a-3zemrfD66QF-A';
+  var API_KEY = '__FIREBASE_API_KEY__'; // injected by tool/build_site.py
   var ENDPOINT = 'https://identitytoolkit.googleapis.com/v1/accounts:';
 
   var params = new URLSearchParams(location.search);

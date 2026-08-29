@@ -12,6 +12,7 @@ Run through tool/build_site.sh, which also builds the app into build/site/app.
 
 import html
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -22,6 +23,38 @@ SITE = ROOT / "site"
 OUT = ROOT / "build/site"
 
 SLOT = re.compile(r"\{\{([a-zA-Z0-9_.]+)\}\}")
+
+# The auth action page calls Identity Toolkit directly, so it needs the web API
+# key — a browser key, public by design, and the oobCode in the URL is the
+# credential, not this. Public is not the same as committed, though: it is read
+# out of the gitignored Firebase config at build time and substituted here, so
+# the repository carries no key and GitHub's secret scanner has nothing to find.
+# Same rule lib/cloud_secrets.dart and lib/firebase_options.dart already follow.
+API_KEY_SLOT = "__FIREBASE_API_KEY__"
+FLAVOR = os.environ.get("FLAVOR", "prod")
+FIREBASE_OPTIONS = {
+    "prod": ROOT / "lib/firebase_options.dart",
+    "dev": ROOT / "lib/firebase_options_dev.dart",
+}
+
+
+def web_api_key() -> str:
+    """The web apiKey of the flavor being built, straight from the app's own
+    config so the page and the app can never drift onto different projects."""
+    path = FIREBASE_OPTIONS.get(FLAVOR, FIREBASE_OPTIONS["prod"])
+    if not path.exists():
+        sys.exit(f"missing {path.relative_to(ROOT)} — see docs/FIREBASE_SETUP.md")
+    src = path.read_text()
+    # `web` is either its own block or an alias of another platform's.
+    target = re.search(r"FirebaseOptions web = (\w+);", src)
+    name = target.group(1) if target and target.group(1) != "FirebaseOptions" else "web"
+    block = re.search(
+        r"FirebaseOptions " + name + r" = FirebaseOptions\((.*?)\);", src, re.S
+    )
+    key = re.search(r"apiKey: '([^']+)'", block.group(1)) if block else None
+    if key is None:
+        sys.exit(f"no web apiKey in {path.relative_to(ROOT)}")
+    return key.group(1)
 
 # Default locale is served at /, the rest under /<code>/.
 LOCALES = ["es", "en"]
@@ -231,8 +264,12 @@ def build(locale: str, subdir: str, template: str) -> None:
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
 
-    for name in ("tokens.css", "landing.js", "action.js"):
+    for name in ("tokens.css", "landing.js"):
         shutil.copy2(SITE / name, OUT / name)
+    action = (SITE / "action.js").read_text()
+    if API_KEY_SLOT not in action:
+        sys.exit(f"site/action.js no longer carries {API_KEY_SLOT}")
+    (OUT / "action.js").write_text(action.replace(API_KEY_SLOT, web_api_key()))
     ink = wordmark_ink()
     for out_name, sources in SHEETS.items():
         (OUT / out_name).write_text(
