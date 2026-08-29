@@ -179,8 +179,36 @@ int? weekStartDayOf(String heading) {
 /// files are already in order, so each resolved Monday anchors the next one.
 /// Omit it and the weeks come back with an empty `weekStart` — every caller in
 /// the app passes it.
-List<Week> parseEpub(Uint8List bytes, {String lang = 'S', String? issue}) {
+List<Week> parseEpub(Uint8List bytes, {String lang = 'S', String? issue}) =>
+    _weeksOf(ZipDecoder().decodeBytes(bytes), lang, issue);
+
+/// jw.org names a workbook's cover image after the publication itself
+/// (`OEBPS/images/mwb_S_202607.jpg`), and that name is the only place in the
+/// archive that says which one this is: `dc:identifier` is a random UUID and
+/// `dc:title` spells the period out in the workbook's own language, so neither
+/// can be matched against anything.
+final _reCover = RegExp(r'/mwb_([A-Z]+)_(\d{6})\.');
+
+/// [parseEpub] for a file that arrived with no label on it — picked off the
+/// user's own disk rather than fetched for a known issue.
+///
+/// The archive is asked which publication it is instead of being told, so a
+/// workbook can never be filed under the wrong issue. Null when the file is
+/// not a meeting workbook at all.
+({List<Week> weeks, String lang, String issue})? parseWorkbookEpub(
+    Uint8List bytes) {
   final archive = ZipDecoder().decodeBytes(bytes);
+  for (final file in archive.files) {
+    final match = _reCover.firstMatch(file.name);
+    if (match == null) continue;
+    final lang = match.group(1)!;
+    final issue = match.group(2)!;
+    return (weeks: _weeksOf(archive, lang, issue), lang: lang, issue: issue);
+  }
+  return null;
+}
+
+List<Week> _weeksOf(Archive archive, String lang, String? issue) {
   // Weekly files are OEBPS/NNNNNNNNN.xhtml (without '-extracted').
   final names = archive.files
       .where((f) => f.isFile && _reWeekFile.hasMatch(f.name))
