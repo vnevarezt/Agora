@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/mwb_api.dart';
 import '../data/mwb_cache.dart';
 import '../data/mwb_repository.dart';
 import '../data/repos/programs_repository.dart';
@@ -7,6 +10,7 @@ import '../domain/meeting_language.dart';
 import '../domain/mwb_calendar.dart';
 import '../models/notebook.dart';
 import 'dashboard_provider.dart';
+import 'ui_state.dart' show localeProvider;
 import 'program_reconciler.dart';
 import 'weeks_provider.dart';
 
@@ -245,6 +249,131 @@ final congregationWorkbookStatusProvider =
       : WorkbookStatus.unavailable;
 });
 
+/// Every workbook the coverage window asks for, with the language it is needed
+/// in and whether the catalog already holds it. Empty while the congregations
+/// have not landed.
+final requiredNotebooksProvider =
+    Provider<List<({String issue, String lang, bool have})>>((ref) {
+  final langs = ref.watch(requiredWorkbookLangsProvider);
+  if (langs == null || langs.isEmpty) return const [];
+  return [
+    for (final lang in langs.split(','))
+      for (final issue in requiredIssues(DateTime.now()))
+        (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
+  ];
+});
+
+/// Whether the catalog holds [issue] in [lang] with WEEKS in it. [buildCatalog]
+/// lists an issue whose EPUB would not parse rather than dropping it, so
+/// presence alone counted a file nothing can be built from as one on hand.
+bool _hasNotebook(Ref ref, String issue, String lang) => ref
+    .watch(notebooksForLangProvider(lang))
+    .any((n) => n.id == issue && n.weeks.isNotEmpty);
+
+/// What the import modal offers, which is a different question from what the
+/// congregations require.
+///
+/// WHICH issues are wanted is a function of the date alone; only the LANGUAGE
+/// needed a congregation, and there is a fair answer without one. Reading both
+/// off [requiredWorkbookLangsProvider] meant that a device with no congregation
+/// yet — a fresh account, or one whose first cloud pull has not landed —
+/// opened the modal to a numbered step with nothing under it. No download
+/// button, no link, nothing: precisely the person who most needs the workbook,
+/// handed the one screen that could give it to them, empty.
+///
+/// Kept apart from [requiredNotebooksProvider] rather than folded into it,
+/// because that one feeds the header card: a device that requires nothing must
+/// not be told a workbook is missing.
+final offerableNotebooksProvider =
+    Provider<List<({String issue, String lang, bool have})>>((ref) {
+  final configured = ref.watch(requiredWorkbookLangsProvider);
+  final langs = (configured == null || configured.isEmpty)
+      ? [offerableWorkbookLang(ref.watch(localeProvider))]
+      : configured.split(',');
+  return [
+    for (final lang in langs)
+      for (final issue in requiredIssues(DateTime.now()))
+        (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
+  ];
+});
+
+/// The half of [requiredNotebooksProvider] that is not on hand.
+final missingNotebooksProvider =
+    Provider<List<({String issue, String lang})>>((ref) => [
+          for (final n in ref.watch(requiredNotebooksProvider))
+            if (!n.have) (issue: n.issue, lang: n.lang),
+        ]);
+
+/// What the header's catalog card reports.
+enum CatalogStatus { syncing, ready, incomplete }
+
+/// Read off the catalog, never off the last download pass.
+///
+/// A pass answers "did the fetching go well", which is not the question the
+/// card asks. It reported an all-clear for issues it skipped as cached — even
+/// when what was cached held no weeks — and on web it fails by design however
+/// complete the catalog is, because the browser cannot read the file at all.
+final catalogStatusProvider = Provider<CatalogStatus>((ref) {
+  // Nothing is known yet, so nothing can be missing. Report the wait rather
+  // than an all-clear no congregation has backed up.
+  if (ref.watch(requiredWorkbookLangsProvider) == null) {
+    return CatalogStatus.syncing;
+  }
+  if (ref.watch(missingNotebooksProvider).isEmpty) return CatalogStatus.ready;
+  return ref.watch(mwbSyncProvider).isLoading
+      ? CatalogStatus.syncing
+      : CatalogStatus.incomplete;
+});
+
+/// jw.org's direct link to one workbook file.
+///
+/// Reachable from a browser even though the file behind it is not, and the
+/// difference is the whole trick: the lookup API answers
+/// `access-control-allow-origin: *`, and NAVIGATING to the file it names is a
+/// download, which CORS does not govern — only reading it from script is. So
+/// the web build can hand someone the exact file instead of sending them off
+/// to find it, and take it back through [NotebookImporter].
+final notebookLinkProvider =
+    FutureProvider.family<String, ({String issue, String lang})>(
+        (ref, key) async =>
+            (await MwbApi.epubUrl(key.issue, lang: key.lang)).url);
+
+final notebookImportProvider =
+    Provider<NotebookImporter>(NotebookImporter.new);
+
+/// Takes a workbook EPUB the user picked off their own disk and puts it where
+/// a download would have: cached, catalogued, and reconciled into the program
+/// snapshots.
+///
+/// The way in on web, where the file cannot be fetched at all — jw.org serves
+/// it from a host with no CORS header (see [MwbRepository.importEpub]). It is
+/// wired everywhere rather than behind a platform check, because a notebook on
+/// a USB stick is just as good an answer to being offline on a laptop.
+class NotebookImporter {
+  NotebookImporter(this._ref);
+
+  final Ref _ref;
+
+  /// Files [bytes] and returns what it turned out to be. Throws
+  /// [FormatException] if the file is not a meeting workbook.
+  Future<({String issue, String lang, int weeks})> run(Uint8List bytes) async {
+    final imported = await _ref.read(repositoryProvider).importEpub(bytes);
+
+    // Same two steps a refresh ends with: the catalog is what the editor and
+    // the congregation status read, and the snapshots are downstream of it.
+    _ref.read(notebooksByLangProvider.notifier).setFrom(await buildCatalog(
+        _ref.read(cacheProvider), _ref.read(repositoryProvider)));
+    final reconciler = _ref.read(programReconcilerProvider);
+    for (final congregation in _ref.read(congregationsProvider)) {
+      await reconciler.reconcileCongregation(congregation.id, force: true);
+    }
+    return imported;
+  }
+}
+
+final catalogRefreshProvider =
+    Provider<CatalogRefresher>(CatalogRefresher.new);
+
 /// Pulls the coverage window down again even though it is cached, then pushes
 /// the result through to the programs.
 ///
@@ -252,9 +381,6 @@ final congregationWorkbookStatusProvider =
 /// corrected workbooks, and a cached issue is never fetched twice, so without
 /// this a correction would never arrive. Manual rather than automatic — there
 /// is no cheap way to know a workbook changed short of downloading it.
-final catalogRefreshProvider =
-    Provider<CatalogRefresher>(CatalogRefresher.new);
-
 class CatalogRefresher {
   CatalogRefresher(this._ref);
 

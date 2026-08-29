@@ -13,6 +13,8 @@ import 'package:agora/data/db/app_database.dart';
 import 'package:agora/data/mwb_cache.dart';
 import 'package:agora/data/mwb_repository.dart';
 import 'package:agora/data/mwb_store_native.dart';
+import 'package:agora/domain/mwb_calendar.dart';
+import 'package:agora/i18n/strings.g.dart';
 import 'package:agora/models/congregation_settings.dart';
 import 'package:agora/models/notebook.dart';
 import 'package:agora/models/week.dart';
@@ -27,9 +29,14 @@ class _RecordingRepository extends MwbRepository {
 
   final requested = <String>[];
 
+  /// Every fetch throws — the web build, where the browser cannot read the
+  /// file at any policy, so no pass ever reports success.
+  bool fails = false;
+
   @override
   Future<int> ensureCached(String issue, {String lang = 'S'}) async {
     requested.add('$issue.$lang');
+    if (fails) throw const NotebookNotDownloadable();
     return 0;
   }
 
@@ -164,6 +171,104 @@ void main() {
     await waitFor(() => langs().length == 2, 'both languages');
 
     expect(langs(), {'S', 'E'});
+  });
+
+  group('catalogStatus', () {
+    /// The catalog as the sync would leave it: one notebook per issue the
+    /// coverage window asks for.
+    void catalogue({required bool parsed}) {
+      container.read(notebooksByLangProvider.notifier).setFrom({
+        'S': [
+          for (final issue in requiredIssues(DateTime.now()))
+            Notebook(
+              id: issue,
+              weeks: parsed
+                  ? const [(start: '2026-06-01', label: 'JUNIO 1-7')]
+                  : const [],
+            ),
+        ],
+      });
+    }
+
+    Future<void> spanishCongregation() async {
+      await container.read(congregationsRepositoryProvider).create(
+            name: 'Ribera',
+            number: '1',
+            settings: const CongregationSettings(meetingLanguage: 'spanish'),
+          );
+      await waitFor(() => repo.requested.isNotEmpty, 'the first pass');
+      await settle();
+    }
+
+    test('waits rather than reporting an all-clear it cannot back up', () {
+      // The congregation stream has not landed, so nothing is known to be
+      // needed — which is not the same as nothing being missing.
+      expect(container.read(catalogStatusProvider), CatalogStatus.syncing);
+    });
+
+    test('a workbook catalogued with no weeks is not one on hand', () async {
+      // buildCatalog lists an issue whose EPUB would not parse rather than
+      // dropping it, so presence alone said "up to date" for a file nothing
+      // can be built from.
+      await spanishCongregation();
+      catalogue(parsed: false);
+
+      expect(container.read(catalogStatusProvider), CatalogStatus.incomplete);
+      expect(container.read(missingNotebooksProvider),
+          hasLength(requiredIssues(DateTime.now()).length));
+    });
+
+    test('a failed pass does not contradict a catalog that has everything',
+        () async {
+      // Web: every fetch fails by design, so the pass keeps reporting failure
+      // long after the workbooks have been imported by hand.
+      repo.fails = true;
+      await spanishCongregation();
+      expect(container.read(catalogStatusProvider), CatalogStatus.incomplete);
+
+      catalogue(parsed: true);
+
+      expect(container.read(catalogStatusProvider), CatalogStatus.ready);
+      expect(container.read(missingNotebooksProvider), isEmpty);
+    });
+  });
+
+  group('offerableNotebooks', () {
+    // The person most likely to be standing in the import modal is the one
+    // whose account holds nothing yet — a fresh sign-in, or one whose first
+    // cloud pull has not landed. Reading the list off the congregations meant
+    // that person opened it to a numbered step with nothing under it.
+    test('offers the period even with no congregation to name a language',
+        () async {
+      await settle();
+
+      final offered = container.read(offerableNotebooksProvider);
+      expect(offered.map((n) => n.issue),
+          containsAll(requiredIssues(DateTime.now())));
+      expect(container.read(requiredNotebooksProvider), isEmpty,
+          reason: 'requiring nothing is not the same as having nothing '
+              'to offer');
+    });
+
+    test('guesses the language from the app, and only until one is set',
+        () async {
+      LocaleSettings.setLocaleSync(AppLocale.en);
+      addTearDown(() => LocaleSettings.setLocaleSync(AppLocale.es));
+      await settle();
+      expect(container.read(offerableNotebooksProvider).map((n) => n.lang),
+          everyElement('E'));
+
+      await container.read(congregationsRepositoryProvider).create(
+            name: 'Ribera',
+            number: '1',
+            settings: const CongregationSettings(meetingLanguage: 'spanish'),
+          );
+      await waitFor(
+          () => container
+              .read(offerableNotebooksProvider)
+              .every((n) => n.lang == 'S'),
+          'the congregation own language to take over');
+    });
   });
 
   group('congregationWorkbookStatus', () {
