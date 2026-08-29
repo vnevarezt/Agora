@@ -188,14 +188,31 @@ class FormController extends Notifier<FormModel> {
   }
 
   /// Marks (or clears) the circuit overseer visit for the given [week] index.
+  ///
+  /// At most one week of a project can be it: the overseer comes once, and a
+  /// project is one workbook. The form used to hold a `true` per week with
+  /// nothing keeping them apart, so two marked weeks landing on the same
+  /// two-per-sheet page printed his talk twice. Marking a week clears whatever
+  /// week was marked before — in the form and in the row behind it.
   void setCircuitOverseer(int week, bool v) {
-    state = state.copyWith(
-      circuitOverseerByWeek: {...state.circuitOverseerByWeek, week: v},
-    );
-    _write(week: week,
-        (id) => ref.read(programsRepositoryProvider).setWeekType(
-            id, v ? WeekType.circuitOverseerVisit : WeekType.normal));
+    final cleared = [
+      for (final e in state.circuitOverseerByWeek.entries)
+        if (e.value && e.key != week) e.key
+    ];
+    state = state.copyWith(circuitOverseerByWeek: {
+      ...state.circuitOverseerByWeek,
+      for (final w in cleared) w: false,
+      week: v,
+    });
+    for (final w in cleared) {
+      _setWeekType(w, WeekType.normal);
+    }
+    _setWeekType(
+        week, v ? WeekType.circuitOverseerVisit : WeekType.normal);
   }
+
+  void _setWeekType(int week, WeekType type) => _write(week: week,
+      (id) => ref.read(programsRepositoryProvider).setWeekType(id, type));
 
   /// Sets or clears the title override for [rowId] in the active week. An empty
   /// or null title removes the override (back to the default title).

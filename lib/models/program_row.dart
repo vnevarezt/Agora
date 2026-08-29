@@ -212,16 +212,36 @@ class Assignments {
 
   static const empty = Assignments({}, {});
 
-  List<String> main(ProgramRow r) =>
-      _main[r.id] ?? List<String>.filled(r.slots, '');
+  List<String> main(ProgramRow r) => _fit(_main[r.id], r.slots);
 
-  List<String> auxiliary(ProgramRow r) =>
-      _auxiliary[r.id] ?? List<String>.filled(r.auxSlots, '');
+  List<String> auxiliary(ProgramRow r) => _fit(_auxiliary[r.id], r.auxSlots);
+
+  /// The ROW decides how many names it has; the stored list can disagree.
+  /// Marking a circuit overseer's visit turns the Congregation Bible Study
+  /// into his talk without changing the row's id, so a slot that held a
+  /// conductor AND a reader is suddenly a lone speaker — and printed both
+  /// ("Orador: A / B") until this trimmed it.
+  static List<String> _fit(List<String>? names, int slots) {
+    if (names == null) return List<String>.filled(slots, '');
+    if (names.length == slots) return names;
+    return [
+      for (var i = 0; i < slots; i++) i < names.length ? names[i] : '',
+    ];
+  }
 }
 
 /// Joins 1–2 names as the format shows them: "a / b", "a" or "".
+///
+/// The separator belongs to a PAIR of names, not to a pair of slots: a slot
+/// nobody has been assigned to yet is blank, and printing its side of the
+/// slash left "J.M Lugo /" — or a lone "/" — sitting on the sheet. The role
+/// label beside the cell already says a second name is expected.
 String joinedNames(List<String> n) {
-  if (n.isEmpty) return '';
-  if (n.length >= 2) return '${n[0]} / ${n[1]}';
-  return n[0];
+  final filled = [
+    for (final s in n)
+      if (s.trim().isNotEmpty) s
+  ];
+  if (filled.isEmpty) return '';
+  if (filled.length >= 2) return '${filled[0]} / ${filled[1]}';
+  return filled.first;
 }

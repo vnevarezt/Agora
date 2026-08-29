@@ -163,10 +163,18 @@ FormModel buildHydratedForm({
   final circuitOverseerByWeek = <int, bool>{};
   final titleOverridesByWeek = <int, Map<String, String>>{};
 
+  // At most one week is the circuit overseer's visit — see
+  // [FormController.setCircuitOverseer]. The rule guards the setter, but rows
+  // written before it existed can already hold two, and a project loaded from
+  // them printed his talk on both weeks of a two-per-sheet page. The earliest
+  // marked week wins; one click moves it, and that click now clears the other.
+  var visitTaken = false;
+
   for (var wi = 0; wi < programs.length; wi++) {
     final program = programs[wi];
-    circuitOverseerByWeek[wi] =
-        program.weekType == WeekType.circuitOverseerVisit;
+    final visit = program.weekType == WeekType.circuitOverseerVisit;
+    circuitOverseerByWeek[wi] = visit && !visitTaken;
+    visitTaken |= visit;
 
     final overrides = _decodeOverrides(program.titleOverridesJson);
     if (overrides.isNotEmpty) titleOverridesByWeek[wi] = overrides;
