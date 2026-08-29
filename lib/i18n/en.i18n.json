@@ -135,6 +135,7 @@
     "signedOut": "Sign in to the cloud to enable syncing.",
     "unknownError": "Couldn't complete. Please try again.",
     "ready": "Sync is on",
+    "syncNow": "Sync now",
     "statusSyncing": "Syncing…",
     "statusOffline": "Offline",
     "statusError": "Sync error",
@@ -145,7 +146,8 @@
     "errorUnknown": "Something went wrong while syncing.",
     "restoring": "Restoring your data…",
     "restoringProgress": "{done} of {total} congregations",
-    "restoreOffline": "Offline. Your data will be restored when you reconnect."
+    "restoreOffline": "Offline. Your data will be restored when you reconnect.",
+    "restoreFailed": "We couldn't read your congregations. Check your connection or sign in again."
   },
   "account": {
     "title": "Cloud account",
@@ -213,7 +215,8 @@
     "upToDate": "Catalogs up to date",
     "upToDateTip": "Your workbooks are up to date.",
     "missing": "A workbook is missing",
-    "missingTip": "The next workbook isn't available yet; it will be retried."
+    "missingTip": "The next workbook isn't available yet; it will be retried.",
+    "missingImportTip": "A workbook is missing and the browser can't download it by itself. Tap to load it."
   },
   "dashboard": {
     "greetingMorning": "Good morning",
@@ -221,6 +224,9 @@
     "greetingEvening": "Good evening",
     "greetingNamed": "{greeting}, {name}",
     "subtitle": "Your projects and to-dos",
+    "noCongregationTitle": "No congregation yet",
+    "noCongregationMessage": "Agora files programs, people and projects under a congregation. Create yours to get started.",
+    "noCongregationCta": "Create congregation",
     "youHave": "You have",
     "draftsOne": "1 project in progress",
     "draftsMany": "{n} projects in progress",

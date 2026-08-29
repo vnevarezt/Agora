@@ -135,6 +135,7 @@
     "signedOut": "Inicia sesión en la nube para activar la sincronización.",
     "unknownError": "No se pudo completar. Inténtalo de nuevo.",
     "ready": "Sincronización activa",
+    "syncNow": "Sincronizar ahora",
     "statusSyncing": "Sincronizando…",
     "statusOffline": "Sin conexión",
     "statusError": "Error de sincronización",
@@ -145,7 +146,8 @@
     "errorUnknown": "Ocurrió un error al sincronizar.",
     "restoring": "Recuperando tus datos…",
     "restoringProgress": "{done} de {total} congregaciones",
-    "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar."
+    "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar.",
+    "restoreFailed": "No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión."
   },
   "account": {
     "title": "Cuenta en la nube",
@@ -213,7 +215,8 @@
     "upToDate": "Catálogos al día",
     "upToDateTip": "Tienes los cuadernos al día.",
     "missing": "Falta un cuaderno",
-    "missingTip": "El próximo cuaderno aún no está disponible; se reintentará."
+    "missingTip": "El próximo cuaderno aún no está disponible; se reintentará.",
+    "missingImportTip": "Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo."
   },
   "dashboard": {
     "greetingMorning": "Buenos días",
@@ -221,6 +224,9 @@
     "greetingEvening": "Buenas noches",
     "greetingNamed": "{greeting}, {name}",
     "subtitle": "Tus proyectos y pendientes",
+    "noCongregationTitle": "Todavía no tienes una congregación",
+    "noCongregationMessage": "Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.",
+    "noCongregationCta": "Crear congregación",
     "youHave": "Tienes",
     "draftsOne": "1 proyecto en curso",
     "draftsMany": "{n} proyectos en curso",

@@ -237,6 +237,9 @@ class Translations$cloudSync$es {
 	/// es: 'Sincronización activa'
 	String get ready => 'Sincronización activa';
 
+	/// es: 'Sincronizar ahora'
+	String get syncNow => 'Sincronizar ahora';
+
 	/// es: 'Sincronizando…'
 	String get statusSyncing => 'Sincronizando…';
 
@@ -269,6 +272,9 @@ class Translations$cloudSync$es {
 
 	/// es: 'Sin conexión. Tus datos se recuperarán al reconectar.'
 	String get restoreOffline => 'Sin conexión. Tus datos se recuperarán al reconectar.';
+
+	/// es: 'No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión.'
+	String get restoreFailed => 'No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión.';
 }
 
 // Path: account
@@ -457,6 +463,9 @@ class Translations$sync$es {
 
 	/// es: 'El próximo cuaderno aún no está disponible; se reintentará.'
 	String get missingTip => 'El próximo cuaderno aún no está disponible; se reintentará.';
+
+	/// es: 'Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo.'
+	String get missingImportTip => 'Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo.';
 }
 
 // Path: dashboard
@@ -481,6 +490,15 @@ class Translations$dashboard$es {
 
 	/// es: 'Tus proyectos y pendientes'
 	String get subtitle => 'Tus proyectos y pendientes';
+
+	/// es: 'Todavía no tienes una congregación'
+	String get noCongregationTitle => 'Todavía no tienes una congregación';
+
+	/// es: 'Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.'
+	String get noCongregationMessage => 'Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.';
+
+	/// es: 'Crear congregación'
+	String get noCongregationCta => 'Crear congregación';
 
 	/// es: 'Tienes'
 	String get youHave => 'Tienes';
@@ -2183,6 +2201,7 @@ extension on Translations {
 			'cloudSync.signedOut' => 'Inicia sesión en la nube para activar la sincronización.',
 			'cloudSync.unknownError' => 'No se pudo completar. Inténtalo de nuevo.',
 			'cloudSync.ready' => 'Sincronización activa',
+			'cloudSync.syncNow' => 'Sincronizar ahora',
 			'cloudSync.statusSyncing' => 'Sincronizando…',
 			'cloudSync.statusOffline' => 'Sin conexión',
 			'cloudSync.statusError' => 'Error de sincronización',
@@ -2194,6 +2213,7 @@ extension on Translations {
 			'cloudSync.restoring' => 'Recuperando tus datos…',
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
 			'cloudSync.restoreOffline' => 'Sin conexión. Tus datos se recuperarán al reconectar.',
+			'cloudSync.restoreFailed' => 'No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión.',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',
@@ -2250,11 +2270,15 @@ extension on Translations {
 			'sync.upToDateTip' => 'Tienes los cuadernos al día.',
 			'sync.missing' => 'Falta un cuaderno',
 			'sync.missingTip' => 'El próximo cuaderno aún no está disponible; se reintentará.',
+			'sync.missingImportTip' => 'Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo.',
 			'dashboard.greetingMorning' => 'Buenos días',
 			'dashboard.greetingAfternoon' => 'Buenas tardes',
 			'dashboard.greetingEvening' => 'Buenas noches',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Tus proyectos y pendientes',
+			'dashboard.noCongregationTitle' => 'Todavía no tienes una congregación',
+			'dashboard.noCongregationMessage' => 'Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.',
+			'dashboard.noCongregationCta' => 'Crear congregación',
 			'dashboard.youHave' => 'Tienes',
 			'dashboard.draftsOne' => '1 proyecto en curso',
 			'dashboard.draftsMany' => ({required Object n}) => '${n} proyectos en curso',
@@ -2574,14 +2598,14 @@ extension on Translations {
 			'workspace.slotInCharge' => 'Encargado',
 			'workspace.slotSpeaker' => 'Orador',
 			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
+			_ => null,
+		} ?? switch (path) {
 			'workspace.editTitle' => 'Editar título',
 			'workspace.editTitleHint' => 'Título de la asignación',
 			'workspace.restoreTitle' => 'Restablecer',
 			'relativeTime.now' => 'ahora mismo',
 			'relativeTime.minutes' => ({required Object n}) => 'hace ${n} min',
 			'relativeTime.hours' => ({required Object n}) => 'hace ${n} h',
-			_ => null,
-		} ?? switch (path) {
 			'relativeTime.days' => ({required Object n}) => 'hace ${n} d',
 			'program.song' => ({required Object n}) => 'Canción ${n}',
 			'program.openingWords' => 'Palabras de introducción',
