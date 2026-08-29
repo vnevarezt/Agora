@@ -12,6 +12,7 @@ import '../../state/weeks_provider.dart';
 import '../responsive.dart';
 import '../theme/dimens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/notebook_import.dart';
 import '../widgets/section_header.dart';
 import 'part_card.dart';
 import 'part_presentation.dart';
@@ -154,29 +155,64 @@ class _WorkspaceSkeleton extends StatelessWidget {
   }
 }
 
-class _EmptyState extends ConsumerWidget {
+class _EmptyState extends ConsumerStatefulWidget {
   const _EmptyState();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_EmptyState> createState() => _EmptyStateState();
+}
+
+class _EmptyStateState extends ConsumerState<_EmptyState> {
+  bool _importing = false;
+  String? _error;
+
+  Future<void> _import() async {
+    setState(() {
+      _importing = true;
+      _error = null;
+    });
+    try {
+      await showNotebookImportDialog(context);
+      if (mounted) {
+        await ref
+            .read(weeksProvider.notifier)
+            .load(ref.read(formProvider).issue);
+      }
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final weeks = ref.watch(weeksProvider);
     final issue = ref.watch(formProvider.select((f) => f.issue));
+    final busy = _importing || weeks.isLoading;
 
     return EmptyState(
       icon: Icons.description_outlined,
       title: context.t.workspace.emptyTitle,
-      message: context.t.workspace.emptyMessage,
-      action: AppButton(
-        icon: Icons.file_download_outlined,
-        label: context.t.workspace.searchNotebook(issue: issue),
-        busy: weeks.isLoading,
-        onPressed: weeks.isLoading
-            ? null
-            : () => ref
-                .read(weeksProvider.notifier)
-                .load(ref.read(formProvider).issue),
-      ),
-      error: weeks.hasError ? '${weeks.error}' : null,
+      message: notebooksMustBeImported
+          ? context.t.workspace.importWebMessage
+          : context.t.workspace.emptyMessage,
+      action: notebooksMustBeImported
+          ? AppButton(
+              icon: Icons.file_open_outlined,
+              label: context.t.workspace.importCta,
+              busy: busy,
+              onPressed: busy ? null : _import,
+            )
+          : AppButton(
+              icon: Icons.file_download_outlined,
+              label: context.t.workspace.searchNotebook(issue: issue),
+              busy: busy,
+              onPressed: busy
+                  ? null
+                  : () => ref
+                      .read(weeksProvider.notifier)
+                      .load(ref.read(formProvider).issue),
+            ),
+      error: _error ?? (weeks.hasError ? '${weeks.error}' : null),
     );
   }
 }
