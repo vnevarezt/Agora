@@ -33,3 +33,14 @@ AppLocale programLocaleFor(String meetingLanguage) =>
 /// Spanish costs two downloads, not three.
 Set<String> workbookLangsFor(Iterable<String> meetingLanguages) =>
     {for (final m in meetingLanguages) workbookLangFor(m)};
+
+/// Workbook language to OFFER when no congregation has said which one it meets
+/// in — the app language, the only thing the app knows about the person in
+/// front of it.
+///
+/// A guess, and deliberately not one the sync is allowed to act on: fetching
+/// on a guess is what cost an English-only user a multi-megabyte Spanish
+/// workbook they never met in. Offering one is different — nothing downloads
+/// until somebody presses the button, and an empty list is the worse answer.
+String offerableWorkbookLang(AppLocale locale) =>
+    locale == AppLocale.en ? 'E' : 'S';
