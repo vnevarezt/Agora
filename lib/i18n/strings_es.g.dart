@@ -933,6 +933,9 @@ class Translations$settings$es {
 
 	/// es: 'Los datos viven solo en este dispositivo'
 	String get localModeDesc => 'Los datos viven solo en este dispositivo';
+
+	/// es: 'El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos.'
+	String get catalogDescWeb => 'El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos.';
 }
 
 // Path: options
@@ -1518,6 +1521,57 @@ class Translations$workspace$es {
 
 	/// es: 'Buscar cuaderno {issue}'
 	String searchNotebook({required Object issue}) => 'Buscar cuaderno ${issue}';
+
+	/// es: 'Importar cuaderno (.epub)'
+	String get importNotebook => 'Importar cuaderno (.epub)';
+
+	/// es: 'En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.'
+	String get importWebMessage => 'En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.';
+
+	/// es: 'Cuaderno {issue} importado ({n} semanas).'
+	String importDone({required Object issue, required Object n}) => 'Cuaderno ${issue} importado (${n} semanas).';
+
+	/// es: 'Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.'
+	String get importNotWorkbook => 'Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.';
+
+	/// es: 'Cargar cuaderno'
+	String get importTitle => 'Cargar cuaderno';
+
+	/// es: 'El navegador no puede descargarlo solo. Son dos pasos:'
+	String get importIntro => 'El navegador no puede descargarlo solo. Son dos pasos:';
+
+	/// es: 'Descarga el cuaderno de jw.org'
+	String get importStepDownload => 'Descarga el cuaderno de jw.org';
+
+	/// es: 'Ábrelo aquí'
+	String get importStepOpen => 'Ábrelo aquí';
+
+	/// es: 'Elegir archivo .epub'
+	String get importPick => 'Elegir archivo .epub';
+
+	/// es: 'Descargar'
+	String get importDownload => 'Descargar';
+
+	/// es: 'Ya está cargado'
+	String get importLoaded => 'Ya está cargado';
+
+	/// es: 'Todavía no está'
+	String get importMissing => 'Todavía no está';
+
+	/// es: 'jw.org aún no lo publica'
+	String get importUnavailable => 'jw.org aún no lo publica';
+
+	/// es: 'Elige el .epub que acabas de descargar.'
+	String get importStepOpenHint => 'Elige el .epub que acabas de descargar.';
+
+	/// es: 'Suelta aquí el .epub que descargaste'
+	String get importDropHere => 'Suelta aquí el .epub que descargaste';
+
+	/// es: 'o elígelo con el botón de abajo'
+	String get importDropOr => 'o elígelo con el botón de abajo';
+
+	/// es: 'Cargar cuaderno'
+	String get importCta => 'Cargar cuaderno';
 
 	/// es: 'Asignar…'
 	String get assignee => 'Asignar…';
@@ -2330,6 +2384,7 @@ extension on Translations {
 			'settings.sessionDesc' => 'Estás usando la app en modo local en este dispositivo.',
 			'settings.localMode' => 'Modo local',
 			'settings.localModeDesc' => 'Los datos viven solo en este dispositivo',
+			'settings.catalogDescWeb' => 'El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos.',
 			'options.timeFormat24' => '24 horas (18:00)',
 			'options.timeFormat12' => '12 horas (6:00 p. m.)',
 			'options.pdfNameFull' => 'Nombre y apellido',
@@ -2491,6 +2546,23 @@ extension on Translations {
 			'workspace.emptyTitle' => 'El cuaderno se descarga solo.',
 			'workspace.emptyMessage' => 'Normalmente está listo automáticamente. Si aún no aparece, búscalo manualmente.',
 			'workspace.searchNotebook' => ({required Object issue}) => 'Buscar cuaderno ${issue}',
+			'workspace.importNotebook' => 'Importar cuaderno (.epub)',
+			'workspace.importWebMessage' => 'En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.',
+			'workspace.importDone' => ({required Object issue, required Object n}) => 'Cuaderno ${issue} importado (${n} semanas).',
+			'workspace.importNotWorkbook' => 'Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.',
+			'workspace.importTitle' => 'Cargar cuaderno',
+			'workspace.importIntro' => 'El navegador no puede descargarlo solo. Son dos pasos:',
+			'workspace.importStepDownload' => 'Descarga el cuaderno de jw.org',
+			'workspace.importStepOpen' => 'Ábrelo aquí',
+			'workspace.importPick' => 'Elegir archivo .epub',
+			'workspace.importDownload' => 'Descargar',
+			'workspace.importLoaded' => 'Ya está cargado',
+			'workspace.importMissing' => 'Todavía no está',
+			'workspace.importUnavailable' => 'jw.org aún no lo publica',
+			'workspace.importStepOpenHint' => 'Elige el .epub que acabas de descargar.',
+			'workspace.importDropHere' => 'Suelta aquí el .epub que descargaste',
+			'workspace.importDropOr' => 'o elígelo con el botón de abajo',
+			'workspace.importCta' => 'Cargar cuaderno',
 			'workspace.assignee' => 'Asignar…',
 			'workspace.duration' => ({required Object n}) => '${n} min',
 			'workspace.songTag' => 'Cántico',
@@ -2508,6 +2580,8 @@ extension on Translations {
 			'relativeTime.now' => 'ahora mismo',
 			'relativeTime.minutes' => ({required Object n}) => 'hace ${n} min',
 			'relativeTime.hours' => ({required Object n}) => 'hace ${n} h',
+			_ => null,
+		} ?? switch (path) {
 			'relativeTime.days' => ({required Object n}) => 'hace ${n} d',
 			'program.song' => ({required Object n}) => 'Canción ${n}',
 			'program.openingWords' => 'Palabras de introducción',
@@ -2526,8 +2600,6 @@ extension on Translations {
 			'program.mainHall' => 'Auditorio principal',
 			'program.auxRoom' => 'Sala Auxiliar',
 			'program.sectionTreasures' => 'TESOROS DE LA BIBLIA',
-			_ => null,
-		} ?? switch (path) {
 			'program.sectionMinistry' => 'SEAMOS MEJORES MAESTROS',
 			'program.sectionChristianLife' => 'NUESTRA VIDA CRISTIANA',
 			_ => null,
