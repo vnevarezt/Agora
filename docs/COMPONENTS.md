@@ -97,8 +97,9 @@ format/action selector both surfaces present.
 Uppercase badge; the base under `StatusBadge`, `PrivBadge` and "Incompleto".
 - **Variants** by caller-supplied `background` / `foreground` / `border`
 - **States** none — it is a mark, not a control
-- **Known gap** `fontSize` defaults to 10, half a point under `AppText.micro`;
-  see `DESIGN_SYSTEM.md` §13.
+- **Rule** one line, always. Given a width it cannot fit, it ellipsizes rather
+  than wrapping: the participant grid lays out on a single tile extent, and a
+  badge that grows a line taller clips the card it sits in.
 - **Golden** `markers_*`
 
 ### `MiniChip`

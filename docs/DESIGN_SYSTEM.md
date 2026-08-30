@@ -230,7 +230,7 @@ a call site is drift**, and `test/ui/scale_guard_test.dart` now says so.
 
 | Step | pt | Role |
 |---|---|---|
-| `micro` | 10.5 | uppercase labels and badges — the floor, with one recorded exception (§13) |
+| `micro` | 10.5 | uppercase labels and badges — the floor, nothing renders smaller |
 | `caption` | 11.5 | secondary and helper text |
 | `small` | 12.5 | dense supporting text inside cards and rows |
 | `body` | 13.5 | default reading size |
@@ -669,13 +669,6 @@ Stated rather than papered over:
    are 2px apart and one of them is probably redundant, and `spinnerInButton`
    15 sits 1px under `spinner` 16. Collapsing either is a visible decision, so
    both were named at their current values rather than merged.
-10. **`Pill` renders below the floor.** Its `fontSize` defaults to 10 and no
-   caller overrides it, so every badge in the app is half a point under
-   `micro`. Raising it to 10.5 overflows the privilege row on the participant
-   card by 5px at 2× text — `participant_card_test` catches it — so the thing
-   that has to give is that card's layout, not the token. Until that row wraps
-   or sheds a badge, the floor has an exception, `scale_guard_test` carries it
-   by name, and this entry is why.
 8. **The document's prose is still unchecked.** `design_doc_test` now holds
    every *value* here to the source, which is what went wrong between
    2026-08-16 and 2026-08-29 — the palette moved twice and every accent and

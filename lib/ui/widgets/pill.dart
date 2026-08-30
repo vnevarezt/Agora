@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 
 /// Label pill/badge: uppercase text with background/foreground colors.
@@ -11,12 +12,7 @@ class Pill extends StatelessWidget {
     required this.background,
     required this.foreground,
     this.border,
-    // 10, not [AppText.micro]'s 10.5, and the one place in the app under the
-    // floor the type scale calls a floor. Raising it overflows the privilege
-    // row on the participant card by 5px at 2x text — the card is the thing
-    // that has to give, and that is a density decision on that screen rather
-    // than a token change here. See DESIGN_SYSTEM.md §13.
-    this.fontSize = 10,
+    this.fontSize = AppText.micro,
   });
 
   final String label;
@@ -39,6 +35,13 @@ class Pill extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
+        // A badge is one line by construction. Given a width it cannot fit —
+        // a long privilege at 2x text, inside a row with a fixed avatar at the
+        // other end — it has to give in width, not in height: the participant
+        // grid lays out on one tile extent and a card a line taller than its
+        // neighbours clips.
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.w800,

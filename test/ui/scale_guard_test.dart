@@ -39,9 +39,6 @@ void main() {
     'child: Icon(Icons.person_outline, size: size / 2, color: t.textMute),',
     // Google's G is drawn at the geometry the brand guidelines fix.
     'size: Size(18, 18),',
-    // Known, measured and recorded as a gap rather than waved through: the
-    // participant card overflows at 2x text if this goes up to the floor.
-    'this.fontSize = 10,',
   };
 
   /// The same numbers hiding in a constructor's default value, where no call

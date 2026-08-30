@@ -113,10 +113,15 @@ class ParticipantCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: Space.s10),
-            if (h.isIncomplete)
-              const _IncompleteBadge()
-            else
-              PrivBadge(role: h.privilege),
+            // Flexible, not a bare child: the badge grows with the system text
+            // size and the row has a fixed avatar on the other end, so at 2x
+            // it was taking width the name column no longer had. It gives now
+            // instead of overflowing.
+            Flexible(
+              child: h.isIncomplete
+                  ? const _IncompleteBadge()
+                  : PrivBadge(role: h.privilege),
+            ),
           ],
         );
       },
