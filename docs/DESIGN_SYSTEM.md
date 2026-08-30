@@ -4,9 +4,12 @@ Reference for Agora's visual and interaction layer. Status: **descriptive, not
 aspirational** — everything below is what `lib/ui/` does today, read out of the
 code. Where the system has a gap, §13 says so instead of inventing a rule.
 
-**Verified against the code on 2026-08-29.** Nothing checks that claim
-automatically (§13.8), so a value here is only as current as the last read: when
-this file and `lib/ui/theme/` disagree, the code is right.
+**Every value below is checked against the source by
+`test/ui/design_doc_test.dart`** — the colours, all three scales, the durations,
+the curves and the breakpoints. If this file and `lib/ui/` disagree on a number,
+the build says so. The prose is not checked and never will be, so a rationale
+here can still go stale where a value cannot; when the two disagree, the code is
+right.
 
 The colour, motion, text-scaling and keyboard rules are enforced by tests
 (§12), so this document and the code cannot drift apart silently.
@@ -147,13 +150,22 @@ draft badge, add chip — without restyling the tint itself, and reaches 4.95:1 
 
 Three families, each a soft tint used as a background plus the ink that sits on
 it. `*Strong` is the solid version for marks that sit directly on `bg`/`surface`
-with no tint behind them (dots, standalone icons).
+with no tint behind them (dots, standalone icons); it holds the same value in
+both themes, because a mark with no tint behind it has the same job either way.
 
-| Family | Ink (light / dark) | Soft (light / dark) | Strong | Meaning |
-|---|---|---|---|---|
-| `success` | `#2E6A3E` / `#A9D8B8` | `#DCF0E0` / `#1E3A2A` | `#4FA06A` | complete, up to date |
-| `warning` | `#7A6512` / `#D9C27A` | `#F3ECD2` / `#3A3115` | `#B9890F` | pending, attention |
-| `alert` | `#A94F2B` / `#E8A38C` | `#FBE7DF` / `#40231C` | — | overdue, nothing assigned |
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `success` | `#2E6A3E` | `#A9D8B8` | ink: complete, up to date |
+| `successSoft` | `#DCF0E0` | `#1E3A2A` | the tint that ink sits on |
+| `successStrong` | `#4FA06A` | `#4FA06A` | solid mark, no tint behind it |
+| `warning` | `#7A6512` | `#D9C27A` | ink: pending, attention |
+| `warningSoft` | `#F3ECD2` | `#3A3115` | the tint that ink sits on |
+| `warningStrong` | `#B9890F` | `#B9890F` | solid mark, no tint behind it |
+| `alert` | `#A94F2B` | `#E8A38C` | ink: overdue, nothing assigned |
+| `alertSoft` | `#FBE7DF` | `#40231C` | the tint that ink sits on |
+
+There is no `alertStrong`: nothing in the app marks "overdue" with a bare dot,
+and a token with no call site is a claim the system cannot keep.
 
 **`colorScheme.error` is a separate axis** (`#B3261E` light / `#F2B8B5` dark).
 Error means validation failure and destructive action; the three families above
@@ -601,6 +613,7 @@ than asserted:
 | Text scaling without breakage | `test/ui/text_scaling_test.dart` — 2× on a 320px phone |
 | Keyboard operability | `test/ui/keyboard_focus_test.dart` — traversal, Space/Enter, ring, no resize |
 | Type, icon and shadow scales | `test/ui/scale_guard_test.dart` — no bare size or one-off `BoxShadow` in `lib/ui/` |
+| This document's own values | `test/ui/design_doc_test.dart` — every colour, scale step, duration, curve and breakpoint |
 
 Touch-target minimums and screen-reader traversal order remain unverified;
 traversal order is the largest single unknown in the audit, because four
@@ -642,12 +655,14 @@ Stated rather than papered over:
    are 2px apart and one of them is probably redundant, and `spinnerInButton`
    15 sits 1px under `spinner` 16. Collapsing either is a visible decision, so
    both were named at their current values rather than merged.
-8. **Nothing enforces this document.** §3, §5, §7 and §9 restate values that
-   live in code, and between 2026-08-16 and 2026-08-29 they went stale without
-   anything noticing: the palette moved twice and every accent and dark-ground
-   cell in §3 was wrong. A test that parses these tables and compares them
-   against `tokens.dart`, `dimens.dart`, `app_theme.dart` and `motion.dart`
-   would close the class of defect rather than this instance of it.
+8. **The document's prose is still unchecked.** `design_doc_test` now holds
+   every *value* here to the source, which is what went wrong between
+   2026-08-16 and 2026-08-29 — the palette moved twice and every accent and
+   dark-ground cell was left describing the one from before the app had a
+   logo. What it cannot check is everything that is not a number: the §9
+   catalogue can fall behind a new widget, §10 can describe an interaction
+   that has since changed, and §11's PDF metrics are quoted rather than read.
+   Those still rely on somebody looking.
 9. **The system is documented; the product is not conformant yet.** The
    behavioural half is now in `docs/UX_PATTERNS.md` and the standard in
    `docs/ACCESSIBILITY.md`. Both carry their own gap lists, and the
