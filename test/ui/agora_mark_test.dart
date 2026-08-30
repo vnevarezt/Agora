@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:agora/i18n/strings.g.dart';
 import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/tokens.dart';
 import 'package:agora/ui/widgets/agora_mark.dart';
@@ -75,11 +76,16 @@ void main() {
     );
   });
 
-  Widget host(Widget child, {bool reduceMotion = false}) => MaterialApp(
-    theme: buildAppTheme(pizarra.light, Brightness.light),
-    home: MediaQuery(
-      data: MediaQueryData(disableAnimations: reduceMotion),
-      child: Scaffold(body: Center(child: child)),
+  // TranslationProvider, as in main.dart: the mark and the loader name
+  // themselves for a screen reader, so they read `context.t` like any other
+  // widget and slang_flutter requires the provider above them.
+  Widget host(Widget child, {bool reduceMotion = false}) => TranslationProvider(
+    child: MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: reduceMotion),
+        child: Scaffold(body: Center(child: child)),
+      ),
     ),
   );
 

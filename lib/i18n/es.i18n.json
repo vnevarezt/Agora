@@ -207,7 +207,8 @@
     "removeAssignment": "Quitar asignación",
     "allFeminine": "Todas",
     "allMasculine": "Todos",
-    "assigned": "asignados"
+    "assigned": "asignados",
+    "loading": "Cargando"
   },
   "sync": {
     "updating": "Actualizando catálogos",

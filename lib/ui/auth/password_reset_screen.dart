@@ -153,6 +153,7 @@ class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>
               }),
               hint: tr.auth.cloud.emailHint,
               keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
               autofocus: true,
               onSubmitted: (_) => _busy ? null : _submit(),
             ),

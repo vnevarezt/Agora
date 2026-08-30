@@ -21,6 +21,7 @@ class Pressable extends StatefulWidget {
     this.onTap,
     this.tooltip,
     this.semanticLabel,
+    this.selected,
     this.focusRadius = Dimens.rControl,
     this.pressScale = Motion.pressScale,
   });
@@ -41,6 +42,14 @@ class Pressable extends StatefulWidget {
   /// element. Controls that render their own text can leave this null — the
   /// text is already the name.
   final String? semanticLabel;
+
+  /// Whether this control is the chosen one of a set — a tab, a filter, a
+  /// navigation destination. Null for a control that is not part of a set.
+  ///
+  /// Selection is otherwise carried entirely by paint, and a screen reader
+  /// sees none of it: without this the tabs, the filter pills and the rail
+  /// read as identical buttons with no way to tell which one is active.
+  final bool? selected;
 
   /// How far the control shrinks while held. [Motion.pressScaleSurface] for
   /// anything card-sized; 1 to opt out where the scale would fight the
@@ -125,6 +134,7 @@ class _PressableState extends State<Pressable> {
     return Semantics(
       button: true,
       enabled: enabled,
+      selected: widget.selected,
       label: widget.semanticLabel,
       child: child,
     );

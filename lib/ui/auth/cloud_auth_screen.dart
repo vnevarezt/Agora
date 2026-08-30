@@ -298,6 +298,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                   _error = null;
                 }),
                 hint: tr.auth.cloud.nameHint,
+                autofillHints: const [AutofillHints.name],
               ),
             ),
             const SizedBox(height: Space.s14),
@@ -312,6 +313,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               }),
               hint: tr.auth.cloud.emailHint,
               keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
               autofocus: true,
             ),
           ),
@@ -327,6 +329,9 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               hint: _login
                   ? tr.auth.cloud.passwordHintLogin
                   : tr.auth.cloud.passwordHintRegister,
+              autofillHints: [
+                _login ? AutofillHints.password : AutofillHints.newPassword,
+              ],
               obscureText: true,
               onSubmitted: (_) => _canSubmit ? _submit() : null,
             ),
@@ -364,6 +369,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
                 }),
                 hint: tr.auth.cloud.confirmHint,
                 obscureText: true,
+                autofillHints: const [AutofillHints.newPassword],
                 onSubmitted: (_) => _canSubmit ? _submit() : null,
               ),
             ),

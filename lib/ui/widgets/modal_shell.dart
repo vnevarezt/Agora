@@ -98,13 +98,16 @@ class ModalShell extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: AppText.title,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                      color: t.text,
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: AppText.title,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                        color: t.text,
+                      ),
                     ),
                   ),
                   if (desc != null) ...[

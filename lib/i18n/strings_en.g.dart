@@ -251,6 +251,7 @@ class _Translations$common$en extends Translations$common$es {
 	@override String get allFeminine => 'All';
 	@override String get allMasculine => 'All';
 	@override String get assigned => 'assigned';
+	@override String get loading => 'Loading';
 }
 
 // Path: sync
@@ -1184,6 +1185,7 @@ extension on TranslationsEn {
 			'common.allFeminine' => 'All',
 			'common.allMasculine' => 'All',
 			'common.assigned' => 'assigned',
+			'common.loading' => 'Loading',
 			'sync.updating' => 'Updating catalogs',
 			'sync.updatingTip' => 'Downloading the latest workbooks…',
 			'sync.upToDate' => 'Catalogs up to date',
@@ -1517,9 +1519,9 @@ extension on TranslationsEn {
 			'workspace.slotAssistant' => 'Assistant',
 			'workspace.slotInCharge' => 'In charge',
 			'workspace.slotSpeaker' => 'Speaker',
-			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
 			_ => null,
 		} ?? switch (path) {
+			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
 			'workspace.editTitle' => 'Edit title',
 			'workspace.editTitleHint' => 'Assignment title',
 			'workspace.restoreTitle' => 'Reset',

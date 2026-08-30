@@ -74,13 +74,16 @@ class AuthTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: context.isMobile ? AppText.display : AppText.displayLarge,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.44,
-        color: context.tokens.text,
+    return Semantics(
+      header: true,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: context.isMobile ? AppText.display : AppText.displayLarge,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.44,
+          color: context.tokens.text,
+        ),
       ),
     );
   }

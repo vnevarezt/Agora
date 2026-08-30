@@ -103,9 +103,15 @@ class AgoraMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _MarkBox(
-      size: size,
-      progress: const AlwaysStoppedAnimation<double>(1),
+    // A CustomPaint announces nothing at all, so on the cover screen the
+    // product's own name was invisible to a screen reader.
+    return Semantics(
+      image: true,
+      label: context.t.app.brand,
+      child: _MarkBox(
+        size: size,
+        progress: const AlwaysStoppedAnimation<double>(1),
+      ),
     );
   }
 }
@@ -129,7 +135,9 @@ class AgoraLockup extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AgoraMark(size: size),
+        // The wordmark beside it already carries the name; a labelled mark
+        // here would have a screen reader say "Agora Agora".
+        ExcludeSemantics(child: AgoraMark(size: size)),
         SizedBox(width: size * .3),
         Text(
           context.t.app.brand,
@@ -244,15 +252,20 @@ class _AgoraLoaderState extends State<AgoraLoader>
   @override
   Widget build(BuildContext context) {
     final (back, front) = _Mark.inks(context);
-    return SizedBox(
-      width: widget.size * _LoaderPainter.box.width / _LoaderPainter.box.height,
-      height: widget.size,
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: _LoaderPainter(
-            progress: _controller,
-            back: widget.color ?? back,
-            front: widget.color ?? front,
+    return Semantics(
+      label: context.t.common.loading,
+      liveRegion: true,
+      child: SizedBox(
+        width:
+            widget.size * _LoaderPainter.box.width / _LoaderPainter.box.height,
+        height: widget.size,
+        child: RepaintBoundary(
+          child: CustomPaint(
+            painter: _LoaderPainter(
+              progress: _controller,
+              back: widget.color ?? back,
+              front: widget.color ?? front,
+            ),
           ),
         ),
       ),

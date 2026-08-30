@@ -125,6 +125,7 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
     final activo = i == widget.index;
     final button = Pressable(
       key: _segmentKeys[i],
+      selected: activo,
       onTap: widget.onChanged == null || activo
           ? null
           : () => widget.onChanged!(i),

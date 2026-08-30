@@ -188,15 +188,18 @@ class _TopBar extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                greeting,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: isMobile ? AppText.display : AppText.displayLarge,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.42,
-                  color: t.text,
+              Semantics(
+                header: true,
+                child: Text(
+                  greeting,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isMobile ? AppText.display : AppText.displayLarge,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.42,
+                    color: t.text,
+                  ),
                 ),
               ),
               const SizedBox(height: Space.s2),

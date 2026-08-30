@@ -68,11 +68,11 @@ Reduce Motion.
 
 | SC | Title | Status | Notes |
 |---|---|---|---|
-| 1.1.1 | Non-text Content | **Not met** | `AgoraMark`, `AgoraLockup` and `AgoraLoader` are `CustomPaint` with no `Semantics` label — the cover screen's brand and the preview's loader announce nothing. Icon-only buttons are covered: `Pressable` wraps `Semantics(button: true)` and `AppIconButton` forwards `tooltip` into `semanticLabel`. |
+| 1.1.1 | Non-text Content | Reviewed | `AgoraMark` announces the product name and `AgoraLoader` announces that it is loading. `AgoraLockup` excludes the mark from semantics on purpose — the wordmark beside it is real text, and labelling both would say the name twice. Icon-only buttons: `Pressable` wraps `Semantics(button: true)` and `AppIconButton` forwards `tooltip` into `semanticLabel`. |
 | 1.2.1 | Audio-only and Video-only | N/A | No audio or video anywhere in the product. |
 | 1.2.2 | Captions (Prerecorded) | N/A | As above. |
 | 1.2.3 | Audio Description or Media Alternative | N/A | As above. |
-| 1.3.1 | Info and Relationships | **Partial** | Form fields are associated: `BoundTextField` uses `InputDecoration(labelText:)`. Headings are not: `SectionHeader` and `BlockTitle` are styled `Text` with no `Semantics(header: true)`, so a screen reader has no structure to navigate by. |
+| 1.3.1 | Info and Relationships | Reviewed | Fields are associated by `InputDecoration(labelText:)`. Headings are exposed with `Semantics(header: true)` — `SectionHeader`, `BlockTitle`, the three screen titles, the auth card title and the modal header. |
 | 1.3.2 | Meaningful Sequence | Unverified | Traversal order has never been walked with a screen reader. |
 | 1.3.3 | Sensory Characteristics | Unverified | No instruction found that depends on shape or position, but all 365 strings have not been read against this. |
 | 1.4.1 | Use of Color | Reviewed | Navigation selection carries three simultaneous signals — indicator surface, outline→filled icon crossfade, weight change. Section identity pairs a colour dot with an uppercase title. Status is a `Pill` with text in it. |
@@ -91,14 +91,14 @@ Reduce Motion.
 | 2.5.2 | Pointer Cancellation | Reviewed | `Pressable` fires on tap-up, so a press can be aborted by dragging off. |
 | 2.5.3 | Label in Name | **Partial** | `AppIconButton` derives `semanticLabel` from `tooltip`, so the two agree by construction. Nothing stops a caller passing an unrelated `semanticLabel` to `AppButton`, which would put the accessible name out of step with the visible one. |
 | 2.5.4 | Motion Actuation | N/A | Nothing responds to shaking or tilting. |
-| 3.1.1 | Language of Page | **Not met** | `MaterialApp.locale` follows the active translation, but `web/index.html` ships `<html>` with no `lang` attribute, so the web build declares no language at all. One-line fix. |
+| 3.1.1 | Language of Page | **Partial** | `MaterialApp.locale` follows the active translation, and `web/index.html` now declares `lang="es"`. That attribute is static, so a browser session switched to English still reports Spanish to the page-level API — the document language and the interface language can disagree by one setting. |
 | 3.2.1 | On Focus | Reviewed | Focus alone changes nothing but the focus ring. |
 | 3.2.2 | On Input | Reviewed | No form submits on change. The Settings language dropdown does apply on selection, which is the control's stated purpose. |
 | 3.2.6 | Consistent Help | N/A | No help, contact or support mechanism is offered on any screen, so there is nothing to keep consistent. |
 | 3.3.1 | Error Identification | Reviewed | Errors are text: `AuthErrorText` under the field, `EmptyState(error:)` for a failed load, panel text for the preview. |
 | 3.3.2 | Labels or Instructions | Reviewed | `labelText` on text fields, `LabeledField` on everything else. There are no placeholder-only fields. |
 | 3.3.7 | Redundant Entry | Reviewed | No process asks for the same information twice. |
-| 4.1.2 | Name, Role, Value | **Partial** | Name and role are handled by `Pressable`; `AppSwitch` exposes `toggled`. **Selected state is not exposed anywhere** — navigation destinations, `SegmentedTabs` and `FilterPill` all communicate selection visually only. |
+| 4.1.2 | Name, Role, Value | Reviewed | Name and role come from `Pressable`, `AppSwitch` exposes `toggled`, and selection is exposed through `Pressable.selected` (`SegmentedTabs`, `FilterPill`) and a `Semantics` wrapper on the sidebar rail, which is built on `InkWell` rather than `Pressable`. The mobile bar is Material's own `NavigationBar`. |
 
 ## 3. Level AA
 
@@ -107,7 +107,7 @@ Reduce Motion.
 | 1.2.4 | Captions (Live) | N/A | No media. |
 | 1.2.5 | Audio Description | N/A | No media. |
 | 1.3.4 | Orientation | Reviewed | No orientation is locked; iOS `Info.plist` allows portrait and both landscapes, and nothing calls `setPreferredOrientations`. |
-| 1.3.5 | Identify Input Purpose | **Not met** | There is not one `autofillHints` in the codebase. Email and password fields therefore offer the platform nothing to fill, which also weakens 3.3.8. |
+| 1.3.5 | Identify Input Purpose | Reviewed | Every auth field declares its purpose through `BoundTextField(autofillHints:)` — name, email, `password` when signing in and `newPassword` when registering. The fields are not wrapped in an `AutofillGroup`, which affects how cleanly a manager *saves* a credential, not whether the purpose is identified. |
 | 1.4.3 | Contrast (Minimum) | **Test** | `contrast_test`, 21 pairs per theme. Covers token pairs, not rendered screens: ink on a ground the list does not name is not covered. |
 | 1.4.4 | Resize Text | **Test** | `text_scaling_test` at 2×. Sizes come from `AppText`, which scales; `scale_guard_test` keeps it that way. |
 | 1.4.5 | Images of Text | Reviewed | The wordmark is a logotype, which the criterion exempts, and `AgoraLockup` builds it live in Manrope rather than shipping a bitmap. Everything else is real text. |
@@ -116,7 +116,7 @@ Reduce Motion.
 | 1.4.12 | Text Spacing | N/A (native) / Unverified (web) | A native app has no user stylesheet to apply. The browser build has not been tested with the criterion's spacing overrides. |
 | 1.4.13 | Content on Hover or Focus | Unverified | Tooltips are Material's own; whether they are dismissible and hoverable per the criterion has not been checked. |
 | 2.4.5 | Multiple Ways | N/A | One application, not a set of pages. |
-| 2.4.6 | Headings and Labels | **Partial** | Labels are descriptive. Headings are visual only — the same gap as 1.3.1. |
+| 2.4.6 | Headings and Labels | Reviewed | Labels are descriptive and headings are exposed as headings — see 1.3.1. |
 | 2.4.7 | Focus Visible | **Test** | `keyboard_focus_test` asserts the ring appears on keyboard focus and never on a mouse click, and that it does not resize the control. |
 | 2.4.11 | Focus Not Obscured (Minimum) | Unverified | `ProjectBar` and the mobile bottom bar are fixed. Whether a focused control can end up behind one on a scrolled, text-scaled screen has not been checked. |
 | 2.5.7 | Dragging Movements | **Partial** | Zoom has buttons. Panning a zoomed page has no button alternative, and the web workbook drop target has one — the file picker beside it. |
@@ -126,8 +126,8 @@ Reduce Motion.
 | 3.2.4 | Consistent Identification | Reviewed | The widget catalog is the mechanism: the same function is the same component everywhere, and building a one-off where a catalog widget fits is treated as drift. |
 | 3.3.3 | Error Suggestion | **Partial** | `cloudAuthErrorText` names every failure; not all of the strings say what to do about it (`UX_PATTERNS.md` §10.6). |
 | 3.3.4 | Error Prevention | Reviewed | Every destructive action is confirmed in a modal, and `DeleteAccountModal` lists what blocks the delete before asking for anything. There is no undo, which the criterion does not require. |
-| 3.3.8 | Accessible Authentication | **Partial** | No puzzle, no CAPTCHA, no cognitive function test; password, Google sign-in and device biometrics are all available. The missing `autofillHints` (1.3.5) is what stops password managers filling cleanly. |
-| 4.1.3 | Status Messages | **Not met** | Snackbars are raw `SnackBar` with no live region, so an export finishing, a backup restoring and a sync failing are announced to nobody. Sync phase changes are likewise silent. |
+| 3.3.8 | Accessible Authentication | Reviewed | No puzzle, no CAPTCHA, no cognitive function test; password, Google sign-in and device biometrics are all available, and the fields now carry autofill hints (1.3.5). |
+| 4.1.3 | Status Messages | **Partial** | Snackbars are covered by the framework: Flutter wraps every one in `Semantics(container: true, liveRegion: true)` and exposes a dismiss action, so an export finishing or a backup failing *is* announced. What is not: status that changes in place — the sync card's phase and subtitle, `AuthErrorText` appearing under a field, and a button entering its busy state. |
 
 ## 4. How to verify
 
@@ -148,25 +148,29 @@ Manual passes, none of which have been done end to end:
 
 Ordered by how much a person is blocked, not by how hard it is to fix.
 
-1. **4.1.3 — nothing is announced.** Every snackbar is silent to a screen
-   reader, so the outcome of an action a person just took is invisible unless
-   they can see it. One `AppSnackBar` with `Semantics(liveRegion: true)` fixes
-   the whole class, and `UX_PATTERNS.md` §10.1 already wants that widget for a
-   different reason.
-2. **4.1.2 — selection state is not exposed.** A screen reader user cannot tell
-   which navigation destination, tab or filter is active. `Semantics(selected:)`
-   on three widgets.
-3. **1.3.1 / 2.4.6 — no headings.** With no `header: true` there is no
-   structure to jump between, so every screen is a flat list of controls.
-4. **3.1.2 — the second language is unmarked.** Content in the meeting's
-   language is read out in the interface's language. This one is a product
-   decision that created a criterion failure, so the fix belongs in the same
-   place the decision does.
-5. **1.1.1 — the mark announces nothing.** Three brand widgets need a label, or
-   an explicit exclusion where they are decorative.
-6. **1.3.5 / 3.3.8 — no autofill hints.** Email and password fields should
-   carry `autofillHints`; it is a two-line change per field.
-7. **3.1.1 — `web/index.html` has no `lang`.** One attribute.
+1. **3.1.2 — the second language is unmarked.** Content in the meeting's
+   language is read out in the interface's language. This is a product decision
+   that created a criterion failure, so the fix belongs in the same place the
+   decision does — the week label knows which workbook it came from.
+2. **4.1.3 — status that changes in place is silent.** The snackbars are
+   handled for us; the sync card's phase, the inline field errors and the busy
+   states are not. Each needs a live region where it currently has none.
+3. **3.1.1 — the web shell's language is a constant.** `lang="es"` is right for
+   the base locale and wrong for anybody running the app in English. It has to
+   be written from the active locale at boot.
+
+The five that were on this list on 2026-08-29 are closed: selection state is
+exposed, headings are headings, the mark and the loader name themselves, every
+auth field declares its purpose, and the web shell declares a language at all.
+None of it is defended by a test — the manual passes in §4 are still what would
+catch a regression, which is its own gap.
+
+Two things that are *not* on this list and could look like they should be. A
+snackbar carries no icon and no colour, so success and failure look identical —
+that is a real defect, but it is a UX one (`UX_PATTERNS.md` §10.1), not a
+criterion failure: the text distinguishes them and 1.4.1 asks no more. And
+there is no undo anywhere, which 3.3.4 does not require once every destructive
+action is confirmed.
 
 ## 6. What is unverified
 

@@ -436,6 +436,9 @@ class Translations$common$es {
 
 	/// es: 'asignados'
 	String get assigned => 'asignados';
+
+	/// es: 'Cargando'
+	String get loading => 'Cargando';
 }
 
 // Path: sync
@@ -2264,6 +2267,7 @@ extension on Translations {
 			'common.allFeminine' => 'Todas',
 			'common.allMasculine' => 'Todos',
 			'common.assigned' => 'asignados',
+			'common.loading' => 'Cargando',
 			'sync.updating' => 'Actualizando catálogos',
 			'sync.updatingTip' => 'Descargando los cuadernos más recientes…',
 			'sync.upToDate' => 'Catálogos al día',
@@ -2597,9 +2601,9 @@ extension on Translations {
 			'workspace.slotAssistant' => 'Ayudante',
 			'workspace.slotInCharge' => 'Encargado',
 			'workspace.slotSpeaker' => 'Orador',
-			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
 			_ => null,
 		} ?? switch (path) {
+			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
 			'workspace.editTitle' => 'Editar título',
 			'workspace.editTitleHint' => 'Título de la asignación',
 			'workspace.restoreTitle' => 'Restablecer',

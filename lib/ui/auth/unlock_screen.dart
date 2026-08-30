@@ -172,6 +172,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
               }),
               hint: tr.auth.cloud.passwordHintLogin,
               obscureText: true,
+              autofillHints: const [AutofillHints.password],
               autofocus: true,
               onSubmitted: (_) => _canSubmit ? _unlock() : null,
             ),

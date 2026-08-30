@@ -262,7 +262,15 @@ class _NavItem extends ConsumerWidget {
     );
 
     if (compact) item = Tooltip(message: label, child: item);
-    return item;
+    // The rail is Material + InkWell rather than Pressable, so it carries
+    // neither of the two things a screen reader needs: the compact form has
+    // no text at all, and selection is painted only.
+    return Semantics(
+      container: true,
+      selected: active,
+      label: compact ? label : null,
+      child: item,
+    );
   }
 
   Widget _badge(AppTokens t) => Container(
