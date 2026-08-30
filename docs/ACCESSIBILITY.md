@@ -54,7 +54,7 @@ only parts of this document that cannot silently rot.
 
 | Test | Defends |
 |---|---|
-| `test/ui/semantics_test.dart` | selection state, heading role and the inline error's live region — 4.1.2, 1.3.1 and 4.1.3 |
+| `test/ui/semantics_test.dart` | selection state, heading role, the busy hint and the inline error's live region — 4.1.2, 1.3.1 and 4.1.3 |
 | `test/ui/contrast_test.dart` | 21 (ink, ground) pairs against 4.5:1 or 3.0:1, in **both** themes — 1.4.3 and 1.4.11 |
 | `test/ui/text_scaling_test.dart` | a control grows rather than clipping at 2× text, and does not overflow a 320px phone — 1.4.4 and part of 1.4.10 |
 | `test/ui/keyboard_focus_test.dart` | tab traversal reaches a control, Space and Enter activate it, the ring is visible, and focus never resizes the control — 2.1.1 and 2.4.7 |
@@ -128,7 +128,7 @@ Reduce Motion.
 | 3.3.3 | Error Suggestion | **Partial** | `cloudAuthErrorText` names every failure; not all of the strings say what to do about it (`UX_PATTERNS.md` §10.6). |
 | 3.3.4 | Error Prevention | Reviewed | Every destructive action is confirmed in a modal, and `DeleteAccountModal` lists what blocks the delete before asking for anything. There is no undo, which the criterion does not require. |
 | 3.3.8 | Accessible Authentication | Reviewed | No puzzle, no CAPTCHA, no cognitive function test; password, Google sign-in and device biometrics are all available, and the fields now carry autofill hints (1.3.5). |
-| 4.1.3 | Status Messages | **Partial** | Snackbars are covered by the framework: Flutter wraps every one in `Semantics(container: true, liveRegion: true)`. `AuthErrorText` and the sync card's status row are live regions of their own — the sync row as a whole, because "Error" without its reason is not a status message. A button entering its busy state still announces nothing beyond becoming disabled. |
+| 4.1.3 | Status Messages | Reviewed | Snackbars are covered by the framework: Flutter wraps every one in `Semantics(container: true, liveRegion: true)`. `AuthErrorText` and the sync card's status row are live regions of their own — the sync row as a whole, because "Error" without its reason is not a status message. A busy `AppButton` carries a hint saying why it stopped responding, delivered as a live region rather than waiting for focus. |
 
 ## 4. How to verify
 
@@ -149,19 +149,19 @@ Manual passes, none of which have been done end to end:
 
 Ordered by how much a person is blocked, not by how hard it is to fix.
 
-1. **4.1.3 — a busy button announces only that it is disabled.** `AppButton`
-   swaps its label for a spinner while it works, and a screen reader is told
-   nothing about why the control stopped responding. It is the last of the
-   in-place status cases; the sync row and the inline errors are handled.
+Nothing, as of 2026-08-30. All seven criteria open on 2026-08-29 are closed,
+and four of them are defended by `semantics_test` rather than by a reading.
 
-That is the whole list. The seven open on 2026-08-29 are closed but one, and
-three of them are now defended by `semantics_test` rather than by a reading.
+**That is not a conformance claim, and the difference matters.** Every closure
+was verified by reading the code or by asserting a semantics property, which
+proves the property is *set* — not that the result is usable. The manual passes
+in §4 have still not been run. Traversal order, whether announcements arrive in
+a sensible sequence, and whether a person can actually complete a week with a
+screen reader are all unknown, and §6 is where they stay until somebody sits
+down with VoiceOver.
 
-**None of this substitutes for the manual passes in §4.** Every closure above
-was verified by reading the code or by a semantics assertion, which proves the
-property is set — not that the result is usable. Traversal order, whether the
-announcements arrive in a sensible sequence, and whether a person can actually
-complete a week with a screen reader are all still unknown.
+A row marked Reviewed here means "no defect found by reading". Only the rows
+marked **Test** mean the property cannot quietly go away again.
 
 Two things that are *not* on this list and could look like they should be. A
 snackbar carries no icon and no colour, so success and failure look identical —

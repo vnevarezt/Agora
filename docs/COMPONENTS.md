@@ -53,10 +53,13 @@ MD3 interactive card: real ripple, state layers, animated elevation and border.
 ### `AppButton`
 - **Variants** `primary` · `ghost`; square when `label` is null
 - **States** default · hover · pressed · focused · disabled (`onPressed: null`)
-  · busy (`busy: true` swaps the label for `AppSpinner` and disables)
+  · busy (`busy: true` puts `AppSpinner` where the icon goes and disables the
+  button; the label stays)
 - **A11y** grows with OS text scale rather than clipping
   (`text_scaling_test`); square instances pad their tap area out to
-  `Dimens.hTouchMin`.
+  `Dimens.hTouchMin`. Busy adds a hint saying why the control stopped
+  responding, as a live region — otherwise a screen reader gets "dimmed" and no
+  reason.
 - **Not for** destructive actions. There is no danger variant on purpose.
 - **Golden** `controls_*`
 
@@ -86,7 +89,7 @@ format/action selector both surfaces present.
   in the app disables together
 - **Not for** anything but export: `runExport` owns build → save/share →
   snackbar, and exists so the desktop menu and the mobile sheet cannot diverge.
-- **Golden** none — needs a provider scope and a route.
+- **Golden** `feedback_*` covers `ExportPanel` in both enabled states.
 
 ## 3. Selection and status marks
 
@@ -175,7 +178,8 @@ picks dialog on desktop and bottom sheet on mobile from one call site.
   (`reduce_motion_test` covers both).
 - **Not for** a flow that would otherwise be a fourth level of navigation — see
   `UX_PATTERNS.md` §2.3. That *is* what it is for.
-- **Golden** none — route-level.
+- **Golden** `modal_*`, both presentations, one of them with a destructive
+  action in the footer.
 
 ### `EmptyState`
 Icon, optional title, message, optional action, optional error.
@@ -191,7 +195,9 @@ The app's only snackbar.
 - **A11y** Flutter wraps every snackbar in a live region, so the message is
   announced; the icon distinguishes the two kinds by shape as well as colour.
 - **Motion** `Motion.message` / `messageLong`, neither zeroed by Reduce Motion.
-- **Golden** none — route-level.
+- **Golden** `snackbar_success_*` and `snackbar_failure_*`, driven through the
+  messenger — one bar per mount, because showing the second dismisses the first
+  and the handover is a race an image would sometimes lose.
 
 ## 6. Input
 
@@ -255,9 +261,11 @@ cannot animate linearly by forgetting.
 
 ## What is not covered
 
-- **No golden covers** the modals, the person picker, the assignment card, the
-  snackbar or the export sheet: each is reached through a route or needs a
-  populated provider scope, so none of them is in an image.
+- **No golden covers** the person picker or the assignment card. Both need a
+  populated provider scope — a congregation, a workbook and a form — so putting
+  them under an image means building that fixture first, which is a larger job
+  than the twelve images that exist. The modal, the export panel and the
+  snackbar were reachable and are covered.
 - **No spec covers** the screen-level compositions in `lib/ui/dashboard/`,
   `participants/`, `workspace/`, `config/` and `auth/`. They are compositions of
   the above, and they are where the state matrix in `UX_PATTERNS.md` §3 lives.

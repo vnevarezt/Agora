@@ -1,10 +1,14 @@
 #!/bin/sh
 # Formats the repo with the pinned toolchain, and refuses under any other one.
 #
-# dart_style's output changes between SDK releases, so formatting off-pin
-# rewrites files nobody edited: 207 of 295 sources disagreed between Flutter
-# 3.44 and the pinned 3.47. That lands as a diff no reviewer can read, and it
-# buries the change it was supposed to accompany.
+# dart_style's output changes between SDK releases, and the repo is formatted
+# for exactly one of them. Running the formatter off-pin rewrites files nobody
+# edited — that is how 211 of 304 sources once ended up disagreeing at the same
+# time — which lands as a diff no reviewer can read, wrapped around whatever
+# change it came with.
+#
+# On-pin this is a no-op: `sh tool/format.sh --output none` should always
+# report 0 changed on a clean tree.
 set -eu
 
 cd "$(dirname "$0")/.."
