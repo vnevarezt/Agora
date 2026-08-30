@@ -13,8 +13,8 @@ The colour, motion, text-scaling and keyboard rules are enforced by tests
 
 Companion documents: `PRODUCT.md` (who this is for and what it must never
 claim), `docs/UX_PATTERNS.md` (how the same interface *behaves* — navigation,
-states, errors, flows), `docs/DATA_ARCHITECTURE.md` (the data layer this UI
-reads).
+states, errors, flows), `docs/ACCESSIBILITY.md` (the standard all three are
+held to), `docs/DATA_ARCHITECTURE.md` (the data layer this UI reads).
 
 **Provenance.** The token names, the `Dimens` constants and most component
 doc-comments refer to a **CSS/HTML mock** (`.sidebar`, `.portada--a`, `.projbar`,
@@ -589,8 +589,10 @@ Binding, from `PRODUCT.md`:
 - Never rely on color alone to carry meaning (§10).
 - Honor reduced motion (§7).
 
-No formal external standard has been adopted as a compliance obligation. Three
-of these are now enforced by tests rather than asserted:
+The standard behind them is **WCAG 2.2 Level AA** — adopted, scoped and walked
+criterion by criterion in `docs/ACCESSIBILITY.md`, which also lists the seven
+that fail today. Four of the commitments above are enforced by tests rather
+than asserted:
 
 | Commitment | Enforced by |
 |---|---|
@@ -600,7 +602,9 @@ of these are now enforced by tests rather than asserted:
 | Keyboard operability | `test/ui/keyboard_focus_test.dart` — traversal, Space/Enter, ring, no resize |
 | Type, icon and shadow scales | `test/ui/scale_guard_test.dart` — no bare size or one-off `BoxShadow` in `lib/ui/` |
 
-Touch-target minimums and screen-reader traversal order remain unverified.
+Touch-target minimums and screen-reader traversal order remain unverified;
+traversal order is the largest single unknown in the audit, because four
+criteria depend on it and none can be settled by reading code.
 
 ## 13. Known gaps
 
@@ -644,8 +648,8 @@ Stated rather than papered over:
    cell in §3 was wrong. A test that parses these tables and compares them
    against `tokens.dart`, `dimens.dart`, `app_theme.dart` and `motion.dart`
    would close the class of defect rather than this instance of it.
-9. **No adopted accessibility standard.** §12 lists binding commitments and
-   the four tests that defend them, but names no external conformance target,
-   so "accessible" has no definition anyone could be held to. The behavioural
-   half of the system is now written down in `docs/UX_PATTERNS.md`; its own
-   §10 carries what is still missing there.
+9. **The system is documented; the product is not conformant yet.** The
+   behavioural half is now in `docs/UX_PATTERNS.md` and the standard in
+   `docs/ACCESSIBILITY.md`. Both carry their own gap lists, and the
+   accessibility one has seven live failures — the largest being that no
+   status message is announced to a screen reader at all.

@@ -11,8 +11,9 @@ of inventing one. Nothing here is enforced by a test yet, which is itself one of
 the gaps.
 
 Companion documents: `PRODUCT.md` (who this is for), `docs/DESIGN_SYSTEM.md`
-(the visual and motion layer), `docs/DATA_ARCHITECTURE.md` (what the state these
-screens read is made of), `lib/i18n/README.md` (the translation pipeline).
+(the visual and motion layer), `docs/ACCESSIBILITY.md` (the standard both are
+held to), `docs/DATA_ARCHITECTURE.md` (what the state these screens read is made
+of), `lib/i18n/README.md` (the translation pipeline).
 
 ---
 
@@ -297,7 +298,9 @@ Stated rather than papered over.
 7. **First-run has no measured path.** There is no instrumentation, so "time to
    first printed sheet" — the only activation metric that matters for this
    product — is unknown.
-8. **No accessibility standard is adopted.** `DESIGN_SYSTEM.md` §12 lists
-   binding commitments and four tests that defend them, but names no external
-   conformance target. Screen-reader traversal order in particular is
-   unverified, and the flows in §2 are exactly where it would break first.
+8. **The flows are where accessibility fails first.** `docs/ACCESSIBILITY.md`
+   adopts WCAG 2.2 AA and walks all 55 criteria; four of its seven live
+   failures are behavioural rather than visual — no status message is
+   announced, no selection state is exposed, no heading structure exists, and
+   the meeting's language is unmarked inside an interface in another. Every
+   one of them lives in a pattern described above.
