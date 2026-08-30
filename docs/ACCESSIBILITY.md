@@ -136,14 +136,18 @@ Reduce Motion.
 flutter test test/ui/          # the four suites above, plus the guards
 ```
 
-Manual passes, none of which have been done end to end:
+The manual passes are written out step by step in `docs/A11Y_MANUAL_PASS.md`,
+with a form to fill in and a table saying which criterion each step settles.
+None of them has been run end to end. In short:
 
 - **Screen reader**: VoiceOver (iOS/macOS), TalkBack (Android), NVDA (web).
-  Walk the first-run flow, the editor and the settings tabs. This is the pass
-  that would close 1.3.1, 1.3.2, 2.4.3 and 4.1.2 at once.
+  Roughly 90 minutes per platform; iOS is worth the most if only one gets done.
 - **Keyboard only**: unplug the mouse, complete a week and export it.
 - **Text at 200%**, on the smallest supported phone, in both themes.
 - **Reduce Motion on**, then the same walk.
+
+Until that document's §4 carries a filled-in, dated row, everything below is a
+self-assessment of the code rather than of the product.
 
 ## 5. What fails today
 
