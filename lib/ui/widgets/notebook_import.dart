@@ -15,6 +15,7 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
+import 'app_snack_bar.dart';
 import 'app_modal.dart';
 import 'dashed_border.dart';
 import 'modal_shell.dart';
@@ -350,16 +351,17 @@ Future<bool> importNotebookBytes(
   final tr = context.t;
   try {
     final imported = await ref.read(notebookImportProvider).run(bytes);
-    messenger?.showSnackBar(SnackBar(
-      content: Text(
-          tr.workspace.importDone(issue: imported.issue, n: imported.weeks)),
-    ));
+    showAppSnack(messenger,
+        message: tr.workspace.importDone(
+            issue: imported.issue, n: imported.weeks),
+        kind: AppSnackKind.success);
     return true;
   } on FormatException {
-    messenger?.showSnackBar(
-        SnackBar(content: Text(tr.workspace.importNotWorkbook)));
+    showAppSnack(messenger,
+        message: tr.workspace.importNotWorkbook,
+        kind: AppSnackKind.failure);
   } catch (e) {
-    messenger?.showSnackBar(SnackBar(content: Text('$e')));
+    showAppSnack(messenger, message: '$e', kind: AppSnackKind.failure);
   }
   return false;
 }

@@ -8,6 +8,7 @@ import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../auth/widgets/auth_error_text.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_snack_bar.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/app_switch.dart';
 import '../widgets/bound_text_field.dart';
@@ -32,10 +33,11 @@ class SecurityCard extends ConsumerWidget {
           .read(authSessionProvider.notifier)
           .setDeviceUnlock(enable, tr.security.deviceUnlockPrompt);
     } on DbKeyException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+      showAppSnack(messenger,
+          message: e.message, kind: AppSnackKind.failure);
     } catch (_) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.account.errors.unknown)));
+      showAppSnack(messenger,
+          message: tr.account.errors.unknown, kind: AppSnackKind.failure);
     }
   }
 
@@ -142,7 +144,8 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
           .changePassword(_current, _next);
       if (!mounted) return;
       widget.onClose();
-      messenger.showSnackBar(SnackBar(content: Text(tr.security.changed)));
+      showAppSnack(messenger,
+          message: tr.security.changed, kind: AppSnackKind.success);
     } on WrongPasswordException {
       if (mounted) {
         setState(() {

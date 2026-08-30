@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +26,10 @@ double contrast(Color a, Color b) {
 ///
 /// Grounds are listed per ink because the same ink lands on several surfaces
 /// and only the worst one decides whether the token passes.
-List<({String name, Color ink, Color ground, double min})> _pairs(AppTokens t) =>
+List<({String name, Color ink, Color ground, double min})> _pairs(
+  AppTokens t,
+  Color error,
+) =>
     [
       (name: 'text/bg', ink: t.text, ground: t.bg, min: 4.5),
       (name: 'text/surface', ink: t.text, ground: t.surface, min: 4.5),
@@ -54,6 +58,9 @@ List<({String name, Color ink, Color ground, double min})> _pairs(AppTokens t) =
       (name: 'borderControl/bg', ink: t.borderControl, ground: t.bg, min: 3.0),
       (name: 'successStrong/surface',
           ink: t.successStrong, ground: t.surface, min: 3.0),
+      // The snackbar's two marks sit on `surface` (app_snack_bar.dart); the
+      // success half is the row above.
+      (name: 'error/surface', ink: error, ground: t.surface, min: 3.0),
       (name: 'warningStrong/surface',
           ink: t.warningStrong, ground: t.surface, min: 3.0),
     ];
@@ -61,11 +68,15 @@ List<({String name, Color ink, Color ground, double min})> _pairs(AppTokens t) =
 void main() {
   group('WCAG AA contrast', () {
     for (final mode in [
-      (label: 'light', tokens: pizarra.light),
-      (label: 'dark', tokens: pizarra.dark),
+      (label: 'light', tokens: pizarra.light, brightness: Brightness.light),
+      (label: 'dark', tokens: pizarra.dark, brightness: Brightness.dark),
     ]) {
       group(mode.label, () {
-        for (final p in _pairs(mode.tokens)) {
+        // colorScheme.error is not an AppTokens role, so it comes back out
+        // of the built theme rather than being restated here.
+        final error =
+            buildAppTheme(mode.tokens, mode.brightness).colorScheme.error;
+        for (final p in _pairs(mode.tokens, error)) {
           test('${p.name} >= ${p.min}:1', () {
             final ratio = contrast(p.ink, p.ground);
             expect(ratio, greaterThanOrEqualTo(p.min),

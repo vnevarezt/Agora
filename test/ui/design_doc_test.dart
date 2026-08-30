@@ -160,9 +160,9 @@ void main() {
     final src = source('lib/ui/widgets/motion.dart');
     final durations = {
       for (final m in RegExp(r'static const Duration (\w+) = '
-              r'Duration\(milliseconds: (\d+)\)')
+              r'Duration\((milliseconds|seconds): (\d+)\)')
           .allMatches(src))
-        m.group(1)!: m.group(2)!,
+        m.group(1)!: m.group(3)!,
     };
     expect(durations, isNotEmpty);
     durations.forEach((name, ms) => expectDocumented(name, ms, 'Motion'));

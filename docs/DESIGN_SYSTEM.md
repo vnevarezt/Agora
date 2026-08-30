@@ -401,11 +401,16 @@ One curve, one duration scale (`lib/ui/widgets/motion.dart`).
   (`AgoraLoader`). Unhurried on purpose: a loop the eye can follow reads as the
   app working, one it cannot reads as the app struggling.
 
+- **`message` 4 s, `messageLong` 6 s** — how long a snackbar stays before it
+  withdraws itself. `messageLong` is for a failure, which gets read twice: the
+  first pass says something went wrong, the second says what.
+
 `instant` · `fast` · `med` are the state scale and it deliberately stops at
 `med`. Entrances used to run at 500 ms, which is long enough that the user waits
-on them instead of reading them. `focal` and `loop` are not extensions of that
-scale — the scale says how long a change takes, `focal` buys one deliberate
-performance per surface and `loop` says how often a cycle comes round.
+on them instead of reading them. `focal`, `loop` and the two message steps are not
+extensions of that scale — the scale says how long a change takes, `focal` buys
+one deliberate performance per surface, `loop` says how often a cycle comes
+round, and `message` says how long a sentence waits to be read.
 - **`pressScale` .97 / `pressScaleSurface` .99** — how far a control gives
   while held. The scale is a ratio, so a card needs the smaller factor: the
   edge of a 264px card travels ten times further than the edge of a chip at the
@@ -420,10 +425,12 @@ were animating that way; passing `curve: Motion.curve` next to the duration is
 what makes the press and hover states feel soft rather than mechanical.
 
 **Every duration goes through `Motion.of(context, d)`**, which returns
-`Duration.zero` when the OS asks for reduced motion. `loop` is the one
-exception: an indeterminate indicator is not decorating a change, it *is* the
+`Duration.zero` when the OS asks for reduced motion. `loop`, `message` and `messageLong` are the
+exceptions. An indeterminate indicator is not decorating a change, it *is* the
 state, and stopping it says the app has finished when it has not — Material
-never routed `CircularProgressIndicator` through the setting either. A raw
+never routed `CircularProgressIndicator` through the setting either. Zeroing a
+message's dwell would take the sentence away before anyone had read it, which
+is the same error in a different place. A raw
 duration handed to an animated widget ignores the setting — that is a bug, not
 a style choice.
 
@@ -510,6 +517,7 @@ drift.
 | `EmptyState` | — | icon, optional title, message, optional action and error |
 | `AppSpinner` | — | 16px default, accent; the only indeterminate spinner inside a control |
 | `AppSwitch` | — | `Switch` painted below platform size while keeping a 48×48 tap area (§5) |
+| `AppSnackBar` | — | `showAppSnack` — the app's only snackbar, success or failure, never neutral |
 | `ExportPanel` | — | format selector + Save/Share, shared by desktop menu and mobile sheet |
 | `ExportButton` | — | mobile export entry point; opens the sheet, busy state shared across instances |
 | `AgoraMark` / `AgoraLockup` | — | the brand mark, and the mark beside the wordmark (§3.5) |

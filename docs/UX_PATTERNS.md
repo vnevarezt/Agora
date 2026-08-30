@@ -165,11 +165,19 @@ lie.**
 | **In the empty state's error slot** | `EmptyState(error:)` | the thing that would have filled this screen failed to load |
 | **Panel text** | plain `Text` in `colorScheme.error` | a pane failed on its own (the PDF preview) |
 | **Full screen** | `KeyErrorScreen` | nothing can proceed — the encrypted database will not open |
-| **Snackbar** | raw `SnackBar` | an action the person already committed to has finished, well or badly |
+| **Snackbar** | `showAppSnack` | an action the person already committed to has finished, well or badly |
 
 `AuthErrorText` accepts null so the call site keeps it mounted, and animates its
 own height through `MotionSize`: **an error appearing must not shove the form**,
 because the button someone is reaching for would move out from under them.
+
+**A snackbar is never neutral.** `showAppSnack` takes a success or a failure and
+nothing else, because a snackbar only ever appears after something the person
+committed to has finished, and finished always resolves one way. Each kind
+carries its own icon as well as its own colour, so the outcome is legible
+without reading and without seeing hue. It replaced sixteen hand-built bars that
+were all the same grey rectangle — a backup restored and a backup that failed to
+decrypt looked identical at the one moment nobody is reading carefully.
 
 ## 4. Error taxonomy
 
@@ -270,35 +278,28 @@ consequences belong here rather than there:
 
 Stated rather than papered over.
 
-1. **No shared snackbar.** Around fifteen call sites build a raw
-   `SnackBar(content: Text(…))` by hand. A backup restored and a backup that
-   failed to decrypt therefore look identical — same colour, no icon, no use of
-   `colorScheme.error`. This is the largest single inconsistency in the app's
-   feedback layer, and it is one widget's worth of work: an `AppSnackBar` with
-   success/failure variants routed through one helper, the way `runExport`
-   already forces both export surfaces down one path.
-2. **A cancelled sign-in reports an error.** `CloudAuthErrorCode.canceled` maps
+1. **A cancelled sign-in reports an error.** `CloudAuthErrorCode.canceled` maps
    to the "something went wrong" string. Dismissing the Google sheet is not a
    failure and should say nothing at all.
-3. **Nothing is undoable.** Every destructive action is confirm-then-gone.
+2. **Nothing is undoable.** Every destructive action is confirm-then-gone.
    Assignments, participants and projects are all local rows with a sync log
    behind them, so an undo window is affordable; none exists.
-4. **No offline indicator outside Settings.** `SyncPhase.offline` is legible
+3. **No offline indicator outside Settings.** `SyncPhase.offline` is legible
    only to somebody already looking at the sync card. Nothing on the dashboard
    or in the editor says the cloud is unreachable — which is defensible under
    §1.2 and is also why nobody can tell a stale congregation from a current one.
-5. **The state matrix is undocumented per screen and unverified anywhere.**
+4. **The state matrix is undocumented per screen and unverified anywhere.**
    §3 describes the registers; no screen has a written inventory of which ones
    it implements, and no test asserts that a surface with a loading state also
    has an empty one. `workspace_panel` gets the skeleton-before-empty ordering
    right; nothing would catch the next screen getting it wrong.
-6. **No error copy review.** The strings exist and are translated, but nobody
+5. **No error copy review.** The strings exist and are translated, but nobody
    has read them as a set against a rule — some name the fix, some only name
    the failure.
-7. **First-run has no measured path.** There is no instrumentation, so "time to
+6. **First-run has no measured path.** There is no instrumentation, so "time to
    first printed sheet" — the only activation metric that matters for this
    product — is unknown.
-8. **The flows are where accessibility fails first.** `docs/ACCESSIBILITY.md`
+7. **The flows are where accessibility fails first.** `docs/ACCESSIBILITY.md`
    adopts WCAG 2.2 AA and walks all 55 criteria; four of its seven live
    failures are behavioural rather than visual — no status message is
    announced, no selection state is exposed, no heading structure exists, and

@@ -204,13 +204,9 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
         borderRadius: BorderRadius.circular(8),
       ),
     ),
-    snackBarTheme: SnackBarThemeData(
-      backgroundColor: t.text,
-      contentTextStyle: TextStyle(
-          color: t.surface, fontSize: AppText.body, fontWeight: FontWeight.w600),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimens.rControl)),
-    ),
+    // No snackBarTheme: showAppSnack paints the bar itself, on `surface`
+    // rather than on inverted ink. The inverted ground swapped between themes,
+    // so no single value for the success or failure mark could clear 3:1
+    // against it in both — see lib/ui/widgets/app_snack_bar.dart.
   );
 }

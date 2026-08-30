@@ -16,6 +16,7 @@ import '../../state/mwb_sync.dart' show catalogRefreshProvider;
 import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_snack_bar.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
 import '../widgets/labeled_field.dart';
@@ -200,19 +201,21 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
       switch (outcome) {
         case SaveDone(:final path):
           ref.read(appSettingsProvider.notifier).markBackupNow();
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.settings.backupSaved(path: path))));
+          showAppSnack(messenger,
+              message: tr.settings.backupSaved(path: path),
+              kind: AppSnackKind.success);
         case SaveShared():
           // saveAs never shares, but the sealed switch must stay exhaustive.
           ref.read(appSettingsProvider.notifier).markBackupNow();
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.settings.backupSharedMsg)));
+          showAppSnack(messenger,
+              message: tr.settings.backupSharedMsg,
+              kind: AppSnackKind.success);
         case SaveCanceled():
           break;
       }
     } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+      showAppSnack(messenger,
+          message: tr.export.error(error: e), kind: AppSnackKind.failure);
     } finally {
       if (mounted) setState(() => _backupBusy = false);
     }
@@ -232,17 +235,19 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
       final bytes = await file.readAsBytes();
       final applied =
           await ref.read(backupServiceProvider).import(bytes, password);
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.settings.backupRestored(n: applied))));
+      showAppSnack(messenger,
+          message: tr.settings.backupRestored(n: applied),
+          kind: AppSnackKind.success);
     } on WrongBackupPasswordException {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.settings.backupWrongPassword)));
+      showAppSnack(messenger,
+          message: tr.settings.backupWrongPassword,
+          kind: AppSnackKind.failure);
     } on MalformedBackupException {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.settings.backupMalformed)));
+      showAppSnack(messenger,
+          message: tr.settings.backupMalformed, kind: AppSnackKind.failure);
     } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+      showAppSnack(messenger,
+          message: tr.export.error(error: e), kind: AppSnackKind.failure);
     } finally {
       if (mounted) setState(() => _backupBusy = false);
     }
@@ -331,11 +336,13 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     try {
       final replaced = await ref.read(catalogRefreshProvider).run();
       if (!mounted) return;
-      messenger.showSnackBar(SnackBar(
-        content: Text(replaced == 0
-            ? tr.settings.catalogRefreshFailed
-            : tr.settings.catalogRefreshed(n: replaced)),
-      ));
+      // The refresh replacing nothing is a failure, not a quieter success;
+      // both used to arrive as the same grey rectangle.
+      showAppSnack(messenger,
+          message: replaced == 0
+              ? tr.settings.catalogRefreshFailed
+              : tr.settings.catalogRefreshed(n: replaced),
+          kind: replaced == 0 ? AppSnackKind.failure : AppSnackKind.success);
     } finally {
       if (mounted) setState(() => _catalogBusy = false);
     }

@@ -17,6 +17,7 @@ import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
+import '../widgets/app_snack_bar.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/danger_button.dart';
 import '../widgets/dashed_border.dart';
@@ -473,8 +474,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     try {
       await ref.read(deleteCongregationCloudProvider)(cid);
     } catch (_) {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.congregation.deleteCloudError)));
+      showAppSnack(messenger,
+          message: tr.congregation.deleteCloudError,
+          kind: AppSnackKind.failure);
     }
   }
 
