@@ -18,7 +18,7 @@ class InkSurface extends StatefulWidget {
     super.key,
     required this.onTap,
     required this.builder,
-    this.borderRadius = 14,
+    this.borderRadius = Dimens.rCard,
     this.padding = EdgeInsets.zero,
     this.color,
     this.borderColor,

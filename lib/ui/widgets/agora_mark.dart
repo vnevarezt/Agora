@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../i18n/strings.g.dart';
 import '../theme/app_theme.dart';
+import '../theme/dimens.dart';
 import 'motion.dart';
 
 /// The drawing itself, a hand copy of `tool/gen_brand_assets.py` — the script
@@ -124,7 +125,7 @@ class AgoraMark extends StatelessWidget {
 /// README asks for anywhere the app can do it: the PNG is for READMEs and
 /// stores, and it cannot follow the theme or stay crisp at an arbitrary size.
 class AgoraLockup extends StatelessWidget {
-  const AgoraLockup({super.key, this.size = 30});
+  const AgoraLockup({super.key, this.size = Dimens.markNav});
 
   /// Height of the mark; everything else is derived from it.
   final double size;

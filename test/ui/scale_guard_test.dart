@@ -39,7 +39,17 @@ void main() {
     'child: Icon(Icons.person_outline, size: size / 2, color: t.textMute),',
     // Google's G is drawn at the geometry the brand guidelines fix.
     'size: Size(18, 18),',
+    // Known, measured and recorded as a gap rather than waved through: the
+    // participant card overflows at 2x text if this goes up to the floor.
+    'this.fontSize = 10,',
   };
+
+  /// The same numbers hiding in a constructor's default value, where no call
+  /// site ever writes them: `Pill` shipped every badge in the app at 10pt —
+  /// under the floor the type scale calls a floor — because nobody passed a
+  /// size and the guard only ever looked at what callers passed.
+  RegExp defaultFor(String param) =>
+      RegExp('\\bthis\\.$param = [0-9]');
 
   List<String> scan(RegExp pattern) {
     final violations = <String>[];
@@ -57,7 +67,10 @@ void main() {
   }
 
   test('font sizes come from AppText', () {
-    final violations = scan(literalFor('fontSize'));
+    final violations = [
+      ...scan(literalFor('fontSize')),
+      ...scan(defaultFor('fontSize')),
+    ];
     expect(
       violations,
       isEmpty,
@@ -72,7 +85,10 @@ void main() {
     // `size:` is the spelling for Icon, AppSpinner and AppText.mono/label
     // alike, so one rule covers all of them: the number belongs to a scale,
     // not to the call site.
-    final violations = scan(literalFor('size'));
+    final violations = [
+      ...scan(literalFor('size')),
+      ...scan(defaultFor('size')),
+    ];
     expect(
       violations,
       isEmpty,

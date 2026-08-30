@@ -11,6 +11,11 @@ class Pill extends StatelessWidget {
     required this.background,
     required this.foreground,
     this.border,
+    // 10, not [AppText.micro]'s 10.5, and the one place in the app under the
+    // floor the type scale calls a floor. Raising it overflows the privilege
+    // row on the participant card by 5px at 2x text — the card is the thing
+    // that has to give, and that is a density decision on that screen rather
+    // than a token change here. See DESIGN_SYSTEM.md §13.
     this.fontSize = 10,
   });
 
