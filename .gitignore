@@ -80,3 +80,8 @@ web/drift_worker.js.map
 
 # FVM's per-machine SDK symlink/cache; .fvmrc is what's shared.
 .fvm/
+
+# What `flutter test` drops beside a golden when one fails: the master, the
+# rendered image and two diffs. Debugging output for the person looking at the
+# failure, never a record of anything.
+test/ui/golden/failures/
