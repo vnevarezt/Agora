@@ -55,8 +55,8 @@ void main() {
         GoldenPage(
           brightness: mode.brightness,
           children: [
-            GoldenRow('ModalShell · dialog', [modal(sheet: false)]),
-            GoldenRow('ModalShell · sheet, with a destructive action', [
+            goldenRow('ModalShell · dialog', [modal(sheet: false)]),
+            goldenRow('ModalShell · sheet, with a destructive action', [
               modal(sheet: true, danger: 'Eliminar'),
             ]),
           ],
@@ -72,7 +72,7 @@ void main() {
         GoldenPage(
           brightness: mode.brightness,
           children: [
-            GoldenRow('ExportPanel', [
+            goldenRow('ExportPanel', [
               SizedBox(
                 width: 320,
                 child: ExportPanel(enabled: true, onExport: (_, _, _) {}),

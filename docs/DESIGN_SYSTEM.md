@@ -623,7 +623,7 @@ than asserted:
 | Keyboard operability | `test/ui/keyboard_focus_test.dart` — traversal, Space/Enter, ring, no resize |
 | Type, icon and shadow scales | `test/ui/scale_guard_test.dart` — no bare size or one-off `BoxShadow` in `lib/ui/` |
 | This document's own values | `test/ui/design_doc_test.dart` — every colour, scale step, duration, curve and breakpoint |
-| The catalogue's appearance | `test/ui/golden/` — twelve golden images, both themes |
+| The catalogue's appearance | `test/ui/golden/` — eighteen golden images, both themes |
 
 Touch-target minimums and screen-reader traversal order remain unverified;
 traversal order is the largest single unknown in the audit, because four
@@ -640,12 +640,13 @@ Stated rather than papered over:
    so the abstraction is currently unexercised.
 3. **Default theme is `light`, not `system`.** A deliberate-looking choice with
    no recorded rationale; the Settings option offers all three.
-4. **No component gallery in the app.** `test/ui/golden/` renders the
-   catalogue in both themes and fails on a pixel that moves, so appearance is
-   defended — but only as twelve images in a test directory. There is still no
-   screen anybody can open and poke at. Two widgets stay outside the images
-   because each needs a populated provider scope to exist at all: the person
-   picker and the assignment card.
+4. **The gallery is debug-only, and the screens are not in it.**
+   `lib/ui/dev/gallery.dart` composes the catalogue once; `GalleryScreen`
+   renders it at `/gallery` behind `kDebugMode`, and `test/ui/golden/` renders
+   the same composition into eighteen images. What is still uncovered is
+   everything above component level: the dashboard, the participants list, the
+   settings tabs and the auth flow have no image and no gallery entry, so a
+   layout regression on a *screen* is still caught only by looking.
 5. **Touch targets: half closed.** `Dimens.hTouchMin` (48) now exists and
    `AppButton` and `AppSwitch` pad out to it, so a square control or a toggle
    below the floor gets a real hit area without growing visually. What is still

@@ -10,8 +10,8 @@ in the dartdoc above each class, and the rationale for a value lives in
 `docs/DESIGN_SYSTEM.md` — neither is repeated here.
 
 Status: **descriptive**, read out of the source on 2026-08-30. Appearance is
-defended by `test/ui/golden/` for the widgets that compose without a provider;
-the rest are noted as uncovered.
+defended by `test/ui/golden/`, which renders the same composition
+`GalleryScreen` shows at `/gallery` in a debug build.
 
 Companion documents: `docs/DESIGN_SYSTEM.md` (tokens, scales, motion),
 `docs/UX_PATTERNS.md` (when a state applies), `docs/ACCESSIBILITY.md` (the
@@ -261,11 +261,14 @@ cannot animate linearly by forgetting.
 
 ## What is not covered
 
-- **No golden covers** the person picker or the assignment card. Both need a
-  populated provider scope — a congregation, a workbook and a form — so putting
-  them under an image means building that fixture first, which is a larger job
-  than the twelve images that exist. The modal, the export panel and the
-  snackbar were reachable and are covered.
+- **Every component here is under an image.** Eighteen of them, in both
+  themes, composed from `lib/ui/dev/gallery.dart` — the same file
+  `GalleryScreen` renders at `/gallery` in a debug build, so what a developer
+  looks at and what the images defend cannot drift apart.
+- **No golden covers a screen.** The dashboard, the participants list, the
+  settings tabs and the auth flow are compositions of the above and none of
+  them is in an image; a regression in how a screen arranges its components is
+  still caught only by looking at it.
 - **No spec covers** the screen-level compositions in `lib/ui/dashboard/`,
   `participants/`, `workspace/`, `config/` and `auth/`. They are compositions of
   the above, and they are where the state matrix in `UX_PATTERNS.md` §3 lives.

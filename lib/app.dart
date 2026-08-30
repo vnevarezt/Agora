@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import 'state/mwb_sync.dart';
 import 'state/program_reconciler.dart';
 import 'state/sync_controller.dart';
 import 'ui/auth/auth_gate.dart';
+import 'ui/dev/gallery.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/tokens.dart';
@@ -23,6 +25,16 @@ final _router = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (context, state) => const _AppRoot()),
     GoRoute(path: '/login', builder: (context, state) => const _AppRoot()),
+    // The component catalogue, outside AuthGate because it reads nothing and
+    // should not need an unlocked database to be looked at. `kDebugMode` is a
+    // const false in a release build, so the branch — and with it the only
+    // reference to lib/ui/dev/ — is compiled out rather than shipped behind a
+    // door nobody opens.
+    if (kDebugMode)
+      GoRoute(
+        path: '/gallery',
+        builder: (context, state) => const GalleryScreen(),
+      ),
   ],
 );
 

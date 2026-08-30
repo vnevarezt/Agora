@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:agora/i18n/strings.g.dart';
+import 'package:agora/ui/dev/gallery.dart';
 import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/dimens.dart';
 import 'package:agora/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Override is not on flutter_riverpod's main entrypoint.
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Loads the faces pubspec.yaml bundles. Without this the test renderer draws
@@ -75,10 +78,16 @@ class GoldenPage extends StatelessWidget {
     super.key,
     required this.brightness,
     required this.children,
+    this.overrides = const [],
   });
 
   final Brightness brightness;
   final List<Widget> children;
+
+  /// Providers a widget under test reads. Everything in the catalogue that
+  /// needs one reads a plain `Provider`, so a value override is enough — none
+  /// of these images needs a database or a workbook behind it.
+  final List<Override> overrides;
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +95,7 @@ class GoldenPage extends StatelessWidget {
         ? pizarra.light
         : pizarra.dark;
     return ProviderScope(
+      overrides: overrides,
       child: TranslationProvider(
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -109,36 +119,11 @@ class GoldenPage extends StatelessWidget {
   }
 }
 
-/// A labelled row of variants, so a diff says which one moved.
-class GoldenRow extends StatelessWidget {
-  const GoldenRow(this.label, this.children, {super.key});
-
-  final String label;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppText.label(
-            size: AppText.micro,
-            color: context.tokens.textMute,
-          ),
-        ),
-        const SizedBox(height: Space.s8),
-        Wrap(
-          spacing: Space.s12,
-          runSpacing: Space.s12,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: children,
-        ),
-      ],
-    );
-  }
-}
+/// [GalleryRow] for a section composed in a test rather than in the gallery —
+/// the surfaces that need a route or an override are not part of the
+/// catalogue screen, but they are laid out the same way.
+Widget goldenRow(String label, List<Widget> children) =>
+    GalleryRow((label: label, children: children));
 
 /// Renders [page] at a fixed size and compares it with
 /// `test/ui/golden/<name>.png`. The size is pinned rather than wrapped so a
