@@ -12,7 +12,9 @@ The colour, motion, text-scaling and keyboard rules are enforced by tests
 (§12), so this document and the code cannot drift apart silently.
 
 Companion documents: `PRODUCT.md` (who this is for and what it must never
-claim), `docs/DATA_ARCHITECTURE.md` (the data layer this UI reads).
+claim), `docs/UX_PATTERNS.md` (how the same interface *behaves* — navigation,
+states, errors, flows), `docs/DATA_ARCHITECTURE.md` (the data layer this UI
+reads).
 
 **Provenance.** The token names, the `Dimens` constants and most component
 doc-comments refer to a **CSS/HTML mock** (`.sidebar`, `.portada--a`, `.projbar`,
@@ -642,9 +644,8 @@ Stated rather than papered over:
    cell in §3 was wrong. A test that parses these tables and compares them
    against `tokens.dart`, `dimens.dart`, `app_theme.dart` and `motion.dart`
    would close the class of defect rather than this instance of it.
-9. **The UX half is undocumented.** This file describes the visual and motion
-   layer. Nothing anywhere records information architecture, the state matrix
-   per surface (loading, empty, partial, error, offline, syncing), the error
-   taxonomy and its recovery paths, the flows themselves, or the rules of
-   voice. §12 also names no external standard as a compliance obligation, so
-   "accessible" has no adopted definition to be measured against.
+9. **No adopted accessibility standard.** §12 lists binding commitments and
+   the four tests that defend them, but names no external conformance target,
+   so "accessible" has no definition anyone could be held to. The behavioural
+   half of the system is now written down in `docs/UX_PATTERNS.md`; its own
+   §10 carries what is still missing there.
