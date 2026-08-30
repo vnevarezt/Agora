@@ -51,8 +51,10 @@ class FilterPill extends StatelessWidget {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration:
-                      BoxDecoration(color: dotColor, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: dotColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: Space.s8),
               ],

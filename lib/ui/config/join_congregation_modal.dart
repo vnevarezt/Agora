@@ -40,8 +40,7 @@ class JoinCongregationModal extends ConsumerStatefulWidget {
       _JoinCongregationModalState();
 }
 
-class _JoinCongregationModalState
-    extends ConsumerState<JoinCongregationModal> {
+class _JoinCongregationModalState extends ConsumerState<JoinCongregationModal> {
   String _raw = '';
   bool _busy = false;
   String? _error;

@@ -21,7 +21,8 @@ import 'sync_provider.dart';
 /// Active project id; null = editor closed.
 final editorProjectProvider =
     NotifierProvider<EditorProjectController, String?>(
-        EditorProjectController.new);
+      EditorProjectController.new,
+    );
 
 class EditorProjectController extends Notifier<String?> {
   @override
@@ -106,12 +107,14 @@ class EditorOpener {
   Future<void> open(Project project) async {
     _ref.read(editorProjectProvider.notifier).set(project.id);
     unawaited(
-        _ref.read(programReconcilerProvider).reconcileProject(project.id));
+      _ref.read(programReconcilerProvider).reconcileProject(project.id),
+    );
 
     final repo = _ref.read(programsRepositoryProvider);
     final programs = await repo.byProject(project.id);
-    final assignments =
-        await repo.assignmentsByPrograms([for (final p in programs) p.id]);
+    final assignments = await repo.assignmentsByPrograms([
+      for (final p in programs) p.id,
+    ]);
 
     // Congregation identity/config: the dashboard primed the stream before
     // navigating here, so the sync list is populated.
@@ -126,7 +129,9 @@ class EditorOpener {
       }
     }
 
-    _ref.read(formProvider.notifier).hydrate(
+    _ref
+        .read(formProvider.notifier)
+        .hydrate(
           buildHydratedForm(
             programs: programs,
             assignments: assignments,

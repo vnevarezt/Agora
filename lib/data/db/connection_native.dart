@@ -50,8 +50,9 @@ QueryExecutor openEncryptedExecutor(String keyHex) {
         final cipher = raw.select('PRAGMA cipher;');
         if (cipher.isEmpty) {
           throw StateError(
-              'sqlite3 sin soporte de cifrado: revisa el bloque hooks '
-              'del pubspec (source: sqlite3mc).');
+            'sqlite3 sin soporte de cifrado: revisa el bloque hooks '
+            'del pubspec (source: sqlite3mc).',
+          );
         }
         raw.execute("PRAGMA key = '$keyHex';");
         // Canary 2: with a wrong key this query throws (unreadable file).

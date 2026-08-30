@@ -95,7 +95,11 @@ class BackupService {
           }
           final hlc = itemHlc ?? await _scribe.nextHlc();
           await _codec.apply(
-              entity, id, item['data'] as Map<String, dynamic>, hlc);
+            entity,
+            id,
+            item['data'] as Map<String, dynamic>,
+            hlc,
+          );
           await _scribe.enqueue(entity, id, hlc);
           applied++;
         }
@@ -107,18 +111,20 @@ class BackupService {
   Future<bool> _rowExists(SyncEntity entity, String id) async =>
       await _codec.hlcOf(entity, id) != null ||
       // hlcOf can't distinguish "no row" from "row with NULL hlc":
-      (await _db.customSelect(
-        'SELECT 1 FROM ${_tableOf(entity)} WHERE id = ? LIMIT 1',
-        variables: [Variable.withString(id)],
-      ).get())
+      (await _db
+              .customSelect(
+                'SELECT 1 FROM ${_tableOf(entity)} WHERE id = ? LIMIT 1',
+                variables: [Variable.withString(id)],
+              )
+              .get())
           .isNotEmpty;
 
   static String _tableOf(SyncEntity entity) => switch (entity) {
-        SyncEntity.congregation => 'congregations',
-        SyncEntity.person => 'people',
-        SyncEntity.personAbsence => 'person_absences',
-        SyncEntity.project => 'projects',
-        SyncEntity.program => 'programs',
-        SyncEntity.assignment => 'assignments',
-      };
+    SyncEntity.congregation => 'congregations',
+    SyncEntity.person => 'people',
+    SyncEntity.personAbsence => 'person_absences',
+    SyncEntity.project => 'projects',
+    SyncEntity.program => 'programs',
+    SyncEntity.assignment => 'assignments',
+  };
 }

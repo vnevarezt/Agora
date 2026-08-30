@@ -10,8 +10,9 @@ import 'locale_boot.dart';
 /// dropdown can read/set it like any other provider; the actual translation
 /// switch + rebuild is driven by [TranslationProvider]. Persisted across
 /// restarts (see [persistLocale]).
-final localeProvider =
-    NotifierProvider<LocaleController, AppLocale>(LocaleController.new);
+final localeProvider = NotifierProvider<LocaleController, AppLocale>(
+  LocaleController.new,
+);
 
 class LocaleController extends Notifier<AppLocale> {
   @override
@@ -27,8 +28,9 @@ class LocaleController extends Notifier<AppLocale> {
 /// Active shell section (sidebar): dashboard, participants or settings.
 enum AppSection { home, participants, settings }
 
-final appSectionProvider =
-    NotifierProvider<AppSectionController, AppSection>(AppSectionController.new);
+final appSectionProvider = NotifierProvider<AppSectionController, AppSection>(
+  AppSectionController.new,
+);
 
 class AppSectionController extends Notifier<AppSection> {
   @override
@@ -45,7 +47,8 @@ enum SettingsTab { app, congregation }
 /// holding the button rather than drop them in Settings to hunt for it.
 final settingsTabProvider =
     NotifierProvider<SettingsTabController, SettingsTab>(
-        SettingsTabController.new);
+      SettingsTabController.new,
+    );
 
 class SettingsTabController extends Notifier<SettingsTab> {
   @override
@@ -59,8 +62,9 @@ class SettingsTabController extends Notifier<SettingsTab> {
 /// Active tab in the mobile layout.
 enum MobileTab { assign, preview }
 
-final mobileTabProvider =
-    NotifierProvider<MobileTabController, MobileTab>(MobileTabController.new);
+final mobileTabProvider = NotifierProvider<MobileTabController, MobileTab>(
+  MobileTabController.new,
+);
 
 class MobileTabController extends Notifier<MobileTab> {
   @override
@@ -70,8 +74,9 @@ class MobileTabController extends Notifier<MobileTab> {
 }
 
 /// Slot whose picker is open; its card is highlighted with the accent ring.
-final activeSlotProvider =
-    NotifierProvider<ActiveSlotController, SlotRef?>(ActiveSlotController.new);
+final activeSlotProvider = NotifierProvider<ActiveSlotController, SlotRef?>(
+  ActiveSlotController.new,
+);
 
 class ActiveSlotController extends Notifier<SlotRef?> {
   @override
@@ -82,8 +87,9 @@ class ActiveSlotController extends Notifier<SlotRef?> {
 
 /// PDF export in progress: disables every export button (project bar and
 /// mobile bottom bar) at once.
-final exportBusyProvider =
-    NotifierProvider<ExportBusyController, bool>(ExportBusyController.new);
+final exportBusyProvider = NotifierProvider<ExportBusyController, bool>(
+  ExportBusyController.new,
+);
 
 class ExportBusyController extends Notifier<bool> {
   @override

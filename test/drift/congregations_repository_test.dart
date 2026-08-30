@@ -31,8 +31,11 @@ void main() {
 
     // A later switch must reach a congregation created after it.
     language = 'Congregation';
-    expect(await repo.ensureDefault(), first,
-        reason: 'an existing congregation is never renamed');
+    expect(
+      await repo.ensureDefault(),
+      first,
+      reason: 'an existing congregation is never renamed',
+    );
   });
 
   test('a language switch reaches the next fresh install', () async {

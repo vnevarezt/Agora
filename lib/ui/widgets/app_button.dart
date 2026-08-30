@@ -94,15 +94,17 @@ class _PressableState extends State<Pressable> {
 
     Widget child = FocusableActionDetector(
       enabled: enabled,
-      mouseCursor:
-          enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      mouseCursor: enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onShowHoverHighlight: (v) => setState(() => _hovered = v),
       // Only true when the focus arrived by keyboard, so a mouse click never
       // leaves a ring behind.
       onShowFocusHighlight: (v) => setState(() => _focused = v),
       actions: {
-        ActivateIntent:
-            CallbackAction<ActivateIntent>(onInvoke: (_) => _activate()),
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) => _activate(),
+        ),
       },
       child: GestureDetector(
         // opaque: with the default deferToChild only PAINTED pixels react,
@@ -310,7 +312,11 @@ class AppIconButton extends StatelessWidget {
             border: bordered || elevated ? Border.all(color: t.border) : null,
             boxShadow: elevated ? Elevation.raised : null,
           ),
-          child: Icon(icon, size: AppIcon.control, color: hovered ? t.text : t.textDim),
+          child: Icon(
+            icon,
+            size: AppIcon.control,
+            color: hovered ? t.text : t.textDim,
+          ),
         );
         // The paint stays [size]; the tap area never shrinks below the
         // platform touch-target floor. Callers positioning this precisely

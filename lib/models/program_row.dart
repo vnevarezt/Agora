@@ -46,13 +46,13 @@ enum SlotRole {
 extension SlotRoleX on SlotRole {
   /// Printed role prefix ('Estudiante/Ayudante:'), in the language of [tr].
   String label(Translations tr) => switch (this) {
-        SlotRole.none => '',
-        SlotRole.student => tr.program.roleStudent,
-        SlotRole.studentAssistant => tr.program.roleStudentAssistant,
-        SlotRole.conductorReader => tr.program.roleConductorReader,
-        SlotRole.prayer => tr.program.rolePrayer,
-        SlotRole.speaker => tr.program.roleSpeaker,
-      };
+    SlotRole.none => '',
+    SlotRole.student => tr.program.roleStudent,
+    SlotRole.studentAssistant => tr.program.roleStudentAssistant,
+    SlotRole.conductorReader => tr.program.roleConductorReader,
+    SlotRole.prayer => tr.program.rolePrayer,
+    SlotRole.speaker => tr.program.roleSpeaker,
+  };
 
   /// True for the paired student + assistant slot, which the PDF lays out
   /// differently (two names in one cell) and caps to a shorter length.
@@ -198,8 +198,12 @@ class ProgramSchedule {
   });
 
   /// All rows in order of appearance.
-  List<ProgramRow> get rows =>
-      [...opening, ...treasures, ...ministry, ...christianLife];
+  List<ProgramRow> get rows => [
+    ...opening,
+    ...treasures,
+    ...ministry,
+    ...christianLife,
+  ];
 }
 
 /// Participant names, indexed by `ProgramRow.id`. The bridge between the
@@ -224,9 +228,7 @@ class Assignments {
   static List<String> _fit(List<String>? names, int slots) {
     if (names == null) return List<String>.filled(slots, '');
     if (names.length == slots) return names;
-    return [
-      for (var i = 0; i < slots; i++) i < names.length ? names[i] : '',
-    ];
+    return [for (var i = 0; i < slots; i++) i < names.length ? names[i] : ''];
   }
 }
 
@@ -239,7 +241,7 @@ class Assignments {
 String joinedNames(List<String> n) {
   final filled = [
     for (final s in n)
-      if (s.trim().isNotEmpty) s
+      if (s.trim().isNotEmpty) s,
   ];
   if (filled.isEmpty) return '';
   if (filled.length >= 2) return '${filled[0]} / ${filled[1]}';

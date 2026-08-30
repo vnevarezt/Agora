@@ -25,28 +25,36 @@ void main() {
   test('cards compute real progress from snapshots + assignments', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [
-      dbProvider.overrideWithValue(db),
-    ]);
+    final container = ProviderContainer(
+      overrides: [dbProvider.overrideWithValue(db)],
+    );
     addTearDown(container.dispose);
 
     final projects = container.read(projectsRepositoryProvider);
     final programs = container.read(programsRepositoryProvider);
     await projects.create(
-        name: 'P', congregationId: '', weeks: [(start: '', label: '7-13 DE JULIO')]);
+      name: 'P',
+      congregationId: '',
+      weeks: [(start: '', label: '7-13 DE JULIO')],
+    );
     final program = (await projects.watchAll().first).single.programs.single;
 
     // One Bible-reading part → schedule slots: chairman (1) + student (1).
     await programs.setContent(
-        program.id,
-        Week(date: '7-13 DE JULIO', parts: [
+      program.id,
+      Week(
+        date: '7-13 DE JULIO',
+        parts: [
           const Part(
-              section: Section.treasures,
-              number: 1,
-              title: 'Lectura de la Biblia',
-              minutes: 4),
-        ]),
-        'S');
+            section: Section.treasures,
+            number: 1,
+            title: 'Lectura de la Biblia',
+            minutes: 4,
+          ),
+        ],
+      ),
+      'S',
+    );
 
     // Riverpod 3 pauses unlistened providers: keep the card provider live.
     final sub = container.listen(projectsProvider, (_, _) {});
@@ -65,15 +73,17 @@ void main() {
     expect(c.status, ProjectStatus.draft);
 
     await programs.saveSlotNames(
-        programId: program.id,
-        slotKey: 'chairman',
-        hall: Hall.main,
-        names: ['Andrés']);
+      programId: program.id,
+      slotKey: 'chairman',
+      hall: Hall.main,
+      names: ['Andrés'],
+    );
     await programs.saveSlotNames(
-        programId: program.id,
-        slotKey: 'te0',
-        hall: Hall.main,
-        names: ['Ana']);
+      programId: program.id,
+      slotKey: 'te0',
+      hall: Hall.main,
+      names: ['Ana'],
+    );
 
     c = await settled();
     expect(c.done, 2);
@@ -85,33 +95,38 @@ void main() {
   test('totals follow snapshot and week-type changes', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [
-      dbProvider.overrideWithValue(db),
-    ]);
+    final container = ProviderContainer(
+      overrides: [dbProvider.overrideWithValue(db)],
+    );
     addTearDown(container.dispose);
 
     final projects = container.read(projectsRepositoryProvider);
     final programs = container.read(programsRepositoryProvider);
     await projects.create(
-        name: 'P', congregationId: '', weeks: [(start: '', label: '7-13 DE JULIO')]);
+      name: 'P',
+      congregationId: '',
+      weeks: [(start: '', label: '7-13 DE JULIO')],
+    );
     final program = (await projects.watchAll().first).single.programs.single;
 
     Week weekWith({required bool withStudy}) => Week(
-          date: '7-13 DE JULIO',
-          parts: [
-            const Part(
-                section: Section.treasures,
-                number: 1,
-                title: 'Lectura de la Biblia',
-                minutes: 4),
-            if (withStudy)
-              const Part(
-                  section: Section.christianLife,
-                  number: 2,
-                  title: 'Estudio biblico de la congregacion',
-                  minutes: 30),
-          ],
-        );
+      date: '7-13 DE JULIO',
+      parts: [
+        const Part(
+          section: Section.treasures,
+          number: 1,
+          title: 'Lectura de la Biblia',
+          minutes: 4,
+        ),
+        if (withStudy)
+          const Part(
+            section: Section.christianLife,
+            number: 2,
+            title: 'Estudio biblico de la congregacion',
+            minutes: 30,
+          ),
+      ],
+    );
 
     await programs.setContent(program.id, weekWith(withStudy: false), 'S');
 

@@ -27,6 +27,7 @@ enum CloudAuthErrorCode {
   network,
   tooManyRequests,
   canceled,
+
   /// The session is too old for a sensitive op (delete): reauthenticate first.
   requiresRecentLogin,
   unknown,
@@ -39,7 +40,8 @@ class CloudAuthException implements Exception {
   final String? detail;
 
   @override
-  String toString() => 'CloudAuthException($code${detail == null ? '' : ': $detail'})';
+  String toString() =>
+      'CloudAuthException($code${detail == null ? '' : ': $detail'})';
 }
 
 /// null = cloud disabled (placeholder config, unsupported platform, or init
@@ -109,7 +111,9 @@ Future<void> _initCrashlytics() async {
     final priorOnError = FlutterError.onError;
     FlutterError.onError = (details) {
       priorOnError?.call(details); // keep the console / red screen in debug
-      crashlytics.recordFlutterError(details); // sent only when collection is on
+      crashlytics.recordFlutterError(
+        details,
+      ); // sent only when collection is on
     };
     PlatformDispatcher.instance.onError = (error, stack) {
       crashlytics.recordError(error, stack, fatal: true);
@@ -137,7 +141,8 @@ Future<void> _initAnalytics() async {
 }
 
 final firebaseAvailableProvider = Provider<bool>(
-    (ref) => ref.watch(firebaseAppProvider).value != null);
+  (ref) => ref.watch(firebaseAppProvider).value != null,
+);
 
 /// Whether cloud sign-in can actually work on this install. FirebaseAuth and
 /// GoogleSignIn persist sessions in the data-protection keychain, which on
@@ -205,25 +210,29 @@ class CloudAuthService {
     });
   }
 
-  Future<void> registerWithEmail(String email, String password,
-          {String? displayName}) =>
-      _mapAuthErrors(() async {
-        await _syncEmailLanguage();
-        final cred = await _auth.createUserWithEmailAndPassword(
-            email: email, password: password);
-        if (displayName != null && displayName.isNotEmpty) {
-          await cred.user?.updateDisplayName(displayName);
-        }
-        // Informative only (access is never gated on it), so a failure to
-        // send must not fail the registration.
-        try {
-          await _callMail('requestEmailVerification', const {});
-        } catch (_) {}
-      });
+  Future<void> registerWithEmail(
+    String email,
+    String password, {
+    String? displayName,
+  }) => _mapAuthErrors(() async {
+    await _syncEmailLanguage();
+    final cred = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    if (displayName != null && displayName.isNotEmpty) {
+      await cred.user?.updateDisplayName(displayName);
+    }
+    // Informative only (access is never gated on it), so a failure to
+    // send must not fail the registration.
+    try {
+      await _callMail('requestEmailVerification', const {});
+    } catch (_) {}
+  });
 
-  Future<void> signInWithEmail(String email, String password) =>
-      _mapAuthErrors(() =>
-          _auth.signInWithEmailAndPassword(email: email, password: password));
+  Future<void> signInWithEmail(String email, String password) => _mapAuthErrors(
+    () => _auth.signInWithEmailAndPassword(email: email, password: password),
+  );
 
   /// Sends the reset mail through functions/ rather than firebase_auth, so the
   /// message is Agora's own rather than the stock Firebase template.
@@ -233,16 +242,15 @@ class CloudAuthService {
   /// tells anyone which addresses are registered. The screen therefore always
   /// reaches its "check your inbox" state, which is what it should have done
   /// all along.
-  Future<void> sendPasswordReset(String email) => _mapAuthErrors(
-        () => _callMail('requestPasswordReset', {'email': email}),
-      );
+  Future<void> sendPasswordReset(String email) =>
+      _mapAuthErrors(() => _callMail('requestPasswordReset', {'email': email}));
 
   Future<void> resendEmailVerification() => _mapAuthErrors(() async {
-        if (_auth.currentUser == null) {
-          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
-        }
-        await _callMail('requestEmailVerification', const {});
-      });
+    if (_auth.currentUser == null) {
+      throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+    }
+    await _callMail('requestEmailVerification', const {});
+  });
 
   Future<bool> refreshEmailVerified() async {
     final user = _auth.currentUser;
@@ -261,8 +269,11 @@ class CloudAuthService {
       return;
     }
     final idToken = await _freshGoogleIdToken();
-    await _mapAuthErrors(() => _auth
-        .signInWithCredential(GoogleAuthProvider.credential(idToken: idToken)));
+    await _mapAuthErrors(
+      () => _auth.signInWithCredential(
+        GoogleAuthProvider.credential(idToken: idToken),
+      ),
+    );
   }
 
   /// Runs the interactive Google flow and returns a fresh id token, shared by
@@ -276,12 +287,12 @@ class CloudAuthService {
         // Android resolves its client via the serverClientId.
         clientId: switch (defaultTargetPlatform) {
           TargetPlatform.iOS ||
-          TargetPlatform.macOS =>
-            currentFirebaseOptions.iosClientId,
+          TargetPlatform.macOS => currentFirebaseOptions.iosClientId,
           _ => null,
         },
-        serverClientId:
-            googleServerClientId.isEmpty ? null : googleServerClientId,
+        serverClientId: googleServerClientId.isEmpty
+            ? null
+            : googleServerClientId,
       );
       _googleInitialized = true;
     }
@@ -289,12 +300,15 @@ class CloudAuthService {
     try {
       account = await gsi.authenticate();
     } on GoogleSignInException catch (e) {
-      debugPrint('GoogleSignIn failed: code=${e.code} '
-          'description=${e.description} details=${e.details}');
+      debugPrint(
+        'GoogleSignIn failed: code=${e.code} '
+        'description=${e.description} details=${e.details}',
+      );
       throw switch (e.code) {
         GoogleSignInExceptionCode.canceled ||
-        GoogleSignInExceptionCode.interrupted =>
-          const CloudAuthException(CloudAuthErrorCode.canceled),
+        GoogleSignInExceptionCode.interrupted => const CloudAuthException(
+          CloudAuthErrorCode.canceled,
+        ),
         _ => CloudAuthException(CloudAuthErrorCode.unknown, e.description),
       };
     }
@@ -302,7 +316,9 @@ class CloudAuthService {
     if (idToken == null) {
       debugPrint('GoogleSignIn: authenticated but no idToken returned');
       throw const CloudAuthException(
-          CloudAuthErrorCode.unknown, 'Google returned no idToken');
+        CloudAuthErrorCode.unknown,
+        'Google returned no idToken',
+      );
     }
     return idToken;
   }
@@ -341,7 +357,8 @@ class CloudAuthService {
           throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
         }
         await user.reauthenticateWithCredential(
-            EmailAuthProvider.credential(email: email, password: password));
+          EmailAuthProvider.credential(email: email, password: password),
+        );
       });
 
   /// Reauthenticates a Google user by re-running the Google flow and feeding a
@@ -364,7 +381,8 @@ class CloudAuthService {
         throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
       }
       await user.reauthenticateWithCredential(
-          GoogleAuthProvider.credential(idToken: idToken));
+        GoogleAuthProvider.credential(idToken: idToken),
+      );
     });
   }
 
@@ -372,15 +390,15 @@ class CloudAuthService {
   /// recently; otherwise this throws [CloudAuthErrorCode.requiresRecentLogin]
   /// and the UI prompts to reauth. Best-effort Google sign-out afterwards.
   Future<void> deleteAccount() => _mapAuthErrors(() async {
-        final user = _auth.currentUser;
-        if (user == null) {
-          throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
-        }
-        await user.delete();
-        try {
-          await GoogleSignIn.instance.signOut();
-        } catch (_) {}
-      });
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const CloudAuthException(CloudAuthErrorCode.userNotFound);
+    }
+    await user.delete();
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
+  });
 
   Future<T> _mapAuthErrors<T>(Future<T> Function() action) async {
     try {
@@ -392,30 +410,28 @@ class CloudAuthService {
   }
 
   static CloudAuthErrorCode _mapCode(String code) => switch (code) {
-        'invalid-email' => CloudAuthErrorCode.invalidEmail,
-        'user-not-found' => CloudAuthErrorCode.userNotFound,
-        // invalid-credential covers wrong password on recent Identity
-        // Platform backends (email enumeration protection).
-        'wrong-password' ||
-        'invalid-credential' ||
-        'INVALID_LOGIN_CREDENTIALS' =>
-          CloudAuthErrorCode.wrongPassword,
-        // Windows' firebase_auth plugin doesn't recognize
-        // INVALID_LOGIN_CREDENTIALS (email enumeration protection) and falls
-        // back to this generic code instead of invalid-credential.
-        'unknown-error' when defaultTargetPlatform == TargetPlatform.windows =>
-          CloudAuthErrorCode.wrongPassword,
-        'email-already-in-use' => CloudAuthErrorCode.emailInUse,
-        'weak-password' => CloudAuthErrorCode.weakPassword,
-        'network-request-failed' => CloudAuthErrorCode.network,
-        'too-many-requests' => CloudAuthErrorCode.tooManyRequests,
-        // Web popup flow: dismissing the window is a cancel, not a failure —
-        // the native path reports the same thing from GoogleSignInException.
-        'popup-closed-by-user' ||
-        'cancelled-popup-request' ||
-        'user-cancelled' =>
-          CloudAuthErrorCode.canceled,
-        'requires-recent-login' => CloudAuthErrorCode.requiresRecentLogin,
-        _ => CloudAuthErrorCode.unknown,
-      };
+    'invalid-email' => CloudAuthErrorCode.invalidEmail,
+    'user-not-found' => CloudAuthErrorCode.userNotFound,
+    // invalid-credential covers wrong password on recent Identity
+    // Platform backends (email enumeration protection).
+    'wrong-password' ||
+    'invalid-credential' ||
+    'INVALID_LOGIN_CREDENTIALS' => CloudAuthErrorCode.wrongPassword,
+    // Windows' firebase_auth plugin doesn't recognize
+    // INVALID_LOGIN_CREDENTIALS (email enumeration protection) and falls
+    // back to this generic code instead of invalid-credential.
+    'unknown-error' when defaultTargetPlatform == TargetPlatform.windows =>
+      CloudAuthErrorCode.wrongPassword,
+    'email-already-in-use' => CloudAuthErrorCode.emailInUse,
+    'weak-password' => CloudAuthErrorCode.weakPassword,
+    'network-request-failed' => CloudAuthErrorCode.network,
+    'too-many-requests' => CloudAuthErrorCode.tooManyRequests,
+    // Web popup flow: dismissing the window is a cancel, not a failure —
+    // the native path reports the same thing from GoogleSignInException.
+    'popup-closed-by-user' ||
+    'cancelled-popup-request' ||
+    'user-cancelled' => CloudAuthErrorCode.canceled,
+    'requires-recent-login' => CloudAuthErrorCode.requiresRecentLogin,
+    _ => CloudAuthErrorCode.unknown,
+  };
 }

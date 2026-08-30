@@ -22,7 +22,9 @@ class InMemoryTransport implements SyncTransport {
       final stamped = doc.withServerTs((++_seq).toString().padLeft(12, '0'));
       (docs[congregationId] ??= {})[doc.entityId] = stamped;
     }
-    final heartbeat = activity[congregationId] ??= {'scopes': <String, String>{}};
+    final heartbeat = activity[congregationId] ??= {
+      'scopes': <String, String>{},
+    };
     final scopes = heartbeat['scopes'] as Map<String, String>;
     final ts = _seq.toString().padLeft(12, '0');
     for (final scope in activityScopes) {
@@ -32,10 +34,10 @@ class InMemoryTransport implements SyncTransport {
   }
 
   @override
-  Future<List<ItemDoc>> pullSince(
-      String congregationId, String? cursor) async {
-    final all = (docs[congregationId] ?? const {}).values.where((d) =>
-        cursor == null || d.serverTs!.compareTo(cursor) > 0);
+  Future<List<ItemDoc>> pullSince(String congregationId, String? cursor) async {
+    final all = (docs[congregationId] ?? const {}).values.where(
+      (d) => cursor == null || d.serverTs!.compareTo(cursor) > 0,
+    );
     return [...all]..sort((a, b) => a.serverTs!.compareTo(b.serverTs!));
   }
 

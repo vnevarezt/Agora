@@ -31,9 +31,11 @@ class PartCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     // Highlight the card that owns the open picker (accent ring).
-    final active = ref.watch(activeSlotProvider.select(
-      (s) => s != null && view.slots.any((spec) => spec.ref == s),
-    ));
+    final active = ref.watch(
+      activeSlotProvider.select(
+        (s) => s != null && view.slots.any((spec) => spec.ref == s),
+      ),
+    );
 
     return AnimatedContainer(
       duration: Motion.of(context, Motion.instant),
@@ -62,7 +64,10 @@ class _FixedLineBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s14,
+        vertical: Space.s10,
+      ),
       child: Row(
         children: [
           SizedBox(
@@ -90,8 +95,7 @@ class _FixedLineBody extends StatelessWidget {
                       TextSpan(
                         // Non-breaking spaces: "· 1 min" wraps as a unit on
                         // narrow widths.
-                        text:
-                            '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
+                        text: '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: t.textMute,
@@ -126,10 +130,15 @@ class _RoleBody extends ConsumerWidget {
     // The chairman card has no real row id, so its title isn't editable.
     // A title override is a `program` write, so it also needs the program
     // capability for this project's type.
-    final editable = view.id != 'presidente' &&
-        ref.watch(canEditOpenProgramProvider);
+    final editable =
+        view.id != 'presidente' && ref.watch(canEditOpenProgramProvider);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s14, Space.s14, Space.s14),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s14,
+        Space.s14,
+        Space.s14,
+        Space.s14,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -202,8 +211,11 @@ class _EditTitleButton extends StatelessWidget {
         ),
         child: Tooltip(
           message: context.t.workspace.editTitle,
-          child: Icon(Icons.edit_outlined,
-              size: AppIcon.control, color: hovered ? t.accentStrong : t.textMute),
+          child: Icon(
+            Icons.edit_outlined,
+            size: AppIcon.control,
+            color: hovered ? t.accentStrong : t.textMute,
+          ),
         ),
       ),
     );
@@ -213,8 +225,10 @@ class _EditTitleButton extends StatelessWidget {
 /// Opens a compact dialog to edit (or restore) the assignment's title.
 void _showEditTitleDialog(BuildContext context, WidgetRef ref, PartView view) {
   var text = view.title;
-  final hasOverride =
-      ref.read(formProvider).titleOverrides.containsKey(view.id);
+  final hasOverride = ref
+      .read(formProvider)
+      .titleOverrides
+      .containsKey(view.id);
   showAppModal<void>(
     context,
     maxWidth: 420,

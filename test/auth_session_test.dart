@@ -41,22 +41,27 @@ class FakeDeviceAuth implements DeviceAuth {
 }
 
 ProviderContainer containerWith(MapKeyStore store, {DeviceAuth? deviceAuth}) {
-  final container = ProviderContainer(overrides: [
-    dbKeyManagerProvider.overrideWithValue(
-        DbKeyManager(store: store, params: testKdfParams)),
-    // No Firebase in unit tests: cloud mode degrades to signed-out.
-    firebaseAppProvider.overrideWith((ref) => Future.value(null)),
-    if (deviceAuth != null) deviceAuthProvider.overrideWithValue(deviceAuth),
-  ]);
+  final container = ProviderContainer(
+    overrides: [
+      dbKeyManagerProvider.overrideWithValue(
+        DbKeyManager(store: store, params: testKdfParams),
+      ),
+      // No Firebase in unit tests: cloud mode degrades to signed-out.
+      firebaseAppProvider.overrideWith((ref) => Future.value(null)),
+      if (deviceAuth != null) deviceAuthProvider.overrideWithValue(deviceAuth),
+    ],
+  );
   addTearDown(container.dispose);
   return container;
 }
 
 /// `_init` runs async after build: wait until the state leaves Loading.
 Future<SessionState> settled(ProviderContainer container) async {
-  for (var i = 0;
-      i < 100 && container.read(authSessionProvider) is SessionLoading;
-      i++) {
+  for (
+    var i = 0;
+    i < 100 && container.read(authSessionProvider) is SessionLoading;
+    i++
+  ) {
     await Future<void>.delayed(const Duration(milliseconds: 10));
   }
   return container.read(authSessionProvider);
@@ -68,7 +73,8 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     PathProviderPlatform.instance = _FakePathProvider(
-        Directory.systemTemp.createTempSync('agora_test').path);
+      Directory.systemTemp.createTempSync('agora_test').path,
+    );
   });
 
   test('fresh install (no mode, no keys) routes to FreshChoose', () async {
@@ -85,20 +91,28 @@ void main() {
     expect((state as SessionLocalCreate).migration, isTrue);
   });
 
-  test('wrapped key without mode is treated as local (pre-mode install)',
-      () async {
-    final store = MapKeyStore();
-    await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('pw-123456');
-    expect(await settled(containerWith(store)), isA<SessionLocalLocked>());
-  });
+  test(
+    'wrapped key without mode is treated as local (pre-mode install)',
+    () async {
+      final store = MapKeyStore();
+      await DbKeyManager(
+        store: store,
+        params: testKdfParams,
+      ).createAccount('pw-123456');
+      expect(await settled(containerWith(store)), isA<SessionLocalLocked>());
+    },
+  );
 
   test('local mode boots locked with the stored profile name', () async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'local_profile_name': 'Andrés Beltrán'});
+    SharedPreferences.setMockInitialValues({
+      'account_mode': 'local',
+      'local_profile_name': 'Andrés Beltrán',
+    });
     final store = MapKeyStore();
-    await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('pw-123456');
+    await DbKeyManager(
+      store: store,
+      params: testKdfParams,
+    ).createAccount('pw-123456');
     final state = await settled(containerWith(store));
     expect(state, isA<SessionLocalLocked>());
     expect((state as SessionLocalLocked).profileName, 'Andrés Beltrán');
@@ -106,8 +120,10 @@ void main() {
 
   test('cloud mode without Firebase routes to CloudSignedOut', () async {
     SharedPreferences.setMockInitialValues({'account_mode': 'cloud'});
-    expect(await settled(containerWith(MapKeyStore())),
-        isA<SessionCloudSignedOut>());
+    expect(
+      await settled(containerWith(MapKeyStore())),
+      isA<SessionCloudSignedOut>(),
+    );
   });
 
   test('createLocalProfile unlocks and persists mode + name', () async {
@@ -124,38 +140,45 @@ void main() {
     expect(prefs.getString('local_profile_name'), 'Ana');
   });
 
-  test('migrate wraps the legacy DEK, unlocks and persists local mode',
-      () async {
-    final store = MapKeyStore();
-    final legacyDek = 'cd' * 32;
-    store.data[DbKeyManager.legacyKeyName] = legacyDek;
-    final container = containerWith(store);
-    await settled(container);
-    await container
-        .read(authSessionProvider.notifier)
-        .migrate('Ana', 'new-pw-123');
-    final state = container.read(authSessionProvider);
-    expect((state as SessionUnlocked).dekHex, legacyDek);
-    expect(store.data.containsKey(DbKeyManager.legacyKeyName), isFalse);
-  });
+  test(
+    'migrate wraps the legacy DEK, unlocks and persists local mode',
+    () async {
+      final store = MapKeyStore();
+      final legacyDek = 'cd' * 32;
+      store.data[DbKeyManager.legacyKeyName] = legacyDek;
+      final container = containerWith(store);
+      await settled(container);
+      await container
+          .read(authSessionProvider.notifier)
+          .migrate('Ana', 'new-pw-123');
+      final state = container.read(authSessionProvider);
+      expect((state as SessionUnlocked).dekHex, legacyDek);
+      expect(store.data.containsKey(DbKeyManager.legacyKeyName), isFalse);
+    },
+  );
 
-  test('unlock: wrong password keeps Locked, right password unlocks',
-      () async {
+  test('unlock: wrong password keeps Locked, right password unlocks', () async {
     SharedPreferences.setMockInitialValues({'account_mode': 'local'});
     final store = MapKeyStore();
-    final dek = await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('right-pw');
+    final dek = await DbKeyManager(
+      store: store,
+      params: testKdfParams,
+    ).createAccount('right-pw');
     final container = containerWith(store);
     await settled(container);
     final session = container.read(authSessionProvider.notifier);
 
     await expectLater(
-        session.unlock('wrong-pw'), throwsA(isA<WrongPasswordException>()));
+      session.unlock('wrong-pw'),
+      throwsA(isA<WrongPasswordException>()),
+    );
     expect(container.read(authSessionProvider), isA<SessionLocalLocked>());
 
     await session.unlock('right-pw');
-    expect((container.read(authSessionProvider) as SessionUnlocked).dekHex,
-        dek);
+    expect(
+      (container.read(authSessionProvider) as SessionUnlocked).dekHex,
+      dek,
+    );
   });
 
   test('lock flips back to Locked keeping the profile name', () async {
@@ -169,93 +192,126 @@ void main() {
   });
 
   test('device unlock pref + support boots Locked with the flag on', () async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'device_unlock': true});
+    SharedPreferences.setMockInitialValues({
+      'account_mode': 'local',
+      'device_unlock': true,
+    });
     final store = MapKeyStore();
-    final dek = await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('pw-123456');
-    await DbKeyManager(store: store, params: testKdfParams)
-        .enableDeviceUnlock(dek);
-    final state =
-        await settled(containerWith(store, deviceAuth: FakeDeviceAuth()));
+    final dek = await DbKeyManager(
+      store: store,
+      params: testKdfParams,
+    ).createAccount('pw-123456');
+    await DbKeyManager(
+      store: store,
+      params: testKdfParams,
+    ).enableDeviceUnlock(dek);
+    final state = await settled(
+      containerWith(store, deviceAuth: FakeDeviceAuth()),
+    );
     expect((state as SessionLocalLocked).deviceUnlock, isTrue);
   });
 
-  test('device unlock pref without hardware support stays password-only',
-      () async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'device_unlock': true});
-    final store = MapKeyStore();
-    await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('pw-123456');
-    final state = await settled(
-        containerWith(store, deviceAuth: FakeDeviceAuth(supported: false)));
-    expect((state as SessionLocalLocked).deviceUnlock, isFalse);
-  });
+  test(
+    'device unlock pref without hardware support stays password-only',
+    () async {
+      SharedPreferences.setMockInitialValues({
+        'account_mode': 'local',
+        'device_unlock': true,
+      });
+      final store = MapKeyStore();
+      await DbKeyManager(
+        store: store,
+        params: testKdfParams,
+      ).createAccount('pw-123456');
+      final state = await settled(
+        containerWith(store, deviceAuth: FakeDeviceAuth(supported: false)),
+      );
+      expect((state as SessionLocalLocked).deviceUnlock, isFalse);
+    },
+  );
 
-  test('unlockWithDeviceAuth releases the DEK after passing the prompt',
-      () async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'device_unlock': true});
-    final store = MapKeyStore();
-    final keys = DbKeyManager(store: store, params: testKdfParams);
-    final dek = await keys.createAccount('pw-123456');
-    await keys.enableDeviceUnlock(dek);
-    final fake = FakeDeviceAuth();
-    final container = containerWith(store, deviceAuth: fake);
-    await settled(container);
+  test(
+    'unlockWithDeviceAuth releases the DEK after passing the prompt',
+    () async {
+      SharedPreferences.setMockInitialValues({
+        'account_mode': 'local',
+        'device_unlock': true,
+      });
+      final store = MapKeyStore();
+      final keys = DbKeyManager(store: store, params: testKdfParams);
+      final dek = await keys.createAccount('pw-123456');
+      await keys.enableDeviceUnlock(dek);
+      final fake = FakeDeviceAuth();
+      final container = containerWith(store, deviceAuth: fake);
+      await settled(container);
 
-    expect(
+      expect(
         await container
             .read(authSessionProvider.notifier)
             .unlockWithDeviceAuth('reason'),
-        isTrue);
-    final state = container.read(authSessionProvider);
-    expect((state as SessionUnlocked).dekHex, dek);
-    expect(state.deviceUnlockEnabled, isTrue);
-    expect(fake.prompts, 1);
-  });
+        isTrue,
+      );
+      final state = container.read(authSessionProvider);
+      expect((state as SessionUnlocked).dekHex, dek);
+      expect(state.deviceUnlockEnabled, isTrue);
+      expect(fake.prompts, 1);
+    },
+  );
 
-  test('unlockWithDeviceAuth: cancelled prompt keeps the session locked',
-      () async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'device_unlock': true});
-    final store = MapKeyStore();
-    final keys = DbKeyManager(store: store, params: testKdfParams);
-    await keys.enableDeviceUnlock(await keys.createAccount('pw-123456'));
-    final container =
-        containerWith(store, deviceAuth: FakeDeviceAuth(result: false));
-    await settled(container);
+  test(
+    'unlockWithDeviceAuth: cancelled prompt keeps the session locked',
+    () async {
+      SharedPreferences.setMockInitialValues({
+        'account_mode': 'local',
+        'device_unlock': true,
+      });
+      final store = MapKeyStore();
+      final keys = DbKeyManager(store: store, params: testKdfParams);
+      await keys.enableDeviceUnlock(await keys.createAccount('pw-123456'));
+      final container = containerWith(
+        store,
+        deviceAuth: FakeDeviceAuth(result: false),
+      );
+      await settled(container);
 
-    expect(
+      expect(
         await container
             .read(authSessionProvider.notifier)
             .unlockWithDeviceAuth('reason'),
-        isFalse);
-    expect(container.read(authSessionProvider), isA<SessionLocalLocked>());
-  });
+        isFalse,
+      );
+      expect(container.read(authSessionProvider), isA<SessionLocalLocked>());
+    },
+  );
 
-  test('unlockWithDeviceAuth: missing key copy turns the pref off and throws',
-      () async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'device_unlock': true});
-    final store = MapKeyStore();
-    await DbKeyManager(store: store, params: testKdfParams)
-        .createAccount('pw-123456');
-    // No enableDeviceUnlock: the copy is gone (e.g. keychain lost it).
-    final container = containerWith(store, deviceAuth: FakeDeviceAuth());
-    await settled(container);
+  test(
+    'unlockWithDeviceAuth: missing key copy turns the pref off and throws',
+    () async {
+      SharedPreferences.setMockInitialValues({
+        'account_mode': 'local',
+        'device_unlock': true,
+      });
+      final store = MapKeyStore();
+      await DbKeyManager(
+        store: store,
+        params: testKdfParams,
+      ).createAccount('pw-123456');
+      // No enableDeviceUnlock: the copy is gone (e.g. keychain lost it).
+      final container = containerWith(store, deviceAuth: FakeDeviceAuth());
+      await settled(container);
 
-    await expectLater(
+      await expectLater(
         container
             .read(authSessionProvider.notifier)
             .unlockWithDeviceAuth('reason'),
-        throwsA(isA<DeviceUnlockKeyMissing>()));
-    final state = container.read(authSessionProvider);
-    expect((state as SessionLocalLocked).deviceUnlock, isFalse);
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool('device_unlock'), isFalse);
-  });
+        throwsA(isA<DeviceUnlockKeyMissing>()),
+      );
+      final state = container.read(authSessionProvider);
+      expect((state as SessionLocalLocked).deviceUnlock, isFalse);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('device_unlock'), isFalse);
+    },
+  );
 
   test('setDeviceUnlock writes the key copy and survives lock()', () async {
     final store = MapKeyStore();
@@ -280,20 +336,24 @@ void main() {
     expect(container.read(authSessionProvider), isA<SessionUnlocked>());
   });
 
-  test('setDeviceUnlock(true) is a no-op when the prompt is cancelled',
-      () async {
-    final store = MapKeyStore();
-    final container =
-        containerWith(store, deviceAuth: FakeDeviceAuth(result: false));
-    await settled(container);
-    final session = container.read(authSessionProvider.notifier);
-    await session.createLocalProfile('Ana', 'pw-123456');
+  test(
+    'setDeviceUnlock(true) is a no-op when the prompt is cancelled',
+    () async {
+      final store = MapKeyStore();
+      final container = containerWith(
+        store,
+        deviceAuth: FakeDeviceAuth(result: false),
+      );
+      await settled(container);
+      final session = container.read(authSessionProvider.notifier);
+      await session.createLocalProfile('Ana', 'pw-123456');
 
-    expect(await session.setDeviceUnlock(true, 'reason'), isFalse);
-    expect(store.data.containsKey(DbKeyManager.deviceUnlockKeyName), isFalse);
-    final state = container.read(authSessionProvider);
-    expect((state as SessionUnlocked).deviceUnlockEnabled, isFalse);
-  });
+      expect(await session.setDeviceUnlock(true, 'reason'), isFalse);
+      expect(store.data.containsKey(DbKeyManager.deviceUnlockKeyName), isFalse);
+      final state = container.read(authSessionProvider);
+      expect((state as SessionUnlocked).deviceUnlockEnabled, isFalse);
+    },
+  );
 
   test('setDeviceUnlock(false) removes the key copy and the pref', () async {
     final store = MapKeyStore();
@@ -308,9 +368,10 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('device_unlock'), isFalse);
     expect(
-        (container.read(authSessionProvider) as SessionUnlocked)
-            .deviceUnlockEnabled,
-        isFalse);
+      (container.read(authSessionProvider) as SessionUnlocked)
+          .deviceUnlockEnabled,
+      isFalse,
+    );
   });
 
   test('resetAllData clears the device-unlock pref', () async {

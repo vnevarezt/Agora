@@ -18,12 +18,14 @@ import 'auth_session.dart';
 /// Tests override it with `AppDatabase(NativeDatabase.memory())` (no
 /// keychain, no encryption).
 final dbProvider = Provider<AppDatabase>((ref) {
-  final dek = ref.watch(authSessionProvider
-      .select((s) => s is SessionUnlocked ? s.dekHex : null));
+  final dek = ref.watch(
+    authSessionProvider.select((s) => s is SessionUnlocked ? s.dekHex : null),
+  );
   if (dek == null) {
     throw StateError(
-        'dbProvider read while the local session is locked; every DB '
-        'consumer must live below AuthGate.');
+      'dbProvider read while the local session is locked; every DB '
+      'consumer must live below AuthGate.',
+    );
   }
   final db = AppDatabase(
     openEncryptedExecutor(dek),
@@ -34,9 +36,11 @@ final dbProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-final peopleDaoProvider =
-    Provider<PeopleDao>((ref) => ref.watch(dbProvider).peopleDao);
+final peopleDaoProvider = Provider<PeopleDao>(
+  (ref) => ref.watch(dbProvider).peopleDao,
+);
 
 /// Stamps every repository mutation with an HLC + outbox entry (phase 3).
 final syncScribeProvider = Provider<SyncScribe>(
-    (ref) => SyncScribe(ref.watch(dbProvider), HlcClock(deviceId())));
+  (ref) => SyncScribe(ref.watch(dbProvider), HlcClock(deviceId())),
+);

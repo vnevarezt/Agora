@@ -18,21 +18,26 @@ void main() {
       FirebaseException(plugin: 'cloud_firestore', code: code);
 
   test('a refusal is permanent, and says so', () {
-    expect(syncErrorKindOf(firestore('permission-denied')),
-        SyncTransportErrorKind.permissionDenied);
+    expect(
+      syncErrorKindOf(firestore('permission-denied')),
+      SyncTransportErrorKind.permissionDenied,
+    );
   });
 
   test('unavailable is the network, not a verdict', () {
-    expect(syncErrorKindOf(firestore('unavailable')),
-        SyncTransportErrorKind.offline);
+    expect(
+      syncErrorKindOf(firestore('unavailable')),
+      SyncTransportErrorKind.offline,
+    );
   });
 
   test('anything else stays unknown rather than being guessed at', () {
-    expect(syncErrorKindOf(firestore('resource-exhausted')),
-        SyncTransportErrorKind.unknown);
+    expect(
+      syncErrorKindOf(firestore('resource-exhausted')),
+      SyncTransportErrorKind.unknown,
+    );
     // A listener can hand back something that is not a FirebaseException at
     // all; it must still classify rather than throw on the way.
-    expect(syncErrorKindOf(StateError('nope')),
-        SyncTransportErrorKind.unknown);
+    expect(syncErrorKindOf(StateError('nope')), SyncTransportErrorKind.unknown);
   });
 }

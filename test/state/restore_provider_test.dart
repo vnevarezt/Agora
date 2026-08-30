@@ -18,11 +18,11 @@ void main() {
       Congregation(id: id, name: id, number: '', color: 0);
 
   Membership mem(String id) => Membership(
-        congregationId: id,
-        uid: 'u1',
-        capabilities: MemberCapabilities.founder,
-        keyVersion: 0,
-      );
+    congregationId: id,
+    uid: 'u1',
+    capabilities: MemberCapabilities.founder,
+    keyVersion: 0,
+  );
 
   // null list = the stream is still loading (never emits).
   Stream<List<T>> streamOf<T>(List<T>? value) => value == null
@@ -35,13 +35,19 @@ void main() {
     List<Membership>? memberships = const [],
     bool membershipsFail = false,
   }) async {
-    final c = ProviderContainer(overrides: [
-      syncUidProvider.overrideWithValue(uid),
-      congregationsStreamProvider.overrideWith((ref) => streamOf(congregations)),
-      myMembershipsProvider.overrideWith((ref) => membershipsFail
-          ? Stream<List<Membership>>.error(StateError('denied'))
-          : streamOf(memberships)),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        syncUidProvider.overrideWithValue(uid),
+        congregationsStreamProvider.overrideWith(
+          (ref) => streamOf(congregations),
+        ),
+        myMembershipsProvider.overrideWith(
+          (ref) => membershipsFail
+              ? Stream<List<Membership>>.error(StateError('denied'))
+              : streamOf(memberships),
+        ),
+      ],
+    );
     addTearDown(c.dispose);
     final sub = c.listen(initialRestoreProvider, (_, _) {});
     addTearDown(sub.close);
@@ -57,10 +63,11 @@ void main() {
   });
 
   test('memberships loading + empty device → indeterminate', () async {
-    expect(
-      await compute(congregations: const [], memberships: null),
-      (done: 0, total: 0, failed: false),
-    );
+    expect(await compute(congregations: const [], memberships: null), (
+      done: 0,
+      total: 0,
+      failed: false,
+    ));
   });
 
   test('a membership read that FAILED is not one still arriving', () async {
@@ -68,10 +75,11 @@ void main() {
     // memberships at all sat on "restoring your data" for ever — and the
     // dashboard held a skeleton behind it, hiding the one thing its owner
     // needed to be told.
-    expect(
-      await compute(congregations: const [], membershipsFail: true),
-      (done: 0, total: 0, failed: true),
-    );
+    expect(await compute(congregations: const [], membershipsFail: true), (
+      done: 0,
+      total: 0,
+      failed: true,
+    ));
   });
 
   test('memberships loading + device already has data → no banner', () async {
@@ -82,10 +90,7 @@ void main() {
   });
 
   test('local stream still loading → no banner (skeleton covers it)', () async {
-    expect(
-      await compute(congregations: null, memberships: [mem('a')]),
-      isNull,
-    );
+    expect(await compute(congregations: null, memberships: [mem('a')]), isNull);
   });
 
   test('partial restore reports done/total', () async {
@@ -105,11 +110,13 @@ void main() {
     );
   });
 
-  test('founder with a local-only congregation and no memberships → done',
-      () async {
-    expect(
-      await compute(congregations: [cong('x')], memberships: const []),
-      isNull,
-    );
-  });
+  test(
+    'founder with a local-only congregation and no memberships → done',
+    () async {
+      expect(
+        await compute(congregations: [cong('x')], memberships: const []),
+        isNull,
+      );
+    },
+  );
 }

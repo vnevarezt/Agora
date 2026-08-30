@@ -25,11 +25,13 @@ class PeopleRepository {
         : p.congregationId;
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      await _db.peopleDao.upsert(p.copyWith(
-        congregationId: congregationId,
-        updatedAt: DateTime.now().toUtc(),
-        hlc: hlc,
-      ));
+      await _db.peopleDao.upsert(
+        p.copyWith(
+          congregationId: congregationId,
+          updatedAt: DateTime.now().toUtc(),
+          hlc: hlc,
+        ),
+      );
       await _scribe.enqueue(SyncEntity.person, p.id, hlc);
     });
   }

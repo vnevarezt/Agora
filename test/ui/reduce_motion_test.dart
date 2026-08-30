@@ -13,14 +13,19 @@ import 'package:agora/ui/widgets/motion.dart';
 // animated widget silently ignores the setting.
 
 Future<Iterable<Duration>> _durationsOf(
-    WidgetTester tester, Widget child, bool disableAnimations) async {
-  await tester.pumpWidget(MaterialApp(
-    theme: buildAppTheme(pizarra.light, Brightness.light),
-    home: MediaQuery(
-      data: MediaQueryData(disableAnimations: disableAnimations),
-      child: Scaffold(body: Center(child: child)),
+  WidgetTester tester,
+  Widget child,
+  bool disableAnimations,
+) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: Scaffold(body: Center(child: child)),
+      ),
     ),
-  ));
+  );
   await tester.pump();
   return tester
       .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
@@ -56,35 +61,36 @@ void main() {
     (label: 'mobile sheet', size: const Size(390, 844)),
   ]) {
     for (final reduced in [false, true]) {
-      testWidgets(
-          '${form.label} ${reduced ? 'honours' : 'animates without'} '
+      testWidgets('${form.label} ${reduced ? 'honours' : 'animates without'} '
           'reduced motion', (tester) async {
         tester.view.physicalSize = form.size;
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
 
-        await tester.pumpWidget(MaterialApp(
-          theme: buildAppTheme(pizarra.light, Brightness.light),
-          // copyWith, not a fresh MediaQueryData: replacing it wholesale
-          // zeroes the size and every screen reads as mobile.
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
-            child: child!,
-          ),
-          home: Builder(
-            builder: (context) => Scaffold(
-              body: Center(
-                child: AppButton(
-                  label: 'Abrir',
-                  onPressed: () => showAppModal<void>(
-                    context,
-                    builder: (_, _, _) => const Text('contenido'),
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildAppTheme(pizarra.light, Brightness.light),
+            // copyWith, not a fresh MediaQueryData: replacing it wholesale
+            // zeroes the size and every screen reads as mobile.
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: reduced),
+              child: child!,
+            ),
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: AppButton(
+                    label: 'Abrir',
+                    onPressed: () => showAppModal<void>(
+                      context,
+                      builder: (_, _, _) => const Text('contenido'),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ));
+        );
 
         await tester.tap(find.text('Abrir'));
         await tester.pump();
@@ -92,28 +98,32 @@ void main() {
         final route =
             ModalRoute.of(tester.element(find.text('contenido')))
                 as TransitionRoute;
-        expect(route.transitionDuration,
-            reduced ? Duration.zero : isNot(Duration.zero));
+        expect(
+          route.transitionDuration,
+          reduced ? Duration.zero : isNot(Duration.zero),
+        );
       });
     }
   }
 
   Future<void> pumpEnterUp(WidgetTester tester, bool disableAnimations) {
-    return tester.pumpWidget(MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(disableAnimations: disableAnimations),
-        child: const Scaffold(
-          body: Center(child: EnterUp(child: Text('Hero'))),
+    return tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: MediaQuery(
+          data: MediaQueryData(disableAnimations: disableAnimations),
+          child: const Scaffold(
+            body: Center(child: EnterUp(child: Text('Hero'))),
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Finder enterUpFade() => find.descendant(
-        of: find.byType(EnterUp),
-        matching: find.byType(FadeTransition),
-      );
+    of: find.byType(EnterUp),
+    matching: find.byType(FadeTransition),
+  );
 
   testWidgets('EnterUp fades in by default', (tester) async {
     await pumpEnterUp(tester, false);
@@ -143,45 +153,52 @@ void main() {
   // which evaluates the field just as calling it would. That is a subtle thing
   // to rely on and an easy one to refactor away, so it is pinned here rather
   // than left as a comment.
-  testWidgets('EnterUp with a delay tears down cleanly under reduced motion',
-      (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: const MediaQuery(
-        data: MediaQueryData(disableAnimations: true),
-        child: Scaffold(
-          body: EnterUp(
-            delay: Duration(milliseconds: 200),
-            child: Text('Hero'),
+  testWidgets('EnterUp with a delay tears down cleanly under reduced motion', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: EnterUp(
+              delay: Duration(milliseconds: 200),
+              child: Text('Hero'),
+            ),
           ),
         ),
       ),
-    ));
+    );
 
     // Gone before its own entrance was due, which is what a fast route change
     // looks like from the widget's side.
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: SizedBox())),
+    );
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(tester.takeException(), isNull);
   });
 
   Future<Duration?> inkDuration(WidgetTester tester, bool disable) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(disableAnimations: disable),
-        child: Scaffold(
-          body: Center(
-            child: AnimatedInk(
-              color: const Color(0xFF123456),
-              builder: (context, color) =>
-                  Text('Link', style: TextStyle(color: color)),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: MediaQuery(
+          data: MediaQueryData(disableAnimations: disable),
+          child: Scaffold(
+            body: Center(
+              child: AnimatedInk(
+                color: const Color(0xFF123456),
+                builder: (context, color) =>
+                    Text('Link', style: TextStyle(color: color)),
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pump();
     return tester
         .widget<TweenAnimationBuilder<Color?>>(
@@ -203,15 +220,19 @@ void main() {
     bool disableAnimations,
     double height,
   ) {
-    return tester.pumpWidget(MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(disableAnimations: disableAnimations),
-        child: Scaffold(
-          body: Center(child: MotionSize(child: SizedBox(height: height))),
+    return tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: MediaQuery(
+          data: MediaQueryData(disableAnimations: disableAnimations),
+          child: Scaffold(
+            body: Center(
+              child: MotionSize(child: SizedBox(height: height)),
+            ),
+          ),
         ),
       ),
-    ));
+    );
   }
 
   testWidgets('MotionSize eases a size change by default', (tester) async {
@@ -227,8 +248,9 @@ void main() {
   // performLayout and, because the forward() completes synchronously, marks
   // itself dirty mid-layout — which asserts. Under reduced motion the child
   // has to be sized directly instead.
-  testWidgets('MotionSize resizes under reduced motion without asserting',
-      (tester) async {
+  testWidgets('MotionSize resizes under reduced motion without asserting', (
+    tester,
+  ) async {
     await pumpMotionSize(tester, true, 20);
     await tester.pump();
     await pumpMotionSize(tester, true, 60);

@@ -52,9 +52,11 @@ SheetFit fitSheet({
 }) {
   final official = probe(noFit);
   if (official.height > available) {
-    for (var rung = 100 - typeStepPercent;
-        rung >= _rungs(metrics.minTypeScale);
-        rung -= typeStepPercent) {
+    for (
+      var rung = 100 - typeStepPercent;
+      rung >= _rungs(metrics.minTypeScale);
+      rung -= typeStepPercent
+    ) {
       // No wrap test on the way down, and no air: smaller type breaks fewer
       // cells, not more, and a block that had to shrink has nothing spare.
       final t = rung / 100;
@@ -67,9 +69,11 @@ SheetFit fitSheet({
 
   var type = 1.0;
   var natural = official.height;
-  for (var rung = _rungs(metrics.maxTypeScale);
-      rung > 100;
-      rung -= typeStepPercent) {
+  for (
+    var rung = _rungs(metrics.maxTypeScale);
+    rung > 100;
+    rung -= typeStepPercent
+  ) {
     final t = rung / 100;
     final p = probe((type: t, air: 1));
     if (p.height <= available &&

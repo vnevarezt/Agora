@@ -76,17 +76,19 @@ class _ModalState extends ConsumerState<_NotebookImportModal> {
     final showLang = needed.map((n) => n.lang).toSet().length > 1;
 
     return NotebookDropTarget(
-      onFile: (bytes) => unawaited(
-          _fileIn(() => importNotebookBytes(context, ref, bytes))),
-      builder: (context, hovering) => _shell(context, needed, showLang, hovering),
+      onFile: (bytes) =>
+          unawaited(_fileIn(() => importNotebookBytes(context, ref, bytes))),
+      builder: (context, hovering) =>
+          _shell(context, needed, showLang, hovering),
     );
   }
 
   Widget _shell(
-      BuildContext context,
-      List<({String issue, String lang, bool have})> needed,
-      bool showLang,
-      bool hovering) {
+    BuildContext context,
+    List<({String issue, String lang, bool have})> needed,
+    bool showLang,
+    bool hovering,
+  ) {
     final t = context.tokens;
     final tr = context.t;
     return ModalShell(
@@ -156,30 +158,35 @@ class _NotebookRow extends ConsumerWidget {
     final t = context.tokens;
     final tr = context.t;
     final link = ref.watch(
-        notebookLinkProvider((issue: target.issue, lang: target.lang)));
+      notebookLinkProvider((issue: target.issue, lang: target.lang)),
+    );
     final label = labelForIssue(target.issue, tr.monthNames);
 
     final (String status, Color tone, IconData mark) = switch (target) {
       _ when target.have => (
-          tr.workspace.importLoaded,
-          t.successStrong,
-          Icons.check_circle_rounded,
-        ),
+        tr.workspace.importLoaded,
+        t.successStrong,
+        Icons.check_circle_rounded,
+      ),
       _ when link.hasError => (
-          tr.workspace.importUnavailable,
-          t.textMute,
-          Icons.remove_circle_outline_rounded,
-        ),
+        tr.workspace.importUnavailable,
+        t.textMute,
+        Icons.remove_circle_outline_rounded,
+      ),
       _ => (
-          tr.workspace.importMissing,
-          t.warningStrong,
-          Icons.radio_button_unchecked_rounded,
-        ),
+        tr.workspace.importMissing,
+        t.warningStrong,
+        Icons.radio_button_unchecked_rounded,
+      ),
     };
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
-          Space.s12, Space.s10, Space.s10, Space.s10),
+        Space.s12,
+        Space.s10,
+        Space.s10,
+        Space.s10,
+      ),
       decoration: BoxDecoration(
         color: t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -226,8 +233,9 @@ class _NotebookRow extends ConsumerWidget {
             icon: Icons.file_download_outlined,
             label: tr.workspace.importDownload,
             busy: link.isLoading,
-            onPressed:
-                link.hasValue ? () => _download(link.requireValue) : null,
+            onPressed: link.hasValue
+                ? () => _download(link.requireValue)
+                : null,
           ),
         ],
       ),
@@ -263,8 +271,11 @@ class _DropZone extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.file_download_outlined,
-                size: AppIcon.control, color: tone),
+            Icon(
+              Icons.file_download_outlined,
+              size: AppIcon.control,
+              color: tone,
+            ),
             const SizedBox(height: Space.s6),
             Text(
               tr.workspace.importDropHere,
@@ -307,20 +318,29 @@ class _Step extends StatelessWidget {
           width: Space.s24,
           height: Space.s24,
           alignment: Alignment.center,
-          decoration: BoxDecoration(color: t.accentTint, shape: BoxShape.circle),
-          child: Text(n,
-              style: TextStyle(
-                  fontSize: AppText.micro,
-                  fontWeight: FontWeight.w800,
-                  color: t.accentStrong)),
+          decoration: BoxDecoration(
+            color: t.accentTint,
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            n,
+            style: TextStyle(
+              fontSize: AppText.micro,
+              fontWeight: FontWeight.w800,
+              color: t.accentStrong,
+            ),
+          ),
         ),
         const SizedBox(width: Space.s6),
         Expanded(
-          child: Text(label,
-              style: TextStyle(
-                  fontSize: AppText.body,
-                  fontWeight: FontWeight.w700,
-                  color: t.text)),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: AppText.body,
+              fontWeight: FontWeight.w700,
+              color: t.text,
+            ),
+          ),
         ),
       ],
     );
@@ -334,9 +354,11 @@ class _Step extends StatelessWidget {
 /// dashboard's catalog card and the editor's empty program — and an answer
 /// offered in only one of them is an answer nobody finds.
 Future<bool> importNotebook(BuildContext context, WidgetRef ref) async {
-  final file = await openFile(acceptedTypeGroups: [
-    const XTypeGroup(label: 'EPUB', extensions: ['epub']),
-  ]);
+  final file = await openFile(
+    acceptedTypeGroups: [
+      const XTypeGroup(label: 'EPUB', extensions: ['epub']),
+    ],
+  );
   if (file == null) return false;
   final bytes = await file.readAsBytes();
   if (!context.mounted) return false;
@@ -346,20 +368,29 @@ Future<bool> importNotebook(BuildContext context, WidgetRef ref) async {
 /// Files a workbook already in hand — picked, or dropped on the page — and
 /// says what it turned out to be. Returns true when one was imported.
 Future<bool> importNotebookBytes(
-    BuildContext context, WidgetRef ref, Uint8List bytes) async {
+  BuildContext context,
+  WidgetRef ref,
+  Uint8List bytes,
+) async {
   final messenger = ScaffoldMessenger.maybeOf(context);
   final tr = context.t;
   try {
     final imported = await ref.read(notebookImportProvider).run(bytes);
-    showAppSnack(messenger,
-        message: tr.workspace.importDone(
-            issue: imported.issue, n: imported.weeks),
-        kind: AppSnackKind.success);
+    showAppSnack(
+      messenger,
+      message: tr.workspace.importDone(
+        issue: imported.issue,
+        n: imported.weeks,
+      ),
+      kind: AppSnackKind.success,
+    );
     return true;
   } on FormatException {
-    showAppSnack(messenger,
-        message: tr.workspace.importNotWorkbook,
-        kind: AppSnackKind.failure);
+    showAppSnack(
+      messenger,
+      message: tr.workspace.importNotWorkbook,
+      kind: AppSnackKind.failure,
+    );
   } catch (e) {
     showAppSnack(messenger, message: '$e', kind: AppSnackKind.failure);
   }

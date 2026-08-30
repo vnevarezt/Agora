@@ -51,8 +51,8 @@ class CongregationMember {
         email: data['email'] as String?,
         pubKey: (data['pubKey'] as String?) ?? '',
         capabilities: MemberCapabilities.fromMap(
-            (data['capabilities'] as Map?)?.cast<String, dynamic>() ??
-                const {}),
+          (data['capabilities'] as Map?)?.cast<String, dynamic>() ?? const {},
+        ),
         wrappedVersions: {
           for (final k in ((data['wrappedCcks'] as Map?) ?? const {}).keys)
             ?int.tryParse('$k'),

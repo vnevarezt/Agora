@@ -18,25 +18,29 @@ final _week = Week(
   closingSong: '61',
   parts: [
     const Part(
-        section: Section.treasures,
-        number: 1,
-        title: 'Guarda tu corazon',
-        minutes: 10),
+      section: Section.treasures,
+      number: 1,
+      title: 'Guarda tu corazon',
+      minutes: 10,
+    ),
     const Part(
-        section: Section.treasures,
-        number: 2,
-        title: 'Lectura de la Biblia',
-        minutes: 4),
+      section: Section.treasures,
+      number: 2,
+      title: 'Lectura de la Biblia',
+      minutes: 4,
+    ),
     const Part(
-        section: Section.ministry,
-        number: 3,
-        title: 'Haga revisitas',
-        minutes: 5),
+      section: Section.ministry,
+      number: 3,
+      title: 'Haga revisitas',
+      minutes: 5,
+    ),
     const Part(
-        section: Section.christianLife,
-        number: 4,
-        title: 'Estudio biblico de la congregacion',
-        minutes: 30),
+      section: Section.christianLife,
+      number: 4,
+      title: 'Estudio biblico de la congregacion',
+      minutes: 30,
+    ),
   ],
 );
 
@@ -45,33 +49,37 @@ Future<ProviderContainer> _pump(WidgetTester tester, {Size? size}) async {
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  final container = ProviderContainer(overrides: [
-    scheduleProvider.overrideWithValue(buildSchedule(_week, 18 * 60, 105)),
-  ]);
+  final container = ProviderContainer(
+    overrides: [
+      scheduleProvider.overrideWithValue(buildSchedule(_week, 18 * 60, 105)),
+    ],
+  );
   addTearDown(container.dispose);
 
-  await tester.pumpWidget(TranslationProvider(
-    child: UncontrolledProviderScope(
-      container: container,
-      child: MaterialApp(
-        theme: buildAppTheme(pizarra.light, Brightness.light),
-        home: const Scaffold(body: SafeArea(child: WorkspacePanel())),
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildAppTheme(pizarra.light, Brightness.light),
+          home: const Scaffold(body: SafeArea(child: WorkspacePanel())),
+        ),
       ),
     ),
-  ));
+  );
   await tester.pump();
   return container;
 }
 
 List<String> _cardTitles(WidgetTester tester) => [
-      for (final c in tester.widgetList<PartCard>(find.byType(PartCard)))
-        c.view.title,
-    ];
+  for (final c in tester.widgetList<PartCard>(find.byType(PartCard)))
+    c.view.title,
+];
 
 List<({int? done, int? total})> _counters(WidgetTester tester) => [
-      for (final h in tester.widgetList<SectionHeader>(find.byType(SectionHeader)))
-        (done: h.done, total: h.total),
-    ];
+  for (final h in tester.widgetList<SectionHeader>(find.byType(SectionHeader)))
+    (done: h.done, total: h.total),
+];
 
 void main() {
   testWidgets('section counters come from the schedule slots', (tester) async {
@@ -103,8 +111,7 @@ void main() {
 
   testWidgets('a name does not rebuild any card', (tester) async {
     final container = await _pump(tester);
-    final before =
-        tester.widgetList<PartCard>(find.byType(PartCard)).toList();
+    final before = tester.widgetList<PartCard>(find.byType(PartCard)).toList();
 
     container.read(formProvider.notifier).setMainNames('te0', ['Ana']);
     await tester.pump();
@@ -112,13 +119,17 @@ void main() {
     final after = tester.widgetList<PartCard>(find.byType(PartCard)).toList();
     expect(after, hasLength(before.length));
     for (var i = 0; i < before.length; i++) {
-      expect(identical(before[i], after[i]), isTrue,
-          reason: 'card $i was rebuilt; only its own slot should react');
+      expect(
+        identical(before[i], after[i]),
+        isTrue,
+        reason: 'card $i was rebuilt; only its own slot should react',
+      );
     }
   });
 
-  testWidgets('the auxiliary room adds its slots to the eligible sections',
-      (tester) async {
+  testWidgets('the auxiliary room adds its slots to the eligible sections', (
+    tester,
+  ) async {
     final container = await _pump(tester);
 
     container.read(formProvider.notifier).setAuxRoom(true);

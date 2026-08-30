@@ -36,17 +36,23 @@ Progress _progressOf(
 final progressProvider = Provider<Progress>((ref) {
   final schedule = ref.watch(scheduleProvider);
   if (schedule == null) return (done: 0, total: 0);
-  final f = ref.watch(formProvider.select((f) => (
+  final f = ref.watch(
+    formProvider.select(
+      (f) => (
         chairman: f.chairman,
         main: f.main,
         auxiliary: f.auxiliary,
         auxRoom: f.auxRoom,
-      )));
-  return _progressOf(schedule,
-      chairman: f.chairman,
-      main: f.main,
-      auxiliary: f.auxiliary,
-      auxRoom: f.auxRoom);
+      ),
+    ),
+  );
+  return _progressOf(
+    schedule,
+    chairman: f.chairman,
+    main: f.main,
+    auxiliary: f.auxiliary,
+    auxRoom: f.auxRoom,
+  );
 });
 
 /// Progress of each notebook week (for the "Go to week" meters).
@@ -59,14 +65,18 @@ final progressProvider = Provider<Progress>((ref) {
 final progressPerWeekProvider = Provider<List<Progress>>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return const [];
-  final f = ref.watch(formProvider.select((f) => (
+  final f = ref.watch(
+    formProvider.select(
+      (f) => (
         startMinutes: f.startMinutes,
         duration: f.duration,
         auxRoom: f.auxRoom,
         chairmanByWeek: f.chairmanByWeek,
         mainByWeek: f.mainByWeek,
         auxByWeek: f.auxByWeek,
-      )));
+      ),
+    ),
+  );
   return [
     for (var i = 0; i < weeks.length; i++)
       _progressOf(

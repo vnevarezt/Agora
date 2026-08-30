@@ -90,7 +90,10 @@ class RolePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s10,
+        vertical: Space.s4,
+      ),
       decoration: BoxDecoration(
         color: t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rPill),

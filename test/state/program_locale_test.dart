@@ -22,9 +22,9 @@ void main() {
 
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
-    container = ProviderContainer(overrides: [
-      dbProvider.overrideWithValue(db),
-    ]);
+    container = ProviderContainer(
+      overrides: [dbProvider.overrideWithValue(db)],
+    );
     addTearDown(container.dispose);
     addTearDown(db.close);
     // Riverpod 3 pauses unlistened providers, and the locale hangs off the
@@ -39,28 +39,36 @@ void main() {
   }
 
   Future<void> openProjectMeetingIn(String meetingLanguage) async {
-    final cong = await container.read(congregationsRepositoryProvider).create(
+    final cong = await container
+        .read(congregationsRepositoryProvider)
+        .create(
           name: 'Riverside',
           number: '104772',
           settings: CongregationSettings(meetingLanguage: meetingLanguage),
         );
-    final projectId = await container.read(projectsRepositoryProvider).create(
-      name: 'July',
-      congregationId: cong.id,
-      weeks: [(start: '', label: 'JULY 6-12')],
-    );
-    await settle();
-    await container.read(editorOpenerProvider).open(Project(
-          id: projectId,
+    final projectId = await container
+        .read(projectsRepositoryProvider)
+        .create(
           name: 'July',
           congregationId: cong.id,
-          weeks: const [],
-          done: 0,
-          total: 0,
-          status: ProjectStatus.draft,
-          editedLabel: '',
-          updatedAt: DateTime.utc(2026, 1, 1),
-        ));
+          weeks: [(start: '', label: 'JULY 6-12')],
+        );
+    await settle();
+    await container
+        .read(editorOpenerProvider)
+        .open(
+          Project(
+            id: projectId,
+            name: 'July',
+            congregationId: cong.id,
+            weeks: const [],
+            done: 0,
+            total: 0,
+            status: ProjectStatus.draft,
+            editedLabel: '',
+            updatedAt: DateTime.utc(2026, 1, 1),
+          ),
+        );
     // The project list is what carries the congregation id, and it lands a
     // stream tick after the editor opens.
     await settle();

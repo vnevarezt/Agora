@@ -45,17 +45,17 @@ class SyncStatus {
     int? pendingOutbox,
     String? errorKey,
     bool clearError = false,
-  }) =>
-      SyncStatus(
-        phase: phase ?? this.phase,
-        lastSyncAt: lastSyncAt ?? this.lastSyncAt,
-        pendingOutbox: pendingOutbox ?? this.pendingOutbox,
-        errorKey: clearError ? null : (errorKey ?? this.errorKey),
-      );
+  }) => SyncStatus(
+    phase: phase ?? this.phase,
+    lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+    pendingOutbox: pendingOutbox ?? this.pendingOutbox,
+    errorKey: clearError ? null : (errorKey ?? this.errorKey),
+  );
 }
 
-final syncControllerProvider =
-    NotifierProvider<SyncController, SyncStatus>(SyncController.new);
+final syncControllerProvider = NotifierProvider<SyncController, SyncStatus>(
+  SyncController.new,
+);
 
 /// Drives the engine so the user never has to (docs/PHASE4_CLOUD_SYNC.md,
 /// 4b-3):
@@ -126,8 +126,10 @@ class SyncController extends Notifier<SyncStatus> {
     // after a rotation and clean up after a revocation; opening a view flushes
     // its deferred pulls (the lazy window exists to coalesce, not to let the
     // user see stale data they're looking at).
-    ref.listen(myMembershipsProvider,
-        (_, next) => unawaited(_onMemberships(next)));
+    ref.listen(
+      myMembershipsProvider,
+      (_, next) => unawaited(_onMemberships(next)),
+    );
     // A congregation created locally must reach the cloud on its own.
     ref.listen(congregationsProvider, (_, _) => _autoEnable());
     ref.listen(editorProjectProvider, (prev, next) {
@@ -197,14 +199,14 @@ class SyncController extends Notifier<SyncStatus> {
   void _arm() {
     final db = ref.read(dbProvider);
     // Debounced push on every outbox change + a live pending count.
-    _outboxSub =
-        db.customSelect('SELECT COUNT(*) AS c FROM outbox').watch().listen(
-      (rows) {
-        final count = rows.first.read<int>('c');
-        state = state.copyWith(pendingOutbox: count);
-        if (count > 0) _schedulePush();
-      },
-    );
+    _outboxSub = db
+        .customSelect('SELECT COUNT(*) AS c FROM outbox')
+        .watch()
+        .listen((rows) {
+          final count = rows.first.read<int>('c');
+          state = state.copyWith(pendingOutbox: count);
+          if (count > 0) _schedulePush();
+        });
     // Regained network or foregrounded: drain whatever queued meanwhile.
     // (Pulls need no hook here — the heartbeat listeners reconnect on their
     // own and redeliver anything missed.)
@@ -309,9 +311,7 @@ class SyncController extends Notifier<SyncStatus> {
     final memberships = ref.read(myMembershipsProvider);
     // Until memberships load we can't tell which are missing.
     if (memberships.isLoading || memberships.hasError) return;
-    final inCloud = {
-      for (final m in memberships.value ?? []) m.congregationId,
-    };
+    final inCloud = {for (final m in memberships.value ?? []) m.congregationId};
     // A congregation already in `syncState` but NOT in our memberships was
     // revoked (syncState is written only when sharing STARTS): never try to
     // re-found its cloud space.
@@ -366,8 +366,10 @@ class SyncController extends Notifier<SyncStatus> {
           .collection('meta')
           .doc('activity')
           .snapshots()
-          .listen((snap) => _onHeartbeat(cid, snap),
-              onError: (Object e) => _onHeartbeatError(cid, e));
+          .listen(
+            (snap) => _onHeartbeat(cid, snap),
+            onError: (Object e) => _onHeartbeatError(cid, e),
+          );
 
   /// A heartbeat listener that dies takes its congregation's syncing with it.
   ///
@@ -390,8 +392,12 @@ class SyncController extends Notifier<SyncStatus> {
     } else {
       _staleCids.add(cid);
     }
-    _onTransportError(SyncTransportException(
-        kind, 'Heartbeat listener for $cid failed: $error'));
+    _onTransportError(
+      SyncTransportException(
+        kind,
+        'Heartbeat listener for $cid failed: $error',
+      ),
+    );
   }
 
   Future<void> _onHeartbeat(
@@ -413,8 +419,10 @@ class SyncController extends Notifier<SyncStatus> {
       fromOwnDevice: data?['srcDevice'] == deviceId(),
       heartbeatExists: snap.exists,
     );
-    syncTrace('heartbeat $cid exists=${snap.exists} '
-        'scopes=${scopes.length} cursor=${await _cursorOf(cid)} -> $urgency');
+    syncTrace(
+      'heartbeat $cid exists=${snap.exists} '
+      'scopes=${scopes.length} cursor=${await _cursorOf(cid)} -> $urgency',
+    );
     switch (urgency) {
       case PullUrgency.none:
         // Nothing newer than our cursor IS the confirmation that we're up to
@@ -432,9 +440,10 @@ class SyncController extends Notifier<SyncStatus> {
   }
 
   Future<String?> _cursorOf(String cid) async {
-    final row = await (ref.read(dbProvider).select(ref.read(dbProvider).syncState)
-          ..where((t) => t.congregationId.equals(cid)))
-        .getSingleOrNull();
+    final row =
+        await (ref.read(dbProvider).select(ref.read(dbProvider).syncState)
+              ..where((t) => t.congregationId.equals(cid)))
+            .getSingleOrNull();
     return row?.pullCursor;
   }
 
@@ -490,8 +499,10 @@ class SyncController extends Notifier<SyncStatus> {
     // arrive won this flag, and the rest were discarded — no retry, no error,
     // no trace. Which is precisely a restore that sits at "1 of 4" for ever.
     if (_pulling || engine == null) {
-      syncTrace('queued ${cids.join(', ')} '
-          '(pulling=$_pulling engine=${engine != null})');
+      syncTrace(
+        'queued ${cids.join(', ')} '
+        '(pulling=$_pulling engine=${engine != null})',
+      );
       _queuedCids.addAll(cids);
       // Nothing will bring us back on its own while the engine is missing:
       // the heartbeats that would have are already spent.
@@ -549,9 +560,11 @@ class SyncController extends Notifier<SyncStatus> {
     PullResult page;
     do {
       page = await engine.pullOnce(cid);
-      syncTrace('page $cid fetched=${page.fetched} applied=${page.applied} '
-          'undecryptable=${page.undecryptable} '
-          'keyringMissing=${page.keyringMissing} held=${page.cursorHeld}');
+      syncTrace(
+        'page $cid fetched=${page.fetched} applied=${page.applied} '
+        'undecryptable=${page.undecryptable} '
+        'keyringMissing=${page.keyringMissing} held=${page.cursorHeld}',
+      );
       if (page.keyringMissing) {
         // Nothing was read, so there is nothing to report as done. The key
         // is fetched and sealed per congregation, and a device that has just
@@ -586,11 +599,13 @@ class SyncController extends Notifier<SyncStatus> {
     // row, so a congregation whose cloud space holds people and projects but
     // no congregation doc pulls perfectly and never finishes restoring.
     final db = ref.read(dbProvider);
-    final row = await (db.select(db.congregations)
-          ..where((t) => t.id.equals(cid)))
-        .getSingleOrNull();
-    syncTrace('drained $cid -> congregation row '
-        '${row == null ? "STILL MISSING" : "present (${row.name})"}');
+    final row = await (db.select(
+      db.congregations,
+    )..where((t) => t.id.equals(cid))).getSingleOrNull();
+    syncTrace(
+      'drained $cid -> congregation row '
+      '${row == null ? "STILL MISSING" : "present (${row.name})"}',
+    );
   }
 
   // ---- outcomes ------------------------------------------------------------
@@ -600,17 +615,26 @@ class SyncController extends Notifier<SyncStatus> {
     _retryTimer?.cancel();
     _retryTimer = null;
     state = state.copyWith(
-        phase: SyncPhase.idle, lastSyncAt: DateTime.now(), clearError: true);
+      phase: SyncPhase.idle,
+      lastSyncAt: DateTime.now(),
+      clearError: true,
+    );
   }
 
   void _onTransportError(SyncTransportException e) {
     state = switch (e.kind) {
-      SyncTransportErrorKind.offline =>
-        state.copyWith(phase: SyncPhase.offline, errorKey: 'offline'),
-      SyncTransportErrorKind.permissionDenied =>
-        state.copyWith(phase: SyncPhase.error, errorKey: 'permissionDenied'),
-      SyncTransportErrorKind.unknown =>
-        state.copyWith(phase: SyncPhase.error, errorKey: 'unknown'),
+      SyncTransportErrorKind.offline => state.copyWith(
+        phase: SyncPhase.offline,
+        errorKey: 'offline',
+      ),
+      SyncTransportErrorKind.permissionDenied => state.copyWith(
+        phase: SyncPhase.error,
+        errorKey: 'permissionDenied',
+      ),
+      SyncTransportErrorKind.unknown => state.copyWith(
+        phase: SyncPhase.error,
+        errorKey: 'unknown',
+      ),
     };
     _scheduleRetry();
   }
@@ -619,8 +643,7 @@ class SyncController extends Notifier<SyncStatus> {
   /// the queued outbox and whatever went stale meanwhile.
   void _scheduleRetry() {
     if (_retryTimer != null) return;
-    final delay =
-        _retryDelays[_failures.clamp(0, _retryDelays.length - 1)];
+    final delay = _retryDelays[_failures.clamp(0, _retryDelays.length - 1)];
     _failures++;
     _retryTimer = Timer(delay, () {
       _retryTimer = null;

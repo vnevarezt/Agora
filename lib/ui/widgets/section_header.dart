@@ -24,7 +24,11 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.only(left: Space.s2, right: Space.s2, bottom: Space.s12),
+      padding: const EdgeInsets.only(
+        left: Space.s2,
+        right: Space.s2,
+        bottom: Space.s12,
+      ),
       child: Row(
         children: [
           if (dotColor != null) ...[

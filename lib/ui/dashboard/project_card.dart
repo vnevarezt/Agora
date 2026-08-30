@@ -46,7 +46,12 @@ class ProjectCard extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(Space.s18, Space.s18, Space.s18, Space.s14),
+              padding: const EdgeInsets.fromLTRB(
+                Space.s18,
+                Space.s18,
+                Space.s18,
+                Space.s14,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

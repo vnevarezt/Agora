@@ -26,16 +26,14 @@ SheetProbe Function(SheetFit) _block({
   double breaksAbove = double.infinity,
   int officialBreaks = 0,
   bool breaksNames = false,
-}) =>
-    (f) {
-      final broken =
-          officialBreaks + (f.type > breaksAbove + 1e-9 ? 3 : 0);
-      return (
-        height: natural * f.type + (f.air - 1) * airCost,
-        titleBreaks: breaksNames ? 0 : broken,
-        nameBreaks: breaksNames ? broken : 0,
-      );
-    };
+}) => (f) {
+  final broken = officialBreaks + (f.type > breaksAbove + 1e-9 ? 3 : 0);
+  return (
+    height: natural * f.type + (f.air - 1) * airCost,
+    titleBreaks: breaksNames ? 0 : broken,
+    nameBreaks: breaksNames ? broken : 0,
+  );
+};
 
 void main() {
   test('a one-week sheet that overflows is left exactly as it is', () {
@@ -45,10 +43,16 @@ void main() {
       metrics: S140Metrics.standard,
     );
 
-    expect(S140Metrics.standard.minTypeScale, 1,
-        reason: 'this sheet may flow to a second page');
-    expect(fit, noFit,
-        reason: 'the caller decides what to do about an overflow, not the fit');
+    expect(
+      S140Metrics.standard.minTypeScale,
+      1,
+      reason: 'this sheet may flow to a second page',
+    );
+    expect(
+      fit,
+      noFit,
+      reason: 'the caller decides what to do about an overflow, not the fit',
+    );
   });
 
   test('a sheet that cannot flow shrinks its type instead of overflowing', () {

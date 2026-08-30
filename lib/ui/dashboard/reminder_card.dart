@@ -19,18 +19,34 @@ class ReminderCard extends StatelessWidget {
     final t = context.tokens;
     final r = recordatorio;
 
-    final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
-        switch (r.type) {
-      ReminderType.alert =>
-        (Icons.warning_amber_rounded, t.alertSoft, t.alert, null),
-      ReminderType.task =>
-        (Icons.schedule, t.accentSoft, t.accentStrong, null),
-      ReminderType.info =>
-        (Icons.auto_awesome_outlined, t.surface2, t.textDim, t.border2),
+    final (
+      IconData icono,
+      Color iconBg,
+      Color iconFg,
+      Color? iconBorde,
+    ) = switch (r.type) {
+      ReminderType.alert => (
+        Icons.warning_amber_rounded,
+        t.alertSoft,
+        t.alert,
+        null,
+      ),
+      ReminderType.task => (Icons.schedule, t.accentSoft, t.accentStrong, null),
+      ReminderType.info => (
+        Icons.auto_awesome_outlined,
+        t.surface2,
+        t.textDim,
+        t.border2,
+      ),
     };
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s14,
+        Space.s12,
+        Space.s14,
+        Space.s12,
+      ),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
@@ -82,8 +98,7 @@ class ReminderCard extends StatelessWidget {
                       fontSize: AppText.small,
                       fontWeight: FontWeight.w800,
                       color: t.accentStrong,
-                      decoration:
-                          hovered ? TextDecoration.underline : null,
+                      decoration: hovered ? TextDecoration.underline : null,
                     ),
                   ),
                 ),

@@ -33,17 +33,17 @@ extension NotebookX on Notebook {
 /// class extends, so this resolves for whichever [Translations] is passed in.
 extension MonthNamesX on Translations {
   List<String> get monthNames => [
-        months.january,
-        months.february,
-        months.march,
-        months.april,
-        months.may,
-        months.june,
-        months.july,
-        months.august,
-        months.september,
-        months.october,
-        months.november,
-        months.december,
-      ];
+    months.january,
+    months.february,
+    months.march,
+    months.april,
+    months.may,
+    months.june,
+    months.july,
+    months.august,
+    months.september,
+    months.october,
+    months.november,
+    months.december,
+  ];
 }

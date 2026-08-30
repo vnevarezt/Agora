@@ -28,55 +28,74 @@ Person _p(String name, {bool active = true}) {
   );
 }
 
-Future<void> _pump(WidgetTester tester, List<Person> people,
-    {double maxHeight = 1200}) async {
+Future<void> _pump(
+  WidgetTester tester,
+  List<Person> people, {
+  double maxHeight = 1200,
+}) async {
   tester.view.physicalSize = const Size(800, 1200);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  await tester.pumpWidget(TranslationProvider(
-    child: ProviderScope(
-      overrides: [peopleProvider.overrideWithValue(people)],
-      child: MaterialApp(
-        theme: buildAppTheme(pizarra.light, Brightness.light),
-        home: Scaffold(
-          body: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxHeight, maxWidth: 320),
-              child: const PersonPickerPanel(
-                  roleLabel: 'Lector', current: '', maxLength: 40),
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: ProviderScope(
+        overrides: [peopleProvider.overrideWithValue(people)],
+        child: MaterialApp(
+          theme: buildAppTheme(pizarra.light, Brightness.light),
+          home: Scaffold(
+            body: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: maxHeight,
+                  maxWidth: 320,
+                ),
+                child: const PersonPickerPanel(
+                  roleLabel: 'Lector',
+                  current: '',
+                  maxLength: 40,
+                ),
+              ),
             ),
           ),
         ),
       ),
     ),
-  ));
+  );
   await tester.pump();
 }
 
 /// Lays out one row at [scale] and returns (actual height, prediction).
 Future<(double, double)> _measureRow(
-    WidgetTester tester, String name, String? tag, double scale) async {
+  WidgetTester tester,
+  String name,
+  String? tag,
+  double scale,
+) async {
   late double predicted;
-  await tester.pumpWidget(TranslationProvider(
-    child: MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-        child: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 300,
-              child: Builder(builder: (context) {
-                predicted = personPickerRowHeight(context);
-                return PersonPickerRow(name: name, tag: tag, onTap: () {});
-              }),
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+          child: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 300,
+                child: Builder(
+                  builder: (context) {
+                    predicted = personPickerRowHeight(context);
+                    return PersonPickerRow(name: name, tag: tag, onTap: () {});
+                  },
+                ),
+              ),
             ),
           ),
         ),
       ),
     ),
-  ));
+  );
   return (tester.getSize(find.byType(PersonPickerRow)).height, predicted);
 }
 
@@ -95,22 +114,36 @@ void main() {
       testWidgets('at text scale $scale', (tester) async {
         final heights = <double>{};
         for (final v in variants.values) {
-          final (actual, predicted) =
-              await _measureRow(tester, v.$1, v.$2, scale);
+          final (actual, predicted) = await _measureRow(
+            tester,
+            v.$1,
+            v.$2,
+            scale,
+          );
           heights.add(actual);
-          expect(predicted, greaterThanOrEqualTo(actual),
-              reason: 'a shorter extent clips the row');
-          expect(predicted - actual, lessThan(6),
-              reason: 'prediction drifted too far above the real height');
+          expect(
+            predicted,
+            greaterThanOrEqualTo(actual),
+            reason: 'a shorter extent clips the row',
+          );
+          expect(
+            predicted - actual,
+            lessThan(6),
+            reason: 'prediction drifted too far above the real height',
+          );
         }
-        expect(heights, hasLength(1),
-            reason: 'row height varies with content: $heights');
+        expect(
+          heights,
+          hasLength(1),
+          reason: 'row height varies with content: $heights',
+        );
       });
     }
   });
 
-  testWidgets('lists the active people, sorted, without the inactive ones',
-      (tester) async {
+  testWidgets('lists the active people, sorted, without the inactive ones', (
+    tester,
+  ) async {
     await _pump(tester, [
       _p('Zacarías'),
       _p('Ana'),
@@ -145,7 +178,9 @@ void main() {
     await _pump(tester, [_p('Ana'), _p('Bruno')], maxHeight: 600);
 
     // Sizing to content is what shrinkWrap buys; virtualising must not cost it.
-    expect(tester.getSize(find.byType(PersonPickerPanel)).height,
-        lessThan(400));
+    expect(
+      tester.getSize(find.byType(PersonPickerPanel)).height,
+      lessThan(400),
+    );
   });
 }

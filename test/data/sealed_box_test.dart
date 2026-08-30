@@ -18,32 +18,43 @@ void main() {
     final seed = PassphraseEnvelope.randomBytes(32);
     final other = PassphraseEnvelope.randomBytes(32);
     final box = await SealedBox.seal(
-        List<int>.filled(32, 7), await SealedBox.publicKeyOf(seed));
-    expect(() => SealedBox.open(box, other),
-        throwsA(isA<SealedBoxException>()));
+      List<int>.filled(32, 7),
+      await SealedBox.publicKeyOf(seed),
+    );
+    expect(
+      () => SealedBox.open(box, other),
+      throwsA(isA<SealedBoxException>()),
+    );
   });
 
   test('tampered ciphertext is rejected', () async {
     final seed = PassphraseEnvelope.randomBytes(32);
-    final box = Map<String, String>.of(await SealedBox.seal(
-        List<int>.filled(32, 7), await SealedBox.publicKeyOf(seed)));
+    final box = Map<String, String>.of(
+      await SealedBox.seal(
+        List<int>.filled(32, 7),
+        await SealedBox.publicKeyOf(seed),
+      ),
+    );
     box['ct'] = box['ct']!.replaceRange(0, 1, box['ct']![0] == 'A' ? 'B' : 'A');
-    expect(() => SealedBox.open(box, seed),
-        throwsA(isA<SealedBoxException>()));
+    expect(() => SealedBox.open(box, seed), throwsA(isA<SealedBoxException>()));
   });
 
   test('malformed box map throws, not crashes', () async {
-    expect(() => SealedBox.open({'epk': '!!'}, List<int>.filled(32, 1)),
-        throwsA(isA<SealedBoxException>()));
+    expect(
+      () => SealedBox.open({'epk': '!!'}, List<int>.filled(32, 1)),
+      throwsA(isA<SealedBoxException>()),
+    );
   });
 
-  test('two seals of the same secret differ (fresh ephemeral + nonce)',
-      () async {
-    final seed = PassphraseEnvelope.randomBytes(32);
-    final pub = await SealedBox.publicKeyOf(seed);
-    final a = await SealedBox.seal(List<int>.filled(32, 7), pub);
-    final b = await SealedBox.seal(List<int>.filled(32, 7), pub);
-    expect(a['ct'] == b['ct'], isFalse);
-    expect(a['epk'] == b['epk'], isFalse);
-  });
+  test(
+    'two seals of the same secret differ (fresh ephemeral + nonce)',
+    () async {
+      final seed = PassphraseEnvelope.randomBytes(32);
+      final pub = await SealedBox.publicKeyOf(seed);
+      final a = await SealedBox.seal(List<int>.filled(32, 7), pub);
+      final b = await SealedBox.seal(List<int>.filled(32, 7), pub);
+      expect(a['ct'] == b['ct'], isFalse);
+      expect(a['epk'] == b['epk'], isFalse);
+    },
+  );
 }

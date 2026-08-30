@@ -23,13 +23,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// A workbook shaped like the real ones: a cover image named after the
 /// publication, and one week.
-Uint8List _workbook({
-  required String fixture,
-  String? cover,
-}) {
+Uint8List _workbook({required String fixture, String? cover}) {
   final archive = Archive()
-    ..addFile(ArchiveFile.string('OEBPS/000000001.xhtml',
-        File('test/fixtures/mwb/$fixture').readAsStringSync()));
+    ..addFile(
+      ArchiveFile.string(
+        'OEBPS/000000001.xhtml',
+        File('test/fixtures/mwb/$fixture').readAsStringSync(),
+      ),
+    );
   if (cover != null) {
     archive.addFile(ArchiveFile('OEBPS/images/$cover', 3, [1, 2, 3]));
   }
@@ -39,7 +40,8 @@ Uint8List _workbook({
 void main() {
   test('the file says which publication it is', () {
     final parsed = parseWorkbookEpub(
-        _workbook(fixture: 'es_week.xhtml', cover: 'mwb_S_202607.jpg'));
+      _workbook(fixture: 'es_week.xhtml', cover: 'mwb_S_202607.jpg'),
+    );
 
     expect(parsed, isNotNull);
     expect(parsed!.lang, 'S');
@@ -52,19 +54,24 @@ void main() {
     // a week only resolves its Monday against the right period, so filing a
     // workbook under a neighbouring issue would quietly cost it its identity.
     final parsed = parseWorkbookEpub(
-        _workbook(fixture: 'es_week.xhtml', cover: 'mwb_S_202607.jpg'));
+      _workbook(fixture: 'es_week.xhtml', cover: 'mwb_S_202607.jpg'),
+    );
 
     expect(parsed!.weeks.single.weekStart, '2026-07-06');
   });
 
   test('the English edition is read the same way', () {
     final parsed = parseWorkbookEpub(
-        _workbook(fixture: 'en_week.xhtml', cover: 'mwb_E_202607.jpg'));
+      _workbook(fixture: 'en_week.xhtml', cover: 'mwb_E_202607.jpg'),
+    );
 
     expect(parsed!.lang, 'E');
     expect(parsed.issue, '202607');
-    expect(parsed.weeks.single.weekStart, '2026-07-06',
-        reason: 'one identity, two languages');
+    expect(
+      parsed.weeks.single.weekStart,
+      '2026-07-06',
+      reason: 'one identity, two languages',
+    );
   });
 
   test('a file that is not a workbook is refused rather than filed', () {
@@ -76,9 +83,11 @@ void main() {
 
   test('a cover that is not a workbook cover does not count as one', () {
     expect(
-        parseWorkbookEpub(
-            _workbook(fixture: 'es_week.xhtml', cover: 'w_S_202607.jpg')),
-        isNull,
-        reason: 'w is the Watchtower; only mwb is this program');
+      parseWorkbookEpub(
+        _workbook(fixture: 'es_week.xhtml', cover: 'w_S_202607.jpg'),
+      ),
+      isNull,
+      reason: 'w is the Watchtower; only mwb is this program',
+    );
   });
 }

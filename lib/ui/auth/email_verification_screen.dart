@@ -25,7 +25,8 @@ class EmailVerificationScreen extends ConsumerStatefulWidget {
 }
 
 class _EmailVerificationScreenState
-    extends ConsumerState<EmailVerificationScreen> with ResendCooldown {
+    extends ConsumerState<EmailVerificationScreen>
+    with ResendCooldown {
   bool _busy = false;
   String? _error;
   Timer? _pollTimer;

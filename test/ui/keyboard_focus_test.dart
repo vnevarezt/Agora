@@ -12,32 +12,41 @@ import 'package:flutter_test/flutter_test.dart';
 // operated without a mouse.
 
 Future<void> _pump(WidgetTester tester, Widget child) async {
-  await tester.pumpWidget(MaterialApp(
-    theme: buildAppTheme(pizarra.light, Brightness.light),
-    home: Scaffold(body: Center(child: child)),
-  ));
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: buildAppTheme(pizarra.light, Brightness.light),
+      home: Scaffold(body: Center(child: child)),
+    ),
+  );
 }
 
 void main() {
   /// Border of the foreground DecoratedBox Pressable uses for the ring.
   BoxBorder? ringOf(WidgetTester tester, Finder control) {
-    final box = tester.widgetList<DecoratedBox>(find.descendant(
-      of: control,
-      matching: find.byType(DecoratedBox),
-    )).firstWhere((d) => d.position == DecorationPosition.foreground);
+    final box = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(of: control, matching: find.byType(DecoratedBox)),
+        )
+        .firstWhere((d) => d.position == DecorationPosition.foreground);
     return (box.decoration as BoxDecoration).border;
   }
 
   testWidgets('tabbing to a control shows a focus ring', (tester) async {
     await _pump(tester, AppButton(label: 'Guardar', onPressed: () {}));
-    expect(ringOf(tester, find.byType(AppButton)), isNull,
-        reason: 'no ring before the control is focused');
+    expect(
+      ringOf(tester, find.byType(AppButton)),
+      isNull,
+      reason: 'no ring before the control is focused',
+    );
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
 
-    expect(ringOf(tester, find.byType(AppButton)), isNotNull,
-        reason: 'the control must show a visible focus indicator');
+    expect(
+      ringOf(tester, find.byType(AppButton)),
+      isNotNull,
+      reason: 'the control must show a visible focus indicator',
+    );
   });
 
   testWidgets('Enter and Space activate a focused control', (tester) async {
@@ -56,8 +65,9 @@ void main() {
     expect(taps, 2);
   });
 
-  testWidgets('a disabled control is skipped by the focus traversal',
-      (tester) async {
+  testWidgets('a disabled control is skipped by the focus traversal', (
+    tester,
+  ) async {
     await _pump(
       tester,
       const Column(

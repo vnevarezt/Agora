@@ -33,11 +33,13 @@ void main() {
     );
   });
 
-  test('carries closed-over state, which is what Isolate.run could not',
-      () async {
-    // Isolate.run has to copy captured values across; inline execution shares
-    // them. Either way the caller sees the same result.
-    final captured = [1, 2, 3];
-    expect(await runInBackground(() => captured.length), 3);
-  });
+  test(
+    'carries closed-over state, which is what Isolate.run could not',
+    () async {
+      // Isolate.run has to copy captured values across; inline execution shares
+      // them. Either way the caller sees the same result.
+      final captured = [1, 2, 3];
+      expect(await runInBackground(() => captured.length), 3);
+    },
+  );
 }

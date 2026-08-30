@@ -51,7 +51,8 @@ final programLocaleProvider = Provider<AppLocale>((ref) {
 /// debounce so typing feels real-time.
 final previewProvider =
     NotifierProvider<PreviewController, AsyncValue<ui.Image>>(
-        PreviewController.new);
+      PreviewController.new,
+    );
 
 class PreviewController extends Notifier<AsyncValue<ui.Image>> {
   Timer? _debounce;
@@ -163,18 +164,18 @@ class PreviewController extends Notifier<AsyncValue<ui.Image>> {
     final saver = ref.read(fileSaverProvider);
     return switch (action) {
       ExportAction.saveAs => saver.saveAs(
-          bytes: bytes,
-          suggestedName: name,
-          extension: extension,
-          mimeType: mimeType,
-          typeLabel: extension.toUpperCase(),
-        ),
+        bytes: bytes,
+        suggestedName: name,
+        extension: extension,
+        mimeType: mimeType,
+        typeLabel: extension.toUpperCase(),
+      ),
       ExportAction.share => saver.share(
-          bytes: bytes,
-          suggestedName: name,
-          mimeType: mimeType,
-          originRect: shareOrigin,
-        ),
+        bytes: bytes,
+        suggestedName: name,
+        mimeType: mimeType,
+        originRect: shareOrigin,
+      ),
     };
   }
 

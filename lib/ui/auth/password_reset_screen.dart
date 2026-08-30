@@ -26,8 +26,7 @@ class PasswordResetPanel extends ConsumerStatefulWidget {
   final String initialEmail;
 
   @override
-  ConsumerState<PasswordResetPanel> createState() =>
-      _PasswordResetPanelState();
+  ConsumerState<PasswordResetPanel> createState() => _PasswordResetPanelState();
 }
 
 class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>

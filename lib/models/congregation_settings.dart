@@ -42,7 +42,8 @@ class CongregationSettings {
     final midweek = decoded['midweek'];
     final weekend = decoded['weekend'];
     return CongregationSettings(
-      meetingLanguage: decoded['meetingLanguage'] is String &&
+      meetingLanguage:
+          decoded['meetingLanguage'] is String &&
               congregationLanguageCodes.contains(decoded['meetingLanguage'])
           ? decoded['meetingLanguage'] as String
           : defaults.meetingLanguage,
@@ -72,11 +73,11 @@ class CongregationSettings {
   }
 
   String toJson() => jsonEncode({
-        'meetingLanguage': meetingLanguage,
-        'midweek': {'weekday': midweekDay, 'time': midweekTime},
-        'weekend': {'weekday': weekendDay, 'time': weekendTime},
-        'auxRoom': auxRoom,
-      });
+    'meetingLanguage': meetingLanguage,
+    'midweek': {'weekday': midweekDay, 'time': midweekTime},
+    'weekend': {'weekday': weekendDay, 'time': weekendTime},
+    'auxRoom': auxRoom,
+  });
 
   CongregationSettings copyWith({
     String? meetingLanguage,

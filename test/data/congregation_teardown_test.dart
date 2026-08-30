@@ -26,7 +26,7 @@ void main() {
         },
     };
     docs.invites[cid] = {
-      't1': {'capabilities': const MemberCapabilities().toMap()}
+      't1': {'capabilities': const MemberCapabilities().toMap()},
     };
     transport.docs[cid] = {};
     transport.activity[cid] = {'scopes': <String, String>{}};

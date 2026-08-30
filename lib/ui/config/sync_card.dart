@@ -30,21 +30,26 @@ class SyncCard extends ConsumerWidget {
       desc: tr.cloudSync.desc,
       children: [
         switch (keys) {
-          SyncKeysUnavailable() =>
-            SettingRow(first: true, title: tr.cloudSync.signedOut),
+          SyncKeysUnavailable() => SettingRow(
+            first: true,
+            title: tr.cloudSync.signedOut,
+          ),
           SyncKeysLoading() => const SettingRow(first: true, title: '…'),
           SyncKeysStalled() => SettingRow(
-              first: true,
-              title: tr.cloudSync.statusOffline,
-              subtitle: tr.cloudSync.errorOffline,
-            ),
+            first: true,
+            title: tr.cloudSync.statusOffline,
+            subtitle: tr.cloudSync.errorOffline,
+          ),
           SyncKeysError() => SettingRow(
-              first: true,
-              title: tr.cloudSync.statusError,
-              subtitle: tr.cloudSync.unknownError,
-            ),
-          SyncKeysReady() =>
-            _statusRow(tr, ref, ref.watch(syncControllerProvider)),
+            first: true,
+            title: tr.cloudSync.statusError,
+            subtitle: tr.cloudSync.unknownError,
+          ),
+          SyncKeysReady() => _statusRow(
+            tr,
+            ref,
+            ref.watch(syncControllerProvider),
+          ),
         },
       ],
     );
@@ -56,15 +61,18 @@ class SyncCard extends ConsumerWidget {
         : tr.cloudSync.lastSync(when: relativeEditedLabel(s.lastSyncAt!));
     final (title, subtitle) = switch (s.phase) {
       SyncPhase.syncing => (tr.cloudSync.statusSyncing, when),
-      SyncPhase.offline => (tr.cloudSync.statusOffline, tr.cloudSync.errorOffline),
+      SyncPhase.offline => (
+        tr.cloudSync.statusOffline,
+        tr.cloudSync.errorOffline,
+      ),
       SyncPhase.error => (
-          tr.cloudSync.statusError,
-          switch (s.errorKey) {
-            'permissionDenied' => tr.cloudSync.errorPermission,
-            'offline' => tr.cloudSync.errorOffline,
-            _ => tr.cloudSync.errorUnknown,
-          }
-        ),
+        tr.cloudSync.statusError,
+        switch (s.errorKey) {
+          'permissionDenied' => tr.cloudSync.errorPermission,
+          'offline' => tr.cloudSync.errorOffline,
+          _ => tr.cloudSync.errorUnknown,
+        },
+      ),
       _ => (tr.cloudSync.ready, when),
     };
     final busy = s.phase == SyncPhase.syncing;

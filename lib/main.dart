@@ -22,7 +22,5 @@ Future<void> main() async {
   if (!kIsWeb) pdfrxFlutterInitialize();
   await initLocale(); // restaura el idioma guardado o sigue el del dispositivo
   await initAppSettings(); // restaura tema y preferencias de la app
-  runApp(
-    TranslationProvider(child: const ProviderScope(child: AgoraApp())),
-  );
+  runApp(TranslationProvider(child: const ProviderScope(child: AgoraApp())));
 }

@@ -32,8 +32,10 @@ class MwbApi {
       }
       final data = jsonDecode(resp.body) as Map<String, dynamic>;
       try {
-        final url = (((data['files'] as Map)[lang] as Map)['EPUB'] as List)[0]
-            ['file']['url'] as String;
+        final url =
+            (((data['files'] as Map)[lang] as Map)['EPUB']
+                    as List)[0]['file']['url']
+                as String;
         final date = (data['formattedDate'] as String?) ?? '';
         return (url: url, date: date);
       } catch (_) {
@@ -56,7 +58,9 @@ class MwbApi {
       final info = await epubUrl(issue, lang: lang, client: c);
       final resp = await c.get(Uri.parse(info.url));
       if (resp.statusCode != 200) {
-        throw Exception('Error al descargar el EPUB (HTTP ${resp.statusCode}).');
+        throw Exception(
+          'Error al descargar el EPUB (HTTP ${resp.statusCode}).',
+        );
       }
       return resp.bodyBytes;
     } finally {

@@ -41,11 +41,14 @@ Future<void> loadAppFonts() async {
   // test runner sits at a different depth than `dart` does, and both move
   // between SDK releases.
   File? icons;
-  for (var dir = File(Platform.resolvedExecutable).parent;
-      dir.path != dir.parent.path;
-      dir = dir.parent) {
-    final candidate =
-        File('${dir.path}/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  for (
+    var dir = File(Platform.resolvedExecutable).parent;
+    dir.path != dir.parent.path;
+    dir = dir.parent
+  ) {
+    final candidate = File(
+      '${dir.path}/artifacts/material_fonts/MaterialIcons-Regular.otf',
+    );
     if (candidate.existsSync()) {
       icons = candidate;
       break;
@@ -58,9 +61,9 @@ Future<void> loadAppFonts() async {
       'renders as a box and every image differs.',
     );
   }
-  await (FontLoader('MaterialIcons')
-        ..addFont(icons.readAsBytes().then(ByteData.sublistView)))
-      .load();
+  await (FontLoader(
+    'MaterialIcons',
+  )..addFont(icons.readAsBytes().then(ByteData.sublistView))).load();
 }
 
 /// One page of the catalog, on the app's real theme.
@@ -79,7 +82,9 @@ class GoldenPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = brightness == Brightness.light ? pizarra.light : pizarra.dark;
+    final tokens = brightness == Brightness.light
+        ? pizarra.light
+        : pizarra.dark;
     return ProviderScope(
       child: TranslationProvider(
         child: MaterialApp(
@@ -155,8 +160,5 @@ Future<void> expectGolden(
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 300));
 
-  await expectLater(
-    find.byType(MaterialApp),
-    matchesGoldenFile('$name.png'),
-  );
+  await expectLater(find.byType(MaterialApp), matchesGoldenFile('$name.png'));
 }

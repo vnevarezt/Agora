@@ -9,17 +9,17 @@ enum ProjectStatus { draft, complete, exported }
 extension ProjectStatusX on ProjectStatus {
   /// Singular label for the badge ("Borrador").
   String label(Translations tr) => switch (this) {
-        ProjectStatus.draft => tr.status.draft,
-        ProjectStatus.complete => tr.status.complete,
-        ProjectStatus.exported => tr.status.exported,
-      };
+    ProjectStatus.draft => tr.status.draft,
+    ProjectStatus.complete => tr.status.complete,
+    ProjectStatus.exported => tr.status.exported,
+  };
 
   /// Plural label for the filter chips ("Borradores").
   String plural(Translations tr) => switch (this) {
-        ProjectStatus.draft => tr.status.draftPlural,
-        ProjectStatus.complete => tr.status.completePlural,
-        ProjectStatus.exported => tr.status.exportedPlural,
-      };
+    ProjectStatus.draft => tr.status.draftPlural,
+    ProjectStatus.complete => tr.status.completePlural,
+    ProjectStatus.exported => tr.status.exportedPlural,
+  };
 }
 
 /// Per-week progress of a project (hero card chips).

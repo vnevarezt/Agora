@@ -37,11 +37,11 @@ class SyncReport {
   /// Issue ids repeat across languages, which is fine — nothing keys off them
   /// beyond [complete] and the counts.
   static SyncReport merge(Iterable<SyncReport> reports) => SyncReport(
-        downloaded: [for (final r in reports) ...r.downloaded],
-        skippedCached: [for (final r in reports) ...r.skippedCached],
-        skippedBackoff: [for (final r in reports) ...r.skippedBackoff],
-        failed: {for (final r in reports) ...r.failed},
-      );
+    downloaded: [for (final r in reports) ...r.downloaded],
+    skippedCached: [for (final r in reports) ...r.skippedCached],
+    skippedBackoff: [for (final r in reports) ...r.skippedBackoff],
+    failed: {for (final r in reports) ...r.failed},
+  );
 }
 
 /// Core sync algorithm (no Riverpod, so it is unit-testable):
@@ -106,7 +106,9 @@ Future<SyncReport> runMwbSync({
 /// A parse failure for an issue is tolerated (the notebook is listed with no
 /// weeks) so one bad file never empties the catalog.
 Future<Map<String, List<Notebook>>> buildCatalog(
-    MwbCache cache, MwbRepository repository) async {
+  MwbCache cache,
+  MwbRepository repository,
+) async {
   final manifest = await cache.readManifest();
   final byLang = <String, List<Notebook>>{};
   for (final e in manifest.entries) {
@@ -201,11 +203,9 @@ class MwbSyncController extends AsyncNotifier<SyncReport> {
     final repository = ref.read(repositoryProvider);
     final reports = <SyncReport>[];
     for (final lang in targets) {
-      reports.add(await runMwbSync(
-        cache: cache,
-        repository: repository,
-        lang: lang,
-      ));
+      reports.add(
+        await runMwbSync(cache: cache, repository: repository, lang: lang),
+      );
     }
     // Before publishing, not after: the catalog must describe what survived.
     await purgeUnneededIssues(
@@ -219,8 +219,9 @@ class MwbSyncController extends AsyncNotifier<SyncReport> {
   }
 }
 
-final mwbSyncProvider =
-    AsyncNotifierProvider<MwbSyncController, SyncReport>(MwbSyncController.new);
+final mwbSyncProvider = AsyncNotifierProvider<MwbSyncController, SyncReport>(
+  MwbSyncController.new,
+);
 
 /// Whether the workbook a congregation needs is on hand.
 enum WorkbookStatus {
@@ -240,28 +241,28 @@ enum WorkbookStatus {
 /// reported, a congregation whose language has notebooks can work.
 final congregationWorkbookStatusProvider =
     Provider.family<WorkbookStatus, String>((ref, congregationId) {
-  final lang = ref.watch(congregationLangProvider(congregationId));
-  if (ref.watch(notebooksForLangProvider(lang)).isNotEmpty) {
-    return WorkbookStatus.ready;
-  }
-  return ref.watch(mwbSyncProvider).isLoading
-      ? WorkbookStatus.downloading
-      : WorkbookStatus.unavailable;
-});
+      final lang = ref.watch(congregationLangProvider(congregationId));
+      if (ref.watch(notebooksForLangProvider(lang)).isNotEmpty) {
+        return WorkbookStatus.ready;
+      }
+      return ref.watch(mwbSyncProvider).isLoading
+          ? WorkbookStatus.downloading
+          : WorkbookStatus.unavailable;
+    });
 
 /// Every workbook the coverage window asks for, with the language it is needed
 /// in and whether the catalog already holds it. Empty while the congregations
 /// have not landed.
 final requiredNotebooksProvider =
     Provider<List<({String issue, String lang, bool have})>>((ref) {
-  final langs = ref.watch(requiredWorkbookLangsProvider);
-  if (langs == null || langs.isEmpty) return const [];
-  return [
-    for (final lang in langs.split(','))
-      for (final issue in requiredIssues(DateTime.now()))
-        (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
-  ];
-});
+      final langs = ref.watch(requiredWorkbookLangsProvider);
+      if (langs == null || langs.isEmpty) return const [];
+      return [
+        for (final lang in langs.split(','))
+          for (final issue in requiredIssues(DateTime.now()))
+            (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
+      ];
+    });
 
 /// Whether the catalog holds [issue] in [lang] with WEEKS in it. [buildCatalog]
 /// lists an issue whose EPUB would not parse rather than dropping it, so
@@ -286,23 +287,24 @@ bool _hasNotebook(Ref ref, String issue, String lang) => ref
 /// not be told a workbook is missing.
 final offerableNotebooksProvider =
     Provider<List<({String issue, String lang, bool have})>>((ref) {
-  final configured = ref.watch(requiredWorkbookLangsProvider);
-  final langs = (configured == null || configured.isEmpty)
-      ? [offerableWorkbookLang(ref.watch(localeProvider))]
-      : configured.split(',');
-  return [
-    for (final lang in langs)
-      for (final issue in requiredIssues(DateTime.now()))
-        (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
-  ];
-});
+      final configured = ref.watch(requiredWorkbookLangsProvider);
+      final langs = (configured == null || configured.isEmpty)
+          ? [offerableWorkbookLang(ref.watch(localeProvider))]
+          : configured.split(',');
+      return [
+        for (final lang in langs)
+          for (final issue in requiredIssues(DateTime.now()))
+            (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
+      ];
+    });
 
 /// The half of [requiredNotebooksProvider] that is not on hand.
-final missingNotebooksProvider =
-    Provider<List<({String issue, String lang})>>((ref) => [
-          for (final n in ref.watch(requiredNotebooksProvider))
-            if (!n.have) (issue: n.issue, lang: n.lang),
-        ]);
+final missingNotebooksProvider = Provider<List<({String issue, String lang})>>(
+  (ref) => [
+    for (final n in ref.watch(requiredNotebooksProvider))
+      if (!n.have) (issue: n.issue, lang: n.lang),
+  ],
+);
 
 /// What the header's catalog card reports.
 enum CatalogStatus { syncing, ready, incomplete }
@@ -335,11 +337,10 @@ final catalogStatusProvider = Provider<CatalogStatus>((ref) {
 /// to find it, and take it back through [NotebookImporter].
 final notebookLinkProvider =
     FutureProvider.family<String, ({String issue, String lang})>(
-        (ref, key) async =>
-            (await MwbApi.epubUrl(key.issue, lang: key.lang)).url);
+      (ref, key) async => (await MwbApi.epubUrl(key.issue, lang: key.lang)).url,
+    );
 
-final notebookImportProvider =
-    Provider<NotebookImporter>(NotebookImporter.new);
+final notebookImportProvider = Provider<NotebookImporter>(NotebookImporter.new);
 
 /// Takes a workbook EPUB the user picked off their own disk and puts it where
 /// a download would have: cached, catalogued, and reconciled into the program
@@ -361,8 +362,14 @@ class NotebookImporter {
 
     // Same two steps a refresh ends with: the catalog is what the editor and
     // the congregation status read, and the snapshots are downstream of it.
-    _ref.read(notebooksByLangProvider.notifier).setFrom(await buildCatalog(
-        _ref.read(cacheProvider), _ref.read(repositoryProvider)));
+    _ref
+        .read(notebooksByLangProvider.notifier)
+        .setFrom(
+          await buildCatalog(
+            _ref.read(cacheProvider),
+            _ref.read(repositoryProvider),
+          ),
+        );
     final reconciler = _ref.read(programReconcilerProvider);
     for (final congregation in _ref.read(congregationsProvider)) {
       await reconciler.reconcileCongregation(congregation.id, force: true);
@@ -371,8 +378,7 @@ class NotebookImporter {
   }
 }
 
-final catalogRefreshProvider =
-    Provider<CatalogRefresher>(CatalogRefresher.new);
+final catalogRefreshProvider = Provider<CatalogRefresher>(CatalogRefresher.new);
 
 /// Pulls the coverage window down again even though it is cached, then pushes
 /// the result through to the programs.
@@ -397,8 +403,10 @@ class CatalogRefresher {
 
     var replaced = 0;
     for (final lang in langs.split(',')) {
-      for (final issue
-          in requiredIssues(now ?? DateTime.now(), monthsAhead: monthsAhead)) {
+      for (final issue in requiredIssues(
+        now ?? DateTime.now(),
+        monthsAhead: monthsAhead,
+      )) {
         try {
           await repository.refresh(issue, lang);
           replaced++;

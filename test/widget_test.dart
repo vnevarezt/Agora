@@ -26,8 +26,9 @@ class _UnlockedSessionController extends SessionController {
 }
 
 void main() {
-  testWidgets('La app arranca en el dashboard (Inicio)',
-      (WidgetTester tester) async {
+  testWidgets('La app arranca en el dashboard (Inicio)', (
+    WidgetTester tester,
+  ) async {
     // Superficie de escritorio: la fuente Ahem de los tests es mucho más
     // ancha que Manrope y desborda en el tamaño por defecto (800).
     tester.view.physicalSize = const Size(1440, 900);
@@ -35,27 +36,33 @@ void main() {
     addTearDown(tester.view.reset);
 
     // TranslationProvider igual que en main.dart (slang_flutter lo exige).
-    await tester.pumpWidget(TranslationProvider(
-      child: ProviderScope(
-        overrides: [
-          mwbSyncProvider.overrideWith(_NoopSyncController.new),
-          authSessionProvider.overrideWith(_UnlockedSessionController.new),
-          // Directorio y dashboard sin BD: se sobreescribe el STREAM, no la
-          // vista síncrona que cuelga de él, para que nada abra la BD cifrada
-          // real — la tarjeta de catálogo de la cabecera lee las
-          // congregaciones para saber qué cuadernos hacen falta.
-          congregationsStreamProvider
-              .overrideWith((ref) => Stream.value(const <Congregation>[])),
-          projectsProvider.overrideWithValue(const <Project>[]),
-          dashboardLoadingProvider.overrideWithValue(false),
-        ],
-        child: const AgoraApp(),
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: ProviderScope(
+          overrides: [
+            mwbSyncProvider.overrideWith(_NoopSyncController.new),
+            authSessionProvider.overrideWith(_UnlockedSessionController.new),
+            // Directorio y dashboard sin BD: se sobreescribe el STREAM, no la
+            // vista síncrona que cuelga de él, para que nada abra la BD cifrada
+            // real — la tarjeta de catálogo de la cabecera lee las
+            // congregaciones para saber qué cuadernos hacen falta.
+            congregationsStreamProvider.overrideWith(
+              (ref) => Stream.value(const <Congregation>[]),
+            ),
+            projectsProvider.overrideWithValue(const <Project>[]),
+            dashboardLoadingProvider.overrideWithValue(false),
+          ],
+          child: const AgoraApp(),
+        ),
       ),
-    ));
+    );
     await tester.pump();
 
     expect(find.text('Agora'), findsOneWidget); // marca de la barra lateral
     expect(find.text('Inicio'), findsOneWidget); // navegación
-    expect(find.text('Tus proyectos y pendientes'), findsOneWidget); // subtítulo
+    expect(
+      find.text('Tus proyectos y pendientes'),
+      findsOneWidget,
+    ); // subtítulo
   });
 }

@@ -21,70 +21,80 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Week _week(String date) => Week(
-      date: date,
-      reading: 'JEREMÍAS 26-28',
-      openingSong: '77',
-      middleSong: '16',
-      closingSong: '71',
-      parts: const [
-        Part(
-            section: Section.treasures,
-            number: 1,
-            title: 'No se deje engañar',
-            minutes: 10),
-        Part(
-            section: Section.treasures,
-            number: 3,
-            title: 'Lectura de la Biblia',
-            minutes: 4),
-        Part(
-            section: Section.ministry,
-            number: 4,
-            title: 'Empiece conversaciones',
-            minutes: 3),
-        Part(
-            section: Section.christianLife,
-            number: 8,
-            title: 'Estudio bíblico de la congregación',
-            minutes: 30),
-      ],
-    );
+  date: date,
+  reading: 'JEREMÍAS 26-28',
+  openingSong: '77',
+  middleSong: '16',
+  closingSong: '71',
+  parts: const [
+    Part(
+      section: Section.treasures,
+      number: 1,
+      title: 'No se deje engañar',
+      minutes: 10,
+    ),
+    Part(
+      section: Section.treasures,
+      number: 3,
+      title: 'Lectura de la Biblia',
+      minutes: 4,
+    ),
+    Part(
+      section: Section.ministry,
+      number: 4,
+      title: 'Empiece conversaciones',
+      minutes: 3,
+    ),
+    Part(
+      section: Section.christianLife,
+      number: 8,
+      title: 'Estudio bíblico de la congregación',
+      minutes: 30,
+    ),
+  ],
+);
 
 class _Weeks extends WeeksController {
   @override
-  Future<List<Week>> build() async =>
-      [_week('17-23 DE AGOSTO'), _week('24-30 DE AGOSTO'), _week('31 DE AGOSTO')];
+  Future<List<Week>> build() async => [
+    _week('17-23 DE AGOSTO'),
+    _week('24-30 DE AGOSTO'),
+    _week('31 DE AGOSTO'),
+  ];
 }
 
 bool _hasTalk(ProgramSchedule s) =>
     s.christianLife.any((r) => r.kind == RowKind.circuitOverseerTalk);
 
 Future<ProviderContainer> _container() async {
-  final c = ProviderContainer(overrides: [
-    weeksProvider.overrideWith(_Weeks.new),
-    twoPerSheetProvider.overrideWithValue(true),
-  ]);
+  final c = ProviderContainer(
+    overrides: [
+      weeksProvider.overrideWith(_Weeks.new),
+      twoPerSheetProvider.overrideWithValue(true),
+    ],
+  );
   addTearDown(c.dispose);
   await c.read(weeksProvider.future);
   // No program ids: the form is the whole truth here, so the write-through
   // stays out of the way and this exercises the rule, not the database.
-  c.read(formProvider.notifier)
+  c
+      .read(formProvider.notifier)
       .hydrate(FormModel.initial, projectId: 'p', programIds: const []);
   return c;
 }
 
 ProgramRecord _program(int i, WeekType type) => ProgramRecord(
-      id: 'p$i',
-      createdAt: DateTime.utc(2026),
-      updatedAt: DateTime.utc(2026),
-      projectId: 'proj',
-      programTypeId: 'mwb-s140',
-      weekType: type,
-      date: 'semana $i',
-      sortIndex: i,
-      label: '',
-      titleOverridesJson: '{}',
-    );
+  id: 'p$i',
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+  projectId: 'proj',
+  programTypeId: 'mwb-s140',
+  weekType: type,
+  date: 'semana $i',
+  sortIndex: i,
+  label: '',
+  titleOverridesJson: '{}',
+);
 
 void main() {
   test('a project that already has two marked weeks loads with one', () {
@@ -103,7 +113,7 @@ void main() {
 
     final marked = [
       for (final e in form.circuitOverseerByWeek.entries)
-        if (e.value) e.key
+        if (e.value) e.key,
     ];
     expect(marked, [0]);
   });
@@ -117,10 +127,11 @@ void main() {
 
     final marked = [
       for (final e in c.read(formProvider).circuitOverseerByWeek.entries)
-        if (e.value) e.key
+        if (e.value) e.key,
     ];
-    expect(marked, [1],
-        reason: 'the overseer comes once, and a project is one workbook');
+    expect(marked, [
+      1,
+    ], reason: 'the overseer comes once, and a project is one workbook');
   });
 
   test('the two weeks of a sheet never both carry the talk', () async {
@@ -142,24 +153,28 @@ void main() {
     form.setCircuitOverseer(1, true);
     form.setCircuitOverseer(1, false);
 
-    expect(c.read(sheetEntriesProvider).any((e) => _hasTalk(e.schedule)),
-        isFalse);
+    expect(
+      c.read(sheetEntriesProvider).any((e) => _hasTalk(e.schedule)),
+      isFalse,
+    );
   });
 
   test("the talk prints one speaker, not the Bible study's pair", () {
     final tr = AppLocale.es.buildSync();
     final week = _week('24-30 DE AGOSTO');
     final study = buildSchedule(week, 18 * 60, 105);
-    final cbs = study.christianLife
-        .firstWhere((r) => r.role == SlotRole.conductorReader);
+    final cbs = study.christianLife.firstWhere(
+      (r) => r.role == SlotRole.conductorReader,
+    );
     // The names were entered against the Bible study, then the week was marked.
     final names = Assignments({
-      cbs.id: const ['Josué Soto', 'Luis Vargas']
+      cbs.id: const ['Josué Soto', 'Luis Vargas'],
     }, {});
 
     final visit = buildSchedule(week, 18 * 60, 105, circuitOverseer: true);
-    final talk = visit.christianLife
-        .firstWhere((r) => r.kind == RowKind.circuitOverseerTalk);
+    final talk = visit.christianLife.firstWhere(
+      (r) => r.kind == RowKind.circuitOverseerTalk,
+    );
 
     expect(talk.id, cbs.id, reason: 'same row, which is how the pair leaked');
     expect(talk.slots, 1);
@@ -171,8 +186,11 @@ void main() {
   test('an unfilled half of a pair takes its separator with it', () {
     expect(joinedNames(const ['', '']), '');
     expect(joinedNames(const ['', ' ']), '');
-    expect(joinedNames(const ['Ana', '']), 'Ana',
-        reason: 'the role label already says a second name is expected');
+    expect(
+      joinedNames(const ['Ana', '']),
+      'Ana',
+      reason: 'the role label already says a second name is expected',
+    );
     expect(joinedNames(const ['', 'Ana']), 'Ana');
     expect(joinedNames(const ['Ana', 'Eva']), 'Ana / Eva');
   });

@@ -55,5 +55,6 @@ class LocalAuthDeviceAuth implements DeviceAuth {
 final deviceAuthProvider = Provider<DeviceAuth>((ref) => LocalAuthDeviceAuth());
 
 /// Settings watches this to decide whether the device-unlock toggle exists.
-final deviceAuthSupportedProvider =
-    FutureProvider<bool>((ref) => ref.watch(deviceAuthProvider).isSupported());
+final deviceAuthSupportedProvider = FutureProvider<bool>(
+  (ref) => ref.watch(deviceAuthProvider).isSupported(),
+);

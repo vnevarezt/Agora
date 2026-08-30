@@ -16,7 +16,12 @@ class AuthNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s14,
+        Space.s12,
+        Space.s14,
+        Space.s12,
+      ),
       decoration: BoxDecoration(
         color: t.accentTint,
         borderRadius: BorderRadius.circular(12),

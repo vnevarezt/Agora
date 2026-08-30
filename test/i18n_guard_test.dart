@@ -29,13 +29,13 @@ void main() {
   const allowed = <String, String>{
     'lib/ui/picker/person_picker.dart':
         'ModalRoute.barrierLabel has no BuildContext; read once by the a11y '
-            'layer when the route is pushed, so it cannot go stale on screen.',
+        'layer when the route is pushed, so it cannot go stale on screen.',
   };
 
   test('lib/ui/ uses context.t, never the global t', () {
-    final catalog = jsonDecode(
-      File('lib/i18n/es.i18n.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
+    final catalog =
+        jsonDecode(File('lib/i18n/es.i18n.json').readAsStringSync())
+            as Map<String, dynamic>;
     // Only top-level translation groups: `t.text` / `t.accent` in the UI are
     // the `context.tokens` alias, not translations.
     final groups = catalog.keys.toList()..sort();
@@ -63,7 +63,8 @@ void main() {
     expect(
       violations,
       isEmpty,
-      reason: 'Use `context.t` in widgets so they rebuild when the language '
+      reason:
+          'Use `context.t` in widgets so they rebuild when the language '
           'changes. For code with no BuildContext, take a `Translations` '
           'parameter instead. See lib/i18n/README.md.\n'
           '${violations.join('\n')}',
@@ -75,12 +76,11 @@ void main() {
   /// ignores that and prints Spanish on an English sheet. That was the weekly
   /// reading label.
   test('lib/pdf/ prints no catalog text of its own', () {
-    final catalog = jsonDecode(
-      File('lib/i18n/es.i18n.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
+    final catalog =
+        jsonDecode(File('lib/i18n/es.i18n.json').readAsStringSync())
+            as Map<String, dynamic>;
     // Placeholders ({n}, {title}) never appear verbatim in source anyway.
-    final printed = (catalog['program'] as Map<String, dynamic>)
-        .values
+    final printed = (catalog['program'] as Map<String, dynamic>).values
         .whereType<String>()
         .where((v) => !v.contains('{'))
         .map((v) => v.trim())
@@ -105,17 +105,25 @@ void main() {
       }
     }
 
-    expect(violations, isEmpty,
-        reason: 'Read these from the `Translations` the document was built '
-            'with (`tr.program.*`), so the sheet follows the congregation\'s '
-            'meeting language.\n${violations.join('\n')}');
+    expect(
+      violations,
+      isEmpty,
+      reason:
+          'Read these from the `Translations` the document was built '
+          'with (`tr.program.*`), so the sheet follows the congregation\'s '
+          'meeting language.\n${violations.join('\n')}',
+    );
   });
 
   test('every allowlisted file still exists', () {
     for (final path in allowed.keys) {
-      expect(File(path).existsSync(), isTrue,
-          reason: '$path is allowlisted in this guard but no longer exists — '
-              'drop the entry.');
+      expect(
+        File(path).existsSync(),
+        isTrue,
+        reason:
+            '$path is allowlisted in this guard but no longer exists — '
+            'drop the entry.',
+      );
     }
   });
 }

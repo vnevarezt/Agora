@@ -22,8 +22,11 @@ class MemberCapabilities {
   /// (`editTypes.hasAny(['*', ...])`) — change both together.
   static const everyType = '*';
 
-  static const founder =
-      MemberCapabilities(admin: true, people: true, editTypes: [everyType]);
+  static const founder = MemberCapabilities(
+    admin: true,
+    people: true,
+    editTypes: [everyType],
+  );
 
   bool get canEditAnything => admin || people || editTypes.isNotEmpty;
 
@@ -38,22 +41,22 @@ class MemberCapabilities {
   /// single rejected doc fails the whole push batch and would otherwise wedge
   /// the outbox behind it forever.
   bool canPush(String entity, String? programTypeId) => switch (entity) {
-        'person' || 'personAbsence' => admin || people,
-        // The rule also demands `programTypeId is string`, so admin alone is
-        // not enough without one.
-        'program' || 'assignment' =>
-          programTypeId != null && (admin || canEditProgram(programTypeId)),
-        'project' => admin || editTypes.isNotEmpty,
-        'congregation' => admin,
-        // An entity kind these rules don't know: let the server decide.
-        _ => true,
-      };
+    'person' || 'personAbsence' => admin || people,
+    // The rule also demands `programTypeId is string`, so admin alone is
+    // not enough without one.
+    'program' || 'assignment' =>
+      programTypeId != null && (admin || canEditProgram(programTypeId)),
+    'project' => admin || editTypes.isNotEmpty,
+    'congregation' => admin,
+    // An entity kind these rules don't know: let the server decide.
+    _ => true,
+  };
 
   Map<String, Object> toMap() => {
-        'admin': admin,
-        'people': people,
-        'editTypes': editTypes,
-      };
+    'admin': admin,
+    'people': people,
+    'editTypes': editTypes,
+  };
 
   factory MemberCapabilities.fromMap(Map<String, dynamic> map) =>
       MemberCapabilities(

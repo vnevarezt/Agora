@@ -41,15 +41,15 @@ class ItemDoc {
   final String? serverTs;
 
   ItemDoc withServerTs(String ts) => ItemDoc(
-        entityId: entityId,
-        entity: entity,
-        hlc: hlc,
-        srcDevice: srcDevice,
-        keyVersion: keyVersion,
-        blob: blob,
-        programTypeId: programTypeId,
-        serverTs: ts,
-      );
+    entityId: entityId,
+    entity: entity,
+    hlc: hlc,
+    srcDevice: srcDevice,
+    keyVersion: keyVersion,
+    blob: blob,
+    programTypeId: programTypeId,
+    serverTs: ts,
+  );
 }
 
 /// The cloud seam (docs/PHASE4_CLOUD_SYNC.md): 4a proves the engine against

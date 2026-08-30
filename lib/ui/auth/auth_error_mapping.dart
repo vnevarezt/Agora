@@ -15,7 +15,6 @@ String cloudAuthErrorText(BuildContext context, CloudAuthErrorCode code) {
     CloudAuthErrorCode.tooManyRequests => e.tooManyRequests,
     CloudAuthErrorCode.canceled ||
     CloudAuthErrorCode.requiresRecentLogin ||
-    CloudAuthErrorCode.unknown =>
-      e.unknown,
+    CloudAuthErrorCode.unknown => e.unknown,
   };
 }

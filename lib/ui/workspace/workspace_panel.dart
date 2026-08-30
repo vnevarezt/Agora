@@ -67,10 +67,11 @@ class WorkspacePanel extends ConsumerWidget {
             padding: EdgeInsets.symmetric(horizontal: side),
             sliver: SliverToBoxAdapter(
               child: _SectionCounter(
-                  title: section.title,
-                  dotColor: section.dot,
-                  rows: section.rows,
-                  aux: aux),
+                title: section.title,
+                dotColor: section.dot,
+                rows: section.rows,
+                aux: aux,
+              ),
             ),
           ),
           SliverPadding(
@@ -80,7 +81,8 @@ class WorkspacePanel extends ConsumerWidget {
               itemBuilder: (context, i) => Padding(
                 padding: EdgeInsets.only(top: i == 0 ? 0 : Space.s10),
                 child: PartCard(
-                    view: mapRow(section.rows[i], auxActive: aux, tr: tr)),
+                  view: mapRow(section.rows[i], auxActive: aux, tr: tr),
+                ),
               ),
             ),
           ),
@@ -111,25 +113,28 @@ class _SectionCounter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final progress = ref.watch(formProvider.select((f) {
-      var total = 0;
-      var done = 0;
-      for (final row in rows) {
-        total += row.slots;
-        done += filledNames(f.main[row.id], row.slots);
-        if (aux && row.auxSlots > 0) {
-          total += row.auxSlots;
-          done += filledNames(f.auxiliary[row.id], row.auxSlots);
+    final progress = ref.watch(
+      formProvider.select((f) {
+        var total = 0;
+        var done = 0;
+        for (final row in rows) {
+          total += row.slots;
+          done += filledNames(f.main[row.id], row.slots);
+          if (aux && row.auxSlots > 0) {
+            total += row.auxSlots;
+            done += filledNames(f.auxiliary[row.id], row.auxSlots);
+          }
         }
-      }
-      return (done: done, total: total);
-    }));
+        return (done: done, total: total);
+      }),
+    );
 
     return SectionHeader(
-        title: title,
-        dotColor: dotColor,
-        done: progress.done,
-        total: progress.total);
+      title: title,
+      dotColor: dotColor,
+      done: progress.done,
+      total: progress.total,
+    );
   }
 }
 
@@ -209,8 +214,8 @@ class _EmptyStateState extends ConsumerState<_EmptyState> {
               onPressed: busy
                   ? null
                   : () => ref
-                      .read(weeksProvider.notifier)
-                      .load(ref.read(formProvider).issue),
+                        .read(weeksProvider.notifier)
+                        .load(ref.read(formProvider).issue),
             ),
       error: _error ?? (weeks.hasError ? '${weeks.error}' : null),
     );

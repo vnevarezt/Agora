@@ -62,18 +62,24 @@ class ProgressRing extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$done/$total',
-                style: TextStyle(
-                    fontSize: AppText.body,
-                    fontWeight: FontWeight.w700,
-                    height: 1.1,
-                    color: t.text)),
-            Text(context.t.common.assigned,
-                style: TextStyle(
-                    fontSize: AppText.caption,
-                    fontWeight: FontWeight.w600,
-                    height: 1.1,
-                    color: t.textMute)),
+            Text(
+              '$done/$total',
+              style: TextStyle(
+                fontSize: AppText.body,
+                fontWeight: FontWeight.w700,
+                height: 1.1,
+                color: t.text,
+              ),
+            ),
+            Text(
+              context.t.common.assigned,
+              style: TextStyle(
+                fontSize: AppText.caption,
+                fontWeight: FontWeight.w600,
+                height: 1.1,
+                color: t.textMute,
+              ),
+            ),
           ],
         ),
       ],

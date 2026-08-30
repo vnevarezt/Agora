@@ -11,11 +11,14 @@ import 'dashboard_provider.dart';
 import 'db_provider.dart';
 import 'weeks_provider.dart';
 
-final programsRepositoryProvider = Provider<ProgramsRepository>((ref) =>
-    ProgramsRepository(ref.watch(dbProvider), ref.watch(syncScribeProvider)));
+final programsRepositoryProvider = Provider<ProgramsRepository>(
+  (ref) =>
+      ProgramsRepository(ref.watch(dbProvider), ref.watch(syncScribeProvider)),
+);
 
-final programReconcilerProvider =
-    Provider<ProgramReconciler>(ProgramReconciler.new);
+final programReconcilerProvider = Provider<ProgramReconciler>(
+  ProgramReconciler.new,
+);
 
 /// What one reconciliation pass did, for the UI and for tests.
 class ReconcileReport {
@@ -31,9 +34,9 @@ class ReconcileReport {
   bool get complete => pending == 0;
 
   ReconcileReport operator +(ReconcileReport other) => ReconcileReport(
-        filled: filled + other.filled,
-        pending: pending + other.pending,
-      );
+    filled: filled + other.filled,
+    pending: pending + other.pending,
+  );
 }
 
 /// Keeps every program's content in step with its congregation's meeting
@@ -64,8 +67,10 @@ class ProgramReconciler {
   /// Reconciles one project. Idempotent: a project already in step writes
   /// nothing, unless [force] is set — which is how a refreshed workbook
   /// reaches snapshots that are already in the right language.
-  Future<ReconcileReport> reconcileProject(String projectId,
-      {bool force = false}) async {
+  Future<ReconcileReport> reconcileProject(
+    String projectId, {
+    bool force = false,
+  }) async {
     final repo = _ref.read(programsRepositoryProvider);
     final programs = await repo.byProject(projectId);
     if (programs.isEmpty) return const ReconcileReport();
@@ -73,15 +78,17 @@ class ProgramReconciler {
     // Resolved with direct lookups rather than the stream-backed providers:
     // this runs fire-and-forget in the background, and watching from here
     // would leave a drift subscription open behind it.
-    final congregationId = await _ref
+    final congregationId =
+        await _ref
             .read(projectsRepositoryProvider)
             .congregationIdOf(projectId) ??
         '';
     final settings = await _ref
         .read(congregationsRepositoryProvider)
         .settingsOf(congregationId);
-    final lang = workbookLangFor(settings?.meetingLanguage ??
-        const CongregationSettings().meetingLanguage);
+    final lang = workbookLangFor(
+      settings?.meetingLanguage ?? const CongregationSettings().meetingLanguage,
+    );
 
     var report = const ReconcileReport();
     for (final program in programs) {
@@ -92,8 +99,10 @@ class ProgramReconciler {
 
   /// Reconciles every project of one congregation — the pass a change of
   /// meeting language needs, since that setting moves for all of them at once.
-  Future<ReconcileReport> reconcileCongregation(String congregationId,
-      {bool force = false}) async {
+  Future<ReconcileReport> reconcileCongregation(
+    String congregationId, {
+    bool force = false,
+  }) async {
     final projectIds = await _ref
         .read(projectsRepositoryProvider)
         .idsByCongregation(congregationId);
@@ -185,9 +194,7 @@ final congregationLanguageWatcherProvider = Provider<void>((ref) {
 
   ref.listen<List<Congregation>>(congregationsProvider, (previous, next) {
     if (previous == null || previous.isEmpty) return;
-    final before = {
-      for (final c in previous) c.id: c.settings.meetingLanguage,
-    };
+    final before = {for (final c in previous) c.id: c.settings.meetingLanguage};
     for (final congregation in next) {
       final was = before[congregation.id];
       if (was != null && was != congregation.settings.meetingLanguage) {

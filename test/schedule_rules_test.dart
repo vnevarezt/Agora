@@ -5,28 +5,36 @@ import 'package:agora/models/week.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Week _week() => Week(
-      date: '18-24 DE MAYO',
-      reading: 'ISAÍAS 62-64',
-      openingSong: '44',
-      parts: const [
-        Part(section: Section.treasures, number: 1, title: 'El Alfarero', minutes: 10),
-        Part(
-            section: Section.treasures,
-            number: 3,
-            title: 'Lectura de la Biblia',
-            minutes: 4),
-        Part(
-            section: Section.ministry,
-            number: 4,
-            title: 'Empiece conversaciones',
-            minutes: 3),
-        Part(
-            section: Section.christianLife,
-            number: 7,
-            title: 'Estudio bíblico de la congregación',
-            minutes: 30),
-      ],
-    );
+  date: '18-24 DE MAYO',
+  reading: 'ISAÍAS 62-64',
+  openingSong: '44',
+  parts: const [
+    Part(
+      section: Section.treasures,
+      number: 1,
+      title: 'El Alfarero',
+      minutes: 10,
+    ),
+    Part(
+      section: Section.treasures,
+      number: 3,
+      title: 'Lectura de la Biblia',
+      minutes: 4,
+    ),
+    Part(
+      section: Section.ministry,
+      number: 4,
+      title: 'Empiece conversaciones',
+      minutes: 3,
+    ),
+    Part(
+      section: Section.christianLife,
+      number: 7,
+      title: 'Estudio bíblico de la congregación',
+      minutes: 30,
+    ),
+  ],
+);
 
 void main() {
   final es = AppLocale.es.buildSync();
@@ -35,42 +43,54 @@ void main() {
   group('buildSchedule – circuit overseer visit', () {
     test('por defecto el EBC es Conductor/Lector con 2 cupos', () {
       final s = buildSchedule(_week(), 18 * 60, 105);
-      final cbs = s.christianLife
-          .firstWhere((r) => r.title.contains('Estudio bíblico'));
+      final cbs = s.christianLife.firstWhere(
+        (r) => r.title.contains('Estudio bíblico'),
+      );
       expect(cbs.slots, 2);
       expect(cbs.role, SlotRole.conductorReader);
     });
 
-    test('con visita: el EBC se reemplaza por el discurso del orador (1 cupo)',
-        () {
-      final base = buildSchedule(_week(), 18 * 60, 105);
-      final visit =
-          buildSchedule(_week(), 18 * 60, 105, circuitOverseer: true);
+    test(
+      'con visita: el EBC se reemplaza por el discurso del orador (1 cupo)',
+      () {
+        final base = buildSchedule(_week(), 18 * 60, 105);
+        final visit = buildSchedule(
+          _week(),
+          18 * 60,
+          105,
+          circuitOverseer: true,
+        );
 
-      final talk = visit.christianLife
-          .firstWhere((r) => r.kind == RowKind.circuitOverseerTalk);
-      expect(talk.slots, 1);
-      expect(talk.role, SlotRole.speaker);
-      expect(
+        final talk = visit.christianLife.firstWhere(
+          (r) => r.kind == RowKind.circuitOverseerTalk,
+        );
+        expect(talk.slots, 1);
+        expect(talk.role, SlotRole.speaker);
+        expect(
           visit.christianLife.any((r) => r.title.contains('Estudio bíblico')),
-          isFalse);
+          isFalse,
+        );
 
-      // The replacement keeps the row id, so the assignment is preserved.
-      final cbsId = base.christianLife
-          .firstWhere((r) => r.title.contains('Estudio bíblico'))
-          .id;
-      expect(talk.id, cbsId);
-    });
+        // The replacement keeps the row id, so the assignment is preserved.
+        final cbsId = base.christianLife
+            .firstWhere((r) => r.title.contains('Estudio bíblico'))
+            .id;
+        expect(talk.id, cbsId);
+      },
+    );
 
     test('con visita: desaparecen las "Palabras de conclusión"', () {
       final base = buildSchedule(_week(), 18 * 60, 105);
-      final visit =
-          buildSchedule(_week(), 18 * 60, 105, circuitOverseer: true);
+      final visit = buildSchedule(_week(), 18 * 60, 105, circuitOverseer: true);
 
-      expect(base.christianLife.any((r) => r.kind == RowKind.closingWords),
-          isTrue);
-      expect(visit.christianLife.any((r) => r.kind == RowKind.closingWords),
-          isFalse);
+      expect(
+        base.christianLife.any((r) => r.kind == RowKind.closingWords),
+        isTrue,
+      );
+      expect(
+        visit.christianLife.any((r) => r.kind == RowKind.closingWords),
+        isFalse,
+      );
     });
   });
 
@@ -82,8 +102,9 @@ void main() {
 
     test('reemplaza el título conservando el sufijo de minutos', () {
       final s = buildSchedule(_week(), 18 * 60, 105, circuitOverseer: true);
-      final talkId =
-          s.christianLife.firstWhere((r) => r.role == SlotRole.speaker).id;
+      final talkId = s.christianLife
+          .firstWhere((r) => r.role == SlotRole.speaker)
+          .id;
 
       final out = applyTitleOverrides(s, {talkId: 'Confía en Jehová'});
       final talk = out.christianLife.firstWhere((r) => r.id == talkId);
@@ -96,32 +117,36 @@ void main() {
     // nothing here reads the wording any more. Verified against the real
     // mwb_202607 workbooks in both languages.
     Week englishWeek() => Week(
-          date: 'MAY 18-24',
-          reading: 'ISAIAH 62-64',
-          openingSong: '44',
-          parts: const [
-            Part(
-                section: Section.treasures,
-                number: 1,
-                title: 'The Potter',
-                minutes: 10),
-            Part(
-                section: Section.treasures,
-                number: 3,
-                title: 'Bible Reading',
-                minutes: 4),
-            Part(
-                section: Section.ministry,
-                number: 4,
-                title: 'Starting a Conversation',
-                minutes: 3),
-            Part(
-                section: Section.christianLife,
-                number: 7,
-                title: 'Congregation Bible Study',
-                minutes: 30),
-          ],
-        );
+      date: 'MAY 18-24',
+      reading: 'ISAIAH 62-64',
+      openingSong: '44',
+      parts: const [
+        Part(
+          section: Section.treasures,
+          number: 1,
+          title: 'The Potter',
+          minutes: 10,
+        ),
+        Part(
+          section: Section.treasures,
+          number: 3,
+          title: 'Bible Reading',
+          minutes: 4,
+        ),
+        Part(
+          section: Section.ministry,
+          number: 4,
+          title: 'Starting a Conversation',
+          minutes: 3,
+        ),
+        Part(
+          section: Section.christianLife,
+          number: 7,
+          title: 'Congregation Bible Study',
+          minutes: 30,
+        ),
+      ],
+    );
 
     List<SlotRole> rolesOf(Week w) =>
         buildSchedule(w, 18 * 60, 105).rows.map((r) => r.role).toList();
@@ -143,23 +168,25 @@ void main() {
 
     test('the last Christian Life part is the CBS (conductor + reader)', () {
       final s = buildSchedule(englishWeek(), 18 * 60, 105);
-      final cbs = s.christianLife
-          .firstWhere((r) => r.role == SlotRole.conductorReader);
+      final cbs = s.christianLife.firstWhere(
+        (r) => r.role == SlotRole.conductorReader,
+      );
       expect(cbs.slots, 2);
     });
 
     test('a ministry part is a talk only when the workbook says so', () {
       Week withMinistry({required bool isTalk}) => Week(
-            openingSong: '1',
-            parts: [
-              Part(
-                  section: Section.ministry,
-                  number: 4,
-                  title: 'Explaining Your Beliefs',
-                  minutes: 4,
-                  isTalk: isTalk),
-            ],
-          );
+        openingSong: '1',
+        parts: [
+          Part(
+            section: Section.ministry,
+            number: 4,
+            title: 'Explaining Your Beliefs',
+            minutes: 4,
+            isTalk: isTalk,
+          ),
+        ],
+      );
 
       final talk = buildSchedule(withMinistry(isTalk: true), 18 * 60, 105);
       expect(talk.ministry.single.role, SlotRole.student);
@@ -182,8 +209,9 @@ void main() {
       expect(song.content(es), 'Canción 44');
       expect(song.content(en), 'Song 44');
 
-      final opening =
-          s.opening.firstWhere((r) => r.kind == RowKind.openingWords);
+      final opening = s.opening.firstWhere(
+        (r) => r.kind == RowKind.openingWords,
+      );
       expect(opening.content(es), 'Palabras de introducción (1 min.)');
       expect(opening.content(en), 'Opening Comments (1 min.)');
     });
@@ -200,8 +228,9 @@ void main() {
     });
 
     test('a part keeps its "(N mins.)" suffix', () {
-      final cbs = s.christianLife
-          .firstWhere((r) => r.title.contains('Estudio bíblico'));
+      final cbs = s.christianLife.firstWhere(
+        (r) => r.title.contains('Estudio bíblico'),
+      );
       expect(cbs.content(es), endsWith(' (30 mins.)'));
     });
   });

@@ -186,16 +186,25 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
   Widget _searchBox(BuildContext context) {
     final t = context.tokens;
     return TextField(
-        onChanged: (v) => setState(() => _query = v),
-        style: TextStyle(
-            fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
-        decoration: InputDecoration(
-          hintText: context.t.common.searchParticipant,
-          prefixIcon: Icon(Icons.search, size: AppIcon.control, color: t.textMute),
-          prefixIconConstraints:
-              const BoxConstraints(minWidth: 36, minHeight: 16),
+      onChanged: (v) => setState(() => _query = v),
+      style: TextStyle(
+        fontSize: AppText.body,
+        fontWeight: FontWeight.w600,
+        color: t.text,
+      ),
+      decoration: InputDecoration(
+        hintText: context.t.common.searchParticipant,
+        prefixIcon: Icon(
+          Icons.search,
+          size: AppIcon.control,
+          color: t.textMute,
         ),
-      );
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 36,
+          minHeight: 16,
+        ),
+      ),
+    );
   }
 
   Widget _separator(AppTokens t) =>
@@ -255,7 +264,9 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
         padding: EdgeInsets.fromLTRB(pad, 0, pad, 0),
         sliver: SliverToBoxAdapter(
           child: BlockTitle(
-              title: context.t.participants.title, count: filtered.length),
+            title: context.t.participants.title,
+            count: filtered.length,
+          ),
         ),
       ),
       SliverPadding(
@@ -283,23 +294,20 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
             mainAxisSpacing: gap,
             mainAxisExtent: participantCardHeight(context),
           ),
-          delegate: SliverChildBuilderDelegate(
-            (context, i) {
-              final h = participants[i];
-              final card = ParticipantCard(
-                participant: h,
-                onTap: () => showParticipantModal(context, original: h),
-              );
-              // A card built after the window is one the user scrolled to,
-              // and an entrance played on scroll reads as lag rather than as
-              // an entrance.
-              if (DateTime.now().difference(_openedAt) > _entranceWindow) {
-                return card;
-              }
-              return EnterUp(delay: Motion.stagger(i), child: card);
-            },
-            childCount: participants.length,
-          ),
+          delegate: SliverChildBuilderDelegate((context, i) {
+            final h = participants[i];
+            final card = ParticipantCard(
+              participant: h,
+              onTap: () => showParticipantModal(context, original: h),
+            );
+            // A card built after the window is one the user scrolled to,
+            // and an entrance played on scroll reads as lag rather than as
+            // an entrance.
+            if (DateTime.now().difference(_openedAt) > _entranceWindow) {
+              return card;
+            }
+            return EnterUp(delay: Motion.stagger(i), child: card);
+          }, childCount: participants.length),
         );
       },
     );
@@ -336,5 +344,4 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
           : context.t.participants.emptyNoResults,
     );
   }
-
 }

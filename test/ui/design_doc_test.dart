@@ -27,14 +27,22 @@ void main() {
 
   void expectDocumented(String name, String value, String where) {
     final found = mentioning(name);
-    expect(found, isNotEmpty,
-        reason: '$where.$name is not mentioned in DESIGN_SYSTEM.md at all. '
-            'A constant the document does not name is a constant nobody can '
-            'look up.');
-    expect(found.any((l) => l.contains(value)), isTrue,
-        reason: 'DESIGN_SYSTEM.md names `$name` but never gives its current '
-            'value $value. The code is the source — fix the document.\n'
-            '${found.map((l) => '  $l').join('\n')}');
+    expect(
+      found,
+      isNotEmpty,
+      reason:
+          '$where.$name is not mentioned in DESIGN_SYSTEM.md at all. '
+          'A constant the document does not name is a constant nobody can '
+          'look up.',
+    );
+    expect(
+      found.any((l) => l.contains(value)),
+      isTrue,
+      reason:
+          'DESIGN_SYSTEM.md names `$name` but never gives its current '
+          'value $value. The code is the source — fix the document.\n'
+          '${found.map((l) => '  $l').join('\n')}',
+    );
   }
 
   String source(String path) => File(path).readAsStringSync();
@@ -72,8 +80,11 @@ void main() {
     final light = colorsIn(scheme(src, 'light'));
     final dark = colorsIn(scheme(src, 'dark'));
 
-    expect(light.keys.toSet(), dark.keys.toSet(),
-        reason: 'the two schemes must carry the same roles');
+    expect(
+      light.keys.toSet(),
+      dark.keys.toSet(),
+      reason: 'the two schemes must carry the same roles',
+    );
     expect(light, isNotEmpty);
 
     for (final role in light.keys) {
@@ -85,25 +96,34 @@ void main() {
   test('the S-140 band colours match kSectionColors', () {
     final src = source('lib/ui/theme/dimens.dart');
     final map = src.substring(src.indexOf('kSectionColors'));
-    for (final m
-        in RegExp(r'Section\.(\w+): Color\(0x[Ff][Ff]([0-9A-Fa-f]{6})\)')
-            .allMatches(map)) {
+    for (final m in RegExp(
+      r'Section\.(\w+): Color\(0x[Ff][Ff]([0-9A-Fa-f]{6})\)',
+    ).allMatches(map)) {
       final hex = '#${m.group(2)!.toUpperCase()}';
-      expect(doc.contains(hex), isTrue,
-          reason: 'kSectionColors[${m.group(1)}] is $hex, which appears '
-              'nowhere in DESIGN_SYSTEM.md §3.4');
+      expect(
+        doc.contains(hex),
+        isTrue,
+        reason:
+            'kSectionColors[${m.group(1)}] is $hex, which appears '
+            'nowhere in DESIGN_SYSTEM.md §3.4',
+      );
     }
   });
 
   test('the brand inks match the ones the mark paints', () {
     final src = source('lib/ui/widgets/agora_mark.dart');
-    for (final m in RegExp(r'static const Color (\w+) = '
-            r'Color\(0x[Ff][Ff]([0-9A-Fa-f]{6})\)')
-        .allMatches(src)) {
+    for (final m in RegExp(
+      r'static const Color (\w+) = '
+      r'Color\(0x[Ff][Ff]([0-9A-Fa-f]{6})\)',
+    ).allMatches(src)) {
       final hex = '#${m.group(2)!.toUpperCase()}';
-      expect(doc.contains(hex), isTrue,
-          reason: '_Mark.${m.group(1)} is $hex, which appears nowhere in '
-              'DESIGN_SYSTEM.md §3.5');
+      expect(
+        doc.contains(hex),
+        isTrue,
+        reason:
+            '_Mark.${m.group(1)} is $hex, which appears nowhere in '
+            'DESIGN_SYSTEM.md §3.5',
+      );
     }
   });
 
@@ -127,8 +147,9 @@ void main() {
     }
     final body = src.substring(start, end);
     return {
-      for (final m
-          in RegExp(r'static const double (\w+) = ([\d.]+);').allMatches(body))
+      for (final m in RegExp(
+        r'static const double (\w+) = ([\d.]+);',
+      ).allMatches(body))
         m.group(1)!: m.group(2)!,
     };
   }
@@ -148,10 +169,14 @@ void main() {
   test('the spacing scale in the document is the one in Space', () {
     final steps = doublesIn(source('lib/ui/theme/dimens.dart'), 'Space');
     final written = steps.values.join(' · ');
-    expect(doc.contains(written), isTrue,
-        reason: 'Space is $written; §5.1 lists something else. The steps are '
-            'written as a run of magnitudes because spacing has no roles, so '
-            'the document has to carry the run verbatim.');
+    expect(
+      doc.contains(written),
+      isTrue,
+      reason:
+          'Space is $written; §5.1 lists something else. The steps are '
+          'written as a run of magnitudes because spacing has no roles, so '
+          'the document has to carry the run verbatim.',
+    );
   });
 
   // ---- motion -------------------------------------------------------------
@@ -159,24 +184,27 @@ void main() {
   test('every duration on the Motion scale is documented at its value', () {
     final src = source('lib/ui/widgets/motion.dart');
     final durations = {
-      for (final m in RegExp(r'static const Duration (\w+) = '
-              r'Duration\((milliseconds|seconds): (\d+)\)')
-          .allMatches(src))
+      for (final m in RegExp(
+        r'static const Duration (\w+) = '
+        r'Duration\((milliseconds|seconds): (\d+)\)',
+      ).allMatches(src))
         m.group(1)!: m.group(3)!,
     };
     expect(durations, isNotEmpty);
     durations.forEach((name, ms) => expectDocumented(name, ms, 'Motion'));
 
-    for (final m
-        in RegExp(r'static const double (\w+) = (\.\d+);').allMatches(src)) {
+    for (final m in RegExp(
+      r'static const double (\w+) = (\.\d+);',
+    ).allMatches(src)) {
       expectDocumented(m.group(1)!, m.group(2)!, 'Motion');
     }
   });
 
   test('the one curve the document quotes is the one Motion defines', () {
     final src = source('lib/ui/widgets/motion.dart');
-    for (final m in RegExp(r'static const Curve (\w+) = (Cubic\([^)]*\))')
-        .allMatches(src)) {
+    for (final m in RegExp(
+      r'static const Curve (\w+) = (Cubic\([^)]*\))',
+    ).allMatches(src)) {
       expectDocumented(m.group(1)!, m.group(2)!, 'Motion');
     }
   });
@@ -185,16 +213,23 @@ void main() {
 
   test('breakpoints and container queries match responsive.dart', () {
     final src = source('lib/ui/responsive.dart');
-    for (final m in RegExp(r'const double k(Mobile|Tablet)Breakpoint = (\d+);')
-        .allMatches(src)) {
-      expect(doc.contains(m.group(2)!), isTrue,
-          reason: 'the ${m.group(1)!.toLowerCase()} breakpoint is '
-              '${m.group(2)}, which §8 does not mention');
+    for (final m in RegExp(
+      r'const double k(Mobile|Tablet)Breakpoint = (\d+);',
+    ).allMatches(src)) {
+      expect(
+        doc.contains(m.group(2)!),
+        isTrue,
+        reason:
+            'the ${m.group(1)!.toLowerCase()} breakpoint is '
+            '${m.group(2)}, which §8 does not mention',
+      );
     }
-    for (final v
-        in doublesIn(src, 'ContainerWidth').values) {
-      expect(doc.contains(v), isTrue,
-          reason: 'a ContainerWidth threshold of $v is missing from §8');
+    for (final v in doublesIn(src, 'ContainerWidth').values) {
+      expect(
+        doc.contains(v),
+        isTrue,
+        reason: 'a ContainerWidth threshold of $v is missing from §8',
+      );
     }
   });
 }

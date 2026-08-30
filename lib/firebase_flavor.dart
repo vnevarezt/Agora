@@ -31,9 +31,9 @@ const Flavor currentFlavor = _flavor == 'prod' ? Flavor.prod : Flavor.dev;
 /// on platforms the flavor was not configured for (same contract as the
 /// generated `DefaultFirebaseOptions.currentPlatform`).
 FirebaseOptions get currentFirebaseOptions => switch (currentFlavor) {
-      Flavor.prod => prod.DefaultFirebaseOptions.currentPlatform,
-      Flavor.dev => dev.DefaultFirebaseOptions.currentPlatform,
-    };
+  Flavor.prod => prod.DefaultFirebaseOptions.currentPlatform,
+  Flavor.dev => dev.DefaultFirebaseOptions.currentPlatform,
+};
 
 /// OAuth Web client id for Android google_sign_in, for the running flavor.
 /// Empty string when not configured (the Google button hides itself).

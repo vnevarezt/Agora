@@ -12,11 +12,11 @@ void main() {
   final bytes = Uint8List.fromList([1, 2, 3]);
 
   Future<SaveOutcome> saveAs(FileSaver saver) => saver.saveAs(
-        bytes: bytes,
-        suggestedName: 'programa.pdf',
-        extension: 'pdf',
-        mimeType: 'application/pdf',
-      );
+    bytes: bytes,
+    suggestedName: 'programa.pdf',
+    extension: 'pdf',
+    mimeType: 'application/pdf',
+  );
 
   group('saveAs', () {
     test('desktop: picked path writes the file and reports it', () async {
@@ -60,17 +60,17 @@ void main() {
 
     test('mobile: document picker path is reported (null cancels)', () async {
       FileSaver saver(String? path) => FileSaver(
-            mobile: true,
-            saveMobile: (name, extension, b) async {
-              expect(name, 'programa.pdf');
-              expect(extension, 'pdf');
-              expect(b, bytes);
-              return path;
-            },
-            pickSavePath: (_, _) async => fail('desktop dialog must not open'),
-            writeFile: (_, _) async => fail('must not write directly'),
-            shareSheet: (_, _, _, _) async => fail('share sheet must not open'),
-          );
+        mobile: true,
+        saveMobile: (name, extension, b) async {
+          expect(name, 'programa.pdf');
+          expect(extension, 'pdf');
+          expect(b, bytes);
+          return path;
+        },
+        pickSavePath: (_, _) async => fail('desktop dialog must not open'),
+        writeFile: (_, _) async => fail('must not write directly'),
+        shareSheet: (_, _, _, _) async => fail('share sheet must not open'),
+      );
 
       final done = await saveAs(saver('/storage/programa.pdf'));
       expect((done as SaveDone).path, '/storage/programa.pdf');
@@ -80,33 +80,42 @@ void main() {
 
   group('share', () {
     Future<SaveOutcome> share(FileSaver saver) => saver.share(
-          bytes: bytes,
-          suggestedName: 'programa.pdf',
-          mimeType: 'application/pdf',
-          originRect: const Rect.fromLTWH(1, 2, 3, 4),
+      bytes: bytes,
+      suggestedName: 'programa.pdf',
+      mimeType: 'application/pdf',
+      originRect: const Rect.fromLTWH(1, 2, 3, 4),
+    );
+
+    test(
+      'maps success/dismissed/unavailable and forwards the origin',
+      () async {
+        FileSaver saver(ShareResultStatus status) => FileSaver(
+          mobile: true,
+          shareSheet: (b, name, mime, origin) async {
+            expect(b, bytes);
+            expect(name, 'programa.pdf');
+            expect(mime, 'application/pdf');
+            expect(origin, const Rect.fromLTWH(1, 2, 3, 4));
+            return status;
+          },
+          pickSavePath: (_, _) async => fail('dialog must not open'),
+          saveMobile: (_, _, _) async => fail('picker must not open'),
+          writeFile: (_, _) async => fail('must not write'),
         );
 
-    test('maps success/dismissed/unavailable and forwards the origin',
-        () async {
-      FileSaver saver(ShareResultStatus status) => FileSaver(
-            mobile: true,
-            shareSheet: (b, name, mime, origin) async {
-              expect(b, bytes);
-              expect(name, 'programa.pdf');
-              expect(mime, 'application/pdf');
-              expect(origin, const Rect.fromLTWH(1, 2, 3, 4));
-              return status;
-            },
-            pickSavePath: (_, _) async => fail('dialog must not open'),
-            saveMobile: (_, _, _) async => fail('picker must not open'),
-            writeFile: (_, _) async => fail('must not write'),
-          );
-
-      expect(await share(saver(ShareResultStatus.success)), isA<SaveShared>());
-      expect(
-          await share(saver(ShareResultStatus.dismissed)), isA<SaveCanceled>());
-      await expectLater(share(saver(ShareResultStatus.unavailable)),
-          throwsA(isA<Exception>()));
-    });
+        expect(
+          await share(saver(ShareResultStatus.success)),
+          isA<SaveShared>(),
+        );
+        expect(
+          await share(saver(ShareResultStatus.dismissed)),
+          isA<SaveCanceled>(),
+        );
+        await expectLater(
+          share(saver(ShareResultStatus.unavailable)),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
   });
 }

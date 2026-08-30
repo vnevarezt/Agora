@@ -21,7 +21,8 @@ import 'package:drift/native.dart';
 /// Minimal but valid mwb EPUB: one weekly XHTML with one numbered part, so
 /// [parseEpub] returns a single week.
 Uint8List _fakeEpub() {
-  const xhtml = '<h1>1-7 DE JUNIO DE 2026</h1>'
+  const xhtml =
+      '<h1>1-7 DE JUNIO DE 2026</h1>'
       '<h2 class="du-color--teal">TESOROS</h2>'
       '<h3 class="p">1. Discurso (10 mins.)</h3>';
   final archive = Archive()
@@ -57,10 +58,10 @@ void main() {
               'S': {
                 'EPUB': [
                   {
-                    'file': {'url': 'https://ex.test/$issue.epub'}
-                  }
-                ]
-              }
+                    'file': {'url': 'https://ex.test/$issue.epub'},
+                  },
+                ],
+              },
             },
             'formattedDate': 'x',
           }),
@@ -119,8 +120,7 @@ void main() {
       await cache.putEpub(issue, 'S', fakeBytes, 1);
     }
     final repo = MwbRepository(cache, client: client([], const {}));
-    final ok = await runMwbSync(
-        cache: cache, repository: repo, now: now);
+    final ok = await runMwbSync(cache: cache, repository: repo, now: now);
     expect(ok.complete, isTrue);
   });
 
@@ -130,47 +130,53 @@ void main() {
     final log = <String>[];
     final repo = MwbRepository(cache, client: client(log, const {}));
 
-    final r1 = await runMwbSync(
-        cache: cache, repository: repo, now: now);
+    final r1 = await runMwbSync(cache: cache, repository: repo, now: now);
     expect(r1.failed.keys, ['202607']);
     expect(r1.complete, isFalse, reason: 'falta un cuaderno -> incompleto');
     expect(log, ['202607']);
 
     // Same day: skipped by back-off, no new request.
-    final r2 = await runMwbSync(
-        cache: cache, repository: repo, now: now);
+    final r2 = await runMwbSync(cache: cache, repository: repo, now: now);
     expect(r2.skippedBackoff, ['202607']);
     expect(log, ['202607']);
 
     // Two days later: retried once.
     final r3 = await runMwbSync(
-        cache: cache,
-        repository: repo,
-          now: now.add(const Duration(days: 2)));
+      cache: cache,
+      repository: repo,
+      now: now.add(const Duration(days: 2)),
+    );
     expect(log, ['202607', '202607']);
     expect(r3.failed.keys, ['202607']);
   });
 
-  test('the catalog keeps every cached language, not just the synced one',
-      () async {
-    // A congregation switching from Spanish to English used to make the
-    // Spanish catalog vanish: the sync rebuilt the whole map from the
-    // languages of that pass alone, while the EPUBs stayed on disk and the
-    // projects built from them still needed their weeks.
-    final now = DateTime(2026, 6, 14);
-    await cache.putEpub('202605', 'S', fakeBytes, 1);
-    await cache.putEpub('202605', 'E', fakeBytes, 1);
-    await cache.putEpub('202607', 'E', fakeBytes, 1);
-    final repo = MwbRepository(cache, client: client([], const {}));
+  test(
+    'the catalog keeps every cached language, not just the synced one',
+    () async {
+      // A congregation switching from Spanish to English used to make the
+      // Spanish catalog vanish: the sync rebuilt the whole map from the
+      // languages of that pass alone, while the EPUBs stayed on disk and the
+      // projects built from them still needed their weeks.
+      final now = DateTime(2026, 6, 14);
+      await cache.putEpub('202605', 'S', fakeBytes, 1);
+      await cache.putEpub('202605', 'E', fakeBytes, 1);
+      await cache.putEpub('202607', 'E', fakeBytes, 1);
+      final repo = MwbRepository(cache, client: client([], const {}));
 
-    await runMwbSync(
-        cache: cache, repository: repo, lang: 'E', now: now, monthsAhead: 2);
-    final catalog = await buildCatalog(cache, repo);
+      await runMwbSync(
+        cache: cache,
+        repository: repo,
+        lang: 'E',
+        now: now,
+        monthsAhead: 2,
+      );
+      final catalog = await buildCatalog(cache, repo);
 
-    expect(catalog.keys, containsAll(['S', 'E']));
-    expect(catalog['S']!.map((n) => n.id), ['202605']);
-    expect(catalog['E']!.map((n) => n.id), ['202605', '202607']);
-  });
+      expect(catalog.keys, containsAll(['S', 'E']));
+      expect(catalog['S']!.map((n) => n.id), ['202605']);
+      expect(catalog['E']!.map((n) => n.id), ['202605', '202607']);
+    },
+  );
 
   group('purgeUnneededIssues', () {
     late AppDatabase db;
@@ -185,28 +191,48 @@ void main() {
     /// A project with one program, so the purge has something to protect.
     Future<void> seedProgram(WeekRef week) async {
       final now = DateTime.utc(2026, 1, 10);
-      await db.into(db.congregations).insert(CongregationsCompanion.insert(
-          id: 'c1', name: 'N', color: 1, createdAt: now, updatedAt: now));
-      await db.into(db.projects).insert(ProjectsCompanion.insert(
-          id: 'pr1',
-          congregationId: 'c1',
-          name: 'P',
-          createdAt: now,
-          updatedAt: now));
-      await db.into(db.programs).insert(ProgramsCompanion.insert(
-            id: 'pg1',
-            projectId: 'pr1',
-            programTypeId: 'mwb-s140',
-            date: week.label,
-            weekStart:
-                week.start.isEmpty ? const Value.absent() : Value(week.start),
-            createdAt: now,
-            updatedAt: now,
-          ));
+      await db
+          .into(db.congregations)
+          .insert(
+            CongregationsCompanion.insert(
+              id: 'c1',
+              name: 'N',
+              color: 1,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+      await db
+          .into(db.projects)
+          .insert(
+            ProjectsCompanion.insert(
+              id: 'pr1',
+              congregationId: 'c1',
+              name: 'P',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+      await db
+          .into(db.programs)
+          .insert(
+            ProgramsCompanion.insert(
+              id: 'pg1',
+              projectId: 'pr1',
+              programTypeId: 'mwb-s140',
+              date: week.label,
+              weekStart: week.start.isEmpty
+                  ? const Value.absent()
+                  : Value(week.start),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
     }
 
-    Future<Set<String>> cachedIssues() async =>
-        {for (final e in (await cache.readManifest()).entries) e.issue};
+    Future<Set<String>> cachedIssues() async => {
+      for (final e in (await cache.readManifest()).entries) e.issue,
+    };
 
     test('drops an issue nothing needs any more', () async {
       final now = DateTime(2026, 6, 14);
@@ -214,29 +240,38 @@ void main() {
       await cache.putEpub('202605', 'S', fakeBytes, 1); // in the window
 
       final removed = await purgeUnneededIssues(
-          cache: cache, programs: programs, now: now, monthsAhead: 2);
+        cache: cache,
+        programs: programs,
+        now: now,
+        monthsAhead: 2,
+      );
 
       expect(removed, 1);
       expect(await cachedIssues(), {'202605'});
-      expect(await cache.readEpub('202601', 'S'), isNull,
-          reason: 'the bytes go too, not just the manifest entry');
+      expect(
+        await cache.readEpub('202601', 'S'),
+        isNull,
+        reason: 'the bytes go too, not just the manifest entry',
+      );
     });
 
-    test('keeps an out-of-window issue an alive program still needs',
-        () async {
+    test('keeps an out-of-window issue an alive program still needs', () async {
       final now = DateTime(2026, 6, 14);
       await cache.putEpub('202601', 'S', fakeBytes, 1);
       await seedProgram((start: '2026-02-02', label: '2-8 DE FEBRERO'));
 
       final removed = await purgeUnneededIssues(
-          cache: cache, programs: programs, now: now, monthsAhead: 2);
+        cache: cache,
+        programs: programs,
+        now: now,
+        monthsAhead: 2,
+      );
 
       expect(removed, 0);
       expect(await cachedIssues(), contains('202601'));
     });
 
-    test('keeps every language of an issue, not just the one in use',
-        () async {
+    test('keeps every language of an issue, not just the one in use', () async {
       // The Spanish workbook is what identifies a pre-v6 row even for a
       // congregation that now meets in English, so it must survive.
       final now = DateTime(2026, 6, 14);
@@ -244,23 +279,33 @@ void main() {
       await cache.putEpub('202605', 'E', fakeBytes, 1);
 
       await purgeUnneededIssues(
-          cache: cache, programs: programs, now: now, monthsAhead: 2);
+        cache: cache,
+        programs: programs,
+        now: now,
+        monthsAhead: 2,
+      );
 
       final manifest = await cache.readManifest();
       expect({for (final e in manifest.entries) e.lang}, {'S', 'E'});
     });
 
-    test('does not run at all while a program is still unidentified',
-        () async {
+    test('does not run at all while a program is still unidentified', () async {
       final now = DateTime(2026, 6, 14);
       await cache.putEpub('202601', 'S', fakeBytes, 1);
       await seedProgram((start: '', label: '2-8 DE FEBRERO'));
 
       final removed = await purgeUnneededIssues(
-          cache: cache, programs: programs, now: now, monthsAhead: 2);
+        cache: cache,
+        programs: programs,
+        now: now,
+        monthsAhead: 2,
+      );
 
-      expect(removed, 0,
-          reason: 'there is no telling which workbook that row needs');
+      expect(
+        removed,
+        0,
+        reason: 'there is no telling which workbook that row needs',
+      );
       expect(await cachedIssues(), contains('202601'));
     });
   });

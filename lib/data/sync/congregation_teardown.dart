@@ -50,8 +50,11 @@ typedef MemberRole = ({String memberUid, bool admin});
 ///  - `blocked`: I'm the sole admin but other members remain → refuse; deleting
 ///    would strand them (nobody could rotate, invite or clean up).
 class AccountDeletionPlan {
-  const AccountDeletionPlan(
-      {required this.wipe, required this.leave, required this.blocked});
+  const AccountDeletionPlan({
+    required this.wipe,
+    required this.leave,
+    required this.blocked,
+  });
 
   final List<String> wipe;
   final List<String> leave;
@@ -59,9 +62,12 @@ class AccountDeletionPlan {
 }
 
 AccountDeletionPlan planAccountDeletion(
-    String uid, Map<String, List<MemberRole>> membersByCongregation) {
+  String uid,
+  Map<String, List<MemberRole>> membersByCongregation,
+) {
   final wipe = <String>[], leave = <String>[], blocked = <String>[];
-  for (final MapEntry(key: cid, value: members) in membersByCongregation.entries) {
+  for (final MapEntry(key: cid, value: members)
+      in membersByCongregation.entries) {
     final iAmAdmin = members.any((m) => m.memberUid == uid && m.admin);
     final others = members.where((m) => m.memberUid != uid).toList();
     if (others.isEmpty) {

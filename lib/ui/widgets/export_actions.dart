@@ -22,25 +22,31 @@ Future<void> runExport(
   final tr = context.t;
   ref.read(exportBusyProvider.notifier).set(true);
   try {
-    final outcome = await ref.read(previewProvider.notifier).export(
-          format: format,
-          action: action,
-          shareOrigin: shareOrigin,
-        );
+    final outcome = await ref
+        .read(previewProvider.notifier)
+        .export(format: format, action: action, shareOrigin: shareOrigin);
     switch (outcome) {
       case SaveDone(:final path):
-        showAppSnack(messenger,
-            message: tr.export.success(path: path),
-            kind: AppSnackKind.success);
+        showAppSnack(
+          messenger,
+          message: tr.export.success(path: path),
+          kind: AppSnackKind.success,
+        );
       case SaveShared():
-        showAppSnack(messenger,
-            message: tr.export.shared, kind: AppSnackKind.success);
+        showAppSnack(
+          messenger,
+          message: tr.export.shared,
+          kind: AppSnackKind.success,
+        );
       case SaveCanceled():
         break; // user's choice, no feedback needed
     }
   } catch (e) {
-    showAppSnack(messenger,
-        message: tr.export.error(error: e), kind: AppSnackKind.failure);
+    showAppSnack(
+      messenger,
+      message: tr.export.error(error: e),
+      kind: AppSnackKind.failure,
+    );
   } finally {
     ref.read(exportBusyProvider.notifier).set(false);
   }

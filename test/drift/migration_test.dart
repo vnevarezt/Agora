@@ -32,8 +32,7 @@ void main() {
     await db.close();
   });
 
-  test('v2 with skeleton programs migrates to current keeping rows',
-      () async {
+  test('v2 with skeleton programs migrates to current keeping rows', () async {
     final schema = await verifier.schemaAt(2);
     schema.rawDatabase.execute('''
       INSERT INTO congregations (id, name, number, color, settings_json,
@@ -133,7 +132,9 @@ void main() {
 
     // The v1 table is gone.
     final leftover = await db
-        .customSelect("SELECT name FROM sqlite_master WHERE name = 'participants'")
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE name = 'participants'",
+        )
         .get();
     expect(leftover, isEmpty);
 
@@ -161,10 +162,11 @@ void main() {
     await db.close();
   });
 
-  test('all-empty congregation strings fall back to the localized default',
-      () async {
-    final schema = await verifier.schemaAt(1);
-    schema.rawDatabase.execute('''
+  test(
+    'all-empty congregation strings fall back to the localized default',
+    () async {
+      final schema = await verifier.schemaAt(1);
+      schema.rawDatabase.execute('''
       INSERT INTO participants
         (id, name, gender, role, congregation, active, notes,
          created_at, updated_at, last_used)
@@ -173,17 +175,18 @@ void main() {
          '2026-01-11T10:00:00.000Z', '2026-01-11T10:00:00.000Z', NULL);
     ''');
 
-    final db = AppDatabase(
-      schema.newConnection(),
-      defaultCongregationName: 'Mi congregación',
-    );
-    await verifier.migrateAndValidate(db, 6);
+      final db = AppDatabase(
+        schema.newConnection(),
+        defaultCongregationName: 'Mi congregación',
+      );
+      await verifier.migrateAndValidate(db, 6);
 
-    final congs = await db.select(db.congregations).get();
-    expect(congs.single.name, 'Mi congregación');
-    expect((await db.peopleDao.all()).single.originCongregation, '');
-    await db.close();
-  });
+      final congs = await db.select(db.congregations).get();
+      expect(congs.single.name, 'Mi congregación');
+      expect((await db.peopleDao.all()).single.originCongregation, '');
+      await db.close();
+    },
+  );
   test('v5 programs migrate to v6 keeping their rows and label', () async {
     final schema = await verifier.schemaAt(5);
     schema.rawDatabase.execute('''

@@ -6,7 +6,8 @@ import '../models/week.dart';
 /// Port of generar_programa.py:129-246 (rol_y_nombres, es_aux_elegible,
 /// construir_filas, hhmm) and the SEAMOS_MIN / CONSEJO_MIN constants.
 
-const int ministryMinutes = 15; // "Apply Yourself" section lasts 15 min (S-38 §6)
+const int ministryMinutes =
+    15; // "Apply Yourself" section lasts 15 min (S-38 §6)
 const int adviceMinutes = 1; // chairman's counsel after each student (§18)
 
 /// hh:mm with no leading zero on the hour.
@@ -54,12 +55,15 @@ bool isAuxEligible(Section section, {required bool isLastInSection}) =>
     (section == Section.treasures && isLastInSection) ||
     section == Section.ministry;
 
-ProgramRow _row(String id, Section section, int t, Part p,
-    {required bool isLastInSection}) {
-  final roleNames =
-      roleAndNames(section, p, isLastInSection: isLastInSection);
-  final eligible =
-      isAuxEligible(section, isLastInSection: isLastInSection);
+ProgramRow _row(
+  String id,
+  Section section,
+  int t,
+  Part p, {
+  required bool isLastInSection,
+}) {
+  final roleNames = roleAndNames(section, p, isLastInSection: isLastInSection);
+  final eligible = isAuxEligible(section, isLastInSection: isLastInSection);
   return ProgramRow(
     id: id,
     time: hhmm(t),
@@ -78,8 +82,12 @@ ProgramRow _row(String id, Section section, int t, Part p,
 ///
 /// When [circuitOverseer] is true, the Congregation Bible Study is replaced by
 /// the overseer's talk: a single speaker ("Orador:") keeping the same slot.
-ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
-    {bool circuitOverseer = false}) {
+ProgramSchedule buildSchedule(
+  Week week,
+  int startMinutes,
+  int duration, {
+  bool circuitOverseer = false,
+}) {
   final parts = week.parts;
   final treasures = parts.where((p) => p.section == Section.treasures).toList();
   final ministry = parts.where((p) => p.section == Section.ministry).toList();
@@ -98,7 +106,8 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   // On a circuit overseer visit the meeting ends with the overseer's talk, so
   // there are no concluding comments: that time is freed back into the slack.
   final conclBlock = circuitOverseer ? 0 : concl;
-  final fixed = intro +
+  final fixed =
+      intro +
       treasuresBlock +
       ministryMinutes +
       lifeNoCbsSum +
@@ -117,30 +126,40 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
 
   // --- Opening ---
   if (week.openingSong != null) {
-    opening.add(ProgramRow(
-      id: 'ap${opening.length}',
-      time: hhmm(t),
-      kind: RowKind.song,
-      songNumber: week.openingSong,
-      role: SlotRole.prayer,
-    ));
+    opening.add(
+      ProgramRow(
+        id: 'ap${opening.length}',
+        time: hhmm(t),
+        kind: RowKind.song,
+        songNumber: week.openingSong,
+        role: SlotRole.prayer,
+      ),
+    );
     t += sOpen;
   }
-  opening.add(ProgramRow(
-    id: 'ap${opening.length}',
-    time: hhmm(t),
-    kind: RowKind.openingWords,
-    minutes: intro,
-    slots: 0,
-  ));
+  opening.add(
+    ProgramRow(
+      id: 'ap${opening.length}',
+      time: hhmm(t),
+      kind: RowKind.openingWords,
+      minutes: intro,
+      slots: 0,
+    ),
+  );
   t += intro;
 
   // --- Treasures From God's Word (counsel after the Bible Reading) ---
   for (final p in treasures) {
     final isLast = identical(p, treasures.last);
-    treasuresRows.add(_row(
-        'te${treasuresRows.length}', Section.treasures, t, p,
-        isLastInSection: isLast));
+    treasuresRows.add(
+      _row(
+        'te${treasuresRows.length}',
+        Section.treasures,
+        t,
+        p,
+        isLastInSection: isLast,
+      ),
+    );
     t += (p.minutes ?? 0);
     if (isLast) t += adviceMinutes; // counsel after the Bible Reading
   }
@@ -148,42 +167,67 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   // --- Apply Yourself: 15-min block, +1 of counsel per part ---
   final ministryStart = t;
   for (final p in ministry) {
-    ministryRows.add(_row('se${ministryRows.length}', Section.ministry, t, p,
-        isLastInSection: identical(p, ministry.last)));
+    ministryRows.add(
+      _row(
+        'se${ministryRows.length}',
+        Section.ministry,
+        t,
+        p,
+        isLastInSection: identical(p, ministry.last),
+      ),
+    );
     t += (p.minutes ?? 0) + adviceMinutes;
   }
   t = ministryStart + ministryMinutes; // pin the section to 15 min
 
   // --- Living as Christians ---
   if (week.middleSong != null) {
-    lifeRows.add(ProgramRow(
-      id: 'vi${lifeRows.length}',
-      time: hhmm(t),
-      kind: RowKind.song,
-      songNumber: week.middleSong,
-      slots: 0,
-    ));
+    lifeRows.add(
+      ProgramRow(
+        id: 'vi${lifeRows.length}',
+        time: hhmm(t),
+        kind: RowKind.song,
+        songNumber: week.middleSong,
+        slots: 0,
+      ),
+    );
     t += sMid;
   }
   for (final p in lifeNoCbs) {
-    lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, p,
-        isLastInSection: false));
+    lifeRows.add(
+      _row(
+        'vi${lifeRows.length}',
+        Section.christianLife,
+        t,
+        p,
+        isLastInSection: false,
+      ),
+    );
     t += (p.minutes ?? 0);
   }
   if (cbs != null) {
     if (circuitOverseer) {
       // Circuit overseer visit: the CBS becomes the overseer's talk (1 speaker).
-      lifeRows.add(ProgramRow(
-        id: 'vi${lifeRows.length}',
-        time: hhmm(t),
-        kind: RowKind.circuitOverseerTalk,
-        minutes: cbsMinutes,
-        role: SlotRole.speaker,
-        slots: 1,
-      ));
+      lifeRows.add(
+        ProgramRow(
+          id: 'vi${lifeRows.length}',
+          time: hhmm(t),
+          kind: RowKind.circuitOverseerTalk,
+          minutes: cbsMinutes,
+          role: SlotRole.speaker,
+          slots: 1,
+        ),
+      );
     } else {
-      lifeRows.add(_row('vi${lifeRows.length}', Section.christianLife, t, cbs,
-          isLastInSection: true));
+      lifeRows.add(
+        _row(
+          'vi${lifeRows.length}',
+          Section.christianLife,
+          t,
+          cbs,
+          isLastInSection: true,
+        ),
+      );
     }
     t += cbsMinutes;
   }
@@ -191,23 +235,27 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
   // --- Conclusion and closing song ---
   // Skipped on a circuit overseer visit (the meeting closes with his talk).
   if (!circuitOverseer) {
-    lifeRows.add(ProgramRow(
-      id: 'vi${lifeRows.length}',
-      time: hhmm(t),
-      kind: RowKind.closingWords,
-      minutes: concl,
-      slots: 0,
-    ));
+    lifeRows.add(
+      ProgramRow(
+        id: 'vi${lifeRows.length}',
+        time: hhmm(t),
+        kind: RowKind.closingWords,
+        minutes: concl,
+        slots: 0,
+      ),
+    );
     t += concl;
   }
   if (week.closingSong != null) {
-    lifeRows.add(ProgramRow(
-      id: 'vi${lifeRows.length}',
-      time: hhmm(t),
-      kind: RowKind.song,
-      songNumber: week.closingSong,
-      role: SlotRole.prayer,
-    ));
+    lifeRows.add(
+      ProgramRow(
+        id: 'vi${lifeRows.length}',
+        time: hhmm(t),
+        kind: RowKind.song,
+        songNumber: week.closingSong,
+        role: SlotRole.prayer,
+      ),
+    );
     t += sClose;
   }
 
@@ -225,15 +273,17 @@ ProgramSchedule buildSchedule(Week week, int startMinutes, int duration,
 /// renderer re-appends the "(N mins.)" suffix. Returns [schedule] unchanged
 /// when there are no overrides.
 ProgramSchedule applyTitleOverrides(
-    ProgramSchedule schedule, Map<String, String> overrides) {
+  ProgramSchedule schedule,
+  Map<String, String> overrides,
+) {
   if (overrides.isEmpty) return schedule;
   List<ProgramRow> mapped(List<ProgramRow> rows) => [
-        for (final r in rows)
-          if (overrides.containsKey(r.id))
-            r.copyWith(titleOverride: overrides[r.id])
-          else
-            r,
-      ];
+    for (final r in rows)
+      if (overrides.containsKey(r.id))
+        r.copyWith(titleOverride: overrides[r.id])
+      else
+        r,
+  ];
   return ProgramSchedule(
     opening: mapped(schedule.opening),
     treasures: mapped(schedule.treasures),

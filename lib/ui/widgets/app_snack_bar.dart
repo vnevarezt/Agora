@@ -39,7 +39,9 @@ void showAppSnack(
     SnackBar(
       // Flutter already wraps the bar in Semantics(liveRegion: true), so the
       // message is announced without anything here.
-      content: Builder(builder: (context) => _Body(message: message, kind: kind)),
+      content: Builder(
+        builder: (context) => _Body(message: message, kind: kind),
+      ),
       backgroundColor: Colors.transparent,
       elevation: 0,
       padding: EdgeInsets.zero,
@@ -81,7 +83,9 @@ class _Body extends StatelessWidget {
           Icon(
             failed ? Icons.error_outline : Icons.check_circle_outline,
             size: AppIcon.control,
-            color: failed ? Theme.of(context).colorScheme.error : t.successStrong,
+            color: failed
+                ? Theme.of(context).colorScheme.error
+                : t.successStrong,
           ),
           const SizedBox(width: Space.s10),
           Flexible(

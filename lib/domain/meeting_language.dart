@@ -17,22 +17,22 @@ import '../models/congregation_settings.dart';
 /// `epub_parser` to read. A signed meeting still prints its S-140 in the local
 /// written language, so the written workbook is the right source anyway.
 String workbookLangFor(String meetingLanguage) => switch (meetingLanguage) {
-      'english' => 'E',
-      _ => 'S', // 'spanish', 'sign', and anything unrecognized
-    };
+  'english' => 'E',
+  _ => 'S', // 'spanish', 'sign', and anything unrecognized
+};
 
 /// Language the printed program (PDF) is rendered in for [meetingLanguage].
-AppLocale programLocaleFor(String meetingLanguage) =>
-    switch (meetingLanguage) {
-      'english' => AppLocale.en,
-      _ => AppLocale.es,
-    };
+AppLocale programLocaleFor(String meetingLanguage) => switch (meetingLanguage) {
+  'english' => AppLocale.en,
+  _ => AppLocale.es,
+};
 
 /// Every workbook language a set of congregations needs, deduplicated. The
 /// catalog sync fetches exactly these — one congregation in English and two in
 /// Spanish costs two downloads, not three.
-Set<String> workbookLangsFor(Iterable<String> meetingLanguages) =>
-    {for (final m in meetingLanguages) workbookLangFor(m)};
+Set<String> workbookLangsFor(Iterable<String> meetingLanguages) => {
+  for (final m in meetingLanguages) workbookLangFor(m),
+};
 
 /// Workbook language to OFFER when no congregation has said which one it meets
 /// in — the app language, the only thing the app knows about the person in

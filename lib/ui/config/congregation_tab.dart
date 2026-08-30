@@ -78,8 +78,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
     void apply() {
       final s = congregation.settings;
-      final languageIndex =
-          congregationLanguageCodes.indexOf(s.meetingLanguage);
+      final languageIndex = congregationLanguageCodes.indexOf(
+        s.meetingLanguage,
+      );
       _congregationId = congregation.id;
       _name = congregation.name;
       _number = congregation.number;
@@ -112,7 +113,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     // debounce timer and from dispose(), either of which can fire after the
     // capabilities changed under us.
     if (!ref.read(rightsProvider(id)).admin) return;
-    ref.read(congregationActionsProvider).update(
+    ref
+        .read(congregationActionsProvider)
+        .update(
           id,
           name: _name.trim(),
           number: _number.trim(),
@@ -134,7 +137,8 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     // Keep a valid selection (the list changes in memory).
     if (congregations.isEmpty) {
       _congregationId = null;
-    } else if (_congregationId == null || !congregations.any((c) => c.id == _congregationId)) {
+    } else if (_congregationId == null ||
+        !congregations.any((c) => c.id == _congregationId)) {
       _select(congregations.first, notify: false);
     }
 
@@ -366,8 +370,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
         ? const AsyncValue<List<CongregationInvite>>.data([])
         : ref.watch(congregationInvitesProvider(cid));
     final myUid = ref.watch(syncUidProvider);
-    final adminCount =
-        (members.value ?? const []).where((m) => m.capabilities.admin).length;
+    final adminCount = (members.value ?? const [])
+        .where((m) => m.capabilities.admin)
+        .length;
 
     return SettingsCard(
       title: tr.congregation.usersTitle,
@@ -375,28 +380,27 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
       children: [
         switch (members) {
           AsyncError() => _hint(t, tr.congregation.membersError),
-          AsyncValue(value: final rows?) when rows.isNotEmpty =>
-            Column(
-              children: [
-                for (final (i, m) in rows.indexed)
-                  UserRow(
-                    first: i == 0,
-                    name: _memberName(m, tr, isMe: m.uid == myUid),
-                    email: m.email ?? '',
-                    trailing: RolePill(role: _roleLabel(m.capabilities, tr)),
-                    // Editing your own row is allowed on purpose: it is how
-                    // a departing admin hands over and leaves.
-                    onTap: !isAdmin
-                        ? null
-                        : () => showMemberAccess(
-                              context,
-                              congregationId: cid,
-                              member: m,
-                              adminCount: adminCount,
-                            ),
-                  ),
-              ],
-            ),
+          AsyncValue(value: final rows?) when rows.isNotEmpty => Column(
+            children: [
+              for (final (i, m) in rows.indexed)
+                UserRow(
+                  first: i == 0,
+                  name: _memberName(m, tr, isMe: m.uid == myUid),
+                  email: m.email ?? '',
+                  trailing: RolePill(role: _roleLabel(m.capabilities, tr)),
+                  // Editing your own row is allowed on purpose: it is how
+                  // a departing admin hands over and leaves.
+                  onTap: !isAdmin
+                      ? null
+                      : () => showMemberAccess(
+                          context,
+                          congregationId: cid,
+                          member: m,
+                          adminCount: adminCount,
+                        ),
+                ),
+            ],
+          ),
           _ => _hint(t, tr.congregation.noUsers),
         },
         if ((invites.value ?? const []).isNotEmpty) ...[
@@ -464,8 +468,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(tr.congregation.deleteCloudButton,
-                style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+            child: Text(
+              tr.congregation.deleteCloudButton,
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -474,20 +480,25 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     try {
       await ref.read(deleteCongregationCloudProvider)(cid);
     } catch (_) {
-      showAppSnack(messenger,
-          message: tr.congregation.deleteCloudError,
-          kind: AppSnackKind.failure);
+      showAppSnack(
+        messenger,
+        message: tr.congregation.deleteCloudError,
+        kind: AppSnackKind.failure,
+      );
     }
   }
 
   Widget _hint(AppTokens t, String text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: Space.s6),
-        child: Text(
-          text,
-          style: TextStyle(
-              fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: Space.s6),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: AppText.body,
+        fontWeight: FontWeight.w600,
+        color: t.textMute,
+      ),
+    ),
+  );
 
   String _memberName(
     CongregationMember m,
@@ -522,10 +533,12 @@ class _PendingInvite extends StatelessWidget {
     final label = expiresAt == null
         ? ''
         : invite.isExpired(DateTime.now().toUtc())
-            ? tr.invite.expired
-            : tr.invite.expiresOn(
-                date: MaterialLocalizations.of(context)
-                    .formatShortDate(expiresAt.toLocal()));
+        ? tr.invite.expired
+        : tr.invite.expiresOn(
+            date: MaterialLocalizations.of(
+              context,
+            ).formatShortDate(expiresAt.toLocal()),
+          );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: Space.s6),
       child: Row(
@@ -536,9 +549,10 @@ class _PendingInvite extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: AppText.small,
-                  fontWeight: FontWeight.w600,
-                  color: t.textMute),
+                fontSize: AppText.small,
+                fontWeight: FontWeight.w600,
+                color: t.textMute,
+              ),
             ),
           ),
           AppButton(
@@ -677,25 +691,29 @@ class _WorkbookStatusLine extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final tr = context.t;
-    final status =
-        ref.watch(congregationWorkbookStatusProvider(congregationId));
-    final language = meetingLanguages[congregationLanguageCodes
-        .indexOf(ref.watch(congregationMeetingLanguageProvider(congregationId)))
-        .clamp(0, meetingLanguages.length - 1)];
+    final status = ref.watch(
+      congregationWorkbookStatusProvider(congregationId),
+    );
+    final language =
+        meetingLanguages[congregationLanguageCodes
+            .indexOf(
+              ref.watch(congregationMeetingLanguageProvider(congregationId)),
+            )
+            .clamp(0, meetingLanguages.length - 1)];
 
     final (String message, Color color) = switch (status) {
       WorkbookStatus.ready => (
-          tr.congregation.workbookReady(language: language),
-          t.textMute,
-        ),
+        tr.congregation.workbookReady(language: language),
+        t.textMute,
+      ),
       WorkbookStatus.downloading => (
-          tr.congregation.workbookDownloading(language: language),
-          t.accentStrong,
-        ),
+        tr.congregation.workbookDownloading(language: language),
+        t.accentStrong,
+      ),
       WorkbookStatus.unavailable => (
-          tr.congregation.workbookUnavailable(language: language),
-          t.warning,
-        ),
+        tr.congregation.workbookUnavailable(language: language),
+        t.warning,
+      ),
     };
 
     return Text(

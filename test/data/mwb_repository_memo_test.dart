@@ -11,7 +11,8 @@ import 'package:agora/data/mwb_repository.dart';
 import 'package:agora/data/mwb_store.dart';
 
 Uint8List _fakeEpub() {
-  const xhtml = '<h1>1-7 DE JUNIO DE 2026</h1>'
+  const xhtml =
+      '<h1>1-7 DE JUNIO DE 2026</h1>'
       '<h2 class="du-color--teal">TESOROS</h2>'
       '<h3 class="p">1. Discurso (10 mins.)</h3>';
   final archive = Archive()
@@ -58,16 +59,18 @@ void main() {
     repo = MwbRepository(MwbCache(store: store));
   });
 
-  test('a cached notebook is parsed once, however often it is asked for',
-      () async {
-    final first = await repo.weeks('202606');
-    expect(first, hasLength(1));
-    expect(store.epubReads, 1);
+  test(
+    'a cached notebook is parsed once, however often it is asked for',
+    () async {
+      final first = await repo.weeks('202606');
+      expect(first, hasLength(1));
+      expect(store.epubReads, 1);
 
-    final second = await repo.weeks('202606');
-    expect(identical(second, first), isTrue);
-    expect(store.epubReads, 1, reason: 'the second call re-read the EPUB');
-  });
+      final second = await repo.weeks('202606');
+      expect(identical(second, first), isTrue);
+      expect(store.epubReads, 1, reason: 'the second call re-read the EPUB');
+    },
+  );
 
   test('ensureCached reuses the parse and feeds it to weeks()', () async {
     expect(await repo.ensureCached('202606'), 1);
@@ -103,18 +106,20 @@ void main() {
             'S': {
               'EPUB': [
                 {
-                  'file': {'url': 'https://ex.test/202606.epub'}
-                }
-              ]
-            }
+                  'file': {'url': 'https://ex.test/202606.epub'},
+                },
+              ],
+            },
           },
           'formattedDate': 'x',
         }),
         200,
       );
     });
-    final repo =
-        MwbRepository(MwbCache(store: _CountingStore(null)), client: client);
+    final repo = MwbRepository(
+      MwbCache(store: _CountingStore(null)),
+      client: client,
+    );
 
     await Future.wait([
       repo.ensureCached('202606'),
@@ -131,8 +136,10 @@ void main() {
       attempts++;
       return http.Response('not found', 404);
     });
-    final repo =
-        MwbRepository(MwbCache(store: _CountingStore(null)), client: client);
+    final repo = MwbRepository(
+      MwbCache(store: _CountingStore(null)),
+      client: client,
+    );
 
     await expectLater(repo.ensureCached('202606'), throwsA(isA<Exception>()));
     await expectLater(repo.ensureCached('202606'), throwsA(isA<Exception>()));

@@ -122,8 +122,8 @@ abstract final class Elevation {
   /// grounds: the accentSoft it used to use sits at 1.5:1 on the dark
   /// surface, which made the active card look no different from the rest.
   static List<BoxShadow> selectionHalo(Color accent) => [
-        BoxShadow(color: accent.withValues(alpha: 0.30), spreadRadius: 3),
-      ];
+    BoxShadow(color: accent.withValues(alpha: 0.30), spreadRadius: 3),
+  ];
 
   /// Scrim behind an anchored panel.
   static const Color scrim = Color(0x47000000);

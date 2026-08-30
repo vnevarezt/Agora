@@ -21,7 +21,4 @@ const Map<String, String> googleServerClientId = {
 /// Check there; native platforms use Play Integrity / DeviceCheck and need no
 /// key here. App Check only attaches an attestation token, so shipping these
 /// empty changes nothing until you turn on *enforcement* in the console.
-const Map<String, String> googleRecaptchaV3SiteKey = {
-  'dev': '',
-  'prod': '',
-};
+const Map<String, String> googleRecaptchaV3SiteKey = {'dev': '', 'prod': ''};

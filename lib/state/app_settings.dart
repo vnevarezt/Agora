@@ -97,12 +97,14 @@ class AppSettings {
 
 final appSettingsProvider =
     NotifierProvider<AppSettingsController, AppSettings>(
-        AppSettingsController.new);
+      AppSettingsController.new,
+    );
 
 /// Two-programs-per-sheet preference, exposed on its own so the PDF/preview
 /// pipeline rebuilds only when this flag flips (not on any settings change).
-final twoPerSheetProvider =
-    Provider<bool>((ref) => ref.watch(appSettingsProvider.select((s) => s.twoPerSheet)));
+final twoPerSheetProvider = Provider<bool>(
+  (ref) => ref.watch(appSettingsProvider.select((s) => s.twoPerSheet)),
+);
 
 class AppSettingsController extends Notifier<AppSettings> {
   @override
@@ -113,8 +115,10 @@ class AppSettingsController extends Notifier<AppSettings> {
       timeFormat24: p.getBool(_timeFormat24Key) ?? true,
       weekStartMonday: p.getBool(_weekStartMondayKey) ?? true,
       pdfNameFormat: _enumFromName(
-          PdfNameFormat.values, p.getString(_pdfNameFormatKey),
-          fallback: PdfNameFormat.full),
+        PdfNameFormat.values,
+        p.getString(_pdfNameFormatKey),
+        fallback: PdfNameFormat.full,
+      ),
       notifications: {
         for (final n in NotifPref.values)
           n: p.getBool('$_notifPrefix${n.name}') ?? _notifDefaults[n]!,
@@ -151,22 +155,24 @@ class AppSettingsController extends Notifier<AppSettings> {
   }
 
   void setNotification(NotifPref pref, bool v) {
-    state = state
-        .copyWith(notifications: {...state.notifications, pref: v});
+    state = state.copyWith(notifications: {...state.notifications, pref: v});
     _prefs?.setBool('$_notifPrefix${pref.name}', v);
   }
 }
 
 /// Theme mode, persisted. Kept as its own provider because the MaterialApp
 /// watches it directly (moved here from ui_state.dart).
-final themeModeProvider =
-    NotifierProvider<ThemeModeController, ThemeMode>(ThemeModeController.new);
+final themeModeProvider = NotifierProvider<ThemeModeController, ThemeMode>(
+  ThemeModeController.new,
+);
 
 class ThemeModeController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() => _enumFromName(
-      ThemeMode.values, _prefs?.getString(_themeKey),
-      fallback: ThemeMode.light);
+    ThemeMode.values,
+    _prefs?.getString(_themeKey),
+    fallback: ThemeMode.light,
+  );
 
   void toggle() =>
       set(state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
@@ -178,8 +184,11 @@ class ThemeModeController extends Notifier<ThemeMode> {
   }
 }
 
-T _enumFromName<T extends Enum>(List<T> values, String? name,
-    {required T fallback}) {
+T _enumFromName<T extends Enum>(
+  List<T> values,
+  String? name, {
+  required T fallback,
+}) {
   if (name == null) return fallback;
   for (final v in values) {
     if (v.name == name) return v;

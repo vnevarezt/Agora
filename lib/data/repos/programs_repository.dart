@@ -19,10 +19,10 @@ class ProgramsRepository {
   final SyncScribe _scribe;
 
   SimpleSelectStatement<$ProgramsTable, ProgramRecord> _aliveByProject(
-          String projectId) =>
-      _db.select(_db.programs)
-        ..where((t) => t.projectId.equals(projectId) & t.deletedAt.isNull())
-        ..orderBy([(t) => OrderingTerm.asc(t.sortIndex)]);
+    String projectId,
+  ) => _db.select(_db.programs)
+    ..where((t) => t.projectId.equals(projectId) & t.deletedAt.isNull())
+    ..orderBy([(t) => OrderingTerm.asc(t.sortIndex)]);
 
   Future<List<ProgramRecord>> byProject(String projectId) =>
       _aliveByProject(projectId).get();
@@ -48,16 +48,19 @@ class ProgramsRepository {
   Future<void> setContent(String programId, Week week, String lang) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-          .write(ProgramsCompanion(
-        contentJson: Value(jsonEncode(week.toJson())),
-        contentLang: Value(lang),
-        date: week.date.isEmpty ? const Value.absent() : Value(week.date),
-        weekStart: week.weekStart.isEmpty
-            ? const Value.absent()
-            : Value(week.weekStart),
-        hlc: Value(hlc),
-      ));
+      await (_db.update(
+        _db.programs,
+      )..where((t) => t.id.equals(programId))).write(
+        ProgramsCompanion(
+          contentJson: Value(jsonEncode(week.toJson())),
+          contentLang: Value(lang),
+          date: week.date.isEmpty ? const Value.absent() : Value(week.date),
+          weekStart: week.weekStart.isEmpty
+              ? const Value.absent()
+              : Value(week.weekStart),
+          hlc: Value(hlc),
+        ),
+      );
       await _scribe.enqueue(SyncEntity.program, programId, hlc);
     });
   }
@@ -71,11 +74,11 @@ class ProgramsRepository {
   Future<void> setWeekStart(String programId, String weekStart) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-          .write(ProgramsCompanion(
-        weekStart: Value(weekStart),
-        hlc: Value(hlc),
-      ));
+      await (_db.update(
+        _db.programs,
+      )..where((t) => t.id.equals(programId))).write(
+        ProgramsCompanion(weekStart: Value(weekStart), hlc: Value(hlc)),
+      );
       await _scribe.enqueue(SyncEntity.program, programId, hlc);
     });
   }
@@ -83,26 +86,34 @@ class ProgramsRepository {
   Future<void> setWeekType(String programId, WeekType weekType) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-          .write(ProgramsCompanion(
-        weekType: Value(weekType),
-        updatedAt: Value(DateTime.now().toUtc()),
-        hlc: Value(hlc),
-      ));
+      await (_db.update(
+        _db.programs,
+      )..where((t) => t.id.equals(programId))).write(
+        ProgramsCompanion(
+          weekType: Value(weekType),
+          updatedAt: Value(DateTime.now().toUtc()),
+          hlc: Value(hlc),
+        ),
+      );
       await _scribe.enqueue(SyncEntity.program, programId, hlc);
     });
   }
 
   Future<void> setTitleOverrides(
-      String programId, Map<String, String> overrides) async {
+    String programId,
+    Map<String, String> overrides,
+  ) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      await (_db.update(_db.programs)..where((t) => t.id.equals(programId)))
-          .write(ProgramsCompanion(
-        titleOverridesJson: Value(jsonEncode(overrides)),
-        updatedAt: Value(DateTime.now().toUtc()),
-        hlc: Value(hlc),
-      ));
+      await (_db.update(
+        _db.programs,
+      )..where((t) => t.id.equals(programId))).write(
+        ProgramsCompanion(
+          titleOverridesJson: Value(jsonEncode(overrides)),
+          updatedAt: Value(DateTime.now().toUtc()),
+          hlc: Value(hlc),
+        ),
+      );
       await _scribe.enqueue(SyncEntity.program, programId, hlc);
     });
   }
@@ -118,22 +129,23 @@ class ProgramsRepository {
   }) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      final programIds = [
-        for (final p in await byProject(projectId)) p.id,
-      ];
-      await (_db.update(_db.programs)
-            ..where(
-                (t) => t.projectId.equals(projectId) & t.deletedAt.isNull()))
-          .write(ProgramsCompanion(
-        startTime:
-            startTime == null ? const Value.absent() : Value(startTime),
-        durationMinutes: durationMinutes == null
-            ? const Value.absent()
-            : Value(durationMinutes),
-        auxRoom: auxRoom == null ? const Value.absent() : Value(auxRoom),
-        updatedAt: Value(DateTime.now().toUtc()),
-        hlc: Value(hlc),
-      ));
+      final programIds = [for (final p in await byProject(projectId)) p.id];
+      await (_db.update(
+            _db.programs,
+          )..where((t) => t.projectId.equals(projectId) & t.deletedAt.isNull()))
+          .write(
+            ProgramsCompanion(
+              startTime: startTime == null
+                  ? const Value.absent()
+                  : Value(startTime),
+              durationMinutes: durationMinutes == null
+                  ? const Value.absent()
+                  : Value(durationMinutes),
+              auxRoom: auxRoom == null ? const Value.absent() : Value(auxRoom),
+              updatedAt: Value(DateTime.now().toUtc()),
+              hlc: Value(hlc),
+            ),
+          );
       for (final programId in programIds) {
         await _scribe.enqueue(SyncEntity.program, programId, hlc);
       }
@@ -145,11 +157,12 @@ class ProgramsRepository {
   /// program still needs — and must not run at all while a program's week is
   /// unidentified, because then there is no telling which workbook that is.
   Future<({Set<String> weekStarts, bool anyUnidentified})>
-      aliveWeekStarts() async {
-    final rows = await (_db.selectOnly(_db.programs)
-          ..addColumns([_db.programs.weekStart])
-          ..where(_db.programs.deletedAt.isNull()))
-        .get();
+  aliveWeekStarts() async {
+    final rows =
+        await (_db.selectOnly(_db.programs)
+              ..addColumns([_db.programs.weekStart])
+              ..where(_db.programs.deletedAt.isNull()))
+            .get();
     final weekStarts = <String>{};
     var anyUnidentified = false;
     for (final row in rows) {
@@ -164,11 +177,12 @@ class ProgramsRepository {
   }
 
   Future<List<AssignmentRecord>> assignmentsByPrograms(
-      List<String> programIds) {
+    List<String> programIds,
+  ) {
     if (programIds.isEmpty) return Future.value(const []);
-    return (_db.select(_db.assignmentRows)
-          ..where((t) => t.programId.isIn(programIds) & t.deletedAt.isNull()))
-        .get();
+    return (_db.select(
+      _db.assignmentRows,
+    )..where((t) => t.programId.isIn(programIds) & t.deletedAt.isNull())).get();
   }
 
   /// Writes the whole name list of one slot row in one hall: empty names
@@ -183,22 +197,27 @@ class ProgramsRepository {
     final now = DateTime.now().toUtc();
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      final existing = await (_db.select(_db.assignmentRows)
-            ..where((t) =>
-                t.programId.equals(programId) &
-                t.slotKey.equals(slotKey) &
-                t.hall.equals(hall.name) &
-                t.deletedAt.isNull()))
-          .get();
+      final existing =
+          await (_db.select(_db.assignmentRows)..where(
+                (t) =>
+                    t.programId.equals(programId) &
+                    t.slotKey.equals(slotKey) &
+                    t.hall.equals(hall.name) &
+                    t.deletedAt.isNull(),
+              ))
+              .get();
       final byPosition = {for (final a in existing) a.position: a};
 
       Future<void> tombstone(String id) async {
-        await (_db.update(_db.assignmentRows)..where((t) => t.id.equals(id)))
-            .write(AssignmentRowsCompanion(
-          deletedAt: Value(now),
-          updatedAt: Value(now),
-          hlc: Value(hlc),
-        ));
+        await (_db.update(
+          _db.assignmentRows,
+        )..where((t) => t.id.equals(id))).write(
+          AssignmentRowsCompanion(
+            deletedAt: Value(now),
+            updatedAt: Value(now),
+            hlc: Value(hlc),
+          ),
+        );
         await _scribe.enqueue(SyncEntity.assignment, id, hlc);
       }
 
@@ -209,7 +228,9 @@ class ProgramsRepository {
           if (current != null) await tombstone(current.id);
         } else if (current == null) {
           final id = const Uuid().v4();
-          await _db.into(_db.assignmentRows).insert(
+          await _db
+              .into(_db.assignmentRows)
+              .insert(
                 AssignmentRowsCompanion.insert(
                   id: id,
                   programId: programId,
@@ -224,13 +245,15 @@ class ProgramsRepository {
               );
           await _scribe.enqueue(SyncEntity.assignment, id, hlc);
         } else if (current.displayName != name) {
-          await (_db.update(_db.assignmentRows)
-                ..where((t) => t.id.equals(current.id)))
-              .write(AssignmentRowsCompanion(
-            displayName: Value(name),
-            updatedAt: Value(now),
-            hlc: Value(hlc),
-          ));
+          await (_db.update(
+            _db.assignmentRows,
+          )..where((t) => t.id.equals(current.id))).write(
+            AssignmentRowsCompanion(
+              displayName: Value(name),
+              updatedAt: Value(now),
+              hlc: Value(hlc),
+            ),
+          );
           await _scribe.enqueue(SyncEntity.assignment, current.id, hlc);
         }
       }

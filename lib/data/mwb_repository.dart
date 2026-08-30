@@ -14,8 +14,10 @@ import 'mwb_cache.dart';
 /// Unzip + HTML parsing are tens-of-ms of pure CPU per notebook: run them off
 /// the UI isolate (they hit it on editor open and during the startup sync).
 Future<List<Week>> _parseEpubInBackground(
-        Uint8List bytes, String lang, String issue) =>
-    runInBackground(() => parseEpub(bytes, lang: lang, issue: issue));
+  Uint8List bytes,
+  String lang,
+  String issue,
+) => runInBackground(() => parseEpub(bytes, lang: lang, issue: issue));
 
 /// A notebook is missing and this platform cannot fetch it — web, where the
 /// workbook file is behind a host that serves no CORS header. Carries no
@@ -103,7 +105,8 @@ class MwbRepository {
   /// Throws [FormatException] when the file is not a meeting workbook, so the
   /// caller can say which of the two went wrong without parsing a message.
   Future<({String issue, String lang, int weeks})> importEpub(
-      Uint8List bytes) async {
+    Uint8List bytes,
+  ) async {
     final parsed = await runInBackground(() => parseWorkbookEpub(bytes));
     if (parsed == null) {
       throw const FormatException('Not a meeting workbook EPUB.');
@@ -111,8 +114,7 @@ class MwbRepository {
     if (parsed.weeks.isEmpty) {
       throw const FormatException('The workbook holds no weeks.');
     }
-    await _cache.putEpub(
-        parsed.issue, parsed.lang, bytes, parsed.weeks.length);
+    await _cache.putEpub(parsed.issue, parsed.lang, bytes, parsed.weeks.length);
     _parsed['${parsed.issue}.${parsed.lang}'] = parsed.weeks;
     return (issue: parsed.issue, lang: parsed.lang, weeks: parsed.weeks.length);
   }

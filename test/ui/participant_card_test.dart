@@ -33,27 +33,34 @@ Person _p(String name, {String origin = '', Gender gender = Gender.male}) {
 
 /// Lays out one card at [scale] and returns (actual height, prediction).
 Future<(double, double)> _measure(
-    WidgetTester tester, Person person, double scale) async {
+  WidgetTester tester,
+  Person person,
+  double scale,
+) async {
   late double predicted;
-  await tester.pumpWidget(TranslationProvider(
-    child: MaterialApp(
-      theme: buildAppTheme(pizarra.light, Brightness.light),
-      home: MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-        child: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 330,
-              child: Builder(builder: (context) {
-                predicted = participantCardHeight(context);
-                return ParticipantCard(participant: person, onTap: () {});
-              }),
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: MaterialApp(
+        theme: buildAppTheme(pizarra.light, Brightness.light),
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+          child: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 330,
+                child: Builder(
+                  builder: (context) {
+                    predicted = participantCardHeight(context);
+                    return ParticipantCard(participant: person, onTap: () {});
+                  },
+                ),
+              ),
             ),
           ),
         ),
       ),
     ),
-  ));
+  );
   return (tester.getSize(find.byType(ParticipantCard)).height, predicted);
 }
 
@@ -61,7 +68,10 @@ void main() {
   final variants = <String, Person>{
     'short name': _p('Ana'),
     'long name': _p('A Considerably Longer Participant Name Here'),
-    'visitor with origin congregation': _p('Luis', origin: 'Another Congregation'),
+    'visitor with origin congregation': _p(
+      'Luis',
+      origin: 'Another Congregation',
+    ),
     'incomplete data': _p('Sin género', gender: Gender.unspecified),
   };
 
@@ -75,8 +85,11 @@ void main() {
         }
         // One height for every variant: this uniformity is what the grid's
         // fixed tile extent depends on.
-        expect(heights, hasLength(1),
-            reason: 'card height varies with content: $heights');
+        expect(
+          heights,
+          hasLength(1),
+          reason: 'card height varies with content: $heights',
+        );
       });
     }
   });
@@ -85,14 +98,24 @@ void main() {
     for (final scale in [1.0, 1.3, 2.0]) {
       testWidgets('at text scale $scale', (tester) async {
         for (final entry in variants.entries) {
-          final (actual, predicted) = await _measure(tester, entry.value, scale);
+          final (actual, predicted) = await _measure(
+            tester,
+            entry.value,
+            scale,
+          );
           // Never under: a short tile clips the card. Never wildly over: a
           // couple of pixels of slack is invisible, more means the formula has
           // drifted from the card.
-          expect(predicted, greaterThanOrEqualTo(actual),
-              reason: '${entry.key} @ $scale would be clipped');
-          expect(predicted, lessThanOrEqualTo(actual + 2),
-              reason: '${entry.key} @ $scale wastes space');
+          expect(
+            predicted,
+            greaterThanOrEqualTo(actual),
+            reason: '${entry.key} @ $scale would be clipped',
+          );
+          expect(
+            predicted,
+            lessThanOrEqualTo(actual + 2),
+            reason: '${entry.key} @ $scale wastes space',
+          );
         }
       });
     }

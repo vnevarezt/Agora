@@ -71,7 +71,10 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
                     BackLink(label: tr.auth.chooseOther, onTap: widget.onBack!),
                     const SizedBox(height: 16),
                   ],
-                  ModePill(icon: Icons.cloud_outlined, label: tr.auth.cloud.pill),
+                  ModePill(
+                    icon: Icons.cloud_outlined,
+                    label: tr.auth.cloud.pill,
+                  ),
                   const SizedBox(height: 14),
                   FadeThroughSwitcher(
                     duration: Motion.of(context, Motion.fast),
@@ -110,11 +113,13 @@ class _CloudAuthScreenState extends ConsumerState<CloudAuthScreen> {
                     text: login
                         ? tr.auth.cloud.noAccount
                         : tr.auth.cloud.hasAccount,
-                    actionLabel:
-                        login ? tr.auth.cloud.register : tr.auth.cloud.login,
+                    actionLabel: login
+                        ? tr.auth.cloud.register
+                        : tr.auth.cloud.login,
                     onTap: () => setState(
-                      () => _mode =
-                          login ? CloudFormMode.register : CloudFormMode.login,
+                      () => _mode = login
+                          ? CloudFormMode.register
+                          : CloudFormMode.login,
                     ),
                   ),
                 ],
@@ -249,7 +254,8 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
     // popup instead of google_sign_in. The kIsWeb check has to come first:
     // defaultTargetPlatform reports the *host* OS in a browser, so a macOS or
     // Windows Chrome would otherwise fall into the exclusions above.
-    final googleAvailable = kIsWeb ||
+    final googleAvailable =
+        kIsWeb ||
         (defaultTargetPlatform != TargetPlatform.windows &&
             defaultTargetPlatform != TargetPlatform.macOS);
 
@@ -264,8 +270,7 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               busy: _googleBusy,
               onPressed: _busy
                   ? null
-                  : () =>
-                      _run((auth) => auth.signInWithGoogle(), google: true),
+                  : () => _run((auth) => auth.signInWithGoogle(), google: true),
             ),
             const SizedBox(height: Space.s14),
             Row(
@@ -342,8 +347,9 @@ class _CloudAuthFormState extends ConsumerState<CloudAuthForm> {
               child: Padding(
                 padding: const EdgeInsets.only(top: Space.s8),
                 child: Pressable(
-                  onTap:
-                      _busy ? null : () => widget.onForgotPassword(_email.trim()),
+                  onTap: _busy
+                      ? null
+                      : () => widget.onForgotPassword(_email.trim()),
                   builder: (context, hovered, _) => Text(
                     tr.auth.cloud.forgot,
                     style: TextStyle(

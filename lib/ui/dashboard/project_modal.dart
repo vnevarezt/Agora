@@ -57,6 +57,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   late String _name = widget.original?.name ?? '';
   late String _congregationId;
   late String _notebookId;
+
   /// Picked weeks, identity and label together. Keyed on the identity, so
   /// editing a project after its congregation changed language matches the
   /// existing programs instead of replacing them (and their assignments).
@@ -76,12 +77,14 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
   void initState() {
     super.initState();
     final congregations = ref.read(congregationsProvider);
-    _congregationId = widget.original?.congregationId ??
+    _congregationId =
+        widget.original?.congregationId ??
         (congregations.isNotEmpty ? congregations.first.id : '');
     // Catalog of THIS congregation's meeting language — read after the id is
     // resolved, since that is what selects it.
-    final notebooks =
-        ref.read(notebooksForCongregationProvider(_congregationId));
+    final notebooks = ref.read(
+      notebooksForCongregationProvider(_congregationId),
+    );
     // New project: starts at the current notebook (the one covering today), not
     // the oldest cached one. When editing, keep the first in the catalog.
     final current = issueForDate(DateTime.now());
@@ -108,8 +111,7 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       if (_picked(w)) {
         _weeks = _weeks.where((x) => !_same(x, w)).toList();
       } else {
-        final extra =
-            _weeks.where((x) => !_inNotebook(notebook, x)).toList();
+        final extra = _weeks.where((x) => !_inNotebook(notebook, x)).toList();
         _weeks = [
           ...notebook.weeks.where((x) => _picked(x) || _same(x, w)),
           ...extra,
@@ -137,11 +139,18 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final String projectId;
     if (_isNew) {
       projectId = await actions.create(
-          name: name, congregationId: _congregationId, weeks: _weeks);
+        name: name,
+        congregationId: _congregationId,
+        weeks: _weeks,
+      );
     } else {
       projectId = widget.original!.id;
-      await actions.update(projectId,
-          name: name, congregationId: _congregationId, weeks: _weeks);
+      await actions.update(
+        projectId,
+        name: name,
+        congregationId: _congregationId,
+        weeks: _weeks,
+      );
     }
     // Fire-and-forget: snapshots the picked weeks' content onto the
     // programs (retried on editor open if a notebook wasn't cached yet).
@@ -164,8 +173,10 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.t.common.delete,
-                style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              context.t.common.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -180,8 +191,9 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
     final isMobile = context.isMobile;
     final tr = context.t;
     final congregations = ref.watch(congregationsProvider);
-    final notebooks =
-        ref.watch(notebooksForCongregationProvider(_congregationId));
+    final notebooks = ref.watch(
+      notebooksForCongregationProvider(_congregationId),
+    );
 
     final desc = tr.projectModal.desc;
     final title = _isNew ? tr.projectModal.newTitle : tr.projectModal.editTitle;
@@ -201,8 +213,10 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       );
     }
 
-    final notebook = notebooks.firstWhere((c) => c.id == _notebookId,
-        orElse: () => notebooks.first);
+    final notebook = notebooks.firstWhere(
+      (c) => c.id == _notebookId,
+      orElse: () => notebooks.first,
+    );
     final extra = _weeks.where((x) => !_inNotebook(notebook, x)).toList();
     final autoName = _autoName(notebook, tr);
 
@@ -211,11 +225,20 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       onClose: widget.onClose,
       title: title,
       desc: desc,
-      body: _body(context.tokens, tr, isMobile, congregations, notebooks,
-          notebook, extra, autoName),
+      body: _body(
+        context.tokens,
+        tr,
+        isMobile,
+        congregations,
+        notebooks,
+        notebook,
+        extra,
+        autoName,
+      ),
       primaryLabel: _isNew ? tr.projectModal.create : tr.common.saveChanges,
-      onPrimary:
-          (_canEdit && _weeks.isNotEmpty) ? () => _save(notebook, tr) : null,
+      onPrimary: (_canEdit && _weeks.isNotEmpty)
+          ? () => _save(notebook, tr)
+          : null,
       onDanger: (_isNew || !_canEdit) ? null : _delete,
     );
   }
@@ -302,7 +325,6 @@ class _ProjectModalState extends ConsumerState<ProjectModal> {
       ],
     );
   }
-
 }
 
 /// Week toggle (`.week-toggle`): rectangular, 1.5 border, tabular figures.
@@ -332,7 +354,10 @@ class _WeekToggle extends StatelessWidget {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
           curve: Motion.curve,
-          padding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Space.s12,
+            vertical: Space.s8,
+          ),
           decoration: BoxDecoration(
             color: active ? t.accent : t.surface,
             borderRadius: BorderRadius.circular(9),

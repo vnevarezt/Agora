@@ -82,9 +82,9 @@ class _NotebookDropTargetState extends State<NotebookDropTarget> {
     final reader = web.FileReader();
     reader.onload = ((web.Event _) {
       final result = reader.result;
-      completer.complete(result == null
-          ? null
-          : (result as JSArrayBuffer).toDart.asUint8List());
+      completer.complete(
+        result == null ? null : (result as JSArrayBuffer).toDart.asUint8List(),
+      );
     }).toJS;
     reader.onerror = ((web.Event _) => completer.complete(null)).toJS;
     reader.readAsArrayBuffer(file);

@@ -20,14 +20,14 @@ const Map<String, Section> _sectionByColor = {
 };
 
 final _rePageNum = RegExp(
-    r'<span[^>]*class="[^"]*pageNum[^"]*"[^>]*>.*?</span>',
-    dotAll: true);
+  r'<span[^>]*class="[^"]*pageNum[^"]*"[^>]*>.*?</span>',
+  dotAll: true,
+);
 final _reSup = RegExp(r'<sup\b[^>]*>.*?</sup>', dotAll: true);
 final _reTags = RegExp(r'<[^>]+>');
 final _reSpaces = RegExp(r'\s+');
 final _reDuration = RegExp(r'\((\d+)\s*mins?\.?\)');
-final _reHeadings =
-    RegExp(r'<(h[123])\b([^>]*)>(.*?)</\1>', dotAll: true);
+final _reHeadings = RegExp(r'<(h[123])\b([^>]*)>(.*?)</\1>', dotAll: true);
 final _reColor = RegExp(r'du-color--(teal|gold|maroon)');
 final _reClass = RegExp(r'class="([^"]*)"');
 final _rePartNum = RegExp(r'^(\d+)\.\s+(.*)$', dotAll: true);
@@ -100,7 +100,9 @@ Week parseWeek(String xhtml, {String lang = 'S'}) {
     final tag = m.group(1)!;
     final attrs = m.group(2)!;
     final inner = m.group(3)!;
-    final end = (i + 1 < headings.length) ? headings[i + 1].start : xhtml.length;
+    final end = (i + 1 < headings.length)
+        ? headings[i + 1].start
+        : xhtml.length;
     final body = xhtml.substring(m.end, end);
     final text = _text(inner);
     final classMatch = _reClass.firstMatch(attrs);
@@ -143,14 +145,17 @@ Week parseWeek(String xhtml, {String lang = 'S'}) {
       final number = int.parse(partMatch.group(1)!);
       final title = partMatch.group(2)!.trim();
       final duration = _duration(body) ?? _duration(text);
-      week.parts.add(Part(
-        section: currentSection,
-        number: number,
-        title: title,
-        minutes: duration,
-        isTalk: currentSection == Section.ministry &&
-            _isTalk(title, _text(body), lang),
-      ));
+      week.parts.add(
+        Part(
+          section: currentSection,
+          number: number,
+          title: title,
+          minutes: duration,
+          isTalk:
+              currentSection == Section.ministry &&
+              _isTalk(title, _text(body), lang),
+        ),
+      );
       continue;
     }
     // ----- date (first h1) and reading (h2 before TESOROS) -----
@@ -196,7 +201,8 @@ final _reCover = RegExp(r'/mwb_([A-Z]+)_(\d{6})\.');
 /// workbook can never be filed under the wrong issue. Null when the file is
 /// not a meeting workbook at all.
 ({List<Week> weeks, String lang, String issue})? parseWorkbookEpub(
-    Uint8List bytes) {
+  Uint8List bytes,
+) {
   final archive = ZipDecoder().decodeBytes(bytes);
   for (final file in archive.files) {
     final match = _reCover.firstMatch(file.name);
@@ -210,11 +216,12 @@ final _reCover = RegExp(r'/mwb_([A-Z]+)_(\d{6})\.');
 
 List<Week> _weeksOf(Archive archive, String lang, String? issue) {
   // Weekly files are OEBPS/NNNNNNNNN.xhtml (without '-extracted').
-  final names = archive.files
-      .where((f) => f.isFile && _reWeekFile.hasMatch(f.name))
-      .map((f) => f.name)
-      .toList()
-    ..sort();
+  final names =
+      archive.files
+          .where((f) => f.isFile && _reWeekFile.hasMatch(f.name))
+          .map((f) => f.name)
+          .toList()
+        ..sort();
   final weeks = <Week>[];
   String? previous;
   for (final n in names) {
@@ -227,7 +234,8 @@ List<Week> _weeksOf(Archive archive, String lang, String? issue) {
       if (day != null) {
         // Chain off the previous week first (exact), and fall back to the
         // period search so one unreadable heading cannot derail the rest.
-        final start = weekStartFor(issue, day, previous: previous) ??
+        final start =
+            weekStartFor(issue, day, previous: previous) ??
             weekStartFor(issue, day);
         if (start != null) week.weekStart = start;
         previous = start;

@@ -68,36 +68,36 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            // v1 predates every other table: this step creates them with
-            // Migrator.createTable, which always uses the CURRENT schema
-            // shape — so the later steps must NOT run on top of it.
-            await _migrateV1ToV2(m);
-            return;
-          }
-          if (from < 3) await _migrateV2ToV3(m);
-          // Same trap as v1 above, one table down: _migrateV3ToV4 CREATES
-          // sync_state, and Migrator.createTable always uses the CURRENT
-          // shape — so the column v5 adds is already there and adding it
-          // again would fail.
-          if (from < 4) {
-            await _migrateV3ToV4(m);
-          } else if (from < 5) {
-            await _migrateV4ToV5(m);
-          }
-          // Safe after every path above: `programs` is created at its v2 shape
-          // by _migrateV2ToV3's predecessor, and the from<2 path returned
-          // early with the current shape already in place.
-          if (from < 6) await _migrateV5ToV6(m);
-        },
-        beforeOpen: (details) async {
-          // Runs after migrations: soft deletes make FK violations rare, but
-          // hard paths (replaceAll, reset) must still be caught early.
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // v1 predates every other table: this step creates them with
+        // Migrator.createTable, which always uses the CURRENT schema
+        // shape — so the later steps must NOT run on top of it.
+        await _migrateV1ToV2(m);
+        return;
+      }
+      if (from < 3) await _migrateV2ToV3(m);
+      // Same trap as v1 above, one table down: _migrateV3ToV4 CREATES
+      // sync_state, and Migrator.createTable always uses the CURRENT
+      // shape — so the column v5 adds is already there and adding it
+      // again would fail.
+      if (from < 4) {
+        await _migrateV3ToV4(m);
+      } else if (from < 5) {
+        await _migrateV4ToV5(m);
+      }
+      // Safe after every path above: `programs` is created at its v2 shape
+      // by _migrateV2ToV3's predecessor, and the from<2 path returned
+      // early with the current shape already in place.
+      if (from < 6) await _migrateV5ToV6(m);
+    },
+    beforeOpen: (details) async {
+      // Runs after migrations: soft deletes make FK violations rare, but
+      // hard paths (replaceAll, reset) must still be caught early.
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 
   /// v1 → CURRENT. One transaction (drift wraps migrations): create every
   /// other table (Migrator.createTable always uses the current shape, which
@@ -143,8 +143,7 @@ class AppDatabase extends _$AppDatabase {
         final topGroup = groupCounts.entries
             .reduce((a, b) => b.value > a.value ? b : a)
             .key;
-        congregationName = spellings[topGroup]!
-            .entries
+        congregationName = spellings[topGroup]!.entries
             .reduce((a, b) => b.value > a.value ? b : a)
             .key;
       }
@@ -152,15 +151,17 @@ class AppDatabase extends _$AppDatabase {
 
       final now = DateTime.now().toUtc();
       final congregationId = const Uuid().v4();
-      await into(congregations).insert(CongregationsCompanion.insert(
-        id: congregationId,
-        name: congregationName,
-        // First color of the dashboard palette; the cycled assignment for
-        // new congregations lands with milestone 3.
-        color: 0xFF7A2230,
-        createdAt: now,
-        updatedAt: now,
-      ));
+      await into(congregations).insert(
+        CongregationsCompanion.insert(
+          id: congregationId,
+          name: congregationName,
+          // First color of the dashboard palette; the cycled assignment for
+          // new congregations lands with milestone 3.
+          color: 0xFF7A2230,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
 
       await batch((b) {
         for (final row in rows) {

@@ -9,34 +9,38 @@ import 'package:agora/state/weeks_provider.dart';
 class _FixedWeeks extends WeeksController {
   @override
   Future<List<Week>> build() async => [
-        for (var i = 0; i < 3; i++)
-          Week(
-            date: 'SEMANA $i',
-            parts: [
-              const Part(
-                  section: Section.treasures,
-                  number: 1,
-                  title: 'Lectura de la Biblia',
-                  minutes: 4),
-            ],
+    for (var i = 0; i < 3; i++)
+      Week(
+        date: 'SEMANA $i',
+        parts: [
+          const Part(
+            section: Section.treasures,
+            number: 1,
+            title: 'Lectura de la Biblia',
+            minutes: 4,
           ),
-      ];
+        ],
+      ),
+  ];
 }
 
 void main() {
   late ProviderContainer container;
 
   setUp(() async {
-    container = ProviderContainer(overrides: [
-      weeksProvider.overrideWith(_FixedWeeks.new),
-    ]);
+    container = ProviderContainer(
+      overrides: [weeksProvider.overrideWith(_FixedWeeks.new)],
+    );
     addTearDown(container.dispose);
     await container.read(weeksProvider.future);
   });
 
   test('per-week progress counts every week', () {
-    expect(container.read(progressPerWeekProvider),
-        [(done: 0, total: 2), (done: 0, total: 2), (done: 0, total: 2)]);
+    expect(container.read(progressPerWeekProvider), [
+      (done: 0, total: 2),
+      (done: 0, total: 2),
+      (done: 0, total: 2),
+    ]);
 
     container.read(formProvider.notifier).setMainNames('te0', ['Ana']);
     expect(container.read(progressPerWeekProvider).first, (done: 1, total: 2));

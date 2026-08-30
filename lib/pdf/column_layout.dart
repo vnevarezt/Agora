@@ -46,7 +46,10 @@ typedef ColumnNeed = ({double want, double floor});
 
 /// Width a row's names column needs, both ways round.
 ColumnNeed namesNeed(
-    SlotRole role, List<String> names, double Function(String) measure) {
+  SlotRole role,
+  List<String> names,
+  double Function(String) measure,
+) {
   if (names.isEmpty) return (want: 0, floor: 0);
   final joined = measure(joinedNames(names));
   if (role.isStudentPair && names.length == 2) {
@@ -92,8 +95,11 @@ typedef _TitleNeed = ({double need, int borrow});
 /// it keeps its place. Stopping at the first occupied column is what makes
 /// that true — drop a column that still has a neighbour printing to its left
 /// and the neighbour slides across, out of line with the rest of the sheet.
-int borrowedColumns(
-    {required bool hasRole, required bool hasAux, required bool auxRoom}) {
+int borrowedColumns({
+  required bool hasRole,
+  required bool hasAux,
+  required bool auxRoom,
+}) {
   if (hasRole) return 0;
   if (auxRoom && hasAux) return 1;
   return auxRoom ? 2 : 1;
@@ -134,10 +140,11 @@ ColumnWidths computeColumns(
   double time(String s) => bold.stringMetrics(s).advanceWidth * m.small;
   final bullet = measure('•') * m.small / m.base;
   final hour = math.min(
-      m.hourWidth,
-      sched.rows.map((f) => time(f.time)).reduce(math.max) +
-          bullet +
-          2 * S140.fboxsep);
+    m.hourWidth,
+    sched.rows.map((f) => time(f.time)).reduce(math.max) +
+        bullet +
+        2 * S140.fboxsep,
+  );
   final role = m.roleWidth; // fixed (role labels, not user input)
   // Per row, so the widths can be chosen from the totals and then scored
   // against every individual cell.
@@ -162,9 +169,10 @@ ColumnWidths computeColumns(
     titles.add((
       need: hour + measure(f.content(tr)) + m.namePad,
       borrow: borrowedColumns(
-          hasRole: f.role.label(tr).isNotEmpty,
-          hasAux: auxWant > 0,
-          auxRoom: auxRoom),
+        hasRole: f.role.label(tr).isNotEmpty,
+        hasAux: auxWant > 0,
+        auxRoom: auxRoom,
+      ),
     ));
   }
   // The title of a row that claims no role column can spread into it, so the
@@ -175,13 +183,12 @@ ColumnWidths computeColumns(
   final titleWant = titles.isEmpty
       ? 0.0
       : titles
-          .map((t) => t.need - (t.borrow > 0 ? m.colGap + role : 0))
-          .reduce(math.max);
+            .map((t) => t.need - (t.borrow > 0 ? m.colGap + role : 0))
+            .reduce(math.max);
   int over(List<double> needs, double width) =>
       needs.where((w) => w > width).length;
   int wrapped(double content, double auxNames) => titles
-      .where((t) =>
-          t.need > content + _extra(m, t.borrow, role, auxNames))
+      .where((t) => t.need > content + _extra(m, t.borrow, role, auxNames))
       .length;
   // A week with nothing in the auxiliary room does not print a column for it.
   // Reserving one costs the same 60-odd points on every row of that week and
@@ -196,28 +203,31 @@ ColumnWidths computeColumns(
     // there while the titles beside it wrap would be honouring the form's
     // measurements over the thing they exist to keep readable.
     final floor = math.max(main.floor + m.namePad, m.minNamesCol);
-    final ceiling = math.max(floor,
-        math.min(avail - m.minContentFrac * m.contentWidth, avail - titleWant));
+    final ceiling = math.max(
+      floor,
+      math.min(avail - m.minContentFrac * m.contentWidth, avail - titleWant),
+    );
     final want = math.max(main.want + m.namePad, m.mainNameWidth);
     final mainNames = want.clamp(floor, ceiling).toDouble();
     final content = avail - mainNames;
     return ColumnWidths(
-        hour: hour,
-        role: role,
-        mainNames: mainNames,
-        auxRoom: 0,
-        band: content + m.colGap + role,
-        titleBreaks: wrapped(content, 0),
-        nameBreaks: over(mainWants, mainNames));
+      hour: hour,
+      role: role,
+      mainNames: mainNames,
+      auxRoom: 0,
+      band: content + m.colGap + role,
+      titleBreaks: wrapped(content, 0),
+      nameBreaks: over(mainWants, mainNames),
+    );
   }
 
   // --- Auxiliary Room mode: 4 columns (X R A P), 3 gaps ---
   final mainFloor = math.max(main.floor + m.namePad, m.minNamesCol);
   final auxFloor = math.max(aux.floor + m.namePad, m.minNamesCol);
   final budget = math.max(
-      mainFloor + auxFloor,
-      math.min(
-          avail - m.minContentAuxFrac * m.contentWidth, avail - titleWant));
+    mainFloor + auxFloor,
+    math.min(avail - m.minContentAuxFrac * m.contentWidth, avail - titleWant),
+  );
   var mainNames = main.want + m.namePad;
   var auxNames = aux.want + m.namePad;
   if (mainNames < mainFloor) mainNames = mainFloor;
@@ -233,11 +243,12 @@ ColumnWidths computeColumns(
   }
   final content = avail - mainNames - auxNames;
   return ColumnWidths(
-      hour: hour,
-      role: role,
-      mainNames: mainNames,
-      auxRoom: auxNames,
-      band: content + m.colGap + role,
-      titleBreaks: wrapped(content, auxNames),
-      nameBreaks: over(mainWants, mainNames) + over(auxWants, auxNames));
+    hour: hour,
+    role: role,
+    mainNames: mainNames,
+    auxRoom: auxNames,
+    band: content + m.colGap + role,
+    titleBreaks: wrapped(content, auxNames),
+    nameBreaks: over(mainWants, mainNames) + over(auxWants, auxNames),
+  );
 }

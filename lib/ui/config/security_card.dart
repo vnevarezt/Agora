@@ -24,7 +24,10 @@ class SecurityCard extends ConsumerWidget {
   const SecurityCard({super.key});
 
   Future<void> _toggleDeviceUnlock(
-      BuildContext context, WidgetRef ref, bool enable) async {
+    BuildContext context,
+    WidgetRef ref,
+    bool enable,
+  ) async {
     final tr = context.t;
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -33,11 +36,13 @@ class SecurityCard extends ConsumerWidget {
           .read(authSessionProvider.notifier)
           .setDeviceUnlock(enable, tr.security.deviceUnlockPrompt);
     } on DbKeyException catch (e) {
-      showAppSnack(messenger,
-          message: e.message, kind: AppSnackKind.failure);
+      showAppSnack(messenger, message: e.message, kind: AppSnackKind.failure);
     } catch (_) {
-      showAppSnack(messenger,
-          message: tr.account.errors.unknown, kind: AppSnackKind.failure);
+      showAppSnack(
+        messenger,
+        message: tr.account.errors.unknown,
+        kind: AppSnackKind.failure,
+      );
     }
   }
 
@@ -48,8 +53,7 @@ class SecurityCard extends ConsumerWidget {
     final unlocked = session is SessionUnlocked ? session : null;
     final localMode = unlocked?.mode == AccountMode.local;
     final deviceUnlockOn = unlocked?.deviceUnlockEnabled ?? false;
-    final deviceAuthOk =
-        ref.watch(deviceAuthSupportedProvider).value ?? false;
+    final deviceAuthOk = ref.watch(deviceAuthSupportedProvider).value ?? false;
 
     return SettingsCard(
       title: tr.security.title,
@@ -144,8 +148,11 @@ class _ChangePasswordModalState extends ConsumerState<_ChangePasswordModal> {
           .changePassword(_current, _next);
       if (!mounted) return;
       widget.onClose();
-      showAppSnack(messenger,
-          message: tr.security.changed, kind: AppSnackKind.success);
+      showAppSnack(
+        messenger,
+        message: tr.security.changed,
+        kind: AppSnackKind.success,
+      );
     } on WrongPasswordException {
       if (mounted) {
         setState(() {

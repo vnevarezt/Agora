@@ -32,22 +32,23 @@ class SyncSeeder {
         count++;
       }
 
-      final congregation = await (_db.select(_db.congregations)
-            ..where((t) => t.id.equals(congregationId)))
-          .getSingleOrNull();
+      final congregation = await (_db.select(
+        _db.congregations,
+      )..where((t) => t.id.equals(congregationId))).getSingleOrNull();
       if (congregation == null) return 0;
       await stampAndEnqueue(
         SyncEntity.congregation,
         congregation.id,
         congregation.hlc,
-        (hlc) => (_db.update(_db.congregations)
-              ..where((t) => t.id.equals(congregation.id)))
-            .write(CongregationsCompanion(hlc: Value(hlc))),
+        (hlc) =>
+            (_db.update(_db.congregations)
+                  ..where((t) => t.id.equals(congregation.id)))
+                .write(CongregationsCompanion(hlc: Value(hlc))),
       );
 
-      final people = await (_db.select(_db.people)
-            ..where((t) => t.congregationId.equals(congregationId)))
-          .get();
+      final people = await (_db.select(
+        _db.people,
+      )..where((t) => t.congregationId.equals(congregationId))).get();
       for (final p in people) {
         await stampAndEnqueue(
           SyncEntity.person,
@@ -56,55 +57,58 @@ class SyncSeeder {
           (hlc) => (_db.update(_db.people)..where((t) => t.id.equals(p.id)))
               .write(PeopleCompanion(hlc: Value(hlc))),
         );
-        final absences = await (_db.select(_db.personAbsences)
-              ..where((t) => t.personId.equals(p.id)))
-            .get();
+        final absences = await (_db.select(
+          _db.personAbsences,
+        )..where((t) => t.personId.equals(p.id))).get();
         for (final a in absences) {
           await stampAndEnqueue(
             SyncEntity.personAbsence,
             a.id,
             a.hlc,
-            (hlc) => (_db.update(_db.personAbsences)
-                  ..where((t) => t.id.equals(a.id)))
-                .write(PersonAbsencesCompanion(hlc: Value(hlc))),
+            (hlc) =>
+                (_db.update(_db.personAbsences)
+                      ..where((t) => t.id.equals(a.id)))
+                    .write(PersonAbsencesCompanion(hlc: Value(hlc))),
           );
         }
       }
 
-      final projects = await (_db.select(_db.projects)
-            ..where((t) => t.congregationId.equals(congregationId)))
-          .get();
+      final projects = await (_db.select(
+        _db.projects,
+      )..where((t) => t.congregationId.equals(congregationId))).get();
       for (final proj in projects) {
         await stampAndEnqueue(
           SyncEntity.project,
           proj.id,
           proj.hlc,
-          (hlc) => (_db.update(_db.projects)..where((t) => t.id.equals(proj.id)))
-              .write(ProjectsCompanion(hlc: Value(hlc))),
+          (hlc) =>
+              (_db.update(_db.projects)..where((t) => t.id.equals(proj.id)))
+                  .write(ProjectsCompanion(hlc: Value(hlc))),
         );
-        final programs = await (_db.select(_db.programs)
-              ..where((t) => t.projectId.equals(proj.id)))
-            .get();
+        final programs = await (_db.select(
+          _db.programs,
+        )..where((t) => t.projectId.equals(proj.id))).get();
         for (final prog in programs) {
           await stampAndEnqueue(
             SyncEntity.program,
             prog.id,
             prog.hlc,
-            (hlc) => (_db.update(_db.programs)
-                  ..where((t) => t.id.equals(prog.id)))
-                .write(ProgramsCompanion(hlc: Value(hlc))),
+            (hlc) =>
+                (_db.update(_db.programs)..where((t) => t.id.equals(prog.id)))
+                    .write(ProgramsCompanion(hlc: Value(hlc))),
           );
-          final rows = await (_db.select(_db.assignmentRows)
-                ..where((t) => t.programId.equals(prog.id)))
-              .get();
+          final rows = await (_db.select(
+            _db.assignmentRows,
+          )..where((t) => t.programId.equals(prog.id))).get();
           for (final r in rows) {
             await stampAndEnqueue(
               SyncEntity.assignment,
               r.id,
               r.hlc,
-              (hlc) => (_db.update(_db.assignmentRows)
-                    ..where((t) => t.id.equals(r.id)))
-                  .write(AssignmentRowsCompanion(hlc: Value(hlc))),
+              (hlc) =>
+                  (_db.update(_db.assignmentRows)
+                        ..where((t) => t.id.equals(r.id)))
+                      .write(AssignmentRowsCompanion(hlc: Value(hlc))),
             );
           }
         }

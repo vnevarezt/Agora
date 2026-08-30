@@ -37,8 +37,7 @@ class NewCongregationModal extends ConsumerStatefulWidget {
       _NewCongregationModalState();
 }
 
-class _NewCongregationModalState
-    extends ConsumerState<NewCongregationModal> {
+class _NewCongregationModalState extends ConsumerState<NewCongregationModal> {
   String _name = '';
   String _number = '';
   // Indexes, not localized labels — see the note in `congregation_tab.dart`.
@@ -52,7 +51,9 @@ class _NewCongregationModalState
   /// (weekday = index in the Monday-first list, stable across locales);
   /// the program templates read them in phase 2.
   Future<void> _crear() async {
-    await ref.read(congregationActionsProvider).add(
+    await ref
+        .read(congregationActionsProvider)
+        .add(
           name: _name.trim(),
           number: _number.trim(),
           settings: CongregationSettings(

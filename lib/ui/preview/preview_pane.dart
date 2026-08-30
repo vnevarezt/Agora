@@ -52,7 +52,7 @@ class _PreviewPaneState extends State<PreviewPane> {
                   segments: [
                     (
                       icon: Icons.description_outlined,
-                      label: context.t.preview.previewTab
+                      label: context.t.preview.previewTab,
                     ),
                   ],
                 ),
@@ -62,9 +62,10 @@ class _PreviewPaneState extends State<PreviewPane> {
                   builder: (context, m, _) => Text(
                     '${(m.getMaxScaleOnAxis() * 100).round()}%',
                     style: AppText.mono(
-                        size: AppText.small,
-                        weight: FontWeight.w700,
-                        color: t.textMute),
+                      size: AppText.small,
+                      weight: FontWeight.w700,
+                      color: t.textMute,
+                    ),
                   ),
                 ),
               ],

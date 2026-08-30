@@ -8,13 +8,14 @@ import 'package:agora/data/sync/user_key_service.dart';
 import '../helpers/fake_key_docs.dart';
 import '../helpers/map_key_store.dart';
 
-UserKeyService userKeys(MapKeyStore store, FakeKeyDocs docs,
-        [String uid = 'u1']) =>
-    UserKeyService(store, docs, uid: uid);
+UserKeyService userKeys(
+  MapKeyStore store,
+  FakeKeyDocs docs, [
+  String uid = 'u1',
+]) => UserKeyService(store, docs, uid: uid);
 
 void main() {
-  test('a fresh account mints its identity with no user interaction',
-      () async {
+  test('a fresh account mints its identity with no user interaction', () async {
     final store = MapKeyStore();
     final docs = FakeKeyDocs();
     final keys = userKeys(store, docs);
@@ -23,24 +24,28 @@ void main() {
     expect(await keys.ensureAvailable(), isTrue);
     expect(await keys.status(), UserKeyStatus.ready);
     // The published public key matches the seed the device holds.
-    expect(docs.users['u1']!['pubKey'],
-        base64Encode(await SealedBox.publicKeyOf((await keys.seed())!)));
+    expect(
+      docs.users['u1']!['pubKey'],
+      base64Encode(await SealedBox.publicKeyOf((await keys.seed())!)),
+    );
     // Never silently replace an identity: that would orphan every CCK.
     expect(keys.generate(), throwsStateError);
   });
 
-  test('a second device restores the identity from the account alone',
-      () async {
-    final docs = FakeKeyDocs();
-    final deviceA = userKeys(MapKeyStore(), docs);
-    await deviceA.ensureAvailable();
-    final identity = await deviceA.seed();
+  test(
+    'a second device restores the identity from the account alone',
+    () async {
+      final docs = FakeKeyDocs();
+      final deviceA = userKeys(MapKeyStore(), docs);
+      await deviceA.ensureAvailable();
+      final identity = await deviceA.seed();
 
-    // No code, no passphrase, no other device involved.
-    final deviceB = userKeys(MapKeyStore(), docs);
-    expect(await deviceB.status(), UserKeyStatus.ready);
-    expect(await deviceB.seed(), identity);
-  });
+      // No code, no passphrase, no other device involved.
+      final deviceB = userKeys(MapKeyStore(), docs);
+      expect(await deviceB.status(), UserKeyStatus.ready);
+      expect(await deviceB.seed(), identity);
+    },
+  );
 
   test('the fetched key is cached, so later reads work offline', () async {
     final docs = FakeKeyDocs();
@@ -68,18 +73,20 @@ void main() {
     expect(docs.users['u1']!.containsKey('privKey'), isFalse);
   });
 
-  test('sign-out clears this device but the account keeps the identity',
-      () async {
-    final docs = FakeKeyDocs();
-    final store = MapKeyStore();
-    final keys = userKeys(store, docs);
-    await keys.ensureAvailable();
+  test(
+    'sign-out clears this device but the account keeps the identity',
+    () async {
+      final docs = FakeKeyDocs();
+      final store = MapKeyStore();
+      final keys = userKeys(store, docs);
+      await keys.ensureAvailable();
 
-    await keys.forget();
-    expect(store.data['jw_program.sync.userkey.u1'], isNull);
-    // Signing back in restores it — that is the whole point of escrowing.
-    expect(await keys.status(), UserKeyStatus.ready);
-  });
+      await keys.forget();
+      expect(store.data['jw_program.sync.userkey.u1'], isNull);
+      // Signing back in restores it — that is the whole point of escrowing.
+      expect(await keys.status(), UserKeyStatus.ready);
+    },
+  );
 
   test('the legacy passphrase envelope is dropped once', () async {
     final docs = FakeKeyDocs();
@@ -91,35 +98,40 @@ void main() {
     expect(docs.users['u1']!.containsKey('wrappedPrivKey'), isFalse);
   });
 
-  test('CCK: founder bootstrap, then any other device of the same account',
-      () async {
-    final docs = FakeKeyDocs();
-    final storeA = MapKeyStore();
-    final userA = userKeys(storeA, docs);
-    await userA.ensureAvailable();
-    final ccksA = CckService(storeA, docs, userA, uid: 'u1');
+  test(
+    'CCK: founder bootstrap, then any other device of the same account',
+    () async {
+      final docs = FakeKeyDocs();
+      final storeA = MapKeyStore();
+      final userA = userKeys(storeA, docs);
+      await userA.ensureAvailable();
+      final ccksA = CckService(storeA, docs, userA, uid: 'u1');
 
-    expect(await ccksA.keyringFor('c1'), isNull); // not enabled yet
+      expect(await ccksA.keyringFor('c1'), isNull); // not enabled yet
 
-    final created = await ccksA.createCongregationSpace('c1', email: 'a@b.c');
-    expect(created.currentVersion, 1);
-    final memberDoc = docs.members['c1']!['u1']!;
-    expect((memberDoc['capabilities'] as Map)['admin'], true);
-    // The member doc stores only the SEALED key, never the raw one.
-    expect(jsonEncode(memberDoc).contains(base64Encode(created.currentKey)),
-        isFalse);
-    expect((await ccksA.createCongregationSpace('c1')).currentKey,
-        created.currentKey); // idempotent
+      final created = await ccksA.createCongregationSpace('c1', email: 'a@b.c');
+      expect(created.currentVersion, 1);
+      final memberDoc = docs.members['c1']!['u1']!;
+      expect((memberDoc['capabilities'] as Map)['admin'], true);
+      // The member doc stores only the SEALED key, never the raw one.
+      expect(
+        jsonEncode(memberDoc).contains(base64Encode(created.currentKey)),
+        isFalse,
+      );
+      expect(
+        (await ccksA.createCongregationSpace('c1')).currentKey,
+        created.currentKey,
+      ); // idempotent
 
-    // A brand-new device recovers the same CCK with nothing but the account.
-    final storeB = MapKeyStore();
-    final userB = userKeys(storeB, docs);
-    final ccksB = CckService(storeB, docs, userB, uid: 'u1');
-    expect((await ccksB.keyringFor('c1'))!.currentKey, created.currentKey);
-  });
+      // A brand-new device recovers the same CCK with nothing but the account.
+      final storeB = MapKeyStore();
+      final userB = userKeys(storeB, docs);
+      final ccksB = CckService(storeB, docs, userB, uid: 'u1');
+      expect((await ccksB.keyringFor('c1'))!.currentKey, created.currentKey);
+    },
+  );
 
-  test('CCK: no identity → null keyring; staleness detects rotation',
-      () async {
+  test('CCK: no identity → null keyring; staleness detects rotation', () async {
     final docs = FakeKeyDocs();
     final store = MapKeyStore();
     final user = userKeys(store, docs);
@@ -142,8 +154,12 @@ void main() {
     final ccks = CckService(store, docs, user, uid: 'u1');
     await ccks.createCongregationSpace('c1');
 
-    final other =
-        CckService(store, docs, userKeys(store, docs, 'u2'), uid: 'u2');
+    final other = CckService(
+      store,
+      docs,
+      userKeys(store, docs, 'u2'),
+      uid: 'u2',
+    );
     expect(await other.keyringFor('c1'), isNull);
   });
 }

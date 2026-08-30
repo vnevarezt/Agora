@@ -26,29 +26,27 @@ final _tr = AppLocale.es.buildSync();
 /// [talkTitle] goes on a Treasures part, which prints no role label — the row
 /// that CAN spread.
 Week _week({required String title, String talkTitle = 'El Alfarero'}) => Week(
-      date: '31 DE AGOSTO A 6 DE SEPTIEMBRE',
-      reading: 'JEREMÍAS 31',
-      openingSong: '27',
-      closingSong: '132',
-      parts: [
-        Part(
-            section: Section.treasures,
-            number: 1,
-            title: talkTitle,
-            minutes: 10),
-        Part(
-            section: Section.treasures,
-            number: 2,
-            title: 'Lectura de la Biblia',
-            minutes: 4),
-        Part(section: Section.ministry, number: 3, title: title, minutes: 3),
-        Part(
-            section: Section.christianLife,
-            number: 4,
-            title: 'Estudio bíblico de la congregación',
-            minutes: 30),
-      ],
-    );
+  date: '31 DE AGOSTO A 6 DE SEPTIEMBRE',
+  reading: 'JEREMÍAS 31',
+  openingSong: '27',
+  closingSong: '132',
+  parts: [
+    Part(section: Section.treasures, number: 1, title: talkTitle, minutes: 10),
+    Part(
+      section: Section.treasures,
+      number: 2,
+      title: 'Lectura de la Biblia',
+      minutes: 4,
+    ),
+    Part(section: Section.ministry, number: 3, title: title, minutes: 3),
+    Part(
+      section: Section.christianLife,
+      number: 4,
+      title: 'Estudio bíblico de la congregación',
+      minutes: 30,
+    ),
+  ],
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -68,19 +66,36 @@ void main() {
 
   /// The layout of one sheet: its column widths, plus the pair that is the
   /// whole point of the exercise.
-  ({ColumnWidths cols, bool pairStacks}) layout(String title, List<String> pair,
-      {String talkTitle = 'El Alfarero',
-      bool auxRoom = false,
-      List<String> aux = const []}) {
+  ({ColumnWidths cols, bool pairStacks}) layout(
+    String title,
+    List<String> pair, {
+    String talkTitle = 'El Alfarero',
+    bool auxRoom = false,
+    List<String> aux = const [],
+  }) {
     final schedule = buildSchedule(
-        _week(title: title, talkTitle: talkTitle), 18 * 60, 105);
-    final assignments = Assignments(
-        {schedule.ministry.first.id: pair},
-        aux.isEmpty ? const {} : {schedule.ministry.first.id: aux});
+      _week(title: title, talkTitle: talkTitle),
+      18 * 60,
+      105,
+    );
+    final assignments = Assignments({
+      schedule.ministry.first.id: pair,
+    }, aux.isEmpty ? const {} : {schedule.ministry.first.id: aux});
     final cols = computeColumns(
-        _m, _tr, schedule, assignments, carlito, carlitoBold, auxRoom);
+      _m,
+      _tr,
+      schedule,
+      assignments,
+      carlito,
+      carlitoBold,
+      auxRoom,
+    );
     final lines = nameLines(
-        SlotRole.studentAssistant, pair, cols.mainNames, measure);
+      SlotRole.studentAssistant,
+      pair,
+      cols.mainNames,
+      measure,
+    );
     return (cols: cols, pairStacks: lines.stacked);
   }
 
@@ -104,8 +119,11 @@ void main() {
     final tight = layout(longTitle, pair);
 
     expect(tight.cols.mainNames, lessThan(wide.cols.mainNames));
-    expect(tight.cols.mainNames, greaterThanOrEqualTo(_m.minNamesCol),
-        reason: 'a column that narrow has stopped being a column');
+    expect(
+      tight.cols.mainNames,
+      greaterThanOrEqualTo(_m.minNamesCol),
+      reason: 'a column that narrow has stopped being a column',
+    );
   });
 
   test('the titles never take the names below their own wrapped width', () {
@@ -113,13 +131,17 @@ void main() {
 
     // Squeezed to the point of stacking, the column still has to hold the
     // longer of the two names — stacking is a line break, not an ellipsis.
-    expect(tight.cols.mainNames,
-        greaterThanOrEqualTo(measure('Luis Javier Vargas')));
+    expect(
+      tight.cols.mainNames,
+      greaterThanOrEqualTo(measure('Luis Javier Vargas')),
+    );
   });
 
   test('the titles keep their official floor whatever the names ask for', () {
-    final huge = layout(shortTitle,
-        const ['Maximiliano de la Concepción', 'Bartolomea Buenaventura']);
+    final huge = layout(shortTitle, const [
+      'Maximiliano de la Concepción',
+      'Bartolomea Buenaventura',
+    ]);
     final content = huge.cols.band - _m.colGap - huge.cols.role;
 
     expect(content, greaterThanOrEqualTo(_m.minContentFrac * _m.contentWidth));
@@ -135,8 +157,11 @@ void main() {
 
     expect(wordy.cols.mainNames, plain.cols.mainNames);
     expect(wordy.pairStacks, isFalse);
-    expect(wordy.cols.titleBreaks, 0,
-        reason: 'the row had a whole empty column to grow into');
+    expect(
+      wordy.cols.titleBreaks,
+      0,
+      reason: 'the row had a whole empty column to grow into',
+    );
   });
 
   test('a week with nobody in the auxiliary room prints no column for it', () {
@@ -144,8 +169,12 @@ void main() {
     // week with nothing in it costs the same points on every row and prints a
     // strip of white.
     final empty = layout(shortTitle, pair, auxRoom: true);
-    final used =
-        layout(shortTitle, pair, auxRoom: true, aux: const ['Ana', 'Eva']);
+    final used = layout(
+      shortTitle,
+      pair,
+      auxRoom: true,
+      aux: const ['Ana', 'Eva'],
+    );
 
     expect(empty.cols.auxRoom, 0);
     expect(used.cols.auxRoom, greaterThan(0));
@@ -157,8 +186,12 @@ void main() {
     final tight = layout(longTitle, pair);
 
     expect(wide.cols.titleBreaks + wide.cols.nameBreaks, 0);
-    expect(tight.cols.nameBreaks, greaterThan(0),
-        reason: 'the fit has to see the stacked pair, or it will happily '
-            'trade a wrapped title for one and call the sheet improved');
+    expect(
+      tight.cols.nameBreaks,
+      greaterThan(0),
+      reason:
+          'the fit has to see the stacked pair, or it will happily '
+          'trade a wrapped title for one and call the sheet improved',
+    );
   });
 }

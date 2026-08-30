@@ -20,7 +20,8 @@ class Hlc implements Comparable<Hlc> {
     return Hlc(ms, counter, parts.sublist(2).join('-'));
   }
 
-  String encode() => '${physicalMs.toString().padLeft(16, '0')}-'
+  String encode() =>
+      '${physicalMs.toString().padLeft(16, '0')}-'
       '${counter.toRadixString(16).padLeft(4, '0')}-$deviceId';
 
   @override
@@ -41,7 +42,7 @@ class Hlc implements Comparable<Hlc> {
 /// after everything already observed.
 class HlcClock {
   HlcClock(this.deviceId, {DateTime Function()? now})
-      : _now = now ?? DateTime.now;
+    : _now = now ?? DateTime.now;
 
   final String deviceId;
   final DateTime Function() _now;
@@ -65,8 +66,7 @@ class HlcClock {
     if (other.physicalMs > _lastMs) {
       _lastMs = other.physicalMs;
       _lastCounter = other.counter;
-    } else if (other.physicalMs == _lastMs &&
-        other.counter > _lastCounter) {
+    } else if (other.physicalMs == _lastMs && other.counter > _lastCounter) {
       _lastCounter = other.counter;
     }
   }

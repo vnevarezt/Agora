@@ -31,8 +31,10 @@ void main() {
     final layout = nameLines(SlotRole.studentAssistant, pair, 5, _measure);
 
     expect(layout.stacked, isTrue);
-    expect(layout.lines, [student, assistant],
-        reason: 'stacking is a line break, not a reordering');
+    expect(layout.lines, [
+      student,
+      assistant,
+    ], reason: 'stacking is a line break, not a reordering');
   });
 
   test('both forms agree on who comes first', () {
@@ -49,10 +51,14 @@ void main() {
     // The names have to read in the order the label promises, in whichever
     // language the sheet is printed. If the label is ever reordered, this is
     // what says the names must move with it.
-    expect(SlotRole.studentAssistant.label(AppLocale.es.buildSync()),
-        'Estudiante/Ayudante:');
-    expect(SlotRole.studentAssistant.label(AppLocale.en.buildSync()),
-        startsWith('Student'));
+    expect(
+      SlotRole.studentAssistant.label(AppLocale.es.buildSync()),
+      'Estudiante/Ayudante:',
+    );
+    expect(
+      SlotRole.studentAssistant.label(AppLocale.en.buildSync()),
+      startsWith('Student'),
+    );
   });
 
   test('a single name never stacks, whatever the width', () {
@@ -63,11 +69,18 @@ void main() {
   });
 
   test('a pair role with only one name stays on one line', () {
-    final layout =
-        nameLines(SlotRole.studentAssistant, const [student], 1, _measure);
+    final layout = nameLines(
+      SlotRole.studentAssistant,
+      const [student],
+      1,
+      _measure,
+    );
 
-    expect(layout.stacked, isFalse,
-        reason: 'there is nothing to stack against');
+    expect(
+      layout.stacked,
+      isFalse,
+      reason: 'there is nothing to stack against',
+    );
     expect(layout.lines.single, student);
   });
 }

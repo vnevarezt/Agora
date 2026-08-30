@@ -17,7 +17,8 @@ int _year(String issue) => int.parse(issue.substring(0, 4));
 int _month(String issue) => int.parse(issue.substring(4, 6));
 
 /// Issue (`YYYYMM`) that contains date [d]. E.g. 2026-06-14 -> '202605'.
-String issueForDate(DateTime d) => '${_pad4(d.year)}${_pad2(_oddMonth(d.month))}';
+String issueForDate(DateTime d) =>
+    '${_pad4(d.year)}${_pad2(_oddMonth(d.month))}';
 
 /// First day of the issue's period: (year, oddMonth, 1).
 DateTime issueStart(String issue) => DateTime(_year(issue), _month(issue), 1);
@@ -28,13 +29,17 @@ DateTime issueEnd(String issue) => DateTime(_year(issue), _month(issue) + 2, 1);
 /// Issue of the following two-month period (rolls the year over: 11 -> 01).
 String nextIssue(String issue) {
   final m = _month(issue);
-  return m == 11 ? '${_pad4(_year(issue) + 1)}01' : '${_pad4(_year(issue))}${_pad2(m + 2)}';
+  return m == 11
+      ? '${_pad4(_year(issue) + 1)}01'
+      : '${_pad4(_year(issue))}${_pad2(m + 2)}';
 }
 
 /// Issue of the previous two-month period (rolls the year back: 01 -> 11).
 String prevIssue(String issue) {
   final m = _month(issue);
-  return m == 1 ? '${_pad4(_year(issue) - 1)}11' : '${_pad4(_year(issue))}${_pad2(m - 2)}';
+  return m == 1
+      ? '${_pad4(_year(issue) - 1)}11'
+      : '${_pad4(_year(issue))}${_pad2(m - 2)}';
 }
 
 /// Ordered list of issues needed to cover from [from] through
@@ -103,10 +108,16 @@ String? weekStartFor(String issue, int startDay, {String? previous}) {
   final periodStart = DateTime.utc(_year(issue), _month(issue), 1);
   final periodEnd = DateTime.utc(_year(issue), _month(issue) + 2, 1);
   return _mondayWithDay(periodStart, periodEnd, startDay) ??
-      _mondayWithDay(periodStart.subtract(const Duration(days: 7)), periodStart,
-          startDay) ??
       _mondayWithDay(
-          periodEnd, periodEnd.add(const Duration(days: 7)), startDay);
+        periodStart.subtract(const Duration(days: 7)),
+        periodStart,
+        startDay,
+      ) ??
+      _mondayWithDay(
+        periodEnd,
+        periodEnd.add(const Duration(days: 7)),
+        startDay,
+      );
 }
 
 /// First Monday in `[from, to)` whose day of month is [day], as ISO text.

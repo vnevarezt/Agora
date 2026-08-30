@@ -95,7 +95,11 @@ class _CloudLockScreenState extends ConsumerState<CloudLockScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: t.border),
                 ),
-                child: Icon(Icons.lock_outline, size: AppIcon.feature, color: t.textMute),
+                child: Icon(
+                  Icons.lock_outline,
+                  size: AppIcon.feature,
+                  color: t.textMute,
+                ),
               ),
               const SizedBox(height: Space.s12),
               AuthTitle(tr.auth.cloudLock.title),

@@ -32,47 +32,55 @@ import 'db_provider.dart';
 /// so it follows locale switches.
 final sessionUserProvider =
     Provider<({String name, String email, AccountMode? mode})>((ref) {
-  final session = ref.watch(authSessionProvider);
-  if (session is! SessionUnlocked) return (name: '', email: '', mode: null);
-  if (session.mode == AccountMode.local) {
-    return (
-      name: session.profileName ?? '',
-      email: '',
-      mode: AccountMode.local,
-    );
-  }
-  final user = ref.watch(cloudUserProvider).value;
-  final email = user?.email ?? '';
-  final display = user?.displayName?.trim() ?? '';
-  final name = display.isNotEmpty
-      ? display
-      : (email.contains('@') ? email.split('@').first : email);
-  return (name: name, email: email, mode: AccountMode.cloud);
-});
+      final session = ref.watch(authSessionProvider);
+      if (session is! SessionUnlocked) return (name: '', email: '', mode: null);
+      if (session.mode == AccountMode.local) {
+        return (
+          name: session.profileName ?? '',
+          email: '',
+          mode: AccountMode.local,
+        );
+      }
+      final user = ref.watch(cloudUserProvider).value;
+      final email = user?.email ?? '';
+      final display = user?.displayName?.trim() ?? '';
+      final name = display.isNotEmpty
+          ? display
+          : (email.contains('@') ? email.split('@').first : email);
+      return (name: name, email: email, mode: AccountMode.cloud);
+    });
 
 final congregationsRepositoryProvider = Provider<CongregationsRepository>(
-    (ref) => CongregationsRepository(
-        ref.watch(dbProvider), ref.watch(syncScribeProvider),
-        // A callback, not a value: this provider has no reason to rebuild on a
-        // language switch, so a String captured here would name a congregation
-        // created afterwards in whatever language the app started in.
-        defaultName: () => t.congregation.defaultName));
+  (ref) => CongregationsRepository(
+    ref.watch(dbProvider),
+    ref.watch(syncScribeProvider),
+    // A callback, not a value: this provider has no reason to rebuild on a
+    // language switch, so a String captured here would name a congregation
+    // created afterwards in whatever language the app started in.
+    defaultName: () => t.congregation.defaultName,
+  ),
+);
 
 final congregationsStreamProvider = StreamProvider<List<Congregation>>(
-    (ref) => ref.watch(congregationsRepositoryProvider).watchAll());
+  (ref) => ref.watch(congregationsRepositoryProvider).watchAll(),
+);
 
 /// Synchronous view (empty during the first frame).
 final congregationsProvider = Provider<List<Congregation>>(
-    (ref) => ref.watch(congregationsStreamProvider).asData?.value ?? const []);
+  (ref) => ref.watch(congregationsStreamProvider).asData?.value ?? const [],
+);
 
 /// True until the dashboard streams emit their first value — the window
 /// where "empty" would lie. Drives the skeleton UI.
-final dashboardLoadingProvider = Provider<bool>((ref) =>
-    ref.watch(congregationsStreamProvider).isLoading ||
-    ref.watch(projectsStreamProvider).isLoading);
+final dashboardLoadingProvider = Provider<bool>(
+  (ref) =>
+      ref.watch(congregationsStreamProvider).isLoading ||
+      ref.watch(projectsStreamProvider).isLoading,
+);
 
-final congregationActionsProvider =
-    Provider<CongregationActions>(CongregationActions.new);
+final congregationActionsProvider = Provider<CongregationActions>(
+  CongregationActions.new,
+);
 
 class CongregationActions {
   CongregationActions(this._ref);
@@ -86,16 +94,14 @@ class CongregationActions {
     required String name,
     required String number,
     CongregationSettings settings = const CongregationSettings(),
-  }) =>
-      _repo.create(name: name, number: number, settings: settings);
+  }) => _repo.create(name: name, number: number, settings: settings);
 
   Future<void> update(
     String id, {
     required String name,
     required String number,
     required CongregationSettings settings,
-  }) =>
-      _repo.update(id, name: name, number: number, settings: settings);
+  }) => _repo.update(id, name: name, number: number, settings: settings);
 }
 
 /// Catalog of cached notebooks, **keyed by workbook language** (the jw.org
@@ -116,16 +122,20 @@ class NotebooksController extends Notifier<Map<String, List<Notebook>>> {
 
 final notebooksByLangProvider =
     NotifierProvider<NotebooksController, Map<String, List<Notebook>>>(
-        NotebooksController.new);
+      NotebooksController.new,
+    );
 
 /// The catalog for one workbook language ('S', 'E', …).
 final notebooksForLangProvider = Provider.family<List<Notebook>, String>(
-    (ref, lang) => ref.watch(notebooksByLangProvider)[lang] ?? const []);
+  (ref, lang) => ref.watch(notebooksByLangProvider)[lang] ?? const [],
+);
 
 /// A congregation's stored meeting language code ('spanish' | 'sign' |
 /// 'english'). Falls back to the schema default for an unknown id.
-final congregationMeetingLanguageProvider =
-    Provider.family<String, String>((ref, id) {
+final congregationMeetingLanguageProvider = Provider.family<String, String>((
+  ref,
+  id,
+) {
   for (final c in ref.watch(congregationsProvider)) {
     if (c.id == id) return c.settings.meetingLanguage;
   }
@@ -137,8 +147,10 @@ final congregationMeetingLanguageProvider =
 /// heading and the part titles are in a different language from everything
 /// around them (WCAG 3.1.2); the PDF's own copy of this is
 /// `programLocaleProvider`, which is scoped to the open editor.
-final meetingLocaleProvider = Provider.family<AppLocale, String>((ref, id) =>
-    programLocaleFor(ref.watch(congregationMeetingLanguageProvider(id))));
+final meetingLocaleProvider = Provider.family<AppLocale, String>(
+  (ref, id) =>
+      programLocaleFor(ref.watch(congregationMeetingLanguageProvider(id))),
+);
 
 /// Workbook language a congregation's programs are built from. Falls back to
 /// Spanish for an unknown id, which is also the schema default.
@@ -151,59 +163,71 @@ final congregationLangProvider = Provider.family<String, String>((ref, id) {
 
 /// The catalog a given congregation should offer.
 final notebooksForCongregationProvider =
-    Provider.family<List<Notebook>, String>((ref, congregationId) =>
-        ref.watch(notebooksForLangProvider(ref.watch(congregationLangProvider(congregationId)))));
+    Provider.family<List<Notebook>, String>(
+      (ref, congregationId) => ref.watch(
+        notebooksForLangProvider(
+          ref.watch(congregationLangProvider(congregationId)),
+        ),
+      ),
+    );
 
 /// Pending-work reminders, derived from the drafts: one per week that
 /// still has unassigned parts, newest project first, capped at 4.
 final remindersProvider = Provider<List<Reminder>>((ref) {
-  final drafts = ref
-      .watch(projectsProvider)
-      .where((p) => p.status == ProjectStatus.draft)
-      .toList()
-    ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  final drafts =
+      ref
+          .watch(projectsProvider)
+          .where((p) => p.status == ProjectStatus.draft)
+          .toList()
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   final reminders = <Reminder>[];
   for (final p in drafts) {
     for (final w in p.weekProgress) {
       final missing = w.total - w.done;
       if (missing <= 0) continue;
-      reminders.add(Reminder(
-        id: '${p.id}/${w.label}',
-        type: w.done == 0 ? ReminderType.alert : ReminderType.task,
-        missing: missing,
-        meta: '${w.label} · ${p.name}',
-        projectId: p.id,
-      ));
+      reminders.add(
+        Reminder(
+          id: '${p.id}/${w.label}',
+          type: w.done == 0 ? ReminderType.alert : ReminderType.task,
+          missing: missing,
+          meta: '${w.label} · ${p.name}',
+          projectId: p.id,
+        ),
+      );
       if (reminders.length >= 4) return reminders;
     }
   }
   return reminders;
 });
 
-final projectsRepositoryProvider = Provider<ProjectsRepository>((ref) =>
-    ProjectsRepository(ref.watch(dbProvider),
-        ref.watch(congregationsRepositoryProvider),
-        ref.watch(syncScribeProvider)));
+final projectsRepositoryProvider = Provider<ProjectsRepository>(
+  (ref) => ProjectsRepository(
+    ref.watch(dbProvider),
+    ref.watch(congregationsRepositoryProvider),
+    ref.watch(syncScribeProvider),
+  ),
+);
 
 final projectsStreamProvider = StreamProvider<List<ProjectData>>(
-    (ref) => ref.watch(projectsRepositoryProvider).watchAll());
+  (ref) => ref.watch(projectsRepositoryProvider).watchAll(),
+);
 
 /// Alive assignment counts per (programId, hall), reactive.
 final _assignmentCountsProvider = StreamProvider<Map<(String, Hall), int>>(
-    (ref) => ref.watch(projectsRepositoryProvider).watchAssignmentCounts());
+  (ref) => ref.watch(projectsRepositoryProvider).watchAssignmentCounts(),
+);
 
 /// Synchronous project cards derived from the DB rows: progress/status/
 /// edited label are computed, never stored (docs/PHASE1_LOCAL_PERSISTENCE.md).
 final projectsProvider = Provider<List<Project>>((ref) {
   final data = ref.watch(projectsStreamProvider).asData?.value ?? const [];
-  final counts =
-      ref.watch(_assignmentCountsProvider).asData?.value ?? const {};
+  final counts = ref.watch(_assignmentCountsProvider).asData?.value ?? const {};
   final congregations = ref.watch(congregationsProvider);
   final settingsById = {for (final c in congregations) c.id: c.settings};
   final slotTotals = ref.watch(_slotTotalsProvider);
   final cards = [
     for (final d in data)
-      _toCard(d, counts, settingsById[d.project.congregationId], slotTotals)
+      _toCard(d, counts, settingsById[d.project.congregationId], slotTotals),
   ];
   slotTotals.retainAll({
     for (final d in data)
@@ -224,7 +248,8 @@ final _slotTotalsProvider = Provider<_SlotTotals>((ref) => _SlotTotals());
 typedef _ProgramSlots = ({int base, int aux});
 
 class _SlotTotals {
-  final _cache = <String, ({String? content, WeekType type, _ProgramSlots slots})>{};
+  final _cache =
+      <String, ({String? content, WeekType type, _ProgramSlots slots})>{};
 
   _ProgramSlots of(ProgramRecord program) {
     final hit = _cache[program.id];
@@ -249,10 +274,15 @@ class _SlotTotals {
     if (program.contentJson == null) {
       return (base: _partsPerWeek, aux: 0);
     }
-    final week =
-        Week.fromJson(jsonDecode(program.contentJson!) as Map<String, dynamic>);
-    final schedule = buildSchedule(week, 18 * 60, 105,
-        circuitOverseer: program.weekType == WeekType.circuitOverseerVisit);
+    final week = Week.fromJson(
+      jsonDecode(program.contentJson!) as Map<String, dynamic>,
+    );
+    final schedule = buildSchedule(
+      week,
+      18 * 60,
+      105,
+      circuitOverseer: program.weekType == WeekType.circuitOverseerVisit,
+    );
     var base = 1; // chairman
     var aux = 0;
     for (final row in schedule.rows) {
@@ -283,16 +313,18 @@ Project _toCard(
   var done = 0;
   var total = 0;
   for (final program in d.programs) {
-    final auxRoom =
-        program.auxRoom ?? congregationSettings?.auxRoom ?? false;
+    final auxRoom = program.auxRoom ?? congregationSettings?.auxRoom ?? false;
     final mainCount = counts[(program.id, Hall.main)] ?? 0;
     final auxCount = auxRoom ? (counts[(program.id, Hall.aux)] ?? 0) : 0;
 
     final slots = slotTotals.of(program);
     final programTotal = slots.base + (auxRoom ? slots.aux : 0);
     final programDone = min(mainCount + auxCount, programTotal);
-    weekProgress.add(
-        (label: program.date, done: programDone, total: programTotal));
+    weekProgress.add((
+      label: program.date,
+      done: programDone,
+      total: programTotal,
+    ));
     total += programTotal;
     done += programDone;
   }
@@ -300,8 +332,8 @@ Project _toCard(
   final status = d.project.exportedAt != null
       ? ProjectStatus.exported
       : (total > 0 && done >= total)
-          ? ProjectStatus.complete
-          : ProjectStatus.draft;
+      ? ProjectStatus.complete
+      : ProjectStatus.draft;
   return Project(
     id: d.project.id,
     name: d.project.name,
@@ -329,10 +361,12 @@ final heroProjectProvider = Provider<Project?>((ref) {
 });
 
 /// Open drafts (subtitle count).
-final draftCountProvider = Provider<int>((ref) => ref
-    .watch(projectsProvider)
-    .where((p) => p.status == ProjectStatus.draft)
-    .length);
+final draftCountProvider = Provider<int>(
+  (ref) => ref
+      .watch(projectsProvider)
+      .where((p) => p.status == ProjectStatus.draft)
+      .length,
+);
 
 /// Missing assignments across drafts (subtitle count).
 final pendingAssignmentsProvider = Provider<int>((ref) {
@@ -367,17 +401,19 @@ class ProjectActions {
     required String name,
     required String congregationId,
     required List<WeekRef> weeks,
-  }) =>
-      _repo.create(name: name, congregationId: congregationId, weeks: weeks);
+  }) => _repo.create(name: name, congregationId: congregationId, weeks: weeks);
 
   Future<void> update(
     String id, {
     required String name,
     required String congregationId,
     required List<WeekRef> weeks,
-  }) =>
-      _repo.update(id,
-          name: name, congregationId: congregationId, weeks: weeks);
+  }) => _repo.update(
+    id,
+    name: name,
+    congregationId: congregationId,
+    weeks: weeks,
+  );
 
   Future<void> delete(String id) => _repo.delete(id);
 
@@ -399,24 +435,32 @@ class DashboardFiltersController extends Notifier<DashboardFilters> {
   @override
   DashboardFilters build() => const DashboardFilters();
 
-  void setCongregation(String congregationId) =>
-      state = DashboardFilters(congregationId: congregationId, status: state.status);
+  void setCongregation(String congregationId) => state = DashboardFilters(
+    congregationId: congregationId,
+    status: state.status,
+  );
 
-  void setStatus(ProjectStatus? status) =>
-      state = DashboardFilters(congregationId: state.congregationId, status: status);
+  void setStatus(ProjectStatus? status) => state = DashboardFilters(
+    congregationId: state.congregationId,
+    status: status,
+  );
 }
 
 final dashboardFiltersProvider =
     NotifierProvider<DashboardFiltersController, DashboardFilters>(
-        DashboardFiltersController.new);
+      DashboardFiltersController.new,
+    );
 
 /// Projects visible after applying the active filters.
 final filteredProjectsProvider = Provider<List<Project>>((ref) {
   final projects = ref.watch(projectsProvider);
   final f = ref.watch(dashboardFiltersProvider);
   return projects
-      .where((p) =>
-          (f.congregationId == 'all' || p.congregationId == f.congregationId) &&
-          (f.status == null || p.status == f.status))
+      .where(
+        (p) =>
+            (f.congregationId == 'all' ||
+                p.congregationId == f.congregationId) &&
+            (f.status == null || p.status == f.status),
+      )
       .toList();
 });

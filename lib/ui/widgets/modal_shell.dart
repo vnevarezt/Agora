@@ -52,7 +52,12 @@ class ModalShell extends StatelessWidget {
         _header(context, t),
         Flexible(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(Space.s18, Space.s4, Space.s18, Space.s18),
+            padding: const EdgeInsets.fromLTRB(
+              Space.s18,
+              Space.s4,
+              Space.s18,
+              Space.s18,
+            ),
             child: body,
           ),
         ),
@@ -75,67 +80,72 @@ class ModalShell extends StatelessWidget {
   }
 
   Widget _handle(AppTokens t) => Padding(
-        padding: const EdgeInsets.only(top: Space.s10),
-        child: Center(
-          child: Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: t.border,
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
+    padding: const EdgeInsets.only(top: Space.s10),
+    child: Center(
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: t.border,
+          borderRadius: BorderRadius.circular(999),
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _header(BuildContext context, AppTokens t) => Padding(
-        padding: EdgeInsets.fromLTRB(Space.s18, sheet ? Space.s12 : Space.s18, Space.s12, Space.s4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: AppText.title,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                        color: t.text,
-                      ),
-                    ),
+    padding: EdgeInsets.fromLTRB(
+      Space.s18,
+      sheet ? Space.s12 : Space.s18,
+      Space.s12,
+      Space.s4,
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: AppText.title,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                    color: t.text,
                   ),
-                  if (desc != null) ...[
-                    const SizedBox(height: Space.s2),
-                    Text(
-                      desc!,
-                      style: TextStyle(
-                        fontSize: AppText.small,
-                        fontWeight: FontWeight.w600,
-                        height: 1.35,
-                        color: t.textMute,
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: Space.s12),
-            AppIconButton(
-              icon: Icons.close,
-              bordered: true,
-              tooltip: context.t.common.close,
-              size: Dimens.hIconModal,
-              onPressed: onClose,
-            ),
-          ],
+              if (desc != null) ...[
+                const SizedBox(height: Space.s2),
+                Text(
+                  desc!,
+                  style: TextStyle(
+                    fontSize: AppText.small,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                    color: t.textMute,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
-      );
+        const SizedBox(width: Space.s12),
+        AppIconButton(
+          icon: Icons.close,
+          bordered: true,
+          tooltip: context.t.common.close,
+          size: Dimens.hIconModal,
+          onPressed: onClose,
+        ),
+      ],
+    ),
+  );
 
   Widget _footer(BuildContext context, AppTokens t) {
     final children = sheet
@@ -161,8 +171,9 @@ class ModalShell extends StatelessWidget {
                 if (onDanger != null) ...[
                   const SizedBox(width: Space.s8),
                   DangerButton(
-                      onTap: onDanger!,
-                      label: dangerLabel ?? context.t.common.delete),
+                    onTap: onDanger!,
+                    label: dangerLabel ?? context.t.common.delete,
+                  ),
                 ],
               ],
             ),
@@ -172,8 +183,9 @@ class ModalShell extends StatelessWidget {
               children: [
                 if (onDanger != null)
                   DangerButton(
-                      onTap: onDanger!,
-                      label: dangerLabel ?? context.t.common.delete),
+                    onTap: onDanger!,
+                    label: dangerLabel ?? context.t.common.delete,
+                  ),
                 const Spacer(),
                 AppButton(
                   variant: AppButtonVariant.ghost,

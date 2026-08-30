@@ -26,8 +26,10 @@ void main() {
 
   group('requiredIssues', () {
     test('two months ahead keeps the current + next issue', () {
-      expect(requiredIssues(DateTime(2026, 6, 14), monthsAhead: 2),
-          ['202605', '202607']);
+      expect(requiredIssues(DateTime(2026, 6, 14), monthsAhead: 2), [
+        '202605',
+        '202607',
+      ]);
     });
 
     test('a single issue suffices when looking no months ahead', () {
@@ -35,26 +37,34 @@ void main() {
     });
 
     test('rolls the year over at the end of December', () {
-      expect(requiredIssues(DateTime(2026, 12, 20), monthsAhead: 2),
-          ['202611', '202701']);
+      expect(requiredIssues(DateTime(2026, 12, 20), monthsAhead: 2), [
+        '202611',
+        '202701',
+      ]);
     });
 
     // El anclaje es SIEMPRE la fecha actual: si desde hoy el cuaderno en caché
     // solo cubre ~1 mes (o menos), el siguiente ya entra como "necesario".
     test('cuando desde hoy solo queda ~1 mes, exige el siguiente cuaderno', () {
       // 1 de junio: 202605 termina el 1 de julio (1 mes por delante) -> baja el siguiente.
-      expect(requiredIssues(DateTime(2026, 6, 1), monthsAhead: 2),
-          ['202605', '202607']);
+      expect(requiredIssues(DateTime(2026, 6, 1), monthsAhead: 2), [
+        '202605',
+        '202607',
+      ]);
       // Últimos días del periodo: queda < 1 mes -> también exige el siguiente.
-      expect(requiredIssues(DateTime(2026, 6, 28), monthsAhead: 2),
-          ['202605', '202607']);
+      expect(requiredIssues(DateTime(2026, 6, 28), monthsAhead: 2), [
+        '202605',
+        '202607',
+      ]);
     });
 
     // Un cuaderno cacheado totalmente en el pasado no cuenta como cobertura:
     // requiredIssues mira desde hoy, así que pedirá el actual + el siguiente.
     test('ignora cobertura pasada y pide desde la fecha actual', () {
-      expect(requiredIssues(DateTime(2026, 7, 1), monthsAhead: 2),
-          ['202607', '202609']);
+      expect(requiredIssues(DateTime(2026, 7, 1), monthsAhead: 2), [
+        '202607',
+        '202609',
+      ]);
     });
   });
 
@@ -120,10 +130,8 @@ void main() {
     });
 
     test('a previous week turns the search into an equality check', () {
-      expect(weekStartFor('202607', 13, previous: '2026-07-06'),
-          '2026-07-13');
-      expect(weekStartFor('202607', 20, previous: '2026-07-13'),
-          '2026-07-20');
+      expect(weekStartFor('202607', 13, previous: '2026-07-06'), '2026-07-13');
+      expect(weekStartFor('202607', 20, previous: '2026-07-13'), '2026-07-20');
     });
 
     test('a heading that does not fit is rejected, never guessed', () {

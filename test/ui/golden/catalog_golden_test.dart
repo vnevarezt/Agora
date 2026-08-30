@@ -39,11 +39,7 @@ void main() {
   List<Widget> controls() => [
     GoldenRow('AppButton', [
       AppButton(label: 'Guardar cambios', onPressed: () {}),
-      AppButton(
-        icon: Icons.add,
-        label: 'Con icono',
-        onPressed: () {},
-      ),
+      AppButton(icon: Icons.add, label: 'Con icono', onPressed: () {}),
       AppButton(
         variant: AppButtonVariant.ghost,
         icon: Icons.download,
@@ -91,17 +87,17 @@ void main() {
 
   List<Widget> markers(AppTokens t) => [
     GoldenRow('Pill', [
-      Pill(
-        label: 'COMPLETO',
-        background: t.successSoft,
-        foreground: t.success,
-      ),
+      Pill(label: 'COMPLETO', background: t.successSoft, foreground: t.success),
       Pill(
         label: 'PENDIENTE',
         background: t.warningSoft,
         foreground: t.warning,
       ),
-      Pill(label: 'BORRADOR', background: t.accentSoft, foreground: t.accentOnSoft),
+      Pill(
+        label: 'BORRADOR',
+        background: t.accentSoft,
+        foreground: t.accentOnSoft,
+      ),
     ]),
     GoldenRow('MiniChip', const [
       MiniChip.time('19:00'),
@@ -148,7 +144,12 @@ void main() {
     GoldenRow('BlockTitle', [
       SizedBox(
         width: 340,
-        child: BlockTitle(title: 'Proyectos', count: 4, linkLabel: 'Ver todo', onLink: () {}),
+        child: BlockTitle(
+          title: 'Proyectos',
+          count: 4,
+          linkLabel: 'Ver todo',
+          onLink: () {},
+        ),
       ),
     ]),
     GoldenRow('AgoraMark · AgoraLockup', const [
@@ -162,7 +163,8 @@ void main() {
         child: EmptyState(
           icon: Icons.groups_outlined,
           title: 'Sin congregación',
-          message: 'Todo se archiva bajo una congregación. Crea o únete a una '
+          message:
+              'Todo se archiva bajo una congregación. Crea o únete a una '
               'para empezar.',
           action: AppButton(icon: Icons.add, label: 'Crear', onPressed: () {}),
         ),

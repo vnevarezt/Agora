@@ -33,20 +33,20 @@ class Part {
   });
 
   factory Part.fromJson(Map<String, dynamic> json) => Part(
-        section: Section.values.byName(json['section'] as String),
-        number: json['number'] as int,
-        title: json['title'] as String,
-        minutes: json['minutes'] as int?,
-        isTalk: json['isTalk'] as bool? ?? false,
-      );
+    section: Section.values.byName(json['section'] as String),
+    number: json['number'] as int,
+    title: json['title'] as String,
+    minutes: json['minutes'] as int?,
+    isTalk: json['isTalk'] as bool? ?? false,
+  );
 
   Map<String, dynamic> toJson() => {
-        'section': section.name,
-        'number': number,
-        'title': title,
-        'minutes': minutes,
-        'isTalk': isTalk,
-      };
+    'section': section.name,
+    'number': number,
+    'title': title,
+    'minutes': minutes,
+    'isTalk': isTalk,
+  };
 }
 
 /// Full program of one week.
@@ -89,31 +89,31 @@ class Week {
   /// becomes self-contained — it renders offline and survives changes to
   /// the MWB cache it was generated from.
   factory Week.fromJson(Map<String, dynamic> json) => Week(
-        date: json['date'] as String? ?? '',
-        // Snapshots written before this field existed decode as empty; the
-        // reconciler resolves them from the catalog on the next pass.
-        weekStart: json['weekStart'] as String? ?? '',
-        reading: json['reading'] as String? ?? '',
-        openingSong: json['openingSong'] as String?,
-        middleSong: json['middleSong'] as String?,
-        closingSong: json['closingSong'] as String?,
-        introMinutes: json['introMinutes'] as int? ?? 1,
-        conclusionMinutes: json['conclusionMinutes'] as int? ?? 3,
-        parts: [
-          for (final p in (json['parts'] as List? ?? const []))
-            Part.fromJson(p as Map<String, dynamic>),
-        ],
-      );
+    date: json['date'] as String? ?? '',
+    // Snapshots written before this field existed decode as empty; the
+    // reconciler resolves them from the catalog on the next pass.
+    weekStart: json['weekStart'] as String? ?? '',
+    reading: json['reading'] as String? ?? '',
+    openingSong: json['openingSong'] as String?,
+    middleSong: json['middleSong'] as String?,
+    closingSong: json['closingSong'] as String?,
+    introMinutes: json['introMinutes'] as int? ?? 1,
+    conclusionMinutes: json['conclusionMinutes'] as int? ?? 3,
+    parts: [
+      for (final p in (json['parts'] as List? ?? const []))
+        Part.fromJson(p as Map<String, dynamic>),
+    ],
+  );
 
   Map<String, dynamic> toJson() => {
-        'date': date,
-        'weekStart': weekStart,
-        'reading': reading,
-        'openingSong': openingSong,
-        'middleSong': middleSong,
-        'closingSong': closingSong,
-        'introMinutes': introMinutes,
-        'conclusionMinutes': conclusionMinutes,
-        'parts': [for (final p in parts) p.toJson()],
-      };
+    'date': date,
+    'weekStart': weekStart,
+    'reading': reading,
+    'openingSong': openingSong,
+    'middleSong': middleSong,
+    'closingSong': closingSong,
+    'introMinutes': introMinutes,
+    'conclusionMinutes': conclusionMinutes,
+    'parts': [for (final p in parts) p.toJson()],
+  };
 }

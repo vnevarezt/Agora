@@ -12,14 +12,16 @@ import 'editor_session.dart';
 final cacheProvider = Provider<MwbCache>((ref) => MwbCache());
 
 /// Data repository (cache-first; downloads from jw.org only on a miss).
-final repositoryProvider =
-    Provider((ref) => MwbRepository(ref.watch(cacheProvider)));
+final repositoryProvider = Provider(
+  (ref) => MwbRepository(ref.watch(cacheProvider)),
+);
 
 /// Weeks the editor is working on, derived from the open project's program
 /// snapshots. Reactive to the background fill, so the editor completes itself
 /// once the notebook lands — no button needed.
-final weeksProvider =
-    AsyncNotifierProvider<WeeksController, List<Week>>(WeeksController.new);
+final weeksProvider = AsyncNotifierProvider<WeeksController, List<Week>>(
+  WeeksController.new,
+);
 
 class WeeksController extends AsyncNotifier<List<Week>> {
   @override
@@ -48,7 +50,8 @@ class WeeksController extends AsyncNotifier<List<Week>> {
   /// workspace's fallback button; goes to the network only on a cache miss.
   Future<void> load(String issue) async {
     final lang = ref.read(
-        congregationLangProvider(ref.read(editorCongregationIdProvider)));
+      congregationLangProvider(ref.read(editorCongregationIdProvider)),
+    );
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => ref.read(repositoryProvider).weeks(issue, lang: lang),

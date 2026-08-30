@@ -48,10 +48,10 @@ class InviteCode {
 
   /// Fresh token + secret for [congregationId].
   factory InviteCode.mint(String congregationId) => InviteCode(
-        congregationId: congregationId,
-        tokenId: _b64(PassphraseEnvelope.randomBytes(16)),
-        secret: PassphraseEnvelope.randomBytes(32),
-      );
+    congregationId: congregationId,
+    tokenId: _b64(PassphraseEnvelope.randomBytes(16)),
+    secret: PassphraseEnvelope.randomBytes(32),
+  );
 
   String encode() {
     final body = _body(congregationId, tokenId, _b64(secret));
@@ -75,8 +75,10 @@ class InviteCode {
     }
     final body = _body(cid, tokenId, secret);
     if (_check(body) != check) {
-      throw const InviteCodeException('The invite code is incomplete or was '
-          'copied wrong.');
+      throw const InviteCodeException(
+        'The invite code is incomplete or was '
+        'copied wrong.',
+      );
     }
     final List<int> bytes;
     try {
@@ -87,8 +89,7 @@ class InviteCode {
     if (bytes.length != 32 || cid.isEmpty || tokenId.isEmpty) {
       throw const InviteCodeException('The invite code is malformed.');
     }
-    return InviteCode(
-        congregationId: cid, tokenId: tokenId, secret: bytes);
+    return InviteCode(congregationId: cid, tokenId: tokenId, secret: bytes);
   }
 
   static String _body(String cid, String tokenId, String secret) =>
@@ -97,7 +98,8 @@ class InviteCode {
   static final _sha256 = Sha256().toSync();
 
   static String _check(String body) => _b64(
-      _sha256.hashSync(utf8.encode(body)).bytes.take(_checkBytes).toList());
+    _sha256.hashSync(utf8.encode(body)).bytes.take(_checkBytes).toList(),
+  );
 
   static String _b64(List<int> bytes) =>
       base64Url.encode(bytes).replaceAll('=', '');
@@ -135,8 +137,13 @@ abstract final class InviteKeyringBox {
     CongregationKeyring keyring,
     InviteCode code,
   ) async {
-    final clear = utf8.encode(jsonEncode(keyring.keys
-        .map((version, key) => MapEntry('$version', base64Encode(key)))));
+    final clear = utf8.encode(
+      jsonEncode(
+        keyring.keys.map(
+          (version, key) => MapEntry('$version', base64Encode(key)),
+        ),
+      ),
+    );
     final nonce = PassphraseEnvelope.randomBytes(12);
     final box = await _aes.encrypt(
       clear,
@@ -176,12 +183,14 @@ abstract final class InviteKeyringBox {
       );
     } on SecretBoxAuthenticationError {
       throw const InviteCodeException(
-          'This invite code does not open this invitation.');
+        'This invite code does not open this invitation.',
+      );
     }
     try {
       final map = (jsonDecode(utf8.decode(clear)) as Map<String, dynamic>).map(
-          (version, b64) =>
-              MapEntry(int.parse(version), base64Decode(b64 as String)));
+        (version, b64) =>
+            MapEntry(int.parse(version), base64Decode(b64 as String)),
+      );
       if (map.isEmpty) throw const FormatException('empty keyring');
       return CongregationKeyring(map);
     } catch (e) {

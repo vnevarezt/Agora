@@ -17,10 +17,14 @@ void main() {
   setUp(() => store = IndexedDbMwbStore());
 
   test('missing keys read as null rather than throwing', () async {
-    expect(await store.readString('nope-${DateTime.now().microsecondsSinceEpoch}'),
-        isNull);
-    expect(await store.readBytes('nope-${DateTime.now().microsecondsSinceEpoch}'),
-        isNull);
+    expect(
+      await store.readString('nope-${DateTime.now().microsecondsSinceEpoch}'),
+      isNull,
+    );
+    expect(
+      await store.readBytes('nope-${DateTime.now().microsecondsSinceEpoch}'),
+      isNull,
+    );
   });
 
   test('strings round-trip', () async {
@@ -50,7 +54,8 @@ void main() {
     // megabytes and localStorage caps out around five for the entire origin.
     final key = 'big-${DateTime.now().microsecondsSinceEpoch}';
     final bytes = Uint8List.fromList(
-        List<int>.generate(6 * 1024 * 1024, (i) => i % 256));
+      List<int>.generate(6 * 1024 * 1024, (i) => i % 256),
+    );
     await store.writeBytes(key, bytes);
     final read = await store.readBytes(key);
     expect(read, isNotNull);

@@ -75,8 +75,12 @@ class SessionCloudUnverified extends SessionState {
 }
 
 class SessionUnlocked extends SessionState {
-  const SessionUnlocked(this.dekHex, this.mode,
-      {this.profileName, this.deviceUnlockEnabled = false});
+  const SessionUnlocked(
+    this.dekHex,
+    this.mode, {
+    this.profileName,
+    this.deviceUnlockEnabled = false,
+  });
 
   final String dekHex;
   final AccountMode mode;
@@ -95,8 +99,9 @@ class SessionKeyError extends SessionState {
   final String message;
 }
 
-final authSessionProvider =
-    NotifierProvider<SessionController, SessionState>(SessionController.new);
+final authSessionProvider = NotifierProvider<SessionController, SessionState>(
+  SessionController.new,
+);
 
 class SessionController extends Notifier<SessionState> {
   static const _modeKey = 'account_mode';
@@ -144,8 +149,9 @@ class SessionController extends Notifier<SessionState> {
           await _startCloudWatch();
         case null:
           state = switch (await _keys.status()) {
-            LocalKeyStatus.legacyPlaintext =>
-              const SessionLocalCreate(migration: true),
+            LocalKeyStatus.legacyPlaintext => const SessionLocalCreate(
+              migration: true,
+            ),
             // Wrapped key without a mode: install predates mode selection.
             LocalKeyStatus.wrapped => SessionLocalLocked(_profileName),
             LocalKeyStatus.none => const SessionFreshChoose(),
@@ -182,8 +188,12 @@ class SessionController extends Notifier<SessionState> {
   /// Throws [WrongPasswordException] / [DbKeyException]; the screen shows the
   /// error while the state stays [SessionLocalLocked].
   Future<void> unlock(String password) async {
-    state = SessionUnlocked(await _keys.unlock(password), AccountMode.local,
-        profileName: _profileName, deviceUnlockEnabled: _deviceUnlock);
+    state = SessionUnlocked(
+      await _keys.unlock(password),
+      AccountMode.local,
+      profileName: _profileName,
+      deviceUnlockEnabled: _deviceUnlock,
+    );
   }
 
   /// OS prompt → unlocked, in either mode. False when the user cancelled or
@@ -195,8 +205,10 @@ class SessionController extends Notifier<SessionState> {
     if (!await _deviceAuth.authenticate(reason)) return false;
     if (_mode == AccountMode.cloud) {
       state = SessionUnlocked(
-          await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud,
-          deviceUnlockEnabled: true);
+        await _keys.getOrCreateCloudKeyHex(),
+        AccountMode.cloud,
+        deviceUnlockEnabled: true,
+      );
       return true;
     }
     final dek = await _keys.readDeviceUnlockKey();
@@ -205,15 +217,19 @@ class SessionController extends Notifier<SessionState> {
       state = SessionLocalLocked(_profileName);
       throw const DeviceUnlockKeyMissing();
     }
-    state = SessionUnlocked(dek, AccountMode.local,
-        profileName: _profileName, deviceUnlockEnabled: true);
+    state = SessionUnlocked(
+      dek,
+      AccountMode.local,
+      profileName: _profileName,
+      deviceUnlockEnabled: true,
+    );
     return true;
   }
 
   void lock() => state = switch (_mode) {
-        AccountMode.cloud => const SessionCloudLocked(),
-        _ => SessionLocalLocked(_profileName, deviceUnlock: _deviceUnlock),
-      };
+    AccountMode.cloud => const SessionCloudLocked(),
+    _ => SessionLocalLocked(_profileName, deviceUnlock: _deviceUnlock),
+  };
 
   /// Settings toggle, both modes; requires an unlocked session. Enabling asks
   /// for the OS prompt right away — proves the user can actually pass it
@@ -231,8 +247,12 @@ class SessionController extends Notifier<SessionState> {
       await _keys.disableDeviceUnlock();
     }
     await _persistDeviceUnlockPref(enable);
-    state = SessionUnlocked(s.dekHex, s.mode,
-        profileName: s.profileName, deviceUnlockEnabled: enable);
+    state = SessionUnlocked(
+      s.dekHex,
+      s.mode,
+      profileName: s.profileName,
+      deviceUnlockEnabled: enable,
+    );
     return enable;
   }
 
@@ -250,13 +270,16 @@ class SessionController extends Notifier<SessionState> {
       await prefs.setString(_modeKey, 'cloud');
       _mode = AccountMode.cloud;
       final app = await ref.read(firebaseAppProvider.future);
-      final user =
-          app == null ? null : FirebaseAuth.instanceFor(app: app).currentUser;
+      final user = app == null
+          ? null
+          : FirebaseAuth.instanceFor(app: app).currentUser;
       state = user != null && _needsEmailVerification(user)
           ? const SessionCloudUnverified()
           : SessionUnlocked(
-              await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud,
-              deviceUnlockEnabled: _deviceUnlock);
+              await _keys.getOrCreateCloudKeyHex(),
+              AccountMode.cloud,
+              deviceUnlockEnabled: _deviceUnlock,
+            );
       await _startCloudWatch();
     } on DbKeyException catch (e) {
       state = SessionKeyError(e.message);
@@ -318,8 +341,9 @@ class SessionController extends Notifier<SessionState> {
       return;
     }
     await _cloudSub?.cancel();
-    _cloudSub =
-        FirebaseAuth.instanceFor(app: app).authStateChanges().listen(_onCloudUser);
+    _cloudSub = FirebaseAuth.instanceFor(
+      app: app,
+    ).authStateChanges().listen(_onCloudUser);
   }
 
   Future<void> _onCloudUser(User? user) async {
@@ -351,7 +375,9 @@ class SessionController extends Notifier<SessionState> {
     }
     try {
       state = SessionUnlocked(
-          await _keys.getOrCreateCloudKeyHex(), AccountMode.cloud);
+        await _keys.getOrCreateCloudKeyHex(),
+        AccountMode.cloud,
+      );
     } on DbKeyException catch (e) {
       state = SessionKeyError(e.message);
     }

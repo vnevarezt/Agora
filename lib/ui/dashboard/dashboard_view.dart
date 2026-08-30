@@ -61,8 +61,7 @@ class DashboardView extends ConsumerWidget {
                 // skeleton.
                 final stalled =
                     phase == SyncPhase.offline || phase == SyncPhase.error;
-                final noCongregation =
-                    ref.watch(congregationsProvider).isEmpty;
+                final noCongregation = ref.watch(congregationsProvider).isEmpty;
                 // A restore that FAILED is not one still arriving: it never
                 // stops, so a skeleton waiting on it never stops either. That
                 // is the forever-skeleton this build shipped with, and behind
@@ -104,17 +103,17 @@ class DashboardView extends ConsumerWidget {
                           // first save, which a browser never reaches, leaving
                           // an empty screen nobody could act on.
                           : noCongregation
-                              ? const _NoCongregation(
-                                  key: ValueKey('no-congregation'))
-                              : Column(
-                                  key: const ValueKey('content'),
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    const _HeroSection(),
-                                    _HomeGrid(stacked: stacked),
-                                  ],
-                                ),
+                          ? const _NoCongregation(
+                              key: ValueKey('no-congregation'),
+                            )
+                          : Column(
+                              key: const ValueKey('content'),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _HeroSection(),
+                                _HomeGrid(stacked: stacked),
+                              ],
+                            ),
                     ),
                   ],
                 );
@@ -145,9 +144,9 @@ class _NoCongregation extends ConsumerWidget {
           icon: Icons.add,
           label: tr.dashboard.noCongregationCta,
           onPressed: () {
-            ref.read(settingsTabProvider.notifier).select(
-                  SettingsTab.congregation,
-                );
+            ref
+                .read(settingsTabProvider.notifier)
+                .select(SettingsTab.congregation);
             ref.read(appSectionProvider.notifier).select(AppSection.settings);
           },
         ),
@@ -326,41 +325,44 @@ class _SyncIndicator extends StatelessWidget {
         : Icon(icon, size: AppIcon.control, color: color);
 
     Widget card(bool hovered) => Container(
-          height: Dimens.hControl,
-          width: compact ? Dimens.hControl : null,
-          padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
-          decoration: BoxDecoration(
-            color: hovered ? t.surface2 : t.surface,
-            borderRadius: BorderRadius.circular(Dimens.rControl),
-            border: Border.all(color: t.border),
-          ),
-          child: compact
-              ? Center(child: leading)
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    leading,
-                    const SizedBox(width: Space.s10),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: AppText.body,
-                        fontWeight: FontWeight.w600,
-                        color: t.textDim,
-                      ),
-                    ),
-                    // Where the card is a button it has to look like one:
-                    // styled as a status chip it read as a read-out, and the
-                    // only way to load a workbook sat behind a tap nobody
-                    // knew was there.
-                    if (onImport != null) ...[
-                      const SizedBox(width: Space.s8),
-                      Icon(Icons.file_open_outlined,
-                          size: AppIcon.inline, color: t.textMute),
-                    ],
-                  ],
+      height: Dimens.hControl,
+      width: compact ? Dimens.hControl : null,
+      padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
+      decoration: BoxDecoration(
+        color: hovered ? t.surface2 : t.surface,
+        borderRadius: BorderRadius.circular(Dimens.rControl),
+        border: Border.all(color: t.border),
+      ),
+      child: compact
+          ? Center(child: leading)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                leading,
+                const SizedBox(width: Space.s10),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: AppText.body,
+                    fontWeight: FontWeight.w600,
+                    color: t.textDim,
+                  ),
                 ),
-        );
+                // Where the card is a button it has to look like one:
+                // styled as a status chip it read as a read-out, and the
+                // only way to load a workbook sat behind a tap nobody
+                // knew was there.
+                if (onImport != null) ...[
+                  const SizedBox(width: Space.s8),
+                  Icon(
+                    Icons.file_open_outlined,
+                    size: AppIcon.inline,
+                    color: t.textMute,
+                  ),
+                ],
+              ],
+            ),
+    );
 
     if (onImport == null) return Tooltip(message: tip, child: card(false));
 
@@ -444,27 +446,38 @@ class _RestoreBanner extends StatelessWidget {
     // perfectly healthy while the membership query is the thing that broke.
     final (Widget leading, String label) = restore.failed
         ? (
-            Icon(Icons.error_outline_rounded,
-                size: AppIcon.control, color: amber),
+            Icon(
+              Icons.error_outline_rounded,
+              size: AppIcon.control,
+              color: amber,
+            ),
             tr.cloudSync.restoreFailed,
           )
         : switch (phase) {
-      SyncPhase.offline => (
-        Icon(Icons.cloud_off_rounded, size: AppIcon.control, color: amber),
-        tr.cloudSync.restoreOffline,
-      ),
-      SyncPhase.error => (
-        Icon(Icons.error_outline_rounded, size: AppIcon.control, color: amber),
-        tr.cloudSync.errorUnknown,
-      ),
-      _ => (
-        const AppSpinner(size: Dimens.spinner),
-        restore.total > 1
-            ? '${tr.cloudSync.restoring} · '
-                  '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
-            : tr.cloudSync.restoring,
-      ),
-    };
+            SyncPhase.offline => (
+              Icon(
+                Icons.cloud_off_rounded,
+                size: AppIcon.control,
+                color: amber,
+              ),
+              tr.cloudSync.restoreOffline,
+            ),
+            SyncPhase.error => (
+              Icon(
+                Icons.error_outline_rounded,
+                size: AppIcon.control,
+                color: amber,
+              ),
+              tr.cloudSync.errorUnknown,
+            ),
+            _ => (
+              const AppSpinner(size: Dimens.spinner),
+              restore.total > 1
+                  ? '${tr.cloudSync.restoring} · '
+                        '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
+                  : tr.cloudSync.restoring,
+            ),
+          };
 
     return Container(
       padding: const EdgeInsets.symmetric(

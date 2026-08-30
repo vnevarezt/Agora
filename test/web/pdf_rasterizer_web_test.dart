@@ -24,31 +24,38 @@ import 'package:pdfrx/pdfrx.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('rasterizePage selects the engine before opening the document', () async {
-    final doc = pw.Document()
-      ..addPage(pw.Page(
-        pageFormat: PdfPageFormat.letter,
-        build: (_) => pw.SizedBox(),
-      ));
-    final bytes = await doc.save();
+  test(
+    'rasterizePage selects the engine before opening the document',
+    () async {
+      final doc = pw.Document()
+        ..addPage(
+          pw.Page(
+            pageFormat: PdfPageFormat.letter,
+            build: (_) => pw.SizedBox(),
+          ),
+        );
+      final bytes = await doc.save();
 
-    expect(
-      PdfrxEntryFunctions.instance.runtimeType.toString(),
-      isNot(contains('Wasm')),
-      reason: 'nothing may have initialised pdfrx before this test runs',
-    );
+      expect(
+        PdfrxEntryFunctions.instance.runtimeType.toString(),
+        isNot(contains('Wasm')),
+        reason: 'nothing may have initialised pdfrx before this test runs',
+      );
 
-    try {
-      await rasterizePage(bytes, scale: 1);
-    } catch (_) {
-      // Expected: the wasm assets are not served here. Selection already
-      // happened by this point, which is what is under test.
-    }
+      try {
+        await rasterizePage(bytes, scale: 1);
+      } catch (_) {
+        // Expected: the wasm assets are not served here. Selection already
+        // happened by this point, which is what is under test.
+      }
 
-    expect(
-      PdfrxEntryFunctions.instance.runtimeType.toString(),
-      contains('Wasm'),
-      reason: 'rasterizePage must call pdfrxFlutterInitialize before openData',
-    );
-  }, timeout: const Timeout(Duration(minutes: 2)));
+      expect(
+        PdfrxEntryFunctions.instance.runtimeType.toString(),
+        contains('Wasm'),
+        reason:
+            'rasterizePage must call pdfrxFlutterInitialize before openData',
+      );
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
 }

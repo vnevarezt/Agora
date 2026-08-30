@@ -104,7 +104,9 @@ class UserKeyService {
   /// mints one the first time. Returns false when it isn't reachable.
   Future<bool> ensureAvailable() async {
     if (await seed() != null) return true;
-    if (await _docs.readUserDoc(uid) != null) return false; // exists, unreachable
+    // Exists but unreachable: minting a second identity would orphan the keys
+    // already sealed for the first.
+    if (await _docs.readUserDoc(uid) != null) return false;
     await generate();
     return true;
   }

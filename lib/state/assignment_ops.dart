@@ -43,7 +43,11 @@ class RowSlot extends SlotRef {
 /// List of [slots] entries with [name] placed at [index], keeping the other
 /// values of [current] (pure, testable function).
 List<String> listWithName(
-    List<String>? current, int slots, int index, String name) {
+  List<String>? current,
+  int slots,
+  int index,
+  String name,
+) {
   return [
     for (var i = 0; i < slots; i++)
       i == index
@@ -67,9 +71,9 @@ String slotName(FormModel f, SlotRef slot) {
   return switch (slot) {
     ChairmanSlot() => f.chairman,
     RowSlot(:final row, :final index, :final aux) => () {
-        final list = aux ? f.auxiliary[row.id] : f.main[row.id];
-        return (list != null && index < list.length) ? list[index] : '';
-      }(),
+      final list = aux ? f.auxiliary[row.id] : f.main[row.id];
+      return (list != null && index < list.length) ? list[index] : '';
+    }(),
   };
 }
 

@@ -27,8 +27,7 @@ class People extends Table with SyncColumns {
       .withDefault(const Constant('[]'))();
 
   /// Free-text home congregation for visitors; '' for local members.
-  TextColumn get originCongregation =>
-      text().withDefault(const Constant(''))();
+  TextColumn get originCongregation => text().withDefault(const Constant(''))();
 
   BoolColumn get active => boolean().withDefault(const Constant(true))();
   TextColumn get notes => text().withDefault(const Constant(''))();

@@ -45,8 +45,10 @@ final initialRestoreProvider = Provider<InitialRestore?>((ref) {
     for (final m in memberships.value ?? const []) m.congregationId,
   };
   final pending = cloudCids.difference(localCids);
-  syncTrace('restore: cloud=${cloudCids.join(', ')} '
-      'local=${localCids.join(', ')} pending=${pending.join(', ')}');
+  syncTrace(
+    'restore: cloud=${cloudCids.join(', ')} '
+    'local=${localCids.join(', ')} pending=${pending.join(', ')}',
+  );
   if (pending.isEmpty) return null;
   final total = cloudCids.length;
   return (done: total - pending.length, total: total, failed: false);

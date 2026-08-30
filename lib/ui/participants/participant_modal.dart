@@ -23,10 +23,10 @@ import '../widgets/segmented_control.dart';
 
 /// Description of each privilege in the modal radio cards.
 String _roleDesc(Role role, Translations tr) => switch (role) {
-      Role.publisher => tr.participantModal.roleDescPublisher,
-      Role.ministerialServant => tr.participantModal.roleDescServant,
-      Role.elder => tr.participantModal.roleDescElder,
-    };
+  Role.publisher => tr.participantModal.roleDescPublisher,
+  Role.ministerialServant => tr.participantModal.roleDescServant,
+  Role.elder => tr.participantModal.roleDescElder,
+};
 
 /// Opens the create/edit person modal. [original] null = new.
 Future<void> showParticipantModal(BuildContext context, {Person? original}) {
@@ -89,10 +89,10 @@ class _PersonModalState extends ConsumerState<PersonModal> {
   }
 
   void _setGender(Gender s) => setState(() {
-        _gender = s;
-        // Women only participate as publishers.
-        if (s == Gender.female) _privilege = Role.publisher;
-      });
+    _gender = s;
+    // Women only participate as publishers.
+    if (s == Gender.female) _privilege = Role.publisher;
+  });
 
   Future<void> _save() async {
     setState(() => _saving = true);
@@ -137,8 +137,9 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       builder: (context) => AlertDialog(
         title: Text(context.t.participantModal.deleteTitle),
         content: Text(
-          context.t.participantModal
-              .deleteConfirm(name: widget.original!.displayName),
+          context.t.participantModal.deleteConfirm(
+            name: widget.original!.displayName,
+          ),
         ),
         actions: [
           TextButton(
@@ -147,8 +148,10 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.t.common.delete,
-                style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              context.t.common.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -169,8 +172,9 @@ class _PersonModalState extends ConsumerState<PersonModal> {
           : tr.participantModal.editTitle,
       desc: tr.participantModal.desc,
       body: _body(context.tokens, tr),
-      primaryLabel:
-          _isCreating ? tr.participantModal.addTitle : tr.common.saveChanges,
+      primaryLabel: _isCreating
+          ? tr.participantModal.addTitle
+          : tr.common.saveChanges,
       primaryBusy: _saving,
       onPrimary: (_canEdit && _displayName.trim().isNotEmpty && !_saving)
           ? _save
@@ -185,8 +189,11 @@ class _PersonModalState extends ConsumerState<PersonModal> {
         .where((c) => c != _origin.trim())
         .take(3)
         .toList();
-    final genderIndex =
-        switch (_gender) { Gender.male => 0, Gender.female => 1, _ => -1 };
+    final genderIndex = switch (_gender) {
+      Gender.male => 0,
+      Gender.female => 1,
+      _ => -1,
+    };
     final availableRoles = _gender == Gender.female
         ? const [Role.publisher]
         : Role.values;
@@ -296,7 +303,6 @@ class _PersonModalState extends ConsumerState<PersonModal> {
       ],
     );
   }
-
 }
 
 /// Privilege radio card (`.priv-option`): circle + title + description.
@@ -322,7 +328,10 @@ class _RoleOption extends StatelessWidget {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
           curve: Motion.curve,
-          padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Space.s14,
+            vertical: Space.s12,
+          ),
           decoration: BoxDecoration(
             color: selected ? t.accentTint : t.surface,
             borderRadius: BorderRadius.circular(12),

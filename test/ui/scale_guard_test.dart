@@ -48,8 +48,7 @@ void main() {
   /// site ever writes them: `Pill` shipped every badge in the app at 10pt —
   /// under the floor the type scale calls a floor — because nobody passed a
   /// size and the guard only ever looked at what callers passed.
-  RegExp defaultFor(String param) =>
-      RegExp('\\bthis\\.$param = [0-9]');
+  RegExp defaultFor(String param) => RegExp('\\bthis\\.$param = [0-9]');
 
   List<String> scan(RegExp pattern) {
     final violations = <String>[];

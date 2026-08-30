@@ -34,12 +34,7 @@ class SharingException implements Exception {
 /// Also owns sharing (4b-2): minting invites, redeeming them, and the
 /// revoke-and-rotate batch.
 class CckService {
-  CckService(
-    this._store,
-    this._docs,
-    this._userKeys, {
-    required this.uid,
-  });
+  CckService(this._store, this._docs, this._userKeys, {required this.uid});
 
   final SecureKeyStore _store;
   final KeyDocsGateway _docs;
@@ -55,20 +50,23 @@ class CckService {
     if (json == null) return null;
     try {
       final map = (jsonDecode(json) as Map<String, dynamic>).map(
-          (version, b64) =>
-              MapEntry(int.parse(version), base64Decode(b64 as String)));
+        (version, b64) =>
+            MapEntry(int.parse(version), base64Decode(b64 as String)),
+      );
       return map.isEmpty ? null : CongregationKeyring(map);
     } catch (_) {
       return null; // unreadable cache: fall through to the member doc
     }
   }
 
-  Future<void> _cache(String cid, CongregationKeyring keyring) =>
-      _store.write(
-        _cacheKeyName(cid),
-        jsonEncode(keyring.keys
-            .map((version, key) => MapEntry('$version', base64Encode(key)))),
-      );
+  Future<void> _cache(String cid, CongregationKeyring keyring) => _store.write(
+    _cacheKeyName(cid),
+    jsonEncode(
+      keyring.keys.map(
+        (version, key) => MapEntry('$version', base64Encode(key)),
+      ),
+    ),
+  );
 
   /// Keys this member holds for [cid]; null = not syncable (no seed on this
   /// device, no membership, or no cloud space). Cache-first: the network is
@@ -88,8 +86,10 @@ class CckService {
     if (wrapped == null || wrapped.isEmpty) return null;
     final keys = <int, List<int>>{};
     for (final MapEntry(key: version, value: box) in wrapped.entries) {
-      keys[int.parse(version)] =
-          await SealedBox.open((box as Map).cast<String, dynamic>(), seed);
+      keys[int.parse(version)] = await SealedBox.open(
+        (box as Map).cast<String, dynamic>(),
+        seed,
+      );
     }
     final keyring = CongregationKeyring(keys);
     await _cache(cid, keyring);
@@ -177,8 +177,10 @@ class CckService {
   }) async {
     final keyring = await keyringFor(cid);
     if (keyring == null) {
-      throw const SharingException('keysUnavailable',
-          'This congregation has no keys on this device yet.');
+      throw const SharingException(
+        'keysUnavailable',
+        'This congregation has no keys on this device yet.',
+      );
     }
     final code = InviteCode.mint(cid);
     await _docs.createInvite(cid, code.tokenId, {
@@ -194,9 +196,9 @@ class CckService {
       _docs.deleteInvite(cid, tokenId);
 
   Future<List<CongregationInvite>> listInvites(String cid) async => [
-        for (final e in (await _docs.listInvites(cid)).entries)
-          CongregationInvite.fromDoc(e.key, e.value),
-      ];
+    for (final e in (await _docs.listInvites(cid)).entries)
+      CongregationInvite.fromDoc(e.key, e.value),
+  ];
 
   /// Joins the congregation [code] points at and returns its keyring.
   ///
@@ -210,8 +212,10 @@ class CckService {
     // Redemption writes a member doc sealed to OUR public key, so the
     // identity keypair has to exist first.
     if (!await _userKeys.ensureAvailable()) {
-      throw const SharingException('keysUnavailable',
-          'The sync keys for this account are not available on this device.');
+      throw const SharingException(
+        'keysUnavailable',
+        'The sync keys for this account are not available on this device.',
+      );
     }
     final seed = (await _userKeys.seed())!;
     final cid = code.congregationId;
@@ -221,17 +225,23 @@ class CckService {
     // to tell the user which one it is.
     if (await _docs.readMemberDoc(cid, uid) != null) {
       throw const SharingException(
-          'alreadyMember', 'You already belong to this congregation.');
+        'alreadyMember',
+        'You already belong to this congregation.',
+      );
     }
     final invite = await _docs.readInvite(cid, code.tokenId);
     if (invite == null) {
-      throw const SharingException('inviteMissing',
-          'This invitation no longer exists — it may already have been used.');
+      throw const SharingException(
+        'inviteMissing',
+        'This invitation no longer exists — it may already have been used.',
+      );
     }
     final expiresAt = invite['expiresAt'] as DateTime?;
     if (expiresAt != null && !expiresAt.isAfter(DateTime.now().toUtc())) {
       throw const SharingException(
-          'inviteExpired', 'This invitation has expired.');
+        'inviteExpired',
+        'This invitation has expired.',
+      );
     }
 
     final keyring = await InviteKeyringBox.open(
@@ -273,16 +283,14 @@ class CckService {
   // ---- members --------------------------------------------------------------
 
   Future<List<CongregationMember>> listMembers(String cid) async => [
-        for (final m in await _docs.listMembers(cid))
-          CongregationMember.fromDoc(m),
-      ];
+    for (final m in await _docs.listMembers(cid)) CongregationMember.fromDoc(m),
+  ];
 
   Future<void> setMemberCapabilities(
     String cid,
     String memberUid,
     MemberCapabilities capabilities,
-  ) =>
-      _docs.updateMemberCapabilities(cid, memberUid, capabilities.toMap());
+  ) => _docs.updateMemberCapabilities(cid, memberUid, capabilities.toMap());
 
   // ---- revoke + rotate ------------------------------------------------------
 
@@ -303,14 +311,19 @@ class CckService {
   }) async {
     final keyring = await keyringFor(cid);
     if (keyring == null) {
-      throw const SharingException('keysUnavailable',
-          'This congregation has no keys on this device.');
+      throw const SharingException(
+        'keysUnavailable',
+        'This congregation has no keys on this device.',
+      );
     }
     final removing = removeUids.toSet();
     final members = await listMembers(cid);
     final serverVersion = await _docs.readCongregationKeyVersion(cid) ?? 0;
     final newVersion =
-        (serverVersion > keyring.currentVersion ? serverVersion : keyring.currentVersion) + 1;
+        (serverVersion > keyring.currentVersion
+            ? serverVersion
+            : keyring.currentVersion) +
+        1;
     final newKey = CongregationKeyring.newKey();
 
     final wrappedForMember = <String, Map<String, String>>{};
@@ -323,9 +336,11 @@ class CckService {
       try {
         pub = base64Decode(member.pubKey);
       } on FormatException {
-        throw SharingException('badMemberKey',
-            'Member ${member.displayName ?? member.uid} has an unreadable '
-            'public key; rotation aborted.');
+        throw SharingException(
+          'badMemberKey',
+          'Member ${member.displayName ?? member.uid} has an unreadable '
+              'public key; rotation aborted.',
+        );
       }
       wrappedForMember[member.uid] = await SealedBox.seal(newKey, pub);
     }
@@ -346,8 +361,7 @@ class CckService {
       await forget([cid]);
       return keyring;
     }
-    final rotated =
-        CongregationKeyring({...keyring.keys, newVersion: newKey});
+    final rotated = CongregationKeyring({...keyring.keys, newVersion: newKey});
     await _cache(cid, rotated);
 
     // Someone may have redeemed an invite BETWEEN the member list above and
@@ -369,8 +383,8 @@ class CckService {
   Future<int> reconcileKeyrings(String cid) async {
     final keyring = await keyringFor(cid);
     if (keyring == null) return 0;
-    final target = await _docs.readCongregationKeyVersion(cid) ??
-        keyring.currentVersion;
+    final target =
+        await _docs.readCongregationKeyVersion(cid) ?? keyring.currentVersion;
     final all = {for (var v = 1; v <= target; v++) v};
 
     var repaired = 0;

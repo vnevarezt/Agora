@@ -23,7 +23,8 @@ class S140 {
   static const double marginRight = 0.5 * 72; // 36
 
   /// Usable width = \textwidth.
-  static const double contentWidth = pageWidth - marginLeft - marginRight; // 496.8
+  static const double contentWidth =
+      pageWidth - marginLeft - marginRight; // 496.8
 
   // ---- Two-per-sheet: portrait Letter, two week blocks stacked, tighter
   // margins so the compact layout gets the full width ----
@@ -44,6 +45,7 @@ class S140 {
 
   // ---- Column widths (tex:57-61) ----
   static const double cm = 28.3465;
+
   /// Official width of the time column. Only a CEILING now: the times are
   /// measured (see `computeColumns`), and "18:31" in 9 pt Carlito is nowhere
   /// near 1.3 cm — the difference was blank on every row of the sheet.
@@ -94,7 +96,9 @@ class S140 {
   static final PdfColor treasures = PdfColor.fromHex('575A5D'); // gray
   static final PdfColor ministryColor = PdfColor.fromHex('BE8900'); // gold
   static final PdfColor christianLife = PdfColor.fromHex('7E0024'); // maroon
-  static final PdfColor labelColor = PdfColor.fromHex('575A5D'); // gray (labels)
+  static final PdfColor labelColor = PdfColor.fromHex(
+    '575A5D',
+  ); // gray (labels)
   static final PdfColor lineColor = PdfColor.fromHex('A6A6A6'); // light gray
   static final PdfColor white = PdfColor.fromHex('FFFFFF');
 }
@@ -199,38 +203,38 @@ class S140Metrics {
   /// what makes growing the type a real constraint rather than a zoom, and it
   /// is why the fit has to measure instead of multiply.
   S140Metrics scaled(double type, {double air = 1}) => S140Metrics(
-        contentWidth: contentWidth,
-        base: base * type,
-        small: small * type,
-        footnote: footnote * type,
-        large: large * type,
-        title: title * type,
-        week: week * type,
-        hourWidth: hourWidth * type,
-        roleWidth: roleWidth * type,
-        // The official 5 cm names column and the auxiliary-room minimum are
-        // floors in PAPER units, not type units: scaling them up would take
-        // width from the titles for names that never asked for it.
-        mainNameWidth: mainNameWidth,
-        colGap: colGap * type,
-        rowSep: rowSep * type * air,
-        fboxsep: fboxsep * type,
-        bandGapTop: bandGapTop * type * air,
-        bandGapBottom: bandGapBottom * type * air,
-        gapHeaderRule: gapHeaderRule * type,
-        gapAfterRule: gapAfterRule * type,
-        gapAfterWeekLine: gapAfterWeekLine * type * air,
-        gapSectionEnd: gapSectionEnd * type * air,
-        weekGap: weekGap * type * air,
-        minContentFrac: minContentFrac,
-        minContentAuxFrac: minContentAuxFrac,
-        minNamesCol: minNamesCol,
-        namePad: namePad * type,
-        inlineWeekLine: inlineWeekLine,
-        maxTypeScale: maxTypeScale,
-        maxAirScale: maxAirScale,
-        minTypeScale: minTypeScale,
-      );
+    contentWidth: contentWidth,
+    base: base * type,
+    small: small * type,
+    footnote: footnote * type,
+    large: large * type,
+    title: title * type,
+    week: week * type,
+    hourWidth: hourWidth * type,
+    roleWidth: roleWidth * type,
+    // The official 5 cm names column and the auxiliary-room minimum are
+    // floors in PAPER units, not type units: scaling them up would take
+    // width from the titles for names that never asked for it.
+    mainNameWidth: mainNameWidth,
+    colGap: colGap * type,
+    rowSep: rowSep * type * air,
+    fboxsep: fboxsep * type,
+    bandGapTop: bandGapTop * type * air,
+    bandGapBottom: bandGapBottom * type * air,
+    gapHeaderRule: gapHeaderRule * type,
+    gapAfterRule: gapAfterRule * type,
+    gapAfterWeekLine: gapAfterWeekLine * type * air,
+    gapSectionEnd: gapSectionEnd * type * air,
+    weekGap: weekGap * type * air,
+    minContentFrac: minContentFrac,
+    minContentAuxFrac: minContentAuxFrac,
+    minNamesCol: minNamesCol,
+    namePad: namePad * type,
+    inlineWeekLine: inlineWeekLine,
+    maxTypeScale: maxTypeScale,
+    maxAirScale: maxAirScale,
+    minTypeScale: minTypeScale,
+  );
 
   /// Official S-140-S metrics (values in [S140], one week per page).
   static const standard = S140Metrics(
