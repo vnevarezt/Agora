@@ -493,7 +493,8 @@ Aux room / Two-per-sheet / Circuit overseer toggles, export) → `WorkspacePanel
 ## 9. Component inventory
 
 `lib/ui/widgets/` is the catalog. Building a one-off where one of these fits is
-drift.
+drift. One line each below; `docs/COMPONENTS.md` carries the per-widget
+variants, states and accessibility contract.
 
 | Widget | Mock selector | Role |
 |---|---|---|
