@@ -29,6 +29,11 @@ copy_if_missing macos/Runner/Configs/FirebaseSecrets-dev.xcconfig.example macos/
 copy_if_missing firebase.json.example firebase.json
 copy_if_missing .firebaserc.example .firebaserc
 
+# The toolchain is pinned in .fvmrc and nothing but fvm enforces it, so say so
+# here rather than letting the first build be the one that finds out.
+. tool/sdk.sh
+
 echo
 echo "Done. The app runs 100% locally with these placeholders."
+echo "Toolchain: $FLUTTER"
 echo "To enable the cloud (optional): docs/FIREBASE_SETUP.md"

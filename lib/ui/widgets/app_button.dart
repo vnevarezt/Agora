@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -22,6 +23,8 @@ class Pressable extends StatefulWidget {
     this.tooltip,
     this.semanticLabel,
     this.selected,
+    this.semanticHint,
+    this.liveRegion = false,
     this.focusRadius = Dimens.rControl,
     this.pressScale = Motion.pressScale,
   });
@@ -50,6 +53,15 @@ class Pressable extends StatefulWidget {
   /// sees none of it: without this the tabs, the filter pills and the rail
   /// read as identical buttons with no way to tell which one is active.
   final bool? selected;
+
+  /// Read after the name, for a condition the label cannot carry — a control
+  /// that has stopped responding because it is working, say.
+  final String? semanticHint;
+
+  /// Whether entering the current state should be announced without waiting
+  /// for focus to arrive. Only true while that state is transient: a permanent
+  /// live region re-reads itself on every unrelated rebuild.
+  final bool liveRegion;
 
   /// How far the control shrinks while held. [Motion.pressScaleSurface] for
   /// anything card-sized; 1 to opt out where the scale would fight the
@@ -136,6 +148,8 @@ class _PressableState extends State<Pressable> {
       enabled: enabled,
       selected: widget.selected,
       label: widget.semanticLabel,
+      hint: widget.semanticHint,
+      liveRegion: widget.liveRegion,
       child: child,
     );
   }
@@ -179,6 +193,12 @@ class AppButton extends StatelessWidget {
     return Pressable(
       onTap: enabled ? onPressed : null,
       semanticLabel: semanticLabel,
+      // Busy disables the button, and "dimmed" with no reason is all a screen
+      // reader would otherwise get. The hint says why it stopped responding,
+      // and the live region delivers it when the state arrives rather than
+      // when focus does.
+      semanticHint: busy ? context.t.common.loading : null,
+      liveRegion: busy,
       builder: (context, hovered, pressed) {
         final bg = esPrimary
             ? (hovered ? t.accentStrong : t.accent)

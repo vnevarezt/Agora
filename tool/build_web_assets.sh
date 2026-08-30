@@ -10,6 +10,7 @@
 set -eu
 
 cd "$(dirname "$0")/.."
+. tool/sdk.sh
 
 sqlite3_version=$(awk '/^  sqlite3:/{f=1} f&&/version:/{gsub(/"/,"",$2); print $2; exit}' pubspec.lock)
 if [ -z "$sqlite3_version" ]; then
@@ -20,7 +21,7 @@ fi
 # Compiled from this project so it links the exact drift version in pubspec.lock
 # rather than whatever prebuilt worker happens to sit in the pub cache.
 echo "compiling web/drift_worker.js"
-dart compile js -O2 -o web/drift_worker.js tool/web/drift_worker.dart
+$DART compile js -O2 -o web/drift_worker.js tool/web/drift_worker.dart
 
 echo "downloading web/sqlite3.wasm (sqlite3 $sqlite3_version)"
 curl -fsSL -o web/sqlite3.wasm \

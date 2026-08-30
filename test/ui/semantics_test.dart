@@ -2,6 +2,7 @@ import 'package:agora/i18n/strings.g.dart';
 import 'package:agora/ui/auth/widgets/auth_error_text.dart';
 import 'package:agora/ui/theme/app_theme.dart';
 import 'package:agora/ui/theme/tokens.dart';
+import 'package:agora/ui/widgets/app_button.dart';
 import 'package:agora/ui/widgets/filter_pill.dart';
 import 'package:agora/ui/widgets/section_header.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,24 @@ void main() {
     expect(
       tester.getSemantics(find.text('TESOROS')),
       isSemantics(label: 'TESOROS', isHeader: true),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('a busy button says why it stopped responding', (tester) async {
+    final handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      host(AppButton(label: 'Exportar', busy: true, onPressed: () {})),
+    );
+
+    // Disabled with no reason is what a screen reader got before: the hint is
+    // the reason, and the live region is what delivers it without waiting for
+    // focus to arrive.
+    expect(
+      tester.getSemantics(find.text('Exportar')),
+      isSemantics(hint: 'Cargando', isLiveRegion: true, isEnabled: false),
     );
 
     handle.dispose();

@@ -12,6 +12,7 @@
 set -eu
 
 cd "$(dirname "$0")/.."
+. tool/sdk.sh
 
 flavor="${1:-prod}"
 out="build/site"
@@ -27,7 +28,7 @@ echo "building the app for /app/"
 # --base-href is what lets the app live in a subdirectory: Flutter resolves its
 # own asset and engine URLs against it, so the bundle does not go looking for
 # /main.dart.wasm at the root where the landing lives.
-flutter build web \
+$FLUTTER build web \
   --wasm \
   --no-web-resources-cdn \
   --release \
