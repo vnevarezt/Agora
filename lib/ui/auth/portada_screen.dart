@@ -55,7 +55,7 @@ class PortadaScreen extends ConsumerWidget {
                     // alone rather than the lockup. No shadow: the drawing has
                     // no edge to cast one, and the tile it used to sit on was
                     // a placeholder.
-                    child: const AgoraMark(size: 52),
+                    child: const AgoraMark(size: Dimens.markCover),
                   ),
                   const SizedBox(height: Space.s18),
                   EnterUp(
@@ -63,7 +63,7 @@ class PortadaScreen extends ConsumerWidget {
                     child: Text(
                       tr.app.brand,
                       style: TextStyle(
-                        fontSize: wide ? 30 : 27,
+                        fontSize: AppText.brand,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.7,
                         height: 1.1,
@@ -80,7 +80,7 @@ class PortadaScreen extends ConsumerWidget {
                         tr.portada.tagline,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: wide ? 15 : 14,
+                          fontSize: wide ? AppText.bodyLarge : AppText.body,
                           fontWeight: FontWeight.w600,
                           height: 1.5,
                           color: t.textMute,

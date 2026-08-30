@@ -73,7 +73,7 @@ class _InviteCodeModalState extends State<InviteCodeModal> {
             ),
             child: SelectableText(
               _text,
-              style: AppText.mono(size: 12.5, color: t.text),
+              style: AppText.mono(size: AppText.small, color: t.text),
             ),
           ),
           const SizedBox(height: Space.s14),

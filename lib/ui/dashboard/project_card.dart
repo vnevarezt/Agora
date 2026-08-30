@@ -145,7 +145,7 @@ class ProjectCard extends StatelessWidget {
                 right: -1,
                 child: AppIconButton(
                   icon: Icons.more_vert,
-                  size: 30,
+                  size: Dimens.hIconCard,
                   tooltip: context.t.projectCard.editProject,
                   onPressed: onEdit,
                 ),

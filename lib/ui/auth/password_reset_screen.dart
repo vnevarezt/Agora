@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/cloud_auth.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
@@ -105,7 +106,7 @@ class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>
               ),
               child: Icon(
                 _sent ? Icons.mark_email_read_outlined : Icons.lock_reset,
-                size: 26,
+                size: AppIcon.feature,
                 color: t.textMute,
               ),
             ),

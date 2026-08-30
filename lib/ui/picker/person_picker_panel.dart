@@ -165,7 +165,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
         children: [
           Text(
             '${context.t.picker.assign.toUpperCase()} · ${widget.roleLabel.toUpperCase()}',
-            style: AppText.label(size: 11, color: t.textMute),
+            style: AppText.label(size: AppText.caption, color: t.textMute),
           ),
           const SizedBox(height: Space.s10),
           TextField(

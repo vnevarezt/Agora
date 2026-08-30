@@ -139,7 +139,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
         children: [
           Column(
             children: [
-              PersonAvatar(name: name, size: 62),
+              PersonAvatar(name: name, size: Dimens.avatarHero),
               const SizedBox(height: Space.s10),
               if (name != null && name.isNotEmpty)
                 Text(

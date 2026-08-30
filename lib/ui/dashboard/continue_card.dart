@@ -43,7 +43,7 @@ class ContinueCard extends StatelessWidget {
         children: [
           Text(
             tr.dashboard.continueWhere.toUpperCase(),
-            style: AppText.label(size: 11, color: t.textMute),
+            style: AppText.label(size: AppText.caption, color: t.textMute),
           ),
           const SizedBox(height: Space.s14),
           LayoutBuilder(builder: (context, c) {

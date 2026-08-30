@@ -156,7 +156,10 @@ class _Brand extends StatelessWidget {
             : MainAxisAlignment.start,
         children: [
           // The rail collapses to icons only, and the word is what goes.
-          if (compact) const AgoraMark(size: 30) else const AgoraLockup(),
+          if (compact)
+            const AgoraMark(size: Dimens.markNav)
+          else
+            const AgoraLockup(),
         ],
       ),
     );
@@ -373,7 +376,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
               child: Pressable(
                 onTap: _toggle,
                 builder: (context, hovered, _) =>
-                    PersonAvatar(name: user.name, size: 32),
+                    PersonAvatar(name: user.name, size: Dimens.avatarBar),
               ),
             ),
           );
@@ -393,7 +396,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
               ),
               child: Row(
                 children: [
-                  PersonAvatar(name: user.name, size: 32),
+                  PersonAvatar(name: user.name, size: Dimens.avatarBar),
                   const SizedBox(width: Space.s10),
                   Expanded(
                     child: Column(

@@ -217,7 +217,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                 key: ValueKey('$_congregationId-number'),
                 initial: _number,
                 enabled: editable,
-                style: AppText.mono(size: 13.5, color: t.text),
+                style: AppText.mono(size: AppText.body, color: t.text),
                 onChanged: (v) {
                   _number = v;
                   _scheduleSave();
@@ -262,7 +262,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   Widget _scheduleCard() {
     final t = context.tokens;
     final tr = context.t;
-    final mono = AppText.mono(size: 13.5, color: t.text);
+    final mono = AppText.mono(size: AppText.body, color: t.text);
     // Same `congregation` item as _dataCard, same admin gate.
     final editable = _canEditCongregation;
     return SettingsCard(

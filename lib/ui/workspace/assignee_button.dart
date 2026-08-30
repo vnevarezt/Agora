@@ -119,7 +119,7 @@ class _ClearButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           child: Icon(Icons.close,
-              size: 14, color: hovered ? t.text : t.textMute),
+              size: AppIcon.inline, color: hovered ? t.text : t.textMute),
         );
       },
     );

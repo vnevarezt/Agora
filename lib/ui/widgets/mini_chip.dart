@@ -48,7 +48,8 @@ class MiniChip extends StatelessWidget {
     };
 
     final estilo = switch (_kind) {
-      _ChipKind.time => AppText.mono(size: 12, weight: FontWeight.w700, color: fg),
+      _ChipKind.time =>
+        AppText.mono(size: AppText.small, weight: FontWeight.w700, color: fg),
       _ChipKind.allMeeting => AppText.label(color: fg),
       _ChipKind.duration =>
         TextStyle(fontSize: AppText.caption, fontWeight: FontWeight.w700, color: fg),

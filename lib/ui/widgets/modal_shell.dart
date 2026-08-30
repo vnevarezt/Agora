@@ -127,7 +127,7 @@ class ModalShell extends StatelessWidget {
               icon: Icons.close,
               bordered: true,
               tooltip: context.t.common.close,
-              size: 32,
+              size: Dimens.hIconModal,
               onPressed: onClose,
             ),
           ],

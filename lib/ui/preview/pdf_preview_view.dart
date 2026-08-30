@@ -58,7 +58,7 @@ class PdfPreviewView extends ConsumerWidget {
       // The one wait in the app the mark carries: a whole panel, held for as
       // long as a PDF takes to render. Everywhere else a spinner is a detail
       // inside a control, and a logo there would be noise.
-      loading: () => const Center(child: AgoraLoader(size: 44)),
+      loading: () => const Center(child: AgoraLoader(size: Dimens.markLoader)),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(Space.s24),

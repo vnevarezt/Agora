@@ -65,7 +65,7 @@ class ParticipantCard extends StatelessWidget {
       builder: (context, hovered) {
         return Row(
           children: [
-            PersonAvatar(name: h.displayName, size: 38),
+            PersonAvatar(name: h.displayName, size: Dimens.avatarCard),
             const SizedBox(width: Space.s12),
             Expanded(
               child: Column(

@@ -99,7 +99,7 @@ class _ExportSheet extends StatelessWidget {
                     twoPerSheet
                         ? Icons.splitscreen_outlined
                         : Icons.description_outlined,
-                    size: 20,
+                    size: AppIcon.control,
                     color: t.textMute),
                 const SizedBox(width: Space.s12),
                 Expanded(

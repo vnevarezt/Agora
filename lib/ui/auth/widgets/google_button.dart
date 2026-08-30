@@ -41,7 +41,7 @@ class GoogleButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (busy)
-              AppSpinner(size: 16, color: t.textDim)
+              AppSpinner(size: Dimens.spinner, color: t.textDim)
             else
               const CustomPaint(
                 size: Size(18, 18),

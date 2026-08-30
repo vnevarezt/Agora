@@ -20,7 +20,7 @@ class LabeledField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label.toUpperCase(),
-            style: AppText.label(size: 11, color: t.textMute)),
+            style: AppText.label(size: AppText.caption, color: t.textMute)),
         const SizedBox(height: Space.s6),
         child,
       ],

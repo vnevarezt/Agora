@@ -107,7 +107,7 @@ class _ParticipantsViewState extends ConsumerState<ParticipantsView> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: isMobile ? 19 : 21,
+                  fontSize: isMobile ? AppText.display : AppText.displayLarge,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.42,
                   color: t.text,

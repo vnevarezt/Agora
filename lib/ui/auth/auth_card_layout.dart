@@ -77,7 +77,7 @@ class AuthTitle extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: context.isMobile ? 20 : 22,
+        fontSize: context.isMobile ? AppText.display : AppText.displayLarge,
         fontWeight: FontWeight.w800,
         letterSpacing: -0.44,
         color: context.tokens.text,

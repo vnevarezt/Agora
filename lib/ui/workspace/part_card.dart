@@ -69,7 +69,7 @@ class _FixedLineBody extends StatelessWidget {
             child: Text(
               view.time,
               textAlign: TextAlign.right,
-              style: AppText.mono(size: 13, color: t.textMute),
+              style: AppText.mono(size: AppText.body, color: t.textMute),
             ),
           ),
           const SizedBox(width: Space.s14),

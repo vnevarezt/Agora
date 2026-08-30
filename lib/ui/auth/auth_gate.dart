@@ -127,7 +127,7 @@ class _AuthSplashState extends State<_AuthSplash> {
             // Well above AppIcon.hero: this is the one surface where the mark
             // carries the screen on its own.
             AgoraMarkEntrance(
-              size: 64,
+              size: Dimens.markSplash,
               onEnd: () => setState(() => _settled = true),
             ),
             // The spinner keeps its space from the first frame, so arriving
@@ -137,7 +137,7 @@ class _AuthSplashState extends State<_AuthSplash> {
               opacity: _settled ? 1 : 0,
               duration: Motion.of(context, Motion.med),
               curve: Motion.curve,
-              child: const AppSpinner(size: 20),
+              child: const AppSpinner(size: Dimens.spinnerLarge),
             ),
           ],
         ),

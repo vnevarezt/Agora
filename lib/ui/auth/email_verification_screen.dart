@@ -7,6 +7,7 @@ import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
 import '../../state/cloud_auth.dart';
 import '../../state/sync_provider.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import 'auth_card_layout.dart';
@@ -149,7 +150,7 @@ class _EmailVerificationScreenState
                 ),
                 child: Icon(
                   Icons.mark_email_unread_outlined,
-                  size: 26,
+                  size: AppIcon.feature,
                   color: t.textMute,
                 ),
               ),

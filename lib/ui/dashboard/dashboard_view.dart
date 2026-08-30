@@ -193,7 +193,7 @@ class _TopBar extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: isMobile ? 19 : 21,
+                  fontSize: isMobile ? AppText.display : AppText.displayLarge,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.42,
                   color: t.text,
@@ -319,7 +319,7 @@ class _SyncIndicator extends StatelessWidget {
     };
 
     final leading = icon == null
-        ? AppSpinner(size: 16, color: color)
+        ? AppSpinner(size: Dimens.spinner, color: color)
         : Icon(icon, size: AppIcon.control, color: color);
 
     Widget card(bool hovered) => Container(
@@ -455,7 +455,7 @@ class _RestoreBanner extends StatelessWidget {
         tr.cloudSync.errorUnknown,
       ),
       _ => (
-        const AppSpinner(size: 16),
+        const AppSpinner(size: Dimens.spinner),
         restore.total > 1
             ? '${tr.cloudSync.restoring} · '
                   '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'

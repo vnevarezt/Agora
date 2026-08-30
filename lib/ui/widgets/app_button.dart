@@ -203,7 +203,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (busy)
-                AppSpinner(size: 15, color: fg)
+                AppSpinner(size: Dimens.spinnerInButton, color: fg)
               else if (icon != null)
                 Icon(icon, size: AppIcon.control, color: fg),
               if (label != null) ...[

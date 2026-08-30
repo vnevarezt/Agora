@@ -62,7 +62,9 @@ class _PreviewPaneState extends State<PreviewPane> {
                   builder: (context, m, _) => Text(
                     '${(m.getMaxScaleOnAxis() * 100).round()}%',
                     style: AppText.mono(
-                        size: 12, weight: FontWeight.w700, color: t.textMute),
+                        size: AppText.small,
+                        weight: FontWeight.w700,
+                        color: t.textMute),
                   ),
                 ),
               ],

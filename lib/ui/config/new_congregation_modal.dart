@@ -83,7 +83,7 @@ class _NewCongregationModalState
   Widget _body(BuildContext context) {
     final t = context.tokens;
     final tr = context.t;
-    final mono = AppText.mono(size: 13.5, color: t.text);
+    final mono = AppText.mono(size: AppText.body, color: t.text);
 
     return LayoutBuilder(
       builder: (context, c) {

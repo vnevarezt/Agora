@@ -38,7 +38,7 @@ class UserRow extends StatelessWidget {
             ),
       child: Row(
         children: [
-          PersonAvatar(name: name, size: 34),
+          PersonAvatar(name: name, size: Dimens.avatarRow),
           const SizedBox(width: Space.s12),
           Expanded(
             child: Column(

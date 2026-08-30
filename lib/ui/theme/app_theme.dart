@@ -36,6 +36,17 @@ abstract final class AppText {
   /// Screen titles and large counts.
   static const double display = 19;
 
+  /// The same screen title with room to breathe. Every top-level view sets its
+  /// heading to [display] on a phone and this on anything wider; it is the one
+  /// step that exists only above the mobile breakpoint.
+  static const double displayLarge = 21;
+
+  /// The product name set as type, on the cover screen only. It belongs to the
+  /// mark rather than to the interface — everything else on that screen is
+  /// arranged around it — which is why it sits this far above [displayLarge]
+  /// and why nothing else may use it.
+  static const double brand = 30;
+
   /// JetBrains Mono for times, codes and percentages (tabular figures).
   static TextStyle mono({
     double size = small,

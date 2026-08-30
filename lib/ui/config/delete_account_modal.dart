@@ -119,7 +119,7 @@ class _DeleteAccountModalState extends ConsumerState<DeleteAccountModal> {
           if (loading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: Space.s12),
-              child: Center(child: AppSpinner(size: 20)),
+              child: Center(child: AppSpinner(size: Dimens.spinnerLarge)),
             )
           else if (blocked.isNotEmpty)
             _BlockedNotice(congregationIds: blocked)

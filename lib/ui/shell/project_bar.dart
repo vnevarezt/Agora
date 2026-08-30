@@ -239,14 +239,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                 border: Border.all(
                   color: open ? t.accent : (hovered ? t.textMute : t.border),
                 ),
-                boxShadow: open
-                    ? [
-                        BoxShadow(
-                            color: t.accentSoft,
-                            blurRadius: 0,
-                            spreadRadius: 3),
-                      ]
-                    : null,
+                boxShadow: open ? Elevation.selectionHalo(t.accent) : null,
               ),
               child: Row(
                 mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
@@ -287,7 +280,7 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.mono(
-                                size: 14,
+                                size: AppText.body,
                                 weight: FontWeight.w800,
                                 color: t.text),
                           ),
@@ -365,7 +358,7 @@ class _Arrow extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          size: 20,
+          size: AppIcon.control,
           color: enabled ? t.textDim : t.textMute.withValues(alpha: 0.4),
         ),
       ),
@@ -396,7 +389,9 @@ class _PctBadge extends StatelessWidget {
           : Text(
               label,
               style: AppText.mono(
-                  size: 11, weight: FontWeight.w700, color: t.textDim),
+                  size: AppText.caption,
+                  weight: FontWeight.w700,
+                  color: t.textDim),
             ),
     );
   }
@@ -487,7 +482,7 @@ class _WeekMenu extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppText.mono(
-                              size: 12.5,
+                              size: AppText.small,
                               weight: FontWeight.w700,
                               color: t.text),
                         ),
@@ -521,7 +516,7 @@ class _WeekMenu extends ConsumerWidget {
                                 '${pr.done}/${pr.total}',
                                 textAlign: TextAlign.right,
                                 style: AppText.mono(
-                                    size: 11,
+                                    size: AppText.caption,
                                     weight: FontWeight.w700,
                                     color: t.textMute),
                               ),
