@@ -9,6 +9,58 @@ that cannot live in the repository.
 Bump `version:` in `pubspec.yaml` (`x.y.z+build`). Android maps it to
 `versionName`/`versionCode`, iOS to `CFBundleShortVersionString`/`CFBundleVersion`.
 
+### `x.y.z` is [Semantic Versioning](https://semver.org/)
+
+The commit convention already decides the bump. Read the log since the last tag
+rather than guessing:
+
+| Bump | Trigger since the last tag |
+|---|---|
+| MAJOR | any `type!:` or `BREAKING CHANGE:` footer — a user's data or workflow needs migrating |
+| MINOR | any `feat` |
+| PATCH | only `fix` `perf` `refactor` `docs` `chore` `test` `build` |
+
+Nothing here has shipped yet, so the first release is `1.0.0` and everything
+before it is prehistory.
+
+### `+build` is a monotonic counter, never reset
+
+Both stores reject a build number that does not increase, even when `x.y.z` went
+up. Increment it on **every** upload, including a re-upload of the same version
+after a rejection.
+
+### Tag
+
+Annotated, `v`-prefixed, on the merge commit that closes the release:
+
+```bash
+git tag -a v1.0.0 -m "v1.0.0"
+git push origin v1.0.0
+```
+
+The two existing `backup/*` tags are pre-refactor snapshots, not releases.
+
+### CHANGELOG.md
+
+Follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/): newest
+version first, each with its release date, an `Unreleased` section on top, and
+only the six defined headings — **Added, Changed, Deprecated, Removed, Fixed,
+Security**.
+
+Write entries for a congregation using the app, not for a developer. "The circuit
+overseer's visit no longer prints on two weeks" is an entry; `fix(pdf): guard slot
+overlap` is not. The commit log is the input, never the output.
+
+### GitHub release
+
+Create it from the tag with that version's CHANGELOG section as the body, and
+attach the artifacts sections 2–3b produce.
+
+Because every commit is Conventional, this whole step can later be automated with
+[release-please](https://github.com/googleapis/release-please) or `git-cliff`.
+Do the first release by hand — automating a checklist nobody has run once only
+hides where it breaks.
+
 ## 2. Android
 
 1. Create a keystore (once, **back it up — losing it means losing the
