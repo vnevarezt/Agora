@@ -132,6 +132,14 @@ final congregationMeetingLanguageProvider =
   return const CongregationSettings().meetingLanguage;
 });
 
+/// The locale a congregation's workbook content is written in — the meeting's
+/// language, not the interface's. Used to tell a screen reader that the week
+/// heading and the part titles are in a different language from everything
+/// around them (WCAG 3.1.2); the PDF's own copy of this is
+/// `programLocaleProvider`, which is scoped to the open editor.
+final meetingLocaleProvider = Provider.family<AppLocale, String>((ref, id) =>
+    programLocaleFor(ref.watch(congregationMeetingLanguageProvider(id))));
+
 /// Workbook language a congregation's programs are built from. Falls back to
 /// Spanish for an unknown id, which is also the schema default.
 final congregationLangProvider = Provider.family<String, String>((ref, id) {

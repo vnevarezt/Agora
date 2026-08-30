@@ -51,6 +51,16 @@ class PartView {
   /// "Auxiliary room" indicator in the header.
   final bool auxFlag;
 
+  /// Whether [title] came out of the workbook rather than out of the app's own
+  /// translations. Only the numbered parts do; the songs, the opening and
+  /// closing words and the circuit overseer's talk are strings this app owns
+  /// and are in the interface's language. A hand-typed override counts as the
+  /// workbook's — whoever typed it was rewriting that line of the program.
+  ///
+  /// The workspace uses it to tell a screen reader which language to read a
+  /// title in (WCAG 3.1.2); see [MeetingLanguage].
+  final bool titleFromWorkbook;
+
   final List<SlotSpec> slots;
 
   const PartView({
@@ -62,6 +72,7 @@ class PartView {
     this.fixedTag,
     this.allMeetingBadge = false,
     this.auxFlag = false,
+    this.titleFromWorkbook = false,
     this.slots = const [],
   });
 }
@@ -116,6 +127,8 @@ PartView mapRow(
   final title = row.titleOnly(tr);
   final duration = row.durationLabel(tr);
   final isSong = row.kind == RowKind.song;
+  final fromWorkbook =
+      row.titleOverride != null || row.kind == RowKind.part;
 
   if (row.slots == 0) {
     return PartView(
@@ -124,6 +137,7 @@ PartView mapRow(
       time: row.time,
       title: title,
       durationLabel: duration,
+      titleFromWorkbook: fromWorkbook,
       fixedTag: isSong ? tr.workspace.songTag : tr.workspace.chairmanTag,
     );
   }
@@ -138,6 +152,7 @@ PartView mapRow(
     time: row.time,
     title: title,
     durationLabel: duration,
+    titleFromWorkbook: fromWorkbook,
     // The opening/closing song carries the prayer slot in the model: it shows
     // as a role card with the "Cántico" chip.
     fixedTag: isSong ? tr.workspace.songTag : null,

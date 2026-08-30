@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/ink_surface.dart';
+import '../widgets/meeting_language.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
@@ -107,7 +108,13 @@ class ProjectCard extends StatelessWidget {
                   Wrap(
                     spacing: Space.s6,
                     runSpacing: Space.s6,
-                    children: [for (final w in p.weeks) MiniChip.week(w.label)],
+                    children: [
+                      for (final w in p.weeks)
+                        MeetingLanguage(
+                          congregationId: p.congregationId,
+                          child: MiniChip.week(w.label),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: Space.s14),
                   Row(

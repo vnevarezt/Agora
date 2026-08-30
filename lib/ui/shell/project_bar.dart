@@ -19,6 +19,7 @@ import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
 import '../widgets/export_actions.dart';
 import '../widgets/export_panel.dart';
+import '../widgets/meeting_language.dart';
 import '../widgets/motion.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
@@ -275,14 +276,18 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                               ],
                             ),
                           ),
-                          Text(
-                            date,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.mono(
-                                size: AppText.body,
-                                weight: FontWeight.w800,
-                                color: t.text),
+                          // Printed by the workbook, so it is in the
+                          // meeting's language rather than the app's.
+                          MeetingLanguage(
+                            child: Text(
+                              date,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.mono(
+                                  size: AppText.body,
+                                  weight: FontWeight.w800,
+                                  color: t.text),
+                            ),
                           ),
                         ],
                       ),

@@ -54,6 +54,7 @@ only parts of this document that cannot silently rot.
 
 | Test | Defends |
 |---|---|
+| `test/ui/semantics_test.dart` | selection state, heading role and the inline error's live region — 4.1.2, 1.3.1 and 4.1.3 |
 | `test/ui/contrast_test.dart` | 21 (ink, ground) pairs against 4.5:1 or 3.0:1, in **both** themes — 1.4.3 and 1.4.11 |
 | `test/ui/text_scaling_test.dart` | a control grows rather than clipping at 2× text, and does not overflow a 320px phone — 1.4.4 and part of 1.4.10 |
 | `test/ui/keyboard_focus_test.dart` | tab traversal reaches a control, Space and Enter activate it, the ring is visible, and focus never resizes the control — 2.1.1 and 2.4.7 |
@@ -91,7 +92,7 @@ Reduce Motion.
 | 2.5.2 | Pointer Cancellation | Reviewed | `Pressable` fires on tap-up, so a press can be aborted by dragging off. |
 | 2.5.3 | Label in Name | **Partial** | `AppIconButton` derives `semanticLabel` from `tooltip`, so the two agree by construction. Nothing stops a caller passing an unrelated `semanticLabel` to `AppButton`, which would put the accessible name out of step with the visible one. |
 | 2.5.4 | Motion Actuation | N/A | Nothing responds to shaking or tilting. |
-| 3.1.1 | Language of Page | **Partial** | `MaterialApp.locale` follows the active translation, and `web/index.html` now declares `lang="es"`. That attribute is static, so a browser session switched to English still reports Spanish to the page-level API — the document language and the interface language can disagree by one setting. |
+| 3.1.1 | Language of Page | Reviewed | `MaterialApp.locale` follows the active translation, `web/index.html` ships the base locale, and `setDocumentLang` rewrites `<html lang>` at boot and on every language change. Non-web platforms get a no-op, having no document to label. |
 | 3.2.1 | On Focus | Reviewed | Focus alone changes nothing but the focus ring. |
 | 3.2.2 | On Input | Reviewed | No form submits on change. The Settings language dropdown does apply on selection, which is the control's stated purpose. |
 | 3.2.6 | Consistent Help | N/A | No help, contact or support mechanism is offered on any screen, so there is nothing to keep consistent. |
@@ -121,13 +122,13 @@ Reduce Motion.
 | 2.4.11 | Focus Not Obscured (Minimum) | Unverified | `ProjectBar` and the mobile bottom bar are fixed. Whether a focused control can end up behind one on a scrolled, text-scaled screen has not been checked. |
 | 2.5.7 | Dragging Movements | **Partial** | Zoom has buttons. Panning a zoomed page has no button alternative, and the web workbook drop target has one — the file picker beside it. |
 | 2.5.8 | Target Size (Minimum) | **Partial** | `Dimens.hTouchMin` (48) pads out `AppButton`, `AppIconButton` and `AppSwitch`, well past the 24×24 the criterion asks. No test asserts a minimum hit rect, and controls outside those three are unverified. |
-| 3.1.2 | Language of Parts | **Not met** | The meeting's language and the interface's language are deliberately different (`UX_PATTERNS.md` §9), so week labels in one language sit inside a UI in another — with no markup saying so. This is the one criterion the product's own design guarantees it fails until it is handled. |
+| 3.1.2 | Language of Parts | Reviewed | The `MeetingLanguage` widget sets `localeForSubtree` on the text that comes out of the workbook — the week heading in the editor bar and on the dashboard cards, and the numbered part titles. The boundary is drawn in the model rather than guessed at the call site: `PartView.titleFromWorkbook` is true for `RowKind.part` and for a hand-typed override, and false for the songs, the opening and closing words and the circuit overseer's talk, which this app translates itself. |
 | 3.2.3 | Consistent Navigation | Reviewed | One shell, one order of destinations, on every screen and both form factors. |
 | 3.2.4 | Consistent Identification | Reviewed | The widget catalog is the mechanism: the same function is the same component everywhere, and building a one-off where a catalog widget fits is treated as drift. |
 | 3.3.3 | Error Suggestion | **Partial** | `cloudAuthErrorText` names every failure; not all of the strings say what to do about it (`UX_PATTERNS.md` §10.6). |
 | 3.3.4 | Error Prevention | Reviewed | Every destructive action is confirmed in a modal, and `DeleteAccountModal` lists what blocks the delete before asking for anything. There is no undo, which the criterion does not require. |
 | 3.3.8 | Accessible Authentication | Reviewed | No puzzle, no CAPTCHA, no cognitive function test; password, Google sign-in and device biometrics are all available, and the fields now carry autofill hints (1.3.5). |
-| 4.1.3 | Status Messages | **Partial** | Snackbars are covered by the framework: Flutter wraps every one in `Semantics(container: true, liveRegion: true)` and exposes a dismiss action, so an export finishing or a backup failing *is* announced. What is not: status that changes in place — the sync card's phase and subtitle, `AuthErrorText` appearing under a field, and a button entering its busy state. |
+| 4.1.3 | Status Messages | **Partial** | Snackbars are covered by the framework: Flutter wraps every one in `Semantics(container: true, liveRegion: true)`. `AuthErrorText` and the sync card's status row are live regions of their own — the sync row as a whole, because "Error" without its reason is not a status message. A button entering its busy state still announces nothing beyond becoming disabled. |
 
 ## 4. How to verify
 
@@ -148,22 +149,19 @@ Manual passes, none of which have been done end to end:
 
 Ordered by how much a person is blocked, not by how hard it is to fix.
 
-1. **3.1.2 — the second language is unmarked.** Content in the meeting's
-   language is read out in the interface's language. This is a product decision
-   that created a criterion failure, so the fix belongs in the same place the
-   decision does — the week label knows which workbook it came from.
-2. **4.1.3 — status that changes in place is silent.** The snackbars are
-   handled for us; the sync card's phase, the inline field errors and the busy
-   states are not. Each needs a live region where it currently has none.
-3. **3.1.1 — the web shell's language is a constant.** `lang="es"` is right for
-   the base locale and wrong for anybody running the app in English. It has to
-   be written from the active locale at boot.
+1. **4.1.3 — a busy button announces only that it is disabled.** `AppButton`
+   swaps its label for a spinner while it works, and a screen reader is told
+   nothing about why the control stopped responding. It is the last of the
+   in-place status cases; the sync row and the inline errors are handled.
 
-The five that were on this list on 2026-08-29 are closed: selection state is
-exposed, headings are headings, the mark and the loader name themselves, every
-auth field declares its purpose, and the web shell declares a language at all.
-None of it is defended by a test — the manual passes in §4 are still what would
-catch a regression, which is its own gap.
+That is the whole list. The seven open on 2026-08-29 are closed but one, and
+three of them are now defended by `semantics_test` rather than by a reading.
+
+**None of this substitutes for the manual passes in §4.** Every closure above
+was verified by reading the code or by a semantics assertion, which proves the
+property is set — not that the result is usable. Traversal order, whether the
+announcements arrive in a sensible sequence, and whether a person can actually
+complete a week with a screen reader are all still unknown.
 
 Two things that are *not* on this list and could look like they should be. A
 snackbar carries no icon and no colour, so success and failure look identical —

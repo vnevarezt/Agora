@@ -12,6 +12,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
+import '../widgets/meeting_language.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/modal_shell.dart';
 import '../widgets/motion.dart';
@@ -74,30 +75,33 @@ class _FixedLineBody extends StatelessWidget {
           ),
           const SizedBox(width: Space.s14),
           Expanded(
-            child: Text.rich(
-              TextSpan(
-                text: view.title,
-                style: TextStyle(
-                  fontSize: AppText.bodyLarge,
-                  fontWeight: FontWeight.w700,
-                  color: t.textDim,
-                ),
-                children: [
-                  if (view.durationLabel != null)
-                    TextSpan(
-                      // Non-breaking spaces: "· 1 min" wraps as a unit on
-                      // narrow widths.
-                      text:
-                          '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: t.textMute,
+            child: MeetingLanguage.maybe(
+              on: view.titleFromWorkbook,
+              child: Text.rich(
+                TextSpan(
+                  text: view.title,
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w700,
+                    color: t.textDim,
+                  ),
+                  children: [
+                    if (view.durationLabel != null)
+                      TextSpan(
+                        // Non-breaking spaces: "· 1 min" wraps as a unit on
+                        // narrow widths.
+                        text:
+                            '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: t.textMute,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (view.fixedTag != null) ...[
@@ -149,13 +153,16 @@ class _RoleBody extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  view.title,
-                  style: TextStyle(
-                    fontSize: AppText.bodyLarge,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.15,
-                    color: t.text,
+                child: MeetingLanguage.maybe(
+                  on: view.titleFromWorkbook,
+                  child: Text(
+                    view.title,
+                    style: TextStyle(
+                      fontSize: AppText.bodyLarge,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.15,
+                      color: t.text,
+                    ),
                   ),
                 ),
               ),

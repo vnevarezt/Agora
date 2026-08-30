@@ -68,18 +68,26 @@ class SyncCard extends ConsumerWidget {
       _ => (tr.cloudSync.ready, when),
     };
     final busy = s.phase == SyncPhase.syncing;
-    return SettingRow(
-      first: true,
-      title: title,
-      subtitle: subtitle,
-      trailing: AppButton(
-        variant: AppButtonVariant.ghost,
-        icon: Icons.sync,
-        label: tr.cloudSync.syncNow,
-        busy: busy,
-        onPressed: busy
-            ? null
-            : () => ref.read(syncControllerProvider.notifier).syncNow(),
+    // A live region: the phase changes under the reader with nothing taking
+    // focus, so going offline or failing a pull is otherwise silent. The whole
+    // row is the region because the title and the subtitle only mean anything
+    // together — "Error" without the reason is not a status message.
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: SettingRow(
+        first: true,
+        title: title,
+        subtitle: subtitle,
+        trailing: AppButton(
+          variant: AppButtonVariant.ghost,
+          icon: Icons.sync,
+          label: tr.cloudSync.syncNow,
+          busy: busy,
+          onPressed: busy
+              ? null
+              : () => ref.read(syncControllerProvider.notifier).syncNow(),
+        ),
       ),
     );
   }
