@@ -9,6 +9,12 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+# Explicit rather than defaulted: the formatter's output already moves between
+# SDK releases (see tool/format.sh), and the page width is the one axis of that
+# a project can nail down for itself.
+formatter:
+  page_width: 80
+
 analyzer:
   exclude:
     # Firebase's SwiftPM checkout copies its Dart examples/tests under build/,
