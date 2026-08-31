@@ -51,8 +51,7 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
   void didUpdateWidget(covariant SegmentedTabs oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.segments.length != widget.segments.length) {
-      _segmentKeys =
-          List.generate(widget.segments.length, (_) => GlobalKey());
+      _segmentKeys = List.generate(widget.segments.length, (_) => GlobalKey());
     }
   }
 
@@ -66,7 +65,10 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
     final segment =
         _segmentKeys[widget.index].currentContext?.findRenderObject()
             as RenderBox?;
-    if (track == null || segment == null || !track.hasSize || !segment.hasSize) {
+    if (track == null ||
+        segment == null ||
+        !track.hasSize ||
+        !segment.hasSize) {
       return;
     }
     final origin = segment.localToGlobal(Offset.zero, ancestor: track);
@@ -125,6 +127,7 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
     final activo = i == widget.index;
     final button = Pressable(
       key: _segmentKeys[i],
+      selected: activo,
       onTap: widget.onChanged == null || activo
           ? null
           : () => widget.onChanged!(i),
@@ -132,7 +135,10 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
           curve: Motion.curve,
-          padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s6),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Space.s14,
+            vertical: Space.s6,
+          ),
           decoration: BoxDecoration(
             // The sliding indicator behind already carries the selected
             // look; hover only needs to read on an unselected segment, and
@@ -154,8 +160,11 @@ class _SegmentedTabsState extends State<SegmentedTabs> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (widget.segments[i].icon != null) ...[
-                      Icon(widget.segments[i].icon,
-                          size: AppIcon.control, color: color),
+                      Icon(
+                        widget.segments[i].icon,
+                        size: AppIcon.control,
+                        color: color,
+                      ),
                       const SizedBox(width: Space.s6),
                     ],
                     Text(

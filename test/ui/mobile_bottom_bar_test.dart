@@ -14,41 +14,47 @@ final _week = Week(
   date: '7-13 DE JULIO',
   parts: [
     const Part(
-        section: Section.treasures,
-        number: 1,
-        title: 'Lectura de la Biblia',
-        minutes: 4),
+      section: Section.treasures,
+      number: 1,
+      title: 'Lectura de la Biblia',
+      minutes: 4,
+    ),
   ],
 );
 
 void main() {
   // The frosted bar wraps a BackdropFilter, the most expensive paint here. It
   // must not rebuild when the progress changes — only the ring inside it may.
-  testWidgets('assigning a name does not rebuild the frosted layer',
-      (tester) async {
+  testWidgets('assigning a name does not rebuild the frosted layer', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(420, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    final container = ProviderContainer(overrides: [
-      scheduleProvider.overrideWithValue(buildSchedule(_week, 18 * 60, 105)),
-    ]);
+    final container = ProviderContainer(
+      overrides: [
+        scheduleProvider.overrideWithValue(buildSchedule(_week, 18 * 60, 105)),
+      ],
+    );
     addTearDown(container.dispose);
 
-    await tester.pumpWidget(TranslationProvider(
-      child: UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          theme: buildAppTheme(pizarra.light, Brightness.light),
-          home: const Scaffold(
-            body: Align(
-              alignment: Alignment.bottomCenter,
-              child: MobileBottomBar(),
+    await tester.pumpWidget(
+      TranslationProvider(
+        child: UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: buildAppTheme(pizarra.light, Brightness.light),
+            home: const Scaffold(
+              body: Align(
+                alignment: Alignment.bottomCenter,
+                child: MobileBottomBar(),
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pump();
 
     final before = tester.widget<BackdropFilter>(find.byType(BackdropFilter));
@@ -57,7 +63,10 @@ void main() {
     await tester.pump();
 
     final after = tester.widget<BackdropFilter>(find.byType(BackdropFilter));
-    expect(identical(before, after), isTrue,
-        reason: 'the blur was rebuilt by a progress change');
+    expect(
+      identical(before, after),
+      isTrue,
+      reason: 'the blur was rebuilt by a progress change',
+    );
   });
 }

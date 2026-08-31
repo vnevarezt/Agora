@@ -10,8 +10,9 @@ import 'locale_boot.dart';
 /// dropdown can read/set it like any other provider; the actual translation
 /// switch + rebuild is driven by [TranslationProvider]. Persisted across
 /// restarts (see [persistLocale]).
-final localeProvider =
-    NotifierProvider<LocaleController, AppLocale>(LocaleController.new);
+final localeProvider = NotifierProvider<LocaleController, AppLocale>(
+  LocaleController.new,
+);
 
 class LocaleController extends Notifier<AppLocale> {
   @override
@@ -27,8 +28,9 @@ class LocaleController extends Notifier<AppLocale> {
 /// Active shell section (sidebar): dashboard, participants or settings.
 enum AppSection { home, participants, settings }
 
-final appSectionProvider =
-    NotifierProvider<AppSectionController, AppSection>(AppSectionController.new);
+final appSectionProvider = NotifierProvider<AppSectionController, AppSection>(
+  AppSectionController.new,
+);
 
 class AppSectionController extends Notifier<AppSection> {
   @override
@@ -37,13 +39,32 @@ class AppSectionController extends Notifier<AppSection> {
   void select(AppSection section) => state = section;
 }
 
+enum SettingsTab { app, congregation }
+
+/// Which Settings tab is showing. Shared state rather than the view's own,
+/// so another screen can land somebody on the right one: the dashboard tells
+/// a new account to create a congregation, and that has to arrive at the tab
+/// holding the button rather than drop them in Settings to hunt for it.
+final settingsTabProvider =
+    NotifierProvider<SettingsTabController, SettingsTab>(
+      SettingsTabController.new,
+    );
+
+class SettingsTabController extends Notifier<SettingsTab> {
+  @override
+  SettingsTab build() => SettingsTab.app;
+
+  void select(SettingsTab tab) => state = tab;
+}
+
 // themeModeProvider moved to app_settings.dart (persisted now).
 
 /// Active tab in the mobile layout.
 enum MobileTab { assign, preview }
 
-final mobileTabProvider =
-    NotifierProvider<MobileTabController, MobileTab>(MobileTabController.new);
+final mobileTabProvider = NotifierProvider<MobileTabController, MobileTab>(
+  MobileTabController.new,
+);
 
 class MobileTabController extends Notifier<MobileTab> {
   @override
@@ -53,8 +74,9 @@ class MobileTabController extends Notifier<MobileTab> {
 }
 
 /// Slot whose picker is open; its card is highlighted with the accent ring.
-final activeSlotProvider =
-    NotifierProvider<ActiveSlotController, SlotRef?>(ActiveSlotController.new);
+final activeSlotProvider = NotifierProvider<ActiveSlotController, SlotRef?>(
+  ActiveSlotController.new,
+);
 
 class ActiveSlotController extends Notifier<SlotRef?> {
   @override
@@ -65,8 +87,9 @@ class ActiveSlotController extends Notifier<SlotRef?> {
 
 /// PDF export in progress: disables every export button (project bar and
 /// mobile bottom bar) at once.
-final exportBusyProvider =
-    NotifierProvider<ExportBusyController, bool>(ExportBusyController.new);
+final exportBusyProvider = NotifierProvider<ExportBusyController, bool>(
+  ExportBusyController.new,
+);
 
 class ExportBusyController extends Notifier<bool> {
   @override

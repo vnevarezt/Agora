@@ -19,6 +19,7 @@ import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
 import '../widgets/export_actions.dart';
 import '../widgets/export_panel.dart';
+import '../widgets/meeting_language.dart';
 import '../widgets/motion.dart';
 import '../widgets/progress_meter.dart';
 import '../widgets/progress_ring.dart';
@@ -42,7 +43,9 @@ class ProjectBar extends ConsumerWidget {
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? Space.s12 : Space.s18, vertical: isMobile ? Space.s8 : Space.s10),
+          horizontal: isMobile ? Space.s12 : Space.s18,
+          vertical: isMobile ? Space.s8 : Space.s10,
+        ),
         child: isMobile ? _mobile(context, ref, t) : _desktop(context, ref, t),
       ),
     );
@@ -93,11 +96,11 @@ class ProjectBar extends ConsumerWidget {
   }
 
   Widget _back(BuildContext context) => AppIconButton(
-        icon: Icons.arrow_back,
-        bordered: true,
-        tooltip: context.t.common.backToPanel,
-        onPressed: () => Navigator.of(context).maybePop(),
-      );
+    icon: Icons.arrow_back,
+    bordered: true,
+    tooltip: context.t.common.backToPanel,
+    onPressed: () => Navigator.of(context).maybePop(),
+  );
 }
 
 /// Project identity: name + congregation + week count.
@@ -113,10 +116,13 @@ class _ProjectId extends ConsumerWidget {
 
     final Congregation? cong = project == null
         ? null
-        : congregations.where((c) => c.id == project!.congregationId).firstOrNull;
+        : congregations
+              .where((c) => c.id == project!.congregationId)
+              .firstOrNull;
     final name = project?.name ?? context.t.app.defaultProjectName;
     final congName =
-        cong?.name ?? (project == null ? ref.watch(formProvider).congregationId : '');
+        cong?.name ??
+        (project == null ? ref.watch(formProvider).congregationId : '');
     final congColor = cong == null ? t.accent : Color(cong.color);
 
     return Column(
@@ -225,9 +231,10 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
       ],
       builder: (context, controller, _) {
         return Pressable(
-          onTap: n == 0 ? null : () => controller.isOpen
-              ? controller.close()
-              : controller.open(),
+          onTap: n == 0
+              ? null
+              : () =>
+                    controller.isOpen ? controller.close() : controller.open(),
           builder: (context, hovered, _) {
             final open = controller.isOpen;
             return Container(
@@ -239,17 +246,12 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                 border: Border.all(
                   color: open ? t.accent : (hovered ? t.textMute : t.border),
                 ),
-                boxShadow: open
-                    ? [
-                        BoxShadow(
-                            color: t.accentSoft,
-                            blurRadius: 0,
-                            spreadRadius: 3),
-                      ]
-                    : null,
+                boxShadow: open ? Elevation.selectionHalo(t.accent) : null,
               ),
               child: Row(
-                mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+                mainAxisSize: widget.expand
+                    ? MainAxisSize.max
+                    : MainAxisSize.min,
                 children: [
                   Expanded(
                     flex: widget.expand ? 1 : 0,
@@ -265,8 +267,9 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                         children: [
                           Text.rich(
                             TextSpan(
-                              text: context.t.projectBar
-                                  .weekN(n: n == 0 ? '—' : active + 1),
+                              text: context.t.projectBar.weekN(
+                                n: n == 0 ? '—' : active + 1,
+                              ),
                               style: TextStyle(
                                 fontSize: AppText.micro,
                                 fontWeight: FontWeight.w700,
@@ -276,20 +279,25 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                                 TextSpan(
                                   text: ' / $n',
                                   style: TextStyle(
-                                      color:
-                                          t.textMute.withValues(alpha: 0.7)),
+                                    color: t.textMute.withValues(alpha: 0.7),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          Text(
-                            date,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.mono(
-                                size: 14,
+                          // Printed by the workbook, so it is in the
+                          // meeting's language rather than the app's.
+                          MeetingLanguage(
+                            child: Text(
+                              date,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.mono(
+                                size: AppText.body,
                                 weight: FontWeight.w800,
-                                color: t.text),
+                                color: t.text,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -309,7 +317,11 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
                     turns: open ? 0.5 : 0,
                     duration: Motion.of(context, Motion.instant),
                     curve: Motion.curve,
-                    child: Icon(Icons.expand_more, size: AppIcon.control, color: t.textMute),
+                    child: Icon(
+                      Icons.expand_more,
+                      size: AppIcon.control,
+                      color: t.textMute,
+                    ),
                   ),
                 ],
               ),
@@ -323,16 +335,18 @@ class _WeekNavState extends ConsumerState<_WeekNav> {
       mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
       children: [
         _Arrow(
-            icon: Icons.chevron_left,
-            label: context.t.projectBar.prevWeek,
-            onTap: active == 0 ? null : () => go(-1)),
+          icon: Icons.chevron_left,
+          label: context.t.projectBar.prevWeek,
+          onTap: active == 0 ? null : () => go(-1),
+        ),
         const SizedBox(width: Space.s6),
         widget.expand ? Expanded(child: current) : current,
         const SizedBox(width: Space.s6),
         _Arrow(
-            icon: Icons.chevron_right,
-            label: context.t.projectBar.nextWeek,
-            onTap: (n == 0 || active >= n - 1) ? null : () => go(1)),
+          icon: Icons.chevron_right,
+          label: context.t.projectBar.nextWeek,
+          onTap: (n == 0 || active >= n - 1) ? null : () => go(1),
+        ),
       ],
     );
   }
@@ -365,7 +379,7 @@ class _Arrow extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          size: 20,
+          size: AppIcon.control,
           color: enabled ? t.textDim : t.textMute.withValues(alpha: 0.4),
         ),
       ),
@@ -385,7 +399,10 @@ class _PctBadge extends StatelessWidget {
     return Container(
       padding: done
           ? const EdgeInsets.all(Space.s4)
-          : const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s4),
+          : const EdgeInsets.symmetric(
+              horizontal: Space.s8,
+              vertical: Space.s4,
+            ),
       decoration: BoxDecoration(
         color: done ? t.accent : t.surface2,
         borderRadius: BorderRadius.circular(Dimens.rPill),
@@ -396,7 +413,10 @@ class _PctBadge extends StatelessWidget {
           : Text(
               label,
               style: AppText.mono(
-                  size: 11, weight: FontWeight.w700, color: t.textDim),
+                size: AppText.caption,
+                weight: FontWeight.w700,
+                color: t.textDim,
+              ),
             ),
     );
   }
@@ -419,8 +439,9 @@ class _WeekMenu extends ConsumerWidget {
     final t = context.tokens;
     final auxRoom = ref.watch(formProvider.select((f) => f.auxRoom));
     final twoPerSheet = ref.watch(twoPerSheetProvider);
-    final coByWeek =
-        ref.watch(formProvider.select((f) => f.circuitOverseerByWeek));
+    final coByWeek = ref.watch(
+      formProvider.select((f) => f.circuitOverseerByWeek),
+    );
     final progressList = ref.watch(progressPerWeekProvider);
 
     return Container(
@@ -438,7 +459,12 @@ class _WeekMenu extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(Space.s8, Space.s6, Space.s8, Space.s8),
+            padding: const EdgeInsets.fromLTRB(
+              Space.s8,
+              Space.s6,
+              Space.s8,
+              Space.s8,
+            ),
             child: Text(
               context.t.projectBar.goToWeek.toUpperCase(),
               style: TextStyle(
@@ -450,90 +476,104 @@ class _WeekMenu extends ConsumerWidget {
             ),
           ),
           for (var i = 0; i < weeks.length; i++)
-            Builder(builder: (context) {
-              final pr = i < progressList.length
-                  ? progressList[i]
-                  : (done: 0, total: 0);
-              final completo = pr.total > 0 && pr.done == pr.total;
-              return Pressable(
-                onTap: () => onPick(i),
-                builder: (context, hovered, _) => Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
-                  decoration: BoxDecoration(
-                    color: i == active
-                        ? t.accentTint
-                        : (hovered ? t.surface2 : Colors.transparent),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 38,
-                        child: Text(
-                          context.t.projectBar.weekShort(n: i + 1).toUpperCase(),
-                          style: TextStyle(
-                            fontSize: AppText.micro,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                            color: i == active ? t.accentStrong : t.textMute,
+            Builder(
+              builder: (context) {
+                final pr = i < progressList.length
+                    ? progressList[i]
+                    : (done: 0, total: 0);
+                final completo = pr.total > 0 && pr.done == pr.total;
+                return Pressable(
+                  onTap: () => onPick(i),
+                  builder: (context, hovered, _) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Space.s10,
+                      vertical: Space.s10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: i == active
+                          ? t.accentTint
+                          : (hovered ? t.surface2 : Colors.transparent),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 38,
+                          child: Text(
+                            context.t.projectBar
+                                .weekShort(n: i + 1)
+                                .toUpperCase(),
+                            style: TextStyle(
+                              fontSize: AppText.micro,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                              color: i == active ? t.accentStrong : t.textMute,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 76,
-                        child: Text(
-                          weeks[i].date as String,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.mono(
-                              size: 12.5,
+                        SizedBox(
+                          width: 76,
+                          child: Text(
+                            weeks[i].date as String,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.mono(
+                              size: AppText.small,
                               weight: FontWeight.w700,
-                              color: t.text),
+                              color: t.text,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: Space.s8),
-                      Expanded(
-                        child: ProgressMeter(
-                          value: pr.total == 0 ? 0 : pr.done / pr.total,
-                          height: 4,
+                        const SizedBox(width: Space.s8),
+                        Expanded(
+                          child: ProgressMeter(
+                            value: pr.total == 0 ? 0 : pr.done / pr.total,
+                            height: 4,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: Space.s8),
-                      SizedBox(
-                        width: 30,
-                        child: completo
-                            ? Align(
-                                alignment: Alignment.centerRight,
-                                child: Container(
-                                  width: 18,
-                                  height: 18,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: t.accent,
-                                    shape: BoxShape.circle,
+                        const SizedBox(width: Space.s8),
+                        SizedBox(
+                          width: 30,
+                          child: completo
+                              ? Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    width: 18,
+                                    height: 18,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: t.accent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.check,
+                                      size: AppIcon.inline,
+                                      color: t.accentInk,
+                                    ),
                                   ),
-                                  child: Icon(Icons.check,
-                                      size: AppIcon.inline, color: t.accentInk),
-                                ),
-                              )
-                            : Text(
-                                '${pr.done}/${pr.total}',
-                                textAlign: TextAlign.right,
-                                style: AppText.mono(
-                                    size: 11,
+                                )
+                              : Text(
+                                  '${pr.done}/${pr.total}',
+                                  textAlign: TextAlign.right,
+                                  style: AppText.mono(
+                                    size: AppText.caption,
                                     weight: FontWeight.w700,
-                                    color: t.textMute),
-                              ),
-                      ),
-                    ],
+                                    color: t.textMute,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
           Container(
             height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: Space.s6, vertical: Space.s4),
+            margin: const EdgeInsets.symmetric(
+              horizontal: Space.s6,
+              vertical: Space.s4,
+            ),
             color: t.border2,
           ),
           _AuxToggle(
@@ -568,30 +608,42 @@ class _AuxToggle extends StatelessWidget {
     return Pressable(
       onTap: () => onChanged(!auxRoom),
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Space.s10,
+          vertical: Space.s10,
+        ),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(Icons.apartment_outlined,
-                size: AppIcon.control, color: auxRoom ? t.accentStrong : t.textMute),
+            Icon(
+              Icons.apartment_outlined,
+              size: AppIcon.control,
+              color: auxRoom ? t.accentStrong : t.textMute,
+            ),
             const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(context.t.projectBar.auxRoom,
-                      style: TextStyle(
-                          fontSize: AppText.body,
-                          fontWeight: FontWeight.w700,
-                          color: t.text)),
-                  Text(context.t.projectBar.auxRoomDesc,
-                      style: TextStyle(
-                          fontSize: AppText.caption,
-                          fontWeight: FontWeight.w600,
-                          color: t.textMute)),
+                  Text(
+                    context.t.projectBar.auxRoom,
+                    style: TextStyle(
+                      fontSize: AppText.body,
+                      fontWeight: FontWeight.w700,
+                      color: t.text,
+                    ),
+                  ),
+                  Text(
+                    context.t.projectBar.auxRoomDesc,
+                    style: TextStyle(
+                      fontSize: AppText.caption,
+                      fontWeight: FontWeight.w600,
+                      color: t.textMute,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -612,7 +664,10 @@ class _AuxToggle extends StatelessWidget {
 /// preference: two weeks side by side on one landscape sheet. Mirrors
 /// [_AuxToggle].
 class _TwoPerSheetToggle extends StatelessWidget {
-  const _TwoPerSheetToggle({required this.twoPerSheet, required this.onChanged});
+  const _TwoPerSheetToggle({
+    required this.twoPerSheet,
+    required this.onChanged,
+  });
 
   final bool twoPerSheet;
   final ValueChanged<bool> onChanged;
@@ -623,30 +678,42 @@ class _TwoPerSheetToggle extends StatelessWidget {
     return Pressable(
       onTap: () => onChanged(!twoPerSheet),
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Space.s10,
+          vertical: Space.s10,
+        ),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(Icons.splitscreen_outlined,
-                size: AppIcon.control, color: twoPerSheet ? t.accentStrong : t.textMute),
+            Icon(
+              Icons.splitscreen_outlined,
+              size: AppIcon.control,
+              color: twoPerSheet ? t.accentStrong : t.textMute,
+            ),
             const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(context.t.projectBar.twoPerSheet,
-                      style: TextStyle(
-                          fontSize: AppText.body,
-                          fontWeight: FontWeight.w700,
-                          color: t.text)),
-                  Text(context.t.projectBar.twoPerSheetDesc,
-                      style: TextStyle(
-                          fontSize: AppText.caption,
-                          fontWeight: FontWeight.w600,
-                          color: t.textMute)),
+                  Text(
+                    context.t.projectBar.twoPerSheet,
+                    style: TextStyle(
+                      fontSize: AppText.body,
+                      fontWeight: FontWeight.w700,
+                      color: t.text,
+                    ),
+                  ),
+                  Text(
+                    context.t.projectBar.twoPerSheetDesc,
+                    style: TextStyle(
+                      fontSize: AppText.caption,
+                      fontWeight: FontWeight.w600,
+                      color: t.textMute,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -678,30 +745,42 @@ class _CircuitOverseerToggle extends StatelessWidget {
     return Pressable(
       onTap: () => onChanged(!active),
       builder: (context, hovered, _) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Space.s10,
+          vertical: Space.s10,
+        ),
         decoration: BoxDecoration(
           color: hovered ? t.surface2 : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(Icons.record_voice_over_outlined,
-                size: AppIcon.control, color: active ? t.accentStrong : t.textMute),
+            Icon(
+              Icons.record_voice_over_outlined,
+              size: AppIcon.control,
+              color: active ? t.accentStrong : t.textMute,
+            ),
             const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(context.t.projectBar.circuitOverseer,
-                      style: TextStyle(
-                          fontSize: AppText.body,
-                          fontWeight: FontWeight.w700,
-                          color: t.text)),
-                  Text(context.t.projectBar.circuitOverseerDesc,
-                      style: TextStyle(
-                          fontSize: AppText.caption,
-                          fontWeight: FontWeight.w600,
-                          color: t.textMute)),
+                  Text(
+                    context.t.projectBar.circuitOverseer,
+                    style: TextStyle(
+                      fontSize: AppText.body,
+                      fontWeight: FontWeight.w700,
+                      color: t.text,
+                    ),
+                  ),
+                  Text(
+                    context.t.projectBar.circuitOverseerDesc,
+                    style: TextStyle(
+                      fontSize: AppText.caption,
+                      fontWeight: FontWeight.w600,
+                      color: t.textMute,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -749,8 +828,13 @@ class _ExportMenu extends ConsumerWidget {
           twoPerSheet: twoUp,
           onExport: (format, action, origin) {
             menu.close();
-            runExport(context, ref,
-                format: format, action: action, shareOrigin: origin);
+            runExport(
+              context,
+              ref,
+              format: format,
+              action: action,
+              shareOrigin: origin,
+            );
           },
         ),
       ],
@@ -761,7 +845,8 @@ class _ExportMenu extends ConsumerWidget {
           busy: busy,
           onPressed: busy
               ? null
-              : () => controller.isOpen ? controller.close() : controller.open(),
+              : () =>
+                    controller.isOpen ? controller.close() : controller.open(),
         );
       },
     );
@@ -798,36 +883,46 @@ class _ExportCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(Space.s12, Space.s8, Space.s12, Space.s8),
+            padding: const EdgeInsets.fromLTRB(
+              Space.s12,
+              Space.s8,
+              Space.s12,
+              Space.s8,
+            ),
             child: Row(
               children: [
                 Icon(
-                    twoPerSheet
-                        ? Icons.splitscreen_outlined
-                        : Icons.description_outlined,
-                    size: AppIcon.control,
-                    color: t.textMute),
+                  twoPerSheet
+                      ? Icons.splitscreen_outlined
+                      : Icons.description_outlined,
+                  size: AppIcon.control,
+                  color: t.textMute,
+                ),
                 const SizedBox(width: Space.s12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                          twoPerSheet
-                              ? tr.export.currentSheet
-                              : tr.export.currentWeek,
-                          style: TextStyle(
-                              fontSize: AppText.body,
-                              fontWeight: FontWeight.w700,
-                              color: t.text)),
+                        twoPerSheet
+                            ? tr.export.currentSheet
+                            : tr.export.currentWeek,
+                        style: TextStyle(
+                          fontSize: AppText.body,
+                          fontWeight: FontWeight.w700,
+                          color: t.text,
+                        ),
+                      ),
                       Text(
-                          twoPerSheet
-                              ? tr.export.currentSheetSub
-                              : tr.export.currentWeekSub,
-                          style: TextStyle(
-                              fontSize: AppText.caption,
-                              fontWeight: FontWeight.w600,
-                              color: t.textMute)),
+                        twoPerSheet
+                            ? tr.export.currentSheetSub
+                            : tr.export.currentWeekSub,
+                        style: TextStyle(
+                          fontSize: AppText.caption,
+                          fontWeight: FontWeight.w600,
+                          color: t.textMute,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -843,4 +938,3 @@ class _ExportCard extends StatelessWidget {
     );
   }
 }
-

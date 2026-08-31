@@ -15,11 +15,10 @@ class MiniChip extends StatelessWidget {
 
   /// Insignia neutra uppercase ("TODA LA REUNIÓN").
   const MiniChip.allMeeting(this.texto, {super.key})
-      : _kind = _ChipKind.allMeeting;
+    : _kind = _ChipKind.allMeeting;
 
   /// Duration ("10 min").
-  const MiniChip.duration(this.texto, {super.key})
-      : _kind = _ChipKind.duration;
+  const MiniChip.duration(this.texto, {super.key}) : _kind = _ChipKind.duration;
 
   /// Fixed-line tag ("Cántico", "A cargo del presidente").
   const MiniChip.tag(this.texto, {super.key}) : _kind = _ChipKind.tag;
@@ -37,8 +36,12 @@ class MiniChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
 
-    final (Color bg, Color? bordeColor, Color fg, double radio) =
-        switch (_kind) {
+    final (
+      Color bg,
+      Color? bordeColor,
+      Color fg,
+      double radio,
+    ) = switch (_kind) {
       _ChipKind.time => (t.accentSoft, null, t.accentStrong, Dimens.rChip),
       _ChipKind.allMeeting => (t.surface2, t.border2, t.textDim, Dimens.rChip),
       _ChipKind.duration => (t.surface2, t.border2, t.textMute, 6.0),
@@ -48,28 +51,52 @@ class MiniChip extends StatelessWidget {
     };
 
     final estilo = switch (_kind) {
-      _ChipKind.time => AppText.mono(size: 12, weight: FontWeight.w700, color: fg),
+      _ChipKind.time => AppText.mono(
+        size: AppText.small,
+        weight: FontWeight.w700,
+        color: fg,
+      ),
       _ChipKind.allMeeting => AppText.label(color: fg),
-      _ChipKind.duration =>
-        TextStyle(fontSize: AppText.caption, fontWeight: FontWeight.w700, color: fg),
-      _ChipKind.tag =>
-        TextStyle(fontSize: AppText.caption, fontWeight: FontWeight.w700, color: fg),
-      _ChipKind.aux =>
-        TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w700, color: fg),
+      _ChipKind.duration => TextStyle(
+        fontSize: AppText.caption,
+        fontWeight: FontWeight.w700,
+        color: fg,
+      ),
+      _ChipKind.tag => TextStyle(
+        fontSize: AppText.caption,
+        fontWeight: FontWeight.w700,
+        color: fg,
+      ),
+      _ChipKind.aux => TextStyle(
+        fontSize: AppText.micro,
+        fontWeight: FontWeight.w700,
+        color: fg,
+      ),
       _ChipKind.week => TextStyle(
-          fontSize: AppText.micro,
-          fontWeight: FontWeight.w700,
-          color: fg,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
+        fontSize: AppText.micro,
+        fontWeight: FontWeight.w700,
+        color: fg,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
     };
 
     final padding = switch (_kind) {
-      _ChipKind.duration => const EdgeInsets.symmetric(horizontal: Space.s8, vertical: 1.5),
-      _ChipKind.tag || _ChipKind.aux =>
-        const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s2),
-      _ChipKind.week => const EdgeInsets.symmetric(horizontal: Space.s8, vertical: Space.s4),
-      _ => const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s2),
+      _ChipKind.duration => const EdgeInsets.symmetric(
+        horizontal: Space.s8,
+        vertical: 1.5,
+      ),
+      _ChipKind.tag || _ChipKind.aux => const EdgeInsets.symmetric(
+        horizontal: Space.s8,
+        vertical: Space.s2,
+      ),
+      _ChipKind.week => const EdgeInsets.symmetric(
+        horizontal: Space.s8,
+        vertical: Space.s4,
+      ),
+      _ => const EdgeInsets.symmetric(
+        horizontal: Space.s10,
+        vertical: Space.s2,
+      ),
     };
 
     return Container(

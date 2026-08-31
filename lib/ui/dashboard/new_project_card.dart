@@ -93,7 +93,11 @@ class _NewProjectCardState extends State<NewProjectCard> {
                             color: ringFill,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.add, size: AppIcon.control, color: fg),
+                          child: Icon(
+                            Icons.add,
+                            size: AppIcon.control,
+                            color: fg,
+                          ),
                         ),
                       ),
                       const SizedBox(height: Space.s10),

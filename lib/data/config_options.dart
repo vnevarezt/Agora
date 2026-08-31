@@ -8,16 +8,16 @@
 import '../i18n/strings.g.dart';
 
 List<String> get daysOfWeek => [
-      t.days.monday,
-      t.days.tuesday,
-      t.days.wednesday,
-      t.days.thursday,
-      t.days.friday,
-      t.days.saturday,
-      t.days.sunday,
-    ];
+  t.days.monday,
+  t.days.tuesday,
+  t.days.wednesday,
+  t.days.thursday,
+  t.days.friday,
+  t.days.saturday,
+  t.days.sunday,
+];
 List<String> get meetingLanguages => [
-      t.options.meetingLangSpanish,
-      t.options.meetingLangSign,
-      t.options.meetingLangEnglish,
-    ];
+  t.options.meetingLangSpanish,
+  t.options.meetingLangSign,
+  t.options.meetingLangEnglish,
+];

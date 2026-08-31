@@ -25,7 +25,7 @@ class ContentDecryptException implements Exception {
 /// skipped FOREVER once the cursor passes them).
 class UnknownKeyVersionException extends ContentDecryptException {
   const UnknownKeyVersionException(this.keyVersion)
-      : super('Unknown content key version.');
+    : super('Unknown content key version.');
 
   final int keyVersion;
 
@@ -39,13 +39,12 @@ class UnknownKeyVersionException extends ContentDecryptException {
 /// version for future writes instead of re-encrypting history.
 class CongregationKeyring {
   CongregationKeyring(this.keys)
-      : assert(keys.isNotEmpty, 'a keyring needs at least one key');
+    : assert(keys.isNotEmpty, 'a keyring needs at least one key');
 
   /// version → 32-byte key. Versions only grow.
   final Map<int, List<int>> keys;
 
-  int get currentVersion =>
-      keys.keys.reduce((a, b) => a > b ? a : b);
+  int get currentVersion => keys.keys.reduce((a, b) => a > b ? a : b);
 
   List<int> get currentKey => keys[currentVersion]!;
 
@@ -106,7 +105,8 @@ class ContentCrypto {
       return jsonDecode(utf8.decode(clear)) as Map<String, dynamic>;
     } on SecretBoxAuthenticationError {
       throw const ContentDecryptException(
-          'Sync blob failed authentication (wrong key or tampered doc).');
+        'Sync blob failed authentication (wrong key or tampered doc).',
+      );
     }
   }
 }

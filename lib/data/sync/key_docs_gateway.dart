@@ -10,8 +10,11 @@ abstract interface class KeyDocsGateway {
   /// here on purpose: it is what lets signing in restore everything with no
   /// code to remember (see UserKeyService for the cost of that choice).
   /// Stamps both timestamps.
-  Future<void> createUserDoc(String uid,
-      {required String pubKey, required String privKey});
+  Future<void> createUserDoc(
+    String uid, {
+    required String pubKey,
+    required String privKey,
+  });
 
   /// Touches `keyUpdatedAt` and drops the legacy passphrase envelope from a
   /// pre-4c doc. Must NOT re-stamp `createdAt`.
@@ -45,20 +48,29 @@ abstract interface class KeyDocsGateway {
   /// Replaces `capabilities` on a member doc (admin only). Never touches the
   /// identity fields the rules freeze.
   Future<void> updateMemberCapabilities(
-      String cid, String uid, Map<String, Object> capabilities);
+    String cid,
+    String uid,
+    Map<String, Object> capabilities,
+  );
 
   /// Adds key versions to a member's `wrappedCcks` WITHOUT rewriting the
   /// existing ones (the rules require `hasAll` of the old keys) — the
   /// reconciliation path for a member who missed a rotation.
   Future<void> appendWrappedCcks(
-      String cid, String uid, Map<int, Map<String, String>> boxes);
+    String cid,
+    String uid,
+    Map<int, Map<String, String>> boxes,
+  );
 
   // ---- invites -------------------------------------------------------------
 
   /// Creates `invites/{tokenId}`. Stamps `createdAt`; [data] carries
   /// capabilities, wrappedKeyring, createdBy and expiresAt.
   Future<void> createInvite(
-      String cid, String tokenId, Map<String, dynamic> data);
+    String cid,
+    String tokenId,
+    Map<String, dynamic> data,
+  );
 
   /// One invite by id — the token in the shared code IS the read credential,
   /// so this works for a not-yet-member. Null when missing or denied.

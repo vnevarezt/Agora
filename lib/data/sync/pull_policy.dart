@@ -32,11 +32,20 @@ PullUrgency decidePull({
     // first real push to create it.
     return cursor == null ? PullUrgency.immediate : PullUrgency.none;
   }
-  if (fromOwnDevice) return PullUrgency.none;
   // Never pulled this congregation: it is 100% out of date, "what's on screen"
   // included, so deferring saves no useful reads. This is the initial-restore
   // path on a fresh device — pull now instead of trickling in minutes later.
+  //
+  // Ahead of [fromOwnDevice], which used to win: they answer different
+  // questions, and "the last push came from this device" says nothing about
+  // whether this device ever READ the congregation back. It can be both, since
+  // the device id is persisted — so a browser profile that pushed once and
+  // then lost its local rows was told there was nothing to fetch, for ever.
+  // The cost of getting it wrong the other way is one redundant page on a
+  // founder's own device, once, after which the cursor exists and this stops
+  // firing.
   if (cursor == null) return PullUrgency.immediate;
+  if (fromOwnDevice) return PullUrgency.none;
 
   final newer = [
     for (final MapEntry(key: scope, value: ts) in scopes.entries)

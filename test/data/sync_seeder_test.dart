@@ -13,33 +13,38 @@ void main() {
   setUp(() => db = AppDatabase(NativeDatabase.memory()));
   tearDown(() => db.close());
 
-  Future<void> insertCongregation(String id, {String? hlc}) =>
-      db.into(db.congregations).insert(CongregationsCompanion.insert(
-            id: id,
-            name: 'C',
-            number: const Value('1'),
-            color: 0,
-            createdAt: DateTime.utc(2026),
-            updatedAt: DateTime.utc(2026),
-            hlc: Value(hlc),
-          ));
+  Future<void> insertCongregation(String id, {String? hlc}) => db
+      .into(db.congregations)
+      .insert(
+        CongregationsCompanion.insert(
+          id: id,
+          name: 'C',
+          number: const Value('1'),
+          color: 0,
+          createdAt: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026),
+          hlc: Value(hlc),
+        ),
+      );
 
-  Future<void> insertPerson(String id, String cid, {String? hlc}) =>
-      db.into(db.people).insert(PeopleCompanion.insert(
-            id: id,
-            congregationId: cid,
-            displayName: 'P',
-            gender: Gender.male,
-            privilege: Role.publisher,
-            createdAt: DateTime.utc(2026),
-            updatedAt: DateTime.utc(2026),
-            hlc: Value(hlc),
-          ));
+  Future<void> insertPerson(String id, String cid, {String? hlc}) => db
+      .into(db.people)
+      .insert(
+        PeopleCompanion.insert(
+          id: id,
+          congregationId: cid,
+          displayName: 'P',
+          gender: Gender.male,
+          privilege: Role.publisher,
+          createdAt: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026),
+          hlc: Value(hlc),
+        ),
+      );
 
   SyncSeeder seeder() => SyncSeeder(db, SyncScribe(db, HlcClock('devSeed')));
 
-  test('seeds every row in the congregation and stamps missing HLCs',
-      () async {
+  test('seeds every row in the congregation and stamps missing HLCs', () async {
     await insertCongregation('c1'); // no hlc
     await insertPerson('p1', 'c1'); // no hlc
     await insertPerson('p2', 'c1', hlc: 'already-stamped');
@@ -51,13 +56,14 @@ void main() {
     final outbox = await db.select(db.outbox).get();
     expect(outbox.map((e) => e.entityId).toSet(), {'c1', 'p1', 'p2'});
     // The previously-unstamped rows now carry an HLC.
-    final cong = await (db.select(db.congregations)
-          ..where((t) => t.id.equals('c1')))
-        .getSingle();
+    final cong = await (db.select(
+      db.congregations,
+    )..where((t) => t.id.equals('c1'))).getSingle();
     expect(cong.hlc, isNotNull);
     // The already-stamped row keeps its stamp.
-    final p2 =
-        await (db.select(db.people)..where((t) => t.id.equals('p2'))).getSingle();
+    final p2 = await (db.select(
+      db.people,
+    )..where((t) => t.id.equals('p2'))).getSingle();
     expect(p2.hlc, 'already-stamped');
   });
 

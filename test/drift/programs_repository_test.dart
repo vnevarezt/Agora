@@ -11,7 +11,7 @@ import 'package:agora/models/week.dart';
 import 'package:agora/models/week_type.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
-import 'package:agora/state/program_content.dart';
+import 'package:agora/state/program_reconciler.dart';
 
 void main() {
   late AppDatabase db;
@@ -21,16 +21,21 @@ void main() {
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
-    container = ProviderContainer(overrides: [
-      dbProvider.overrideWithValue(db),
-    ]);
+    container = ProviderContainer(
+      overrides: [dbProvider.overrideWithValue(db)],
+    );
     addTearDown(container.dispose);
     addTearDown(db.close);
-    projectId = await container.read(projectsRepositoryProvider).create(
-      name: 'P',
-      congregationId: '',
-      weeks: ['7-13 DE JULIO', '14-20 DE JULIO'],
-    );
+    projectId = await container
+        .read(projectsRepositoryProvider)
+        .create(
+          name: 'P',
+          congregationId: '',
+          weeks: [
+            (start: '', label: '7-13 DE JULIO'),
+            (start: '', label: '14-20 DE JULIO'),
+          ],
+        );
     repo = container.read(programsRepositoryProvider);
   });
 
@@ -44,65 +49,138 @@ void main() {
     final program = (await repo.byProject(projectId)).first;
 
     await repo.saveSlotNames(
-        programId: program.id,
-        slotKey: 'se1',
-        hall: Hall.main,
-        names: ['Ana', 'Luis']);
+      programId: program.id,
+      slotKey: 'se1',
+      hall: Hall.main,
+      names: ['Ana', 'Luis'],
+    );
     var rows = await repo.assignmentsByPrograms([program.id]);
-    expect({for (final r in rows) r.position: r.displayName},
-        {0: 'Ana', 1: 'Luis'});
+    expect(
+      {for (final r in rows) r.position: r.displayName},
+      {0: 'Ana', 1: 'Luis'},
+    );
 
     // Update one position, clear the other.
     await repo.saveSlotNames(
-        programId: program.id,
-        slotKey: 'se1',
-        hall: Hall.main,
-        names: ['Eva', '']);
+      programId: program.id,
+      slotKey: 'se1',
+      hall: Hall.main,
+      names: ['Eva', ''],
+    );
     rows = await repo.assignmentsByPrograms([program.id]);
     expect({for (final r in rows) r.position: r.displayName}, {0: 'Eva'});
 
     // A different hall is an independent list.
     await repo.saveSlotNames(
-        programId: program.id,
-        slotKey: 'se1',
-        hall: Hall.aux,
-        names: ['Sara']);
+      programId: program.id,
+      slotKey: 'se1',
+      hall: Hall.aux,
+      names: ['Sara'],
+    );
     rows = await repo.assignmentsByPrograms([program.id]);
     expect(rows, hasLength(2));
 
     // Shrinking the list tombstones positions beyond it.
     await repo.saveSlotNames(
-        programId: program.id, slotKey: 'se1', hall: Hall.main, names: []);
+      programId: program.id,
+      slotKey: 'se1',
+      hall: Hall.main,
+      names: [],
+    );
     rows = await repo.assignmentsByPrograms([program.id]);
     expect(rows.single.hall, Hall.aux);
 
     // Tombstones stay in the table for future sync.
     final raw = await db
-        .customSelect('SELECT COUNT(*) AS n FROM assignments').getSingle();
+        .customSelect('SELECT COUNT(*) AS n FROM assignments')
+        .getSingle();
     expect(raw.read<int>('n'), 3);
   });
 
-  test('setContent stores the snapshot without touching updatedAt',
-      () async {
+  test('setContent stores the snapshot without touching updatedAt', () async {
     final before = (await repo.byProject(projectId)).first;
-    final week = Week(date: '7-13 DE JULIO', reading: 'PROV. 1', parts: [
-      const Part(
+    final week = Week(
+      date: '7-13 DE JULIO',
+      reading: 'PROV. 1',
+      parts: [
+        const Part(
           section: Section.ministry,
           number: 3,
           title: 'Empiece conversaciones',
-          minutes: 3),
-    ]);
+          minutes: 3,
+        ),
+      ],
+    );
 
-    await repo.setContent(before.id, week);
+    await repo.setContent(before.id, week, 'S');
 
     final after = (await repo.byProject(projectId)).first;
     expect(after.contentJson, isNotNull);
-    expect(after.updatedAt, before.updatedAt,
-        reason: 'snapshotting is bookkeeping, not an edit');
+    expect(
+      after.updatedAt,
+      before.updatedAt,
+      reason: 'snapshotting is bookkeeping, not an edit',
+    );
   });
 
-  test('setProjectConfig writes every program; setWeekType only one',
-      () async {
+  test('setContent records the language and backfills the identity', () async {
+    final program = (await repo.byProject(projectId)).first;
+    expect(program.weekStart, isNull, reason: 'a v6 row starts without one');
+
+    await repo.setContent(
+      program.id,
+      Week(
+        date: 'JULY 6-12',
+        weekStart: '2026-07-06',
+        parts: [
+          const Part(
+            section: Section.treasures,
+            number: 1,
+            title: 'T',
+            minutes: 10,
+          ),
+        ],
+      ),
+      'E',
+    );
+
+    final after = (await repo.byProject(projectId)).first;
+    expect(after.contentLang, 'E');
+    expect(after.weekStart, '2026-07-06');
+  });
+
+  test(
+    'a snapshot with no date of its own leaves the identity alone',
+    () async {
+      final program = (await repo.byProject(projectId)).first;
+      await repo.setWeekStart(program.id, '2026-07-06');
+
+      // An old snapshot, decoded from JSON written before weekStart existed.
+      await repo.setContent(
+        program.id,
+        Week(
+          date: '6-12 DE JULIO',
+          parts: [
+            const Part(
+              section: Section.treasures,
+              number: 1,
+              title: 'T',
+              minutes: 10,
+            ),
+          ],
+        ),
+        'S',
+      );
+
+      expect(
+        (await repo.byProject(projectId)).first.weekStart,
+        '2026-07-06',
+        reason: 'never trade a good identity for an empty one',
+      );
+    },
+  );
+
+  test('setProjectConfig writes every program; setWeekType only one', () async {
     await repo.setProjectConfig(projectId, auxRoom: true, startTime: '19:30');
     final programs = await repo.byProject(projectId);
     expect(programs.map((p) => p.auxRoom).toSet(), {true});

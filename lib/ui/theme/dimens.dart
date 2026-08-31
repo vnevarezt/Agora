@@ -32,7 +32,7 @@ abstract final class Dimens {
   static const double rAssignee = 11;
   static const double rCard = 14;
   static const double rPicker = 16;
-  static const double rSheet = 22; // bottom sheet móvil (esquinas superiores)
+  static const double rSheet = 22; // mobile bottom sheet, top corners only
   static const double rPill = 999;
 
   // Durations live in Motion (widgets/motion.dart), which is the single
@@ -40,8 +40,8 @@ abstract final class Dimens {
 
   // Control heights.
   static const double hControl = 38; // botones e icon-buttons de la barra
-  static const double hField = 40; // inputs del panel de configuración
-  static const double hAssignee = 44; // botón de asignación
+  static const double hField = 40; // settings panel inputs
+  static const double hAssignee = 44; // assignment button
   static const double hPreviewBar = 46;
   static const double hExportMobile = 48;
 
@@ -51,8 +51,33 @@ abstract final class Dimens {
   static const double hTouchMin = 48;
 
   // Other sizes.
+  /// Avatar diameters, one per context the initials appear in. [avatar] is
+  /// [PersonAvatar]'s default and the size the picker rows are laid out
+  /// against; the rest are the places that need a different presence.
   static const double avatar = 30;
-  static const double ring = 34; // anillo de progreso
+  static const double avatarBar = 32; // account row in the sidebar
+  static const double avatarRow = 34; // a member row in settings
+  static const double avatarCard = 38; // a participant card
+  static const double avatarHero = 62; // the unlock screen's single face
+
+  /// Brand mark sizes. Not [AppIcon] steps: the mark is a drawing that carries
+  /// a surface, not a glyph set against text (see DESIGN_SYSTEM.md §3.5).
+  static const double markNav = 30; // collapsed sidebar, in place of the lockup
+  static const double markLoader = 44; // AgoraLoader over the PDF preview
+  static const double markCover = 52; // the cover screen
+  static const double markSplash = 64; // the boot entrance, carrying the screen
+
+  /// Spinner diameters. [spinner] is [AppSpinner]'s default.
+  static const double spinnerInButton = 15; // in place of a button's label
+  static const double spinner = 16;
+  static const double spinnerLarge = 20; // a modal or a bar waiting on its own
+
+  /// Bare icon-button boxes below [hControl]. Two steps 2px apart, which is
+  /// one more than the system should need — see DESIGN_SYSTEM.md §13.
+  static const double hIconCard = 30; // overflow button pinned inside a card
+  static const double hIconModal = 32; // the close button on a modal header
+
+  static const double ring = 34; // progress ring
   static const double pickerW = 340;
   static const double pickerMaxH = 460;
 }
@@ -97,8 +122,8 @@ abstract final class Elevation {
   /// grounds: the accentSoft it used to use sits at 1.5:1 on the dark
   /// surface, which made the active card look no different from the rest.
   static List<BoxShadow> selectionHalo(Color accent) => [
-        BoxShadow(color: accent.withValues(alpha: 0.30), spreadRadius: 3),
-      ];
+    BoxShadow(color: accent.withValues(alpha: 0.30), spreadRadius: 3),
+  ];
 
   /// Scrim behind an anchored panel.
   static const Color scrim = Color(0x47000000);

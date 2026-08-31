@@ -24,7 +24,7 @@ void main() {
   test('empty v1 migrates to a valid current schema', () async {
     final connection = await verifier.startAt(1);
     final db = AppDatabase(connection);
-    await verifier.migrateAndValidate(db, 5);
+    await verifier.migrateAndValidate(db, 6);
 
     // No participants → no auto-created congregation.
     expect(await db.select(db.congregations).get(), isEmpty);
@@ -32,8 +32,7 @@ void main() {
     await db.close();
   });
 
-  test('v2 with skeleton programs migrates to current keeping rows',
-      () async {
+  test('v2 with skeleton programs migrates to current keeping rows', () async {
     final schema = await verifier.schemaAt(2);
     schema.rawDatabase.execute('''
       INSERT INTO congregations (id, name, number, color, settings_json,
@@ -51,7 +50,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    await verifier.migrateAndValidate(db, 6);
 
     // The skeleton program survives with NULL content (the snapshot
     // service fills it on first open) and the defaults in place.
@@ -94,7 +93,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    await verifier.migrateAndValidate(db, 6);
 
     // One congregation, named after the dominant spelling of the top group.
     final congs = await db.select(db.congregations).get();
@@ -133,7 +132,9 @@ void main() {
 
     // The v1 table is gone.
     final leftover = await db
-        .customSelect("SELECT name FROM sqlite_master WHERE name = 'participants'")
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE name = 'participants'",
+        )
         .get();
     expect(leftover, isEmpty);
 
@@ -150,7 +151,7 @@ void main() {
     ''');
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    await verifier.migrateAndValidate(db, 6);
 
     // The cursor is untouched and the new column reads as "nothing was ever
     // skipped here" without any backfill.
@@ -161,10 +162,11 @@ void main() {
     await db.close();
   });
 
-  test('all-empty congregation strings fall back to the localized default',
-      () async {
-    final schema = await verifier.schemaAt(1);
-    schema.rawDatabase.execute('''
+  test(
+    'all-empty congregation strings fall back to the localized default',
+    () async {
+      final schema = await verifier.schemaAt(1);
+      schema.rawDatabase.execute('''
       INSERT INTO participants
         (id, name, gender, role, congregation, active, notes,
          created_at, updated_at, last_used)
@@ -173,15 +175,49 @@ void main() {
          '2026-01-11T10:00:00.000Z', '2026-01-11T10:00:00.000Z', NULL);
     ''');
 
-    final db = AppDatabase(
-      schema.newConnection(),
-      defaultCongregationName: 'Mi congregación',
-    );
-    await verifier.migrateAndValidate(db, 5);
+      final db = AppDatabase(
+        schema.newConnection(),
+        defaultCongregationName: 'Mi congregación',
+      );
+      await verifier.migrateAndValidate(db, 6);
 
-    final congs = await db.select(db.congregations).get();
-    expect(congs.single.name, 'Mi congregación');
-    expect((await db.peopleDao.all()).single.originCongregation, '');
+      final congs = await db.select(db.congregations).get();
+      expect(congs.single.name, 'Mi congregación');
+      expect((await db.peopleDao.all()).single.originCongregation, '');
+      await db.close();
+    },
+  );
+  test('v5 programs migrate to v6 keeping their rows and label', () async {
+    final schema = await verifier.schemaAt(5);
+    schema.rawDatabase.execute('''
+      INSERT INTO congregations (id, name, number, color, settings_json,
+        created_at, updated_at)
+      VALUES ('c1', 'Norte', '', 1, '{}',
+        '2026-01-10T10:00:00.000Z', '2026-01-10T10:00:00.000Z');
+      INSERT INTO projects (id, congregation_id, name, notes,
+        created_at, updated_at)
+      VALUES ('pr1', 'c1', 'Julio', '',
+        '2026-01-10T10:00:00.000Z', '2026-01-10T10:00:00.000Z');
+      INSERT INTO programs (id, project_id, program_type_id, week_type,
+        date, sort_index, label, content_json, title_overrides_json,
+        created_at, updated_at)
+      VALUES ('pg1', 'pr1', 'mwb-s140', 'normal', '7-13 DE JULIO', 0, '',
+        '{"date":"7-13 DE JULIO","parts":[]}', '{}',
+        '2026-01-10T10:00:00.000Z', '2026-01-10T10:00:00.000Z');
+    ''');
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 6);
+
+    final program = await db.select(db.programs).getSingle();
+    // The localized label stays: it is still what the PDF prints, and it is
+    // what the reconciler matches on to work out the week's real date.
+    expect(program.date, '7-13 DE JULIO');
+    expect(program.contentJson, isNotNull);
+    // Both new columns are null on purpose. Resolving them needs the cached
+    // workbook, which a migration cannot reach, so the reconciler does it.
+    expect(program.weekStart, isNull);
+    expect(program.contentLang, isNull);
     await db.close();
   });
 }

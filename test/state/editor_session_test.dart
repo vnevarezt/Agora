@@ -13,7 +13,7 @@ import 'package:agora/models/week_type.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
 import 'package:agora/state/editor_session.dart';
-import 'package:agora/state/program_content.dart';
+import 'package:agora/state/program_reconciler.dart';
 import 'package:agora/state/program_form.dart';
 
 void main() {
@@ -23,23 +23,32 @@ void main() {
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
-    container = ProviderContainer(overrides: [
-      dbProvider.overrideWithValue(db),
-    ]);
+    container = ProviderContainer(
+      overrides: [dbProvider.overrideWithValue(db)],
+    );
     addTearDown(container.dispose);
     addTearDown(db.close);
 
-    final cong = await container.read(congregationsRepositoryProvider).create(
+    final cong = await container
+        .read(congregationsRepositoryProvider)
+        .create(
           name: 'Norte',
           number: '7',
           settings: const CongregationSettings(
-              midweekTime: '19:30', auxRoom: true),
+            midweekTime: '19:30',
+            auxRoom: true,
+          ),
         );
-    projectId = await container.read(projectsRepositoryProvider).create(
-      name: 'Julio',
-      congregationId: cong.id,
-      weeks: ['7-13 DE JULIO', '14-20 DE JULIO'],
-    );
+    projectId = await container
+        .read(projectsRepositoryProvider)
+        .create(
+          name: 'Julio',
+          congregationId: cong.id,
+          weeks: [
+            (start: '', label: '7-13 DE JULIO'),
+            (start: '', label: '14-20 DE JULIO'),
+          ],
+        );
     // Riverpod 3 pauses unlistened providers: keep the streams active for
     // the whole test (the app's widgets do this by watching them).
     container.listen(congregationsStreamProvider, (_, _) {});
@@ -52,77 +61,91 @@ void main() {
       (await container.read(projectsStreamProvider.future))
           .map((d) => d.project)
           .where((p) => p.id == projectId)
-          .map((p) => Project(
-                id: p.id,
-                name: p.name,
-                congregationId: p.congregationId,
-                weeks: const [],
-                done: 0,
-                total: 0,
-                status: ProjectStatus.draft,
-                editedLabel: '',
-                updatedAt: DateTime.utc(2026, 1, 1),
-              ))
+          .map(
+            (p) => Project(
+              id: p.id,
+              name: p.name,
+              congregationId: p.congregationId,
+              weeks: const [],
+              done: 0,
+              total: 0,
+              status: ProjectStatus.draft,
+              editedLabel: '',
+              updatedAt: DateTime.utc(2026, 1, 1),
+            ),
+          )
           .first;
 
-  test('hydration maps stored rows; edits write through and re-hydrate',
-      () async {
-    final programs =
-        await container.read(programsRepositoryProvider).byProject(projectId);
+  test(
+    'hydration maps stored rows; edits write through and re-hydrate',
+    () async {
+      final programs = await container
+          .read(programsRepositoryProvider)
+          .byProject(projectId);
 
-    // Pre-existing data from "a previous session".
-    final repo = container.read(programsRepositoryProvider);
-    await repo.saveSlotNames(
+      // Pre-existing data from "a previous session".
+      final repo = container.read(programsRepositoryProvider);
+      await repo.saveSlotNames(
         programId: programs[0].id,
         slotKey: 'chairman',
         hall: Hall.main,
-        names: ['Andrés']);
-    await repo.saveSlotNames(
+        names: ['Andrés'],
+      );
+      await repo.saveSlotNames(
         programId: programs[0].id,
         slotKey: 'se1',
         hall: Hall.main,
-        names: ['Ana', 'Luis']);
-    await repo.setWeekType(programs[1].id, WeekType.circuitOverseerVisit);
-    await repo.setTitleOverrides(programs[1].id, {'vi2': 'Necesidades'});
+        names: ['Ana', 'Luis'],
+      );
+      await repo.setWeekType(programs[1].id, WeekType.circuitOverseerVisit);
+      await repo.setTitleOverrides(programs[1].id, {'vi2': 'Necesidades'});
 
-    await container.read(editorOpenerProvider).open(await projectCard());
+      await container.read(editorOpenerProvider).open(await projectCard());
 
-    var f = container.read(formProvider);
-    expect(f.congregationId, 'Norte');
-    expect(f.startTime, '19:30', reason: 'congregation setting is the default');
-    expect(f.auxRoom, true);
-    expect(f.chairmanByWeek[0], 'Andrés');
-    expect(f.mainByWeek[0]!['se1'], ['Ana', 'Luis']);
-    expect(f.circuitOverseerByWeek[1], true);
-    expect(f.titleOverridesByWeek[1], {'vi2': 'Necesidades'});
+      var f = container.read(formProvider);
+      expect(f.congregationId, 'Norte');
+      expect(
+        f.startTime,
+        '19:30',
+        reason: 'congregation setting is the default',
+      );
+      expect(f.auxRoom, true);
+      expect(f.chairmanByWeek[0], 'Andrés');
+      expect(f.mainByWeek[0]!['se1'], ['Ana', 'Luis']);
+      expect(f.circuitOverseerByWeek[1], true);
+      expect(f.titleOverridesByWeek[1], {'vi2': 'Necesidades'});
 
-    // Edits go through the form and land in the DB.
-    final controller = container.read(formProvider.notifier);
-    controller.setMainNames('se1', ['Eva', '']);
-    controller.setChairman('Marcos');
-    controller.selectWeek(1);
-    controller.setCircuitOverseer(1, false);
-    controller.setAuxRoom(false);
-    await pumpEventQueue();
+      // Edits go through the form and land in the DB.
+      final controller = container.read(formProvider.notifier);
+      controller.setMainNames('se1', ['Eva', '']);
+      controller.setChairman('Marcos');
+      controller.selectWeek(1);
+      controller.setCircuitOverseer(1, false);
+      controller.setAuxRoom(false);
+      await pumpEventQueue();
 
-    // A fresh hydration (the "restart") sees the edited values.
-    await container.read(editorOpenerProvider).open(await projectCard());
-    f = container.read(formProvider);
-    expect(f.mainByWeek[0]!['se1'], ['Eva']);
-    expect(f.chairmanByWeek[0], 'Marcos');
-    expect(f.circuitOverseerByWeek[1], false);
-    expect(f.auxRoom, false, reason: 'program override beats the setting');
-  });
+      // A fresh hydration (the "restart") sees the edited values.
+      await container.read(editorOpenerProvider).open(await projectCard());
+      f = container.read(formProvider);
+      expect(f.mainByWeek[0]!['se1'], ['Eva']);
+      expect(f.chairmanByWeek[0], 'Marcos');
+      expect(f.circuitOverseerByWeek[1], false);
+      expect(f.auxRoom, false, reason: 'program override beats the setting');
+    },
+  );
 
-  test('hydration tolerates gaps: only position 1 of a pair filled',
-      () async {
-    final programs =
-        await container.read(programsRepositoryProvider).byProject(projectId);
-    await container.read(programsRepositoryProvider).saveSlotNames(
-        programId: programs[0].id,
-        slotKey: 'se2',
-        hall: Hall.aux,
-        names: ['', 'Sara']);
+  test('hydration tolerates gaps: only position 1 of a pair filled', () async {
+    final programs = await container
+        .read(programsRepositoryProvider)
+        .byProject(projectId);
+    await container
+        .read(programsRepositoryProvider)
+        .saveSlotNames(
+          programId: programs[0].id,
+          slotKey: 'se2',
+          hall: Hall.aux,
+          names: ['', 'Sara'],
+        );
 
     await container.read(editorOpenerProvider).open(await projectCard());
 

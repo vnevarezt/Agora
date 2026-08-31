@@ -31,24 +31,30 @@ class FakeDeviceAuth implements DeviceAuth {
   }
 }
 
-Future<void> pumpApp(WidgetTester tester, MapKeyStore store,
-    {DeviceAuth? deviceAuth}) async {
+Future<void> pumpApp(
+  WidgetTester tester,
+  MapKeyStore store, {
+  DeviceAuth? deviceAuth,
+}) async {
   tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  await tester.pumpWidget(TranslationProvider(
-    child: ProviderScope(
-      overrides: [
-        dbKeyManagerProvider.overrideWithValue(
-            DbKeyManager(store: store, params: testKdfParams)),
-        firebaseAppProvider.overrideWith((ref) => Future.value(null)),
-        if (deviceAuth != null)
-          deviceAuthProvider.overrideWithValue(deviceAuth),
-      ],
-      child: const AgoraApp(),
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: ProviderScope(
+        overrides: [
+          dbKeyManagerProvider.overrideWithValue(
+            DbKeyManager(store: store, params: testKdfParams),
+          ),
+          firebaseAppProvider.overrideWith((ref) => Future.value(null)),
+          if (deviceAuth != null)
+            deviceAuthProvider.overrideWithValue(deviceAuth),
+        ],
+        child: const AgoraApp(),
+      ),
     ),
-  ));
+  );
   // _init (prefs + keychain) y animaciones de entrada de la portada.
   await tester.pump();
   await tester.pump();
@@ -58,8 +64,9 @@ Future<void> pumpApp(WidgetTester tester, MapKeyStore store,
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('portada muestra las 3 acciones (nube configurada o no)',
-      (tester) async {
+  testWidgets('portada muestra las 3 acciones (nube configurada o no)', (
+    tester,
+  ) async {
     await pumpApp(tester, MapKeyStore());
 
     expect(find.text('Agora'), findsOneWidget);
@@ -69,8 +76,9 @@ void main() {
     expect(find.text('Solo en este dispositivo'), findsOneWidget);
   });
 
-  testWidgets('portada → nube: login y registro completos, aviso sin config',
-      (tester) async {
+  testWidgets('portada → nube: login y registro completos, aviso sin config', (
+    tester,
+  ) async {
     await pumpApp(tester, MapKeyStore());
 
     await tester.tap(find.text('Iniciar sesión'));
@@ -95,17 +103,20 @@ void main() {
     await tester.tap(find.text('Continuar con Google'));
     await tester.pump();
     expect(
-        find.text(
-            'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.'),
-        findsOneWidget);
+      find.text(
+        'Esta instalación no tiene proyecto de Firebase; el modo nube no está disponible.',
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Elegir otro modo'));
     await tester.pumpAndSettle();
     expect(find.text('Continuar sin cuenta'), findsOneWidget);
   });
 
-  testWidgets('portada → perfil local: navegación y validaciones',
-      (tester) async {
+  testWidgets('portada → perfil local: navegación y validaciones', (
+    tester,
+  ) async {
     await pumpApp(tester, MapKeyStore());
 
     await tester.tap(find.text('Continuar sin cuenta'));
@@ -123,8 +134,10 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Crear perfil y empezar'));
     await tester.pump();
-    expect(find.text('La contraseña debe tener al menos 8 caracteres.'),
-        findsOneWidget);
+    expect(
+      find.text('La contraseña debe tener al menos 8 caracteres.'),
+      findsOneWidget,
+    );
 
     await tester.enterText(fields.at(1), 'contraseña-larga');
     await tester.enterText(fields.at(2), 'otra-distinta');
@@ -139,16 +152,22 @@ void main() {
     expect(find.text('Continuar sin cuenta'), findsOneWidget);
   });
 
-  testWidgets('modo local bloqueado muestra el perfil en el unlock',
-      (tester) async {
-    SharedPreferences.setMockInitialValues(
-        {'account_mode': 'local', 'local_profile_name': 'Ana Pérez'});
+  testWidgets('modo local bloqueado muestra el perfil en el unlock', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'account_mode': 'local',
+      'local_profile_name': 'Ana Pérez',
+    });
     final store = MapKeyStore();
     // runAsync: createAccount deriva la KEK con Argon2 en un Isolate.run,
     // que nunca completa dentro de la zona fake-async de testWidgets.
-    await tester.runAsync(() =>
-        DbKeyManager(store: store, params: testKdfParams)
-            .createAccount('pw-123456'));
+    await tester.runAsync(
+      () => DbKeyManager(
+        store: store,
+        params: testKdfParams,
+      ).createAccount('pw-123456'),
+    );
 
     await pumpApp(tester, store);
 
@@ -162,30 +181,34 @@ void main() {
   });
 
   testWidgets(
-      'desbloqueo del dispositivo activado: auto-prompt al montar y botón '
-      'para reintentar', (tester) async {
-    SharedPreferences.setMockInitialValues({
-      'account_mode': 'local',
-      'local_profile_name': 'Ana Pérez',
-      'device_unlock': true,
-    });
-    final store = MapKeyStore();
-    final keys = DbKeyManager(store: store, params: testKdfParams);
-    await tester.runAsync(() async =>
-        keys.enableDeviceUnlock(await keys.createAccount('pw-123456')));
+    'desbloqueo del dispositivo activado: auto-prompt al montar y botón '
+    'para reintentar',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'account_mode': 'local',
+        'local_profile_name': 'Ana Pérez',
+        'device_unlock': true,
+      });
+      final store = MapKeyStore();
+      final keys = DbKeyManager(store: store, params: testKdfParams);
+      await tester.runAsync(
+        () async =>
+            keys.enableDeviceUnlock(await keys.createAccount('pw-123456')),
+      );
 
-    // result=false: el prompt "cancelado" deja la pantalla montada (con
-    // result=true la app entera se construiría y tocaría la BD real).
-    final fake = FakeDeviceAuth(result: false);
-    await pumpApp(tester, store, deviceAuth: fake);
+      // result=false: el prompt "cancelado" deja la pantalla montada (con
+      // result=true la app entera se construiría y tocaría la BD real).
+      final fake = FakeDeviceAuth(result: false);
+      await pumpApp(tester, store, deviceAuth: fake);
 
-    expect(fake.prompts, 1); // auto-prompt del initState
-    final button = find.text('Usar desbloqueo del dispositivo');
-    expect(button, findsOneWidget);
+      expect(fake.prompts, 1); // auto-prompt del initState
+      final button = find.text('Usar desbloqueo del dispositivo');
+      expect(button, findsOneWidget);
 
-    await tester.tap(button);
-    await tester.pump();
-    expect(fake.prompts, 2);
-    expect(find.text('Desbloquear'), findsOneWidget); // sigue bloqueado
-  });
+      await tester.tap(button);
+      await tester.pump();
+      expect(fake.prompts, 2);
+      expect(find.text('Desbloquear'), findsOneWidget); // sigue bloqueado
+    },
+  );
 }

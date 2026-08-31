@@ -9,6 +9,19 @@ import 'sync_transport.dart';
 /// (back off and retry).
 enum SyncTransportErrorKind { permissionDenied, offline, unknown }
 
+/// What a Firestore failure means to the sync, for the two places that have to
+/// answer it: a request that threw, and a snapshot listener that died. Shared
+/// so a listener error is classified exactly as the equivalent read would be —
+/// they carry the same codes and deserve the same verdict.
+SyncTransportErrorKind syncErrorKindOf(Object error) =>
+    error is FirebaseException
+    ? switch (error.code) {
+        'permission-denied' => SyncTransportErrorKind.permissionDenied,
+        'unavailable' => SyncTransportErrorKind.offline,
+        _ => SyncTransportErrorKind.unknown,
+      }
+    : SyncTransportErrorKind.unknown;
+
 class SyncTransportException implements Exception {
   const SyncTransportException(this.kind, this.message, [this.cause]);
 
@@ -71,52 +84,46 @@ class FirestoreTransport implements SyncTransport {
     String congregationId,
     List<ItemDoc> docs,
     Set<String> activityScopes,
-  ) =>
-      _guard(() async {
-        for (var start = 0; start < docs.length; start += _batchLimit) {
-          final chunk = docs.sublist(
-              start,
-              start + _batchLimit > docs.length
-                  ? docs.length
-                  : start + _batchLimit);
-          final batch = _db.batch();
-          for (final doc in chunk) {
-            batch.set(_items(congregationId).doc(doc.entityId), {
-              'entity': doc.entity,
-              'programTypeId': doc.programTypeId,
-              'hlc': doc.hlc,
-              'srcDevice': doc.srcDevice,
-              'keyVersion': doc.keyVersion,
-              'blob': doc.blob,
-              'serverTs': FieldValue.serverTimestamp(),
-            });
-          }
-          // Same batch: peers get ONE cheap signal per push, and the rules
-          // member-doc get() is cached across the whole request.
-          batch.set(
-            _activity(congregationId),
-            {
-              'scopes': {
-                for (final scope in activityScopes)
-                  scope: FieldValue.serverTimestamp(),
-              },
-              'srcDevice': chunk.first.srcDevice,
-            },
-            SetOptions(merge: true),
-          );
-          await batch.commit().timeout(_writeTimeout);
-        }
-      });
+  ) => _guard(() async {
+    for (var start = 0; start < docs.length; start += _batchLimit) {
+      final chunk = docs.sublist(
+        start,
+        start + _batchLimit > docs.length ? docs.length : start + _batchLimit,
+      );
+      final batch = _db.batch();
+      for (final doc in chunk) {
+        batch.set(_items(congregationId).doc(doc.entityId), {
+          'entity': doc.entity,
+          'programTypeId': doc.programTypeId,
+          'hlc': doc.hlc,
+          'srcDevice': doc.srcDevice,
+          'keyVersion': doc.keyVersion,
+          'blob': doc.blob,
+          'serverTs': FieldValue.serverTimestamp(),
+        });
+      }
+      // Same batch: peers get ONE cheap signal per push, and the rules
+      // member-doc get() is cached across the whole request.
+      batch.set(_activity(congregationId), {
+        'scopes': {
+          for (final scope in activityScopes)
+            scope: FieldValue.serverTimestamp(),
+        },
+        'srcDevice': chunk.first.srcDevice,
+      }, SetOptions(merge: true));
+      await batch.commit().timeout(_writeTimeout);
+    }
+  });
 
   @override
   Future<List<ItemDoc>> pullSince(String congregationId, String? cursor) =>
       _guard(() async {
-        var query = _items(congregationId)
-            .orderBy('serverTs')
-            .limit(pageSize);
+        var query = _items(congregationId).orderBy('serverTs').limit(pageSize);
         if (cursor != null) {
-          query = query.where('serverTs',
-              isGreaterThan: decodeServerTs(cursor));
+          query = query.where(
+            'serverTs',
+            isGreaterThan: decodeServerTs(cursor),
+          );
         }
         // Source.server: a doc whose write is still latency-compensated has
         // serverTs == null locally; never let it poison the cursor.
@@ -129,24 +136,24 @@ class FirestoreTransport implements SyncTransport {
 
   @override
   Future<void> deleteAllItems(String congregationId) => _guard(() async {
-        // Page through the items collection deleting in batches under the
-        // 500-op cap. Each page re-queries from the start, so already-deleted
-        // docs fall away and an interrupted run simply resumes.
-        while (true) {
-          final snap = await _items(congregationId)
-              .limit(_batchLimit)
-              .get(const GetOptions(source: Source.server));
-          if (snap.docs.isEmpty) break;
-          final batch = _db.batch();
-          for (final d in snap.docs) {
-            batch.delete(d.reference);
-          }
-          await batch.commit().timeout(_writeTimeout);
-          if (snap.docs.length < _batchLimit) break;
-        }
-        // The heartbeat is not in the items collection: delete it explicitly.
-        await _activity(congregationId).delete().timeout(_writeTimeout);
-      });
+    // Page through the items collection deleting in batches under the
+    // 500-op cap. Each page re-queries from the start, so already-deleted
+    // docs fall away and an interrupted run simply resumes.
+    while (true) {
+      final snap = await _items(
+        congregationId,
+      ).limit(_batchLimit).get(const GetOptions(source: Source.server));
+      if (snap.docs.isEmpty) break;
+      final batch = _db.batch();
+      for (final d in snap.docs) {
+        batch.delete(d.reference);
+      }
+      await batch.commit().timeout(_writeTimeout);
+      if (snap.docs.length < _batchLimit) break;
+    }
+    // The heartbeat is not in the items collection: delete it explicitly.
+    await _activity(congregationId).delete().timeout(_writeTimeout);
+  });
 
   ItemDoc _toItemDoc(QueryDocumentSnapshot<Map<String, dynamic>> d) {
     final data = d.data();
@@ -167,17 +174,16 @@ class FirestoreTransport implements SyncTransport {
       return await op();
     } on FirebaseException catch (e) {
       throw SyncTransportException(
-        switch (e.code) {
-          'permission-denied' => SyncTransportErrorKind.permissionDenied,
-          'unavailable' => SyncTransportErrorKind.offline,
-          _ => SyncTransportErrorKind.unknown,
-        },
+        syncErrorKindOf(e),
         'Firestore ${e.code}: ${e.message}',
         e,
       );
     } on TimeoutException catch (e) {
       throw SyncTransportException(
-          SyncTransportErrorKind.offline, 'Firestore write timed out.', e);
+        SyncTransportErrorKind.offline,
+        'Firestore write timed out.',
+        e,
+      );
     }
   }
 }

@@ -26,7 +26,7 @@ class CongregationsRepository {
 
   /// Localized fallback used by [ensureDefault] on fresh installs (the
   /// v1→v2 migration covers upgrades).
-  final String defaultName;
+  final String Function() defaultName;
 
   SimpleSelectStatement<$CongregationsTable, CongregationRecord> _alive() =>
       _db.select(_db.congregations)
@@ -38,13 +38,12 @@ class CongregationsRepository {
   /// opening that stream from a background fill keeps a drift subscription
   /// alive for the rest of the caller's life.
   Future<CongregationSettings?> settingsOf(String id) async {
-    final row = await (_db.select(_db.congregations)
-          ..where((t) => t.id.equals(id) & t.deletedAt.isNull())
-          ..limit(1))
-        .getSingleOrNull();
-    return row == null
-        ? null
-        : CongregationSettings.fromJson(row.settingsJson);
+    final row =
+        await (_db.select(_db.congregations)
+              ..where((t) => t.id.equals(id) & t.deletedAt.isNull())
+              ..limit(1))
+            .getSingleOrNull();
+    return row == null ? null : CongregationSettings.fromJson(row.settingsJson);
   }
 
   /// Creation order (new ones append at the end, as the old controller did).
@@ -86,8 +85,9 @@ class CongregationsRepository {
   }) async {
     final hlc = await _scribe.nextHlc();
     await _db.transaction(() async {
-      await (_db.update(_db.congregations)..where((t) => t.id.equals(id)))
-          .write(
+      await (_db.update(
+        _db.congregations,
+      )..where((t) => t.id.equals(id))).write(
         CongregationsCompanion(
           name: Value(name),
           number: Value(number),
@@ -105,14 +105,14 @@ class CongregationsRepository {
   Future<String> ensureDefault() async {
     final existing = await (_alive()..limit(1)).getSingleOrNull();
     if (existing != null) return existing.id;
-    return (await create(name: defaultName, number: '')).id;
+    return (await create(name: defaultName(), number: '')).id;
   }
 
   Congregation _toModel(CongregationRecord r) => Congregation(
-        id: r.id,
-        name: r.name,
-        number: r.number,
-        color: r.color,
-        settings: CongregationSettings.fromJson(r.settingsJson),
-      );
+    id: r.id,
+    name: r.name,
+    number: r.number,
+    color: r.color,
+    settings: CongregationSettings.fromJson(r.settingsJson),
+  );
 }

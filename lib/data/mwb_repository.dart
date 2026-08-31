@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 import 'background.dart';
 
+import '../domain/mwb_calendar.dart';
 import '../models/week.dart';
 import 'epub_parser.dart';
 import 'mwb_api.dart';
@@ -11,8 +13,20 @@ import 'mwb_cache.dart';
 
 /// Unzip + HTML parsing are tens-of-ms of pure CPU per notebook: run them off
 /// the UI isolate (they hit it on editor open and during the startup sync).
-Future<List<Week>> _parseEpubInBackground(Uint8List bytes, String lang) =>
-    runInBackground(() => parseEpub(bytes, lang: lang));
+Future<List<Week>> _parseEpubInBackground(
+  Uint8List bytes,
+  String lang,
+  String issue,
+) => runInBackground(() => parseEpub(bytes, lang: lang, issue: issue));
+
+/// A notebook is missing and this platform cannot fetch it — web, where the
+/// workbook file is behind a host that serves no CORS header. Carries no
+/// message: the UI has one, and it is an instruction, not a diagnosis.
+class NotebookNotDownloadable implements Exception {
+  const NotebookNotDownloadable();
+  @override
+  String toString() => 'NotebookNotDownloadable';
+}
 
 /// Data facade: serves the mwb notebook from the on-disk cache, downloading it
 /// from jw.org only the first time (then re-parsing the cached EPUB).
@@ -34,45 +48,141 @@ class MwbRepository {
   /// re-downloaded, so the bytes behind a key do not change.
   final _parsed = <String, List<Week>>{};
 
+  /// Loads still running, keyed the same way.
+  ///
+  /// [_parsed] holds finished results only, so it cannot collapse callers that
+  /// start together: two sync passes racing on the same issue both miss it and
+  /// both go to the network for the same file. This is what makes the second
+  /// one wait on the first instead.
+  final _inFlight = <String, Future<List<Week>>>{};
+
   /// Returns the weeks of notebook [issue] (YYYYMM). Reads the cached EPUB when
   /// present (no network); otherwise downloads, caches and parses it. Throws an
   /// [Exception] with a readable message if the download/parse yields no weeks.
   Future<List<Week>> weeks(String issue, {String lang = 'S'}) async {
-    final memo = _parsed['$issue.$lang'];
-    if (memo != null) return memo;
-
-    final cached = await _cache.readEpub(issue, lang);
-    final bytes =
-        cached ?? await MwbApi.downloadEpub(issue, lang: lang, client: _client);
-    final weeks = await _parseEpubInBackground(bytes, lang);
+    final weeks = await _load(issue, lang);
     if (weeks.isEmpty) {
       throw Exception('No se encontraron semanas en el notebook $issue.');
     }
-    if (cached == null) await _cache.putEpub(issue, lang, bytes, weeks.length);
-    _parsed['$issue.$lang'] = weeks;
     return weeks;
   }
 
   /// Ensures notebook [issue] is in the cache, downloading it if missing.
   /// Returns the number of weeks. Used by the background sync (which owns the
   /// back-off policy), kept separate from the UI-facing [weeks].
-  Future<int> ensureCached(String issue, {String lang = 'S'}) async {
-    final memo = _parsed['$issue.$lang'];
-    if (memo != null) return memo.length;
+  Future<int> ensureCached(String issue, {String lang = 'S'}) async =>
+      (await _load(issue, lang)).length;
 
-    final cached = await _cache.readEpub(issue, lang);
-    if (cached != null) {
-      final weeks = await _parseEpubInBackground(cached, lang);
-      _parsed['$issue.$lang'] = weeks;
-      return weeks.length;
+  /// The week starting on [weekStart] in workbook language [lang], or null
+  /// when no cached workbook of that language holds it.
+  ///
+  /// Never goes to the network: downloading is the sync's job, and a caller
+  /// that cannot find a week must leave what the program already has alone
+  /// rather than block on a fetch. Presence is checked against the manifest
+  /// rather than by reading the EPUB, which would pull megabytes off disk just
+  /// to answer a yes/no.
+  Future<Week?> weekFor(String weekStart, String lang) async {
+    if (weekStart.isEmpty) return null;
+    final manifest = await _cache.readManifest();
+    for (final issue in issuesForWeekStart(weekStart)) {
+      if (!_cache.has(manifest, issue, lang)) continue;
+      for (final week in await _load(issue, lang)) {
+        if (week.weekStart == weekStart) return week;
+      }
     }
+    return null;
+  }
+
+  /// Files a workbook the user picked off their own disk exactly as a download
+  /// would have, under whatever issue and language the FILE says it is.
+  ///
+  /// This is the only way a notebook gets in on web. jw.org's lookup API sends
+  /// `access-control-allow-origin: *`, but every file it points at — EPUB,
+  /// JWPUB, PDF alike — is served from a host that sends no CORS header at all
+  /// and answers 403 to a preflight, so no page policy makes it readable from a
+  /// browser. See docs/RELEASE.md.
+  ///
+  /// Throws [FormatException] when the file is not a meeting workbook, so the
+  /// caller can say which of the two went wrong without parsing a message.
+  Future<({String issue, String lang, int weeks})> importEpub(
+    Uint8List bytes,
+  ) async {
+    final parsed = await runInBackground(() => parseWorkbookEpub(bytes));
+    if (parsed == null) {
+      throw const FormatException('Not a meeting workbook EPUB.');
+    }
+    if (parsed.weeks.isEmpty) {
+      throw const FormatException('The workbook holds no weeks.');
+    }
+    await _cache.putEpub(parsed.issue, parsed.lang, bytes, parsed.weeks.length);
+    _parsed['${parsed.issue}.${parsed.lang}'] = parsed.weeks;
+    return (issue: parsed.issue, lang: parsed.lang, weeks: parsed.weeks.length);
+  }
+
+  /// Re-downloads [issue]/[lang] even though it is cached, replacing what is
+  /// on disk only once the fetch and the parse have both succeeded.
+  ///
+  /// Nothing else here would ever notice a correction: a cached issue is never
+  /// fetched twice, by design. Deliberately not delete-then-download — a user
+  /// who asks for this offline must not end up with less than they started
+  /// with.
+  ///
+  /// Refused outright on web, for the same reason [_read] refuses there. Left
+  /// unguarded this was the one path that still asked the browser for the file
+  /// itself: every attempt died, the caller reported "could not refresh", and
+  /// on the deployed site — where a Content-Security-Policy names the hosts the
+  /// page may reach — each one also logged a violation for a button that could
+  /// never have worked. Widening that policy would not have helped: the file's
+  /// host sends no CORS header, so the fetch fails one step later regardless.
+  Future<void> refresh(String issue, String lang) async {
+    if (kIsWeb) throw const NotebookNotDownloadable();
     final bytes = await MwbApi.downloadEpub(issue, lang: lang, client: _client);
-    final weeks = await _parseEpubInBackground(bytes, lang);
+    final weeks = await _parseEpubInBackground(bytes, lang, issue);
     if (weeks.isEmpty) {
       throw Exception('No se encontraron semanas en el notebook $issue.');
     }
     await _cache.putEpub(issue, lang, bytes, weeks.length);
     _parsed['$issue.$lang'] = weeks;
-    return weeks.length;
+  }
+
+  /// The one path to a notebook's weeks: memo, then in-flight load, then disk,
+  /// then the network. A failure drops the in-flight entry so the next caller
+  /// retries rather than awaiting a dead future.
+  Future<List<Week>> _load(String issue, String lang) {
+    final key = '$issue.$lang';
+    final memo = _parsed[key];
+    if (memo != null) return Future.value(memo);
+    // The callback body is a block on purpose: `Map.remove` hands back the
+    // future being removed, and an arrow body would return it — `whenComplete`
+    // waits on a returned future, so it would wait on itself and never settle.
+    return _inFlight[key] ??= _read(issue, lang).whenComplete(() {
+      _inFlight.remove(key);
+    });
+  }
+
+  Future<List<Week>> _read(String issue, String lang) async {
+    final cached = await _cache.readEpub(issue, lang);
+    if (cached == null && kIsWeb) {
+      // Not attempted rather than attempted-and-failed: the browser cannot
+      // read the file at any policy (see [importEpub]), so the sync would
+      // spend its back-off on a request that can never succeed and the user
+      // would be shown a CORS error instead of the thing to do about it.
+      throw const NotebookNotDownloadable();
+    }
+    final bytes =
+        cached ?? await MwbApi.downloadEpub(issue, lang: lang, client: _client);
+    final weeks = await _parseEpubInBackground(bytes, lang, issue);
+    // A freshly downloaded notebook with no weeks is a failed download, not an
+    // empty notebook: it must not be cached, and the sync has to see it fail so
+    // its back-off kicks in. A cached one that parses empty is left to the
+    // caller — the catalog lists it with no weeks rather than breaking a pass.
+    if (cached == null) {
+      if (weeks.isEmpty) {
+        throw Exception('No se encontraron semanas en el notebook $issue.');
+      }
+      await _cache.putEpub(issue, lang, bytes, weeks.length);
+    }
+    _parsed['$issue.$lang'] = weeks;
+    return weeks;
   }
 }

@@ -21,20 +21,20 @@ class CacheEntry {
   });
 
   Map<String, dynamic> toJson() => {
-        'issue': issue,
-        'lang': lang,
-        'fileName': fileName,
-        'downloadedAt': downloadedAt.toIso8601String(),
-        'weekCount': weekCount,
-      };
+    'issue': issue,
+    'lang': lang,
+    'fileName': fileName,
+    'downloadedAt': downloadedAt.toIso8601String(),
+    'weekCount': weekCount,
+  };
 
   factory CacheEntry.fromJson(Map<String, dynamic> j) => CacheEntry(
-        issue: j['issue'] as String,
-        lang: j['lang'] as String,
-        fileName: j['fileName'] as String,
-        downloadedAt: DateTime.parse(j['downloadedAt'] as String),
-        weekCount: (j['weekCount'] as num).toInt(),
-      );
+    issue: j['issue'] as String,
+    lang: j['lang'] as String,
+    fileName: j['fileName'] as String,
+    downloadedAt: DateTime.parse(j['downloadedAt'] as String),
+    weekCount: (j['weekCount'] as num).toInt(),
+  );
 }
 
 /// A failed download attempt (e.g. a future issue not published yet). Used to
@@ -53,18 +53,18 @@ class FailedAttempt {
   });
 
   Map<String, dynamic> toJson() => {
-        'issue': issue,
-        'lang': lang,
-        'lastAttempt': lastAttempt.toIso8601String(),
-        'message': message,
-      };
+    'issue': issue,
+    'lang': lang,
+    'lastAttempt': lastAttempt.toIso8601String(),
+    'message': message,
+  };
 
   factory FailedAttempt.fromJson(Map<String, dynamic> j) => FailedAttempt(
-        issue: j['issue'] as String,
-        lang: j['lang'] as String,
-        lastAttempt: DateTime.parse(j['lastAttempt'] as String),
-        message: j['message'] as String?,
-      );
+    issue: j['issue'] as String,
+    lang: j['lang'] as String,
+    lastAttempt: DateTime.parse(j['lastAttempt'] as String),
+    message: j['message'] as String?,
+  );
 }
 
 /// On-disk cache index (app-owned metadata, hence JSON).
@@ -75,21 +75,21 @@ class CacheManifest {
   const CacheManifest({this.entries = const [], this.failures = const []});
 
   Map<String, dynamic> toJson() => {
-        'version': 1,
-        'entries': [for (final e in entries) e.toJson()],
-        'failures': [for (final f in failures) f.toJson()],
-      };
+    'version': 1,
+    'entries': [for (final e in entries) e.toJson()],
+    'failures': [for (final f in failures) f.toJson()],
+  };
 
   factory CacheManifest.fromJson(Map<String, dynamic> j) => CacheManifest(
-        entries: [
-          for (final e in (j['entries'] as List? ?? const []))
-            CacheEntry.fromJson(e as Map<String, dynamic>),
-        ],
-        failures: [
-          for (final f in (j['failures'] as List? ?? const []))
-            FailedAttempt.fromJson(f as Map<String, dynamic>),
-        ],
-      );
+    entries: [
+      for (final e in (j['entries'] as List? ?? const []))
+        CacheEntry.fromJson(e as Map<String, dynamic>),
+    ],
+    failures: [
+      for (final f in (j['failures'] as List? ?? const []))
+        FailedAttempt.fromJson(f as Map<String, dynamic>),
+    ],
+  );
 }
 
 /// Disk cache for downloaded notebook EPUBs plus a JSON manifest. Lets the app
@@ -136,54 +136,104 @@ class MwbCache {
   /// Stores [bytes], records the entry in the manifest and clears any prior
   /// failure for this issue.
   Future<void> putEpub(
-      String issue, String lang, Uint8List bytes, int weekCount) async {
+    String issue,
+    String lang,
+    Uint8List bytes,
+    int weekCount,
+  ) async {
     final name = _epubName(issue, lang);
     await _store.writeBytes(name, bytes);
 
     final m = await readManifest();
-    await _writeManifest(CacheManifest(
-      entries: [
-        for (final e in m.entries)
-          if (!(e.issue == issue && e.lang == lang)) e,
-        CacheEntry(
-          issue: issue,
-          lang: lang,
-          fileName: name,
-          downloadedAt: DateTime.now(),
-          weekCount: weekCount,
-        ),
-      ],
-      failures: [
-        for (final fa in m.failures)
-          if (!(fa.issue == issue && fa.lang == lang)) fa,
-      ],
-    ));
+    await _writeManifest(
+      CacheManifest(
+        entries: [
+          for (final e in m.entries)
+            if (!(e.issue == issue && e.lang == lang)) e,
+          CacheEntry(
+            issue: issue,
+            lang: lang,
+            fileName: name,
+            downloadedAt: DateTime.now(),
+            weekCount: weekCount,
+          ),
+        ],
+        failures: [
+          for (final fa in m.failures)
+            if (!(fa.issue == issue && fa.lang == lang)) fa,
+        ],
+      ),
+    );
   }
 
   /// Records/updates the last failed attempt for back-off. [at] defaults to now
   /// (injectable for deterministic tests).
-  Future<void> recordFailure(String issue, String lang, String message,
-      {DateTime? at}) async {
+  Future<void> recordFailure(
+    String issue,
+    String lang,
+    String message, {
+    DateTime? at,
+  }) async {
     final m = await readManifest();
-    await _writeManifest(CacheManifest(
-      entries: m.entries,
-      failures: [
-        for (final fa in m.failures)
-          if (!(fa.issue == issue && fa.lang == lang)) fa,
-        FailedAttempt(
-          issue: issue,
-          lang: lang,
-          lastAttempt: at ?? DateTime.now(),
-          message: message,
-        ),
-      ],
-    ));
+    await _writeManifest(
+      CacheManifest(
+        entries: m.entries,
+        failures: [
+          for (final fa in m.failures)
+            if (!(fa.issue == issue && fa.lang == lang)) fa,
+          FailedAttempt(
+            issue: issue,
+            lang: lang,
+            lastAttempt: at ?? DateTime.now(),
+            message: message,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Drops every cached workbook whose issue is not in [issues], whatever its
+  /// language, and forgets their failures. Returns what it removed.
+  ///
+  /// The unit is the ISSUE, not the issue-and-language pair, and that is
+  /// deliberate. A program written before v6 is identified by matching its
+  /// printed heading against whichever cached workbook happens to list it, so
+  /// purging the language a congregation stopped meeting in would take away
+  /// the only thing that can still repair those rows.
+  Future<List<CacheEntry>> retainIssues(Set<String> issues) async {
+    final m = await readManifest();
+    final dropped = [
+      for (final e in m.entries)
+        if (!issues.contains(e.issue)) e,
+    ];
+    if (dropped.isEmpty) return const [];
+    for (final e in dropped) {
+      await _store.delete(e.fileName);
+    }
+    await _writeManifest(
+      CacheManifest(
+        entries: [
+          for (final e in m.entries)
+            if (issues.contains(e.issue)) e,
+        ],
+        failures: [
+          for (final f in m.failures)
+            if (issues.contains(f.issue)) f,
+        ],
+      ),
+    );
+    return dropped;
   }
 
   /// True if [issue] failed less than [backoff] ago (so it should be skipped).
   /// [now] is injectable for deterministic tests.
-  bool inBackoff(CacheManifest m, String issue, String lang,
-      {Duration backoff = const Duration(days: 1), DateTime? now}) {
+  bool inBackoff(
+    CacheManifest m,
+    String issue,
+    String lang, {
+    Duration backoff = const Duration(days: 1),
+    DateTime? now,
+  }) {
     final ref = now ?? DateTime.now();
     for (final fa in m.failures) {
       if (fa.issue == issue && fa.lang == lang) {

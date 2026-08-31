@@ -10,24 +10,30 @@ import 'db_provider.dart';
 // here lives below AuthGate — watching these providers while the session is
 // locked is a programming error (see dbProvider).
 
-final peopleRepositoryProvider = Provider<PeopleRepository>((ref) =>
-    PeopleRepository(ref.watch(dbProvider),
-        ref.watch(congregationsRepositoryProvider),
-        ref.watch(syncScribeProvider)));
+final peopleRepositoryProvider = Provider<PeopleRepository>(
+  (ref) => PeopleRepository(
+    ref.watch(dbProvider),
+    ref.watch(congregationsRepositoryProvider),
+    ref.watch(syncScribeProvider),
+  ),
+);
 
 /// Reactive directory straight from drift.
 final peopleStreamProvider = StreamProvider<List<Person>>(
-    (ref) => ref.watch(peopleRepositoryProvider).watchAll());
+  (ref) => ref.watch(peopleRepositoryProvider).watchAll(),
+);
 
 /// Synchronous view of the directory (empty during the first frame). Kept
 /// synchronous so pickers/filters read it directly, same policy as
 /// [notebooksProvider].
 final peopleProvider = Provider<List<Person>>(
-    (ref) => ref.watch(peopleStreamProvider).asData?.value ?? const []);
+  (ref) => ref.watch(peopleStreamProvider).asData?.value ?? const [],
+);
 
 /// True until the directory stream emits — drives the skeleton UI.
-final peopleLoadingProvider =
-    Provider<bool>((ref) => ref.watch(peopleStreamProvider).isLoading);
+final peopleLoadingProvider = Provider<bool>(
+  (ref) => ref.watch(peopleStreamProvider).isLoading,
+);
 
 typedef KeyedPerson = ({String key, Person person});
 
@@ -45,8 +51,9 @@ final activePeopleKeyedProvider = Provider<List<KeyedPerson>>((ref) {
 });
 
 /// Active ones sorted by normalized display name (picker list).
-final activePeopleProvider = Provider<List<Person>>((ref) =>
-    [for (final e in ref.watch(activePeopleKeyedProvider)) e.person]);
+final activePeopleProvider = Provider<List<Person>>(
+  (ref) => [for (final e in ref.watch(activePeopleKeyedProvider)) e.person],
+);
 
 /// Recently used (by `lastUsed` desc), max 6.
 final recentPeopleProvider = Provider<List<Person>>((ref) {
@@ -84,8 +91,9 @@ List<Person> filterPeople(
           (originCongregation == null ||
               p.originCongregation == originCongregation) &&
           (q.isEmpty ||
-              normalizeName('${p.displayName} ${p.firstName} ${p.lastName}')
-                  .contains(q)))
+              normalizeName(
+                '${p.displayName} ${p.firstName} ${p.lastName}',
+              ).contains(q)))
         p,
   ];
 }
@@ -116,22 +124,24 @@ class PersonActions {
         return;
       }
     }
-    await _repo.save(Person(
-      id: _uuid.v4(),
-      congregationId: '', // resolved to the default congregation on save
-      firstName: '',
-      lastName: '',
-      displayName: clean,
-      gender: Gender.unspecified,
-      privilege: Role.publisher,
-      qualifications: const [],
-      originCongregation: '',
-      active: true,
-      notes: '',
-      createdAt: now,
-      updatedAt: now,
-      lastUsed: now,
-    ));
+    await _repo.save(
+      Person(
+        id: _uuid.v4(),
+        congregationId: '', // resolved to the default congregation on save
+        firstName: '',
+        lastName: '',
+        displayName: clean,
+        gender: Gender.unspecified,
+        privilege: Role.publisher,
+        qualifications: const [],
+        originCongregation: '',
+        active: true,
+        notes: '',
+        createdAt: now,
+        updatedAt: now,
+        lastUsed: now,
+      ),
+    );
   }
 
   Future<void> save(Person p) => _repo.save(p);

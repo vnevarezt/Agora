@@ -14,15 +14,11 @@ import 'motion.dart';
 /// export sheet so both offer the same choices. Holds the selected format;
 /// [onExport] fires with (format, action, shareOrigin).
 class ExportPanel extends StatefulWidget {
-  const ExportPanel({
-    super.key,
-    required this.enabled,
-    required this.onExport,
-  });
+  const ExportPanel({super.key, required this.enabled, required this.onExport});
 
   final bool enabled;
   final void Function(ExportFormat format, ExportAction action, Rect? origin)
-      onExport;
+  onExport;
 
   @override
   State<ExportPanel> createState() => _ExportPanelState();
@@ -52,8 +48,7 @@ class _ExportPanelState extends State<ExportPanel> {
                 label: tr.export.saveAction,
                 expand: true,
                 onPressed: widget.enabled
-                    ? () => widget.onExport(
-                        _format, ExportAction.saveAs, null)
+                    ? () => widget.onExport(_format, ExportAction.saveAs, null)
                     : null,
               ),
             ),
@@ -67,8 +62,11 @@ class _ExportPanelState extends State<ExportPanel> {
                   label: tr.export.shareAction,
                   expand: true,
                   onPressed: widget.enabled
-                      ? () => widget.onExport(_format, ExportAction.share,
-                          originRectOf(btnContext))
+                      ? () => widget.onExport(
+                          _format,
+                          ExportAction.share,
+                          originRectOf(btnContext),
+                        )
                       : null,
                 ),
               ),
@@ -195,8 +193,11 @@ class _Segment extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon,
-                  size: AppIcon.control, color: selected ? t.accentStrong : t.textMute),
+              Icon(
+                icon,
+                size: AppIcon.control,
+                color: selected ? t.accentStrong : t.textMute,
+              ),
               const SizedBox(width: Space.s6),
               Text(
                 label,

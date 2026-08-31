@@ -9,6 +9,7 @@ import '../../state/program_form.dart';
 import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
+import '../widgets/agora_mark.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 
@@ -33,7 +34,11 @@ class PdfPreviewView extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.description_outlined, size: AppIcon.hero, color: t.textMute),
+            Icon(
+              Icons.description_outlined,
+              size: AppIcon.hero,
+              color: t.textMute,
+            ),
             const SizedBox(height: Space.s12),
             Text(
               context.t.preview.emptyHint,
@@ -50,7 +55,10 @@ class PdfPreviewView extends ConsumerWidget {
 
     final preview = ref.watch(previewProvider);
     return preview.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      // The one wait in the app the mark carries: a whole panel, held for as
+      // long as a PDF takes to render. Everywhere else a spinner is a detail
+      // inside a control, and a logo there would be noise.
+      loading: () => const Center(child: AgoraLoader(size: Dimens.markLoader)),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(Space.s24),
@@ -91,8 +99,12 @@ class _Vista extends ConsumerWidget {
         void escalaCentrada(double s) {
           s = s.clamp(0.2, 6.0);
           controller.value = Matrix4.identity()
-            ..translateByDouble((c.maxWidth - childW * s) / 2,
-                (c.maxHeight - childH * s) / 2, 0, 1)
+            ..translateByDouble(
+              (c.maxWidth - childW * s) / 2,
+              (c.maxHeight - childH * s) / 2,
+              0,
+              1,
+            )
             ..scaleByDouble(s, s, s, 1);
           ref.read(previewProvider.notifier).adjustZoomQuality(s);
         }
@@ -150,29 +162,32 @@ class _Vista extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   AppIconButton(
-                      icon: Icons.add,
-                      elevated: true,
-                      tooltip: context.t.preview.zoomIn,
-                      onPressed: () => zoom(1.3)),
+                    icon: Icons.add,
+                    elevated: true,
+                    tooltip: context.t.preview.zoomIn,
+                    onPressed: () => zoom(1.3),
+                  ),
                   const SizedBox(height: Space.s6),
                   AppIconButton(
-                      icon: Icons.remove,
-                      elevated: true,
-                      tooltip: context.t.preview.zoomOut,
-                      onPressed: () => zoom(1 / 1.3)),
+                    icon: Icons.remove,
+                    elevated: true,
+                    tooltip: context.t.preview.zoomOut,
+                    onPressed: () => zoom(1 / 1.3),
+                  ),
                   const SizedBox(height: Space.s6),
                   AppIconButton(
-                      icon: Icons.fit_screen_outlined,
-                      elevated: true,
-                      tooltip: context.t.preview.fitPage,
-                      onPressed: () => escalaCentrada(fitPage)),
+                    icon: Icons.fit_screen_outlined,
+                    elevated: true,
+                    tooltip: context.t.preview.fitPage,
+                    onPressed: () => escalaCentrada(fitPage),
+                  ),
                   const SizedBox(height: Space.s6),
                   AppIconButton(
-                      icon: Icons.width_normal_outlined,
-                      elevated: true,
-                      tooltip: context.t.preview.fitWidth,
-                      onPressed: () =>
-                          controller.value = Matrix4.identity()),
+                    icon: Icons.width_normal_outlined,
+                    elevated: true,
+                    tooltip: context.t.preview.fitWidth,
+                    onPressed: () => controller.value = Matrix4.identity(),
+                  ),
                 ],
               ),
             ),

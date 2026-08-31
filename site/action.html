@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{action.meta.title}}</title>
+<!-- Reached only from a one-time link in an email: there is nothing here to
+     index, and an indexed copy would just be a dead oobCode in search results. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/icons/Icon-192.png">
+
+<link rel="preload" href="/fonts/Manrope-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Manrope-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+
+<script>
+  /* Same pre-paint read as the landing: someone who chose dark should not be
+     flashed a white page on arriving here from an email. */
+  (function () {
+    try {
+      var t = localStorage.getItem('agora-theme');
+      if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  })();
+</script>
+
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/action.css">
+</head>
+<body>
+
+<main class="auth">
+  <div class="auth-col">
+
+    <div class="lockup enter">
+      <span class="lockup-mark" aria-hidden="true">{{brand.mark}}</span>
+      <span class="lockup-name">Agora</span>
+    </div>
+
+    <div class="card enter" style="--enter-delay: 60ms">
+
+      <!-- Checking the code ------------------------------------------- -->
+      <section class="state centered" id="s-loading" aria-live="polite">
+        <span class="spinner" role="status" aria-label="{{action.checking}}"></span>
+        <p class="auth-sub center-text">{{action.checking}}</p>
+      </section>
+
+      <!-- Choose a new password --------------------------------------- -->
+      <section class="state" id="s-reset" hidden>
+        <h1 class="auth-title">{{action.reset.title}}</h1>
+        <p class="auth-sub">{{action.reset.sub}} <strong id="s-reset-email"></strong></p>
+
+        <form id="s-reset-form" novalidate>
+          <div class="field">
+            <label class="field-label" for="pw">{{action.reset.passwordLabel}}</label>
+            <input id="pw" type="password" autocomplete="new-password" required
+                   placeholder="{{action.reset.passwordPlaceholder}}">
+            <p class="hint">{{action.reset.hint}}</p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="pw2">{{action.reset.confirmLabel}}</label>
+            <input id="pw2" type="password" autocomplete="new-password" required>
+          </div>
+          <p class="notice notice-error" id="s-reset-error" hidden role="alert"
+             data-mismatch="{{action.reset.mismatch}}"
+             data-weak="{{action.reset.weak}}"
+             data-generic="{{action.errors.generic}}"></p>
+          <button class="btn" type="submit" id="s-reset-submit">{{action.reset.cta}}</button>
+        </form>
+      </section>
+
+      <!-- Finished ---------------------------------------------------- -->
+      <section class="state centered" id="s-done" hidden>
+        <span class="result-icon result-ok" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+        </span>
+        <h1 class="auth-title center-text" id="s-done-title"
+            data-reset="{{action.reset.done.title}}"
+            data-verify="{{action.verify.done.title}}"></h1>
+        <p class="auth-sub center-text" id="s-done-sub"
+           data-reset="{{action.reset.done.sub}}"
+           data-verify="{{action.verify.done.sub}}"></p>
+        <a class="btn" href="/app/">{{action.openApp}}</a>
+      </section>
+
+      <!-- Dead link --------------------------------------------------- -->
+      <section class="state centered" id="s-invalid" hidden>
+        <span class="result-icon result-bad" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5m0 3.5v.01M12 3l9 16H3z"/></svg>
+        </span>
+        <h1 class="auth-title center-text">{{action.invalid.title}}</h1>
+        <p class="auth-sub center-text">{{action.invalid.sub}}</p>
+        <a class="btn" href="/app/">{{action.openApp}}</a>
+      </section>
+
+    </div>
+
+    <p class="legal">{{action.legal}}</p>
+  </div>
+</main>
+
+<script src="/action.js" defer></script>
+</body>
+</html>

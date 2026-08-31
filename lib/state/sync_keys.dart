@@ -42,8 +42,9 @@ class SyncKeysError extends SyncKeysState {
 /// cleared on sign-out, which is why it lives outside the controller.
 const syncOwnerUidKey = 'sync_owner_uid';
 
-final syncKeysProvider =
-    NotifierProvider<SyncKeysController, SyncKeysState>(SyncKeysController.new);
+final syncKeysProvider = NotifierProvider<SyncKeysController, SyncKeysState>(
+  SyncKeysController.new,
+);
 
 class SyncKeysController extends Notifier<SyncKeysState> {
   UserKeyService? get _service => ref.read(userKeyServiceProvider);

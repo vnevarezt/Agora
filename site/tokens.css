@@ -2,46 +2,58 @@
    Do not edit: change the Dart and re-run, or the page and the app it is
    selling stop being the same colour. */
 
+/* Three states, because the reader can override the OS.
+   Bare :root is the light palette and the fallback for everything.
+   The media query is the OS preference, guarded so an explicit "light" wins
+   over a dark OS; [data-theme="dark"] is the explicit choice, and it comes
+   last so it also wins on a light OS. Only the tokens change — no rule may
+   define a colour solely inside one of these blocks, or the other two states
+   inherit a hole. */
+
 :root {
   --bg: #f8fafd;
   --surface: #ffffff;
   --surface2: #f4f7fb;
   --border: #dee2e7;
   --border2: #eceff2;
+  --border-control: #878f9b;
   --text: #1f242d;
   --text-dim: #5d646f;
-  --text-mute: #6b7280;
-  --accent: #41629f;
-  --accent-strong: #2e5091;
-  --accent-ink: #f8fcff;
-  --accent-soft: #e7f1ff;
-  --accent-tint: #f2f7ff;
+  --text-mute: #6b7079;
+  --accent: #405cb5;
+  --accent-strong: #2f48a7;
+  --accent-ink: #fafbff;
+  --accent-soft: #eaf0ff;
+  --accent-tint: #f3f7ff;
+  --accent-on-soft: #2f48a7;
   --success: #2e6a3e;
   --success-soft: #dcf0e0;
   --success-strong: #4fa06a;
   --warning: #7a6512;
   --warning-soft: #f3ecd2;
   --warning-strong: #b9890f;
-  --alert: #b5562f;
+  --alert: #a94f2b;
   --alert-soft: #fbe7df;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b0f14;
-    --surface: #13181e;
-    --surface2: #191f26;
-    --border: #282e36;
-    --border2: #21262c;
+  :root:not([data-theme="light"]) {
+    --bg: #12161b;
+    --surface: #1a1f26;
+    --surface2: #21272f;
+    --border: #2f3742;
+    --border2: #272e37;
+    --border-control: #6b7686;
     --text: #eceff2;
     --text-dim: #a6abb2;
-    --text-mute: #7e8389;
-    --accent: #6f97e2;
-    --accent-strong: #5a84d4;
-    --accent-ink: #060d1a;
-    --accent-soft: #21344c;
-    --accent-tint: #192431;
+    --text-mute: #979ca4;
+    --accent: #7292f1;
+    --accent-strong: #5e7fe3;
+    --accent-ink: #080c1a;
+    --accent-soft: #28324d;
+    --accent-tint: #1d2331;
+    --accent-on-soft: #7c9eff;
     --success: #a9d8b8;
     --success-soft: #1e3a2a;
     --success-strong: #4fa06a;
@@ -51,4 +63,123 @@
     --alert: #e8a38c;
     --alert-soft: #40231c;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12161b;
+  --surface: #1a1f26;
+  --surface2: #21272f;
+  --border: #2f3742;
+  --border2: #272e37;
+  --border-control: #6b7686;
+  --text: #eceff2;
+  --text-dim: #a6abb2;
+  --text-mute: #979ca4;
+  --accent: #7292f1;
+  --accent-strong: #5e7fe3;
+  --accent-ink: #080c1a;
+  --accent-soft: #28324d;
+  --accent-tint: #1d2331;
+  --accent-on-soft: #7c9eff;
+  --success: #a9d8b8;
+  --success-soft: #1e3a2a;
+  --success-strong: #4fa06a;
+  --warning: #d9c27a;
+  --warning-soft: #3a3115;
+  --warning-strong: #b9890f;
+  --alert: #e8a38c;
+  --alert-soft: #40231c;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+/* The inverted band, which is how sections separate: the tone change IS the
+   divider, so nothing else has to draw one. It re-declares the token set rather
+   than introducing colours, which is what lets every component inside keep
+   using var(--text) and var(--border) without knowing where it sits. The values
+   are the ones test/ui/contrast_test.dart already proves at AA. The wash
+   differs per theme so the step away from the page ground survives — see
+   band(). */
+
+.section--invert {
+  --bg: #1d2331;
+  --surface: #1a1f26;
+  --surface2: #21272f;
+  --border: #2f3742;
+  --border2: #272e37;
+  --border-control: #6b7686;
+  --text: #eceff2;
+  --text-dim: #a6abb2;
+  --text-mute: #979ca4;
+  --accent: #7292f1;
+  --accent-strong: #5e7fe3;
+  --accent-ink: #080c1a;
+  --accent-soft: #28324d;
+  --accent-tint: #1d2331;
+  --accent-on-soft: #7c9eff;
+  --success: #a9d8b8;
+  --success-soft: #1e3a2a;
+  --success-strong: #4fa06a;
+  --warning: #d9c27a;
+  --warning-soft: #3a3115;
+  --warning-strong: #b9890f;
+  --alert: #e8a38c;
+  --alert-soft: #40231c;
+  background: var(--bg);
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .section--invert {
+    --bg: #28324d;
+    --surface: #1a1f26;
+    --surface2: #21272f;
+    --border: #2f3742;
+    --border2: #272e37;
+    --border-control: #6b7686;
+    --text: #eceff2;
+    --text-dim: #a6abb2;
+    --text-mute: #979ca4;
+    --accent: #7292f1;
+    --accent-strong: #5e7fe3;
+    --accent-ink: #080c1a;
+    --accent-soft: #28324d;
+    --accent-tint: #1d2331;
+    --accent-on-soft: #7c9eff;
+    --success: #a9d8b8;
+    --success-soft: #1e3a2a;
+    --success-strong: #4fa06a;
+    --warning: #d9c27a;
+    --warning-soft: #3a3115;
+    --warning-strong: #b9890f;
+    --alert: #e8a38c;
+    --alert-soft: #40231c;
+  }
+}
+
+:root[data-theme="dark"] .section--invert {
+  --bg: #28324d;
+  --surface: #1a1f26;
+  --surface2: #21272f;
+  --border: #2f3742;
+  --border2: #272e37;
+  --border-control: #6b7686;
+  --text: #eceff2;
+  --text-dim: #a6abb2;
+  --text-mute: #979ca4;
+  --accent: #7292f1;
+  --accent-strong: #5e7fe3;
+  --accent-ink: #080c1a;
+  --accent-soft: #28324d;
+  --accent-tint: #1d2331;
+  --accent-on-soft: #7c9eff;
+  --success: #a9d8b8;
+  --success-soft: #1e3a2a;
+  --success-strong: #4fa06a;
+  --warning: #d9c27a;
+  --warning-soft: #3a3115;
+  --warning-strong: #b9890f;
+  --alert: #e8a38c;
+  --alert-soft: #40231c;
 }

@@ -82,6 +82,28 @@ abstract final class Motion {
   /// element on the same screen wants this, one of them is not focal.
   static const Duration focal = Duration(milliseconds: 720);
 
+  /// One turn of a looping indeterminate indicator. Not a step on the scale
+  /// above: those say how long a change takes, this says how often a loop
+  /// comes round, and the two are not interchangeable. Unhurried on purpose —
+  /// a loop the eye can follow reads as the app working, one it cannot reads
+  /// as the app struggling.
+  ///
+  /// It is also the one duration here that Reduce Motion does not zero. An
+  /// indeterminate indicator is not decorating a change, it *is* the state —
+  /// stopping it says the app has finished when it has not. Material never
+  /// routed `CircularProgressIndicator` through the setting either.
+  static const Duration loop = Duration(milliseconds: 1600);
+
+  /// How long a snackbar stays before it withdraws itself. Not a step on the
+  /// scale above and not a duration [of] may touch: the scale says how long a
+  /// change takes, this says how long a sentence waits to be read, and zeroing
+  /// it under Reduce Motion would take the message away before anyone had it.
+  static const Duration message = Duration(seconds: 4);
+
+  /// The same for a message that has to be read twice — the first pass says
+  /// something went wrong, the second says what.
+  static const Duration messageLong = Duration(seconds: 6);
+
   /// [d] unless the user has asked the OS to reduce motion, in which case
   /// zero — the state change still happens, it just arrives immediately.
   /// Every animation in this file goes through here; a raw duration handed

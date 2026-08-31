@@ -40,8 +40,7 @@ class PersonPickerPanel extends ConsumerStatefulWidget {
 class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   String _query = '';
 
-  void _pop(PickResult resultado) =>
-      Navigator.of(context).pop(resultado);
+  void _pop(PickResult resultado) => Navigator.of(context).pop(resultado);
 
   String get _search => _query.trim();
 
@@ -102,14 +101,16 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                       ),
                     if (recent.isNotEmpty) ...[
                       SliverToBoxAdapter(
-                          child: _group(t, context.t.picker.recent)),
+                        child: _group(t, context.t.picker.recent),
+                      ),
                       SliverFixedExtentList.builder(
                         itemExtent: rowHeight,
                         itemCount: recent.length,
                         itemBuilder: (context, i) => _row(recent[i]),
                       ),
                       SliverToBoxAdapter(
-                          child: _group(t, context.t.picker.all)),
+                        child: _group(t, context.t.picker.all),
+                      ),
                     ],
                     SliverFixedExtentList.builder(
                       itemExtent: rowHeight,
@@ -120,7 +121,9 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: Space.s12, vertical: Space.s18),
+                            horizontal: Space.s12,
+                            vertical: Space.s18,
+                          ),
                           child: Text(
                             context.t.picker.noResults(query: _search),
                             textAlign: TextAlign.center,
@@ -156,7 +159,12 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
   Widget _header(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s14, Space.s14, Space.s10),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s14,
+        Space.s14,
+        Space.s14,
+        Space.s10,
+      ),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: t.border2)),
       ),
@@ -165,7 +173,7 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
         children: [
           Text(
             '${context.t.picker.assign.toUpperCase()} · ${widget.roleLabel.toUpperCase()}',
-            style: AppText.label(size: 11, color: t.textMute),
+            style: AppText.label(size: AppText.caption, color: t.textMute),
           ),
           const SizedBox(height: Space.s10),
           TextField(
@@ -173,13 +181,22 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
             maxLength: widget.maxLength,
             onChanged: (v) => setState(() => _query = v),
             style: TextStyle(
-                fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.text),
+              fontSize: AppText.body,
+              fontWeight: FontWeight.w600,
+              color: t.text,
+            ),
             decoration: InputDecoration(
               counterText: '',
               hintText: context.t.common.searchParticipant,
-              prefixIcon: Icon(Icons.search, size: AppIcon.control, color: t.textMute),
-              prefixIconConstraints:
-                  const BoxConstraints(minWidth: 36, minHeight: 16),
+              prefixIcon: Icon(
+                Icons.search,
+                size: AppIcon.control,
+                color: t.textMute,
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 36,
+                minHeight: 16,
+              ),
             ),
           ),
         ],
@@ -189,9 +206,13 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
 
   Widget _group(AppTokens t, String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.s10, Space.s8, Space.s10, Space.s4),
-      child: Text(title.toUpperCase(),
-          style: AppText.label(color: t.textMute)),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s10,
+        Space.s8,
+        Space.s10,
+        Space.s4,
+      ),
+      child: Text(title.toUpperCase(), style: AppText.label(color: t.textMute)),
     );
   }
 
@@ -210,32 +231,39 @@ class _PersonPickerPanelState extends ConsumerState<PersonPickerPanel> {
       ),
       child: Pressable(
         onTap: enabled
-            ? () => _pop(PickName(
-                _search.length > widget.maxLength
-                    ? _search.substring(0, widget.maxLength)
-                    : _search))
+            ? () => _pop(
+                PickName(
+                  _search.length > widget.maxLength
+                      ? _search.substring(0, widget.maxLength)
+                      : _search,
+                ),
+              )
             : null,
         builder: (context, hovered, _) {
           final color = enabled ? t.accentStrong : t.textMute;
           return AnimatedContainer(
             duration: Motion.of(context, Motion.instant),
             curve: Motion.curve,
-            padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Space.s10,
+              vertical: Space.s10,
+            ),
             decoration: BoxDecoration(
-              color: hovered && enabled
-                  ? t.accentSoft
-                  : Colors.transparent,
+              color: hovered && enabled ? t.accentSoft : Colors.transparent,
               borderRadius: BorderRadius.circular(Dimens.rControl),
             ),
             child: Row(
               children: [
                 Icon(Icons.add, size: AppIcon.control, color: color),
                 const SizedBox(width: Space.s10),
-                Text(label,
-                    style: TextStyle(
-                        fontSize: AppText.body,
-                        fontWeight: FontWeight.w700,
-                        color: color)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: AppText.body,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
               ],
             ),
           );
@@ -288,13 +316,16 @@ class PersonPickerRow extends StatelessWidget {
         return AnimatedContainer(
           duration: Motion.of(context, Motion.instant),
           curve: Motion.curve,
-          padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Space.s10,
+            vertical: Space.s8,
+          ),
           decoration: BoxDecoration(
             color: selected
                 ? t.accentSoft
                 : hovered
-                    ? t.surface2
-                    : Colors.transparent,
+                ? t.surface2
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(Dimens.rControl),
           ),
           child: Row(

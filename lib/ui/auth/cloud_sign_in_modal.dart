@@ -56,8 +56,9 @@ class _CloudSignInModalState extends State<CloudSignInModal> {
                   ],
                   index: _mode == CloudFormMode.login ? 0 : 1,
                   onChanged: (i) => setState(
-                    () => _mode =
-                        i == 0 ? CloudFormMode.login : CloudFormMode.register,
+                    () => _mode = i == 0
+                        ? CloudFormMode.login
+                        : CloudFormMode.register,
                   ),
                 ),
                 const SizedBox(height: 16),

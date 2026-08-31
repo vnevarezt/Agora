@@ -22,7 +22,10 @@ class MobileTabs extends ConsumerWidget {
     final tab = ref.watch(mobileTabProvider);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s14,
+        vertical: Space.s8,
+      ),
       decoration: BoxDecoration(
         color: t.surface,
         border: Border(bottom: BorderSide(color: t.border)),
@@ -32,11 +35,13 @@ class MobileTabs extends ConsumerWidget {
         index: tab.index,
         segments: [
           (icon: Icons.edit_outlined, label: context.t.preview.assignTab),
-          (icon: Icons.description_outlined, label: context.t.preview.previewTab),
+          (
+            icon: Icons.description_outlined,
+            label: context.t.preview.previewTab,
+          ),
         ],
-        onChanged: (i) => ref
-            .read(mobileTabProvider.notifier)
-            .select(MobileTab.values[i]),
+        onChanged: (i) =>
+            ref.read(mobileTabProvider.notifier).select(MobileTab.values[i]),
       ),
     );
   }
@@ -61,7 +66,12 @@ class MobileBottomBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12 + safeBottom),
+          padding: EdgeInsets.fromLTRB(
+            Space.s14,
+            Space.s12,
+            Space.s14,
+            Space.s12 + safeBottom,
+          ),
           decoration: BoxDecoration(
             color: t.surface.withValues(alpha: 0.88),
             border: Border(top: BorderSide(color: t.border)),

@@ -18,6 +18,7 @@ class BoundTextField extends StatefulWidget {
     this.obscureText = false,
     this.autofocus = false,
     this.enabled = true,
+    this.autofillHints,
   });
 
   final String initial;
@@ -35,6 +36,12 @@ class BoundTextField extends StatefulWidget {
   final bool dense;
   final bool obscureText;
   final bool autofocus;
+
+  /// What this field is for, in the platform's own vocabulary — see
+  /// [AutofillHints]. Without it the OS and the password manager have no way
+  /// to tell an email box from a name box, which is both a filling problem
+  /// and the reason WCAG 1.3.5 asks for it.
+  final List<String>? autofillHints;
 
   /// False renders the field read-only (greyed, not focusable) — how a
   /// capability gate shows a member they may look but not edit.
@@ -66,6 +73,7 @@ class _BoundTextFieldState extends State<BoundTextField> {
       style: widget.style,
       obscureText: widget.obscureText,
       autofocus: widget.autofocus,
+      autofillHints: widget.autofillHints,
       decoration: InputDecoration(
         labelText: widget.label.isEmpty ? null : widget.label,
         hintText: widget.hint,

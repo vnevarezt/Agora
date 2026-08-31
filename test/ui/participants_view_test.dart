@@ -38,31 +38,36 @@ Future<void> _pump(WidgetTester tester, List<Person> lista) async {
 
   // TranslationProvider igual que en main.dart: slang_flutter lo exige en el
   // árbol para resolver context.t.
-  await tester.pumpWidget(TranslationProvider(
-    child: ProviderScope(
-      overrides: [
-        peopleProvider.overrideWithValue(lista),
-        peopleLoadingProvider.overrideWithValue(false),
-      ],
-      child: MaterialApp(
-        theme: buildAppTheme(pizarra.light, Brightness.light),
-        home: const Scaffold(body: SafeArea(child: ParticipantsView())),
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: ProviderScope(
+        overrides: [
+          peopleProvider.overrideWithValue(lista),
+          peopleLoadingProvider.overrideWithValue(false),
+        ],
+        child: MaterialApp(
+          theme: buildAppTheme(pizarra.light, Brightness.light),
+          home: const Scaffold(body: SafeArea(child: ParticipantsView())),
+        ),
       ),
     ),
-  ));
+  );
   await tester.pump();
 }
 
 void main() {
-  testWidgets('renderiza tarjetas y la búsqueda filtra sin acentos',
-      (tester) async {
+  testWidgets('renderiza tarjetas y la búsqueda filtra sin acentos', (
+    tester,
+  ) async {
     await _pump(tester, [_h('a', 'Raúl Espinoza'), _h('b', 'Saúl Bravo')]);
 
     expect(find.text('Raúl Espinoza'), findsOneWidget);
     expect(find.text('Saúl Bravo'), findsOneWidget);
 
     await tester.enterText(
-        find.widgetWithText(TextField, 'Buscar participante…'), 'raul');
+      find.widgetWithText(TextField, 'Buscar participante…'),
+      'raul',
+    );
     await tester.pump();
 
     expect(find.text('Raúl Espinoza'), findsOneWidget);

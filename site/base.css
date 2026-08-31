@@ -1,0 +1,171 @@
+/* Shared base for every page the site serves.
+ *
+ * Reset, bundled faces, the scales transcribed from the app's design system
+ * (LandingSpace, LandingText, Dimens) and the page-agnostic furniture: body
+ * type, .shell, the skip link and the focus ring.
+ *
+ * tool/build_site.py prepends this to each page's own sheet, so a page ships
+ * one stylesheet and nothing it does not use. It was extracted verbatim out of
+ * landing.css when the auth action page needed the same foundation; the colours
+ * still come from tokens.css, generated from tokens.dart.
+ */
+
+/* ---- reset ------------------------------------------------------------ */
+
+*, *::before, *::after { box-sizing: border-box; }
+/* Both of these belong to the scrolling element, which is html, not body.
+ * Sitting on body they were inert: anchor jumps landed hard and behind the
+ * glass bar instead of gliding to a stop below it. */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--bar-h) + var(--s24));
+}
+body, h1, h2, h3, p, dl, dd, ol, ul, figure { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
+
+/* The brand mark, inlined by tool/build_site.py from the files
+   gen_brand_assets.py renders. Both variants are in the markup and CSS picks
+   one: only the back plane differs between them, and it has to, because the
+   brand navy drowns on a dark ground. Three states, for the same reason
+   tokens.css has three — the reader can override the OS. */
+.mark-on-light, .mark-on-dark { height: 100%; width: auto; }
+.mark-on-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mark-on-light { display: none; }
+  :root:not([data-theme="light"]) .mark-on-dark { display: block; }
+}
+:root[data-theme="dark"] .mark-on-light { display: none; }
+:root[data-theme="dark"] .mark-on-dark { display: block; }
+button { font: inherit; color: inherit; background: none; border: 0; }
+
+/* ---- fonts ------------------------------------------------------------ */
+/* Subset to Latin + Latin-ext by tool/subset_fonts.sh. Declared per weight so
+ * the browser fetches only the faces the page actually renders in — Manrope
+ * Regular, for instance, never downloads unless something falls back to it. */
+
+@font-face { font-family: Manrope; font-weight: 400; font-display: swap; src: url(/fonts/Manrope-Regular.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 500; font-display: swap; src: url(/fonts/Manrope-Medium.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 600; font-display: swap; src: url(/fonts/Manrope-SemiBold.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 700; font-display: swap; src: url(/fonts/Manrope-Bold.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 800; font-display: swap; src: url(/fonts/Manrope-ExtraBold.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 600; font-display: swap; src: url(/fonts/JetBrainsMono-SemiBold.woff2) format('woff2'); }
+
+/* ---- scales ----------------------------------------------------------- */
+/* LandingSpace / LandingText / Dimens. The type steps up at each breakpoint
+ * together with --shell, so the measure stays put while the page grows. */
+
+:root {
+  --s4: 4px;   --s8: 8px;   --s12: 12px; --s16: 16px; --s20: 20px;
+  --s24: 24px; --s32: 32px; --s40: 40px; --s48: 48px; --s56: 56px; --s64: 64px;
+
+  --r-chip: 7px;
+  --r-control: 10px;
+  --r-card: 14px;
+  --r-pill: 999px;
+
+  /* Motion, from DESIGN_SYSTEM §7: one duration scale, and deliberately
+   * nothing above --d-med. Reduce Motion is handled per page, because the
+   * right answer differs — a transition drops to none, an entrance skips its
+   * transform and leaves the content already in place. */
+  --d-instant: 150ms;
+  --d-fast: 180ms;
+  --d-med: 300ms;
+
+  --bar-h: 64px;          /* LandingHeader.height */
+  --touch: 48px;          /* Dimens.hTouchMin */
+
+  --shell: 1160px;
+  --gutter: var(--s20);
+  --section: 72px;
+
+  --t-display: 40px;
+  --t-heading: 28px;
+  --t-lead: 17px;
+  --t-tile: 19px;
+  --t-item-body: 15px;
+  --t-body: 13.5px;
+  --t-caption: 11.5px;
+  --t-micro: 10.5px;
+
+  --ease: cubic-bezier(.2, 0, 0, 1);
+}
+
+@media (min-width: 721px) {
+  :root {
+    --gutter: 28px; --section: 96px;
+    --t-display: 54px; --t-heading: 36px; --t-lead: 19px; --t-tile: 21px;
+  }
+}
+
+@media (min-width: 1081px) {
+  :root { --gutter: var(--s32); --section: 120px; --t-display: 66px; --t-heading: 42px; }
+}
+
+@media (min-width: 1601px) {
+  :root {
+    --shell: 1320px; --section: 144px;
+    --t-display: 78px; --t-heading: 50px; --t-lead: 21px; --t-tile: 23px;
+    --t-item-body: 16.5px;
+  }
+}
+
+/* ---- page ------------------------------------------------------------- */
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* A section is full-bleed and paints its own ground; .shell inside is what holds
+ * the content to the measure. That split is what lets a band of tone run edge to
+ * edge while the reading column stays put — and it is the only thing on the page
+ * that separates one section from the next. Padding is symmetric now, because a
+ * band with air only above it reads as a mistake. */
+.section {
+  padding-block: var(--section);
+  background: var(--bg);
+}
+
+.hero { padding-top: calc(var(--bar-h) + var(--section)); }
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--s8);
+  padding: var(--s8) var(--s16);
+  background: var(--surface);
+  border-radius: var(--r-control);
+  z-index: 10;
+}
+.skip-link:focus { left: var(--s16); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-chip);
+}
+

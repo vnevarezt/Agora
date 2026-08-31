@@ -23,8 +23,7 @@ class PeopleDao extends DatabaseAccessor<AppDatabase> with _$PeopleDaoMixin {
   }
 
   Future<List<Person>> all() {
-    return (_alive()..orderBy([(t) => OrderingTerm.asc(t.displayName)]))
-        .get();
+    return (_alive()..orderBy([(t) => OrderingTerm.asc(t.displayName)])).get();
   }
 
   /// Inserts or updates by id. The caller is responsible for setting
@@ -35,8 +34,9 @@ class PeopleDao extends DatabaseAccessor<AppDatabase> with _$PeopleDaoMixin {
   /// Marks usage from the picker. ONLY touches `lastUsed`: touching
   /// `updatedAt` would clobber real edits when merging.
   Future<void> markUsed(String id, DateTime when) {
-    return (update(people)..where((t) => t.id.equals(id)))
-        .write(PeopleCompanion(lastUsed: Value(when)));
+    return (update(people)..where((t) => t.id.equals(id))).write(
+      PeopleCompanion(lastUsed: Value(when)),
+    );
   }
 
   Future<void> setActive(String id, bool v, DateTime when, {String? hlc}) {
@@ -64,8 +64,9 @@ class PeopleDao extends DatabaseAccessor<AppDatabase> with _$PeopleDaoMixin {
   Future<void> bulkUpsert(List<Person> items) {
     return transaction(() async {
       await batch((b) {
-        b.insertAllOnConflictUpdate(
-            people, [for (final p in items) p.toInsertable()]);
+        b.insertAllOnConflictUpdate(people, [
+          for (final p in items) p.toInsertable(),
+        ]);
       });
     });
   }
@@ -84,10 +85,11 @@ class PeopleDao extends DatabaseAccessor<AppDatabase> with _$PeopleDaoMixin {
   /// Alive rows only.
   Future<int> count() async {
     final c = countAll();
-    final row = await (selectOnly(people)
-          ..where(people.deletedAt.isNull())
-          ..addColumns([c]))
-        .getSingle();
+    final row =
+        await (selectOnly(people)
+              ..where(people.deletedAt.isNull())
+              ..addColumns([c]))
+            .getSingle();
     return row.read(c) ?? 0;
   }
 }

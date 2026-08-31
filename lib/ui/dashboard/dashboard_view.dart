@@ -9,6 +9,7 @@ import '../../models/reminder.dart';
 import '../../state/dashboard_provider.dart';
 import '../../state/mwb_sync.dart';
 import '../../state/restore_provider.dart';
+import '../../state/ui_state.dart';
 import '../../state/sync_controller.dart';
 import '../../state/sync_provider.dart';
 import '../responsive.dart';
@@ -17,8 +18,10 @@ import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
+import '../widgets/notebook_import.dart';
 import '../widgets/app_spinner.dart';
 import '../widgets/block_title.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/filter_pill.dart';
 import '../widgets/motion.dart';
 import 'continue_card.dart';
@@ -48,54 +51,106 @@ class DashboardView extends ConsumerWidget {
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(pad, Space.s18, pad, 120),
-            child: Consumer(builder: (context, ref, _) {
-              final stacked = size != ScreenSize.desktop;
-              final restore = ref.watch(initialRestoreProvider);
-              final phase = ref.watch(syncControllerProvider).phase;
-              // Offline/error stall the restore: show the real (empty)
-              // dashboard with the banner explaining it, never a forever
-              // skeleton.
-              final stalled =
-                  phase == SyncPhase.offline || phase == SyncPhase.error;
-              final showSkeleton = ref.watch(dashboardLoadingProvider) ||
-                  (restore != null &&
-                      ref.watch(congregationsProvider).isEmpty &&
-                      !stalled);
+            child: Consumer(
+              builder: (context, ref, _) {
+                final stacked = size != ScreenSize.desktop;
+                final restore = ref.watch(initialRestoreProvider);
+                final phase = ref.watch(syncControllerProvider).phase;
+                // Offline/error stall the restore: show the real (empty)
+                // dashboard with the banner explaining it, never a forever
+                // skeleton.
+                final stalled =
+                    phase == SyncPhase.offline || phase == SyncPhase.error;
+                final noCongregation = ref.watch(congregationsProvider).isEmpty;
+                // A restore that FAILED is not one still arriving: it never
+                // stops, so a skeleton waiting on it never stops either. That
+                // is the forever-skeleton this build shipped with, and behind
+                // it sat the one thing the person needed to be told.
+                final showSkeleton =
+                    ref.watch(dashboardLoadingProvider) ||
+                    (restore != null &&
+                        !restore.failed &&
+                        noCongregation &&
+                        !stalled);
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FadeThroughSwitcher(
-                    child: restore == null
-                        ? const SizedBox(
-                            key: ValueKey('no-restore'),
-                            width: double.infinity)
-                        : Padding(
-                            key: const ValueKey('restore'),
-                            padding: const EdgeInsets.only(bottom: Space.s18),
-                            child: _RestoreBanner(
-                                restore: restore, phase: phase),
-                          ),
-                  ),
-                  FadeThroughSwitcher(
-                    child: showSkeleton
-                        ? _DashboardSkeleton(
-                            key: const ValueKey('skeleton'), stacked: stacked)
-                        : Column(
-                            key: const ValueKey('content'),
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const _HeroSection(),
-                              _HomeGrid(stacked: stacked),
-                            ],
-                          ),
-                  ),
-                ],
-              );
-            }),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FadeThroughSwitcher(
+                      child: restore == null
+                          ? const SizedBox(
+                              key: ValueKey('no-restore'),
+                              width: double.infinity,
+                            )
+                          : Padding(
+                              key: const ValueKey('restore'),
+                              padding: const EdgeInsets.only(bottom: Space.s18),
+                              child: _RestoreBanner(
+                                restore: restore,
+                                phase: phase,
+                              ),
+                            ),
+                    ),
+                    FadeThroughSwitcher(
+                      child: showSkeleton
+                          ? _DashboardSkeleton(
+                              key: const ValueKey('skeleton'),
+                              stacked: stacked,
+                            )
+                          // Everything here is filed under a congregation, so
+                          // with none there is no dashboard to draw — and the
+                          // app never said so. It created one silently on the
+                          // first save, which a browser never reaches, leaving
+                          // an empty screen nobody could act on.
+                          : noCongregation
+                          ? const _NoCongregation(
+                              key: ValueKey('no-congregation'),
+                            )
+                          : Column(
+                              key: const ValueKey('content'),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _HeroSection(),
+                                _HomeGrid(stacked: stacked),
+                              ],
+                            ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Shown in place of the dashboard when no congregation exists yet, which is
+/// where every project, person and program hangs off.
+class _NoCongregation extends ConsumerWidget {
+  const _NoCongregation({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tr = context.t;
+    return Padding(
+      padding: const EdgeInsets.only(top: Space.s24),
+      child: EmptyState(
+        icon: Icons.groups_outlined,
+        title: tr.dashboard.noCongregationTitle,
+        message: tr.dashboard.noCongregationMessage,
+        action: AppButton(
+          icon: Icons.add,
+          label: tr.dashboard.noCongregationCta,
+          onPressed: () {
+            ref
+                .read(settingsTabProvider.notifier)
+                .select(SettingsTab.congregation);
+            ref.read(appSectionProvider.notifier).select(AppSection.settings);
+          },
+        ),
+      ),
     );
   }
 }
@@ -132,15 +187,18 @@ class _TopBar extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                greeting,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: isMobile ? 19 : 21,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.42,
-                  color: t.text,
+              Semantics(
+                header: true,
+                child: Text(
+                  greeting,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isMobile ? AppText.display : AppText.displayLarge,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.42,
+                    color: t.text,
+                  ),
                 ),
               ),
               const SizedBox(height: Space.s2),
@@ -171,8 +229,8 @@ class _TopBar extends ConsumerWidget {
                         ),
                       ),
                       TextSpan(
-                          text:
-                              ' · ${tr.dashboard.pendingItem(n: pending)}'),
+                        text: ' · ${tr.dashboard.pendingItem(n: pending)}',
+                      ),
                     ],
                   ),
                   maxLines: 1,
@@ -183,8 +241,15 @@ class _TopBar extends ConsumerWidget {
         ),
         const SizedBox(width: Space.s12),
         _SyncIndicator(
-          state: _catalogState(ref.watch(mwbSyncProvider)),
+          state: ref.watch(catalogStatusProvider),
           compact: isMobile,
+          // On a build that cannot fetch its own notebooks, this card is where
+          // someone finds out one is missing — so it is also where the way out
+          // has to be. Without it the only import button lived inside a project
+          // nobody can open until a notebook exists.
+          onImport: notebooksMustBeImported
+              ? () => showNotebookImportDialog(context)
+              : null,
         ),
         const _CloudSyncIndicator(),
         const SizedBox(width: Space.s8),
@@ -205,24 +270,21 @@ class _TopBar extends ConsumerWidget {
   }
 }
 
-/// Persistent state of the notebook catalog, shown in the header.
-enum _CatalogState { busy, ok, incomplete }
-
-_CatalogState _catalogState(AsyncValue<SyncReport> sync) {
-  if (sync.isLoading) return _CatalogState.busy;
-  final report = sync.asData?.value;
-  if (report == null) return _CatalogState.incomplete; // sync error
-  return report.complete ? _CatalogState.ok : _CatalogState.incomplete;
-}
-
 /// Persistent card next to the notifications button: spinner while syncing,
 /// a check when everything is up to date, a warning when a notebook is missing.
 /// On mobile it collapses to an icon-only square to save space.
 class _SyncIndicator extends StatelessWidget {
-  const _SyncIndicator({required this.state, this.compact = false});
+  const _SyncIndicator({
+    required this.state,
+    this.compact = false,
+    this.onImport,
+  });
 
-  final _CatalogState state;
+  final CatalogStatus state;
   final bool compact;
+
+  /// Offers to take a notebook file, on builds that cannot download one.
+  final VoidCallback? onImport;
 
   @override
   Widget build(BuildContext context) {
@@ -230,65 +292,85 @@ class _SyncIndicator extends StatelessWidget {
     final tr = context.t;
     final amber = t.warningStrong;
 
-    final (IconData? icon, String label, Color color, String tip) =
-        switch (state) {
-      _CatalogState.busy => (
-          null,
-          tr.sync.updating,
-          t.accent,
-          tr.sync.updatingTip,
-        ),
-      _CatalogState.ok => (
-          Icons.check_circle_rounded,
-          tr.sync.upToDate,
-          t.accent,
-          tr.sync.upToDateTip,
-        ),
-      _CatalogState.incomplete => (
-          Icons.error_outline_rounded,
-          tr.sync.missing,
-          amber,
-          tr.sync.missingTip,
-        ),
+    final (
+      IconData? icon,
+      String label,
+      Color color,
+      String tip,
+    ) = switch (state) {
+      CatalogStatus.syncing => (
+        null,
+        tr.sync.updating,
+        t.accent,
+        tr.sync.updatingTip,
+      ),
+      CatalogStatus.ready => (
+        Icons.check_circle_rounded,
+        tr.sync.upToDate,
+        t.accent,
+        tr.sync.upToDateTip,
+      ),
+      CatalogStatus.incomplete => (
+        Icons.error_outline_rounded,
+        tr.sync.missing,
+        amber,
+        // A build that cannot fetch its own workbooks will not retry its way
+        // out of this one; the way out is the modal this card opens.
+        onImport == null ? tr.sync.missingTip : tr.sync.missingImportTip,
+      ),
     };
 
     final leading = icon == null
-        ? SizedBox(
-            width: Space.s18,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2, color: color),
-          )
+        ? AppSpinner(size: Dimens.spinner, color: color)
         : Icon(icon, size: AppIcon.control, color: color);
 
-    return Tooltip(
-      message: tip,
-      child: Container(
-        height: Dimens.hControl,
-        width: compact ? Dimens.hControl : null,
-        padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
-        decoration: BoxDecoration(
-          color: t.surface,
-          borderRadius: BorderRadius.circular(Dimens.rControl),
-          border: Border.all(color: t.border),
-        ),
-        child: compact
-            ? Center(child: leading)
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  leading,
-                  const SizedBox(width: Space.s10),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: AppText.body,
-                      fontWeight: FontWeight.w600,
-                      color: t.textDim,
-                    ),
+    Widget card(bool hovered) => Container(
+      height: Dimens.hControl,
+      width: compact ? Dimens.hControl : null,
+      padding: EdgeInsets.symmetric(horizontal: compact ? 0 : Space.s12),
+      decoration: BoxDecoration(
+        color: hovered ? t.surface2 : t.surface,
+        borderRadius: BorderRadius.circular(Dimens.rControl),
+        border: Border.all(color: t.border),
+      ),
+      child: compact
+          ? Center(child: leading)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                leading,
+                const SizedBox(width: Space.s10),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: AppText.body,
+                    fontWeight: FontWeight.w600,
+                    color: t.textDim,
+                  ),
+                ),
+                // Where the card is a button it has to look like one:
+                // styled as a status chip it read as a read-out, and the
+                // only way to load a workbook sat behind a tap nobody
+                // knew was there.
+                if (onImport != null) ...[
+                  const SizedBox(width: Space.s8),
+                  Icon(
+                    Icons.file_open_outlined,
+                    size: AppIcon.inline,
+                    color: t.textMute,
                   ),
                 ],
-              ),
-      ),
+              ],
+            ),
+    );
+
+    if (onImport == null) return Tooltip(message: tip, child: card(false));
+
+    return Pressable(
+      onTap: onImport,
+      tooltip: [tip, tr.workspace.importCta].join('\n'),
+      semanticLabel: '$label · ${tr.workspace.importCta}',
+      builder: (context, hovered, _) => card(hovered),
     );
   }
 }
@@ -310,17 +392,17 @@ class _CloudSyncIndicator extends ConsumerWidget {
         status.phase == SyncPhase.offline && status.pendingOutbox > 0;
     final (IconData icon, Color color, String tip)? shown = switch (status) {
       _ when offlinePending => (
-          Icons.cloud_off_rounded,
-          amber,
-          tr.cloudSync.errorOffline,
-        ),
+        Icons.cloud_off_rounded,
+        amber,
+        tr.cloudSync.errorOffline,
+      ),
       SyncStatus(phase: SyncPhase.error, :final errorKey) => (
-          Icons.cloud_off_rounded,
-          amber,
-          errorKey == 'permissionDenied'
-              ? tr.cloudSync.errorPermission
-              : tr.cloudSync.errorUnknown,
-        ),
+        Icons.cloud_off_rounded,
+        amber,
+        errorKey == 'permissionDenied'
+            ? tr.cloudSync.errorPermission
+            : tr.cloudSync.errorUnknown,
+      ),
       _ => null,
     };
     if (shown == null) return const SizedBox.shrink();
@@ -360,26 +442,48 @@ class _RestoreBanner extends StatelessWidget {
     final tr = context.t;
     final amber = t.warningStrong;
 
-    final (Widget leading, String label) = switch (phase) {
-      SyncPhase.offline => (
-          Icon(Icons.cloud_off_rounded, size: AppIcon.control, color: amber),
-          tr.cloudSync.restoreOffline,
-        ),
-      SyncPhase.error => (
-          Icon(Icons.error_outline_rounded, size: AppIcon.control, color: amber),
-          tr.cloudSync.errorUnknown,
-        ),
-      _ => (
-          const AppSpinner(size: 16),
-          restore.total > 1
-              ? '${tr.cloudSync.restoring} · '
-                  '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
-              : tr.cloudSync.restoring,
-        ),
-    };
+    // The failed read comes first: it outranks the sync phase, which can read
+    // perfectly healthy while the membership query is the thing that broke.
+    final (Widget leading, String label) = restore.failed
+        ? (
+            Icon(
+              Icons.error_outline_rounded,
+              size: AppIcon.control,
+              color: amber,
+            ),
+            tr.cloudSync.restoreFailed,
+          )
+        : switch (phase) {
+            SyncPhase.offline => (
+              Icon(
+                Icons.cloud_off_rounded,
+                size: AppIcon.control,
+                color: amber,
+              ),
+              tr.cloudSync.restoreOffline,
+            ),
+            SyncPhase.error => (
+              Icon(
+                Icons.error_outline_rounded,
+                size: AppIcon.control,
+                color: amber,
+              ),
+              tr.cloudSync.errorUnknown,
+            ),
+            _ => (
+              const AppSpinner(size: Dimens.spinner),
+              restore.total > 1
+                  ? '${tr.cloudSync.restoring} · '
+                        '${tr.cloudSync.restoringProgress(done: restore.done, total: restore.total)}'
+                  : tr.cloudSync.restoring,
+            ),
+          };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s14,
+        vertical: Space.s12,
+      ),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(Dimens.rControl),
@@ -424,8 +528,7 @@ class _HeroSection extends ConsumerWidget {
         project: hero,
         congregation: congregation,
         onContinue: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-              builder: (_) => ProgramShell(project: hero)),
+          MaterialPageRoute<void>(builder: (_) => ProgramShell(project: hero)),
         ),
       ),
     );
@@ -534,8 +637,9 @@ class _ProjectsSection extends ConsumerWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               BlockTitle(
-                  title: context.t.dashboard.projects,
-                  count: allProjects.length),
+                title: context.t.dashboard.projects,
+                count: allProjects.length,
+              ),
               const SizedBox(width: Space.s6),
               FilterPill(
                 label: context.t.common.allMasculine,
@@ -569,29 +673,34 @@ class _ProjectsSection extends ConsumerWidget {
               children: [
                 SizedBox(
                   width: colW,
-                  child: enter(NewProjectCard(
-                    // A new project lands in the first congregation, the
-                    // same one the modal defaults to. Null onTap renders the
-                    // card disabled.
-                    onTap: _canCreateProjects(ref, congregations)
-                        ? () => showProjectModal(context)
-                        : null,
-                  )),
+                  child: enter(
+                    NewProjectCard(
+                      // A new project lands in the first congregation, the
+                      // same one the modal defaults to. Null onTap renders the
+                      // card disabled.
+                      onTap: _canCreateProjects(ref, congregations)
+                          ? () => showProjectModal(context)
+                          : null,
+                    ),
+                  ),
                 ),
                 for (final p in projects)
                   SizedBox(
                     width: colW,
-                    child: enter(ProjectCard(
-                      project: p,
-                      congregation: porId[p.congregationId],
-                      // The editor session hydrates the form (congregation
-                      // name included) from the DB on open.
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                            builder: (_) => ProgramShell(project: p)),
+                    child: enter(
+                      ProjectCard(
+                        project: p,
+                        congregation: porId[p.congregationId],
+                        // The editor session hydrates the form (congregation
+                        // name included) from the DB on open.
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => ProgramShell(project: p),
+                          ),
+                        ),
+                        onEdit: () => showProjectModal(context, project: p),
                       ),
-                      onEdit: () => showProjectModal(context, project: p),
-                    )),
+                    ),
                   ),
               ],
             );
@@ -612,8 +721,9 @@ class _RemindersSection extends ConsumerWidget {
       if (p.id == projectId) project = p;
     }
     if (project == null) return;
-    Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => ProgramShell(project: project)));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => ProgramShell(project: project)),
+    );
   }
 
   @override
@@ -624,8 +734,7 @@ class _RemindersSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BlockTitle(
-            title: context.t.dashboard.pending, count: reminders.length),
+        BlockTitle(title: context.t.dashboard.pending, count: reminders.length),
         if (reminders.isEmpty)
           Text(
             context.t.dashboard.allDone,
@@ -639,8 +748,7 @@ class _RemindersSection extends ConsumerWidget {
           if (i > 0) const SizedBox(height: Space.s10),
           ReminderCard(
             recordatorio: reminders[i],
-            onCta: () =>
-                _openProject(context, ref, reminders[i].projectId),
+            onCta: () => _openProject(context, ref, reminders[i].projectId),
           ),
         ],
         if (reminders.isNotEmpty) ...[
@@ -672,7 +780,11 @@ class _DashboardSkeleton extends StatelessWidget {
     id: 'skeleton',
     name: 'Programa de ejemplo',
     congregationId: 'skeleton',
-    weeks: const ['SEMANA UNO', 'SEMANA DOS', 'SEMANA TRES'],
+    weeks: const [
+      (start: '', label: 'SEMANA UNO'),
+      (start: '', label: 'SEMANA DOS'),
+      (start: '', label: 'SEMANA TRES'),
+    ],
     done: 12,
     total: 59,
     status: ProjectStatus.draft,
@@ -686,14 +798,17 @@ class _DashboardSkeleton extends StatelessWidget {
   );
 
   static const _congregation = Congregation(
-      id: 'skeleton', name: 'Congregación', number: '', color: 0xFF7A2230);
+    id: 'skeleton',
+    name: 'Congregación',
+    number: '',
+    color: 0xFF7A2230,
+  );
 
   static const _reminder = Reminder(
     id: 'skeleton',
     type: ReminderType.task,
-    title: 'Asignaciones pendientes',
+    missing: 3,
     meta: 'Semana · Proyecto',
-    cta: 'Abrir proyecto',
   );
 
   @override
@@ -703,27 +818,29 @@ class _DashboardSkeleton extends StatelessWidget {
       children: [
         BlockTitle(title: context.t.dashboard.projects, count: 0),
         const SizedBox(height: Space.s12),
-        LayoutBuilder(builder: (context, c) {
-          const gap = 14.0;
-          final cols = (c.maxWidth / 264).floor().clamp(1, 4);
-          final colW = (c.maxWidth - (cols - 1) * gap) / cols;
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [
-              for (var i = 0; i < 4; i++)
-                SizedBox(
-                  width: colW,
-                  child: ProjectCard(
-                    project: _project,
-                    congregation: _congregation,
-                    onTap: () {},
-                    onEdit: () {},
+        LayoutBuilder(
+          builder: (context, c) {
+            const gap = 14.0;
+            final cols = (c.maxWidth / 264).floor().clamp(1, 4);
+            final colW = (c.maxWidth - (cols - 1) * gap) / cols;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (var i = 0; i < 4; i++)
+                  SizedBox(
+                    width: colW,
+                    child: ProjectCard(
+                      project: _project,
+                      congregation: _congregation,
+                      onTap: () {},
+                      onEdit: () {},
+                    ),
                   ),
-                ),
-            ],
-          );
-        }),
+              ],
+            );
+          },
+        ),
       ],
     );
 

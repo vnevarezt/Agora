@@ -6,8 +6,7 @@ import 'package:agora/state/program_form.dart';
 
 void main() {
   group('listWithName', () {
-    test('rellena hasta el nº de slots y coloca el nombre en su posición',
-        () {
+    test('rellena hasta el nº de slots y coloca el nombre en su posición', () {
       expect(listWithName(null, 2, 0, 'Ana'), ['Ana', '']);
       expect(listWithName(null, 2, 1, 'Luis'), ['', 'Luis']);
     });
@@ -23,11 +22,12 @@ void main() {
 
   group('SlotRef', () {
     const fila = ProgramRow(
-        id: 'se1',
-        time: '18:31',
-        kind: RowKind.part,
-        title: 'Demostración',
-        slots: 2);
+      id: 'se1',
+      time: '18:31',
+      kind: RowKind.part,
+      title: 'Demostración',
+      slots: 2,
+    );
 
     test('claves estables para principal y auxiliar', () {
       expect(const ChairmanSlot().key, 'chairman');
@@ -37,18 +37,21 @@ void main() {
 
     test('igualdad por clave (instancias recreadas en cada build)', () {
       expect(const RowSlot(fila, 0), const RowSlot(fila, 0));
-      expect(const RowSlot(fila, 0) == const RowSlot(fila, 0, aux: true),
-          isFalse);
+      expect(
+        const RowSlot(fila, 0) == const RowSlot(fila, 0, aux: true),
+        isFalse,
+      );
     });
   });
 
   group('slotName / filledNames', () {
     const fila = ProgramRow(
-        id: 'te0',
-        time: '18:06',
-        kind: RowKind.part,
-        title: 'Discurso',
-        slots: 1);
+      id: 'te0',
+      time: '18:06',
+      kind: RowKind.part,
+      title: 'Discurso',
+      slots: 1,
+    );
 
     test('lee del mapa correcto y tolera listas cortas', () {
       final f = FormModel.initial.copyWith(

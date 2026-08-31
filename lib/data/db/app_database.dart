@@ -33,6 +33,11 @@ part 'app_database.g.dart';
 ///   v5: phase-4b-2 sharing — `sync_state.missing_key_version` remembers a
 ///       CCK version the cursor was allowed past, so recovering that key can
 ///       rewind and re-pull what was skipped.
+///   v6: language-free week identity — `programs.week_start` (ISO Monday) and
+///       `programs.content_lang`. Both nullable and both backfilled by the
+///       reconciler rather than by SQL, because resolving a localized week
+///       label into a date needs the cached workbook, which a migration
+///       cannot reach.
 @DriftDatabase(
   tables: [
     Congregations,
@@ -59,36 +64,40 @@ class AppDatabase extends _$AppDatabase {
   final String defaultCongregationName;
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            // v1 predates every other table: this step creates them with
-            // Migrator.createTable, which always uses the CURRENT schema
-            // shape — so the later steps must NOT run on top of it.
-            await _migrateV1ToV2(m);
-            return;
-          }
-          if (from < 3) await _migrateV2ToV3(m);
-          // Same trap as v1 above, one table down: _migrateV3ToV4 CREATES
-          // sync_state, and Migrator.createTable always uses the CURRENT
-          // shape — so the column v5 adds is already there and adding it
-          // again would fail.
-          if (from < 4) {
-            await _migrateV3ToV4(m);
-          } else if (from < 5) {
-            await _migrateV4ToV5(m);
-          }
-        },
-        beforeOpen: (details) async {
-          // Runs after migrations: soft deletes make FK violations rare, but
-          // hard paths (replaceAll, reset) must still be caught early.
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // v1 predates every other table: this step creates them with
+        // Migrator.createTable, which always uses the CURRENT schema
+        // shape — so the later steps must NOT run on top of it.
+        await _migrateV1ToV2(m);
+        return;
+      }
+      if (from < 3) await _migrateV2ToV3(m);
+      // Same trap as v1 above, one table down: _migrateV3ToV4 CREATES
+      // sync_state, and Migrator.createTable always uses the CURRENT
+      // shape — so the column v5 adds is already there and adding it
+      // again would fail.
+      if (from < 4) {
+        await _migrateV3ToV4(m);
+      } else if (from < 5) {
+        await _migrateV4ToV5(m);
+      }
+      // Safe after every path above: `programs` is created at its v2 shape
+      // by _migrateV2ToV3's predecessor, and the from<2 path returned
+      // early with the current shape already in place.
+      if (from < 6) await _migrateV5ToV6(m);
+    },
+    beforeOpen: (details) async {
+      // Runs after migrations: soft deletes make FK violations rare, but
+      // hard paths (replaceAll, reset) must still be caught early.
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 
   /// v1 → CURRENT. One transaction (drift wraps migrations): create every
   /// other table (Migrator.createTable always uses the current shape, which
@@ -134,8 +143,7 @@ class AppDatabase extends _$AppDatabase {
         final topGroup = groupCounts.entries
             .reduce((a, b) => b.value > a.value ? b : a)
             .key;
-        congregationName = spellings[topGroup]!
-            .entries
+        congregationName = spellings[topGroup]!.entries
             .reduce((a, b) => b.value > a.value ? b : a)
             .key;
       }
@@ -143,15 +151,17 @@ class AppDatabase extends _$AppDatabase {
 
       final now = DateTime.now().toUtc();
       final congregationId = const Uuid().v4();
-      await into(congregations).insert(CongregationsCompanion.insert(
-        id: congregationId,
-        name: congregationName,
-        // First color of the dashboard palette; the cycled assignment for
-        // new congregations lands with milestone 3.
-        color: 0xFF7A2230,
-        createdAt: now,
-        updatedAt: now,
-      ));
+      await into(congregations).insert(
+        CongregationsCompanion.insert(
+          id: congregationId,
+          name: congregationName,
+          // First color of the dashboard palette; the cycled assignment for
+          // new congregations lands with milestone 3.
+          color: 0xFF7A2230,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
 
       await batch((b) {
         for (final row in rows) {
@@ -207,5 +217,19 @@ class AppDatabase extends _$AppDatabase {
   /// correctly means "nothing was ever skipped here".
   Future<void> _migrateV4ToV5(Migrator m) async {
     await m.addColumn(syncState, syncState.missingKeyVersion);
+  }
+
+  /// v5 → v6: a week identity that does not change with the meeting language,
+  /// and a snapshot that says which language it is in.
+  ///
+  /// Deliberately no backfill. Turning "7-13 DE JULIO" into 2026-07-13 needs
+  /// the cached workbook to match against, which a migration has no access to
+  /// — and a program with no resolvable week is already broken today, so
+  /// nothing is lost by leaving it null. The reconciler resolves both columns
+  /// on its next pass, which is also what repairs projects whose programs are
+  /// already a mix of languages.
+  Future<void> _migrateV5ToV6(Migrator m) async {
+    await m.addColumn(programs, programs.weekStart);
+    await m.addColumn(programs, programs.contentLang);
   }
 }

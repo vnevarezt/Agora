@@ -160,6 +160,7 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get signedOut => 'Sign in to the cloud to enable syncing.';
 	@override String get unknownError => 'Couldn\'t complete. Please try again.';
 	@override String get ready => 'Sync is on';
+	@override String get syncNow => 'Sync now';
 	@override String get statusSyncing => 'Syncing…';
 	@override String get statusOffline => 'Offline';
 	@override String get statusError => 'Sync error';
@@ -171,6 +172,7 @@ class _Translations$cloudSync$en extends Translations$cloudSync$es {
 	@override String get restoring => 'Restoring your data…';
 	@override String restoringProgress({required Object done, required Object total}) => '${done} of ${total} congregations';
 	@override String get restoreOffline => 'Offline. Your data will be restored when you reconnect.';
+	@override String get restoreFailed => 'We couldn\'t read your congregations. Check your connection or sign in again.';
 }
 
 // Path: account
@@ -249,6 +251,7 @@ class _Translations$common$en extends Translations$common$es {
 	@override String get allFeminine => 'All';
 	@override String get allMasculine => 'All';
 	@override String get assigned => 'assigned';
+	@override String get loading => 'Loading';
 }
 
 // Path: sync
@@ -264,6 +267,7 @@ class _Translations$sync$en extends Translations$sync$es {
 	@override String get upToDateTip => 'Your workbooks are up to date.';
 	@override String get missing => 'A workbook is missing';
 	@override String get missingTip => 'The next workbook isn\'t available yet; it will be retried.';
+	@override String get missingImportTip => 'A workbook is missing and the browser can\'t download it by itself. Tap to load it.';
 }
 
 // Path: dashboard
@@ -278,6 +282,9 @@ class _Translations$dashboard$en extends Translations$dashboard$es {
 	@override String get greetingEvening => 'Good evening';
 	@override String greetingNamed({required Object greeting, required Object name}) => '${greeting}, ${name}';
 	@override String get subtitle => 'Your projects and to-dos';
+	@override String get noCongregationTitle => 'No congregation yet';
+	@override String get noCongregationMessage => 'Agora files programs, people and projects under a congregation. Create yours to get started.';
+	@override String get noCongregationCta => 'Create congregation';
 	@override String get youHave => 'You have';
 	@override String get draftsOne => '1 project in progress';
 	@override String draftsMany({required Object n}) => '${n} projects in progress';
@@ -468,6 +475,11 @@ class _Translations$settings$en extends Translations$settings$es {
 	@override String get import => 'Import';
 	@override String get lastBackup => 'Last backup';
 	@override String get noBackupsYet => 'No backups yet';
+	@override String get catalogTitle => 'Meeting workbooks';
+	@override String get catalogDesc => 'These download on their own. Refresh by hand if jw.org published a correction.';
+	@override String get catalogRefresh => 'Refresh';
+	@override String catalogRefreshed({required Object n}) => 'Catalog refreshed (${n} workbooks).';
+	@override String get catalogRefreshFailed => 'Could not refresh. What you had is still there.';
 	@override String get backupPasswordTitle => 'Backup password';
 	@override String get backupPasswordDesc => 'Protects the file: it cannot be restored without it.';
 	@override String get backupPasswordRepeat => 'Repeat the password';
@@ -482,6 +494,7 @@ class _Translations$settings$en extends Translations$settings$es {
 	@override String get sessionDesc => 'You are using the app in local mode on this device.';
 	@override String get localMode => 'Local mode';
 	@override String get localModeDesc => 'Data lives only on this device';
+	@override String get catalogDescWeb => 'The browser cannot download them by itself. Load them from jw.org in two steps.';
 }
 
 // Path: options
@@ -551,6 +564,9 @@ class _Translations$congregation$en extends Translations$congregation$es {
 	@override String get number => 'Number';
 	@override String get defaultName => 'My congregation';
 	@override String get meetingLanguage => 'Meeting language';
+	@override String workbookReady({required Object language}) => 'Workbook available in ${language}.';
+	@override String workbookDownloading({required Object language}) => 'Downloading the ${language} workbook…';
+	@override String workbookUnavailable({required Object language}) => 'No ${language} workbook yet. It will be retried once you are online.';
 	@override String get scheduleTitle => 'Meeting schedule';
 	@override String get scheduleDesc => 'Each part\'s time is calculated from here.';
 	@override String get weekdayDay => 'Midweek · day';
@@ -742,6 +758,23 @@ class _Translations$workspace$en extends Translations$workspace$es {
 	@override String get emptyTitle => 'The workbook downloads automatically.';
 	@override String get emptyMessage => 'It is usually ready automatically. If it still doesn\'t appear, look for it manually.';
 	@override String searchNotebook({required Object issue}) => 'Look for workbook ${issue}';
+	@override String get importNotebook => 'Import notebook (.epub)';
+	@override String get importWebMessage => 'In the browser the notebook cannot download itself: jw.org serves the file from a server that does not allow it. Download it from jw.org and open it here.';
+	@override String importDone({required Object issue, required Object n}) => 'Notebook ${issue} imported (${n} weeks).';
+	@override String get importNotWorkbook => 'That file is not a Life and Ministry workbook. Look for the .epub from jw.org.';
+	@override String get importTitle => 'Load notebook';
+	@override String get importIntro => 'The browser cannot download it by itself. Two steps:';
+	@override String get importStepDownload => 'Download the notebook from jw.org';
+	@override String get importStepOpen => 'Open it here';
+	@override String get importPick => 'Choose .epub file';
+	@override String get importDownload => 'Download';
+	@override String get importLoaded => 'Already loaded';
+	@override String get importMissing => 'Not loaded yet';
+	@override String get importUnavailable => 'jw.org hasn\'t published it yet';
+	@override String get importStepOpenHint => 'Choose the .epub you just downloaded.';
+	@override String get importDropHere => 'Drop the .epub you downloaded here';
+	@override String get importDropOr => 'or choose it with the button below';
+	@override String get importCta => 'Load notebook';
 	@override String get assignee => 'Assign…';
 	@override String duration({required Object n}) => '${n} min';
 	@override String get songTag => 'Song';
@@ -790,6 +823,7 @@ class _Translations$program$en extends Translations$program$es {
 	@override String get rolePrayer => 'Prayer:';
 	@override String get roleSpeaker => 'Speaker:';
 	@override String get title => 'Midweek Meeting Program';
+	@override String get weeklyReading => 'WEEKLY BIBLE READING';
 	@override String get chairman => 'Chairman: ';
 	@override String get mainHall => 'Main Hall';
 	@override String get auxRoom => 'Auxiliary Classroom';
@@ -1088,6 +1122,7 @@ extension on TranslationsEn {
 			'cloudSync.signedOut' => 'Sign in to the cloud to enable syncing.',
 			'cloudSync.unknownError' => 'Couldn\'t complete. Please try again.',
 			'cloudSync.ready' => 'Sync is on',
+			'cloudSync.syncNow' => 'Sync now',
 			'cloudSync.statusSyncing' => 'Syncing…',
 			'cloudSync.statusOffline' => 'Offline',
 			'cloudSync.statusError' => 'Sync error',
@@ -1099,6 +1134,7 @@ extension on TranslationsEn {
 			'cloudSync.restoring' => 'Restoring your data…',
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} of ${total} congregations',
 			'cloudSync.restoreOffline' => 'Offline. Your data will be restored when you reconnect.',
+			'cloudSync.restoreFailed' => 'We couldn\'t read your congregations. Check your connection or sign in again.',
 			'account.title' => 'Cloud account',
 			'account.desc' => 'Optional identity for future sync. It does not replace the local password.',
 			'account.notConfigured' => 'Cloud not configured',
@@ -1149,17 +1185,22 @@ extension on TranslationsEn {
 			'common.allFeminine' => 'All',
 			'common.allMasculine' => 'All',
 			'common.assigned' => 'assigned',
+			'common.loading' => 'Loading',
 			'sync.updating' => 'Updating catalogs',
 			'sync.updatingTip' => 'Downloading the latest workbooks…',
 			'sync.upToDate' => 'Catalogs up to date',
 			'sync.upToDateTip' => 'Your workbooks are up to date.',
 			'sync.missing' => 'A workbook is missing',
 			'sync.missingTip' => 'The next workbook isn\'t available yet; it will be retried.',
+			'sync.missingImportTip' => 'A workbook is missing and the browser can\'t download it by itself. Tap to load it.',
 			'dashboard.greetingMorning' => 'Good morning',
 			'dashboard.greetingAfternoon' => 'Good afternoon',
 			'dashboard.greetingEvening' => 'Good evening',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Your projects and to-dos',
+			'dashboard.noCongregationTitle' => 'No congregation yet',
+			'dashboard.noCongregationMessage' => 'Agora files programs, people and projects under a congregation. Create yours to get started.',
+			'dashboard.noCongregationCta' => 'Create congregation',
 			'dashboard.youHave' => 'You have',
 			'dashboard.draftsOne' => '1 project in progress',
 			'dashboard.draftsMany' => ({required Object n}) => '${n} projects in progress',
@@ -1270,6 +1311,11 @@ extension on TranslationsEn {
 			'settings.import' => 'Import',
 			'settings.lastBackup' => 'Last backup',
 			'settings.noBackupsYet' => 'No backups yet',
+			'settings.catalogTitle' => 'Meeting workbooks',
+			'settings.catalogDesc' => 'These download on their own. Refresh by hand if jw.org published a correction.',
+			'settings.catalogRefresh' => 'Refresh',
+			'settings.catalogRefreshed' => ({required Object n}) => 'Catalog refreshed (${n} workbooks).',
+			'settings.catalogRefreshFailed' => 'Could not refresh. What you had is still there.',
 			'settings.backupPasswordTitle' => 'Backup password',
 			'settings.backupPasswordDesc' => 'Protects the file: it cannot be restored without it.',
 			'settings.backupPasswordRepeat' => 'Repeat the password',
@@ -1284,6 +1330,7 @@ extension on TranslationsEn {
 			'settings.sessionDesc' => 'You are using the app in local mode on this device.',
 			'settings.localMode' => 'Local mode',
 			'settings.localModeDesc' => 'Data lives only on this device',
+			'settings.catalogDescWeb' => 'The browser cannot download them by itself. Load them from jw.org in two steps.',
 			'options.timeFormat24' => '24-hour (18:00)',
 			'options.timeFormat12' => '12-hour (6:00 p.m.)',
 			'options.pdfNameFull' => 'First and last name',
@@ -1317,6 +1364,9 @@ extension on TranslationsEn {
 			'congregation.number' => 'Number',
 			'congregation.defaultName' => 'My congregation',
 			'congregation.meetingLanguage' => 'Meeting language',
+			'congregation.workbookReady' => ({required Object language}) => 'Workbook available in ${language}.',
+			'congregation.workbookDownloading' => ({required Object language}) => 'Downloading the ${language} workbook…',
+			'congregation.workbookUnavailable' => ({required Object language}) => 'No ${language} workbook yet. It will be retried once you are online.',
 			'congregation.scheduleTitle' => 'Meeting schedule',
 			'congregation.scheduleDesc' => 'Each part\'s time is calculated from here.',
 			'congregation.weekdayDay' => 'Midweek · day',
@@ -1442,6 +1492,23 @@ extension on TranslationsEn {
 			'workspace.emptyTitle' => 'The workbook downloads automatically.',
 			'workspace.emptyMessage' => 'It is usually ready automatically. If it still doesn\'t appear, look for it manually.',
 			'workspace.searchNotebook' => ({required Object issue}) => 'Look for workbook ${issue}',
+			'workspace.importNotebook' => 'Import notebook (.epub)',
+			'workspace.importWebMessage' => 'In the browser the notebook cannot download itself: jw.org serves the file from a server that does not allow it. Download it from jw.org and open it here.',
+			'workspace.importDone' => ({required Object issue, required Object n}) => 'Notebook ${issue} imported (${n} weeks).',
+			'workspace.importNotWorkbook' => 'That file is not a Life and Ministry workbook. Look for the .epub from jw.org.',
+			'workspace.importTitle' => 'Load notebook',
+			'workspace.importIntro' => 'The browser cannot download it by itself. Two steps:',
+			'workspace.importStepDownload' => 'Download the notebook from jw.org',
+			'workspace.importStepOpen' => 'Open it here',
+			'workspace.importPick' => 'Choose .epub file',
+			'workspace.importDownload' => 'Download',
+			'workspace.importLoaded' => 'Already loaded',
+			'workspace.importMissing' => 'Not loaded yet',
+			'workspace.importUnavailable' => 'jw.org hasn\'t published it yet',
+			'workspace.importStepOpenHint' => 'Choose the .epub you just downloaded.',
+			'workspace.importDropHere' => 'Drop the .epub you downloaded here',
+			'workspace.importDropOr' => 'or choose it with the button below',
+			'workspace.importCta' => 'Load notebook',
 			'workspace.assignee' => 'Assign…',
 			'workspace.duration' => ({required Object n}) => '${n} min',
 			'workspace.songTag' => 'Song',
@@ -1452,6 +1519,8 @@ extension on TranslationsEn {
 			'workspace.slotAssistant' => 'Assistant',
 			'workspace.slotInCharge' => 'In charge',
 			'workspace.slotSpeaker' => 'Speaker',
+			_ => null,
+		} ?? switch (path) {
 			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
 			'workspace.editTitle' => 'Edit title',
 			'workspace.editTitleHint' => 'Assignment title',
@@ -1472,6 +1541,7 @@ extension on TranslationsEn {
 			'program.rolePrayer' => 'Prayer:',
 			'program.roleSpeaker' => 'Speaker:',
 			'program.title' => 'Midweek Meeting Program',
+			'program.weeklyReading' => 'WEEKLY BIBLE READING',
 			'program.chairman' => 'Chairman: ',
 			'program.mainHall' => 'Main Hall',
 			'program.auxRoom' => 'Auxiliary Classroom',

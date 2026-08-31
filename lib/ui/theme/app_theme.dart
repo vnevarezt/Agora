@@ -36,6 +36,17 @@ abstract final class AppText {
   /// Screen titles and large counts.
   static const double display = 19;
 
+  /// The same screen title with room to breathe. Every top-level view sets its
+  /// heading to [display] on a phone and this on anything wider; it is the one
+  /// step that exists only above the mobile breakpoint.
+  static const double displayLarge = 21;
+
+  /// The product name set as type, on the cover screen only. It belongs to the
+  /// mark rather than to the interface — everything else on that screen is
+  /// arranged around it — which is why it sits this far above [displayLarge]
+  /// and why nothing else may use it.
+  static const double brand = 30;
+
   /// JetBrains Mono for times, codes and percentages (tabular figures).
   static TextStyle mono({
     double size = small,
@@ -126,42 +137,54 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     extensions: [t],
     textTheme: TextTheme(
       bodyLarge: TextStyle(
-          fontSize: AppText.bodyLarge,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.15,
-          color: t.text),
+        fontSize: AppText.bodyLarge,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.15,
+        color: t.text,
+      ),
       bodyMedium: TextStyle(
-          fontSize: AppText.body,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.1,
-          color: t.text),
+        fontSize: AppText.body,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.1,
+        color: t.text,
+      ),
       bodySmall: TextStyle(
-          fontSize: AppText.caption,
-          fontWeight: FontWeight.w600,
-          color: t.textDim),
+        fontSize: AppText.caption,
+        fontWeight: FontWeight.w600,
+        color: t.textDim,
+      ),
       titleLarge: TextStyle(
-          fontSize: AppText.title,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.3,
-          color: t.text),
+        fontSize: AppText.title,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
+        color: t.text,
+      ),
       titleMedium: TextStyle(
-          fontSize: AppText.bodyLarge,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.15,
-          color: t.text),
+        fontSize: AppText.bodyLarge,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.15,
+        color: t.text,
+      ),
       labelLarge: TextStyle(
-          fontSize: AppText.body, fontWeight: FontWeight.w700, color: t.text),
+        fontSize: AppText.body,
+        fontWeight: FontWeight.w700,
+        color: t.text,
+      ),
     ),
     iconTheme: IconThemeData(color: t.textDim, size: 19),
     inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: t.surface2,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s12),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: Space.s12,
+        vertical: Space.s12,
+      ),
       hintStyle: TextStyle(
-          color: t.textMute,
-          fontWeight: FontWeight.w600,
-          fontSize: AppText.body),
+        color: t.textMute,
+        fontWeight: FontWeight.w600,
+        fontSize: AppText.body,
+      ),
       // borderControl, not border: the outline is what identifies the field.
       border: border(t.borderControl),
       enabledBorder: border(t.borderControl),
@@ -187,19 +210,18 @@ ThemeData buildAppTheme(AppTokens t, Brightness brightness) {
     ),
     tooltipTheme: TooltipThemeData(
       textStyle: TextStyle(
-          color: t.surface, fontSize: AppText.small, fontWeight: FontWeight.w600),
+        color: t.surface,
+        fontSize: AppText.small,
+        fontWeight: FontWeight.w600,
+      ),
       decoration: BoxDecoration(
         color: t.text,
         borderRadius: BorderRadius.circular(8),
       ),
     ),
-    snackBarTheme: SnackBarThemeData(
-      backgroundColor: t.text,
-      contentTextStyle: TextStyle(
-          color: t.surface, fontSize: AppText.body, fontWeight: FontWeight.w600),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Dimens.rControl)),
-    ),
+    // No snackBarTheme: showAppSnack paints the bar itself, on `surface`
+    // rather than on inverted ink. The inverted ground swapped between themes,
+    // so no single value for the success or failure mark could clear 3:1
+    // against it in both — see lib/ui/widgets/app_snack_bar.dart.
   );
 }

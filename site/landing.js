@@ -18,14 +18,25 @@
   if (!('IntersectionObserver' in window) || reduced.matches) {
     reveals.forEach(function (el) { el.classList.add('seen'); });
   } else {
-    var seen = new IntersectionObserver(function (entries, obs) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('seen');
-        obs.unobserve(entry.target);
-      });
-    }, { rootMargin: '0px 0px -64px 0px' });
-    reveals.forEach(function (el) { seen.observe(el); });
+    var watch = function (margin) {
+      return new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('seen');
+          obs.unobserve(entry.target);
+        });
+      }, { rootMargin: '0px 0px ' + margin + ' 0px' });
+    };
+    // 64px in from the bottom is right for anything about as tall as a
+    // paragraph: the element is on screen when it moves. It is wrong for
+    // something the height of a phone, which trips the observer with only its
+    // top edge showing and has finished rising before the reader can see it.
+    // Those wait until they are a third of the way up the window.
+    var near = watch('-64px');
+    var tall = watch('-30%');
+    reveals.forEach(function (el) {
+      (el.classList.contains('reveal-tall') ? tall : near).observe(el);
+    });
   }
 
   /* ---- solo / team comparison ------------------------------------------
@@ -145,7 +156,113 @@
     // finger down and finger up — small, but it is the only warning a touch
     // screen ever gives.
     var full = function () { prefetch(entry.concat(engine)); };
-    document.querySelectorAll('a[href^="/app/"]').forEach(function (a) {
+  
+  /* In-page navigation without the hash.
+   *
+   * A bare href="#downloads" makes the browser jump and stamp the fragment into
+   * the address bar, which turns a reading position into something the user has
+   * to clean up — and back then walks the sections rather than leaving the page.
+   * Taking the click ourselves keeps the URL as the reader found it.
+   *
+   * Focus still has to move, or a keyboard user scrolls the viewport while their
+   * tab position stays behind in the header. tabindex -1 makes the section
+   * focusable without adding it to the tab order, and preventScroll stops the
+   * focus call from undoing the smooth scroll it was just handed.
+   */
+
+  /* Theme: system -> light -> dark -> system.
+   *
+   * "System" is the absence of a stored value, so clearing the key is what
+   * hands control back to the OS. The <head> already applied any stored choice
+   * before paint; this only wires the control and keeps the label truthful,
+   * since the icon alone tells a screen reader nothing. */
+  (function () {
+    var button = document.querySelector('[data-theme-toggle]');
+    if (!button) return;
+    var order = ['system', 'light', 'dark'];
+
+    var read = function () {
+      try {
+        var t = localStorage.getItem('agora-theme');
+        return t === 'light' || t === 'dark' ? t : 'system';
+      } catch (e) { return 'system'; }
+    };
+
+    var paint = function (state) {
+      button.setAttribute('data-state', state);
+      var label = button.getAttribute('data-label-' + state);
+      button.setAttribute('aria-label', label);
+      button.setAttribute('title', label);
+      if (state === 'system') delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = state;
+    };
+
+    paint(read());
+
+    button.addEventListener('click', function () {
+      var next = order[(order.indexOf(read()) + 1) % order.length];
+      try {
+        if (next === 'system') localStorage.removeItem('agora-theme');
+        else localStorage.setItem('agora-theme', next);
+      } catch (e) {}
+      paint(next);
+    });
+  })();
+
+
+  /* Which section the reader is in.
+   *
+   * The nav named four destinations but never said which one you were looking
+   * at. rootMargin pins the decision line just under the glass bar rather than
+   * at the viewport edge, so the heading you are actually reading is the one
+   * that counts. aria-current does the announcing; the underline is the visible
+   * half of the same fact.
+   */
+  (function () {
+    var links = Array.prototype.slice.call(
+      document.querySelectorAll('.nav a[href^="#"]'));
+    if (!links.length || !window.IntersectionObserver) return;
+
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+
+    var sections = Object.keys(byId)
+      .map(function (id) { return document.getElementById(id); })
+      .filter(Boolean);
+    if (!sections.length) return;
+
+    var visible = {};
+    var mark = function () {
+      var current = null;
+      sections.forEach(function (el) { if (visible[el.id]) current = current || el.id; });
+      links.forEach(function (a) {
+        if (a.getAttribute('href') === '#' + current) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
+    };
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+      mark();
+    }, { rootMargin: '-72px 0px -55% 0px' });
+
+    sections.forEach(function (el) { io.observe(el); });
+  })();
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      var id = a.getAttribute('href').slice(1);
+      var target = id ? document.getElementById(id) : document.body;
+      if (!target) return;
+      ev.preventDefault();
+      var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      target.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
+    });
+  });
+
+  document.querySelectorAll('a[href^="/app/"]').forEach(function (a) {
       ['pointerenter', 'focus', 'touchstart'].forEach(function (evt) {
         a.addEventListener(evt, full, { once: true, passive: true });
       });

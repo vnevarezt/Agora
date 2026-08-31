@@ -3,6 +3,13 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "functions": {
+    "//": "Transactional mail only: the Agora-branded reset and verification messages that replace the stock Firebase templates. Nothing in the sync path runs here \u2014 invite redemption is still the client-side batch firestore.rules describes, and moving it server-side is a separate decision.",
+    "source": "functions",
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ]
+  },
   "hosting": {
     "//": "Built by tool/build_site.sh: the static landing at the root, the Flutter app under /app/. Deploying build/web directly would put the app back at / and strand the landing.",
     "public": "build/site",
@@ -13,14 +20,14 @@
     ],
     "rewrites": [
       {
-        "//": "Only the app needs SPA routing — go_router owns everything under /app/. The landing is real files, so it must NOT be rewritten: a catch-all here would answer /en/ and every 404 with the app shell, costing a visitor 3.4 MB to be told nothing.",
+        "//": "Only the app needs SPA routing \u2014 go_router owns everything under /app/. The landing is real files, so it must NOT be rewritten: a catch-all here would answer /en/ and every 404 with the app shell, costing a visitor 3.4 MB to be told nothing.",
         "source": "/app/**",
         "destination": "/app/index.html"
       }
     ],
     "headers": [
       {
-        "//": "There is deliberately no Cross-Origin-Opener-Policy here. Any value interferes with firebase_auth's signInWithPopup, which needs the opener link to get the Google credential back — sign-in was observed hanging with one set. The only value worth the risk would be 'same-origin', for the cross-origin isolation that lets drift use OPFS, and that is the value that breaks popups outright. drift uses IndexedDB, which measured no slower. Referrer-Policy is strict-origin-when-cross-origin rather than same-origin: the stricter value sends no origin at all to Google, which its OAuth endpoints may check.",
+        "//": "There is deliberately no Cross-Origin-Opener-Policy here. Any value interferes with firebase_auth's signInWithPopup, which needs the opener link to get the Google credential back \u2014 sign-in was observed hanging with one set. The only value worth the risk would be 'same-origin', for the cross-origin isolation that lets drift use OPFS, and that is the value that breaks popups outright. drift uses IndexedDB, which measured no slower. Referrer-Policy is strict-origin-when-cross-origin rather than same-origin: the stricter value sends no origin at all to Google, which its OAuth endpoints may check.",
         "source": "**",
         "headers": [
           {
@@ -28,23 +35,18 @@
             "value": "nosniff"
           },
           {
+            "//": "The default for everything, and note that NOTHING under /app/ overrides it. There used to be an immutable rule there, on the premise that the engine payload was content-hashed; it is not. Flutter emits fixed names \u2014 flutter_bootstrap.js, flutter.js, main.dart.wasm, main.dart.mjs, flutter_service_worker.js \u2014 so immutable pinned every returning visitor to the build they first loaded and broke updates at the root: the bootstrap never refreshed, so it never requested flutter_service_worker.js?v=<new>, so the worker never replaced itself. Repeat loads stay fast regardless, because the service worker keeps its own copies in Cache Storage and the HTTP layer only answers 304. Overridden below by the blocks that name a specific path \u2014 verified on a preview channel: a later, more specific rule wins, so the hashed app payload stays immutable while this catches the rest. It has to sit on ** rather than on **/*.html because header globs match the REQUEST path: a visitor asks for / or /app/, never /index.html, so an html-only pattern left precisely the URLs people actually open on Firebase's one-hour default. That is a deploy leaving returning readers on the previous build.",
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
             "key": "Referrer-Policy",
             "value": "strict-origin-when-cross-origin"
           },
           {
-            "//": "connect-src is the directive that earns its keep: the local database is not encrypted (see connection_web.dart), so the risk the browser adds over native is script injection reading it — and this pins where anything can be sent to. An attacker who lands script here still cannot POST the congregation to a host of their choosing. script-src keeps 'unsafe-inline' because Flutter's bootstrap emits inline scripts; dropping it needs per-release hashes that break on every engine bump, so this policy does NOT claim to stop XSS execution, only its exfiltration. Verified against a real load: fonts.gstatic.com is CanvasKit fetching its Roboto fallback and accounts.google.com is google_sign_in_web injecting the GSI client on registration, both of which the engine requires even though web signs in through firebase_auth's popup. www.gstatic.com serves the Firebase JS SDK that firebase_core loads at runtime — without it cloud mode cannot start at all, which is the whole of web. The landing needs none of this: its own needs are a strict subset ('self' for script, style and font), and tightening it there is worth a follow-up.",
+            "//": "connect-src is the directive that earns its keep: the local database is not encrypted (see connection_web.dart), so the risk the browser adds over native is script injection reading it \u2014 and this pins where anything can be sent to. An attacker who lands script here still cannot POST the congregation to a host of their choosing. script-src keeps 'unsafe-inline' because Flutter's bootstrap emits inline scripts; dropping it needs per-release hashes that break on every engine bump, so this policy does NOT claim to stop XSS execution, only its exfiltration. Verified against a real load: fonts.gstatic.com is CanvasKit fetching its Roboto fallback and accounts.google.com is google_sign_in_web injecting the GSI client on registration, both of which the engine requires even though web signs in through firebase_auth's popup. cloudfunctions.net and run.app are the mail callables in functions/: v2 callables are Cloud Run services behind a cloudfunctions.net address, and without both the browser blocks the request before it leaves \u2014 a password reset that fails silently. www.gstatic.com serves the Firebase JS SDK that firebase_core loads at runtime \u2014 without it cloud mode cannot start at all, which is the whole of web. The landing needs none of this: its own needs are a strict subset ('self' for script, style and font), and tightening it there is worth a follow-up. apis.google.com is the gapi loader firebase_auth injects for its auth iframe: blocked, the popup opens and the sign-in never comes back. googletagmanager.com serves the gtag.js that firebase_analytics loads, with *.google-analytics.com and *.analytics.google.com taking the events; the ad hosts Google's own CSP guide lists beside them (*.g.doubleclick.net, pagead2.googlesyndication.com, the per-TLD google.com entries) are for remarketing, which this app does not do, so they stay out. app.jw-cdn.org is the workbook lookup, and it answers `access-control-allow-origin: *`. The file that lookup points at does NOT: cfp2.jw-cdn.org sends no CORS header at all and answers 403 to a preflight, so the EPUB cannot be read from a browser under ANY policy. It is deliberately absent rather than listed-and-broken \u2014 that download needs a proxy on our own origin, and a host sitting here would read as though it worked. www.google.com/recaptcha/ is App Check: firebase_app_check activates with a ReCaptchaV3Provider on web (see cloud_auth.dart), and reCAPTCHA loads its script and its frame from there while gstatic serves the assets. Leaving it out does not look like a CSP problem from the outside \u2014 App Check never gets a token, so Firestore refuses every read, the congregation stream never lands, and the dashboard sits on 'Recuperando tus datos' forever while the catalog card reports everything up to date over an empty set. Path-restricted on purpose: this grants the reCAPTCHA endpoints, not www.google.com. blob: is in connect-src because a picked file is read back through its own blob: URL: cross_file's web XFile.readAsBytes rehydrates the Blob with an XHR against it, and an XHR answers to connect-src \u2014 without it, importing a workbook is blocked outright, which is the only way a workbook gets in on web at all. It buys an attacker no reach: a blob: URL is an in-memory object the page itself created, same-origin and unfetchable from anywhere else. worker-src already trusts blob:, which is the far stronger permission.",
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://fonts.gstatic.com https://www.gstatic.com https://accounts.google.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
-          }
-        ]
-      },
-      {
-        "//": "Scoped to /app/ on purpose. As `**` this pattern also matched /landing.js, which carries no content hash — a visitor who loaded the site once would have been pinned to that copy of the landing for a year, with no way to push a fix.",
-        "source": "/app/**/*.@(wasm|js|mjs|ttf|otf|png)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
+            "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://accounts.google.com https://apis.google.com https://www.googletagmanager.com https://www.google.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.googleusercontent.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; connect-src 'self' blob: https://*.googleapis.com https://*.cloudfunctions.net https://*.run.app https://*.firebaseio.com wss://*.firebaseio.com https://fonts.gstatic.com https://www.gstatic.com https://accounts.google.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://app.jw-cdn.org https://www.google.com/recaptcha/; frame-src https://accounts.google.com https://*.firebaseapp.com https://apis.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
           }
         ]
       },
@@ -59,7 +61,7 @@
         ]
       },
       {
-        "//": "Subsets regenerated only when tool/subset_fonts.sh is run, which is rare, but the names are not hashed either — a month is long enough to never be fetched twice by a returning reader and short enough to self-heal.",
+        "//": "Subsets regenerated only when tool/subset_fonts.sh is run, which is rare, but the names are not hashed either \u2014 a month is long enough to never be fetched twice by a returning reader and short enough to self-heal.",
         "source": "/fonts/**",
         "headers": [
           {
@@ -69,12 +71,12 @@
         ]
       },
       {
-        "//": "Hashed engine and app payloads are immutable; HTML must never be, or a deploy leaves clients on the old build.",
-        "source": "**/*.html",
+        "//": "The hero art, on the same bet as the fonts above: tool/demo/site_shots.py is run about as often as the fonts are subset, and the names are just as stable. A week rather than a month because the art is the thing most likely to be redrawn, and a stale hero is a visible wrong where a stale font subset is not. The default no-cache would otherwise spend a conditional request per visit on a ~90 KB image, which is most of what this page weighs.",
+        "source": "/media/**",
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "no-cache"
+            "value": "public, max-age=604800"
           }
         ]
       }

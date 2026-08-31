@@ -45,26 +45,33 @@ class FileSaver {
   FileSaver({
     bool? mobile,
     Future<String?> Function(String suggestedName, XTypeGroup type)?
-        pickSavePath,
+    pickSavePath,
     Future<void> Function(String path, Uint8List bytes)? writeFile,
     Future<String?> Function(
-            String suggestedName, String extension, Uint8List bytes)?
-        saveMobile,
+      String suggestedName,
+      String extension,
+      Uint8List bytes,
+    )?
+    saveMobile,
     Future<ShareResultStatus> Function(
-            Uint8List bytes, String name, String mimeType, Rect? origin)?
-        shareSheet,
-  })  : _mobile = mobile ?? platform.isMobilePlatform,
-        _pickSavePath = pickSavePath ?? platform.pickSavePath,
-        _writeFile = writeFile ?? platform.writeFile,
-        _saveMobile = saveMobile ?? _defaultSaveMobile,
-        _shareSheet = shareSheet ?? _defaultShareSheet;
+      Uint8List bytes,
+      String name,
+      String mimeType,
+      Rect? origin,
+    )?
+    shareSheet,
+  }) : _mobile = mobile ?? platform.isMobilePlatform,
+       _pickSavePath = pickSavePath ?? platform.pickSavePath,
+       _writeFile = writeFile ?? platform.writeFile,
+       _saveMobile = saveMobile ?? _defaultSaveMobile,
+       _shareSheet = shareSheet ?? _defaultShareSheet;
 
   final bool _mobile;
   final Future<String?> Function(String, XTypeGroup) _pickSavePath;
   final Future<void> Function(String, Uint8List) _writeFile;
   final Future<String?> Function(String, String, Uint8List) _saveMobile;
   final Future<ShareResultStatus> Function(Uint8List, String, String, Rect?)
-      _shareSheet;
+  _shareSheet;
 
   /// Prompts for a location and writes the bytes there.
   Future<SaveOutcome> saveAs({
@@ -95,17 +102,26 @@ class FileSaver {
     required String mimeType,
     Rect? originRect,
   }) async {
-    final status = await _shareSheet(bytes, suggestedName, mimeType, originRect);
+    final status = await _shareSheet(
+      bytes,
+      suggestedName,
+      mimeType,
+      originRect,
+    );
     return switch (status) {
       ShareResultStatus.success => const SaveShared(),
       ShareResultStatus.dismissed => const SaveCanceled(),
-      ShareResultStatus.unavailable =>
-        throw Exception('Share sheet unavailable on this device.'),
+      ShareResultStatus.unavailable => throw Exception(
+        'Share sheet unavailable on this device.',
+      ),
     };
   }
 
   static Future<String?> _defaultSaveMobile(
-      String suggestedName, String extension, Uint8List bytes) {
+    String suggestedName,
+    String extension,
+    Uint8List bytes,
+  ) {
     // On mobile `bytes` makes saveFile write through the document picker and
     // return the resulting path (null when the user backs out).
     return FilePicker.saveFile(
@@ -117,12 +133,18 @@ class FileSaver {
   }
 
   static Future<ShareResultStatus> _defaultShareSheet(
-      Uint8List bytes, String name, String mimeType, Rect? origin) async {
-    final result = await SharePlus.instance.share(ShareParams(
-      files: [XFile.fromData(bytes, mimeType: mimeType)],
-      fileNameOverrides: [name],
-      sharePositionOrigin: origin,
-    ));
+    Uint8List bytes,
+    String name,
+    String mimeType,
+    Rect? origin,
+  ) async {
+    final result = await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile.fromData(bytes, mimeType: mimeType)],
+        fileNameOverrides: [name],
+        sharePositionOrigin: origin,
+      ),
+    );
     return result.status;
   }
 }

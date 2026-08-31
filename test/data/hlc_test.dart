@@ -2,8 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:agora/data/sync/hlc.dart';
 
 void main() {
-  test('encode/parse roundtrip and lexicographic order matches compareTo',
-      () {
+  test('encode/parse roundtrip and lexicographic order matches compareTo', () {
     const a = Hlc(1752601402114, 3, 'aaaa1111');
     final parsed = Hlc.tryParse(a.encode())!;
     expect(parsed.physicalMs, a.physicalMs);
@@ -29,8 +28,11 @@ void main() {
 
     wall = wall.subtract(const Duration(minutes: 5)); // clock jumped back
     final regressed = clock.next();
-    expect(regressed.compareTo(stalled) > 0, true,
-        reason: 'stamps never go backwards');
+    expect(
+      regressed.compareTo(stalled) > 0,
+      true,
+      reason: 'stamps never go backwards',
+    );
 
     wall = DateTime.utc(2026, 7, 16, 11); // clock recovered
     final recovered = clock.next();
@@ -41,8 +43,11 @@ void main() {
   test('receive folds observed stamps in so new ones sort after them', () {
     var wall = DateTime.utc(2026, 7, 16, 10);
     final clock = HlcClock('dev1', now: () => wall);
-    final observed =
-        Hlc(wall.add(const Duration(hours: 2)).millisecondsSinceEpoch, 7, 'dev2');
+    final observed = Hlc(
+      wall.add(const Duration(hours: 2)).millisecondsSinceEpoch,
+      7,
+      'dev2',
+    );
 
     clock.receive(observed);
     final next = clock.next();

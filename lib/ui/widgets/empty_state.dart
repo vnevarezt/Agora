@@ -38,7 +38,10 @@ class EmptyState extends StatelessWidget {
                 title!,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: AppText.bodyLarge, fontWeight: FontWeight.w700, color: t.text),
+                  fontSize: AppText.bodyLarge,
+                  fontWeight: FontWeight.w700,
+                  color: t.text,
+                ),
               ),
               const SizedBox(height: Space.s4),
             ],
@@ -46,12 +49,12 @@ class EmptyState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
+                fontSize: AppText.body,
+                fontWeight: FontWeight.w600,
+                color: t.textMute,
+              ),
             ),
-            if (action != null) ...[
-              const SizedBox(height: Space.s18),
-              action!,
-            ],
+            if (action != null) ...[const SizedBox(height: Space.s18), action!],
             if (error != null) ...[
               const SizedBox(height: Space.s14),
               Text(

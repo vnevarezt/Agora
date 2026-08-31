@@ -19,15 +19,15 @@ class IndexedDbMwbStore implements MwbStore {
   Future<web.IDBDatabase>? _db;
 
   Future<web.IDBDatabase> _open() => _db ??= () async {
-        final request = web.window.indexedDB.open(_dbName, 1);
-        request.onupgradeneeded = ((web.Event _) {
-          final db = request.result as web.IDBDatabase;
-          if (!db.objectStoreNames.contains(_storeName)) {
-            db.createObjectStore(_storeName);
-          }
-        }).toJS;
-        return await _request<web.IDBDatabase>(request);
-      }();
+    final request = web.window.indexedDB.open(_dbName, 1);
+    request.onupgradeneeded = ((web.Event _) {
+      final db = request.result as web.IDBDatabase;
+      if (!db.objectStoreNames.contains(_storeName)) {
+        db.createObjectStore(_storeName);
+      }
+    }).toJS;
+    return await _request<web.IDBDatabase>(request);
+  }();
 
   /// IndexedDB is callback-based; every call funnels through here to become a
   /// Future.
@@ -38,7 +38,8 @@ class IndexedDbMwbStore implements MwbStore {
     }).toJS;
     request.onerror = ((web.Event _) {
       completer.completeError(
-          StateError('IndexedDB request failed: ${request.error?.message}'));
+        StateError('IndexedDB request failed: ${request.error?.message}'),
+      );
     }).toJS;
     return completer.future;
   }
@@ -79,6 +80,13 @@ class IndexedDbMwbStore implements MwbStore {
   @override
   Future<void> writeBytes(String name, Uint8List bytes) =>
       _write(name, bytes.toJS);
+
+  @override
+  Future<void> delete(String name) async {
+    final db = await _open();
+    final tx = db.transaction(_storeName.toJS, 'readwrite');
+    await _request<JSAny?>(tx.objectStore(_storeName).delete(name.toJS));
+  }
 }
 
 MwbStore defaultMwbStore() => IndexedDbMwbStore();

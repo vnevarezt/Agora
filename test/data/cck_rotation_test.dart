@@ -43,8 +43,7 @@ void main() {
     return device;
   }
 
-  test('an invitee redeems the code and recovers the WHOLE keyring',
-      () async {
+  test('an invitee redeems the code and recovers the WHOLE keyring', () async {
     // Two versions exist before anyone is invited: the newcomer must be able
     // to read the history, not just what happens next.
     await admin.cck.rotateAndRevoke('c1');
@@ -79,20 +78,33 @@ void main() {
     final carol = _Device(docs, 'carol');
     await expectLater(
       carol.cck.redeemInvite(code),
-      throwsA(isA<SharingException>()
-          .having((e) => e.reason, 'reason', 'inviteMissing')),
+      throwsA(
+        isA<SharingException>().having(
+          (e) => e.reason,
+          'reason',
+          'inviteMissing',
+        ),
+      ),
     );
   });
 
   test('an expired invite is refused with a distinguishable reason', () async {
-    final code = await admin.cck
-        .createInvite('c1', capabilities: _viewer, ttl: Duration.zero);
+    final code = await admin.cck.createInvite(
+      'c1',
+      capabilities: _viewer,
+      ttl: Duration.zero,
+    );
     final bob = _Device(docs, 'bob');
 
     await expectLater(
       bob.cck.redeemInvite(code),
-      throwsA(isA<SharingException>()
-          .having((e) => e.reason, 'reason', 'inviteExpired')),
+      throwsA(
+        isA<SharingException>().having(
+          (e) => e.reason,
+          'reason',
+          'inviteExpired',
+        ),
+      ),
     );
   });
 
@@ -100,8 +112,13 @@ void main() {
     final code = await admin.cck.createInvite('c1', capabilities: _viewer);
     await expectLater(
       admin.cck.redeemInvite(code),
-      throwsA(isA<SharingException>()
-          .having((e) => e.reason, 'reason', 'alreadyMember')),
+      throwsA(
+        isA<SharingException>().having(
+          (e) => e.reason,
+          'reason',
+          'alreadyMember',
+        ),
+      ),
     );
   });
 
@@ -118,32 +135,37 @@ void main() {
     expect(docs.congregations['c1']!['keyVersion'], 2);
   });
 
-  test('survivors get the new version, the revoked member gets nothing',
-      () async {
-    final bobCode = await admin.cck.createInvite('c1', capabilities: _viewer);
-    final bob = await join(bobCode, 'bob');
-    final carolCode = await admin.cck.createInvite('c1', capabilities: _viewer);
-    await join(carolCode, 'carol');
+  test(
+    'survivors get the new version, the revoked member gets nothing',
+    () async {
+      final bobCode = await admin.cck.createInvite('c1', capabilities: _viewer);
+      final bob = await join(bobCode, 'bob');
+      final carolCode = await admin.cck.createInvite(
+        'c1',
+        capabilities: _viewer,
+      );
+      await join(carolCode, 'carol');
 
-    await admin.cck.rotateAndRevoke('c1', removeUids: ['bob']);
+      await admin.cck.rotateAndRevoke('c1', removeUids: ['bob']);
 
-    // Carol survives: a fresh device of hers recovers v1 AND v2.
-    final carolAgain = _Device(docs, 'carol');
-    final carolKeyring = (await carolAgain.cck.keyringFor('c1'))!;
-    expect(carolKeyring.keys.keys.toSet(), {1, 2});
+      // Carol survives: a fresh device of hers recovers v1 AND v2.
+      final carolAgain = _Device(docs, 'carol');
+      final carolKeyring = (await carolAgain.cck.keyringFor('c1'))!;
+      expect(carolKeyring.keys.keys.toSet(), {1, 2});
 
-    // Bob is gone from the collection entirely.
-    expect(docs.members['c1'], isNot(contains('bob')));
-    // His cached keyring still opens history — that data is already on his
-    // device — but a fresh device of his recovers nothing.
-    expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1});
-    expect(await _Device(docs, 'bob').cck.keyringFor('c1'), isNull);
+      // Bob is gone from the collection entirely.
+      expect(docs.members['c1'], isNot(contains('bob')));
+      // His cached keyring still opens history — that data is already on his
+      // device — but a fresh device of his recovers nothing.
+      expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1});
+      expect(await _Device(docs, 'bob').cck.keyringFor('c1'), isNull);
 
-    final rotation = docs.rotations.single;
-    expect(rotation.version, 2);
-    expect(rotation.sealedFor, {'admin', 'carol'});
-    expect(rotation.removed, {'bob'});
-  });
+      final rotation = docs.rotations.single;
+      expect(rotation.version, 2);
+      expect(rotation.sealedFor, {'admin', 'carol'});
+      expect(rotation.removed, {'bob'});
+    },
+  );
 
   test('rotation kills pending invites in the same batch', () async {
     // A pending invite's wrappedKeyring is immutable and frozen at v1: left
@@ -163,8 +185,7 @@ void main() {
     expect(bob.uid, 'bob');
   });
 
-  test('an admin can revoke themselves and rotate in the same batch',
-      () async {
+  test('an admin can revoke themselves and rotate in the same batch', () async {
     // The only way a departing admin can rotate at all: `isAdmin` reads
     // their PRE-batch doc, so the self-delete and the bump commit together.
     final code = await admin.cck.createInvite('c1', capabilities: _viewer);
@@ -179,23 +200,27 @@ void main() {
     expect(await admin.cck.keyringFor('c1'), isNull);
   });
 
-  test('a member with an unreadable public key aborts the rotation by name',
-      () async {
-    final code = await admin.cck.createInvite('c1', capabilities: _viewer);
-    await join(code, 'bob');
-    docs.members['c1']!['bob']!['pubKey'] = 'not-base64!!';
+  test(
+    'a member with an unreadable public key aborts the rotation by name',
+    () async {
+      final code = await admin.cck.createInvite('c1', capabilities: _viewer);
+      await join(code, 'bob');
+      docs.members['c1']!['bob']!['pubKey'] = 'not-base64!!';
 
-    // Skipping Bob would leave a permanent hole in his keyring — he'd
-    // silently stop reading new writes.
-    await expectLater(
-      admin.cck.rotateAndRevoke('c1'),
-      throwsA(isA<SharingException>()
-          .having((e) => e.reason, 'reason', 'badMemberKey')
-          .having((e) => e.message, 'message', contains('bob'))),
-    );
-    expect(docs.rotations, isEmpty);
-    expect(docs.congregations['c1']!['keyVersion'], 1);
-  });
+      // Skipping Bob would leave a permanent hole in his keyring — he'd
+      // silently stop reading new writes.
+      await expectLater(
+        admin.cck.rotateAndRevoke('c1'),
+        throwsA(
+          isA<SharingException>()
+              .having((e) => e.reason, 'reason', 'badMemberKey')
+              .having((e) => e.message, 'message', contains('bob')),
+        ),
+      );
+      expect(docs.rotations, isEmpty);
+      expect(docs.congregations['c1']!['keyVersion'], 1);
+    },
+  );
 
   test('reconciliation repairs a hole in the MIDDLE of a keyring', () async {
     final code = await admin.cck.createInvite('c1', capabilities: _viewer);
@@ -218,8 +243,7 @@ void main() {
     }
   });
 
-  test('someone who joins mid-rotation is repaired by the same call',
-      () async {
+  test('someone who joins mid-rotation is repaired by the same call', () async {
     // The one moment a gap can open: the member list is read, THEN the
     // batch commits — a redemption in between lands a doc holding every
     // version except the one being minted.
@@ -239,8 +263,7 @@ void main() {
     expect(daveKeyring.keys[2], (await admin.cck.keyringFor('c1'))!.keys[2]);
   });
 
-  test('reconciliation is a no-op when every keyring is contiguous',
-      () async {
+  test('reconciliation is a no-op when every keyring is contiguous', () async {
     final code = await admin.cck.createInvite('c1', capabilities: _viewer);
     await join(code, 'bob');
     await admin.cck.rotateAndRevoke('c1');
@@ -248,28 +271,30 @@ void main() {
     expect(await admin.cck.reconcileKeyrings('c1'), 0);
   });
 
-  test('refreshIfStale pulls a rotated key once, then short-circuits',
-      () async {
-    // Bob joins on his own device: his cache holds v1 only.
-    final code = await admin.cck.createInvite('c1', capabilities: _viewer);
-    final bob = await join(code, 'bob');
-    expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1});
+  test(
+    'refreshIfStale pulls a rotated key once, then short-circuits',
+    () async {
+      // Bob joins on his own device: his cache holds v1 only.
+      final code = await admin.cck.createInvite('c1', capabilities: _viewer);
+      final bob = await join(code, 'bob');
+      expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1});
 
-    // Another device (the admin) rotates: bob's member doc gains v2, but his
-    // LOCAL cache is still v1 — exactly the window that made him keep pushing
-    // with the old key.
-    await admin.cck.rotateAndRevoke('c1');
-    expect(docs.congregations['c1']!['keyVersion'], 2);
+      // Another device (the admin) rotates: bob's member doc gains v2, but his
+      // LOCAL cache is still v1 — exactly the window that made him keep pushing
+      // with the old key.
+      await admin.cck.rotateAndRevoke('c1');
+      expect(docs.congregations['c1']!['keyVersion'], 2);
 
-    final before = docs.memberReads;
-    await bob.cck.refreshIfStale('c1', 2); // stale hint → one read, refreshes
-    expect(docs.memberReads, before + 1);
-    expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1, 2});
+      final before = docs.memberReads;
+      await bob.cck.refreshIfStale('c1', 2); // stale hint → one read, refreshes
+      expect(docs.memberReads, before + 1);
+      expect((await bob.cck.keyringFor('c1'))!.keys.keys.toSet(), {1, 2});
 
-    final after = docs.memberReads;
-    await bob.cck.refreshIfStale('c1', 2); // cache already covers 2 → no read
-    expect(docs.memberReads, after);
-  });
+      final after = docs.memberReads;
+      await bob.cck.refreshIfStale('c1', 2); // cache already covers 2 → no read
+      expect(docs.memberReads, after);
+    },
+  );
 
   test('capabilities can be changed without rotating', () async {
     // Downgrading keeps the keyring: the rules stop their writes, and
@@ -278,10 +303,14 @@ void main() {
     await join(code, 'bob');
 
     await admin.cck.setMemberCapabilities(
-        'c1', 'bob', const MemberCapabilities(editTypes: ['*']));
+      'c1',
+      'bob',
+      const MemberCapabilities(editTypes: ['*']),
+    );
 
-    final bob = (await admin.cck.listMembers('c1'))
-        .firstWhere((m) => m.uid == 'bob');
+    final bob = (await admin.cck.listMembers(
+      'c1',
+    )).firstWhere((m) => m.uid == 'bob');
     expect(bob.capabilities.people, isFalse);
     expect(bob.capabilities.editTypes, ['*']);
     expect(docs.rotations, isEmpty);

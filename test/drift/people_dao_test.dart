@@ -13,30 +13,34 @@ void main() {
   final t0 = DateTime.utc(2026, 1, 1);
 
   Person person(String id, String name, {DateTime? updatedAt}) => Person(
-        id: id,
-        congregationId: congId,
-        firstName: '',
-        lastName: '',
-        displayName: name,
-        gender: Gender.male,
-        privilege: Role.publisher,
-        qualifications: const [],
-        originCongregation: '',
-        active: true,
-        notes: '',
-        createdAt: t0,
-        updatedAt: updatedAt ?? t0,
-      );
+    id: id,
+    congregationId: congId,
+    firstName: '',
+    lastName: '',
+    displayName: name,
+    gender: Gender.male,
+    privilege: Role.publisher,
+    qualifications: const [],
+    originCongregation: '',
+    active: true,
+    notes: '',
+    createdAt: t0,
+    updatedAt: updatedAt ?? t0,
+  );
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
-    await db.into(db.congregations).insert(CongregationsCompanion.insert(
-          id: congId,
-          name: 'Mi congregación',
-          color: 0xFF7A2230,
-          createdAt: t0,
-          updatedAt: t0,
-        ));
+    await db
+        .into(db.congregations)
+        .insert(
+          CongregationsCompanion.insert(
+            id: congId,
+            name: 'Mi congregación',
+            color: 0xFF7A2230,
+            createdAt: t0,
+            updatedAt: t0,
+          ),
+        );
   });
 
   tearDown(() => db.close());
@@ -66,25 +70,29 @@ void main() {
     expect(p.updatedAt, when);
   });
 
-  test('softDelete hides the row from reads but keeps it in the table',
-      () async {
-    await db.peopleDao.upsert(person('p1', 'Ana'));
-    await db.peopleDao.softDelete('p1', DateTime.utc(2026, 2, 3));
-    expect(await db.peopleDao.all(), isEmpty);
-    expect(await db.peopleDao.count(), 0);
-    final raw = await db.customSelect('SELECT id FROM people').get();
-    expect(raw, hasLength(1));
-  });
+  test(
+    'softDelete hides the row from reads but keeps it in the table',
+    () async {
+      await db.peopleDao.upsert(person('p1', 'Ana'));
+      await db.peopleDao.softDelete('p1', DateTime.utc(2026, 2, 3));
+      expect(await db.peopleDao.all(), isEmpty);
+      expect(await db.peopleDao.count(), 0);
+      final raw = await db.customSelect('SELECT id FROM people').get();
+      expect(raw, hasLength(1));
+    },
+  );
 
   test('replaceAll swaps the whole directory in one transaction', () async {
     await db.peopleDao.upsert(person('p1', 'Ana'));
-    await db.peopleDao
-        .replaceAll([person('p9', 'Eva'), person('p8', 'Bruno')]);
+    await db.peopleDao.replaceAll([person('p9', 'Eva'), person('p8', 'Bruno')]);
     expect((await db.peopleDao.all()).map((p) => p.id), ['p8', 'p9']);
   });
 
   test('congregation FK is enforced', () async {
     final orphan = person('px', 'Sin casa').copyWith(congregationId: 'nope');
-    await expectLater(db.peopleDao.upsert(orphan), throwsA(isA<SqliteException>()));
+    await expectLater(
+      db.peopleDao.upsert(orphan),
+      throwsA(isA<SqliteException>()),
+    );
   });
 }

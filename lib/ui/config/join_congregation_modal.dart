@@ -40,8 +40,7 @@ class JoinCongregationModal extends ConsumerStatefulWidget {
       _JoinCongregationModalState();
 }
 
-class _JoinCongregationModalState
-    extends ConsumerState<JoinCongregationModal> {
+class _JoinCongregationModalState extends ConsumerState<JoinCongregationModal> {
   String _raw = '';
   bool _busy = false;
   String? _error;
@@ -100,7 +99,7 @@ class _JoinCongregationModalState
               initial: _raw,
               hint: tr.invite.codeHint,
               maxLines: 2,
-              style: AppText.mono(size: 12.5, color: t.text),
+              style: AppText.mono(size: AppText.small, color: t.text),
               onChanged: (v) => setState(() {
                 _raw = v;
                 _error = null;

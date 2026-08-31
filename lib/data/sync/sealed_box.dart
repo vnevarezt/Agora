@@ -53,13 +53,17 @@ abstract final class SealedBox {
     final ephemeralPub = (await ephemeral.extractPublicKey()).bytes;
     final shared = await _x25519.sharedSecretKey(
       keyPair: ephemeral,
-      remotePublicKey:
-          SimplePublicKey(recipientPubKey, type: KeyPairType.x25519),
+      remotePublicKey: SimplePublicKey(
+        recipientPubKey,
+        type: KeyPairType.x25519,
+      ),
     );
     final nonce = PassphraseEnvelope.randomBytes(12);
     final box = await _aes.encrypt(
       secret,
-      secretKey: SecretKey(await _wrapKey(shared, ephemeralPub, recipientPubKey)),
+      secretKey: SecretKey(
+        await _wrapKey(shared, ephemeralPub, recipientPubKey),
+      ),
       nonce: nonce,
     );
     return {
@@ -94,7 +98,9 @@ abstract final class SealedBox {
     try {
       return await _aes.decrypt(
         SecretBox(ct, nonce: nonce, mac: Mac(mac)),
-        secretKey: SecretKey(await _wrapKey(shared, ephemeralPub, recipientPub)),
+        secretKey: SecretKey(
+          await _wrapKey(shared, ephemeralPub, recipientPub),
+        ),
       );
     } on SecretBoxAuthenticationError catch (e) {
       throw SealedBoxException('Sealed box authentication failed.', e);
@@ -103,5 +109,7 @@ abstract final class SealedBox {
 
   /// Public key (32 raw bytes) for a stored private seed.
   static Future<List<int>> publicKeyOf(List<int> seed) async =>
-      (await _x25519.newKeyPairFromSeed(seed)).extractPublicKey().then((k) => k.bytes);
+      (await _x25519.newKeyPairFromSeed(
+        seed,
+      )).extractPublicKey().then((k) => k.bytes);
 }

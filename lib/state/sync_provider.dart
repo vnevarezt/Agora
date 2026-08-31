@@ -33,8 +33,7 @@ import 'sync_keys.dart' show syncOwnerUidKey;
 /// hygiene. Tests override the leaf providers with fakes.
 
 /// The OS keychain for sync key material (same store DbKeyManager uses).
-final syncKeyStoreProvider =
-    Provider((ref) => const KeychainKeyStore());
+final syncKeyStoreProvider = Provider((ref) => const KeychainKeyStore());
 
 /// Firestore instance, or null when the cloud is unconfigured. Own cache
 /// disabled: this app IS the offline layer (a second cache only creates
@@ -49,7 +48,8 @@ final firestoreProvider = Provider<FirebaseFirestore?>((ref) {
 
 /// Signed-in uid (null while signed out / cloud disabled).
 final syncUidProvider = Provider<String?>(
-    (ref) => ref.watch(cloudUserProvider).value?.uid);
+  (ref) => ref.watch(cloudUserProvider).value?.uid,
+);
 
 final keyDocsProvider = Provider<KeyDocsGateway?>((ref) {
   final fs = ref.watch(firestoreProvider);
@@ -95,7 +95,8 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
 });
 
 final syncSeederProvider = Provider<SyncSeeder>(
-    (ref) => SyncSeeder(ref.watch(dbProvider), ref.watch(syncScribeProvider)));
+  (ref) => SyncSeeder(ref.watch(dbProvider), ref.watch(syncScribeProvider)),
+);
 
 /// "My congregations": the collection-group membership stream. Drives the
 /// pull target list, capability gating and the members UI. Empty when the
@@ -108,10 +109,12 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
       .collectionGroup('members')
       .where('uid', isEqualTo: uid)
       .snapshots()
-      .map((snap) => [
-            for (final d in snap.docs)
-              Membership.fromDoc(d.reference.parent.parent!.id, d.data()),
-          ]);
+      .map(
+        (snap) => [
+          for (final d in snap.docs)
+            Membership.fromDoc(d.reference.parent.parent!.id, d.data()),
+        ],
+      );
 });
 
 /// What this user may PUSH in [congregationId] — the sync engine's write
@@ -131,8 +134,10 @@ final myMembershipsProvider = StreamProvider<List<Membership>>((ref) {
 ///    forever.
 ///
 /// [rightsProvider] is the UI-facing view of the same resolution.
-final pushCapabilitiesProvider =
-    Provider.family<MemberCapabilities?, String>((ref, congregationId) {
+final pushCapabilitiesProvider = Provider.family<MemberCapabilities?, String>((
+  ref,
+  congregationId,
+) {
   if (ref.watch(syncUidProvider) == null) return null;
   final shared = ref.watch(sharedCongregationIdsProvider).value;
   if (shared == null || !shared.contains(congregationId)) return null;
@@ -165,10 +170,11 @@ final sharedCongregationIdsProvider = StreamProvider<Set<String>>((ref) {
 /// Route every gate through here rather than re-deriving it: confusing
 /// "never shared" with "revoked" is the easy mistake, and they want opposite
 /// answers.
-final rightsProvider =
-    Provider.family<MemberCapabilities, String>((ref, congregationId) =>
-        ref.watch(pushCapabilitiesProvider(congregationId)) ??
-        MemberCapabilities.founder);
+final rightsProvider = Provider.family<MemberCapabilities, String>(
+  (ref, congregationId) =>
+      ref.watch(pushCapabilitiesProvider(congregationId)) ??
+      MemberCapabilities.founder,
+);
 
 /// The members admin screen's live list.
 ///
@@ -177,26 +183,34 @@ final rightsProvider =
 /// as long as it is open. It must die with the screen.
 final congregationMembersProvider = StreamProvider.autoDispose
     .family<List<CongregationMember>, String>((ref, congregationId) {
-  final docs = ref.watch(keyDocsProvider);
-  if (docs == null) return Stream.value(const []);
-  return docs.watchMembers(congregationId).map(
-      (rows) => [for (final r in rows) CongregationMember.fromDoc(r)]);
-});
+      final docs = ref.watch(keyDocsProvider);
+      if (docs == null) return Stream.value(const []);
+      return docs
+          .watchMembers(congregationId)
+          .map((rows) => [for (final r in rows) CongregationMember.fromDoc(r)]);
+    });
 
 /// Pending invites of a congregation (admin-only per the rules). Same
 /// autoDispose reasoning as [congregationMembersProvider].
 final congregationInvitesProvider = StreamProvider.autoDispose
     .family<List<CongregationInvite>, String>((ref, congregationId) {
-  final docs = ref.watch(keyDocsProvider);
-  if (docs == null) return Stream.value(const []);
-  return docs.watchInvites(congregationId).map((rows) => [
-        for (final e in rows.entries) CongregationInvite.fromDoc(e.key, e.value),
-      ]);
-});
+      final docs = ref.watch(keyDocsProvider);
+      if (docs == null) return Stream.value(const []);
+      return docs
+          .watchInvites(congregationId)
+          .map(
+            (rows) => [
+              for (final e in rows.entries)
+                CongregationInvite.fromDoc(e.key, e.value),
+            ],
+          );
+    });
 
 /// Whether [congregationId] already has a cloud space this user belongs to.
-final isCongregationSyncedProvider =
-    Provider.family<bool, String>((ref, congregationId) {
+final isCongregationSyncedProvider = Provider.family<bool, String>((
+  ref,
+  congregationId,
+) {
   final memberships = ref.watch(myMembershipsProvider).value ?? const [];
   return memberships.any((m) => m.congregationId == congregationId);
 });
@@ -208,42 +222,52 @@ final isCongregationSyncedProvider =
 ///
 /// Every sign-out affordance must call this — never `CloudAuthService.signOut`
 /// directly, or the keys stay behind.
-final cloudSignOutProvider = Provider((ref) => () async {
-      final cck = ref.read(cckServiceProvider);
-      if (cck != null) {
-        final cids = <String>[
-          for (final m in ref.read(myMembershipsProvider).value ?? const [])
-            m.congregationId,
-        ];
-        // Best-effort: a keychain hiccup must never trap the user signed in.
-        try {
-          await cck.forget(cids);
-        } catch (_) {}
-      }
+final cloudSignOutProvider = Provider(
+  (ref) => () async {
+    final cck = ref.read(cckServiceProvider);
+    if (cck != null) {
+      final cids = <String>[
+        for (final m in ref.read(myMembershipsProvider).value ?? const [])
+          m.congregationId,
+      ];
+      // Best-effort: a keychain hiccup must never trap the user signed in.
       try {
-        await ref.read(userKeyServiceProvider)?.forget();
+        await cck.forget(cids);
       } catch (_) {}
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(syncOwnerUidKey);
-      } catch (_) {}
-      await (await ref.read(cloudAuthProvider.future))?.signOut();
-    });
+    }
+    try {
+      await ref.read(userKeyServiceProvider)?.forget();
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(syncOwnerUidKey);
+    } catch (_) {}
+    await (await ref.read(cloudAuthProvider.future))?.signOut();
+  },
+);
 
 /// Orchestrates enabling cloud sync for a congregation (founder path):
 /// mint the CCK + create the cloud space, seed the whole subtree into the
 /// outbox, then kick a sync. Requires the sync keys to be ready and the user
 /// signed in. Returns false when preconditions aren't met.
-final enableCongregationSyncProvider =
-    Provider((ref) => (String congregationId) async {
-          final cck = ref.read(cckServiceProvider);
-          if (cck == null) return false;
-          await cck.createCongregationSpace(congregationId);
-          await markCongregationShared(
-              ref.read(dbProvider), congregationId);
-          await ref.read(syncSeederProvider).seedCongregation(congregationId);
-          return true;
-        });
+final enableCongregationSyncProvider = Provider(
+  (ref) => (String congregationId) async {
+    final cck = ref.read(cckServiceProvider);
+    if (cck == null) return false;
+    await cck.createCongregationSpace(congregationId);
+    // Seed BEFORE marking it shared, never after. The mark is the local
+    // fact that tells auto-enable to leave this congregation alone from
+    // here on, so writing it first meant a seed that failed — or simply
+    // never reached the outbox — left a cloud space holding a member doc
+    // and nothing else, excluded from every later attempt on every
+    // device, with no error recorded anywhere. What its owner sees is a
+    // congregation that restores empty, for ever. Marked last, a failure
+    // leaves the congregation unmarked and the next pass retries it.
+    await ref.read(syncSeederProvider).seedCongregation(congregationId);
+    await markCongregationShared(ref.read(dbProvider), congregationId);
+    return true;
+  },
+);
 
 /// Records that [congregationId] has a cloud presence on this device.
 ///
@@ -254,40 +278,48 @@ final enableCongregationSyncProvider =
 ///
 /// insertOrIgnore, never a plain upsert: an existing row carries the pull
 /// cursor, and resetting that would silently re-download the world.
-Future<void> markCongregationShared(AppDatabase db, String congregationId) =>
-    db.into(db.syncState).insert(
-          SyncStateCompanion.insert(
-            congregationId: congregationId,
-            updatedAt: DateTime.now().toUtc(),
-          ),
-          mode: InsertMode.insertOrIgnore,
-        );
+Future<void> markCongregationShared(AppDatabase db, String congregationId) => db
+    .into(db.syncState)
+    .insert(
+      SyncStateCompanion.insert(
+        congregationId: congregationId,
+        updatedAt: DateTime.now().toUtc(),
+      ),
+      mode: InsertMode.insertOrIgnore,
+    );
 
 /// Joins the congregation an invite code points at: redeem, mark it shared,
 /// then pull explicitly — nothing else would (with a null cursor
 /// `decidePull` returns `lazy` at most, so the data would trickle in
 /// minutes later, if at all).
-final redeemInviteProvider = Provider((ref) => (InviteCode code) async {
-      final cck = ref.read(cckServiceProvider);
-      if (cck == null) {
-        throw const SharingException(
-            'keysUnavailable', 'Cloud sync is not available.');
-      }
-      final user = ref.read(cloudUserProvider).value;
-      await cck.redeemInvite(code,
-          email: user?.email, displayName: user?.displayName);
-      final cid = code.congregationId;
-      await markCongregationShared(ref.read(dbProvider), cid);
+final redeemInviteProvider = Provider(
+  (ref) => (InviteCode code) async {
+    final cck = ref.read(cckServiceProvider);
+    if (cck == null) {
+      throw const SharingException(
+        'keysUnavailable',
+        'Cloud sync is not available.',
+      );
+    }
+    final user = ref.read(cloudUserProvider).value;
+    await cck.redeemInvite(
+      code,
+      email: user?.email,
+      displayName: user?.displayName,
+    );
+    final cid = code.congregationId;
+    await markCongregationShared(ref.read(dbProvider), cid);
 
-      final engine = ref.read(syncEngineProvider);
-      if (engine != null) {
-        PullResult page;
-        do {
-          page = await engine.pullOnce(cid);
-        } while (page.fetched >= FirestoreTransport.pageSize);
-      }
-      return cid;
-    });
+    final engine = ref.read(syncEngineProvider);
+    if (engine != null) {
+      PullResult page;
+      do {
+        page = await engine.pullOnce(cid);
+      } while (page.fetched >= FirestoreTransport.pageSize);
+    }
+    return cid;
+  },
+);
 
 // ---- account & congregation deletion ---------------------------------------
 
@@ -305,7 +337,8 @@ final congregationTeardownProvider = Provider<CongregationTeardown?>((ref) {
 /// deletion flow can be exercised without a real FirebaseAuth. Null once cloud
 /// init settles with the cloud disabled.
 final deleteCloudUserProvider = FutureProvider<Future<void> Function()?>(
-    (ref) async => (await ref.watch(cloudAuthProvider.future))?.deleteAccount);
+  (ref) async => (await ref.watch(cloudAuthProvider.future))?.deleteAccount,
+);
 
 /// Thrown by [deleteMyAccountProvider] when the user is the sole admin of a
 /// congregation that still has other members: deleting would strand them, so
@@ -337,7 +370,10 @@ Future<void> _deleteSyncState(AppDatabase db, String cid) =>
 
 /// Snapshots every congregation's member landscape into the deletion plan.
 Future<AccountDeletionPlan> _accountDeletionPlan(
-    CckService cck, String uid, List<Membership> memberships) async {
+  CckService cck,
+  String uid,
+  List<Membership> memberships,
+) async {
   final landscape = <String, List<MemberRole>>{};
   for (final m in memberships) {
     landscape[m.congregationId] = [
@@ -351,8 +387,9 @@ Future<AccountDeletionPlan> _accountDeletionPlan(
 /// Congregations that would BLOCK account deletion (I'm the sole admin and
 /// other members remain). Lets the delete modal warn upfront, before asking
 /// the user to reauthenticate. Empty when nothing blocks.
-final accountDeletionBlockersProvider =
-    FutureProvider.autoDispose<List<String>>((ref) async {
+final accountDeletionBlockersProvider = FutureProvider.autoDispose<List<String>>((
+  ref,
+) async {
   final cck = ref.watch(cckServiceProvider);
   final uid = ref.watch(syncUidProvider);
   if (cck == null || uid == null) return const [];
@@ -366,28 +403,32 @@ final accountDeletionBlockersProvider =
 /// Admin action: hard-delete this congregation's cloud space while KEEPING the
 /// local data — it reverts to a local-only congregation (un-share). Destroys
 /// every other member's access, so the UI confirms first.
-final deleteCongregationCloudProvider = Provider((ref) => (String cid) async {
-      final teardown = ref.read(congregationTeardownProvider);
-      if (teardown == null) {
-        throw const SharingException(
-            'keysUnavailable', 'Cloud sync is not available.');
-      }
-      final sync = ref.read(syncControllerProvider.notifier);
-      // A push landing mid-wipe recreates item docs that nobody can delete
-      // afterwards: `isAdmin(cid)` reads the member doc the wipe just removed.
-      sync.pause();
-      try {
-        await teardown.wipe(cid);
-        await ref.read(cckServiceProvider)?.forget([cid]);
-        // Drop the "shared" fact so rightsProvider treats it as local again.
-        await _deleteSyncState(ref.read(dbProvider), cid);
-      } finally {
-        // keepLocal: un-sharing removes both facts auto-enable uses to skip a
-        // congregation (member doc + syncState), so without this it would
-        // re-found the cloud space seconds later and undo the action.
-        sync.resume(keepLocal: [cid]);
-      }
-    });
+final deleteCongregationCloudProvider = Provider(
+  (ref) => (String cid) async {
+    final teardown = ref.read(congregationTeardownProvider);
+    if (teardown == null) {
+      throw const SharingException(
+        'keysUnavailable',
+        'Cloud sync is not available.',
+      );
+    }
+    final sync = ref.read(syncControllerProvider.notifier);
+    // A push landing mid-wipe recreates item docs that nobody can delete
+    // afterwards: `isAdmin(cid)` reads the member doc the wipe just removed.
+    sync.pause();
+    try {
+      await teardown.wipe(cid);
+      await ref.read(cckServiceProvider)?.forget([cid]);
+      // Drop the "shared" fact so rightsProvider treats it as local again.
+      await _deleteSyncState(ref.read(dbProvider), cid);
+    } finally {
+      // keepLocal: un-sharing removes both facts auto-enable uses to skip a
+      // congregation (member doc + syncState), so without this it would
+      // re-found the cloud space seconds later and undo the action.
+      sync.resume(keepLocal: [cid]);
+    }
+  },
+);
 
 /// Cancels the cloud account: for every congregation, wipe (sole member &
 /// admin) or leave; then delete the identity doc, delete the Firebase account,
@@ -396,53 +437,57 @@ final deleteCongregationCloudProvider = Provider((ref) => (String cid) async {
 /// The caller MUST have reauthenticated first — `user.delete()` needs a recent
 /// login. Throws [AccountDeletionBlocked] BEFORE deleting anything when the
 /// user is the sole admin of a shared congregation.
-final deleteMyAccountProvider = Provider((ref) => () async {
-      final teardown = ref.read(congregationTeardownProvider);
-      final cck = ref.read(cckServiceProvider);
-      final docs = ref.read(keyDocsProvider);
-      final uid = ref.read(syncUidProvider);
-      final deleteCloudUser = await ref.read(deleteCloudUserProvider.future);
-      if (teardown == null ||
-          cck == null ||
-          docs == null ||
-          uid == null ||
-          deleteCloudUser == null) {
-        throw const SharingException(
-            'keysUnavailable', 'Cloud sync is not available.');
+final deleteMyAccountProvider = Provider(
+  (ref) => () async {
+    final teardown = ref.read(congregationTeardownProvider);
+    final cck = ref.read(cckServiceProvider);
+    final docs = ref.read(keyDocsProvider);
+    final uid = ref.read(syncUidProvider);
+    final deleteCloudUser = await ref.read(deleteCloudUserProvider.future);
+    if (teardown == null ||
+        cck == null ||
+        docs == null ||
+        uid == null ||
+        deleteCloudUser == null) {
+      throw const SharingException(
+        'keysUnavailable',
+        'Cloud sync is not available.',
+      );
+    }
+
+    // Awaited, never `.value ?? []`: planning off a stream that has not
+    // emitted would delete the account while leaving every congregation doc
+    // behind — and no account able to delete them ever again.
+    final memberships = await _awaitMemberships(ref);
+
+    // Decide per congregation, then check FIRST (before any deletion):
+    // refuse if deleting would strand other members.
+    final plan = await _accountDeletionPlan(cck, uid, memberships);
+    if (plan.blocked.isNotEmpty) throw AccountDeletionBlocked(plan.blocked);
+
+    final sync = ref.read(syncControllerProvider.notifier);
+    // See deleteCongregationCloudProvider: a push mid-wipe outlives the
+    // teardown as undeletable docs.
+    sync.pause();
+    try {
+      for (final cid in plan.wipe) {
+        await teardown.wipe(cid);
+        await cck.forget([cid]);
       }
-
-      // Awaited, never `.value ?? []`: planning off a stream that has not
-      // emitted would delete the account while leaving every congregation doc
-      // behind — and no account able to delete them ever again.
-      final memberships = await _awaitMemberships(ref);
-
-      // Decide per congregation, then check FIRST (before any deletion):
-      // refuse if deleting would strand other members.
-      final plan = await _accountDeletionPlan(cck, uid, memberships);
-      if (plan.blocked.isNotEmpty) throw AccountDeletionBlocked(plan.blocked);
-
-      final sync = ref.read(syncControllerProvider.notifier);
-      // See deleteCongregationCloudProvider: a push mid-wipe outlives the
-      // teardown as undeletable docs.
-      sync.pause();
-      try {
-        for (final cid in plan.wipe) {
-          await teardown.wipe(cid);
-          await cck.forget([cid]);
-        }
-        for (final cid in plan.leave) {
-          await teardown.leave(cid);
-          await cck.forget([cid]);
-        }
-        await docs.deleteUserDoc(uid);
-        await deleteCloudUser();
-      } catch (_) {
-        // The account outlived the failure: the session is still live, so give
-        // it its sync back instead of leaving a half-torn-down app mute.
-        sync.resume();
-        rethrow;
+      for (final cid in plan.leave) {
+        await teardown.leave(cid);
+        await cck.forget([cid]);
       }
+      await docs.deleteUserDoc(uid);
+      await deleteCloudUser();
+    } catch (_) {
+      // The account outlived the failure: the session is still live, so give
+      // it its sync back instead of leaving a half-torn-down app mute.
+      sync.resume();
+      rethrow;
+    }
 
-      // Everything cloud-side is gone: wipe local and return to the Portada.
-      await ref.read(authSessionProvider.notifier).resetAllData();
-    });
+    // Everything cloud-side is gone: wipe local and return to the Portada.
+    await ref.read(authSessionProvider.notifier).resetAllData();
+  },
+);

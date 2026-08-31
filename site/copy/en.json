@@ -6,7 +6,11 @@
   },
   "a11y": {
     "skipToContent": "Skip to content",
-    "sections": "Sections"
+    "sections": "Sections",
+    "themeLabel": "Theme",
+    "themeSystem": "Theme: match the system",
+    "themeLight": "Theme: light",
+    "themeDark": "Theme: dark"
   },
   "landing": {
     "nav": {
@@ -23,7 +27,8 @@
       "title": "You type the names. That's it.",
       "subtitle": "Agora works out the timing and leaves you a print-ready PDF.",
       "cta": "Try it now",
-      "note": "No account. Nothing to install."
+      "note": "No account. Nothing to install.",
+      "shotAlt": "Agora on screen, with the week's program filled in"
     },
     "howItWorks": {
       "title": "Three steps.",
@@ -39,20 +44,7 @@
       "body": "Change one part and every time below shifts on its own.",
       "circuit": "Circuit overseer visiting? Mark it and the program reorders.",
       "slack": "26 min left over · 8·8·10 to the songs",
-      "sampleLabel": "Normal week · starts 6:00 p.m.",
-      "sampleTargetEnd": "19:45",
-      "sampleOpeningSong": "Song and prayer",
-      "sampleIntro": "Opening comments",
-      "sampleTreasures": "Treasures From God's Word",
-      "sampleTreasuresDuration": "25 min",
-      "sampleMinistry": "Apply Yourself to the Field Ministry",
-      "sampleMinistryDuration": "15 min fixed",
-      "sampleSong2": "Song",
-      "sampleChristianLife": "Living as Christians",
-      "sampleChristianLifeDuration": "5 min",
-      "sampleBibleStudy": "Congregation Bible study",
-      "sampleClosingWords": "Concluding comments",
-      "sampleClosingSong": "Song and prayer"
+      "shotAlt": "Agora on an iPhone, the week's program in the preview"
     },
     "preview": {
       "title": "The preview doesn't look like the PDF. It is the PDF.",
@@ -112,6 +104,52 @@
       "license": "The code is visible on GitHub, but it isn't free software: it can be viewed and used for noncommercial purposes (PolyForm Noncommercial 1.0.0). Made by Vicente Nevárez Treviño.",
       "linksLabel": "Links",
       "linkRepo": "Repository on GitHub"
+    },
+    "eyebrow": {
+      "howItWorks": "How it works",
+      "schedules": "Timing",
+      "privacy": "Your data",
+      "downloads": "Get started",
+      "whatYouGet": "What you get"
+    },
+    "whatYouGet": {
+      "title": "The rest is already handled."
+    }
+  },
+  "action": {
+    "meta": {
+      "title": "Agora — Your account"
+    },
+    "checking": "Checking the link…",
+    "openApp": "Open Agora",
+    "legal": "Agora — midweek meeting programs.",
+    "errors": {
+      "generic": "That did not go through. Try again in a moment."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "sub": "For the account",
+      "passwordLabel": "NEW PASSWORD",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmLabel": "REPEAT IT",
+      "hint": "Use something you do not use anywhere else.",
+      "cta": "Save password",
+      "mismatch": "The two passwords do not match.",
+      "weak": "The password needs at least 6 characters.",
+      "done": {
+        "title": "Password changed",
+        "sub": "You can sign in to Agora with your new password now."
+      }
+    },
+    "verify": {
+      "done": {
+        "title": "Email confirmed",
+        "sub": "Thank you. Your address is verified."
+      }
+    },
+    "invalid": {
+      "title": "This link no longer works",
+      "sub": "Links expire after an hour and can only be used once. Ask for a new one from the app."
     }
   }
 }

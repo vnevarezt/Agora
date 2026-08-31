@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../i18n/strings.g.dart';
+import 'document_lang.dart';
 
 /// Locale persistence. The chosen language survives restarts; on first run we
 /// follow the device locale (falling back to the base locale if unsupported).
@@ -32,10 +33,15 @@ Future<void> initLocale() async {
   if (!shippedLocales.contains(LocaleSettings.currentLocale)) {
     LocaleSettings.setLocaleSync(AppLocale.es);
   }
+  setDocumentLang(LocaleSettings.currentLocale.languageTag);
 }
 
-/// Persists the picked locale so it is restored on the next launch.
+/// Persists the picked locale so it is restored on the next launch, and tells
+/// the browser which language the page is now in — `<html lang>` ships as the
+/// base locale and would otherwise keep claiming Spanish for an English
+/// session.
 Future<void> persistLocale(AppLocale locale) async {
+  setDocumentLang(locale.languageTag);
   _prefs ??= await SharedPreferences.getInstance();
   await _prefs!.setString(_localeKey, locale.languageTag);
 }

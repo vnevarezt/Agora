@@ -28,7 +28,8 @@ double participantCardHeight(BuildContext context) {
   const avatar = 38.0;
   const verticalPadding = Space.s12 * 2;
   const lineHeight = 1.44;
-  final textColumn = scaler.scale(AppText.bodyLarge) * lineHeight +
+  final textColumn =
+      scaler.scale(AppText.bodyLarge) * lineHeight +
       1 +
       scaler.scale(AppText.caption) * lineHeight;
   return math.max(avatar, textColumn) + verticalPadding;
@@ -38,16 +39,20 @@ double participantCardHeight(BuildContext context) {
 /// subtitle (gender · origin congregation for visitors) and a privilege
 /// badge. Tapping it opens the edit modal.
 class ParticipantCard extends StatelessWidget {
-  const ParticipantCard({super.key, required this.participant, required this.onTap});
+  const ParticipantCard({
+    super.key,
+    required this.participant,
+    required this.onTap,
+  });
 
   final Person participant;
   final VoidCallback onTap;
 
   String _genderLabel(BuildContext context) => switch (participant.gender) {
-        Gender.male => context.t.participantModal.male,
-        Gender.female => context.t.participantModal.female,
-        Gender.unspecified => context.t.participantCard.genderUnspecified,
-      };
+    Gender.male => context.t.participantModal.male,
+    Gender.female => context.t.participantModal.female,
+    Gender.unspecified => context.t.participantCard.genderUnspecified,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +66,14 @@ class ParticipantCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: 14,
       hoverElevation: 4,
-      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s14,
+        vertical: Space.s12,
+      ),
       builder: (context, hovered) {
         return Row(
           children: [
-            PersonAvatar(name: h.displayName, size: 38),
+            PersonAvatar(name: h.displayName, size: Dimens.avatarCard),
             const SizedBox(width: Space.s12),
             Expanded(
               child: Column(
@@ -105,10 +113,15 @@ class ParticipantCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: Space.s10),
-            if (h.isIncomplete)
-              const _IncompleteBadge()
-            else
-              PrivBadge(role: h.privilege),
+            // Flexible, not a bare child: the badge grows with the system text
+            // size and the row has a fixed avatar on the other end, so at 2x
+            // it was taking width the name column no longer had. It gives now
+            // instead of overflowing.
+            Flexible(
+              child: h.isIncomplete
+                  ? const _IncompleteBadge()
+                  : PrivBadge(role: h.privilege),
+            ),
           ],
         );
       },

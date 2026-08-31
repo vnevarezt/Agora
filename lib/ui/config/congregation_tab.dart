@@ -10,12 +10,14 @@ import '../../models/congregation_member.dart';
 import '../../models/congregation_settings.dart';
 import '../../models/member_capabilities.dart';
 import '../../state/dashboard_provider.dart';
+import '../../state/mwb_sync.dart';
 import '../../state/sync_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
+import '../widgets/app_snack_bar.dart';
 import '../widgets/bound_text_field.dart';
 import '../widgets/danger_button.dart';
 import '../widgets/dashed_border.dart';
@@ -76,8 +78,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
 
     void apply() {
       final s = congregation.settings;
-      final languageIndex =
-          congregationLanguageCodes.indexOf(s.meetingLanguage);
+      final languageIndex = congregationLanguageCodes.indexOf(
+        s.meetingLanguage,
+      );
       _congregationId = congregation.id;
       _name = congregation.name;
       _number = congregation.number;
@@ -110,7 +113,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     // debounce timer and from dispose(), either of which can fire after the
     // capabilities changed under us.
     if (!ref.read(rightsProvider(id)).admin) return;
-    ref.read(congregationActionsProvider).update(
+    ref
+        .read(congregationActionsProvider)
+        .update(
           id,
           name: _name.trim(),
           number: _number.trim(),
@@ -132,7 +137,8 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     // Keep a valid selection (the list changes in memory).
     if (congregations.isEmpty) {
       _congregationId = null;
-    } else if (_congregationId == null || !congregations.any((c) => c.id == _congregationId)) {
+    } else if (_congregationId == null ||
+        !congregations.any((c) => c.id == _congregationId)) {
       _select(congregations.first, notify: false);
     }
 
@@ -216,7 +222,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
                 key: ValueKey('$_congregationId-number'),
                 initial: _number,
                 enabled: editable,
-                style: AppText.mono(size: 13.5, color: t.text),
+                style: AppText.mono(size: AppText.body, color: t.text),
                 onChanged: (v) {
                   _number = v;
                   _scheduleSave();
@@ -225,16 +231,31 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
             ),
             LabeledField(
               label: tr.congregation.meetingLanguage,
-              child: AppDropdown<int>(
-                value: _language,
-                items: [for (var i = 0; i < meetingLanguages.length; i++) i],
-                itemLabel: (i) => meetingLanguages[i],
-                onChanged: !editable
-                    ? null
-                    : (v) {
-                        setState(() => _language = v);
-                        _scheduleSave();
-                      },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppDropdown<int>(
+                    value: _language,
+                    items: [
+                      for (var i = 0; i < meetingLanguages.length; i++) i,
+                    ],
+                    itemLabel: (i) => meetingLanguages[i],
+                    onChanged: !editable
+                        ? null
+                        : (v) {
+                            setState(() => _language = v);
+                            _scheduleSave();
+                          },
+                  ),
+                  // Right under the control that causes it, rather than in the
+                  // dashboard's global indicator: switching language can mean
+                  // a download, and the person who just switched is the one
+                  // who needs to know it is happening.
+                  if (_congregationId != null) ...[
+                    const SizedBox(height: Space.s6),
+                    _WorkbookStatusLine(congregationId: _congregationId!),
+                  ],
+                ],
               ),
             ),
           ],
@@ -246,7 +267,7 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
   Widget _scheduleCard() {
     final t = context.tokens;
     final tr = context.t;
-    final mono = AppText.mono(size: 13.5, color: t.text);
+    final mono = AppText.mono(size: AppText.body, color: t.text);
     // Same `congregation` item as _dataCard, same admin gate.
     final editable = _canEditCongregation;
     return SettingsCard(
@@ -349,8 +370,9 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
         ? const AsyncValue<List<CongregationInvite>>.data([])
         : ref.watch(congregationInvitesProvider(cid));
     final myUid = ref.watch(syncUidProvider);
-    final adminCount =
-        (members.value ?? const []).where((m) => m.capabilities.admin).length;
+    final adminCount = (members.value ?? const [])
+        .where((m) => m.capabilities.admin)
+        .length;
 
     return SettingsCard(
       title: tr.congregation.usersTitle,
@@ -358,28 +380,27 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
       children: [
         switch (members) {
           AsyncError() => _hint(t, tr.congregation.membersError),
-          AsyncValue(value: final rows?) when rows.isNotEmpty =>
-            Column(
-              children: [
-                for (final (i, m) in rows.indexed)
-                  UserRow(
-                    first: i == 0,
-                    name: _memberName(m, tr, isMe: m.uid == myUid),
-                    email: m.email ?? '',
-                    trailing: RolePill(role: _roleLabel(m.capabilities, tr)),
-                    // Editing your own row is allowed on purpose: it is how
-                    // a departing admin hands over and leaves.
-                    onTap: !isAdmin
-                        ? null
-                        : () => showMemberAccess(
-                              context,
-                              congregationId: cid,
-                              member: m,
-                              adminCount: adminCount,
-                            ),
-                  ),
-              ],
-            ),
+          AsyncValue(value: final rows?) when rows.isNotEmpty => Column(
+            children: [
+              for (final (i, m) in rows.indexed)
+                UserRow(
+                  first: i == 0,
+                  name: _memberName(m, tr, isMe: m.uid == myUid),
+                  email: m.email ?? '',
+                  trailing: RolePill(role: _roleLabel(m.capabilities, tr)),
+                  // Editing your own row is allowed on purpose: it is how
+                  // a departing admin hands over and leaves.
+                  onTap: !isAdmin
+                      ? null
+                      : () => showMemberAccess(
+                          context,
+                          congregationId: cid,
+                          member: m,
+                          adminCount: adminCount,
+                        ),
+                ),
+            ],
+          ),
           _ => _hint(t, tr.congregation.noUsers),
         },
         if ((invites.value ?? const []).isNotEmpty) ...[
@@ -447,8 +468,10 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(tr.congregation.deleteCloudButton,
-                style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+            child: Text(
+              tr.congregation.deleteCloudButton,
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -457,19 +480,25 @@ class _CongregationTabState extends ConsumerState<CongregationTab> {
     try {
       await ref.read(deleteCongregationCloudProvider)(cid);
     } catch (_) {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.congregation.deleteCloudError)));
+      showAppSnack(
+        messenger,
+        message: tr.congregation.deleteCloudError,
+        kind: AppSnackKind.failure,
+      );
     }
   }
 
   Widget _hint(AppTokens t, String text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: Space.s6),
-        child: Text(
-          text,
-          style: TextStyle(
-              fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textMute),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: Space.s6),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: AppText.body,
+        fontWeight: FontWeight.w600,
+        color: t.textMute,
+      ),
+    ),
+  );
 
   String _memberName(
     CongregationMember m,
@@ -504,10 +533,12 @@ class _PendingInvite extends StatelessWidget {
     final label = expiresAt == null
         ? ''
         : invite.isExpired(DateTime.now().toUtc())
-            ? tr.invite.expired
-            : tr.invite.expiresOn(
-                date: MaterialLocalizations.of(context)
-                    .formatShortDate(expiresAt.toLocal()));
+        ? tr.invite.expired
+        : tr.invite.expiresOn(
+            date: MaterialLocalizations.of(
+              context,
+            ).formatShortDate(expiresAt.toLocal()),
+          );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: Space.s6),
       child: Row(
@@ -518,9 +549,10 @@ class _PendingInvite extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: AppText.small,
-                  fontWeight: FontWeight.w600,
-                  color: t.textMute),
+                fontSize: AppText.small,
+                fontWeight: FontWeight.w600,
+                color: t.textMute,
+              ),
             ),
           ),
           AppButton(
@@ -643,6 +675,54 @@ class _AddChip extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// One quiet line telling the person who just switched the meeting language
+/// whether the workbook for it is on hand. Text only, no spinner: the states
+/// are slow and the card is already dense.
+class _WorkbookStatusLine extends ConsumerWidget {
+  const _WorkbookStatusLine({required this.congregationId});
+
+  final String congregationId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.tokens;
+    final tr = context.t;
+    final status = ref.watch(
+      congregationWorkbookStatusProvider(congregationId),
+    );
+    final language =
+        meetingLanguages[congregationLanguageCodes
+            .indexOf(
+              ref.watch(congregationMeetingLanguageProvider(congregationId)),
+            )
+            .clamp(0, meetingLanguages.length - 1)];
+
+    final (String message, Color color) = switch (status) {
+      WorkbookStatus.ready => (
+        tr.congregation.workbookReady(language: language),
+        t.textMute,
+      ),
+      WorkbookStatus.downloading => (
+        tr.congregation.workbookDownloading(language: language),
+        t.accentStrong,
+      ),
+      WorkbookStatus.unavailable => (
+        tr.congregation.workbookUnavailable(language: language),
+        t.warning,
+      ),
+    };
+
+    return Text(
+      message,
+      style: TextStyle(
+        fontSize: AppText.small,
+        fontWeight: FontWeight.w600,
+        color: color,
+      ),
     );
   }
 }

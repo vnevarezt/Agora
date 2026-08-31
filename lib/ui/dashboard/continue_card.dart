@@ -32,7 +32,12 @@ class ContinueCard extends StatelessWidget {
     final pct = (p.progress * 100).round();
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(Space.s24, Space.s18, Space.s24, Space.s18),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s24,
+        Space.s18,
+        Space.s24,
+        Space.s18,
+      ),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(18),
@@ -43,43 +48,47 @@ class ContinueCard extends StatelessWidget {
         children: [
           Text(
             tr.dashboard.continueWhere.toUpperCase(),
-            style: AppText.label(size: 11, color: t.textMute),
+            style: AppText.label(size: AppText.caption, color: t.textMute),
           ),
           const SizedBox(height: Space.s14),
-          LayoutBuilder(builder: (context, c) {
-            final narrow = c.maxWidth < ContainerWidth.continueRow;
-            final ring = _ProgressRing(value: p.progress, label: '$pct%');
-            final body = _body(t, tr, p);
-            final cta = AppButton(
-              icon: Icons.arrow_forward,
-              label: tr.dashboard.continueCta,
-              onPressed: onContinue,
-            );
-            if (narrow) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          LayoutBuilder(
+            builder: (context, c) {
+              final narrow = c.maxWidth < ContainerWidth.continueRow;
+              final ring = _ProgressRing(value: p.progress, label: '$pct%');
+              final body = _body(t, tr, p);
+              final cta = AppButton(
+                icon: Icons.arrow_forward,
+                label: tr.dashboard.continueCta,
+                onPressed: onContinue,
+              );
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        ring,
+                        const SizedBox(width: Space.s18),
+                        Expanded(child: body),
+                      ],
+                    ),
+                    const SizedBox(height: Space.s14),
+                    Align(alignment: Alignment.centerRight, child: cta),
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(children: [
-                    ring,
-                    const SizedBox(width: Space.s18),
-                    Expanded(child: body),
-                  ]),
-                  const SizedBox(height: Space.s14),
-                  Align(alignment: Alignment.centerRight, child: cta),
+                  ring,
+                  const SizedBox(width: Space.s18),
+                  Expanded(child: body),
+                  const SizedBox(width: Space.s18),
+                  cta,
                 ],
               );
-            }
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ring,
-                const SizedBox(width: Space.s18),
-                Expanded(child: body),
-                const SizedBox(width: Space.s18),
-                cta,
-              ],
-            );
-          }),
+            },
+          ),
         ],
       ),
     );
@@ -89,70 +98,72 @@ class ContinueCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(children: [
-          Flexible(
-            child: Text(
-              p.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppText.display,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: t.text,
-              ),
-            ),
-          ),
-          const SizedBox(width: Space.s10),
-          StatusBadge(status: p.status),
-        ]),
-        const SizedBox(height: Space.s6),
-        Row(children: [
-          if (congregation != null) ...[
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Color(congregation!.color),
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: Space.s6),
+        Row(
+          children: [
             Flexible(
               child: Text(
-                congregation!.name,
+                p.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppText.display,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                  color: t.text,
+                ),
+              ),
+            ),
+            const SizedBox(width: Space.s10),
+            StatusBadge(status: p.status),
+          ],
+        ),
+        const SizedBox(height: Space.s6),
+        Row(
+          children: [
+            if (congregation != null) ...[
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Color(congregation!.color),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: Space.s6),
+              Flexible(
+                child: Text(
+                  congregation!.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: AppText.small,
+                    fontWeight: FontWeight.w700,
+                    color: t.textMute,
+                  ),
+                ),
+              ),
+              const SizedBox(width: Space.s8),
+            ],
+            Flexible(
+              child: Text(
+                '${tr.dashboard.assignmentsDone(done: p.done, total: p.total)}'
+                ' · ${tr.projectCard.edited(label: p.editedLabel)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppText.small,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: t.textMute,
                 ),
               ),
             ),
-            const SizedBox(width: Space.s8),
           ],
-          Flexible(
-            child: Text(
-              '${tr.dashboard.assignmentsDone(done: p.done, total: p.total)}'
-              ' · ${tr.projectCard.edited(label: p.editedLabel)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppText.small,
-                fontWeight: FontWeight.w600,
-                color: t.textMute,
-              ),
-            ),
-          ),
-        ]),
+        ),
         const SizedBox(height: Space.s12),
         Wrap(
           spacing: Space.s6,
           runSpacing: Space.s6,
-          children: [
-            for (final w in p.weekProgress) _WeekChip(progress: w),
-          ],
+          children: [for (final w in p.weekProgress) _WeekChip(progress: w)],
         ),
       ],
     );
@@ -213,11 +224,14 @@ class _WeekChip extends StatelessWidget {
     final (IconData? icon, Color bg, Color fg) = complete
         ? (Icons.check_rounded, t.successSoft, t.success)
         : started
-            ? (Icons.timelapse_rounded, t.warningSoft, t.warning)
-            : (null, t.surface2, t.textDim);
+        ? (Icons.timelapse_rounded, t.warningSoft, t.warning)
+        : (null, t.surface2, t.textDim);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s10, vertical: Space.s6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s10,
+        vertical: Space.s6,
+      ),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(8),

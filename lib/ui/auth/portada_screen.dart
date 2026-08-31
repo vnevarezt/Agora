@@ -8,6 +8,7 @@ import '../responsive.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/agora_mark.dart';
 import '../widgets/app_button.dart';
 import '../widgets/motion.dart';
 
@@ -50,32 +51,11 @@ class PortadaScreen extends ConsumerWidget {
                 children: [
                   EnterUp(
                     delay: Motion.stagger(0),
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: t.accent,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: t.accent.withValues(alpha: 0.6),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                            spreadRadius: -8,
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        'JW',
-                        style: TextStyle(
-                          fontSize: AppText.display,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.38,
-                          color: t.accentInk,
-                        ),
-                      ),
-                    ),
+                    // The name sits under the mark here, so this is the mark
+                    // alone rather than the lockup. No shadow: the drawing has
+                    // no edge to cast one, and the tile it used to sit on was
+                    // a placeholder.
+                    child: const AgoraMark(size: Dimens.markCover),
                   ),
                   const SizedBox(height: Space.s18),
                   EnterUp(
@@ -83,7 +63,7 @@ class PortadaScreen extends ConsumerWidget {
                     child: Text(
                       tr.app.brand,
                       style: TextStyle(
-                        fontSize: wide ? 30 : 27,
+                        fontSize: AppText.brand,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.7,
                         height: 1.1,
@@ -100,7 +80,7 @@ class PortadaScreen extends ConsumerWidget {
                         tr.portada.tagline,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: wide ? 15 : 14,
+                          fontSize: wide ? AppText.bodyLarge : AppText.body,
                           fontWeight: FontWeight.w600,
                           height: 1.5,
                           color: t.textMute,
@@ -227,7 +207,11 @@ class _PortadaButton extends StatelessWidget {
                   duration: Motion.of(context, Motion.instant),
                   curve: Motion.curve,
                   offset: hovered ? const Offset(0.18, 0) : Offset.zero,
-                  child: Icon(Icons.arrow_forward, size: AppIcon.control, color: fg),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    size: AppIcon.control,
+                    color: fg,
+                  ),
                 ),
               ],
             ],
@@ -253,7 +237,10 @@ class _LocalEntryCard extends StatelessWidget {
       builder: (context, hovered, _) => AnimatedContainer(
         duration: Motion.of(context, Motion.instant),
         curve: Motion.curve,
-        padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Space.s14,
+          vertical: Space.s12,
+        ),
         decoration: BoxDecoration(
           color: hovered ? t.accentTint : t.surface2,
           borderRadius: BorderRadius.circular(12),
@@ -261,7 +248,11 @@ class _LocalEntryCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.smartphone, size: AppIcon.control, color: t.accentStrong),
+            Icon(
+              Icons.smartphone,
+              size: AppIcon.control,
+              color: t.accentStrong,
+            ),
             const SizedBox(width: Space.s12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

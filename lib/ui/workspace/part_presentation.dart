@@ -51,6 +51,16 @@ class PartView {
   /// "Auxiliary room" indicator in the header.
   final bool auxFlag;
 
+  /// Whether [title] came out of the workbook rather than out of the app's own
+  /// translations. Only the numbered parts do; the songs, the opening and
+  /// closing words and the circuit overseer's talk are strings this app owns
+  /// and are in the interface's language. A hand-typed override counts as the
+  /// workbook's — whoever typed it was rewriting that line of the program.
+  ///
+  /// The workspace uses it to tell a screen reader which language to read a
+  /// title in (WCAG 3.1.2); see [MeetingLanguage].
+  final bool titleFromWorkbook;
+
   final List<SlotSpec> slots;
 
   const PartView({
@@ -62,6 +72,7 @@ class PartView {
     this.fixedTag,
     this.allMeetingBadge = false,
     this.auxFlag = false,
+    this.titleFromWorkbook = false,
     this.slots = const [],
   });
 }
@@ -71,19 +82,18 @@ class PartView {
 List<String> _labelsForRole(ProgramRow row, Translations tr) =>
     switch (row.role) {
       SlotRole.conductorReader => [
-          tr.workspace.slotConductor,
-          tr.workspace.slotReader,
-        ],
+        tr.workspace.slotConductor,
+        tr.workspace.slotReader,
+      ],
       SlotRole.studentAssistant => [
-          tr.workspace.slotStudent,
-          tr.workspace.slotAssistant,
-        ],
+        tr.workspace.slotStudent,
+        tr.workspace.slotAssistant,
+      ],
       SlotRole.speaker => [tr.workspace.slotSpeaker],
       SlotRole.none => [tr.workspace.slotInCharge],
       // Single-slot roles reuse the printed prefix without its colon.
       SlotRole.student ||
-      SlotRole.prayer =>
-        [row.role.label(tr).replaceAll(':', '')],
+      SlotRole.prayer => [row.role.label(tr).replaceAll(':', '')],
     };
 
 int _maxLengthForRole(ProgramRow row) =>
@@ -116,6 +126,7 @@ PartView mapRow(
   final title = row.titleOnly(tr);
   final duration = row.durationLabel(tr);
   final isSong = row.kind == RowKind.song;
+  final fromWorkbook = row.titleOverride != null || row.kind == RowKind.part;
 
   if (row.slots == 0) {
     return PartView(
@@ -124,6 +135,7 @@ PartView mapRow(
       time: row.time,
       title: title,
       durationLabel: duration,
+      titleFromWorkbook: fromWorkbook,
       fixedTag: isSong ? tr.workspace.songTag : tr.workspace.chairmanTag,
     );
   }
@@ -138,17 +150,14 @@ PartView mapRow(
     time: row.time,
     title: title,
     durationLabel: duration,
+    titleFromWorkbook: fromWorkbook,
     // The opening/closing song carries the prayer slot in the model: it shows
     // as a role card with the "Cántico" chip.
     fixedTag: isSong ? tr.workspace.songTag : null,
     auxFlag: withAux,
     slots: [
       for (var i = 0; i < row.slots; i++)
-        SlotSpec(
-          label: labels[i],
-          ref: RowSlot(row, i),
-          maxLength: maxLength,
-        ),
+        SlotSpec(label: labels[i], ref: RowSlot(row, i), maxLength: maxLength),
       if (withAux)
         for (var i = 0; i < row.auxSlots; i++)
           SlotSpec(

@@ -10,7 +10,7 @@ import '../models/week.dart';
 import '../models/week_type.dart';
 import '../pdf/program_document.dart' show WeekEntry;
 import 'app_settings.dart';
-import 'program_content.dart';
+import 'program_reconciler.dart';
 import 'weeks_provider.dart';
 
 /// Editable form state (immutable). Assignments are stored **per week** (index
@@ -108,8 +108,7 @@ class FormModel {
           ? chairmanByWeek
           : {...chairmanByWeek, idx: chairman},
       mainByWeek: main == null ? mainByWeek : {...mainByWeek, idx: main},
-      auxByWeek:
-          auxiliary == null ? auxByWeek : {...auxByWeek, idx: auxiliary},
+      auxByWeek: auxiliary == null ? auxByWeek : {...auxByWeek, idx: auxiliary},
       circuitOverseerByWeek:
           circuitOverseerByWeek ?? this.circuitOverseerByWeek,
       titleOverridesByWeek: titleOverrides == null
@@ -119,8 +118,9 @@ class FormModel {
   }
 }
 
-final formProvider =
-    NotifierProvider<FormController, FormModel>(FormController.new);
+final formProvider = NotifierProvider<FormController, FormModel>(
+  FormController.new,
+);
 
 class FormController extends Notifier<FormModel> {
   /// DB identity behind the form (phase 2 write-through). Empty when the
@@ -134,8 +134,11 @@ class FormController extends Notifier<FormModel> {
 
   /// Replaces the whole form with the DB-hydrated [model] and arms the
   /// write-through ([programIds] is index-aligned with the weeks).
-  void hydrate(FormModel model,
-      {required String projectId, required List<String> programIds}) {
+  void hydrate(
+    FormModel model, {
+    required String projectId,
+    required List<String> programIds,
+  }) {
     _projectId = projectId;
     _programIds = programIds;
     state = model;
@@ -169,33 +172,68 @@ class FormController extends Notifier<FormModel> {
     _writeProjectConfig(auxRoom: v);
   }
 
-  void _writeProjectConfig(
-      {String? startTime, int? durationMinutes, bool? auxRoom}) {
+  void _writeProjectConfig({
+    String? startTime,
+    int? durationMinutes,
+    bool? auxRoom,
+  }) {
     final projectId = _projectId;
     if (projectId == null) return;
-    unawaited(ref.read(programsRepositoryProvider).setProjectConfig(
-          projectId,
-          startTime: startTime,
-          durationMinutes: durationMinutes,
-          auxRoom: auxRoom,
-        ));
+    unawaited(
+      ref
+          .read(programsRepositoryProvider)
+          .setProjectConfig(
+            projectId,
+            startTime: startTime,
+            durationMinutes: durationMinutes,
+            auxRoom: auxRoom,
+          ),
+    );
   }
 
   void setChairman(String v) {
     state = state.copyWith(chairman: v);
-    _write((id) => ref.read(programsRepositoryProvider).saveSlotNames(
-        programId: id, slotKey: 'chairman', hall: Hall.main, names: [v]));
+    _write(
+      (id) => ref
+          .read(programsRepositoryProvider)
+          .saveSlotNames(
+            programId: id,
+            slotKey: 'chairman',
+            hall: Hall.main,
+            names: [v],
+          ),
+    );
   }
 
   /// Marks (or clears) the circuit overseer visit for the given [week] index.
+  ///
+  /// At most one week of a project can be it: the overseer comes once, and a
+  /// project is one workbook. The form used to hold a `true` per week with
+  /// nothing keeping them apart, so two marked weeks landing on the same
+  /// two-per-sheet page printed his talk twice. Marking a week clears whatever
+  /// week was marked before — in the form and in the row behind it.
   void setCircuitOverseer(int week, bool v) {
+    final cleared = [
+      for (final e in state.circuitOverseerByWeek.entries)
+        if (e.value && e.key != week) e.key,
+    ];
     state = state.copyWith(
-      circuitOverseerByWeek: {...state.circuitOverseerByWeek, week: v},
+      circuitOverseerByWeek: {
+        ...state.circuitOverseerByWeek,
+        for (final w in cleared) w: false,
+        week: v,
+      },
     );
-    _write(week: week,
-        (id) => ref.read(programsRepositoryProvider).setWeekType(
-            id, v ? WeekType.circuitOverseerVisit : WeekType.normal));
+    for (final w in cleared) {
+      _setWeekType(w, WeekType.normal);
+    }
+    _setWeekType(week, v ? WeekType.circuitOverseerVisit : WeekType.normal);
   }
+
+  void _setWeekType(int week, WeekType type) => _write(
+    week: week,
+    (id) => ref.read(programsRepositoryProvider).setWeekType(id, type),
+  );
 
   /// Sets or clears the title override for [rowId] in the active week. An empty
   /// or null title removes the override (back to the default title).
@@ -207,8 +245,9 @@ class FormController extends Notifier<FormModel> {
       next[rowId] = title.trim();
     }
     state = state.copyWith(titleOverrides: next);
-    _write((id) =>
-        ref.read(programsRepositoryProvider).setTitleOverrides(id, next));
+    _write(
+      (id) => ref.read(programsRepositoryProvider).setTitleOverrides(id, next),
+    );
   }
 
   /// Switches week while preserving each week's assignments.
@@ -216,14 +255,30 @@ class FormController extends Notifier<FormModel> {
 
   void setMainNames(String rowId, List<String> names) {
     state = state.copyWith(main: {...state.main, rowId: names});
-    _write((id) => ref.read(programsRepositoryProvider).saveSlotNames(
-        programId: id, slotKey: rowId, hall: Hall.main, names: names));
+    _write(
+      (id) => ref
+          .read(programsRepositoryProvider)
+          .saveSlotNames(
+            programId: id,
+            slotKey: rowId,
+            hall: Hall.main,
+            names: names,
+          ),
+    );
   }
 
   void setAuxNames(String rowId, List<String> names) {
     state = state.copyWith(auxiliary: {...state.auxiliary, rowId: names});
-    _write((id) => ref.read(programsRepositoryProvider).saveSlotNames(
-        programId: id, slotKey: rowId, hall: Hall.aux, names: names));
+    _write(
+      (id) => ref
+          .read(programsRepositoryProvider)
+          .saveSlotNames(
+            programId: id,
+            slotKey: rowId,
+            hall: Hall.aux,
+            names: names,
+          ),
+    );
   }
 }
 
@@ -240,12 +295,14 @@ final currentWeekProvider = Provider<Week?>((ref) {
 final scheduleProvider = Provider<ProgramSchedule?>((ref) {
   final weeks = ref.watch(weeksProvider).asData?.value;
   if (weeks == null || weeks.isEmpty) return null;
-  final sel = ref.watch(formProvider.select((f) =>
-      (f.weekIndex, f.startMinutes, f.duration, f.circuitOverseer)));
+  final sel = ref.watch(
+    formProvider.select(
+      (f) => (f.weekIndex, f.startMinutes, f.duration, f.circuitOverseer),
+    ),
+  );
   final overrides = ref.watch(formProvider.select((f) => f.titleOverrides));
   final week = weeks[sel.$1.clamp(0, weeks.length - 1)];
-  final schedule =
-      buildSchedule(week, sel.$2, sel.$3, circuitOverseer: sel.$4);
+  final schedule = buildSchedule(week, sel.$2, sel.$3, circuitOverseer: sel.$4);
   return applyTitleOverrides(schedule, overrides);
 });
 
@@ -280,12 +337,18 @@ final sheetEntriesProvider = Provider<List<WeekEntry>>((ref) {
       (
         week: weeks[i],
         schedule: applyTitleOverrides(
-          buildSchedule(weeks[i], f.startMinutes, f.duration,
-              circuitOverseer: f.circuitOverseerByWeek[i] ?? false),
+          buildSchedule(
+            weeks[i],
+            f.startMinutes,
+            f.duration,
+            circuitOverseer: f.circuitOverseerByWeek[i] ?? false,
+          ),
           f.titleOverridesByWeek[i] ?? const {},
         ),
         assignments: Assignments(
-            f.mainByWeek[i] ?? const {}, f.auxByWeek[i] ?? const {}),
+          f.mainByWeek[i] ?? const {},
+          f.auxByWeek[i] ?? const {},
+        ),
         chairman: f.chairmanByWeek[i] ?? '',
       ),
   ];

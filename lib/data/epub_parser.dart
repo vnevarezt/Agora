@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:html/parser.dart' as html_parser;
 
+import '../domain/mwb_calendar.dart';
 import '../models/week.dart';
 
 /// Parsing of the mwb notebook EPUB -> list of weeks.
@@ -19,14 +20,14 @@ const Map<String, Section> _sectionByColor = {
 };
 
 final _rePageNum = RegExp(
-    r'<span[^>]*class="[^"]*pageNum[^"]*"[^>]*>.*?</span>',
-    dotAll: true);
+  r'<span[^>]*class="[^"]*pageNum[^"]*"[^>]*>.*?</span>',
+  dotAll: true,
+);
 final _reSup = RegExp(r'<sup\b[^>]*>.*?</sup>', dotAll: true);
 final _reTags = RegExp(r'<[^>]+>');
 final _reSpaces = RegExp(r'\s+');
 final _reDuration = RegExp(r'\((\d+)\s*mins?\.?\)');
-final _reHeadings =
-    RegExp(r'<(h[123])\b([^>]*)>(.*?)</\1>', dotAll: true);
+final _reHeadings = RegExp(r'<(h[123])\b([^>]*)>(.*?)</\1>', dotAll: true);
 final _reColor = RegExp(r'du-color--(teal|gold|maroon)');
 final _reClass = RegExp(r'class="([^"]*)"');
 final _rePartNum = RegExp(r'^(\d+)\.\s+(.*)$', dotAll: true);
@@ -99,7 +100,9 @@ Week parseWeek(String xhtml, {String lang = 'S'}) {
     final tag = m.group(1)!;
     final attrs = m.group(2)!;
     final inner = m.group(3)!;
-    final end = (i + 1 < headings.length) ? headings[i + 1].start : xhtml.length;
+    final end = (i + 1 < headings.length)
+        ? headings[i + 1].start
+        : xhtml.length;
     final body = xhtml.substring(m.end, end);
     final text = _text(inner);
     final classMatch = _reClass.firstMatch(attrs);
@@ -142,14 +145,17 @@ Week parseWeek(String xhtml, {String lang = 'S'}) {
       final number = int.parse(partMatch.group(1)!);
       final title = partMatch.group(2)!.trim();
       final duration = _duration(body) ?? _duration(text);
-      week.parts.add(Part(
-        section: currentSection,
-        number: number,
-        title: title,
-        minutes: duration,
-        isTalk: currentSection == Section.ministry &&
-            _isTalk(title, _text(body), lang),
-      ));
+      week.parts.add(
+        Part(
+          section: currentSection,
+          number: number,
+          title: title,
+          minutes: duration,
+          isTalk:
+              currentSection == Section.ministry &&
+              _isTalk(title, _text(body), lang),
+        ),
+      );
       continue;
     }
     // ----- date (first h1) and reading (h2 before TESOROS) -----
@@ -165,21 +171,79 @@ Week parseWeek(String xhtml, {String lang = 'S'}) {
   return week;
 }
 
+/// Day of the month a week heading opens with, language-independently:
+/// '6-12 DE JULIO' and 'JULY 6-12' both answer 6. Null when there is no digit.
+int? weekStartDayOf(String heading) {
+  final match = _reNumber.firstMatch(heading);
+  return match == null ? null : int.tryParse(match.group(0)!);
+}
+
 /// Parses the whole EPUB (bytes) and returns the weeks with parts.
-List<Week> parseEpub(Uint8List bytes, {String lang = 'S'}) {
+///
+/// [issue] (`YYYYMM`) is what lets each week carry its [Week.weekStart]; the
+/// files are already in order, so each resolved Monday anchors the next one.
+/// Omit it and the weeks come back with an empty `weekStart` — every caller in
+/// the app passes it.
+List<Week> parseEpub(Uint8List bytes, {String lang = 'S', String? issue}) =>
+    _weeksOf(ZipDecoder().decodeBytes(bytes), lang, issue);
+
+/// jw.org names a workbook's cover image after the publication itself
+/// (`OEBPS/images/mwb_S_202607.jpg`), and that name is the only place in the
+/// archive that says which one this is: `dc:identifier` is a random UUID and
+/// `dc:title` spells the period out in the workbook's own language, so neither
+/// can be matched against anything.
+final _reCover = RegExp(r'/mwb_([A-Z]+)_(\d{6})\.');
+
+/// [parseEpub] for a file that arrived with no label on it — picked off the
+/// user's own disk rather than fetched for a known issue.
+///
+/// The archive is asked which publication it is instead of being told, so a
+/// workbook can never be filed under the wrong issue. Null when the file is
+/// not a meeting workbook at all.
+({List<Week> weeks, String lang, String issue})? parseWorkbookEpub(
+  Uint8List bytes,
+) {
   final archive = ZipDecoder().decodeBytes(bytes);
+  for (final file in archive.files) {
+    final match = _reCover.firstMatch(file.name);
+    if (match == null) continue;
+    final lang = match.group(1)!;
+    final issue = match.group(2)!;
+    return (weeks: _weeksOf(archive, lang, issue), lang: lang, issue: issue);
+  }
+  return null;
+}
+
+List<Week> _weeksOf(Archive archive, String lang, String? issue) {
   // Weekly files are OEBPS/NNNNNNNNN.xhtml (without '-extracted').
-  final names = archive.files
-      .where((f) => f.isFile && _reWeekFile.hasMatch(f.name))
-      .map((f) => f.name)
-      .toList()
-    ..sort();
+  final names =
+      archive.files
+          .where((f) => f.isFile && _reWeekFile.hasMatch(f.name))
+          .map((f) => f.name)
+          .toList()
+        ..sort();
   final weeks = <Week>[];
+  String? previous;
   for (final n in names) {
     final f = archive.findFile(n)!;
     final xhtml = utf8.decode(f.content as List<int>);
     final week = parseWeek(xhtml, lang: lang);
-    if (week.parts.isNotEmpty) weeks.add(week); // ignore cover/index
+    if (week.parts.isEmpty) continue; // cover / index
+    if (issue != null) {
+      final day = weekStartDayOf(week.date);
+      if (day != null) {
+        // Chain off the previous week first (exact), and fall back to the
+        // period search so one unreadable heading cannot derail the rest.
+        final start =
+            weekStartFor(issue, day, previous: previous) ??
+            weekStartFor(issue, day);
+        if (start != null) week.weekStart = start;
+        previous = start;
+      } else {
+        previous = null;
+      }
+    }
+    weeks.add(week);
   }
   return weeks;
 }

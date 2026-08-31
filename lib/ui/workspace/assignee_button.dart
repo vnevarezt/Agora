@@ -46,8 +46,7 @@ class AssigneeButton extends StatelessWidget {
             color: _filled ? t.surface : t.surface2,
             borderRadius: BorderRadius.circular(Dimens.rAssignee),
             border: _filled
-                ? Border.all(
-                    color: hovered ? t.accent : t.border, width: 1.5)
+                ? Border.all(color: hovered ? t.accent : t.border, width: 1.5)
                 : null,
           ),
           child: Row(
@@ -118,8 +117,11 @@ class _ClearButton extends StatelessWidget {
             color: hovered ? t.surface2 : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
-          child: Icon(Icons.close,
-              size: 14, color: hovered ? t.text : t.textMute),
+          child: Icon(
+            Icons.close,
+            size: AppIcon.inline,
+            color: hovered ? t.text : t.textMute,
+          ),
         );
       },
     );

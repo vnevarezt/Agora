@@ -24,7 +24,10 @@ class SlotField extends ConsumerWidget {
   final SlotSpec spec;
 
   Future<void> _openPicker(
-      BuildContext anchorContext, WidgetRef ref, String current) async {
+    BuildContext anchorContext,
+    WidgetRef ref,
+    String current,
+  ) async {
     ref.read(activeSlotProvider.notifier).set(spec.ref);
     try {
       final result = await showPersonPicker(
@@ -51,8 +54,7 @@ class SlotField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final name =
-        ref.watch(formProvider.select((f) => slotName(f, spec.ref)));
+    final name = ref.watch(formProvider.select((f) => slotName(f, spec.ref)));
     final canEdit = ref.watch(canEditOpenProgramProvider);
 
     return Column(
@@ -63,7 +65,8 @@ class SlotField extends ConsumerWidget {
           child: Text(
             spec.label.toUpperCase(),
             style: AppText.label(
-                color: spec.accent ? t.accentStrong : t.textMute),
+              color: spec.accent ? t.accentStrong : t.textMute,
+            ),
           ),
         ),
         // Builder: popover anchor = the button only, not the label.
@@ -71,9 +74,7 @@ class SlotField extends ConsumerWidget {
           builder: (anchorContext) => AssigneeButton(
             name: name.isEmpty ? null : name,
             alwaysShowClear: context.isMobile,
-            onTap: canEdit
-                ? () => _openPicker(anchorContext, ref, name)
-                : null,
+            onTap: canEdit ? () => _openPicker(anchorContext, ref, name) : null,
             onClear: (name.isEmpty || !canEdit)
                 ? null
                 : () => writeAssignment(ref, spec.ref, ''),

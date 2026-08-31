@@ -47,8 +47,7 @@ class _InviteCodeModalState extends State<InviteCodeModal> {
     if (mounted) setState(() => _copied = true);
   }
 
-  Future<void> _share() =>
-      SharePlus.instance.share(ShareParams(text: _text));
+  Future<void> _share() => SharePlus.instance.share(ShareParams(text: _text));
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +72,7 @@ class _InviteCodeModalState extends State<InviteCodeModal> {
             ),
             child: SelectableText(
               _text,
-              style: AppText.mono(size: 12.5, color: t.text),
+              style: AppText.mono(size: AppText.small, color: t.text),
             ),
           ),
           const SizedBox(height: Space.s14),

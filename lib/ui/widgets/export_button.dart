@@ -44,8 +44,13 @@ class ExportButton extends ConsumerWidget {
         twoPerSheet: twoUp,
         onExport: (format, action, origin) {
           close();
-          runExport(context, ref,
-              format: format, action: action, shareOrigin: origin);
+          runExport(
+            context,
+            ref,
+            format: format,
+            action: action,
+            shareOrigin: origin,
+          );
         },
       ),
     );
@@ -59,8 +64,7 @@ class ExportButton extends ConsumerWidget {
     return AppButton(
       onPressed: haySemana && !busy ? () => _openSheet(context, ref) : null,
       icon: Icons.ios_share,
-      label:
-          variant == ExportVariant.compact ? null : context.t.export.export,
+      label: variant == ExportVariant.compact ? null : context.t.export.export,
       height: variant == ExportVariant.full
           ? Dimens.hExportMobile
           : Dimens.hControl,
@@ -88,7 +92,12 @@ class _ExportSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(Space.s18, Space.s18, Space.s18, Space.s18),
+        padding: const EdgeInsets.fromLTRB(
+          Space.s18,
+          Space.s18,
+          Space.s18,
+          Space.s18,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -96,32 +105,37 @@ class _ExportSheet extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                    twoPerSheet
-                        ? Icons.splitscreen_outlined
-                        : Icons.description_outlined,
-                    size: 20,
-                    color: t.textMute),
+                  twoPerSheet
+                      ? Icons.splitscreen_outlined
+                      : Icons.description_outlined,
+                  size: AppIcon.control,
+                  color: t.textMute,
+                ),
                 const SizedBox(width: Space.s12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                          twoPerSheet
-                              ? tr.export.currentSheet
-                              : tr.export.currentWeek,
-                          style: TextStyle(
-                              fontSize: AppText.bodyLarge,
-                              fontWeight: FontWeight.w800,
-                              color: t.text)),
+                        twoPerSheet
+                            ? tr.export.currentSheet
+                            : tr.export.currentWeek,
+                        style: TextStyle(
+                          fontSize: AppText.bodyLarge,
+                          fontWeight: FontWeight.w800,
+                          color: t.text,
+                        ),
+                      ),
                       Text(
-                          twoPerSheet
-                              ? tr.export.currentSheetSub
-                              : tr.export.currentWeekSub,
-                          style: TextStyle(
-                              fontSize: AppText.small,
-                              fontWeight: FontWeight.w600,
-                              color: t.textMute)),
+                        twoPerSheet
+                            ? tr.export.currentSheetSub
+                            : tr.export.currentWeekSub,
+                        style: TextStyle(
+                          fontSize: AppText.small,
+                          fontWeight: FontWeight.w600,
+                          color: t.textMute,
+                        ),
+                      ),
                     ],
                   ),
                 ),

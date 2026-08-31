@@ -19,8 +19,10 @@ class LabeledField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(),
-            style: AppText.label(size: 11, color: t.textMute)),
+        Text(
+          label.toUpperCase(),
+          style: AppText.label(size: AppText.caption, color: t.textMute),
+        ),
         const SizedBox(height: Space.s6),
         child,
       ],
@@ -103,7 +105,10 @@ class ReadonlyField extends StatelessWidget {
       child: Text(
         texto,
         style: TextStyle(
-            fontSize: AppText.body, fontWeight: FontWeight.w600, color: t.textDim),
+          fontSize: AppText.body,
+          fontWeight: FontWeight.w600,
+          color: t.textDim,
+        ),
       ),
     );
   }

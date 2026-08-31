@@ -1,11 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/mwb_api.dart';
 import '../data/mwb_cache.dart';
 import '../data/mwb_repository.dart';
+import '../data/repos/programs_repository.dart';
 import '../domain/meeting_language.dart';
 import '../domain/mwb_calendar.dart';
 import '../models/notebook.dart';
 import 'dashboard_provider.dart';
+import 'ui_state.dart' show localeProvider;
+import 'program_reconciler.dart';
 import 'weeks_provider.dart';
 
 /// Outcome of one sync cycle (for the UI/diagnostics).
@@ -31,11 +37,11 @@ class SyncReport {
   /// Issue ids repeat across languages, which is fine — nothing keys off them
   /// beyond [complete] and the counts.
   static SyncReport merge(Iterable<SyncReport> reports) => SyncReport(
-        downloaded: [for (final r in reports) ...r.downloaded],
-        skippedCached: [for (final r in reports) ...r.skippedCached],
-        skippedBackoff: [for (final r in reports) ...r.skippedBackoff],
-        failed: {for (final r in reports) ...r.failed},
-      );
+    downloaded: [for (final r in reports) ...r.downloaded],
+    skippedCached: [for (final r in reports) ...r.skippedCached],
+    skippedBackoff: [for (final r in reports) ...r.skippedBackoff],
+    failed: {for (final r in reports) ...r.failed},
+  );
 }
 
 /// Core sync algorithm (no Riverpod, so it is unit-testable):
@@ -43,13 +49,14 @@ class SyncReport {
 /// 2. For each, skip if already cached or within back-off (no network);
 ///    otherwise download + cache it. A failure (e.g. a future issue not yet
 ///    published) is recorded for back-off, not rethrown.
-/// 3. Rebuild the notebook catalog from the cache and hand it to [onCatalog].
+///
+/// Fetching only — the catalog is [buildCatalog]'s job, because it spans every
+/// cached language while a pass covers exactly one.
 ///
 /// When everything needed is already cached, **no network request is made**.
 Future<SyncReport> runMwbSync({
   required MwbCache cache,
   required MwbRepository repository,
-  required void Function(List<Notebook>) onCatalog,
   DateTime? now,
   int monthsAhead = 2,
   String lang = 'S',
@@ -81,8 +88,6 @@ Future<SyncReport> runMwbSync({
     }
   }
 
-  onCatalog(await _buildCatalog(cache, repository, lang));
-
   return SyncReport(
     downloaded: downloaded,
     skippedCached: skippedCached,
@@ -91,25 +96,82 @@ Future<SyncReport> runMwbSync({
   );
 }
 
-/// Builds one [Notebook] per cached issue. A parse failure for an issue is
-/// tolerated (the notebook is listed with no weeks) so it never breaks the sync.
-Future<List<Notebook>> _buildCatalog(
-    MwbCache cache, MwbRepository repository, String lang) async {
+/// One [Notebook] per cached issue, keyed by workbook language.
+///
+/// Reads the WHOLE manifest, not just the languages the caller happens to have
+/// fetched: a congregation switching from Spanish to English must not make the
+/// Spanish catalog vanish. Those EPUBs are still on disk and the projects built
+/// from them still need their weeks.
+///
+/// A parse failure for an issue is tolerated (the notebook is listed with no
+/// weeks) so one bad file never empties the catalog.
+Future<Map<String, List<Notebook>>> buildCatalog(
+  MwbCache cache,
+  MwbRepository repository,
+) async {
   final manifest = await cache.readManifest();
-  final notebooks = <Notebook>[];
-  for (final e in manifest.entries.where((e) => e.lang == lang)) {
+  final byLang = <String, List<Notebook>>{};
+  for (final e in manifest.entries) {
+    List<WeekRef> weeks;
     try {
-      final weeks = await repository.weeks(e.issue, lang: lang);
-      notebooks.add(Notebook(
-        id: e.issue,
-        weeks: [for (final w in weeks) w.date],
-      ));
+      final parsed = await repository.weeks(e.issue, lang: e.lang);
+      weeks = [for (final w in parsed) (start: w.weekStart, label: w.date)];
     } catch (_) {
-      notebooks.add(Notebook(id: e.issue, weeks: const []));
+      weeks = const [];
     }
+    (byLang[e.lang] ??= []).add(Notebook(id: e.issue, weeks: weeks));
   }
-  return notebooks;
+  // Manifest order is write order (a re-download moves an issue to the end), so
+  // sort: the project modal picks `notebooks.first` as its fallback tab.
+  for (final notebooks in byLang.values) {
+    notebooks.sort((a, b) => a.id.compareTo(b.id));
+  }
+  return byLang;
 }
+
+/// Drops the workbooks nothing needs any more: neither inside the coverage
+/// window nor referenced by an alive program. Returns how many were removed.
+///
+/// Nothing evicted these before, so a long-running install accumulated every
+/// issue it had ever seen — several megabytes each — and the project modal
+/// grew a tab for each of them.
+///
+/// Skipped entirely while any alive program is still unidentified. Such a
+/// program is matched by its printed heading against whatever workbook happens
+/// to list it, so there is no way to know which one it needs; the reconciler
+/// clears that state, and the next pass purges.
+Future<int> purgeUnneededIssues({
+  required MwbCache cache,
+  required ProgramsRepository programs,
+  DateTime? now,
+  int monthsAhead = 2,
+}) async {
+  final alive = await programs.aliveWeekStarts();
+  if (alive.anyUnidentified) return 0;
+  final keep = {
+    ...requiredIssues(now ?? DateTime.now(), monthsAhead: monthsAhead),
+    for (final weekStart in alive.weekStarts) ...issuesForWeekStart(weekStart),
+  };
+  return (await cache.retainIssues(keep)).length;
+}
+
+/// Workbook languages the sync has to cover, as a canonical `'E,S'` string.
+/// `null` while the congregation stream has not landed, `''` when there are no
+/// congregations to serve.
+///
+/// A String rather than the `Set` [workbookLangsFor] returns, because Riverpod
+/// compares with `==` and collections compare by identity: handing back a Set
+/// re-ran the whole sync on every congregation write — including the settings
+/// tab's 400 ms debounce, so roughly once per keystroke in the name field —
+/// which relaunched every pass and blinked the dashboard's catalog indicator.
+final requiredWorkbookLangsProvider = Provider<String?>((ref) {
+  final congregations = ref.watch(congregationsStreamProvider);
+  if (!congregations.hasValue) return null;
+  final langs = workbookLangsFor(
+    congregations.requireValue.map((c) => c.settings.meetingLanguage),
+  );
+  return (langs.toList()..sort()).join(',');
+});
 
 /// Runs [runMwbSync] once on first watch (app startup), in the background. The
 /// dashboard reads the resulting [SyncReport] (loading / complete / incomplete)
@@ -117,33 +179,254 @@ Future<List<Notebook>> _buildCatalog(
 class MwbSyncController extends AsyncNotifier<SyncReport> {
   @override
   Future<SyncReport> build() async {
-    // One pass per workbook language actually in use. Watching the
-    // congregations means adding one that meets in another language pulls its
-    // workbook down without a restart; passes whose issues are already cached
-    // make no network request, so re-running is cheap.
-    final langs = workbookLangsFor(
-      ref.watch(congregationsProvider).map((c) => c.settings.meetingLanguage),
-    );
-    // Before the congregation stream emits, fall back to the schema default so
-    // the very first launch still fills a catalog.
-    final targets = langs.isEmpty ? {workbookLangFor('spanish')} : langs;
+    // One pass per workbook language actually in use. Watching the languages
+    // (not the congregations) means adding one that meets in another language
+    // pulls its workbook down without a restart, while renaming one does
+    // nothing at all.
+    final langs = ref.watch(requiredWorkbookLangsProvider);
+    if (langs == null) {
+      // The congregation stream has not landed, so there is nothing to guess
+      // from — and guessing Spanish here cost an English-only user a
+      // multi-megabyte download of a workbook they never meet in, kept
+      // forever. Await it so the dashboard holds its "syncing" state instead
+      // of flashing "up to date" before anything was checked; its arrival
+      // re-runs this build with a real answer.
+      await ref.watch(congregationsStreamProvider.future);
+      return const SyncReport();
+    }
+    // No congregations yet: ensureDefault() creates one on the first real
+    // write, so this resolves itself shortly.
+    if (langs.isEmpty) return const SyncReport();
+    final targets = langs.split(',');
 
     final cache = ref.read(cacheProvider);
     final repository = ref.read(repositoryProvider);
-    final catalog = <String, List<Notebook>>{};
     final reports = <SyncReport>[];
     for (final lang in targets) {
-      reports.add(await runMwbSync(
-        cache: cache,
-        repository: repository,
-        lang: lang,
-        onCatalog: (ns) => catalog[lang] = ns,
-      ));
+      reports.add(
+        await runMwbSync(cache: cache, repository: repository, lang: lang),
+      );
     }
-    ref.read(notebooksByLangProvider.notifier).setFrom(catalog);
+    // Before publishing, not after: the catalog must describe what survived.
+    await purgeUnneededIssues(
+      cache: cache,
+      programs: ref.read(programsRepositoryProvider),
+    );
+    ref
+        .read(notebooksByLangProvider.notifier)
+        .setFrom(await buildCatalog(cache, repository));
     return SyncReport.merge(reports);
   }
 }
 
-final mwbSyncProvider =
-    AsyncNotifierProvider<MwbSyncController, SyncReport>(MwbSyncController.new);
+final mwbSyncProvider = AsyncNotifierProvider<MwbSyncController, SyncReport>(
+  MwbSyncController.new,
+);
+
+/// Whether the workbook a congregation needs is on hand.
+enum WorkbookStatus {
+  /// The catalog holds notebooks in that meeting language.
+  ready,
+
+  /// Nothing yet, but a pass is running — the usual state for the seconds
+  /// right after a language is switched.
+  downloading,
+
+  /// Nothing, and no pass is running: offline, or the issue is not published.
+  unavailable,
+}
+
+/// Reads off the catalog rather than off the sync report, because the catalog
+/// is the thing the rest of the app actually uses. Whatever the last pass
+/// reported, a congregation whose language has notebooks can work.
+final congregationWorkbookStatusProvider =
+    Provider.family<WorkbookStatus, String>((ref, congregationId) {
+      final lang = ref.watch(congregationLangProvider(congregationId));
+      if (ref.watch(notebooksForLangProvider(lang)).isNotEmpty) {
+        return WorkbookStatus.ready;
+      }
+      return ref.watch(mwbSyncProvider).isLoading
+          ? WorkbookStatus.downloading
+          : WorkbookStatus.unavailable;
+    });
+
+/// Every workbook the coverage window asks for, with the language it is needed
+/// in and whether the catalog already holds it. Empty while the congregations
+/// have not landed.
+final requiredNotebooksProvider =
+    Provider<List<({String issue, String lang, bool have})>>((ref) {
+      final langs = ref.watch(requiredWorkbookLangsProvider);
+      if (langs == null || langs.isEmpty) return const [];
+      return [
+        for (final lang in langs.split(','))
+          for (final issue in requiredIssues(DateTime.now()))
+            (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
+      ];
+    });
+
+/// Whether the catalog holds [issue] in [lang] with WEEKS in it. [buildCatalog]
+/// lists an issue whose EPUB would not parse rather than dropping it, so
+/// presence alone counted a file nothing can be built from as one on hand.
+bool _hasNotebook(Ref ref, String issue, String lang) => ref
+    .watch(notebooksForLangProvider(lang))
+    .any((n) => n.id == issue && n.weeks.isNotEmpty);
+
+/// What the import modal offers, which is a different question from what the
+/// congregations require.
+///
+/// WHICH issues are wanted is a function of the date alone; only the LANGUAGE
+/// needed a congregation, and there is a fair answer without one. Reading both
+/// off [requiredWorkbookLangsProvider] meant that a device with no congregation
+/// yet — a fresh account, or one whose first cloud pull has not landed —
+/// opened the modal to a numbered step with nothing under it. No download
+/// button, no link, nothing: precisely the person who most needs the workbook,
+/// handed the one screen that could give it to them, empty.
+///
+/// Kept apart from [requiredNotebooksProvider] rather than folded into it,
+/// because that one feeds the header card: a device that requires nothing must
+/// not be told a workbook is missing.
+final offerableNotebooksProvider =
+    Provider<List<({String issue, String lang, bool have})>>((ref) {
+      final configured = ref.watch(requiredWorkbookLangsProvider);
+      final langs = (configured == null || configured.isEmpty)
+          ? [offerableWorkbookLang(ref.watch(localeProvider))]
+          : configured.split(',');
+      return [
+        for (final lang in langs)
+          for (final issue in requiredIssues(DateTime.now()))
+            (issue: issue, lang: lang, have: _hasNotebook(ref, issue, lang)),
+      ];
+    });
+
+/// The half of [requiredNotebooksProvider] that is not on hand.
+final missingNotebooksProvider = Provider<List<({String issue, String lang})>>(
+  (ref) => [
+    for (final n in ref.watch(requiredNotebooksProvider))
+      if (!n.have) (issue: n.issue, lang: n.lang),
+  ],
+);
+
+/// What the header's catalog card reports.
+enum CatalogStatus { syncing, ready, incomplete }
+
+/// Read off the catalog, never off the last download pass.
+///
+/// A pass answers "did the fetching go well", which is not the question the
+/// card asks. It reported an all-clear for issues it skipped as cached — even
+/// when what was cached held no weeks — and on web it fails by design however
+/// complete the catalog is, because the browser cannot read the file at all.
+final catalogStatusProvider = Provider<CatalogStatus>((ref) {
+  // Nothing is known yet, so nothing can be missing. Report the wait rather
+  // than an all-clear no congregation has backed up.
+  if (ref.watch(requiredWorkbookLangsProvider) == null) {
+    return CatalogStatus.syncing;
+  }
+  if (ref.watch(missingNotebooksProvider).isEmpty) return CatalogStatus.ready;
+  return ref.watch(mwbSyncProvider).isLoading
+      ? CatalogStatus.syncing
+      : CatalogStatus.incomplete;
+});
+
+/// jw.org's direct link to one workbook file.
+///
+/// Reachable from a browser even though the file behind it is not, and the
+/// difference is the whole trick: the lookup API answers
+/// `access-control-allow-origin: *`, and NAVIGATING to the file it names is a
+/// download, which CORS does not govern — only reading it from script is. So
+/// the web build can hand someone the exact file instead of sending them off
+/// to find it, and take it back through [NotebookImporter].
+final notebookLinkProvider =
+    FutureProvider.family<String, ({String issue, String lang})>(
+      (ref, key) async => (await MwbApi.epubUrl(key.issue, lang: key.lang)).url,
+    );
+
+final notebookImportProvider = Provider<NotebookImporter>(NotebookImporter.new);
+
+/// Takes a workbook EPUB the user picked off their own disk and puts it where
+/// a download would have: cached, catalogued, and reconciled into the program
+/// snapshots.
+///
+/// The way in on web, where the file cannot be fetched at all — jw.org serves
+/// it from a host with no CORS header (see [MwbRepository.importEpub]). It is
+/// wired everywhere rather than behind a platform check, because a notebook on
+/// a USB stick is just as good an answer to being offline on a laptop.
+class NotebookImporter {
+  NotebookImporter(this._ref);
+
+  final Ref _ref;
+
+  /// Files [bytes] and returns what it turned out to be. Throws
+  /// [FormatException] if the file is not a meeting workbook.
+  Future<({String issue, String lang, int weeks})> run(Uint8List bytes) async {
+    final imported = await _ref.read(repositoryProvider).importEpub(bytes);
+
+    // Same two steps a refresh ends with: the catalog is what the editor and
+    // the congregation status read, and the snapshots are downstream of it.
+    _ref
+        .read(notebooksByLangProvider.notifier)
+        .setFrom(
+          await buildCatalog(
+            _ref.read(cacheProvider),
+            _ref.read(repositoryProvider),
+          ),
+        );
+    final reconciler = _ref.read(programReconcilerProvider);
+    for (final congregation in _ref.read(congregationsProvider)) {
+      await reconciler.reconcileCongregation(congregation.id, force: true);
+    }
+    return imported;
+  }
+}
+
+final catalogRefreshProvider = Provider<CatalogRefresher>(CatalogRefresher.new);
+
+/// Pulls the coverage window down again even though it is cached, then pushes
+/// the result through to the programs.
+///
+/// The one thing the cache cannot decide for itself: jw.org republishes
+/// corrected workbooks, and a cached issue is never fetched twice, so without
+/// this a correction would never arrive. Manual rather than automatic — there
+/// is no cheap way to know a workbook changed short of downloading it.
+class CatalogRefresher {
+  CatalogRefresher(this._ref);
+
+  final Ref _ref;
+
+  /// Returns how many issues were replaced. A language that fails is skipped,
+  /// not fatal: what is on disk stays, so a partial refresh never costs the
+  /// user a workbook they already had.
+  Future<int> run({DateTime? now, int monthsAhead = 2}) async {
+    final langs = _ref.read(requiredWorkbookLangsProvider) ?? '';
+    if (langs.isEmpty) return 0;
+    final cache = _ref.read(cacheProvider);
+    final repository = _ref.read(repositoryProvider);
+
+    var replaced = 0;
+    for (final lang in langs.split(',')) {
+      for (final issue in requiredIssues(
+        now ?? DateTime.now(),
+        monthsAhead: monthsAhead,
+      )) {
+        try {
+          await repository.refresh(issue, lang);
+          replaced++;
+        } catch (_) {
+          // Offline, or the issue is not published yet. Both are fine.
+        }
+      }
+    }
+    if (replaced == 0) return 0;
+
+    _ref
+        .read(notebooksByLangProvider.notifier)
+        .setFrom(await buildCatalog(cache, repository));
+
+    // A corrected workbook has to reach the snapshots too, and those are
+    // already in the right language — so this pass has to be forced.
+    final reconciler = _ref.read(programReconcilerProvider);
+    for (final congregation in _ref.read(congregationsProvider)) {
+      await reconciler.reconcileCongregation(congregation.id, force: true);
+    }
+    return replaced;
+  }
+}

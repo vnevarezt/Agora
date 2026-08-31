@@ -22,18 +22,18 @@ class CongregationInvite {
   final DateTime? createdAt;
   final DateTime? expiresAt;
 
-  bool isExpired(DateTime now) =>
-      expiresAt != null && !expiresAt!.isAfter(now);
+  bool isExpired(DateTime now) => expiresAt != null && !expiresAt!.isAfter(now);
 
   factory CongregationInvite.fromDoc(
-          String tokenId, Map<String, dynamic> data) =>
-      CongregationInvite(
-        tokenId: tokenId,
-        capabilities: MemberCapabilities.fromMap(
-            (data['capabilities'] as Map?)?.cast<String, dynamic>() ??
-                const {}),
-        createdBy: (data['createdBy'] as String?) ?? '',
-        createdAt: data['createdAt'] as DateTime?,
-        expiresAt: data['expiresAt'] as DateTime?,
-      );
+    String tokenId,
+    Map<String, dynamic> data,
+  ) => CongregationInvite(
+    tokenId: tokenId,
+    capabilities: MemberCapabilities.fromMap(
+      (data['capabilities'] as Map?)?.cast<String, dynamic>() ?? const {},
+    ),
+    createdBy: (data['createdBy'] as String?) ?? '',
+    createdAt: data['createdAt'] as DateTime?,
+    expiresAt: data['expiresAt'] as DateTime?,
+  );
 }

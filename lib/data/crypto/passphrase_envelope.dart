@@ -99,7 +99,10 @@ class PassphraseEnvelope {
       ct = base64Decode(blob['ct'] as String);
       mac = base64Decode(blob['mac'] as String);
     } catch (e) {
-      throw CorruptEnvelopeException('The stored key blob is corrupted. ($e)', e);
+      throw CorruptEnvelopeException(
+        'The stored key blob is corrupted. ($e)',
+        e,
+      );
     }
     final kek = await _deriveKek(passphrase, salt, blobParams);
     try {

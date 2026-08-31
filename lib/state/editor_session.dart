@@ -9,8 +9,8 @@ import '../models/hall.dart';
 import '../models/project.dart';
 import '../models/week_type.dart';
 import 'dashboard_provider.dart';
-import 'program_content.dart';
 import 'program_form.dart';
+import 'program_reconciler.dart';
 import 'sync_provider.dart';
 
 /// Editor session (phase 2, docs/PHASE2_PROGRAMS_IN_DB.md): which project
@@ -21,7 +21,8 @@ import 'sync_provider.dart';
 /// Active project id; null = editor closed.
 final editorProjectProvider =
     NotifierProvider<EditorProjectController, String?>(
-        EditorProjectController.new);
+      EditorProjectController.new,
+    );
 
 class EditorProjectController extends Notifier<String?> {
   @override
@@ -29,6 +30,22 @@ class EditorProjectController extends Notifier<String?> {
 
   void set(String? id) => state = id;
 }
+
+/// Congregation the open project belongs to; empty while the editor is closed
+/// or before the project list lands.
+///
+/// The form's `congregationId` holds the printed congregation NAME, so anything
+/// that needs the real id has to come back through the project.
+final editorCongregationIdProvider = Provider<String>((ref) {
+  final projectId = ref.watch(editorProjectProvider);
+  if (projectId == null) return '';
+  return ref
+          .watch(projectsProvider)
+          .where((p) => p.id == projectId)
+          .firstOrNull
+          ?.congregationId ??
+      '';
+});
 
 /// The open project's alive programs, reactive: content snapshots filled
 /// in the background show up here (and re-derive the editor's weeks).
@@ -42,15 +59,15 @@ final editorProgramsProvider = StreamProvider<List<ProgramRecord>>((ref) {
 /// notebook catalog, leaving pre-snapshot programs without content and no
 /// retry (seen in the wild: empty titles/assignments until the project was
 /// re-saved). Watching the catalog re-runs the fill the moment it lands;
-/// `ensureProjectContent` is idempotent, so extra runs are no-ops.
+/// `reconcileProject` is idempotent, so extra runs are no-ops.
 final editorContentFillProvider = Provider<void>((ref) {
   final projectId = ref.watch(editorProjectProvider);
-  // Any language's catalog landing is worth a retry — the service picks the
-  // right one from the project's congregation.
+  // Any language's catalog landing is worth a retry — the reconciler picks
+  // the right one from the project's congregation.
   final notebooks = ref.watch(notebooksByLangProvider);
   if (projectId == null || notebooks.isEmpty) return;
-  final service = ref.read(programContentServiceProvider);
-  Future.microtask(() => service.ensureProjectContent(projectId));
+  final reconciler = ref.read(programReconcilerProvider);
+  Future.microtask(() => reconciler.reconcileProject(projectId));
 });
 
 /// Whether this user may edit what the editor currently has open.
@@ -89,14 +106,15 @@ class EditorOpener {
   /// hydrates the form with the stored assignments/flags/config.
   Future<void> open(Project project) async {
     _ref.read(editorProjectProvider.notifier).set(project.id);
-    unawaited(_ref
-        .read(programContentServiceProvider)
-        .ensureProjectContent(project.id));
+    unawaited(
+      _ref.read(programReconcilerProvider).reconcileProject(project.id),
+    );
 
     final repo = _ref.read(programsRepositoryProvider);
     final programs = await repo.byProject(project.id);
-    final assignments =
-        await repo.assignmentsByPrograms([for (final p in programs) p.id]);
+    final assignments = await repo.assignmentsByPrograms([
+      for (final p in programs) p.id,
+    ]);
 
     // Congregation identity/config: the dashboard primed the stream before
     // navigating here, so the sync list is populated.
@@ -111,7 +129,9 @@ class EditorOpener {
       }
     }
 
-    _ref.read(formProvider.notifier).hydrate(
+    _ref
+        .read(formProvider.notifier)
+        .hydrate(
           buildHydratedForm(
             programs: programs,
             assignments: assignments,
@@ -148,10 +168,18 @@ FormModel buildHydratedForm({
   final circuitOverseerByWeek = <int, bool>{};
   final titleOverridesByWeek = <int, Map<String, String>>{};
 
+  // At most one week is the circuit overseer's visit — see
+  // [FormController.setCircuitOverseer]. The rule guards the setter, but rows
+  // written before it existed can already hold two, and a project loaded from
+  // them printed his talk on both weeks of a two-per-sheet page. The earliest
+  // marked week wins; one click moves it, and that click now clears the other.
+  var visitTaken = false;
+
   for (var wi = 0; wi < programs.length; wi++) {
     final program = programs[wi];
-    circuitOverseerByWeek[wi] =
-        program.weekType == WeekType.circuitOverseerVisit;
+    final visit = program.weekType == WeekType.circuitOverseerVisit;
+    circuitOverseerByWeek[wi] = visit && !visitTaken;
+    visitTaken |= visit;
 
     final overrides = _decodeOverrides(program.titleOverridesJson);
     if (overrides.isNotEmpty) titleOverridesByWeek[wi] = overrides;

@@ -27,9 +27,9 @@ class EntityCodec {
   Future<Map<String, dynamic>?> encode(SyncEntity entity, String id) async {
     switch (entity) {
       case SyncEntity.congregation:
-        final r = await (_db.select(_db.congregations)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.congregations,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         if (r == null) return null;
         return {
           'v': 1,
@@ -42,9 +42,9 @@ class EntityCodec {
           'deletedAt': _date(r.deletedAt),
         };
       case SyncEntity.person:
-        final r = await (_db.select(_db.people)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.people,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         if (r == null) return null;
         return {
           'v': 1,
@@ -64,9 +64,9 @@ class EntityCodec {
           'deletedAt': _date(r.deletedAt),
         };
       case SyncEntity.personAbsence:
-        final r = await (_db.select(_db.personAbsences)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.personAbsences,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         if (r == null) return null;
         return {
           'v': 1,
@@ -79,9 +79,9 @@ class EntityCodec {
           'deletedAt': _date(r.deletedAt),
         };
       case SyncEntity.project:
-        final r = await (_db.select(_db.projects)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.projects,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         if (r == null) return null;
         return {
           'v': 1,
@@ -94,9 +94,9 @@ class EntityCodec {
           'deletedAt': _date(r.deletedAt),
         };
       case SyncEntity.program:
-        final r = await (_db.select(_db.programs)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.programs,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         if (r == null) return null;
         return {
           'v': 1,
@@ -104,9 +104,11 @@ class EntityCodec {
           'programTypeId': r.programTypeId,
           'weekType': r.weekType.name,
           'date': r.date,
+          'weekStart': r.weekStart,
           'sortIndex': r.sortIndex,
           'label': r.label,
           'contentJson': r.contentJson,
+          'contentLang': r.contentLang,
           'titleOverridesJson': r.titleOverridesJson,
           'startTime': r.startTime,
           'durationMinutes': r.durationMinutes,
@@ -116,9 +118,9 @@ class EntityCodec {
           'deletedAt': _date(r.deletedAt),
         };
       case SyncEntity.assignment:
-        final r = await (_db.select(_db.assignmentRows)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.assignmentRows,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         if (r == null) return null;
         return {
           'v': 1,
@@ -136,11 +138,17 @@ class EntityCodec {
   }
 
   /// Upserts the pulled payload as the row's new state, stamping [hlc].
-  Future<void> apply(SyncEntity entity, String id,
-      Map<String, dynamic> payload, String hlc) async {
+  Future<void> apply(
+    SyncEntity entity,
+    String id,
+    Map<String, dynamic> payload,
+    String hlc,
+  ) async {
     switch (entity) {
       case SyncEntity.congregation:
-        await _db.into(_db.congregations).insertOnConflictUpdate(
+        await _db
+            .into(_db.congregations)
+            .insertOnConflictUpdate(
               CongregationRecord(
                 id: id,
                 name: payload['name'] as String,
@@ -154,7 +162,9 @@ class EntityCodec {
               ),
             );
       case SyncEntity.person:
-        await _db.into(_db.people).insertOnConflictUpdate(
+        await _db
+            .into(_db.people)
+            .insertOnConflictUpdate(
               Person(
                 id: id,
                 congregationId: payload['congregationId'] as String,
@@ -162,12 +172,10 @@ class EntityCodec {
                 lastName: payload['lastName'] as String,
                 displayName: payload['displayName'] as String,
                 gender: Gender.values.byName(payload['gender'] as String),
-                privilege:
-                    Role.values.byName(payload['privilege'] as String),
-                qualifications:
-                    (payload['qualifications'] as List).cast<String>(),
-                originCongregation:
-                    payload['originCongregation'] as String,
+                privilege: Role.values.byName(payload['privilege'] as String),
+                qualifications: (payload['qualifications'] as List)
+                    .cast<String>(),
+                originCongregation: payload['originCongregation'] as String,
                 active: payload['active'] as bool,
                 notes: payload['notes'] as String,
                 createdAt: _parseDate(payload['createdAt'])!,
@@ -178,7 +186,9 @@ class EntityCodec {
               ).toInsertable(),
             );
       case SyncEntity.personAbsence:
-        await _db.into(_db.personAbsences).insertOnConflictUpdate(
+        await _db
+            .into(_db.personAbsences)
+            .insertOnConflictUpdate(
               PersonAbsenceRecord(
                 id: id,
                 personId: payload['personId'] as String,
@@ -192,7 +202,9 @@ class EntityCodec {
               ),
             );
       case SyncEntity.project:
-        await _db.into(_db.projects).insertOnConflictUpdate(
+        await _db
+            .into(_db.projects)
+            .insertOnConflictUpdate(
               ProjectRecord(
                 id: id,
                 congregationId: payload['congregationId'] as String,
@@ -206,17 +218,23 @@ class EntityCodec {
               ),
             );
       case SyncEntity.program:
-        await _db.into(_db.programs).insertOnConflictUpdate(
+        await _db
+            .into(_db.programs)
+            .insertOnConflictUpdate(
               ProgramRecord(
                 id: id,
                 projectId: payload['projectId'] as String,
                 programTypeId: payload['programTypeId'] as String,
-                weekType:
-                    WeekType.values.byName(payload['weekType'] as String),
+                weekType: WeekType.values.byName(payload['weekType'] as String),
                 date: payload['date'] as String,
+                // Nullable and read by name, so a peer still on v5 sends a
+                // payload without them, they arrive null, and the reconciler
+                // resolves them locally. No `v` bump, no coordinated rollout.
+                weekStart: payload['weekStart'] as String?,
                 sortIndex: payload['sortIndex'] as int,
                 label: payload['label'] as String,
                 contentJson: payload['contentJson'] as String?,
+                contentLang: payload['contentLang'] as String?,
                 titleOverridesJson: payload['titleOverridesJson'] as String,
                 startTime: payload['startTime'] as String?,
                 durationMinutes: payload['durationMinutes'] as int?,
@@ -228,7 +246,9 @@ class EntityCodec {
               ),
             );
       case SyncEntity.assignment:
-        await _db.into(_db.assignmentRows).insertOnConflictUpdate(
+        await _db
+            .into(_db.assignmentRows)
+            .insertOnConflictUpdate(
               AssignmentRecord(
                 id: id,
                 programId: payload['programId'] as String,
@@ -253,33 +273,31 @@ class EntityCodec {
       case SyncEntity.congregation:
         return id;
       case SyncEntity.person:
-        final r = await (_db.select(_db.people)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.people,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r?.congregationId;
       case SyncEntity.personAbsence:
-        final r = await (_db.select(_db.personAbsences)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
-        return r == null
-            ? null
-            : congregationOf(SyncEntity.person, r.personId);
+        final r = await (_db.select(
+          _db.personAbsences,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
+        return r == null ? null : congregationOf(SyncEntity.person, r.personId);
       case SyncEntity.project:
-        final r = await (_db.select(_db.projects)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.projects,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r?.congregationId;
       case SyncEntity.program:
-        final r = await (_db.select(_db.programs)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.programs,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r == null
             ? null
             : congregationOf(SyncEntity.project, r.projectId);
       case SyncEntity.assignment:
-        final r = await (_db.select(_db.assignmentRows)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.assignmentRows,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r == null
             ? null
             : congregationOf(SyncEntity.program, r.programId);
@@ -292,14 +310,14 @@ class EntityCodec {
   Future<String?> programTypeOf(SyncEntity entity, String id) async {
     switch (entity) {
       case SyncEntity.program:
-        final r = await (_db.select(_db.programs)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.programs,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r?.programTypeId;
       case SyncEntity.assignment:
-        final r = await (_db.select(_db.assignmentRows)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.assignmentRows,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r == null
             ? null
             : programTypeOf(SyncEntity.program, r.programId);
@@ -326,14 +344,14 @@ class EntityCodec {
       case SyncEntity.project:
         return id;
       case SyncEntity.program:
-        final r = await (_db.select(_db.programs)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.programs,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r?.projectId;
       case SyncEntity.assignment:
-        final r = await (_db.select(_db.assignmentRows)
-              ..where((t) => t.id.equals(id)))
-            .getSingleOrNull();
+        final r = await (_db.select(
+          _db.assignmentRows,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
         return r == null ? null : scopeOf(SyncEntity.program, r.programId);
     }
   }
@@ -341,14 +359,16 @@ class EntityCodec {
   /// The row's current HLC stamp (LWW comparand); null = never stamped,
   /// which loses against any remote stamp.
   Future<String?> hlcOf(SyncEntity entity, String id) async {
-    final table = switch (entity) {
-      SyncEntity.congregation => _db.congregations,
-      SyncEntity.person => _db.people,
-      SyncEntity.personAbsence => _db.personAbsences,
-      SyncEntity.project => _db.projects,
-      SyncEntity.program => _db.programs,
-      SyncEntity.assignment => _db.assignmentRows,
-    } as TableInfo<dynamic, dynamic>;
+    final table =
+        switch (entity) {
+              SyncEntity.congregation => _db.congregations,
+              SyncEntity.person => _db.people,
+              SyncEntity.personAbsence => _db.personAbsences,
+              SyncEntity.project => _db.projects,
+              SyncEntity.program => _db.programs,
+              SyncEntity.assignment => _db.assignmentRows,
+            }
+            as TableInfo<dynamic, dynamic>;
     final rows = await _db
         .customSelect(
           'SELECT hlc FROM ${table.actualTableName} WHERE id = ?',

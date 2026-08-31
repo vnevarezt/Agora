@@ -29,6 +29,7 @@ class FilterPill extends StatelessWidget {
     final t = context.tokens;
     return Pressable(
       onTap: onTap,
+      selected: active,
       builder: (context, hovered, _) {
         final fg = active ? t.accentInk : (hovered ? t.text : t.textDim);
         return AnimatedContainer(
@@ -50,8 +51,10 @@ class FilterPill extends StatelessWidget {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration:
-                      BoxDecoration(color: dotColor, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: dotColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: Space.s8),
               ],

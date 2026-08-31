@@ -28,9 +28,9 @@ class FirestoreKeyDocs implements KeyDocsGateway {
   /// stay free of cloud_firestore (the gateway owns timestamps, see the
   /// interface doc).
   static Map<String, dynamic> _normalize(Map<String, dynamic> data) => {
-        for (final MapEntry(:key, :value) in data.entries)
-          key: value is Timestamp ? value.toDate().toUtc() : value,
-      };
+    for (final MapEntry(:key, :value) in data.entries)
+      key: value is Timestamp ? value.toDate().toUtc() : value,
+  };
 
   @override
   Future<Map<String, dynamic>?> readUserDoc(String uid) async {
@@ -39,20 +39,22 @@ class FirestoreKeyDocs implements KeyDocsGateway {
   }
 
   @override
-  Future<void> createUserDoc(String uid,
-          {required String pubKey, required String privKey}) =>
-      _user(uid).set({
-        'pubKey': pubKey,
-        'privKey': privKey,
-        'keyUpdatedAt': FieldValue.serverTimestamp(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+  Future<void> createUserDoc(
+    String uid, {
+    required String pubKey,
+    required String privKey,
+  }) => _user(uid).set({
+    'pubKey': pubKey,
+    'privKey': privKey,
+    'keyUpdatedAt': FieldValue.serverTimestamp(),
+    'createdAt': FieldValue.serverTimestamp(),
+  });
 
   @override
   Future<void> dropLegacyEnvelope(String uid) => _user(uid).update({
-        'wrappedPrivKey': FieldValue.delete(),
-        'keyUpdatedAt': FieldValue.serverTimestamp(),
-      });
+    'wrappedPrivKey': FieldValue.delete(),
+    'keyUpdatedAt': FieldValue.serverTimestamp(),
+  });
 
   @override
   Future<Map<String, dynamic>?> readMemberDoc(String cid, String uid) async {
@@ -67,8 +69,7 @@ class FirestoreKeyDocs implements KeyDocsGateway {
 
   @override
   Future<int?> readCongregationKeyVersion(String cid) async {
-    final data =
-        await _readOrNull(() => _congregation(cid).get(_serverSource));
+    final data = await _readOrNull(() => _congregation(cid).get(_serverSource));
     return data?['keyVersion'] as int?;
   }
 
@@ -113,8 +114,9 @@ class FirestoreKeyDocs implements KeyDocsGateway {
   @override
   Future<List<Map<String, dynamic>>> listMembers(String cid) async {
     try {
-      final snap =
-          await _congregation(cid).collection('members').get(_serverSource);
+      final snap = await _congregation(
+        cid,
+      ).collection('members').get(_serverSource);
       return [for (final d in snap.docs) _normalize(d.data())];
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') return const [];
@@ -131,13 +133,17 @@ class FirestoreKeyDocs implements KeyDocsGateway {
 
   @override
   Future<void> updateMemberCapabilities(
-          String cid, String uid, Map<String, Object> capabilities) =>
-      _member(cid, uid).update({'capabilities': capabilities});
+    String cid,
+    String uid,
+    Map<String, Object> capabilities,
+  ) => _member(cid, uid).update({'capabilities': capabilities});
 
   @override
   Future<void> appendWrappedCcks(
-          String cid, String uid, Map<int, Map<String, String>> boxes) =>
-      _member(cid, uid).set(_wrappedPatch(boxes), SetOptions(merge: true));
+    String cid,
+    String uid,
+    Map<int, Map<String, String>> boxes,
+  ) => _member(cid, uid).set(_wrappedPatch(boxes), SetOptions(merge: true));
 
   /// Appends key versions without rewriting the existing ones.
   ///
@@ -152,35 +158,40 @@ class FirestoreKeyDocs implements KeyDocsGateway {
   /// which the create rule rejects (it demands uid/pubKey/capabilities/…).
   /// So a rotation racing a member's departure fails closed.
   static Map<String, dynamic> _wrappedPatch(
-          Map<int, Map<String, String>> boxes) =>
-      {
-        'wrappedCcks': {
-          for (final MapEntry(key: version, value: box) in boxes.entries)
-            '$version': box,
-        },
-      };
+    Map<int, Map<String, String>> boxes,
+  ) => {
+    'wrappedCcks': {
+      for (final MapEntry(key: version, value: box) in boxes.entries)
+        '$version': box,
+    },
+  };
 
   // ---- invites --------------------------------------------------------------
 
   @override
   Future<void> createInvite(
-          String cid, String tokenId, Map<String, dynamic> data) =>
-      _invite(cid, tokenId).set({
-        ...data,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+    String cid,
+    String tokenId,
+    Map<String, dynamic> data,
+  ) => _invite(
+    cid,
+    tokenId,
+  ).set({...data, 'createdAt': FieldValue.serverTimestamp()});
 
   @override
   Future<Map<String, dynamic>?> readInvite(String cid, String tokenId) async {
-    final data = await _readOrNull(() => _invite(cid, tokenId).get(_serverSource));
+    final data = await _readOrNull(
+      () => _invite(cid, tokenId).get(_serverSource),
+    );
     return data == null ? null : _normalize(data);
   }
 
   @override
   Future<Map<String, Map<String, dynamic>>> listInvites(String cid) async {
     try {
-      final snap =
-          await _congregation(cid).collection('invites').get(_serverSource);
+      final snap = await _congregation(
+        cid,
+      ).collection('invites').get(_serverSource);
       return {for (final d in snap.docs) d.id: _normalize(d.data())};
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') return const {};
@@ -253,8 +264,9 @@ class FirestoreKeyDocs implements KeyDocsGateway {
       // members who can't read the new writes and a revoked member who still
       // can. Better to refuse than to corrupt.
       throw StateError(
-          'Rotation needs $writes writes, over the $_maxBatchWrites batch '
-          'limit. Remove members in smaller groups.');
+        'Rotation needs $writes writes, over the $_maxBatchWrites batch '
+        'limit. Remove members in smaller groups.',
+      );
     }
 
     final batch = _db.batch();

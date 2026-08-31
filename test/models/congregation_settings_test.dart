@@ -31,8 +31,9 @@ void main() {
 
     // Old M3 rows: no auxRoom key, valid schedule.
     final legacy = CongregationSettings.fromJson(
-        '{"meetingLanguage":"sign","midweek":{"weekday":0,"time":"19:30"},'
-        '"weekend":{"weekday":6,"time":"10:00"}}');
+      '{"meetingLanguage":"sign","midweek":{"weekday":0,"time":"19:30"},'
+      '"weekend":{"weekday":6,"time":"10:00"}}',
+    );
     expect(legacy.meetingLanguage, 'sign');
     expect(legacy.midweekDay, 0);
     expect(legacy.midweekTime, '19:30');
@@ -40,7 +41,8 @@ void main() {
 
     // Out-of-range weekday and unknown language are rejected.
     final garbage = CongregationSettings.fromJson(
-        '{"meetingLanguage":"klingon","midweek":{"weekday":9,"time":"19:30"}}');
+      '{"meetingLanguage":"klingon","midweek":{"weekday":9,"time":"19:30"}}',
+    );
     expect(garbage.meetingLanguage, defaults.meetingLanguage);
     expect(garbage.midweekDay, defaults.midweekDay);
     expect(garbage.midweekTime, '19:30');

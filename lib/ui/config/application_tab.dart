@@ -12,12 +12,15 @@ import '../../state/auth_session.dart';
 import '../../state/backup_provider.dart';
 import '../../state/cloud_auth.dart' show cloudUserProvider;
 import '../../state/locale_boot.dart' show shippedLocales;
+import '../../state/mwb_sync.dart' show catalogRefreshProvider;
 import '../../state/preview_provider.dart' show fileSaverProvider;
 import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_snack_bar.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_switch.dart';
 import '../widgets/labeled_field.dart';
+import '../widgets/notebook_import.dart';
 import '../widgets/segmented_control.dart';
 import 'account_card.dart';
 import 'security_card.dart';
@@ -28,40 +31,42 @@ import 'sync_card.dart';
 // app_settings.dart. They take the active [Translations] rather than reading
 // the global `t`, so the labels are resolved against the same snapshot the
 // calling widget rebuilt with (see lib/i18n/README.md).
-List<String> _timeFormats(Translations tr) =>
-    [tr.options.timeFormat24, tr.options.timeFormat12];
+List<String> _timeFormats(Translations tr) => [
+  tr.options.timeFormat24,
+  tr.options.timeFormat12,
+];
 List<String> _weekStarts(Translations tr) => [tr.days.monday, tr.days.sunday];
 List<String> _pdfNameFormats(Translations tr) => [
-      tr.options.pdfNameFull,
-      tr.options.pdfNameLastFirst,
-      tr.options.pdfNameFirstOnly,
-    ];
+  tr.options.pdfNameFull,
+  tr.options.pdfNameLastFirst,
+  tr.options.pdfNameFirstOnly,
+];
 
 /// Row copy per notification preference, in display order.
 List<({NotifPref pref, String title, String desc})> _notifItems(
-        Translations tr) =>
-    [
-      (
-        pref: NotifPref.unassigned,
-        title: tr.settings.notif.unassignedTitle,
-        desc: tr.settings.notif.unassignedDesc
-      ),
-      (
-        pref: NotifPref.load,
-        title: tr.settings.notif.loadTitle,
-        desc: tr.settings.notif.loadDesc
-      ),
-      (
-        pref: NotifPref.newNotebooks,
-        title: tr.settings.notif.newNotebooksTitle,
-        desc: tr.settings.notif.newNotebooksDesc
-      ),
-      (
-        pref: NotifPref.exports,
-        title: tr.settings.notif.exportsTitle,
-        desc: tr.settings.notif.exportsDesc
-      ),
-    ];
+  Translations tr,
+) => [
+  (
+    pref: NotifPref.unassigned,
+    title: tr.settings.notif.unassignedTitle,
+    desc: tr.settings.notif.unassignedDesc,
+  ),
+  (
+    pref: NotifPref.load,
+    title: tr.settings.notif.loadTitle,
+    desc: tr.settings.notif.loadDesc,
+  ),
+  (
+    pref: NotifPref.newNotebooks,
+    title: tr.settings.notif.newNotebooksTitle,
+    desc: tr.settings.notif.newNotebooksDesc,
+  ),
+  (
+    pref: NotifPref.exports,
+    title: tr.settings.notif.exportsTitle,
+    desc: tr.settings.notif.exportsDesc,
+  ),
+];
 
 /// Native language names for the app-language selector. New languages added as
 /// a `<locale>.i18n.json` file appear automatically; add an entry here to show
@@ -82,20 +87,23 @@ class ApplicationTab extends ConsumerStatefulWidget {
 
 class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   bool _backupBusy = false;
+  bool _catalogBusy = false;
 
   @override
   Widget build(BuildContext context) {
     // SecurityCard adapts to the mode (password rows are local-only; device
     // unlock exists in both). In cloud mode it only appears when the device
     // can actually authenticate its owner — otherwise it would be empty.
-    final localMode = ref.watch(authSessionProvider.select(
-        (s) => s is SessionUnlocked && s.mode == AccountMode.local));
-    final deviceAuthOk =
-        ref.watch(deviceAuthSupportedProvider).value ?? false;
+    final localMode = ref.watch(
+      authSessionProvider.select(
+        (s) => s is SessionUnlocked && s.mode == AccountMode.local,
+      ),
+    );
+    final deviceAuthOk = ref.watch(deviceAuthSupportedProvider).value ?? false;
     // Cloud sync card: only once the cloud is configured and signed in.
     final signedIn = ref.watch(cloudUserProvider).value != null;
     return SettingsColumns(
-      left: [_appearance(), _general(), _notificationsCard()],
+      left: [_appearance(), _general(), _notificationsCard(), _catalogCard()],
       right: [
         _datos(),
         if (localMode || deviceAuthOk) const SecurityCard(),
@@ -137,7 +145,8 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
                 TextField(
                   obscureText: true,
                   decoration: InputDecoration(
-                      hintText: tr.settings.backupPasswordRepeat),
+                    hintText: tr.settings.backupPasswordRepeat,
+                  ),
                   onChanged: (v) => repeat = v,
                 ),
               ],
@@ -147,8 +156,9 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
                   child: Text(
                     error!,
                     style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: AppText.small),
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: AppText.small,
+                    ),
                   ),
                 ),
             ],
@@ -162,14 +172,12 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
               onPressed: () {
                 if (password.isEmpty) return;
                 if (confirm && password != repeat) {
-                  setState(
-                      () => error = tr.settings.backupPasswordMismatch);
+                  setState(() => error = tr.settings.backupPasswordMismatch);
                   return;
                 }
                 Navigator.of(context).pop(password);
               },
-              child: Text(
-                  confirm ? tr.settings.export : tr.settings.import),
+              child: Text(confirm ? tr.settings.export : tr.settings.import),
             ),
           ],
         ),
@@ -185,9 +193,10 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     setState(() => _backupBusy = true);
     try {
       final bytes = await ref.read(backupServiceProvider).export(password);
-      final date =
-          DateTime.now().toIso8601String().substring(0, 10);
-      final outcome = await ref.read(fileSaverProvider).saveAs(
+      final date = DateTime.now().toIso8601String().substring(0, 10);
+      final outcome = await ref
+          .read(fileSaverProvider)
+          .saveAs(
             bytes: bytes,
             suggestedName: 'agora-$date.agora',
             extension: 'agora',
@@ -197,19 +206,28 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
       switch (outcome) {
         case SaveDone(:final path):
           ref.read(appSettingsProvider.notifier).markBackupNow();
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.settings.backupSaved(path: path))));
+          showAppSnack(
+            messenger,
+            message: tr.settings.backupSaved(path: path),
+            kind: AppSnackKind.success,
+          );
         case SaveShared():
           // saveAs never shares, but the sealed switch must stay exhaustive.
           ref.read(appSettingsProvider.notifier).markBackupNow();
-          messenger.showSnackBar(
-              SnackBar(content: Text(tr.settings.backupSharedMsg)));
+          showAppSnack(
+            messenger,
+            message: tr.settings.backupSharedMsg,
+            kind: AppSnackKind.success,
+          );
         case SaveCanceled():
           break;
       }
     } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+      showAppSnack(
+        messenger,
+        message: tr.export.error(error: e),
+        kind: AppSnackKind.failure,
+      );
     } finally {
       if (mounted) setState(() => _backupBusy = false);
     }
@@ -218,28 +236,43 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
   Future<void> _importBackup() async {
     final tr = context.t;
     final messenger = ScaffoldMessenger.of(context);
-    final file = await openFile(acceptedTypeGroups: [
-      const XTypeGroup(label: 'Agora', extensions: ['agora']),
-    ]);
+    final file = await openFile(
+      acceptedTypeGroups: [
+        const XTypeGroup(label: 'Agora', extensions: ['agora']),
+      ],
+    );
     if (file == null || !mounted) return;
     final password = await _askBackupPassword(confirm: false);
     if (password == null || password.isEmpty) return;
     setState(() => _backupBusy = true);
     try {
       final bytes = await file.readAsBytes();
-      final applied =
-          await ref.read(backupServiceProvider).import(bytes, password);
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.settings.backupRestored(n: applied))));
+      final applied = await ref
+          .read(backupServiceProvider)
+          .import(bytes, password);
+      showAppSnack(
+        messenger,
+        message: tr.settings.backupRestored(n: applied),
+        kind: AppSnackKind.success,
+      );
     } on WrongBackupPasswordException {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.settings.backupWrongPassword)));
+      showAppSnack(
+        messenger,
+        message: tr.settings.backupWrongPassword,
+        kind: AppSnackKind.failure,
+      );
     } on MalformedBackupException {
-      messenger.showSnackBar(
-          SnackBar(content: Text(tr.settings.backupMalformed)));
+      showAppSnack(
+        messenger,
+        message: tr.settings.backupMalformed,
+        kind: AppSnackKind.failure,
+      );
     } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+      showAppSnack(
+        messenger,
+        message: tr.export.error(error: e),
+        kind: AppSnackKind.failure,
+      );
     } finally {
       if (mounted) setState(() => _backupBusy = false);
     }
@@ -251,9 +284,9 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
     final lastLabel = last == null
         ? tr.settings.noBackupsYet
         : '${last.day.toString().padLeft(2, '0')}/'
-            '${last.month.toString().padLeft(2, '0')}/${last.year} '
-            '${last.hour.toString().padLeft(2, '0')}:'
-            '${last.minute.toString().padLeft(2, '0')}';
+              '${last.month.toString().padLeft(2, '0')}/${last.year} '
+              '${last.hour.toString().padLeft(2, '0')}:'
+              '${last.minute.toString().padLeft(2, '0')}';
     return SettingsCard(
       title: tr.settings.data,
       desc: tr.settings.dataDesc,
@@ -283,6 +316,64 @@ class _ApplicationTabState extends ConsumerState<ApplicationTab> {
         SettingRow(title: tr.settings.lastBackup, subtitle: lastLabel),
       ],
     );
+  }
+
+  Widget _catalogCard() {
+    final tr = context.t;
+    // Refreshing means re-downloading, which a browser cannot do here — the
+    // file's host sends no CORS header. Offering it anyway spent every press
+    // on a request that died, and answered with "could not refresh" as though
+    // the network had been unlucky. Where the workbook has to be handed over,
+    // the honest version of "get a newer one" is the loader.
+    final handOver = notebooksMustBeImported;
+    final desc = handOver
+        ? tr.settings.catalogDescWeb
+        : tr.settings.catalogDesc;
+    return SettingsCard(
+      title: tr.settings.catalogTitle,
+      desc: desc,
+      children: [
+        SettingRow(
+          first: true,
+          title: tr.settings.catalogTitle,
+          subtitle: desc,
+          trailing: AppButton(
+            variant: AppButtonVariant.ghost,
+            icon: handOver ? Icons.file_open_outlined : Icons.refresh,
+            label: handOver
+                ? tr.workspace.importCta
+                : tr.settings.catalogRefresh,
+            busy: _catalogBusy,
+            onPressed: _catalogBusy
+                ? null
+                : handOver
+                ? () => showNotebookImportDialog(context)
+                : _refreshCatalog,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _refreshCatalog() async {
+    final tr = context.t;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _catalogBusy = true);
+    try {
+      final replaced = await ref.read(catalogRefreshProvider).run();
+      if (!mounted) return;
+      // The refresh replacing nothing is a failure, not a quieter success;
+      // both used to arrive as the same grey rectangle.
+      showAppSnack(
+        messenger,
+        message: replaced == 0
+            ? tr.settings.catalogRefreshFailed
+            : tr.settings.catalogRefreshed(n: replaced),
+        kind: replaced == 0 ? AppSnackKind.failure : AppSnackKind.success,
+      );
+    } finally {
+      if (mounted) setState(() => _catalogBusy = false);
+    }
   }
 
   Widget _appearance() {

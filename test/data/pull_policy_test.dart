@@ -9,15 +9,14 @@ void main() {
     bool participantsVisible = false,
     bool fromOwnDevice = false,
     bool heartbeatExists = true,
-  }) =>
-      decidePull(
-        scopes: scopes,
-        cursor: cursor,
-        openProjectId: openProjectId,
-        participantsVisible: participantsVisible,
-        fromOwnDevice: fromOwnDevice,
-        heartbeatExists: heartbeatExists,
-      );
+  }) => decidePull(
+    scopes: scopes,
+    cursor: cursor,
+    openProjectId: openProjectId,
+    participantsVisible: participantsVisible,
+    fromOwnDevice: fromOwnDevice,
+    heartbeatExists: heartbeatExists,
+  );
 
   test('own device pushes never trigger a pull', () {
     expect(
@@ -27,8 +26,10 @@ void main() {
   });
 
   test('nothing newer than the cursor → none', () {
-    expect(decide(scopes: {'p1': '5', 'people': '3'}, cursor: '5'),
-        PullUrgency.none);
+    expect(
+      decide(scopes: {'p1': '5', 'people': '3'}, cursor: '5'),
+      PullUrgency.none,
+    );
   });
 
   test('open project changed → immediate', () {
@@ -46,23 +47,41 @@ void main() {
   });
 
   test('off-screen changes → lazy (coalescing window)', () {
-    expect(decide(scopes: {'p2': '9'}, cursor: '5', openProjectId: 'p1'),
-        PullUrgency.lazy);
+    expect(
+      decide(scopes: {'p2': '9'}, cursor: '5', openProjectId: 'p1'),
+      PullUrgency.lazy,
+    );
     expect(decide(scopes: {'people': '9'}, cursor: '5'), PullUrgency.lazy);
-    expect(decide(scopes: {'congregation': '9'}, cursor: '5'),
-        PullUrgency.lazy);
+    expect(
+      decide(scopes: {'congregation': '9'}, cursor: '5'),
+      PullUrgency.lazy,
+    );
   });
 
   test('null cursor: a never-pulled congregation restores immediately', () {
-    expect(decide(scopes: {'p1': '1'}, openProjectId: 'p1'),
-        PullUrgency.immediate);
+    expect(
+      decide(scopes: {'p1': '1'}, openProjectId: 'p1'),
+      PullUrgency.immediate,
+    );
     // Even for off-screen scopes — a fresh device is 100% out of date, so
     // there is nothing to gain by deferring the first pull.
     expect(decide(scopes: {'p2': '1'}), PullUrgency.immediate);
   });
 
-  test('own-device heartbeat never pulls, even with a null cursor', () {
-    expect(decide(scopes: {'p1': '1'}, fromOwnDevice: true), PullUrgency.none);
+  test('own-device heartbeat holds off only once we have pulled once', () {
+    // Deliberately the opposite of what this asserted before. The two facts
+    // are independent: the device id is persisted, so "the last push was
+    // mine" can be true on a device that has never read the congregation
+    // back — a browser profile that pushed once and then lost its local rows
+    // was told there was nothing to fetch, permanently.
+    expect(
+      decide(scopes: {'p1': '1'}, fromOwnDevice: true),
+      PullUrgency.immediate,
+    );
+    expect(
+      decide(scopes: {'p1': '9'}, fromOwnDevice: true, cursor: '5'),
+      PullUrgency.none,
+    );
   });
 
   test('missing heartbeat doc: first-ever sync pulls, an already-synced '

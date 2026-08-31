@@ -29,15 +29,18 @@ class BlockTitle extends StatelessWidget {
       child: Row(
         children: [
           Flexible(
-            child: Text(
-              title.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppText.body,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.26,
-                color: t.text,
+            child: Semantics(
+              header: true,
+              child: Text(
+                title.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppText.body,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.26,
+                  color: t.text,
+                ),
               ),
             ),
           ),

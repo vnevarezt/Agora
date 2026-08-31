@@ -12,6 +12,7 @@ import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_modal.dart';
 import '../widgets/bound_text_field.dart';
+import '../widgets/meeting_language.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/modal_shell.dart';
 import '../widgets/motion.dart';
@@ -30,9 +31,11 @@ class PartCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     // Highlight the card that owns the open picker (accent ring).
-    final active = ref.watch(activeSlotProvider.select(
-      (s) => s != null && view.slots.any((spec) => spec.ref == s),
-    ));
+    final active = ref.watch(
+      activeSlotProvider.select(
+        (s) => s != null && view.slots.any((spec) => spec.ref == s),
+      ),
+    );
 
     return AnimatedContainer(
       duration: Motion.of(context, Motion.instant),
@@ -61,7 +64,10 @@ class _FixedLineBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s14, vertical: Space.s10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s14,
+        vertical: Space.s10,
+      ),
       child: Row(
         children: [
           SizedBox(
@@ -69,35 +75,37 @@ class _FixedLineBody extends StatelessWidget {
             child: Text(
               view.time,
               textAlign: TextAlign.right,
-              style: AppText.mono(size: 13, color: t.textMute),
+              style: AppText.mono(size: AppText.body, color: t.textMute),
             ),
           ),
           const SizedBox(width: Space.s14),
           Expanded(
-            child: Text.rich(
-              TextSpan(
-                text: view.title,
-                style: TextStyle(
-                  fontSize: AppText.bodyLarge,
-                  fontWeight: FontWeight.w700,
-                  color: t.textDim,
-                ),
-                children: [
-                  if (view.durationLabel != null)
-                    TextSpan(
-                      // Non-breaking spaces: "· 1 min" wraps as a unit on
-                      // narrow widths.
-                      text:
-                          '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: t.textMute,
+            child: MeetingLanguage.maybe(
+              on: view.titleFromWorkbook,
+              child: Text.rich(
+                TextSpan(
+                  text: view.title,
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w700,
+                    color: t.textDim,
+                  ),
+                  children: [
+                    if (view.durationLabel != null)
+                      TextSpan(
+                        // Non-breaking spaces: "· 1 min" wraps as a unit on
+                        // narrow widths.
+                        text: '  · ${view.durationLabel!.replaceAll(' ', ' ')}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: t.textMute,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (view.fixedTag != null) ...[
@@ -122,10 +130,15 @@ class _RoleBody extends ConsumerWidget {
     // The chairman card has no real row id, so its title isn't editable.
     // A title override is a `program` write, so it also needs the program
     // capability for this project's type.
-    final editable = view.id != 'presidente' &&
-        ref.watch(canEditOpenProgramProvider);
+    final editable =
+        view.id != 'presidente' && ref.watch(canEditOpenProgramProvider);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s14, Space.s14, Space.s14),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s14,
+        Space.s14,
+        Space.s14,
+        Space.s14,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -149,13 +162,16 @@ class _RoleBody extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  view.title,
-                  style: TextStyle(
-                    fontSize: AppText.bodyLarge,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.15,
-                    color: t.text,
+                child: MeetingLanguage.maybe(
+                  on: view.titleFromWorkbook,
+                  child: Text(
+                    view.title,
+                    style: TextStyle(
+                      fontSize: AppText.bodyLarge,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.15,
+                      color: t.text,
+                    ),
                   ),
                 ),
               ),
@@ -195,8 +211,11 @@ class _EditTitleButton extends StatelessWidget {
         ),
         child: Tooltip(
           message: context.t.workspace.editTitle,
-          child: Icon(Icons.edit_outlined,
-              size: AppIcon.control, color: hovered ? t.accentStrong : t.textMute),
+          child: Icon(
+            Icons.edit_outlined,
+            size: AppIcon.control,
+            color: hovered ? t.accentStrong : t.textMute,
+          ),
         ),
       ),
     );
@@ -206,8 +225,10 @@ class _EditTitleButton extends StatelessWidget {
 /// Opens a compact dialog to edit (or restore) the assignment's title.
 void _showEditTitleDialog(BuildContext context, WidgetRef ref, PartView view) {
   var text = view.title;
-  final hasOverride =
-      ref.read(formProvider).titleOverrides.containsKey(view.id);
+  final hasOverride = ref
+      .read(formProvider)
+      .titleOverrides
+      .containsKey(view.id);
   showAppModal<void>(
     context,
     maxWidth: 420,

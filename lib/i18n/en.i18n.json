@@ -135,6 +135,7 @@
     "signedOut": "Sign in to the cloud to enable syncing.",
     "unknownError": "Couldn't complete. Please try again.",
     "ready": "Sync is on",
+    "syncNow": "Sync now",
     "statusSyncing": "Syncing…",
     "statusOffline": "Offline",
     "statusError": "Sync error",
@@ -145,7 +146,8 @@
     "errorUnknown": "Something went wrong while syncing.",
     "restoring": "Restoring your data…",
     "restoringProgress": "{done} of {total} congregations",
-    "restoreOffline": "Offline. Your data will be restored when you reconnect."
+    "restoreOffline": "Offline. Your data will be restored when you reconnect.",
+    "restoreFailed": "We couldn't read your congregations. Check your connection or sign in again."
   },
   "account": {
     "title": "Cloud account",
@@ -205,7 +207,8 @@
     "removeAssignment": "Remove assignment",
     "allFeminine": "All",
     "allMasculine": "All",
-    "assigned": "assigned"
+    "assigned": "assigned",
+    "loading": "Loading"
   },
   "sync": {
     "updating": "Updating catalogs",
@@ -213,7 +216,8 @@
     "upToDate": "Catalogs up to date",
     "upToDateTip": "Your workbooks are up to date.",
     "missing": "A workbook is missing",
-    "missingTip": "The next workbook isn't available yet; it will be retried."
+    "missingTip": "The next workbook isn't available yet; it will be retried.",
+    "missingImportTip": "A workbook is missing and the browser can't download it by itself. Tap to load it."
   },
   "dashboard": {
     "greetingMorning": "Good morning",
@@ -221,6 +225,9 @@
     "greetingEvening": "Good evening",
     "greetingNamed": "{greeting}, {name}",
     "subtitle": "Your projects and to-dos",
+    "noCongregationTitle": "No congregation yet",
+    "noCongregationMessage": "Agora files programs, people and projects under a congregation. Create yours to get started.",
+    "noCongregationCta": "Create congregation",
     "youHave": "You have",
     "draftsOne": "1 project in progress",
     "draftsMany": "{n} projects in progress",
@@ -357,6 +364,11 @@
     "import": "Import",
     "lastBackup": "Last backup",
     "noBackupsYet": "No backups yet",
+    "catalogTitle": "Meeting workbooks",
+    "catalogDesc": "These download on their own. Refresh by hand if jw.org published a correction.",
+    "catalogRefresh": "Refresh",
+    "catalogRefreshed": "Catalog refreshed ({n} workbooks).",
+    "catalogRefreshFailed": "Could not refresh. What you had is still there.",
     "backupPasswordTitle": "Backup password",
     "backupPasswordDesc": "Protects the file: it cannot be restored without it.",
     "backupPasswordRepeat": "Repeat the password",
@@ -370,7 +382,8 @@
     "session": "Session",
     "sessionDesc": "You are using the app in local mode on this device.",
     "localMode": "Local mode",
-    "localModeDesc": "Data lives only on this device"
+    "localModeDesc": "Data lives only on this device",
+    "catalogDescWeb": "The browser cannot download them by itself. Load them from jw.org in two steps."
   },
   "options": {
     "timeFormat24": "24-hour (18:00)",
@@ -412,6 +425,9 @@
     "number": "Number",
     "defaultName": "My congregation",
     "meetingLanguage": "Meeting language",
+    "workbookReady": "Workbook available in {language}.",
+    "workbookDownloading": "Downloading the {language} workbook…",
+    "workbookUnavailable": "No {language} workbook yet. It will be retried once you are online.",
     "scheduleTitle": "Meeting schedule",
     "scheduleDesc": "Each part's time is calculated from here.",
     "weekdayDay": "Midweek · day",
@@ -554,6 +570,23 @@
     "emptyTitle": "The workbook downloads automatically.",
     "emptyMessage": "It is usually ready automatically. If it still doesn't appear, look for it manually.",
     "searchNotebook": "Look for workbook {issue}",
+    "importNotebook": "Import notebook (.epub)",
+    "importWebMessage": "In the browser the notebook cannot download itself: jw.org serves the file from a server that does not allow it. Download it from jw.org and open it here.",
+    "importDone": "Notebook {issue} imported ({n} weeks).",
+    "importNotWorkbook": "That file is not a Life and Ministry workbook. Look for the .epub from jw.org.",
+    "importTitle": "Load notebook",
+    "importIntro": "The browser cannot download it by itself. Two steps:",
+    "importStepDownload": "Download the notebook from jw.org",
+    "importStepOpen": "Open it here",
+    "importPick": "Choose .epub file",
+    "importDownload": "Download",
+    "importLoaded": "Already loaded",
+    "importMissing": "Not loaded yet",
+    "importUnavailable": "jw.org hasn't published it yet",
+    "importStepOpenHint": "Choose the .epub you just downloaded.",
+    "importDropHere": "Drop the .epub you downloaded here",
+    "importDropOr": "or choose it with the button below",
+    "importCta": "Load notebook",
     "assignee": "Assign…",
     "duration": "{n} min",
     "songTag": "Song",
@@ -588,6 +621,7 @@
     "rolePrayer": "Prayer:",
     "roleSpeaker": "Speaker:",
     "title": "Midweek Meeting Program",
+    "weeklyReading": "WEEKLY BIBLE READING",
     "chairman": "Chairman: ",
     "mainHall": "Main Hall",
     "auxRoom": "Auxiliary Classroom",

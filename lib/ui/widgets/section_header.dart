@@ -24,7 +24,11 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Padding(
-      padding: const EdgeInsets.only(left: Space.s2, right: Space.s2, bottom: Space.s12),
+      padding: const EdgeInsets.only(
+        left: Space.s2,
+        right: Space.s2,
+        bottom: Space.s12,
+      ),
       child: Row(
         children: [
           if (dotColor != null) ...[
@@ -39,13 +43,18 @@ class SectionHeader extends StatelessWidget {
             const SizedBox(width: Space.s10),
           ],
           Expanded(
-            child: Text(
-              title.toUpperCase(),
-              style: TextStyle(
-                fontSize: AppText.body,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.26,
-                color: t.text,
+            // Weight and tracking say "heading" to an eye and nothing at all
+            // to a screen reader, which then has no structure to move by.
+            child: Semantics(
+              header: true,
+              child: Text(
+                title.toUpperCase(),
+                style: TextStyle(
+                  fontSize: AppText.body,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.26,
+                  color: t.text,
+                ),
               ),
             ),
           ),

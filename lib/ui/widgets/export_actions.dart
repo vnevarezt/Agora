@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app_snack_bar.dart';
 import '../../data/files/file_saver.dart';
 import '../../i18n/strings.g.dart';
 import '../../state/preview_provider.dart';
@@ -21,23 +22,31 @@ Future<void> runExport(
   final tr = context.t;
   ref.read(exportBusyProvider.notifier).set(true);
   try {
-    final outcome = await ref.read(previewProvider.notifier).export(
-          format: format,
-          action: action,
-          shareOrigin: shareOrigin,
-        );
+    final outcome = await ref
+        .read(previewProvider.notifier)
+        .export(format: format, action: action, shareOrigin: shareOrigin);
     switch (outcome) {
       case SaveDone(:final path):
-        messenger.showSnackBar(
-            SnackBar(content: Text(tr.export.success(path: path))));
+        showAppSnack(
+          messenger,
+          message: tr.export.success(path: path),
+          kind: AppSnackKind.success,
+        );
       case SaveShared():
-        messenger.showSnackBar(SnackBar(content: Text(tr.export.shared)));
+        showAppSnack(
+          messenger,
+          message: tr.export.shared,
+          kind: AppSnackKind.success,
+        );
       case SaveCanceled():
         break; // user's choice, no feedback needed
     }
   } catch (e) {
-    messenger
-        .showSnackBar(SnackBar(content: Text(tr.export.error(error: e))));
+    showAppSnack(
+      messenger,
+      message: tr.export.error(error: e),
+      kind: AppSnackKind.failure,
+    );
   } finally {
     ref.read(exportBusyProvider.notifier).set(false);
   }

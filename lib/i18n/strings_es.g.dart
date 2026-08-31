@@ -237,6 +237,9 @@ class Translations$cloudSync$es {
 	/// es: 'Sincronización activa'
 	String get ready => 'Sincronización activa';
 
+	/// es: 'Sincronizar ahora'
+	String get syncNow => 'Sincronizar ahora';
+
 	/// es: 'Sincronizando…'
 	String get statusSyncing => 'Sincronizando…';
 
@@ -269,6 +272,9 @@ class Translations$cloudSync$es {
 
 	/// es: 'Sin conexión. Tus datos se recuperarán al reconectar.'
 	String get restoreOffline => 'Sin conexión. Tus datos se recuperarán al reconectar.';
+
+	/// es: 'No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión.'
+	String get restoreFailed => 'No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión.';
 }
 
 // Path: account
@@ -430,6 +436,9 @@ class Translations$common$es {
 
 	/// es: 'asignados'
 	String get assigned => 'asignados';
+
+	/// es: 'Cargando'
+	String get loading => 'Cargando';
 }
 
 // Path: sync
@@ -457,6 +466,9 @@ class Translations$sync$es {
 
 	/// es: 'El próximo cuaderno aún no está disponible; se reintentará.'
 	String get missingTip => 'El próximo cuaderno aún no está disponible; se reintentará.';
+
+	/// es: 'Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo.'
+	String get missingImportTip => 'Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo.';
 }
 
 // Path: dashboard
@@ -481,6 +493,15 @@ class Translations$dashboard$es {
 
 	/// es: 'Tus proyectos y pendientes'
 	String get subtitle => 'Tus proyectos y pendientes';
+
+	/// es: 'Todavía no tienes una congregación'
+	String get noCongregationTitle => 'Todavía no tienes una congregación';
+
+	/// es: 'Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.'
+	String get noCongregationMessage => 'Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.';
+
+	/// es: 'Crear congregación'
+	String get noCongregationCta => 'Crear congregación';
 
 	/// es: 'Tienes'
 	String get youHave => 'Tienes';
@@ -877,6 +898,21 @@ class Translations$settings$es {
 	/// es: 'Sin copias todavía'
 	String get noBackupsYet => 'Sin copias todavía';
 
+	/// es: 'Cuadernos de reunión'
+	String get catalogTitle => 'Cuadernos de reunión';
+
+	/// es: 'Se descargan solos. Actualiza a mano si jw.org publicó una corrección.'
+	String get catalogDesc => 'Se descargan solos. Actualiza a mano si jw.org publicó una corrección.';
+
+	/// es: 'Actualizar'
+	String get catalogRefresh => 'Actualizar';
+
+	/// es: 'Catálogo actualizado ({n} cuadernos).'
+	String catalogRefreshed({required Object n}) => 'Catálogo actualizado (${n} cuadernos).';
+
+	/// es: 'No se ha podido actualizar. Se conserva lo que ya tenías.'
+	String get catalogRefreshFailed => 'No se ha podido actualizar. Se conserva lo que ya tenías.';
+
 	/// es: 'Contraseña de la copia'
 	String get backupPasswordTitle => 'Contraseña de la copia';
 
@@ -918,6 +954,9 @@ class Translations$settings$es {
 
 	/// es: 'Los datos viven solo en este dispositivo'
 	String get localModeDesc => 'Los datos viven solo en este dispositivo';
+
+	/// es: 'El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos.'
+	String get catalogDescWeb => 'El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos.';
 }
 
 // Path: options
@@ -1053,6 +1092,15 @@ class Translations$congregation$es {
 
 	/// es: 'Idioma de la reunión'
 	String get meetingLanguage => 'Idioma de la reunión';
+
+	/// es: 'Cuaderno disponible en {language}.'
+	String workbookReady({required Object language}) => 'Cuaderno disponible en ${language}.';
+
+	/// es: 'Descargando el cuaderno en {language}…'
+	String workbookDownloading({required Object language}) => 'Descargando el cuaderno en ${language}…';
+
+	/// es: 'Aún no hay cuaderno en {language}. Se reintentará cuando haya conexión.'
+	String workbookUnavailable({required Object language}) => 'Aún no hay cuaderno en ${language}. Se reintentará cuando haya conexión.';
 
 	/// es: 'Horarios de reunión'
 	String get scheduleTitle => 'Horarios de reunión';
@@ -1495,6 +1543,57 @@ class Translations$workspace$es {
 	/// es: 'Buscar cuaderno {issue}'
 	String searchNotebook({required Object issue}) => 'Buscar cuaderno ${issue}';
 
+	/// es: 'Importar cuaderno (.epub)'
+	String get importNotebook => 'Importar cuaderno (.epub)';
+
+	/// es: 'En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.'
+	String get importWebMessage => 'En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.';
+
+	/// es: 'Cuaderno {issue} importado ({n} semanas).'
+	String importDone({required Object issue, required Object n}) => 'Cuaderno ${issue} importado (${n} semanas).';
+
+	/// es: 'Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.'
+	String get importNotWorkbook => 'Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.';
+
+	/// es: 'Cargar cuaderno'
+	String get importTitle => 'Cargar cuaderno';
+
+	/// es: 'El navegador no puede descargarlo solo. Son dos pasos:'
+	String get importIntro => 'El navegador no puede descargarlo solo. Son dos pasos:';
+
+	/// es: 'Descarga el cuaderno de jw.org'
+	String get importStepDownload => 'Descarga el cuaderno de jw.org';
+
+	/// es: 'Ábrelo aquí'
+	String get importStepOpen => 'Ábrelo aquí';
+
+	/// es: 'Elegir archivo .epub'
+	String get importPick => 'Elegir archivo .epub';
+
+	/// es: 'Descargar'
+	String get importDownload => 'Descargar';
+
+	/// es: 'Ya está cargado'
+	String get importLoaded => 'Ya está cargado';
+
+	/// es: 'Todavía no está'
+	String get importMissing => 'Todavía no está';
+
+	/// es: 'jw.org aún no lo publica'
+	String get importUnavailable => 'jw.org aún no lo publica';
+
+	/// es: 'Elige el .epub que acabas de descargar.'
+	String get importStepOpenHint => 'Elige el .epub que acabas de descargar.';
+
+	/// es: 'Suelta aquí el .epub que descargaste'
+	String get importDropHere => 'Suelta aquí el .epub que descargaste';
+
+	/// es: 'o elígelo con el botón de abajo'
+	String get importDropOr => 'o elígelo con el botón de abajo';
+
+	/// es: 'Cargar cuaderno'
+	String get importCta => 'Cargar cuaderno';
+
 	/// es: 'Asignar…'
 	String get assignee => 'Asignar…';
 
@@ -1602,6 +1701,9 @@ class Translations$program$es {
 
 	/// es: 'Programa para la reunión de entre semana'
 	String get title => 'Programa para la reunión de entre semana';
+
+	/// es: 'LECTURA SEMANAL DE LA BIBLIA'
+	String get weeklyReading => 'LECTURA SEMANAL DE LA BIBLIA';
 
 	/// es: 'Presidente: '
 	String get chairman => 'Presidente: ';
@@ -2102,6 +2204,7 @@ extension on Translations {
 			'cloudSync.signedOut' => 'Inicia sesión en la nube para activar la sincronización.',
 			'cloudSync.unknownError' => 'No se pudo completar. Inténtalo de nuevo.',
 			'cloudSync.ready' => 'Sincronización activa',
+			'cloudSync.syncNow' => 'Sincronizar ahora',
 			'cloudSync.statusSyncing' => 'Sincronizando…',
 			'cloudSync.statusOffline' => 'Sin conexión',
 			'cloudSync.statusError' => 'Error de sincronización',
@@ -2113,6 +2216,7 @@ extension on Translations {
 			'cloudSync.restoring' => 'Recuperando tus datos…',
 			'cloudSync.restoringProgress' => ({required Object done, required Object total}) => '${done} de ${total} congregaciones',
 			'cloudSync.restoreOffline' => 'Sin conexión. Tus datos se recuperarán al reconectar.',
+			'cloudSync.restoreFailed' => 'No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión.',
 			'account.title' => 'Cuenta en la nube',
 			'account.desc' => 'Identidad opcional para sincronizar en el futuro. No sustituye a la contraseña local.',
 			'account.notConfigured' => 'Nube no configurada',
@@ -2163,17 +2267,22 @@ extension on Translations {
 			'common.allFeminine' => 'Todas',
 			'common.allMasculine' => 'Todos',
 			'common.assigned' => 'asignados',
+			'common.loading' => 'Cargando',
 			'sync.updating' => 'Actualizando catálogos',
 			'sync.updatingTip' => 'Descargando los cuadernos más recientes…',
 			'sync.upToDate' => 'Catálogos al día',
 			'sync.upToDateTip' => 'Tienes los cuadernos al día.',
 			'sync.missing' => 'Falta un cuaderno',
 			'sync.missingTip' => 'El próximo cuaderno aún no está disponible; se reintentará.',
+			'sync.missingImportTip' => 'Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo.',
 			'dashboard.greetingMorning' => 'Buenos días',
 			'dashboard.greetingAfternoon' => 'Buenas tardes',
 			'dashboard.greetingEvening' => 'Buenas noches',
 			'dashboard.greetingNamed' => ({required Object greeting, required Object name}) => '${greeting}, ${name}',
 			'dashboard.subtitle' => 'Tus proyectos y pendientes',
+			'dashboard.noCongregationTitle' => 'Todavía no tienes una congregación',
+			'dashboard.noCongregationMessage' => 'Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.',
+			'dashboard.noCongregationCta' => 'Crear congregación',
 			'dashboard.youHave' => 'Tienes',
 			'dashboard.draftsOne' => '1 proyecto en curso',
 			'dashboard.draftsMany' => ({required Object n}) => '${n} proyectos en curso',
@@ -2284,6 +2393,11 @@ extension on Translations {
 			'settings.import' => 'Importar',
 			'settings.lastBackup' => 'Última copia',
 			'settings.noBackupsYet' => 'Sin copias todavía',
+			'settings.catalogTitle' => 'Cuadernos de reunión',
+			'settings.catalogDesc' => 'Se descargan solos. Actualiza a mano si jw.org publicó una corrección.',
+			'settings.catalogRefresh' => 'Actualizar',
+			'settings.catalogRefreshed' => ({required Object n}) => 'Catálogo actualizado (${n} cuadernos).',
+			'settings.catalogRefreshFailed' => 'No se ha podido actualizar. Se conserva lo que ya tenías.',
 			'settings.backupPasswordTitle' => 'Contraseña de la copia',
 			'settings.backupPasswordDesc' => 'Protege el archivo: sin ella no se puede restaurar.',
 			'settings.backupPasswordRepeat' => 'Repite la contraseña',
@@ -2298,6 +2412,7 @@ extension on Translations {
 			'settings.sessionDesc' => 'Estás usando la app en modo local en este dispositivo.',
 			'settings.localMode' => 'Modo local',
 			'settings.localModeDesc' => 'Los datos viven solo en este dispositivo',
+			'settings.catalogDescWeb' => 'El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos.',
 			'options.timeFormat24' => '24 horas (18:00)',
 			'options.timeFormat12' => '12 horas (6:00 p. m.)',
 			'options.pdfNameFull' => 'Nombre y apellido',
@@ -2331,6 +2446,9 @@ extension on Translations {
 			'congregation.number' => 'Número',
 			'congregation.defaultName' => 'Mi congregación',
 			'congregation.meetingLanguage' => 'Idioma de la reunión',
+			'congregation.workbookReady' => ({required Object language}) => 'Cuaderno disponible en ${language}.',
+			'congregation.workbookDownloading' => ({required Object language}) => 'Descargando el cuaderno en ${language}…',
+			'congregation.workbookUnavailable' => ({required Object language}) => 'Aún no hay cuaderno en ${language}. Se reintentará cuando haya conexión.',
 			'congregation.scheduleTitle' => 'Horarios de reunión',
 			'congregation.scheduleDesc' => 'Las horas de cada parte se calculan a partir de aquí.',
 			'congregation.weekdayDay' => 'Entre semana · día',
@@ -2456,6 +2574,23 @@ extension on Translations {
 			'workspace.emptyTitle' => 'El cuaderno se descarga solo.',
 			'workspace.emptyMessage' => 'Normalmente está listo automáticamente. Si aún no aparece, búscalo manualmente.',
 			'workspace.searchNotebook' => ({required Object issue}) => 'Buscar cuaderno ${issue}',
+			'workspace.importNotebook' => 'Importar cuaderno (.epub)',
+			'workspace.importWebMessage' => 'En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.',
+			'workspace.importDone' => ({required Object issue, required Object n}) => 'Cuaderno ${issue} importado (${n} semanas).',
+			'workspace.importNotWorkbook' => 'Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.',
+			'workspace.importTitle' => 'Cargar cuaderno',
+			'workspace.importIntro' => 'El navegador no puede descargarlo solo. Son dos pasos:',
+			'workspace.importStepDownload' => 'Descarga el cuaderno de jw.org',
+			'workspace.importStepOpen' => 'Ábrelo aquí',
+			'workspace.importPick' => 'Elegir archivo .epub',
+			'workspace.importDownload' => 'Descargar',
+			'workspace.importLoaded' => 'Ya está cargado',
+			'workspace.importMissing' => 'Todavía no está',
+			'workspace.importUnavailable' => 'jw.org aún no lo publica',
+			'workspace.importStepOpenHint' => 'Elige el .epub que acabas de descargar.',
+			'workspace.importDropHere' => 'Suelta aquí el .epub que descargaste',
+			'workspace.importDropOr' => 'o elígelo con el botón de abajo',
+			'workspace.importCta' => 'Cargar cuaderno',
 			'workspace.assignee' => 'Asignar…',
 			'workspace.duration' => ({required Object n}) => '${n} min',
 			'workspace.songTag' => 'Cántico',
@@ -2466,6 +2601,8 @@ extension on Translations {
 			'workspace.slotAssistant' => 'Ayudante',
 			'workspace.slotInCharge' => 'Encargado',
 			'workspace.slotSpeaker' => 'Orador',
+			_ => null,
+		} ?? switch (path) {
 			'workspace.slotAux' => ({required Object label}) => '${label} · Aux.',
 			'workspace.editTitle' => 'Editar título',
 			'workspace.editTitleHint' => 'Título de la asignación',
@@ -2486,6 +2623,7 @@ extension on Translations {
 			'program.rolePrayer' => 'Oración:',
 			'program.roleSpeaker' => 'Orador:',
 			'program.title' => 'Programa para la reunión de entre semana',
+			'program.weeklyReading' => 'LECTURA SEMANAL DE LA BIBLIA',
 			'program.chairman' => 'Presidente: ',
 			'program.mainHall' => 'Auditorio principal',
 			'program.auxRoom' => 'Sala Auxiliar',

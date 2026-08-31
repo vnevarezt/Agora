@@ -4,29 +4,51 @@ Flutter app for planning meeting programs and scheduling participants. **Local-f
 feature works offline against a local drift/SQLite database. Firebase cloud sync is opt-in,
 end-to-end encrypted, and must never become a hard dependency of a code path.
 
-`.fvmrc` pins Flutter to **3.47.0**; use fvm when it is installed, since nothing else enforces it.
+`.fvmrc` pins Flutter to **3.47.0** and **everything goes through fvm** — `fvm flutter test`, not
+`flutter test`. Nothing else enforces the pin, and the toolchain is not cosmetic: the formatter's
+output and the golden images both move between SDK releases.
 State is Riverpod, persistence is drift, translations are slang, print output is the `pdf` package.
 
 ## First run
 
 ```sh
+dart pub global activate fvm
+export PATH="$PATH:$HOME/.pub-cache/bin"   # put this in ~/.zshrc; pub's bin is not on it by default
+fvm install            # reads .fvmrc, installs Flutter 3.47.0
 sh tool/bootstrap.sh   # copies every committed .example config to its gitignored real path
-flutter pub get
+fvm flutter pub get
 ```
 
 Without `bootstrap.sh` the build fails on missing `firebase_options.dart` / `cloud_secrets.dart`.
+Every script under `tool/` sources `tool/sdk.sh`, which finds fvm on PATH or in `~/.pub-cache/bin`
+and refuses outright if the toolchain is neither fvm nor the pinned version.
 
 ## Commands
 
 ```sh
-flutter analyze                  # must be clean before committing
-flutter test                     # must be green before committing
-dart run slang                   # after editing lib/i18n/*.i18n.json
-dart run build_runner build --delete-conflicting-outputs   # after changing drift tables
+fvm flutter analyze              # must be clean before committing
+fvm flutter test                 # must be green before committing
+fvm dart run slang               # after editing lib/i18n/*.i18n.json
+fvm dart run build_runner build --delete-conflicting-outputs   # after changing drift tables
 sh tool/build_web_assets.sh      # after bumping drift or sqlite3 in pubspec.yaml
+sh tool/format.sh                # the only sanctioned way to run dart format
+fvm flutter test --update-goldens test/ui/golden   # after an intended visual change
 ```
 
+The component catalogue is a screen: run a debug build and open `/gallery`. It and the golden
+images are composed from the same file (`lib/ui/dev/gallery.dart`), so adding a widget to one adds
+it to the other. `kDebugMode` keeps the whole thing out of release builds.
+
+Goldens are rendered by the engine, so they are pinned twice over: regenerate them under **fvm**
+(a different SDK redraws every one of them) on **macOS**, and **look at the diff before accepting
+it** — an updated golden is a claim that the new appearance is the intended one.
+
 There is no CI. `flutter analyze` and `flutter test` are the only gate, so run both yourself.
+
+**Never run `dart format` directly.** dart_style's output moves between SDK releases, and 207 of
+295 sources disagree between Flutter 3.44 and the pinned 3.47 — formatting off-pin rewrites most
+of the repo and buries the change it came with. `tool/format.sh` uses fvm when it is there and
+refuses outright when the running Flutter is not the pinned one.
 
 ## Rules
 
@@ -139,6 +161,10 @@ Read these on demand rather than assuming their contents:
 
 - `docs/DATA_ARCHITECTURE.md` — domain model, layering, LWW sync engine, E2E encryption model
 - `docs/DESIGN_SYSTEM.md` — token contract, color roles, type scale, motion, print artifact
+- `docs/UX_PATTERNS.md` — navigation, the loading/empty/error state matrix, flows, voice
+- `docs/COMPONENTS.md` — per-widget variants, states, a11y contract and what each is not for
+- `docs/ACCESSIBILITY.md` — the adopted standard (WCAG 2.2 AA), the criterion matrix, open failures
+- `docs/A11Y_MANUAL_PASS.md` — the screen-reader walk nobody has run yet, and the form it fills in
 - `docs/FIREBASE_SETUP.md` — enabling the optional cloud
 - `docs/RELEASE.md` — release process
 

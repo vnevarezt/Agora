@@ -17,6 +17,7 @@ class PullResult {
     this.undecryptable = 0,
     this.unknownKeyVersions = const {},
     this.cursorHeld = false,
+    this.keyringMissing = false,
   });
 
   final int fetched;
@@ -34,6 +35,16 @@ class PullResult {
   /// because of [unknownKeyVersions]. The caller must refresh the keyring
   /// and retry the SAME page — draining on would spin forever.
   final bool cursorHeld;
+
+  /// True when there is no keyring for this congregation AT ALL, so nothing
+  /// was even attempted. Distinct from [cursorHeld], which is about versions
+  /// missing from a page that was read.
+  ///
+  /// Without this the caller could not tell "I hold no key here" from "there
+  /// is nothing new", because both arrive as a page of zero — so a device
+  /// that had not yet unsealed a congregation's key reported a clean, empty,
+  /// successful pull and never came back to it.
+  final bool keyringMissing;
 }
 
 /// Push/pull engine (phase 4a, docs/PHASE4_CLOUD_SYNC.md). Cloud-agnostic:
@@ -56,15 +67,14 @@ class SyncEngine {
 
   /// Keys this member holds for a congregation; null = not syncable (not
   /// shared/enabled), its outbox entries stay queued.
-  final Future<CongregationKeyring?> Function(String congregationId)
-      keyringFor;
+  final Future<CongregationKeyring?> Function(String congregationId) keyringFor;
 
   /// What this member is allowed to write in a congregation. Null = unknown
   /// (membership stream not loaded yet) and means "don't filter": the batch
   /// may bounce, but a stale read must never silently delete the user's
   /// pending edits. See [pushOnce].
   final Future<MemberCapabilities?> Function(String congregationId)
-      capabilitiesFor;
+  capabilitiesFor;
 
   static Future<MemberCapabilities?> _unknownCapabilities(String _) async =>
       null;
@@ -86,9 +96,9 @@ class SyncEngine {
   /// forever, blocking that member's legitimate writes too. Gating the UI
   /// isn't enough — capabilities can be downgraded mid-session.
   Future<int> pushOnce() async {
-    final entries = await (_db.select(_db.outbox)
-          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
-        .get();
+    final entries = await (_db.select(
+      _db.outbox,
+    )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
     if (entries.isEmpty) return 0;
 
     // Dart map literals keep insertion order (= outbox id order).
@@ -99,21 +109,21 @@ class SyncEngine {
 
     // Per congregation: docs to upsert, their activity scopes, and the
     // outbox ids to delete once the batch lands.
-    final batches =
-        <String, (List<ItemDoc>, Set<String>, List<int>)>{};
+    final batches = <String, (List<ItemDoc>, Set<String>, List<int>)>{};
     final keyrings = <String, CongregationKeyring?>{};
     final capabilities = <String, MemberCapabilities?>{};
 
     for (final MapEntry(key: (entityName, entityId), value: group)
         in groups.entries) {
-      Future<void> drop() => (_db.delete(_db.outbox)
-            ..where((t) => t.id.isIn([for (final e in group) e.id])))
-          .go();
+      Future<void> drop() => (_db.delete(
+        _db.outbox,
+      )..where((t) => t.id.isIn([for (final e in group) e.id]))).go();
 
       final entity = SyncEntity.values.byName(entityName);
       final congregationId = await _codec.congregationOf(entity, entityId);
-      final payload =
-          congregationId == null ? null : await _codec.encode(entity, entityId);
+      final payload = congregationId == null
+          ? null
+          : await _codec.encode(entity, entityId);
       if (congregationId == null || payload == null) {
         // Broken chain (corrupt outbox): unpushable forever, drop it.
         await drop();
@@ -128,8 +138,9 @@ class SyncEngine {
       final programTypeId = await _codec.programTypeOf(entity, entityId);
       final caps = capabilities.containsKey(congregationId)
           ? capabilities[congregationId]
-          : capabilities[congregationId] =
-              await capabilitiesFor(congregationId);
+          : capabilities[congregationId] = await capabilitiesFor(
+              congregationId,
+            );
       if (caps != null && !caps.canPush(entityName, programTypeId)) {
         // Unpushable for as long as these capabilities hold, and keeping it
         // would block everything behind it. The local row is untouched —
@@ -146,16 +157,20 @@ class SyncEngine {
         payload: payload,
       );
       final (docs, scopes, outboxIds) = batches.putIfAbsent(
-          congregationId, () => ([], <String>{}, []));
-      docs.add(ItemDoc(
-        entityId: entityId,
-        entity: entityName,
-        programTypeId: programTypeId,
-        hlc: hlc,
-        srcDevice: deviceId,
-        keyVersion: keyring.currentVersion,
-        blob: blob,
-      ));
+        congregationId,
+        () => ([], <String>{}, []),
+      );
+      docs.add(
+        ItemDoc(
+          entityId: entityId,
+          entity: entityName,
+          programTypeId: programTypeId,
+          hlc: hlc,
+          srcDevice: deviceId,
+          keyVersion: keyring.currentVersion,
+          blob: blob,
+        ),
+      );
       final scope = await _codec.scopeOf(entity, entityId);
       if (scope != null) scopes.add(scope);
       outboxIds.addAll([for (final e in group) e.id]);
@@ -201,18 +216,22 @@ class SyncEngine {
   }) async {
     const empty = PullResult(fetched: 0, applied: 0);
     final keyring = await keyringFor(congregationId);
-    if (keyring == null) return empty;
+    if (keyring == null) {
+      return const PullResult(fetched: 0, applied: 0, keyringMissing: true);
+    }
 
-    var state = await (_db.select(_db.syncState)
-          ..where((t) => t.congregationId.equals(congregationId)))
-        .getSingleOrNull();
+    var state = await (_db.select(
+      _db.syncState,
+    )..where((t) => t.congregationId.equals(congregationId))).getSingleOrNull();
 
     // Recovery: we once gave up on a version and moved the cursor past docs
     // we couldn't read. Now that we hold it, the only way to get them back
     // is to rewind and re-pull the whole history (LWW makes that idempotent).
     final missing = state?.missingKeyVersion;
     if (missing != null && keyring.keys.containsKey(missing)) {
-      await _db.into(_db.syncState).insertOnConflictUpdate(
+      await _db
+          .into(_db.syncState)
+          .insertOnConflictUpdate(
             SyncStateCompanion.insert(
               congregationId: congregationId,
               pullCursor: const Value(null),
@@ -223,8 +242,7 @@ class SyncEngine {
       state = null;
     }
 
-    final docs =
-        await _transport.pullSince(congregationId, state?.pullCursor);
+    final docs = await _transport.pullSince(congregationId, state?.pullCursor);
     if (docs.isEmpty) return empty;
 
     var applied = 0;
@@ -268,15 +286,18 @@ class SyncEngine {
       // Everything we DID apply stays applied even when the cursor is held:
       // re-pulling the same page is idempotent under LWW.
       if (unknownVersions.isEmpty || acceptUnknownKeyVersions) {
-        await _db.into(_db.syncState).insertOnConflictUpdate(
+        await _db
+            .into(_db.syncState)
+            .insertOnConflictUpdate(
               SyncStateCompanion.insert(
                 congregationId: congregationId,
                 pullCursor: Value(docs.last.serverTs),
                 // Remember the LOWEST version we gave up on: recovering it
                 // rewinds the furthest, and re-pulling then rediscovers any
                 // higher one still missing.
-                missingKeyVersion: Value(_lowestMissing(
-                    state?.missingKeyVersion, unknownVersions)),
+                missingKeyVersion: Value(
+                  _lowestMissing(state?.missingKeyVersion, unknownVersions),
+                ),
                 updatedAt: DateTime.now().toUtc(),
               ),
             );

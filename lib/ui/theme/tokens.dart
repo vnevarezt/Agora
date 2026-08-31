@@ -21,6 +21,20 @@ class AppTokens extends ThemeExtension<AppTokens> {
   final Color text;
   final Color textDim;
   final Color textMute;
+
+  /// The accent ramp sits on oklch hue 268 — the mark's hue, not a hue of its
+  /// own. It used to be 262, six degrees off, which is not a difference anyone
+  /// names but is enough for the logo and the button beside it to read as two
+  /// blues. Only the hue moved: lightness is what drives contrast, and holding
+  /// it is why `test/ui/contrast_test.dart` did not have to be re-tuned.
+  ///
+  /// Chroma rose on [accent], [accentStrong] and [accentOnSoft] alone, towards
+  /// the mark's own. The soft, tint and ink steps are near-white or near-black,
+  /// where added chroma clips out of sRGB instead of reading.
+  ///
+  /// The mark keeps more chroma than any of these on purpose. Matching it would
+  /// put every button in competition with the logo; the family is shared, the
+  /// intensity is not.
   final Color accent;
   final Color accentStrong;
   final Color accentInk;
@@ -182,12 +196,12 @@ const pizarra = AppPalette(
     // and a value tuned against bg alone lands at 4.5 there — on the line,
     // which is not the same as over it.
     textMute: Color(0xFF6B7079),
-    accent: Color(0xFF41629F),
-    accentStrong: Color(0xFF2E5091),
-    accentInk: Color(0xFFF8FCFF),
-    accentSoft: Color(0xFFE7F1FF),
-    accentTint: Color(0xFFF2F7FF),
-    accentOnSoft: Color(0xFF2E5091),
+    accent: Color(0xFF405CB5),
+    accentStrong: Color(0xFF2F48A7),
+    accentInk: Color(0xFFFAFBFF),
+    accentSoft: Color(0xFFEAF0FF),
+    accentTint: Color(0xFFF3F7FF),
+    accentOnSoft: Color(0xFF2F48A7),
     success: Color(0xFF2E6A3E),
     successSoft: Color(0xFFDCF0E0),
     successStrong: Color(0xFF4FA06A),
@@ -198,24 +212,24 @@ const pizarra = AppPalette(
     alertSoft: Color(0xFFFBE7DF),
   ),
   dark: AppTokens(
-    bg: Color(0xFF0B0F14),
-    surface: Color(0xFF13181E),
-    surface2: Color(0xFF191F26),
-    border: Color(0xFF282E36),
-    border2: Color(0xFF21262C),
-    borderControl: Color(0xFF626D7D),
+    bg: Color(0xFF12161B),
+    surface: Color(0xFF1A1F26),
+    surface2: Color(0xFF21272F),
+    border: Color(0xFF2F3742),
+    border2: Color(0xFF272E37),
+    borderControl: Color(0xFF6B7686),
     text: Color(0xFFECEFF2),
     textDim: Color(0xFFA6ABB2),
     // 5.6:1 on bg, 5.2:1 on surface, 4.8:1 on surface2. Same reasoning as the
     // light scheme inverted: surface2 is the lightest ground here, so it is
     // the one the ink has to clear.
-    textMute: Color(0xFF868B92),
-    accent: Color(0xFF6F97E2),
-    accentStrong: Color(0xFF5A84D4),
-    accentInk: Color(0xFF060D1A),
-    accentSoft: Color(0xFF21344C),
-    accentTint: Color(0xFF192431),
-    accentOnSoft: Color(0xFF7FA3E8),
+    textMute: Color(0xFF979CA4),
+    accent: Color(0xFF7292F1),
+    accentStrong: Color(0xFF5E7FE3),
+    accentInk: Color(0xFF080C1A),
+    accentSoft: Color(0xFF28324D),
+    accentTint: Color(0xFF1D2331),
+    accentOnSoft: Color(0xFF7C9EFF),
     success: Color(0xFFA9D8B8),
     successSoft: Color(0xFF1E3A2A),
     successStrong: Color(0xFF4FA06A),

@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/ink_surface.dart';
+import '../widgets/meeting_language.dart';
 import '../widgets/mini_chip.dart';
 import '../widgets/progress_meter.dart';
 import 'status_badge.dart';
@@ -45,7 +46,12 @@ class ProjectCard extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(Space.s18, Space.s18, Space.s18, Space.s14),
+              padding: const EdgeInsets.fromLTRB(
+                Space.s18,
+                Space.s18,
+                Space.s18,
+                Space.s14,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -107,7 +113,13 @@ class ProjectCard extends StatelessWidget {
                   Wrap(
                     spacing: Space.s6,
                     runSpacing: Space.s6,
-                    children: [for (final w in p.weeks) MiniChip.week(w)],
+                    children: [
+                      for (final w in p.weeks)
+                        MeetingLanguage(
+                          congregationId: p.congregationId,
+                          child: MiniChip.week(w.label),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: Space.s14),
                   Row(
@@ -145,7 +157,7 @@ class ProjectCard extends StatelessWidget {
                 right: -1,
                 child: AppIconButton(
                   icon: Icons.more_vert,
-                  size: 30,
+                  size: Dimens.hIconCard,
                   tooltip: context.t.projectCard.editProject,
                   onPressed: onEdit,
                 ),

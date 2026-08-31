@@ -22,6 +22,11 @@ class PrivBadge extends StatelessWidget {
       Role.publisher => (t.surface2, t.textDim, t.border2),
     };
 
-    return Pill(label: role.label(context.t), background: bg, foreground: fg, border: border);
+    return Pill(
+      label: role.label(context.t),
+      background: bg,
+      foreground: fg,
+      border: border,
+    );
   }
 }

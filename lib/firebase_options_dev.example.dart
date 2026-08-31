@@ -17,7 +17,8 @@ class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for web.');
+        'DefaultFirebaseOptions have not been configured for web.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -30,7 +31,8 @@ class DefaultFirebaseOptions {
         return windows;
       default:
         throw UnsupportedError(
-            'DefaultFirebaseOptions are not supported for this platform.');
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
     }
   }
 

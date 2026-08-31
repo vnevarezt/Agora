@@ -12,6 +12,7 @@ Run through tool/build_site.sh, which also builds the app into build/site/app.
 
 import html
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -23,58 +24,186 @@ OUT = ROOT / "build/site"
 
 SLOT = re.compile(r"\{\{([a-zA-Z0-9_.]+)\}\}")
 
+# The auth action page calls Identity Toolkit directly, so it needs the web API
+# key — a browser key, public by design, and the oobCode in the URL is the
+# credential, not this. Public is not the same as committed, though: it is read
+# out of the gitignored Firebase config at build time and substituted here, so
+# the repository carries no key and GitHub's secret scanner has nothing to find.
+# Same rule lib/cloud_secrets.dart and lib/firebase_options.dart already follow.
+API_KEY_SLOT = "__FIREBASE_API_KEY__"
+FLAVOR = os.environ.get("FLAVOR", "prod")
+FIREBASE_OPTIONS = {
+    "prod": ROOT / "lib/firebase_options.dart",
+    "dev": ROOT / "lib/firebase_options_dev.dart",
+}
+
+
+def web_api_key() -> str:
+    """The web apiKey of the flavor being built, straight from the app's own
+    config so the page and the app can never drift onto different projects."""
+    path = FIREBASE_OPTIONS.get(FLAVOR, FIREBASE_OPTIONS["prod"])
+    if not path.exists():
+        sys.exit(f"missing {path.relative_to(ROOT)} — see docs/FIREBASE_SETUP.md")
+    src = path.read_text()
+    # `web` is either its own block or an alias of another platform's.
+    target = re.search(r"FirebaseOptions web = (\w+);", src)
+    name = target.group(1) if target and target.group(1) != "FirebaseOptions" else "web"
+    block = re.search(
+        r"FirebaseOptions " + name + r" = FirebaseOptions\((.*?)\);", src, re.S
+    )
+    key = re.search(r"apiKey: '([^']+)'", block.group(1)) if block else None
+    if key is None:
+        sys.exit(f"no web apiKey in {path.relative_to(ROOT)}")
+    return key.group(1)
+
 # Default locale is served at /, the rest under /<code>/.
 LOCALES = ["es", "en"]
+
+# (template, subdirectory under the locale root). The landing sits at the root;
+# the action page is what the reset and verification emails link to, so its path
+# is part of the contract with functions/src/index.ts — moving it here without
+# moving it there sends every link in the wild to a 404.
+PAGES = [
+    ("template.html", ""),
+    ("action.html", "auth/action"),
+]
+
+# Each page ships one stylesheet: the shared base plus its own rules. Two files
+# would cost a second blocking request for a page whose whole point is to be
+# cheap to open.
+SHEETS = {
+    "landing.css": ("base.css", "landing.css"),
+    "action.css": ("base.css", "action.css"),
+}
 ORIGIN = "https://agora-vnevarezt.web.app"
 
-# The sample program. Hardcoded, and in Spanish in every locale, for the same
-# reason a screenshot in a manual is not retranslated: it is a picture of one
-# congregation's printout, not interface text.
-SHEET = [
-    ("row", "18:00", "Canción 42 y oración", "R. Cano"),
-    ("row", "18:05", "Palabras de introducción", "M. Salas"),
-    ("band treasures", "Tesoros de la Biblia", None, None),
-    ("row", "18:09", "Discurso", "M. Salas"),
-    ("row", "18:19", "Busquemos perlas escondidas", "A. Beltrán"),
-    ("row", "18:29", "Lectura de la Biblia", "J. Ríos"),
-    ("band ministry", "Seamos mejores maestros", None, None),
-    ("row", "18:34", "Empiece conversaciones", "D. Puga"),
-    ("row", "18:39", "Haga revisitas", "R. Ledesma"),
-    ("row", "18:44", "Discurso", "C. Vega"),
-    ("gap", None, None, None),
-    ("row", "18:49", "Canción 108", None),
-    ("band life", "Nuestra vida cristiana", None, None),
-    ("row", "18:57", "Necesidades de la congregación", "L. Ordaz"),
-    ("row", "19:02", "Estudio bíblico de la congregación", "H. Mena"),
-    ("gap", None, None, None),
-    ("row", "19:32", "Palabras de conclusión", "M. Salas"),
-    ("row", "19:35", "Canción 55 y oración", "T. Ibarra"),
-]
+# The hero art: one montage per device class, at two densities, rendered into
+# site/media/ by tool/demo/site_shots.py. Named here rather than in the
+# stylesheet because the shot has interface text in it, so it differs per
+# locale, and there is one landing.css for every locale.
+#
+# The widths are the ones landing.css switches on, and the preload below has to
+# repeat them: a preload that disagreed with the stylesheet by one pixel would
+# fetch a montage the page then declines to use.
+SHOT_SLOTS = {
+    "phone": "(max-width: 720px)",
+    "tablet": "(min-width: 721px) and (max-width: 1080px)",
+    "desk": "(min-width: 1081px)",
+}
 
 
 def esc(value: str) -> str:
     return html.escape(str(value), quote=True)
 
 
-def render_sheet() -> str:
-    parts = [
-        '<div class="sheet" role="img" aria-label="Ejemplo de programa impreso">',
-        '<div class="sheet-head"><span>Reunión de entresemana</span>'
-        "<span>6-12 abr</span></div>",
-    ]
-    for kind, a, b, c in SHEET:
-        if kind == "gap":
-            parts.append('<div class="sheet-gap"></div>')
-        elif kind.startswith("band"):
-            parts.append(f'<div class="sheet-{kind}">{esc(a)}</div>')
-        else:
-            name = f'<span class="sheet-n">{esc(c)}</span>' if c else ""
-            parts.append(
-                f'<div class="sheet-row"><span class="sheet-t">{esc(a)}</span>'
-                f'<span class="sheet-p">{esc(b)}</span>{name}</div>'
+def mark() -> str:
+    """The brand mark, inlined from the files gen_brand_assets.py renders.
+
+    Read at build time rather than copied into the CSS, so the page can never
+    hold a stale version of a drawing whose source of truth is a script two
+    directories away. Both variants ship because only the back plane changes
+    between them, and it has to: the brand navy drowns on a dark ground.
+
+    Inline rather than <img>: it is 200 bytes against a request, on a page
+    whose whole point is to be cheap to open.
+    """
+    out = []
+    for theme, name in (("light", "agora-mark.svg"), ("dark", "agora-mark-dark.svg")):
+        svg = (ROOT / "assets/brand" / name).read_text().strip()
+        # Drop the intrinsic size; the height comes from CSS and the width
+        # follows the viewBox, or the mark cannot be reused at two sizes.
+        svg = re.sub(r'\s(width|height)="[^"]*"', "", svg, count=2)
+        out.append(svg.replace("<svg ", f'<svg class="mark-on-{theme}" ', 1))
+    return "".join(out)
+
+
+def wordmark_ink() -> str:
+    """The lockup's word colour, per theme, as custom properties.
+
+    Same source as the mark: gen_brand_assets.py holds it, the app reads its
+    own copy (guarded by test/ui/agora_mark_test.dart), and this pulls it out
+    of the generator so the page cannot be the one that drifts.
+    """
+    src = (ROOT / "tool/gen_brand_assets.py").read_text()
+    line = re.search(r"^WORDMARK_INK = (.*)$", src, re.M).group(1)
+    light, dark = re.findall(r"#[0-9a-f]{6}", line)
+    return (
+        f":root {{ --brand-word: {light}; }}\n"
+        "@media (prefers-color-scheme: dark) {\n"
+        f'  :root:not([data-theme="light"]) {{ --brand-word: {dark}; }}\n'
+        "}\n"
+        f':root[data-theme="dark"] {{ --brand-word: {dark}; }}\n'
+    )
+
+
+def shot_url(slot: str, locale: str, theme: str, density: int) -> str:
+    at = "" if density == 1 else f"@{density}x"
+    return f"/media/hero-{slot}-{locale}-{theme}{at}.webp"
+
+
+def render_shot(locale: str, alt: str) -> str:
+    """The hero montage, as the candidates landing.css picks one of.
+
+    A background image rather than a <picture>, because the theme here is a
+    data-theme attribute as often as it is prefers-color-scheme and a source
+    media query cannot see the attribute. Only the rule that wins is ever
+    fetched, so the reader pays for one of these, not twelve.
+    """
+    props = "".join(
+        f"--shot-{slot}-{theme}{'' if d == 1 else f'-{d}x'}:"
+        f"url({shot_url(slot, locale, theme, d)});"
+        for slot in SHOT_SLOTS
+        for theme in ("light", "dark")
+        for d in (1, 2)
+    )
+    return f'<div class="shot" role="img" aria-label="{alt}" style="{props}"></div>'
+
+
+def render_program(locale: str, alt: str) -> str:
+    """One iPad with the preview panel open, under the timing section.
+
+    Same mechanism as the hero and for the same reasons — locale in the URL,
+    theme in the cascade — but one composition rather than three: the argument
+    there is the program, not the hardware, so nothing is gained by handing a
+    phone reader a phone.
+    """
+    props = "".join(
+        f"--program-{theme}{'' if d == 1 else f'-{d}x'}:"
+        f"url(/media/program-{locale}-{theme}{'' if d == 1 else f'@{d}x'}.webp);"
+        for theme in ("light", "dark")
+        for d in (1, 2, 3)
+    )
+    return (f'<div class="program" role="img" aria-label="{alt}" '
+            f'style="{props}"></div>')
+
+
+def shot_preload(locale: str) -> str:
+    """Start the hero fetching with the stylesheet, not after it.
+
+    A background image is not visible to the preload scanner: the browser has
+    to parse the CSS, build the box and resolve the custom property before it
+    learns there is an image at all, which on the largest thing on the page is
+    the difference between the hero arriving with the text and arriving after
+    it. Each link carries the same width the stylesheet switches on plus the
+    theme, so exactly one of the six matches.
+
+    The one it can get wrong is a reader whose stored theme contradicts their
+    system: the media query only knows the system, so that reader fetches one
+    montage they will not see. One wasted image against a hero that lands late
+    for everyone else is the trade.
+    """
+    links = []
+    for slot, width in SHOT_SLOTS.items():
+        for theme in ("light", "dark"):
+            srcset = ", ".join(
+                f"{shot_url(slot, locale, theme, d)} {d}x" for d in (1, 2)
             )
-    parts.append("</div>")
-    return "\n".join(parts)
+            links.append(
+                f'<link rel="preload" as="image" fetchpriority="high" '
+                f'imagesrcset="{srcset}" '
+                f'media="{width} and (prefers-color-scheme: {theme})">'
+            )
+    return "\n".join(links)
 
 
 def flatten(node, prefix="", out=None):
@@ -97,11 +226,16 @@ def alternates(locale: str) -> str:
     return "\n".join(links)
 
 
-def build(locale: str, template: str, sheet: str) -> None:
+def build(locale: str, subdir: str, template: str) -> None:
     src = SITE / f"copy/{locale}.json"
     strings = {k: esc(v) for k, v in flatten(json.loads(src.read_text())).items()}
     strings["lang"] = locale
-    strings["sheet"] = sheet
+    strings["brand.mark"] = mark()
+    strings["shot"] = render_shot(locale, strings["landing.hero.shotAlt"])
+    strings["shot.preload"] = shot_preload(locale)
+    strings["programShot"] = render_program(
+        locale, strings["landing.schedules.shotAlt"]
+    )
     strings["meta.canonical"] = ORIGIN + (
         "/" if locale == LOCALES[0] else f"/{locale}/"
     )
@@ -120,27 +254,38 @@ def build(locale: str, template: str, sheet: str) -> None:
     if missing:
         sys.exit(f"{locale}: template asks for keys that do not exist: {sorted(set(missing))}")
 
-    target = OUT / ("index.html" if locale == LOCALES[0] else f"{locale}/index.html")
+    parts = [p for p in ("" if locale == LOCALES[0] else locale, subdir) if p]
+    target = OUT.joinpath(*parts, "index.html")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(page)
     print(f"  {target.relative_to(ROOT)}  ({len(page) // 1024} KB)")
 
 
 def main() -> None:
-    template = (SITE / "template.html").read_text()
-    sheet = render_sheet()
     OUT.mkdir(parents=True, exist_ok=True)
 
-    for name in ("landing.css", "tokens.css", "landing.js"):
+    for name in ("tokens.css", "landing.js"):
         shutil.copy2(SITE / name, OUT / name)
+    action = (SITE / "action.js").read_text()
+    if API_KEY_SLOT not in action:
+        sys.exit(f"site/action.js no longer carries {API_KEY_SLOT}")
+    (OUT / "action.js").write_text(action.replace(API_KEY_SLOT, web_api_key()))
+    ink = wordmark_ink()
+    for out_name, sources in SHEETS.items():
+        (OUT / out_name).write_text(
+            ink + "".join((SITE / src).read_text() for src in sources)
+        )
     shutil.copytree(SITE / "fonts", OUT / "fonts", dirs_exist_ok=True)
+    shutil.copytree(SITE / "media", OUT / "media", dirs_exist_ok=True)
 
     # Shared with the app shell so a bookmark of either shows the same icon.
     shutil.copy2(ROOT / "web/favicon.png", OUT / "favicon.png")
     shutil.copytree(ROOT / "web/icons", OUT / "icons", dirs_exist_ok=True)
 
-    for locale in LOCALES:
-        build(locale, template, sheet)
+    for name, subdir in PAGES:
+        template = (SITE / name).read_text()
+        for locale in LOCALES:
+            build(locale, subdir, template)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
-import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/auth_session.dart';
+import '../theme/app_theme.dart';
+import '../theme/dimens.dart';
 import '../widgets/app_button.dart';
 import 'auth_card_layout.dart';
 
@@ -23,7 +24,7 @@ class KeyErrorScreen extends ConsumerWidget {
         children: [
           Icon(
             Icons.error_outline,
-            size: 34,
+            size: AppIcon.hero,
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: Space.s14),

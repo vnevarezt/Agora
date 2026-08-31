@@ -62,8 +62,10 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
     });
     InviteCode? code;
     try {
-      code = await cck.createInvite(widget.congregationId,
-          capabilities: _capabilities);
+      code = await cck.createInvite(
+        widget.congregationId,
+        capabilities: _capabilities,
+      );
     } on SharingException catch (e) {
       if (mounted) setState(() => _error = _messageFor(context, e.reason));
     } catch (_) {
@@ -94,7 +96,10 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
           Text(
             tr.invite.capabilitiesDesc,
             style: TextStyle(
-                fontSize: AppText.small, fontWeight: FontWeight.w600, color: t.textMute),
+              fontSize: AppText.small,
+              fontWeight: FontWeight.w600,
+              color: t.textMute,
+            ),
           ),
           const SizedBox(height: Space.s12),
           // Toggling FilterPills rather than a new multi-select primitive:
@@ -106,33 +111,39 @@ class _InviteUserModalState extends ConsumerState<InviteUserModal> {
               FilterPill(
                 label: tr.invite.capAdmin,
                 active: _capabilities.admin,
-                onTap: () => setState(() => _capabilities = MemberCapabilities(
-                      admin: !_capabilities.admin,
-                      people: _capabilities.people,
-                      editTypes: _capabilities.editTypes,
-                    )),
+                onTap: () => setState(
+                  () => _capabilities = MemberCapabilities(
+                    admin: !_capabilities.admin,
+                    people: _capabilities.people,
+                    editTypes: _capabilities.editTypes,
+                  ),
+                ),
               ),
               FilterPill(
                 label: tr.invite.capPeople,
                 active: _capabilities.people,
-                onTap: () => setState(() => _capabilities = MemberCapabilities(
-                      admin: _capabilities.admin,
-                      people: !_capabilities.people,
-                      editTypes: _capabilities.editTypes,
-                    )),
+                onTap: () => setState(
+                  () => _capabilities = MemberCapabilities(
+                    admin: _capabilities.admin,
+                    people: !_capabilities.people,
+                    editTypes: _capabilities.editTypes,
+                  ),
+                ),
               ),
               FilterPill(
                 label: tr.invite.capPrograms,
                 active: _capabilities.editTypes.isNotEmpty,
-                onTap: () => setState(() => _capabilities = MemberCapabilities(
-                      admin: _capabilities.admin,
-                      people: _capabilities.people,
-                      // '*' = every program type. Per-type invitations wait
-                      // for the program type registry (out of scope here).
-                      editTypes: _capabilities.editTypes.isEmpty
-                          ? const [MemberCapabilities.everyType]
-                          : const [],
-                    )),
+                onTap: () => setState(
+                  () => _capabilities = MemberCapabilities(
+                    admin: _capabilities.admin,
+                    people: _capabilities.people,
+                    // '*' = every program type. Per-type invitations wait
+                    // for the program type registry (out of scope here).
+                    editTypes: _capabilities.editTypes.isEmpty
+                        ? const [MemberCapabilities.everyType]
+                        : const [],
+                  ),
+                ),
               ),
             ],
           ),
@@ -180,7 +191,10 @@ class _CapabilityHint extends StatelessWidget {
             child: Text(
               '· $line',
               style: TextStyle(
-                  fontSize: AppText.small, fontWeight: FontWeight.w600, color: t.textDim),
+                fontSize: AppText.small,
+                fontWeight: FontWeight.w600,
+                color: t.textDim,
+              ),
             ),
           ),
       ],
@@ -202,7 +216,7 @@ String _messageFor(BuildContext context, String reason) {
 }
 
 String sharingMessage(BuildContext context, Object error) => switch (error) {
-      SharingException(:final reason) => _messageFor(context, reason),
-      InviteCodeException() => context.t.invite.errorInvalid,
-      _ => context.t.invite.errorUnknown,
-    };
+  SharingException(:final reason) => _messageFor(context, reason),
+  InviteCodeException() => context.t.invite.errorInvalid,
+  _ => context.t.invite.errorUnknown,
+};

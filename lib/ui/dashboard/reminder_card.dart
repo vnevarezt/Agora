@@ -1,6 +1,7 @@
 import '../theme/dimens.dart';
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../../models/reminder.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -18,18 +19,34 @@ class ReminderCard extends StatelessWidget {
     final t = context.tokens;
     final r = recordatorio;
 
-    final (IconData icono, Color iconBg, Color iconFg, Color? iconBorde) =
-        switch (r.type) {
-      ReminderType.alert =>
-        (Icons.warning_amber_rounded, t.alertSoft, t.alert, null),
-      ReminderType.task =>
-        (Icons.schedule, t.accentSoft, t.accentStrong, null),
-      ReminderType.info =>
-        (Icons.auto_awesome_outlined, t.surface2, t.textDim, t.border2),
+    final (
+      IconData icono,
+      Color iconBg,
+      Color iconFg,
+      Color? iconBorde,
+    ) = switch (r.type) {
+      ReminderType.alert => (
+        Icons.warning_amber_rounded,
+        t.alertSoft,
+        t.alert,
+        null,
+      ),
+      ReminderType.task => (Icons.schedule, t.accentSoft, t.accentStrong, null),
+      ReminderType.info => (
+        Icons.auto_awesome_outlined,
+        t.surface2,
+        t.textDim,
+        t.border2,
+      ),
     };
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(Space.s14, Space.s12, Space.s14, Space.s12),
+      padding: const EdgeInsets.fromLTRB(
+        Space.s14,
+        Space.s12,
+        Space.s14,
+        Space.s12,
+      ),
       decoration: BoxDecoration(
         color: t.surface,
         borderRadius: BorderRadius.circular(14),
@@ -55,7 +72,7 @@ class ReminderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  r.title,
+                  r.title(context.t),
                   style: TextStyle(
                     fontSize: AppText.body,
                     fontWeight: FontWeight.w700,
@@ -76,13 +93,12 @@ class ReminderCard extends StatelessWidget {
                 Pressable(
                   onTap: onCta,
                   builder: (context, hovered, _) => Text(
-                    '${r.cta} →',
+                    '${context.t.dashboard.openProject} →',
                     style: TextStyle(
                       fontSize: AppText.small,
                       fontWeight: FontWeight.w800,
                       color: t.accentStrong,
-                      decoration:
-                          hovered ? TextDecoration.underline : null,
+                      decoration: hovered ? TextDecoration.underline : null,
                     ),
                   ),
                 ),

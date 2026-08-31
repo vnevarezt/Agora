@@ -15,7 +15,7 @@ import 'package:agora/models/person.dart';
 import 'package:agora/state/dashboard_provider.dart';
 import 'package:agora/state/db_provider.dart';
 import 'package:agora/state/people_provider.dart';
-import 'package:agora/state/program_content.dart';
+import 'package:agora/state/program_reconciler.dart';
 
 import '../helpers/in_memory_transport.dart';
 
@@ -27,9 +27,9 @@ class Device {
     Map<String, MemberCapabilities>? capabilities,
   }) {
     db = AppDatabase(NativeDatabase.memory());
-    container = ProviderContainer(overrides: [
-      dbProvider.overrideWithValue(db),
-    ]);
+    container = ProviderContainer(
+      overrides: [dbProvider.overrideWithValue(db)],
+    );
     engine = SyncEngine(
       db,
       transport,
@@ -50,8 +50,7 @@ class Device {
   late final ProviderContainer container;
   late final SyncEngine engine;
 
-  Future<int> outboxCount() async =>
-      (await db.select(db.outbox).get()).length;
+  Future<int> outboxCount() async => (await db.select(db.outbox).get()).length;
 
   void dispose() {
     container.dispose();
@@ -75,181 +74,206 @@ void main() {
   });
 
   Person person(String id, String name, String congregationId) => Person(
-        id: id,
-        congregationId: congregationId,
-        firstName: '',
-        lastName: '',
-        displayName: name,
-        gender: Gender.male,
-        privilege: Role.elder,
-        qualifications: const ['read'],
-        originCongregation: '',
-        active: true,
-        notes: 'nota',
-        createdAt: DateTime.utc(2026, 1, 1),
-        updatedAt: DateTime.utc(2026, 1, 1),
+    id: id,
+    congregationId: congregationId,
+    firstName: '',
+    lastName: '',
+    displayName: name,
+    gender: Gender.male,
+    privilege: Role.elder,
+    qualifications: const ['read'],
+    originCongregation: '',
+    active: true,
+    notes: 'nota',
+    createdAt: DateTime.utc(2026, 1, 1),
+    updatedAt: DateTime.utc(2026, 1, 1),
+  );
+
+  test(
+    'full loop: push, pull, echo suppression, LWW conflict, delete',
+    () async {
+      // --- Device A creates real data through the repositories.
+      final cong = await a.container
+          .read(congregationsRepositoryProvider)
+          .create(name: 'Norte', number: '7');
+      await a.container
+          .read(peopleRepositoryProvider)
+          .save(person('p1', 'Ana', cong.id));
+      await a.container
+          .read(projectsRepositoryProvider)
+          .create(
+            name: 'Julio',
+            congregationId: cong.id,
+            weeks: [(start: '', label: 'W1')],
+          );
+      final program =
+          (await a.container.read(projectsRepositoryProvider).watchAll().first)
+              .single
+              .programs
+              .single;
+      await a.container
+          .read(programsRepositoryProvider)
+          .saveSlotNames(
+            programId: program.id,
+            slotKey: 'te0',
+            hall: Hall.main,
+            names: ['Ana'],
+          );
+
+      // --- Without a keyring the outbox stays queued (not syncable yet).
+      expect(await a.engine.pushOnce(), 0);
+      expect(await a.outboxCount(), greaterThan(0));
+
+      // A pull with no keyring says so, instead of passing for an empty page.
+      // The two are identical on the wire — zero docs — and reading the second
+      // as the first is how a freshly signed-in device reported a clean,
+      // successful restore having fetched nothing at all, for ever.
+      final blind = await a.engine.pullOnce(cong.id);
+      expect(blind.keyringMissing, isTrue);
+      expect(blind.fetched, 0);
+
+      // --- Enable sync for the congregation and push.
+      keyrings[cong.id] = CongregationKeyring({
+        1: CongregationKeyring.newKey(),
+      });
+      final pushed = await a.engine.pushOnce();
+      expect(
+        pushed,
+        5,
+      ); // congregation + person + project + program + assignment
+      expect(await a.outboxCount(), 0);
+
+      // The server never sees content: only base64 blobs + metadata.
+      for (final doc in transport.docs[cong.id]!.values) {
+        expect(doc.blob.contains('Ana'), false);
+        expect(doc.blob.contains('Norte'), false);
+      }
+      // programTypeId IS clear metadata (rules gate edit:<type> with it), but
+      // only on program/assignment docs.
+      for (final doc in transport.docs[cong.id]!.values) {
+        final typed = doc.entity == 'program' || doc.entity == 'assignment';
+        expect(doc.programTypeId, typed ? 'mwb-s140' : isNull);
+      }
+      // The push announced its activity scopes in the heartbeat: the project
+      // (for project/program/assignment), the people directory and the
+      // congregation row — with this device as the source.
+      final heartbeat = transport.activity[cong.id]!;
+      final projectId =
+          (await a.container.read(projectsRepositoryProvider).watchAll().first)
+              .single
+              .project
+              .id;
+      expect((heartbeat['scopes'] as Map).keys.toSet(), {
+        'congregation',
+        'people',
+        projectId,
+      });
+      expect(heartbeat['srcDevice'], 'devA');
+
+      // --- Device B pulls everything.
+      expect((await b.engine.pullOnce(cong.id)).applied, 5);
+      final bPerson =
+          (await b.container.read(peopleRepositoryProvider).all()).single;
+      expect(bPerson.displayName, 'Ana');
+      expect(bPerson.qualifications, ['read']);
+      final bData =
+          (await b.container.read(projectsRepositoryProvider).watchAll().first)
+              .single;
+      expect(bData.project.name, 'Julio');
+      expect(bData.programs.single.date, 'W1');
+      final bAssignments = await b.container
+          .read(programsRepositoryProvider)
+          .assignmentsByPrograms([bData.programs.single.id]);
+      expect(bAssignments.single.displayName, 'Ana');
+
+      // Pulled rows must NOT re-enqueue (no echo storms).
+      expect(await b.outboxCount(), 0);
+
+      // --- Echo suppression: A pulls its own writes back, applies nothing.
+      expect((await a.engine.pullOnce(cong.id)).applied, 0);
+
+      // --- LWW conflict: B renames first, A renames later → A wins.
+      await b.container
+          .read(peopleRepositoryProvider)
+          .save(bPerson.copyWith(displayName: 'Eva'));
+      await b.engine.pushOnce();
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      await a.container
+          .read(peopleRepositoryProvider)
+          .save(person('p1', 'Zoe', cong.id));
+      await a.engine.pushOnce();
+
+      await b.engine.pullOnce(cong.id);
+      expect(
+        (await b.container.read(peopleRepositoryProvider).all())
+            .single
+            .displayName,
+        'Zoe',
+      );
+      // A pulls B's older doc state: its newer local row must win.
+      await a.engine.pullOnce(cong.id);
+      expect(
+        (await a.container.read(peopleRepositoryProvider).all())
+            .single
+            .displayName,
+        'Zoe',
       );
 
-  test('full loop: push, pull, echo suppression, LWW conflict, delete',
-      () async {
-    // --- Device A creates real data through the repositories.
-    final cong = await a.container
-        .read(congregationsRepositoryProvider)
-        .create(name: 'Norte', number: '7');
-    await a.container
-        .read(peopleRepositoryProvider)
-        .save(person('p1', 'Ana', cong.id));
-    await a.container
-        .read(projectsRepositoryProvider)
-        .create(name: 'Julio', congregationId: cong.id, weeks: ['W1']);
-    final program = (await a.container
-            .read(projectsRepositoryProvider)
-            .watchAll()
-            .first)
-        .single
-        .programs
-        .single;
-    await a.container.read(programsRepositoryProvider).saveSlotNames(
-        programId: program.id,
-        slotKey: 'te0',
-        hall: Hall.main,
-        names: ['Ana']);
+      // --- Tombstones replicate.
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      await a.container.read(peopleRepositoryProvider).delete('p1');
+      await a.engine.pushOnce();
+      await b.engine.pullOnce(cong.id);
+      expect(await b.container.read(peopleRepositoryProvider).all(), isEmpty);
 
-    // --- Without a keyring the outbox stays queued (not syncable yet).
-    expect(await a.engine.pushOnce(), 0);
-    expect(await a.outboxCount(), greaterThan(0));
+      // --- Cursors: a fresh pull with nothing new fetches nothing.
+      final noop = await b.engine.pullOnce(cong.id);
+      expect(noop.fetched, 0);
+      expect(noop.applied, 0);
+    },
+  );
 
-    // --- Enable sync for the congregation and push.
-    keyrings[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
-    final pushed = await a.engine.pushOnce();
-    expect(pushed, 5); // congregation + person + project + program + assignment
-    expect(await a.outboxCount(), 0);
+  test(
+    'an undecryptable doc is skipped without wedging the batch or cursor',
+    () async {
+      final cong = await a.container
+          .read(congregationsRepositoryProvider)
+          .create(name: 'Este', number: '3');
+      keyrings[cong.id] = CongregationKeyring({
+        1: CongregationKeyring.newKey(),
+      });
+      await a.container
+          .read(peopleRepositoryProvider)
+          .save(person('p1', 'Ana', cong.id));
+      await a.engine.pushOnce();
 
-    // The server never sees content: only base64 blobs + metadata.
-    for (final doc in transport.docs[cong.id]!.values) {
-      expect(doc.blob.contains('Ana'), false);
-      expect(doc.blob.contains('Norte'), false);
-    }
-    // programTypeId IS clear metadata (rules gate edit:<type> with it), but
-    // only on program/assignment docs.
-    for (final doc in transport.docs[cong.id]!.values) {
-      final typed = doc.entity == 'program' || doc.entity == 'assignment';
-      expect(doc.programTypeId, typed ? 'mwb-s140' : isNull);
-    }
-    // The push announced its activity scopes in the heartbeat: the project
-    // (for project/program/assignment), the people directory and the
-    // congregation row — with this device as the source.
-    final heartbeat = transport.activity[cong.id]!;
-    final projectId = (await a.container
-            .read(projectsRepositoryProvider)
-            .watchAll()
-            .first)
-        .single
-        .project
-        .id;
-    expect((heartbeat['scopes'] as Map).keys.toSet(),
-        {'congregation', 'people', projectId});
-    expect(heartbeat['srcDevice'], 'devA');
+      // Someone with write access injects a blob nobody can open (the cheap
+      // denial of service this guards against).
+      final poison = transport.docs[cong.id]!.values.first;
+      transport.docs[cong.id]!['poison'] = ItemDoc(
+        entityId: 'poison',
+        entity: 'person',
+        hlc: 'zzzzzzzzzzzzzzzzzzz-zzzz-evil',
+        srcDevice: 'evil',
+        keyVersion: 1,
+        blob: 'bm90LWEtcmVhbC1ibG9i',
+        serverTs: poison.serverTs,
+      );
 
-    // --- Device B pulls everything.
-    expect((await b.engine.pullOnce(cong.id)).applied, 5);
-    final bPerson =
-        (await b.container.read(peopleRepositoryProvider).all()).single;
-    expect(bPerson.displayName, 'Ana');
-    expect(bPerson.qualifications, ['read']);
-    final bData = (await b.container
-            .read(projectsRepositoryProvider)
-            .watchAll()
-            .first)
-        .single;
-    expect(bData.project.name, 'Julio');
-    expect(bData.programs.single.date, 'W1');
-    final bAssignments = await b.container
-        .read(programsRepositoryProvider)
-        .assignmentsByPrograms([bData.programs.single.id]);
-    expect(bAssignments.single.displayName, 'Ana');
-
-    // Pulled rows must NOT re-enqueue (no echo storms).
-    expect(await b.outboxCount(), 0);
-
-    // --- Echo suppression: A pulls its own writes back, applies nothing.
-    expect((await a.engine.pullOnce(cong.id)).applied, 0);
-
-    // --- LWW conflict: B renames first, A renames later → A wins.
-    await b.container
-        .read(peopleRepositoryProvider)
-        .save(bPerson.copyWith(displayName: 'Eva'));
-    await b.engine.pushOnce();
-    await Future<void>.delayed(const Duration(milliseconds: 5));
-    await a.container
-        .read(peopleRepositoryProvider)
-        .save(person('p1', 'Zoe', cong.id));
-    await a.engine.pushOnce();
-
-    await b.engine.pullOnce(cong.id);
-    expect(
-      (await b.container.read(peopleRepositoryProvider).all())
-          .single
-          .displayName,
-      'Zoe',
-    );
-    // A pulls B's older doc state: its newer local row must win.
-    await a.engine.pullOnce(cong.id);
-    expect(
-      (await a.container.read(peopleRepositoryProvider).all())
-          .single
-          .displayName,
-      'Zoe',
-    );
-
-    // --- Tombstones replicate.
-    await Future<void>.delayed(const Duration(milliseconds: 5));
-    await a.container.read(peopleRepositoryProvider).delete('p1');
-    await a.engine.pushOnce();
-    await b.engine.pullOnce(cong.id);
-    expect(await b.container.read(peopleRepositoryProvider).all(), isEmpty);
-
-    // --- Cursors: a fresh pull with nothing new fetches nothing.
-    final noop = await b.engine.pullOnce(cong.id);
-    expect(noop.fetched, 0);
-    expect(noop.applied, 0);
-  });
-
-  test('an undecryptable doc is skipped without wedging the batch or cursor',
-      () async {
-    final cong = await a.container
-        .read(congregationsRepositoryProvider)
-        .create(name: 'Este', number: '3');
-    keyrings[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
-    await a.container
-        .read(peopleRepositoryProvider)
-        .save(person('p1', 'Ana', cong.id));
-    await a.engine.pushOnce();
-
-    // Someone with write access injects a blob nobody can open (the cheap
-    // denial of service this guards against).
-    final poison = transport.docs[cong.id]!.values.first;
-    transport.docs[cong.id]!['poison'] = ItemDoc(
-      entityId: 'poison',
-      entity: 'person',
-      hlc: 'zzzzzzzzzzzzzzzzzzz-zzzz-evil',
-      srcDevice: 'evil',
-      keyVersion: 1,
-      blob: 'bm90LWEtcmVhbC1ibG9i',
-      serverTs: poison.serverTs,
-    );
-
-    final page = await b.engine.pullOnce(cong.id);
-    expect(page.undecryptable, 1);
-    // The good docs still landed...
-    expect(page.applied, greaterThan(0));
-    expect(
-      (await b.container.read(peopleRepositoryProvider).all()).single.displayName,
-      'Ana',
-    );
-    // ...and the cursor moved on, so the poison can't replay forever.
-    expect((await b.engine.pullOnce(cong.id)).fetched, 0);
-  });
+      final page = await b.engine.pullOnce(cong.id);
+      expect(page.undecryptable, 1);
+      // The good docs still landed...
+      expect(page.applied, greaterThan(0));
+      expect(
+        (await b.container.read(peopleRepositoryProvider).all())
+            .single
+            .displayName,
+        'Ana',
+      );
+      // ...and the cursor moved on, so the poison can't replay forever.
+      expect((await b.engine.pullOnce(cong.id)).fetched, 0);
+    },
+  );
 
   // ---- rotation: an unknown key version must never be skipped past --------
   //
@@ -261,8 +285,10 @@ void main() {
   /// pushed by a device that holds both versions. Returns the cid, the full
   /// keyring, and a fresh device that only holds v1.
   Future<(String, CongregationKeyring, Device)> rotatedCongregation() async {
-    final full = CongregationKeyring(
-        {1: CongregationKeyring.newKey(), 2: CongregationKeyring.newKey()});
+    final full = CongregationKeyring({
+      1: CongregationKeyring.newKey(),
+      2: CongregationKeyring.newKey(),
+    });
 
     final writerKeys = <String, CongregationKeyring>{};
     final writer = Device('devW', transport, writerKeys);
@@ -285,16 +311,18 @@ void main() {
         .save(person('new', 'Bea', cong.id));
     await writer.engine.pushOnce();
 
-    final laggingKeys = {cong.id: CongregationKeyring({1: full.keys[1]!})};
+    final laggingKeys = {
+      cong.id: CongregationKeyring({1: full.keys[1]!}),
+    };
     final lagging = Device('devL', transport, laggingKeys);
     addTearDown(lagging.dispose);
     return (cong.id, full, lagging);
   }
 
   Future<int?> missingKeyVersionOf(Device d, String cid) async =>
-      (await (d.db.select(d.db.syncState)
-                ..where((t) => t.congregationId.equals(cid)))
-              .getSingleOrNull())
+      (await (d.db.select(
+            d.db.syncState,
+          )..where((t) => t.congregationId.equals(cid))).getSingleOrNull())
           ?.missingKeyVersion;
 
   test('a doc with an unknown key version holds the cursor', () async {
@@ -333,7 +361,8 @@ void main() {
     expect(recovered.cursorHeld, isFalse);
     expect(
       {
-        for (final p in await lagging.container.read(peopleRepositoryProvider).all())
+        for (final p
+            in await lagging.container.read(peopleRepositoryProvider).all())
           p.displayName,
       },
       {'Ana', 'Bea'},
@@ -341,49 +370,56 @@ void main() {
     expect((await lagging.engine.pullOnce(cid)).fetched, 0);
   });
 
-  test('a permanently unknown version advances the cursor but is remembered',
-      () async {
-    final (cid, _, lagging) = await rotatedCongregation();
+  test(
+    'a permanently unknown version advances the cursor but is remembered',
+    () async {
+      final (cid, _, lagging) = await rotatedCongregation();
 
-    // The controller's escape hatch after a refresh didn't help. Without it,
-    // a hostile member writing keyVersion: 9999 would freeze the whole
-    // congregation — the denial of service we already closed once.
-    final page =
-        await lagging.engine.pullOnce(cid, acceptUnknownKeyVersions: true);
-    expect(page.cursorHeld, isFalse);
-    expect(page.unknownKeyVersions, {2});
-    expect(await missingKeyVersionOf(lagging, cid), 2);
-    // The cursor moved on, so sync is not wedged.
-    expect((await lagging.engine.pullOnce(cid)).fetched, 0);
-  });
+      // The controller's escape hatch after a refresh didn't help. Without it,
+      // a hostile member writing keyVersion: 9999 would freeze the whole
+      // congregation — the denial of service we already closed once.
+      final page = await lagging.engine.pullOnce(
+        cid,
+        acceptUnknownKeyVersions: true,
+      );
+      expect(page.cursorHeld, isFalse);
+      expect(page.unknownKeyVersions, {2});
+      expect(await missingKeyVersionOf(lagging, cid), 2);
+      // The cursor moved on, so sync is not wedged.
+      expect((await lagging.engine.pullOnce(cid)).fetched, 0);
+    },
+  );
 
-  test('recovering a remembered version rewinds and re-reads what was skipped',
-      () async {
-    final (cid, full, lagging) = await rotatedCongregation();
-    await lagging.engine.pullOnce(cid, acceptUnknownKeyVersions: true);
-    expect(
-      (await lagging.container.read(peopleRepositoryProvider).all()).length,
-      1,
-      reason: 'Bea was skipped',
-    );
+  test(
+    'recovering a remembered version rewinds and re-reads what was skipped',
+    () async {
+      final (cid, full, lagging) = await rotatedCongregation();
+      await lagging.engine.pullOnce(cid, acceptUnknownKeyVersions: true);
+      expect(
+        (await lagging.container.read(peopleRepositoryProvider).all()).length,
+        1,
+        reason: 'Bea was skipped',
+      );
 
-    // The key finally reaches this device (a reconciliation, or an admin
-    // repairing the keyring). Rewinding is the ONLY way to get those docs.
-    lagging.keyrings[cid] = full;
-    final page = await lagging.engine.pullOnce(cid);
+      // The key finally reaches this device (a reconciliation, or an admin
+      // repairing the keyring). Rewinding is the ONLY way to get those docs.
+      lagging.keyrings[cid] = full;
+      final page = await lagging.engine.pullOnce(cid);
 
-    expect(page.applied, 1);
-    expect(await missingKeyVersionOf(lagging, cid), isNull);
-    expect(
-      {
-        for (final p in await lagging.container.read(peopleRepositoryProvider).all())
-          p.displayName,
-      },
-      {'Ana', 'Bea'},
-    );
-    // And it settles: no endless re-pull loop.
-    expect((await lagging.engine.pullOnce(cid)).fetched, 0);
-  });
+      expect(page.applied, 1);
+      expect(await missingKeyVersionOf(lagging, cid), isNull);
+      expect(
+        {
+          for (final p
+              in await lagging.container.read(peopleRepositoryProvider).all())
+            p.displayName,
+        },
+        {'Ana', 'Bea'},
+      );
+      // And it settles: no endless re-pull loop.
+      expect((await lagging.engine.pullOnce(cid)).fetched, 0);
+    },
+  );
 
   // ---- push: capabilities the server would bounce ------------------------
 
@@ -412,33 +448,35 @@ void main() {
     expect(transport.docs[cong.id]!.keys, ['p1']);
   });
 
-  test('a revoked member (read-only) drops its outbox instead of rebounding',
-      () async {
-    final caps = <String, MemberCapabilities>{};
-    final keys = <String, CongregationKeyring>{};
-    final revoked = Device('devRev', transport, keys, capabilities: caps);
-    addTearDown(revoked.dispose);
+  test(
+    'a revoked member (read-only) drops its outbox instead of rebounding',
+    () async {
+      final caps = <String, MemberCapabilities>{};
+      final keys = <String, CongregationKeyring>{};
+      final revoked = Device('devRev', transport, keys, capabilities: caps);
+      addTearDown(revoked.dispose);
 
-    final cong = await revoked.container
-        .read(congregationsRepositoryProvider)
-        .create(name: 'Oriente', number: '7');
-    keys[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
-    await revoked.container
-        .read(peopleRepositoryProvider)
-        .save(person('p1', 'Ana', cong.id));
+      final cong = await revoked.container
+          .read(congregationsRepositoryProvider)
+          .create(name: 'Oriente', number: '7');
+      keys[cong.id] = CongregationKeyring({1: CongregationKeyring.newKey()});
+      await revoked.container
+          .read(peopleRepositoryProvider)
+          .save(person('p1', 'Ana', cong.id));
 
-    // Revoked = shared-before-but-not-a-member-now: pushCapabilitiesProvider
-    // hands the engine read-only rights, so every write is forbidden. Without
-    // this the outbox would rebound against the rules forever (the bug).
-    caps[cong.id] = const MemberCapabilities();
+      // Revoked = shared-before-but-not-a-member-now: pushCapabilitiesProvider
+      // hands the engine read-only rights, so every write is forbidden. Without
+      // this the outbox would rebound against the rules forever (the bug).
+      caps[cong.id] = const MemberCapabilities();
 
-    expect(await revoked.engine.pushOnce(), 0);
-    expect(await revoked.outboxCount(), 0, reason: 'dropped, not rebounding');
-    expect(transport.docs[cong.id], anyOf(isNull, isEmpty));
+      expect(await revoked.engine.pushOnce(), 0);
+      expect(await revoked.outboxCount(), 0, reason: 'dropped, not rebounding');
+      expect(transport.docs[cong.id], anyOf(isNull, isEmpty));
 
-    // A later push has nothing left to retry.
-    expect(await revoked.engine.pushOnce(), 0);
-  });
+      // A later push has nothing left to retry.
+      expect(await revoked.engine.pushOnce(), 0);
+    },
+  );
 
   test('pushOnce does not filter while capabilities are unknown', () async {
     // Null capabilities mean "the membership stream has not loaded", NOT

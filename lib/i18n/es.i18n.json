@@ -135,6 +135,7 @@
     "signedOut": "Inicia sesión en la nube para activar la sincronización.",
     "unknownError": "No se pudo completar. Inténtalo de nuevo.",
     "ready": "Sincronización activa",
+    "syncNow": "Sincronizar ahora",
     "statusSyncing": "Sincronizando…",
     "statusOffline": "Sin conexión",
     "statusError": "Error de sincronización",
@@ -145,7 +146,8 @@
     "errorUnknown": "Ocurrió un error al sincronizar.",
     "restoring": "Recuperando tus datos…",
     "restoringProgress": "{done} de {total} congregaciones",
-    "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar."
+    "restoreOffline": "Sin conexión. Tus datos se recuperarán al reconectar.",
+    "restoreFailed": "No pudimos leer tus congregaciones. Revisa tu conexión o vuelve a iniciar sesión."
   },
   "account": {
     "title": "Cuenta en la nube",
@@ -205,7 +207,8 @@
     "removeAssignment": "Quitar asignación",
     "allFeminine": "Todas",
     "allMasculine": "Todos",
-    "assigned": "asignados"
+    "assigned": "asignados",
+    "loading": "Cargando"
   },
   "sync": {
     "updating": "Actualizando catálogos",
@@ -213,7 +216,8 @@
     "upToDate": "Catálogos al día",
     "upToDateTip": "Tienes los cuadernos al día.",
     "missing": "Falta un cuaderno",
-    "missingTip": "El próximo cuaderno aún no está disponible; se reintentará."
+    "missingTip": "El próximo cuaderno aún no está disponible; se reintentará.",
+    "missingImportTip": "Falta un cuaderno y el navegador no puede descargarlo solo. Pulsa para cargarlo."
   },
   "dashboard": {
     "greetingMorning": "Buenos días",
@@ -221,6 +225,9 @@
     "greetingEvening": "Buenas noches",
     "greetingNamed": "{greeting}, {name}",
     "subtitle": "Tus proyectos y pendientes",
+    "noCongregationTitle": "Todavía no tienes una congregación",
+    "noCongregationMessage": "Agora organiza los programas, los participantes y los proyectos por congregación. Crea la tuya para empezar.",
+    "noCongregationCta": "Crear congregación",
     "youHave": "Tienes",
     "draftsOne": "1 proyecto en curso",
     "draftsMany": "{n} proyectos en curso",
@@ -357,6 +364,11 @@
     "import": "Importar",
     "lastBackup": "Última copia",
     "noBackupsYet": "Sin copias todavía",
+    "catalogTitle": "Cuadernos de reunión",
+    "catalogDesc": "Se descargan solos. Actualiza a mano si jw.org publicó una corrección.",
+    "catalogRefresh": "Actualizar",
+    "catalogRefreshed": "Catálogo actualizado ({n} cuadernos).",
+    "catalogRefreshFailed": "No se ha podido actualizar. Se conserva lo que ya tenías.",
     "backupPasswordTitle": "Contraseña de la copia",
     "backupPasswordDesc": "Protege el archivo: sin ella no se puede restaurar.",
     "backupPasswordRepeat": "Repite la contraseña",
@@ -370,7 +382,8 @@
     "session": "Sesión",
     "sessionDesc": "Estás usando la app en modo local en este dispositivo.",
     "localMode": "Modo local",
-    "localModeDesc": "Los datos viven solo en este dispositivo"
+    "localModeDesc": "Los datos viven solo en este dispositivo",
+    "catalogDescWeb": "El navegador no puede descargarlos solo. Cárgalos desde jw.org en dos pasos."
   },
   "options": {
     "timeFormat24": "24 horas (18:00)",
@@ -412,6 +425,9 @@
     "number": "Número",
     "defaultName": "Mi congregación",
     "meetingLanguage": "Idioma de la reunión",
+    "workbookReady": "Cuaderno disponible en {language}.",
+    "workbookDownloading": "Descargando el cuaderno en {language}…",
+    "workbookUnavailable": "Aún no hay cuaderno en {language}. Se reintentará cuando haya conexión.",
     "scheduleTitle": "Horarios de reunión",
     "scheduleDesc": "Las horas de cada parte se calculan a partir de aquí.",
     "weekdayDay": "Entre semana · día",
@@ -554,6 +570,23 @@
     "emptyTitle": "El cuaderno se descarga solo.",
     "emptyMessage": "Normalmente está listo automáticamente. Si aún no aparece, búscalo manualmente.",
     "searchNotebook": "Buscar cuaderno {issue}",
+    "importNotebook": "Importar cuaderno (.epub)",
+    "importWebMessage": "En el navegador el cuaderno no se puede descargar solo: jw.org sirve el archivo desde un servidor que no lo permite. Descárgalo de jw.org y ábrelo aquí.",
+    "importDone": "Cuaderno {issue} importado ({n} semanas).",
+    "importNotWorkbook": "Ese archivo no es un cuaderno Vida y Ministerio. Busca el .epub de jw.org.",
+    "importTitle": "Cargar cuaderno",
+    "importIntro": "El navegador no puede descargarlo solo. Son dos pasos:",
+    "importStepDownload": "Descarga el cuaderno de jw.org",
+    "importStepOpen": "Ábrelo aquí",
+    "importPick": "Elegir archivo .epub",
+    "importDownload": "Descargar",
+    "importLoaded": "Ya está cargado",
+    "importMissing": "Todavía no está",
+    "importUnavailable": "jw.org aún no lo publica",
+    "importStepOpenHint": "Elige el .epub que acabas de descargar.",
+    "importDropHere": "Suelta aquí el .epub que descargaste",
+    "importDropOr": "o elígelo con el botón de abajo",
+    "importCta": "Cargar cuaderno",
     "assignee": "Asignar…",
     "duration": "{n} min",
     "songTag": "Cántico",
@@ -588,6 +621,7 @@
     "rolePrayer": "Oración:",
     "roleSpeaker": "Orador:",
     "title": "Programa para la reunión de entre semana",
+    "weeklyReading": "LECTURA SEMANAL DE LA BIBLIA",
     "chairman": "Presidente: ",
     "mainHall": "Auditorio principal",
     "auxRoom": "Sala Auxiliar",

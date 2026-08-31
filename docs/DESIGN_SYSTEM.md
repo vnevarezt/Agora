@@ -4,11 +4,20 @@ Reference for Agora's visual and interaction layer. Status: **descriptive, not
 aspirational** — everything below is what `lib/ui/` does today, read out of the
 code. Where the system has a gap, §13 says so instead of inventing a rule.
 
+**Every value below is checked against the source by
+`test/ui/design_doc_test.dart`** — the colours, all three scales, the durations,
+the curves and the breakpoints. If this file and `lib/ui/` disagree on a number,
+the build says so. The prose is not checked and never will be, so a rationale
+here can still go stale where a value cannot; when the two disagree, the code is
+right.
+
 The colour, motion, text-scaling and keyboard rules are enforced by tests
 (§12), so this document and the code cannot drift apart silently.
 
 Companion documents: `PRODUCT.md` (who this is for and what it must never
-claim), `docs/DATA_ARCHITECTURE.md` (the data layer this UI reads).
+claim), `docs/UX_PATTERNS.md` (how the same interface *behaves* — navigation,
+states, errors, flows), `docs/ACCESSIBILITY.md` (the standard all three are
+held to), `docs/DATA_ARCHITECTURE.md` (the data layer this UI reads).
 
 **Provenance.** The token names, the `Dimens` constants and most component
 doc-comments refer to a **CSS/HTML mock** (`.sidebar`, `.portada--a`, `.projbar`,
@@ -51,11 +60,21 @@ color: t.surface, border: Border.all(color: t.border)
 ```
 
 **A literal `Color(0x…)` in `lib/ui/` outside `tokens.dart` and `dimens.dart` is
-drift.** The exceptions are enumerated: the shadow/scrim constants in
-`Elevation`, the S-140 section identity colors in `kSectionColors`, the four
-Google brand colors in `auth/widgets/google_button.dart` (official brand assets
-must not be re-tinted), and the PDF palette in `lib/pdf/pdf_theme.dart` (which
-is print, not screen — §11).
+drift.** The exceptions are enumerated:
+
+- the shadow/scrim constants in `Elevation`;
+- the S-140 section identity colors in `kSectionColors` (§3.4);
+- the brand inks in `widgets/agora_mark.dart` (§3.5) — the mark is one drawing
+  on every palette, so it does not take theme tokens;
+- the four Google brand colors in `auth/widgets/google_button.dart` — official
+  brand assets must not be re-tinted;
+- `_paper` in `preview/pdf_preview_view.dart`, the white of the sheet: the
+  preview shows paper, and paper does not follow the app theme;
+- the PDF palette in `lib/pdf/pdf_theme.dart`, which is print, not screen (§11).
+
+`tokens.dart` is also the source for the marketing site: `tool/gen_css_tokens.py`
+generates `site/tokens.css` from it. Edit the palette, re-run the script, and the
+landing page follows the product instead of drifting a shade away from it.
 
 Only one palette ships: **`pizarra`**. `AppPalette` exists so more can be added
 (the code names Granate, Salvia and Biblioteca as candidates); none are built.
@@ -66,15 +85,25 @@ Only one palette ships: **`pizarra`**. `AppPalette` exists so more can be added
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `bg` | `#F8FAFD` | `#0B0F14` | app canvas / scaffold |
-| `surface` | `#FFFFFF` | `#13181E` | cards, bars, modals |
-| `surface2` | `#F4F7FB` | `#191F26` | inputs, insets, table headers |
-| `border` | `#DEE2E7` | `#282E36` | decorative hairline: cards, dividers |
-| `border2` | `#ECEFF2` | `#21262C` | quieter internal dividers |
-| `borderControl` | `#878F9B` | `#626D7D` | outline of an interactive control |
+| `bg` | `#F8FAFD` | `#12161B` | app canvas / scaffold |
+| `surface` | `#FFFFFF` | `#1A1F26` | cards, bars, modals |
+| `surface2` | `#F4F7FB` | `#21272F` | inputs, insets, table headers |
+| `border` | `#DEE2E7` | `#2F3742` | decorative hairline: cards, dividers |
+| `border2` | `#ECEFF2` | `#272E37` | quieter internal dividers |
+| `borderControl` | `#878F9B` | `#6B7686` | outline of an interactive control |
 | `text` | `#1F242D` | `#ECEFF2` | primary ink |
 | `textDim` | `#5D646F` | `#A6ABB2` | secondary ink, default icon color |
-| `textMute` | `#6B7079` | `#868B92` | hints, placeholders, uppercase labels |
+| `textMute` | `#6B7079` | `#979CA4` | hints, placeholders, uppercase labels |
+
+**The dark ground is deliberately not near-black.** It used to be `#0B0F14`,
+darker than the `#121212` Material recommends and dark enough that body text
+landed at 16.65:1 — far past what accessibility asks for and into the range that
+tires the eye at night. It read as the lights being off rather than as a theme
+anyone designed. The whole ground scale moved up together, and two ink tokens
+had to move with it: `textMute` over `surface2` would have fallen to 4.39, and
+`borderControl` to 2.87, under the 3.0 WCAG 1.4.11 asks of a control outline.
+The values were solved for rather than eyeballed; the tightest pair in the dark
+theme now sits at 5.45 (`textMute` on `surface2`) and text on `bg` at 15.74.
 
 `border` and `borderControl` are split on purpose. WCAG 1.4.11 asks 3:1 of
 anything that identifies a control, and a decorative divider carries no such
@@ -86,33 +115,57 @@ flat, layered look §1.4 depends on. Inputs and ghost buttons outline with
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `accent` | `#41629F` | `#6F97E2` | primary fill, focus ring, switch on |
-| `accentStrong` | `#2E5091` | `#5A84D4` | pressed, links, emphasis on tint |
-| `accentInk` | `#F8FCFF` | `#060D1A` | ink ON accent |
-| `accentSoft` | `#E7F1FF` | `#21344C` | selected/tint background |
-| `accentTint` | `#F2F7FF` | `#192431` | the faintest wash |
-| `accentOnSoft` | `#2E5091` | `#7FA3E8` | ink ON `accentSoft`/`accentTint` |
+| `accent` | `#405CB5` | `#7292F1` | primary fill, focus ring, switch on |
+| `accentStrong` | `#2F48A7` | `#5E7FE3` | pressed, links, emphasis on tint |
+| `accentInk` | `#FAFBFF` | `#080C1A` | ink ON accent |
+| `accentSoft` | `#EAF0FF` | `#28324D` | selected/tint background |
+| `accentTint` | `#F3F7FF` | `#1D2331` | the faintest wash |
+| `accentOnSoft` | `#2F48A7` | `#7C9EFF` | ink ON `accentSoft`/`accentTint` |
 
-A cool slate blue, deliberately unsaturated: it has to sit next to the S-140
-band colors (§3.4) without competing with them.
+**The ramp sits on the mark's hue.** The app was designed before the logo
+existed, so the accent was picked on its own — an unsaturated slate blue on
+oklch hue 262, against the mark's 268. Six degrees is not a difference anyone
+can name, which is exactly the problem: the logo and the button beside it read
+as two blues that almost match, and almost is worse than either matching or
+contrasting. The accent moved onto the mark. **The code is the current value;
+the older, greyer blues are history, not a target to restore.**
+
+Only the hue moved. Lightness is what drives contrast, so holding it is why
+`contrast_test` needed no re-tuning. Chroma rose on `accent`, `accentStrong`
+and `accentOnSoft` alone — the soft, tint and ink steps are near-white or
+near-black, where added chroma clips out of sRGB rather than reading as color.
+The mark keeps more chroma than any of these on purpose: matching it would put
+every button in competition with the logo. The family is shared, the intensity
+is not. The ramp still has to sit next to the S-140 band colors (§3.4) without
+competing with them, which is what keeps it off a saturated blue.
 
 `accentOnSoft` exists because the theme is not symmetric. In light mode it is
-`accentStrong`; in dark, `accentStrong` on `accentSoft` lands at 3.42:1, which
-had put **both** states of the bottom navigation below AA at once. A separate
-ink token fixes every tinted surface — nav, privilege badge, draft badge, add
-chip — without restyling the tint itself.
+`accentStrong` (7.06:1 on `accentSoft`); in dark, `accentStrong` on `accentSoft`
+lands at 3.40:1, which had put **both** states of the bottom navigation below AA
+at once. A separate ink token fixes every tinted surface — nav, privilege badge,
+draft badge, add chip — without restyling the tint itself, and reaches 4.95:1 on
+`accentSoft` and 6.13:1 on `accentTint`.
 
 ### 3.3 Status, and what is *not* status
 
 Three families, each a soft tint used as a background plus the ink that sits on
 it. `*Strong` is the solid version for marks that sit directly on `bg`/`surface`
-with no tint behind them (dots, standalone icons).
+with no tint behind them (dots, standalone icons); it holds the same value in
+both themes, because a mark with no tint behind it has the same job either way.
 
-| Family | Ink (light / dark) | Soft (light / dark) | Strong | Meaning |
-|---|---|---|---|---|
-| `success` | `#2E6A3E` / `#A9D8B8` | `#DCF0E0` / `#1E3A2A` | `#4FA06A` | complete, up to date |
-| `warning` | `#7A6512` / `#D9C27A` | `#F3ECD2` / `#3A3115` | `#B9890F` | pending, attention |
-| `alert` | `#A94F2B` / `#E8A38C` | `#FBE7DF` / `#40231C` | — | overdue, nothing assigned |
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `success` | `#2E6A3E` | `#A9D8B8` | ink: complete, up to date |
+| `successSoft` | `#DCF0E0` | `#1E3A2A` | the tint that ink sits on |
+| `successStrong` | `#4FA06A` | `#4FA06A` | solid mark, no tint behind it |
+| `warning` | `#7A6512` | `#D9C27A` | ink: pending, attention |
+| `warningSoft` | `#F3ECD2` | `#3A3115` | the tint that ink sits on |
+| `warningStrong` | `#B9890F` | `#B9890F` | solid mark, no tint behind it |
+| `alert` | `#A94F2B` | `#E8A38C` | ink: overdue, nothing assigned |
+| `alertSoft` | `#FBE7DF` | `#40231C` | the tint that ink sits on |
+
+There is no `alertStrong`: nothing in the app marks "overdue" with a bare dot,
+and a token with no call site is a claim the system cannot keep.
 
 **`colorScheme.error` is a separate axis** (`#B3261E` light / `#F2B8B5` dark).
 Error means validation failure and destructive action; the three families above
@@ -133,6 +186,32 @@ The screen values are the mock's; the PDF values are taken exactly from the
 official format. They are close but **not identical, on purpose** — screen and
 paper are different substrates. Opening (`apertura`) has no color.
 
+### 3.5 Brand inks
+
+The mark is one drawing on every palette, so it does not take theme tokens.
+`widgets/agora_mark.dart` holds the inks, hand-copied from
+`tool/gen_brand_assets.py` — the generator that renders everything under
+`assets/brand/` and the source of truth for the geometry.
+`test/ui/agora_mark_test.dart` fails if the two disagree.
+
+| Role | On light | On dark |
+|---|---|---|
+| Back plane | `#14208F` | `#3350E0` |
+| Front plane | `#4AA8EE` | `#4AA8EE` |
+| Wordmark | `#14208F` | `#ECEFF2` |
+
+Only the back plane changes: `#14208F` drowns below `#1A1F26`. The wordmark on
+light is brand navy rather than the `text` token, because matching it is what
+makes the in-app lockup and the one in the stores read as the same object.
+
+Two planes cut by one diagonal, separated by air rather than by an outline —
+which is why there is no separate outline version. Lockup proportions for a
+mark of height H: gap `0.30 H`, font size `0.63 H` in Manrope ExtraBold,
+tracking `-0.035em`. Build it live (`AgoraLockup`) rather than shipping the PNG;
+the PNGs exist for READMEs, stores and anything outside the app. Full asset
+rules, including the app-icon copy steps for all six platforms, are in
+`assets/brand/README.md`.
+
 ## 4. Typography
 
 Two families, both bundled — no webfont fetch, no silent fallback.
@@ -146,8 +225,8 @@ Two families, both bundled — no webfont fetch, no silent fallback.
 
 ### 4.1 The scale
 
-Seven steps, in `AppText` (`lib/ui/theme/app_theme.dart`). **A bare font size at
-a call site is drift.**
+Nine steps, in `AppText` (`lib/ui/theme/app_theme.dart`). **A bare font size at
+a call site is drift**, and `test/ui/scale_guard_test.dart` now says so.
 
 | Step | pt | Role |
 |---|---|---|
@@ -158,10 +237,19 @@ a call site is drift.**
 | `bodyLarge` | 15 | emphasised body: names, list item titles |
 | `title` | 16.5 | section and modal titles |
 | `display` | 19 | screen titles and large counts |
+| `displayLarge` | 21 | the same screen title above the mobile breakpoint |
+| `brand` | 30 | the product name set as type, on the cover screen only |
 
 Deliberately coarse. It replaced a free-form scale that had grown to **nineteen
 distinct values between 9.5 and 19** with no rule for choosing among them, which
 is why equivalent elements on different screens did not match.
+
+`displayLarge` and `brand` were added when the guard went in, because both were
+already in use and neither had a name: every top-level view was writing
+`isMobile ? 19 : 21` by hand and the auth card was writing `20 : 22` — the same
+role at almost the same size, which is the exact failure a scale exists to
+prevent. `brand` has one call site and must keep it: it belongs to the mark, not
+to the interface.
 
 ### 4.2 Weight and tracking
 
@@ -221,7 +309,24 @@ destinations had drifted to 21 on the desktop rail and 24 in the mobile bar;
 | `hPreviewBar` | 46 | preview toolbar |
 | `hExportMobile` | 48 | mobile export button |
 
-Other: `avatar` 30 · `ring` 34 · `pickerW` 340 · `pickerMaxH` 460.
+`hTouchMin` 48 is not a control height but a floor: the tap area a control is
+padded out to when its painted size is smaller. `AppButton` expands any square
+control below it, and `AppSwitch` keeps a full 48×48 region around a switch
+painted smaller than the platform default — a bare `Transform.scale` shrinks the
+hit region along with the paint, which is how the toggles fell under the floor.
+
+Two icon-button boxes below `hControl`: `hIconCard` 30 (an overflow button
+pinned inside a card) and `hIconModal` 32 (the close button on a modal header).
+Both keep the `hTouchMin` tap area. They are 2px apart, which is one step more
+than the system should need — §13.
+
+| Family | Steps | Note |
+|---|---|---|
+| Avatar | `avatar` 30 · `avatarBar` 32 · `avatarRow` 34 · `avatarCard` 38 · `avatarHero` 62 | `avatar` is `PersonAvatar`'s default and what the picker rows are laid out against |
+| Brand mark | `markNav` 30 · `markLoader` 44 · `markCover` 52 · `markSplash` 64 | not `AppIcon` steps: the mark carries a surface, it is not a glyph set against text (§3.5) |
+| Spinner | `spinnerInButton` 15 · `spinner` 16 · `spinnerLarge` 20 | `spinner` is `AppSpinner`'s default |
+
+Other: `ring` 34 · `pickerW` 340 · `pickerMaxH` 460.
 
 ### 5.1 Spacing
 
@@ -266,12 +371,19 @@ behind a full modal, which must dim more of the app.
 
 One curve, one duration scale (`lib/ui/widgets/motion.dart`).
 
-- **Curve:** `Cubic(.2, .8, .3, 1)` — a single ease-out, everywhere. It is the
-  shape a critically damped spring draws: leaves fast, settles slowly, never
-  overshoots. Overshoot belongs to motion that inherited momentum from a
-  gesture, and nothing here is dragged or flicked, so `Motion.curve` is the
-  only curve in the app. `Motion.curveOut` is it mirrored, for the return leg
-  of a reversible transition.
+- **`curve` `Cubic(.2, .8, .3, 1)`** — the default ease-out: the shape a
+  critically damped spring draws, leaves fast, settles slowly, never overshoots.
+  Overshoot belongs to motion that inherited momentum from a gesture, and
+  nothing here is dragged or flicked, so no curve in the app overshoots.
+  `Motion.curveOut` is this one mirrored, for the return leg of a reversible
+  transition.
+- **`arrive` `Cubic(.16, 1, .3, 1)`** — the arrival curve, for content
+  travelling a visible distance on its way in. `curve` decelerates gently,
+  which is right for a control settling into a new state a few pixels away;
+  over 14px or more it reads as drift. `arrive` dumps almost all its speed in
+  the first third, so the element looks placed rather than floated into
+  position. **The two are not interchangeable**: entrances and content swaps
+  take `arrive`, state and press feedback stay on `curve`.
 - **`instant` 150 ms** — hover and press feedback. Short enough to read as a
   direct response to the finger rather than an animation.
 - **`fast` 180 ms** — a single element changing state or position.
@@ -282,8 +394,23 @@ One curve, one duration scale (`lib/ui/widgets/motion.dart`).
   watched item by item; the cap is inside the function, so no caller can turn
   a long list into a queue.
 
-There is deliberately no step above `med`. Entrances used to run at 500 ms,
-which is long enough that the user waits on them instead of reading them.
+- **`focal` 720 ms** — one authored entrance per surface, long enough to be
+  watched rather than merely noticed: the mark's entrance on the boot splash.
+  If a second element on the same screen wants this, one of them is not focal.
+- **`loop` 1600 ms** — one turn of a looping indeterminate indicator
+  (`AgoraLoader`). Unhurried on purpose: a loop the eye can follow reads as the
+  app working, one it cannot reads as the app struggling.
+
+- **`message` 4 s, `messageLong` 6 s** — how long a snackbar stays before it
+  withdraws itself. `messageLong` is for a failure, which gets read twice: the
+  first pass says something went wrong, the second says what.
+
+`instant` · `fast` · `med` are the state scale and it deliberately stops at
+`med`. Entrances used to run at 500 ms, which is long enough that the user waits
+on them instead of reading them. `focal`, `loop` and the two message steps are not
+extensions of that scale — the scale says how long a change takes, `focal` buys
+one deliberate performance per surface, `loop` says how often a cycle comes
+round, and `message` says how long a sentence waits to be read.
 - **`pressScale` .97 / `pressScaleSurface` .99** — how far a control gives
   while held. The scale is a ratio, so a card needs the smaller factor: the
   edge of a 264px card travels ten times further than the edge of a chip at the
@@ -298,8 +425,14 @@ were animating that way; passing `curve: Motion.curve` next to the duration is
 what makes the press and hover states feel soft rather than mechanical.
 
 **Every duration goes through `Motion.of(context, d)`**, which returns
-`Duration.zero` when the OS asks for reduced motion. A raw duration handed to an
-animated widget ignores the setting — that is a bug, not a style choice.
+`Duration.zero` when the OS asks for reduced motion. `loop`, `message` and `messageLong` are the
+exceptions. An indeterminate indicator is not decorating a change, it *is* the
+state, and stopping it says the app has finished when it has not — Material
+never routed `CircularProgressIndicator` through the setting either. Zeroing a
+message's dwell would take the sentence away before anyone had read it, which
+is the same error in a different place. A raw
+duration handed to an animated widget ignores the setting — that is a bug, not
+a style choice.
 
 The two modal presentations in `showAppModal` are the only places the rule has
 to be applied by hand, because each builds its own route: the desktop dialog
@@ -316,13 +449,22 @@ duration, curves only from `Motion`, timings only from the scale — because
 every violation still compiles and still animates, just not like the rest of
 the app.
 
-Three shared transitions:
+Five shared motion widgets:
 
 | Widget | Motion | Where |
 |---|---|---|
 | `FadeThroughSwitcher` | MD3 fade-through, transparent fill | top-level section changes |
 | `SlideSwitcher` | push/pop, ±0.22 offset + fade | steps inside a flow (auth) |
 | `EnterUp` | fade + 14px rise, staggered by `delay` | welcome screen, and the first cards of every list view: dashboard, participants, settings |
+| `MotionSize` | `AnimatedSize` that honours Reduce Motion without asserting | anything whose height changes |
+| `AnimatedInk` | tweens a color for text and icons alongside their container | controls whose label and background must answer at the same speed |
+
+`MotionSize` exists because `AnimatedSize(duration: Motion.of(context, …))` is
+a crash, not a spelling: `RenderAnimatedSize` restarts its controller from
+inside `performLayout`, and a zero-length `forward()` notifies synchronously, so
+the render object dirties itself mid-layout. `AnimatedInk` tweens the color
+alone rather than reaching for `AnimatedDefaultTextStyle`, which *replaces* the
+ambient style and silently drops the app's font family.
 
 ## 8. Layout and responsiveness
 
@@ -351,7 +493,8 @@ Aux room / Two-per-sheet / Circuit overseer toggles, export) → `WorkspacePanel
 ## 9. Component inventory
 
 `lib/ui/widgets/` is the catalog. Building a one-off where one of these fits is
-drift.
+drift. One line each below; `docs/COMPONENTS.md` carries the per-widget
+variants, states and accessibility contract.
 
 | Widget | Mock selector | Role |
 |---|---|---|
@@ -373,8 +516,20 @@ drift.
 | `Avatar` | — | initials from the display name |
 | `DashedBorder` | — | Flutter has none; used by the empty avatar and "Asignar…" |
 | `EmptyState` | — | icon, optional title, message, optional action and error |
-| `AppSpinner` | — | 16px default, accent |
+| `AppSpinner` | — | 16px default, accent; the only indeterminate spinner inside a control |
+| `AppSwitch` | — | `Switch` painted below platform size while keeping a 48×48 tap area (§5) |
+| `AppSnackBar` | — | `showAppSnack` — the app's only snackbar, success or failure, never neutral |
 | `ExportPanel` | — | format selector + Save/Share, shared by desktop menu and mobile sheet |
+| `ExportButton` | — | mobile export entry point; opens the sheet, busy state shared across instances |
+| `AgoraMark` / `AgoraLockup` | — | the brand mark, and the mark beside the wordmark (§3.5) |
+| `AgoraMarkEntrance` | — | the boot splash: a streak of light draws the cut, then each plane grows to meet it (`focal`, §7) |
+| `AgoraLoader` | — | the mark turning, for the one wait long enough to deserve a logo: the PDF preview (`loop`, §7) |
+| `NotebookDropTarget` | — | drag-and-drop for a workbook file; the web build has a real one, every other platform gets a stub that offers nothing |
+| `NotebookImportDialog` | — | fetch the workbook from jw.org, then hand it back — the web fallback for a file the browser cannot read across origins |
+
+`runExport` in `export_actions.dart` is not a widget but belongs to the same
+catalog rule: both export surfaces call it, so the build → save/share → snackbar
+sequence cannot diverge between desktop and mobile.
 
 ## 10. Interaction and state
 
@@ -455,8 +610,10 @@ Binding, from `PRODUCT.md`:
 - Never rely on color alone to carry meaning (§10).
 - Honor reduced motion (§7).
 
-No formal external standard has been adopted as a compliance obligation. Three
-of these are now enforced by tests rather than asserted:
+The standard behind them is **WCAG 2.2 Level AA** — adopted, scoped and walked
+criterion by criterion in `docs/ACCESSIBILITY.md`, which also lists the seven
+that fail today. Four of the commitments above are enforced by tests rather
+than asserted:
 
 | Commitment | Enforced by |
 |---|---|
@@ -464,8 +621,13 @@ of these are now enforced by tests rather than asserted:
 | Reduced motion | `test/ui/reduce_motion_test.dart` — the catalog surfaces and both modal routes |
 | Text scaling without breakage | `test/ui/text_scaling_test.dart` — 2× on a 320px phone |
 | Keyboard operability | `test/ui/keyboard_focus_test.dart` — traversal, Space/Enter, ring, no resize |
+| Type, icon and shadow scales | `test/ui/scale_guard_test.dart` — no bare size or one-off `BoxShadow` in `lib/ui/` |
+| This document's own values | `test/ui/design_doc_test.dart` — every colour, scale step, duration, curve and breakpoint |
+| The catalogue's appearance | `test/ui/golden/` — eighteen golden images, both themes |
 
-Touch-target minimums and screen-reader traversal order remain unverified.
+Touch-target minimums and screen-reader traversal order remain unverified;
+traversal order is the largest single unknown in the audit, because four
+criteria depend on it and none can be settled by reading code.
 
 ## 13. Known gaps
 
@@ -478,18 +640,45 @@ Stated rather than papered over:
    so the abstraction is currently unexercised.
 3. **Default theme is `light`, not `system`.** A deliberate-looking choice with
    no recorded rationale; the Settings option offers all three.
-4. **No component gallery.** There is no storybook screen and no visual
-   regression test, so the catalog's *appearance* is verified only by reading
-   it — its behaviour is now covered (§12), its looks are not.
-5. **Touch targets are unverified.** `hControl` is 38, below the 44pt/48dp
-   platform minimum. On a pointer that is fine and deliberate; on touch it
-   needs either a larger control or an expanded hit area, and nothing currently
-   distinguishes the two cases. Fixing it is a visible density decision on
-   mobile, not a mechanical change.
+4. **The gallery is debug-only, and the screens are not in it.**
+   `lib/ui/dev/gallery.dart` composes the catalogue once; `GalleryScreen`
+   renders it at `/gallery` behind `kDebugMode`, and `test/ui/golden/` renders
+   the same composition into eighteen images. What is still uncovered is
+   everything above component level: the dashboard, the participants list, the
+   settings tabs and the auth flow have no image and no gallery entry, so a
+   layout regression on a *screen* is still caught only by looking.
+5. **Touch targets: half closed.** `Dimens.hTouchMin` (48) now exists and
+   `AppButton` and `AppSwitch` pad out to it, so a square control or a toggle
+   below the floor gets a real hit area without growing visually. What is still
+   unverified is coverage: `hControl` is 38, nothing enumerates which controls
+   go through the expanding path, and no test asserts a minimum hit rect. The
+   remaining question is whether any *non-square* control on a touch screen is
+   still short — a visible density decision on mobile, not a mechanical change.
 6. **Screen and print section colors differ** (§3.4) with the rationale recorded
    here for the first time. If that was accidental rather than intentional, this
    is the place to fix it.
-7. **Nothing enforces the scales.** `AppText`, `AppIcon` and `Space` are
-   conventions a reviewer has to spot. A custom lint, or a test that greps
-   `lib/ui` for bare numbers in the constructs each scale owns, would make the
-   rule self-defending — the same way `contrast_test` now defends §12.
+7. **`Space` is still on the honour system.** `AppText`, `AppIcon` and
+   `Elevation` are now defended by `scale_guard_test`, which closed 40 call
+   sites that had drifted off them. `Space` is not: padding and gaps are
+   written as `EdgeInsets` and `SizedBox` numbers that no single parameter name
+   identifies, so the same grep would either miss most of them or drown in
+   false positives. It needs a different shape of check — probably an
+   `EdgeInsets`/`SizedBox` argument walk — before the ninth scale is as safe as
+   the other three.
+   Two smaller residues of the same pass: `hIconCard` 30 and `hIconModal` 32
+   are 2px apart and one of them is probably redundant, and `spinnerInButton`
+   15 sits 1px under `spinner` 16. Collapsing either is a visible decision, so
+   both were named at their current values rather than merged.
+8. **The document's prose is still unchecked.** `design_doc_test` now holds
+   every *value* here to the source, which is what went wrong between
+   2026-08-16 and 2026-08-29 — the palette moved twice and every accent and
+   dark-ground cell was left describing the one from before the app had a
+   logo. What it cannot check is everything that is not a number: the §9
+   catalogue can fall behind a new widget, §10 can describe an interaction
+   that has since changed, and §11's PDF metrics are quoted rather than read.
+   Those still rely on somebody looking.
+9. **The system is documented; the product is not conformant yet.** The
+   behavioural half is now in `docs/UX_PATTERNS.md` and the standard in
+   `docs/ACCESSIBILITY.md`. Both carry their own gap lists, and the
+   accessibility one has seven live failures — the largest being that no
+   status message is announced to a screen reader at all.

@@ -46,9 +46,7 @@ class AppSwitch extends StatelessWidget {
         width: Dimens.hTouchMin,
         height: Dimens.hTouchMin,
         child: MouseRegion(
-          cursor: enabled
-              ? SystemMouseCursors.click
-              : SystemMouseCursors.basic,
+          cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: enabled ? () => onChanged!(!value) : null,

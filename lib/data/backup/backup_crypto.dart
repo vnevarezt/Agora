@@ -32,33 +32,44 @@ class BackupCrypto {
   static const _parallelism = 1;
 
   static Future<Uint8List> seal(
-      Map<String, dynamic> payload, String password) async {
+    Map<String, dynamic> payload,
+    String password,
+  ) async {
     final rnd = Random.secure();
     final salt = List<int>.generate(16, (_) => rnd.nextInt(256));
     final nonce = List<int>.generate(12, (_) => rnd.nextInt(256));
-    final key = await _deriveKey(password, salt, _memoryKib, _iterations,
-        _parallelism);
+    final key = await _deriveKey(
+      password,
+      salt,
+      _memoryKib,
+      _iterations,
+      _parallelism,
+    );
     final box = await AesGcm.with256bits().encrypt(
       utf8.encode(jsonEncode(payload)),
       secretKey: SecretKey(key),
       nonce: nonce,
     );
-    return utf8.encode(jsonEncode({
-      'magic': _magic,
-      'v': 1,
-      'kdf': 'argon2id',
-      'm': _memoryKib,
-      't': _iterations,
-      'p': _parallelism,
-      'salt': base64Encode(salt),
-      'nonce': base64Encode(nonce),
-      'ct': base64Encode(box.cipherText),
-      'mac': base64Encode(box.mac.bytes),
-    }));
+    return utf8.encode(
+      jsonEncode({
+        'magic': _magic,
+        'v': 1,
+        'kdf': 'argon2id',
+        'm': _memoryKib,
+        't': _iterations,
+        'p': _parallelism,
+        'salt': base64Encode(salt),
+        'nonce': base64Encode(nonce),
+        'ct': base64Encode(box.cipherText),
+        'mac': base64Encode(box.mac.bytes),
+      }),
+    );
   }
 
   static Future<Map<String, dynamic>> open(
-      Uint8List bytes, String password) async {
+    Uint8List bytes,
+    String password,
+  ) async {
     final Map<String, dynamic> envelope;
     final List<int> salt, nonce, ct, mac;
     final int m, t, p;
@@ -66,7 +77,8 @@ class BackupCrypto {
       envelope = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
       if (envelope['magic'] != _magic) {
         throw const MalformedBackupException(
-            'The file is not an Agora backup.');
+          'The file is not an Agora backup.',
+        );
       }
       m = envelope['m'] as int;
       t = envelope['t'] as int;
@@ -95,7 +107,12 @@ class BackupCrypto {
   /// Argon2id in pure Dart takes ~1 s at OWASP cost: off the UI isolate
   /// (same rationale as DbKeyManager).
   static Future<List<int>> _deriveKey(
-      String password, List<int> salt, int m, int t, int p) {
+    String password,
+    List<int> salt,
+    int m,
+    int t,
+    int p,
+  ) {
     return runInBackground(() async {
       final key = await Argon2id(
         parallelism: p,

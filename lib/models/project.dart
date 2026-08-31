@@ -1,4 +1,5 @@
 import '../i18n/strings.g.dart';
+import 'notebook.dart';
 
 /// Project status on the dashboard.
 enum ProjectStatus { draft, complete, exported }
@@ -8,17 +9,17 @@ enum ProjectStatus { draft, complete, exported }
 extension ProjectStatusX on ProjectStatus {
   /// Singular label for the badge ("Borrador").
   String label(Translations tr) => switch (this) {
-        ProjectStatus.draft => tr.status.draft,
-        ProjectStatus.complete => tr.status.complete,
-        ProjectStatus.exported => tr.status.exported,
-      };
+    ProjectStatus.draft => tr.status.draft,
+    ProjectStatus.complete => tr.status.complete,
+    ProjectStatus.exported => tr.status.exported,
+  };
 
   /// Plural label for the filter chips ("Borradores").
   String plural(Translations tr) => switch (this) {
-        ProjectStatus.draft => tr.status.draftPlural,
-        ProjectStatus.complete => tr.status.completePlural,
-        ProjectStatus.exported => tr.status.exportedPlural,
-      };
+    ProjectStatus.draft => tr.status.draftPlural,
+    ProjectStatus.complete => tr.status.completePlural,
+    ProjectStatus.exported => tr.status.exportedPlural,
+  };
 }
 
 /// Per-week progress of a project (hero card chips).
@@ -31,7 +32,11 @@ class Project {
   final String id;
   final String name;
   final String congregationId;
-  final List<String> weeks;
+
+  /// The project's weeks, identity and printed label together — the modal
+  /// needs the first to diff safely across a language change, the cards need
+  /// the second to show anything.
+  final List<WeekRef> weeks;
   final int done;
   final int total;
   final ProjectStatus status;

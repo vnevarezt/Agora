@@ -13,7 +13,7 @@ const _scrim = Elevation.scrimStrong;
 Future<T?> showAppModal<T>(
   BuildContext context, {
   required Widget Function(BuildContext context, bool sheet, VoidCallback close)
-      builder,
+  builder,
   double maxWidth = 520,
 }) {
   if (context.isMobile) {
@@ -33,14 +33,16 @@ Future<T?> showAppModal<T>(
         reverseCurve: Motion.curve.flipped,
       ),
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(Dimens.rSheet)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Dimens.rSheet),
+        ),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
         child: ConstrainedBox(
-          constraints:
-              BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.9),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+          ),
           child: builder(ctx, true, () => Navigator.of(ctx).pop()),
         ),
       ),

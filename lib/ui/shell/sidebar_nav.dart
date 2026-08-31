@@ -10,6 +10,7 @@ import '../../state/ui_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
+import '../widgets/agora_mark.dart';
 import '../widgets/app_button.dart';
 import '../widgets/avatar.dart';
 import '../widgets/motion.dart';
@@ -18,32 +19,34 @@ import '../widgets/motion.dart';
 /// bar). Labels follow the active language. Each item pairs an outline icon
 /// (inactive) with a filled variant (active) for the MD3 selection change.
 List<({AppSection section, IconData icon, IconData activeIcon, String label})>
-    _items(Translations tr) => [
-      (
-        section: AppSection.home,
-        icon: Icons.home_outlined,
-        activeIcon: Icons.home_rounded,
-        label: tr.nav.home,
-      ),
-      (
-        section: AppSection.participants,
-        icon: Icons.people_outline,
-        activeIcon: Icons.people_rounded,
-        label: tr.nav.participants,
-      ),
-      (
-        section: AppSection.settings,
-        icon: Icons.settings_outlined,
-        activeIcon: Icons.settings_rounded,
-        label: tr.nav.settings,
-      ),
-    ];
+_items(Translations tr) => [
+  (
+    section: AppSection.home,
+    icon: Icons.home_outlined,
+    activeIcon: Icons.home_rounded,
+    label: tr.nav.home,
+  ),
+  (
+    section: AppSection.participants,
+    icon: Icons.people_outline,
+    activeIcon: Icons.people_rounded,
+    label: tr.nav.participants,
+  ),
+  (
+    section: AppSection.settings,
+    icon: Icons.settings_outlined,
+    activeIcon: Icons.settings_rounded,
+    label: tr.nav.settings,
+  ),
+];
 
 /// Number of urgent reminders; shown as a badge on "Inicio".
-final _alertsProvider = Provider<int>((ref) => ref
-    .watch(remindersProvider)
-    .where((r) => r.type == ReminderType.alert)
-    .length);
+final _alertsProvider = Provider<int>(
+  (ref) => ref
+      .watch(remindersProvider)
+      .where((r) => r.type == ReminderType.alert)
+      .length,
+);
 
 /// Icon that cross-fades (with a small scale pop) between its outline and
 /// filled variants when the item selection changes — the MD3 destination cue.
@@ -104,7 +107,10 @@ class Sidebar extends ConsumerWidget {
         color: t.surface,
         border: Border(right: BorderSide(color: t.border)),
       ),
-      padding: EdgeInsets.symmetric(horizontal: compact ? Space.s8 : Space.s10, vertical: Space.s14),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? Space.s8 : Space.s10,
+        vertical: Space.s14,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -137,44 +143,23 @@ class _Brand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    final mark = Container(
-      width: 30,
-      height: 30,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: t.accent,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Text(
-        'JW',
-        style: TextStyle(
-          fontSize: AppText.body,
-          fontWeight: FontWeight.w800,
-          color: t.accentInk,
-        ),
-      ),
-    );
-
     return Padding(
-      padding: EdgeInsets.fromLTRB(compact ? 0 : Space.s4, Space.s4, Space.s4, Space.s10),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 0 : Space.s4,
+        Space.s4,
+        Space.s4,
+        Space.s10,
+      ),
       child: Row(
-        mainAxisAlignment:
-            compact ? MainAxisAlignment.center : MainAxisAlignment.start,
+        mainAxisAlignment: compact
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: [
-          mark,
-          if (!compact) ...[
-            const SizedBox(width: Space.s10),
-            Text(
-              context.t.app.brand,
-              style: TextStyle(
-                fontSize: AppText.bodyLarge,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: t.text,
-              ),
-            ),
-          ],
+          // The rail collapses to icons only, and the word is what goes.
+          if (compact)
+            const AgoraMark(size: Dimens.markNav)
+          else
+            const AgoraLockup(),
         ],
       ),
     );
@@ -209,8 +194,12 @@ class _NavItem extends ConsumerWidget {
     final fg = active ? t.accentOnSoft : t.textDim;
     final radius = BorderRadius.circular(12);
 
-    final navIcon =
-        _NavIcon(icon: icon, activeIcon: activeIcon, active: active, color: fg);
+    final navIcon = _NavIcon(
+      icon: icon,
+      activeIcon: activeIcon,
+      active: active,
+      color: fg,
+    );
 
     final content = compact
         ? Center(
@@ -218,7 +207,10 @@ class _NavItem extends ConsumerWidget {
                 ? Stack(
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
-                    children: [navIcon, Positioned(top: -7, right: -9, child: _badge(t))],
+                    children: [
+                      navIcon,
+                      Positioned(top: -7, right: -9, child: _badge(t)),
+                    ],
                   )
                 : navIcon,
           )
@@ -270,27 +262,35 @@ class _NavItem extends ConsumerWidget {
     );
 
     if (compact) item = Tooltip(message: label, child: item);
-    return item;
+    // The rail is Material + InkWell rather than Pressable, so it carries
+    // neither of the two things a screen reader needs: the compact form has
+    // no text at all, and selection is painted only.
+    return Semantics(
+      container: true,
+      selected: active,
+      label: compact ? label : null,
+      child: item,
+    );
   }
 
   Widget _badge(AppTokens t) => Container(
-        constraints: const BoxConstraints(minWidth: 19),
-        height: 19,
-        padding: const EdgeInsets.symmetric(horizontal: Space.s6),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: t.accent,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          '$badge',
-          style: TextStyle(
-            fontSize: AppText.micro,
-            fontWeight: FontWeight.w800,
-            color: t.accentInk,
-          ),
-        ),
-      );
+    constraints: const BoxConstraints(minWidth: 19),
+    height: 19,
+    padding: const EdgeInsets.symmetric(horizontal: Space.s6),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: t.accent,
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Text(
+      '$badge',
+      style: TextStyle(
+        fontSize: AppText.micro,
+        fontWeight: FontWeight.w800,
+        color: t.accentInk,
+      ),
+    ),
+  );
 }
 
 /// User card at the bottom of the sidebar: avatar + name + account subtitle
@@ -354,8 +354,9 @@ class _UserCardState extends ConsumerState<_UserCard> {
               icon: Icons.settings_outlined,
               label: tr.nav.settings,
               divider: false,
-              onTap: () =>
-                  ref.read(appSectionProvider.notifier).select(AppSection.settings),
+              onTap: () => ref
+                  .read(appSectionProvider.notifier)
+                  .select(AppSection.settings),
             ),
             if (canLock)
               (
@@ -383,7 +384,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
               child: Pressable(
                 onTap: _toggle,
                 builder: (context, hovered, _) =>
-                    PersonAvatar(name: user.name, size: 32),
+                    PersonAvatar(name: user.name, size: Dimens.avatarBar),
               ),
             ),
           );
@@ -403,7 +404,7 @@ class _UserCardState extends ConsumerState<_UserCard> {
               ),
               child: Row(
                 children: [
-                  PersonAvatar(name: user.name, size: 32),
+                  PersonAvatar(name: user.name, size: Dimens.avatarBar),
                   const SizedBox(width: Space.s10),
                   Expanded(
                     child: Column(
@@ -435,7 +436,11 @@ class _UserCardState extends ConsumerState<_UserCard> {
                     ),
                   ),
                   const SizedBox(width: Space.s6),
-                  Icon(Icons.unfold_more, size: AppIcon.control, color: t.textMute),
+                  Icon(
+                    Icons.unfold_more,
+                    size: AppIcon.control,
+                    color: t.textMute,
+                  ),
                 ],
               ),
             );
@@ -480,7 +485,10 @@ class _UserMenu extends StatelessWidget {
             if (it.divider)
               Container(
                 height: 1,
-                margin: const EdgeInsets.symmetric(horizontal: Space.s6, vertical: Space.s4),
+                margin: const EdgeInsets.symmetric(
+                  horizontal: Space.s6,
+                  vertical: Space.s4,
+                ),
                 color: t.border2,
               ),
             Pressable(
@@ -489,8 +497,10 @@ class _UserMenu extends StatelessWidget {
                 it.onTap();
               },
               builder: (context, hovered, _) => Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Space.s12,
+                  vertical: Space.s10,
+                ),
                 decoration: BoxDecoration(
                   color: hovered ? t.surface2 : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
@@ -574,8 +584,12 @@ class BottomNav extends ConsumerWidget {
             for (final it in items)
               NavigationDestination(
                 icon: _navBadge(t, it.section, alerts, Icon(it.icon)),
-                selectedIcon:
-                    _navBadge(t, it.section, alerts, Icon(it.activeIcon)),
+                selectedIcon: _navBadge(
+                  t,
+                  it.section,
+                  alerts,
+                  Icon(it.activeIcon),
+                ),
                 label: it.label,
               ),
           ],
@@ -586,6 +600,6 @@ class BottomNav extends ConsumerWidget {
 
   Widget _navBadge(AppTokens t, AppSection section, int alerts, Widget icon) =>
       (section == AppSection.home && alerts > 0)
-          ? Badge(backgroundColor: t.accent, child: icon)
-          : icon;
+      ? Badge(backgroundColor: t.accent, child: icon)
+      : icon;
 }

@@ -19,11 +19,11 @@ class SettingsColumns extends StatelessWidget {
   /// desktop the two columns come in side by side instead of the right one
   /// waiting out the whole left one.
   static List<Widget> _conSeparacion(List<Widget> cards) => [
-        for (var i = 0; i < cards.length; i++) ...[
-          if (i > 0) const SizedBox(height: Space.s18),
-          EnterUp(delay: Motion.stagger(i), child: cards[i]),
-        ],
-      ];
+    for (var i = 0; i < cards.length; i++) ...[
+      if (i > 0) const SizedBox(height: Space.s18),
+      EnterUp(delay: Motion.stagger(i), child: cards[i]),
+    ],
+  ];
 
   @override
   Widget build(BuildContext context) {

@@ -23,13 +23,14 @@ class Membership {
     final maxVersion = wrapped.isEmpty
         ? 0
         : wrapped
-            .map((k) => int.tryParse('$k') ?? 0)
-            .reduce((a, b) => a > b ? a : b);
+              .map((k) => int.tryParse('$k') ?? 0)
+              .reduce((a, b) => a > b ? a : b);
     return Membership(
       congregationId: congregationId,
       uid: data['uid'] as String,
       capabilities: MemberCapabilities.fromMap(
-          (data['capabilities'] as Map?)?.cast<String, dynamic>() ?? const {}),
+        (data['capabilities'] as Map?)?.cast<String, dynamic>() ?? const {},
+      ),
       keyVersion: maxVersion,
     );
   }

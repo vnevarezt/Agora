@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../state/cloud_auth.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/bound_text_field.dart';
@@ -25,8 +26,7 @@ class PasswordResetPanel extends ConsumerStatefulWidget {
   final String initialEmail;
 
   @override
-  ConsumerState<PasswordResetPanel> createState() =>
-      _PasswordResetPanelState();
+  ConsumerState<PasswordResetPanel> createState() => _PasswordResetPanelState();
 }
 
 class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>
@@ -105,7 +105,7 @@ class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>
               ),
               child: Icon(
                 _sent ? Icons.mark_email_read_outlined : Icons.lock_reset,
-                size: 26,
+                size: AppIcon.feature,
                 color: t.textMute,
               ),
             ),
@@ -152,6 +152,7 @@ class _PasswordResetPanelState extends ConsumerState<PasswordResetPanel>
               }),
               hint: tr.auth.cloud.emailHint,
               keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
               autofocus: true,
               onSubmitted: (_) => _busy ? null : _submit(),
             ),

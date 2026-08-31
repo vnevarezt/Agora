@@ -60,7 +60,8 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     PathProviderPlatform.instance = _FakePathProvider(
-        Directory.systemTemp.createTempSync('agora_test').path);
+      Directory.systemTemp.createTempSync('agora_test').path,
+    );
     docs = FakeKeyDocs();
     transport = InMemoryTransport();
     store = MapKeyStore();
@@ -73,20 +74,28 @@ void main() {
   tearDown(() => memberships.close());
 
   ProviderContainer makeContainer() {
-    final container = ProviderContainer(overrides: [
-      dbKeyManagerProvider.overrideWithValue(
-          DbKeyManager(store: MapKeyStore(), params: testKdfParams)),
-      firebaseAppProvider.overrideWith((ref) => Future.value(null)),
-      keyDocsProvider.overrideWithValue(docs),
-      syncTransportProvider.overrideWithValue(transport),
-      syncUidProvider.overrideWithValue('me'),
-      cckServiceProvider.overrideWithValue(
-          CckService(store, docs, UserKeyService(store, docs, uid: 'me'),
-              uid: 'me')),
-      myMembershipsProvider.overrideWith((ref) => memberships.stream),
-      deleteCloudUserProvider.overrideWith((ref) async => deleteCloudUser),
-      syncControllerProvider.overrideWith(() => _RecordingSync(trace)),
-    ]);
+    final container = ProviderContainer(
+      overrides: [
+        dbKeyManagerProvider.overrideWithValue(
+          DbKeyManager(store: MapKeyStore(), params: testKdfParams),
+        ),
+        firebaseAppProvider.overrideWith((ref) => Future.value(null)),
+        keyDocsProvider.overrideWithValue(docs),
+        syncTransportProvider.overrideWithValue(transport),
+        syncUidProvider.overrideWithValue('me'),
+        cckServiceProvider.overrideWithValue(
+          CckService(
+            store,
+            docs,
+            UserKeyService(store, docs, uid: 'me'),
+            uid: 'me',
+          ),
+        ),
+        myMembershipsProvider.overrideWith((ref) => memberships.stream),
+        deleteCloudUserProvider.overrideWith((ref) async => deleteCloudUser),
+        syncControllerProvider.overrideWith(() => _RecordingSync(trace)),
+      ],
+    );
     addTearDown(container.dispose);
     // AuthGate watches the session for the whole app life; without a listener
     // here the notifier is disposed between reads and resetAllData throws.
@@ -114,7 +123,11 @@ void main() {
   }
 
   Membership membership(String cid, MemberCapabilities caps) => Membership(
-      congregationId: cid, uid: 'me', capabilities: caps, keyVersion: 1);
+    congregationId: cid,
+    uid: 'me',
+    capabilities: caps,
+    keyVersion: 1,
+  );
 
   /// Lets pending microtasks and the session's async init run.
   Future<void> pump() async {
@@ -123,71 +136,79 @@ void main() {
     }
   }
 
-  test('waits for the memberships stream instead of planning for zero',
-      () async {
-    final container = makeContainer();
-    await pump();
-    seedAccount();
-    seedCongregation('c1', {'me': MemberCapabilities.founder});
+  test(
+    'waits for the memberships stream instead of planning for zero',
+    () async {
+      final container = makeContainer();
+      await pump();
+      seedAccount();
+      seedCongregation('c1', {'me': MemberCapabilities.founder});
 
-    var done = false;
-    final deletion = container.read(deleteMyAccountProvider)();
-    unawaited(deletion.then((_) => done = true));
-    await pump();
+      var done = false;
+      final deletion = container.read(deleteMyAccountProvider)();
+      unawaited(deletion.then((_) => done = true));
+      await pump();
 
-    // The stream has not emitted yet: nothing may have been decided, let alone
-    // deleted. Before the fix this planned for zero congregations and deleted
-    // the account, orphaning c1 forever.
-    expect(done, isFalse);
-    expect(docs.users, contains('me'));
-    expect(docs.congregations, contains('c1'));
-    expect(trace, isEmpty);
+      // The stream has not emitted yet: nothing may have been decided, let alone
+      // deleted. Before the fix this planned for zero congregations and deleted
+      // the account, orphaning c1 forever.
+      expect(done, isFalse);
+      expect(docs.users, contains('me'));
+      expect(docs.congregations, contains('c1'));
+      expect(trace, isEmpty);
 
-    memberships.add([membership('c1', MemberCapabilities.founder)]);
-    await deletion;
+      memberships.add([membership('c1', MemberCapabilities.founder)]);
+      await deletion;
 
-    expect(docs.congregations, isNot(contains('c1')));
-    expect(docs.users, isNot(contains('me')));
-  });
+      expect(docs.congregations, isNot(contains('c1')));
+      expect(docs.users, isNot(contains('me')));
+    },
+  );
 
-  test('pauses sync before the first delete and tears the space down',
-      () async {
-    final container = makeContainer();
-    await pump();
-    seedAccount();
-    seedCongregation('c1', {'me': MemberCapabilities.founder});
-    memberships.add([membership('c1', MemberCapabilities.founder)]);
+  test(
+    'pauses sync before the first delete and tears the space down',
+    () async {
+      final container = makeContainer();
+      await pump();
+      seedAccount();
+      seedCongregation('c1', {'me': MemberCapabilities.founder});
+      memberships.add([membership('c1', MemberCapabilities.founder)]);
 
-    await container.read(deleteMyAccountProvider)();
+      await container.read(deleteMyAccountProvider)();
 
-    // A push between the first delete and the last one recreates items nobody
-    // can delete afterwards, so the pause must come first.
-    expect(trace.first, 'pause');
-    expect(trace, contains('deleteMember:me'));
-    expect(trace.last, 'deleteCloudUser');
-    expect(transport.docs, isNot(contains('c1')));
-    expect(transport.activity, isNot(contains('c1')));
-    expect(docs.users, isNot(contains('me')));
-  });
+      // A push between the first delete and the last one recreates items nobody
+      // can delete afterwards, so the pause must come first.
+      expect(trace.first, 'pause');
+      expect(trace, contains('deleteMember:me'));
+      expect(trace.last, 'deleteCloudUser');
+      expect(transport.docs, isNot(contains('c1')));
+      expect(transport.activity, isNot(contains('c1')));
+      expect(docs.users, isNot(contains('me')));
+    },
+  );
 
-  test('sole admin with other members: refuses without touching anything',
-      () async {
-    final container = makeContainer();
-    await pump();
-    seedAccount();
-    seedCongregation('c1', {
-      'me': MemberCapabilities.founder,
-      'bob': const MemberCapabilities(people: true),
-    });
-    memberships.add([membership('c1', MemberCapabilities.founder)]);
+  test(
+    'sole admin with other members: refuses without touching anything',
+    () async {
+      final container = makeContainer();
+      await pump();
+      seedAccount();
+      seedCongregation('c1', {
+        'me': MemberCapabilities.founder,
+        'bob': const MemberCapabilities(people: true),
+      });
+      memberships.add([membership('c1', MemberCapabilities.founder)]);
 
-    await expectLater(container.read(deleteMyAccountProvider)(),
-        throwsA(isA<AccountDeletionBlocked>()));
+      await expectLater(
+        container.read(deleteMyAccountProvider)(),
+        throwsA(isA<AccountDeletionBlocked>()),
+      );
 
-    expect(docs.congregations, contains('c1'));
-    expect(docs.users, contains('me'));
-    expect(trace, isEmpty);
-  });
+      expect(docs.congregations, contains('c1'));
+      expect(docs.users, contains('me'));
+      expect(trace, isEmpty);
+    },
+  );
 
   test('a failing cloud delete gives sync back', () async {
     deleteCloudUser = () async => throw StateError('requires-recent-login');
@@ -197,7 +218,9 @@ void main() {
     memberships.add(const []);
 
     await expectLater(
-        container.read(deleteMyAccountProvider)(), throwsStateError);
+      container.read(deleteMyAccountProvider)(),
+      throwsStateError,
+    );
 
     expect(trace, ['pause', 'resume()']);
   });

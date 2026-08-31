@@ -14,11 +14,17 @@ class S140 {
   static const double pageHeight = 792; // 11 in
   static const double marginTop = 0.7 * 72; // 50.4
   static const double marginBottom = 0.5 * 72; // 36
-  static const double marginLeft = 0.8 * 72; // 57.6
-  static const double marginRight = 0.8 * 72; // 57.6
+  // The Word original sets 0.8 in at the sides. That is 23% of the paper spent
+  // on white, and it is what caps the type: the sheet has vertical room to
+  // spare, so what stops the fit from growing is the longest title and a pair
+  // of names competing for the same line. At 0.5 in — the margin the foot of
+  // the page already uses — the same week prints at 11.5 pt instead of 10.5.
+  static const double marginLeft = 0.5 * 72; // 36
+  static const double marginRight = 0.5 * 72; // 36
 
   /// Usable width = \textwidth.
-  static const double contentWidth = pageWidth - marginLeft - marginRight; // 496.8
+  static const double contentWidth =
+      pageWidth - marginLeft - marginRight; // 496.8
 
   // ---- Two-per-sheet: portrait Letter, two week blocks stacked, tighter
   // margins so the compact layout gets the full width ----
@@ -39,6 +45,10 @@ class S140 {
 
   // ---- Column widths (tex:57-61) ----
   static const double cm = 28.3465;
+
+  /// Official width of the time column. Only a CEILING now: the times are
+  /// measured (see `computeColumns`), and "18:31" in 9 pt Carlito is nowhere
+  /// near 1.3 cm — the difference was blank on every row of the sheet.
   static const double hourWidth = 1.3 * cm; // 36.85
   static const double roleWidth = 2.6 * cm; // 73.70
   static const double mainNameWidth = 5.0 * cm; // 141.73
@@ -63,26 +73,45 @@ class S140 {
   /// Title floor in Auxiliary Room mode (4 columns).
   static const double minContentAux = 0.34 * contentWidth;
 
-  /// Minimum width of each names column in Auxiliary Room mode.
-  static const double minAuxCol = 60;
+  /// Hard floor for a names column: below this a column stops being a column,
+  /// whatever the titles beside it need.
+  static const double minNamesCol = 60;
 
   /// Slack added to the measured width of the longest name.
   static const double namePad = 6;
+
+  /// Pairs of names the fit may stack beyond what the official size already
+  /// stacks, on a sheet printing an Auxiliary Room column.
+  ///
+  /// Three columns of names share one page width there, and the type cannot
+  /// grow a single step without stacking a pair — so holding the line strictly
+  /// pins the sheet at 10 pt with a fifteenth of the page blank and the row
+  /// spacing already at its ceiling. Two pairs buy a whole size (10 → 11 pt)
+  /// and a full page. Nothing is bought anywhere else: without the auxiliary
+  /// column the names have the room to stay on one line, and stacking them to
+  /// grow the type would be undoing the point of measuring them.
+  static const int auxNameTolerance = 2;
 
   // ---- Official colors (tex:31-35) ----
   static final PdfColor treasures = PdfColor.fromHex('575A5D'); // gray
   static final PdfColor ministryColor = PdfColor.fromHex('BE8900'); // gold
   static final PdfColor christianLife = PdfColor.fromHex('7E0024'); // maroon
-  static final PdfColor labelColor = PdfColor.fromHex('575A5D'); // gray (labels)
+  static final PdfColor labelColor = PdfColor.fromHex(
+    '575A5D',
+  ); // gray (labels)
   static final PdfColor lineColor = PdfColor.fromHex('A6A6A6'); // light gray
   static final PdfColor white = PdfColor.fromHex('FFFFFF');
 }
 
 /// The tunable layout metrics of one program block. [standard] mirrors the
 /// official S-140-S values in [S140]; [compact] is the two-per-sheet variant:
-/// slightly smaller type, tighter row/band spacing and the full width of the
-/// reduced page margins, so the content REFLOWS (titles and names use the
-/// space) instead of being photo-reduced.
+/// tighter row/band spacing and the full width of the reduced page margins, so
+/// the content REFLOWS (titles and names use the space) instead of being
+/// photo-reduced.
+///
+/// Both are STARTING points. What a sheet actually prints at is one of these
+/// run through [scaled], with the factors chosen per document so the block
+/// fills its page — see `sheet_fit.dart`.
 class S140Metrics {
   final double contentWidth;
 
@@ -97,7 +126,7 @@ class S140Metrics {
   // Columns.
   final double hourWidth;
   final double roleWidth;
-  final double mainNameWidth; // floor of the names column
+  final double mainNameWidth; // resting width of the names column
   final double colGap;
 
   // Spacing.
@@ -109,17 +138,31 @@ class S140Metrics {
   final double gapAfterRule; // rule → week line (\smallskip)
   final double gapAfterWeekLine; // week line → rows (\addvspace{8pt})
   final double gapSectionEnd; // last row → closing rule
+  final double weekGap; // between stacked week blocks (two-per-sheet)
 
   // Adaptive-width floors (see computeColumns).
   final double minContentFrac; // title floor, fraction of contentWidth
   final double minContentAuxFrac; // same, Auxiliary Room mode
-  final double minAuxCol;
+  final double minNamesCol;
   final double namePad;
 
   /// Date + weekly reading on ONE line ("13-19 DE JULIO | LECTURA SEMANAL DE
   /// LA BIBLIA: JEREMÍAS 16, 17") instead of the official two-line form —
   /// saves a line per week on the stacked sheet.
   final bool inlineWeekLine;
+
+  /// Bounds for the per-sheet fit (see `sheet_fit.dart`). [maxTypeScale]
+  /// bounds how far the type may grow to fill the page; [maxAirScale] how far
+  /// the row/band gaps may open once the type has stopped growing. Type first,
+  /// air second: a fuller page should read larger, not just looser.
+  final double maxTypeScale;
+  final double maxAirScale;
+
+  /// How far the type may SHRINK when the block does not fit at all. 1 means
+  /// it may not: the one-week sheet flows onto a second page instead, which
+  /// keeps the official size honest. A sheet that cannot flow sets this below
+  /// 1 — see [minTypeScale] on [compact].
+  final double minTypeScale;
 
   const S140Metrics({
     required this.contentWidth,
@@ -141,12 +184,57 @@ class S140Metrics {
     required this.gapAfterRule,
     required this.gapAfterWeekLine,
     required this.gapSectionEnd,
+    required this.weekGap,
     required this.minContentFrac,
     required this.minContentAuxFrac,
-    required this.minAuxCol,
+    required this.minNamesCol,
     required this.namePad,
     this.inlineWeekLine = false,
+    required this.maxTypeScale,
+    required this.maxAirScale,
+    this.minTypeScale = 1,
   });
+
+  /// The same layout with the type at [type]× and the vertical air at [air]×.
+  ///
+  /// Everything tied to the type scales — including the hour and role columns,
+  /// which hold text, and the gaps, so the block grows as one piece instead of
+  /// getting crowded. [contentWidth] is the sheet's and never scales: that is
+  /// what makes growing the type a real constraint rather than a zoom, and it
+  /// is why the fit has to measure instead of multiply.
+  S140Metrics scaled(double type, {double air = 1}) => S140Metrics(
+    contentWidth: contentWidth,
+    base: base * type,
+    small: small * type,
+    footnote: footnote * type,
+    large: large * type,
+    title: title * type,
+    week: week * type,
+    hourWidth: hourWidth * type,
+    roleWidth: roleWidth * type,
+    // The official 5 cm names column and the auxiliary-room minimum are
+    // floors in PAPER units, not type units: scaling them up would take
+    // width from the titles for names that never asked for it.
+    mainNameWidth: mainNameWidth,
+    colGap: colGap * type,
+    rowSep: rowSep * type * air,
+    fboxsep: fboxsep * type,
+    bandGapTop: bandGapTop * type * air,
+    bandGapBottom: bandGapBottom * type * air,
+    gapHeaderRule: gapHeaderRule * type,
+    gapAfterRule: gapAfterRule * type,
+    gapAfterWeekLine: gapAfterWeekLine * type * air,
+    gapSectionEnd: gapSectionEnd * type * air,
+    weekGap: weekGap * type * air,
+    minContentFrac: minContentFrac,
+    minContentAuxFrac: minContentAuxFrac,
+    minNamesCol: minNamesCol,
+    namePad: namePad * type,
+    inlineWeekLine: inlineWeekLine,
+    maxTypeScale: maxTypeScale,
+    maxAirScale: maxAirScale,
+    minTypeScale: minTypeScale,
+  );
 
   /// Official S-140-S metrics (values in [S140], one week per page).
   static const standard = S140Metrics(
@@ -169,10 +257,19 @@ class S140Metrics {
     gapAfterRule: 3,
     gapAfterWeekLine: 8,
     gapSectionEnd: 4,
+    weekGap: 0, // one week per page
     minContentFrac: 0.40,
     minContentAuxFrac: 0.34,
-    minAuxCol: S140.minAuxCol,
+    minNamesCol: S140.minNamesCol,
     namePad: S140.namePad,
+    // The official sheet is left at its official size: 1 means the fit cannot
+    // move it at all. Growing the type and opening the rows until the block
+    // reached the foot of the page did fill the paper, but it stopped looking
+    // like the form — a page of 14 rows spread over 11 inches reads as a list
+    // that ran out of things to say, not as a programme. The two-per-sheet
+    // layout keeps the fit: there, filling the page is the entire point.
+    maxTypeScale: 1.0,
+    maxAirScale: 1.0,
   );
 
   /// Two-per-sheet metrics: body type slightly LARGER than the official
@@ -200,11 +297,22 @@ class S140Metrics {
     gapAfterRule: 2,
     gapAfterWeekLine: 5,
     gapSectionEnd: 3,
+    weekGap: S140.stackedWeekGap,
     minContentFrac: 0.40,
     minContentAuxFrac: 0.34,
-    minAuxCol: S140.minAuxCol,
+    minNamesCol: S140.minNamesCol,
     namePad: S140.namePad,
     inlineWeekLine: true,
+    // Half a page per week: less room to grow into, and the air has to stay
+    // tighter or the two blocks stop reading as two blocks.
+    maxTypeScale: 1.2,
+    maxAirScale: 1.5,
+    // This page cannot flow: it is one sheet by definition. Left to overflow
+    // it gets photo-reduced by the [pw.BoxFit.scaleDown] wrapper, which takes
+    // the WIDTH down with the height and hands back the right margin the
+    // layout just spent its whole design claiming. Shrinking the type instead
+    // keeps the full measure, so the reduction is a last resort now.
+    minTypeScale: 0.85,
   );
 }
 

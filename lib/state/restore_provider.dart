@@ -2,11 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dashboard_provider.dart';
 import 'sync_provider.dart';
+import 'sync_trace.dart';
 
 /// Progress of the first-time data restore on a freshly signed-in device.
 /// [total] 0 means we are still discovering how much there is (memberships
 /// not loaded yet). [done] rises as each congregation's first pull page lands.
-typedef InitialRestore = ({int done, int total});
+///
+/// [failed] says the membership read ERRORED rather than being slow. Without
+/// it the two were the same `(0, 0)`, so a device that could not read its
+/// memberships at all spun on "restoring your data" for ever — the screen
+/// could not say what had gone wrong because nothing here knew.
+typedef InitialRestore = ({int done, int total, bool failed});
 
 /// Whether this device is still restoring cloud data it has never seen, and
 /// how far along it is — or null when there is nothing to restore.
@@ -30,14 +36,20 @@ final initialRestoreProvider = Provider<InitialRestore?>((ref) {
   if (memberships.isLoading || memberships.hasError) {
     // Login done, memberships not in yet: only a device with no local data is
     // plausibly mid-restore, so an established device never flashes the banner.
-    return localCids.isEmpty ? (done: 0, total: 0) : null;
+    return localCids.isEmpty
+        ? (done: 0, total: 0, failed: memberships.hasError)
+        : null;
   }
 
   final cloudCids = {
     for (final m in memberships.value ?? const []) m.congregationId,
   };
   final pending = cloudCids.difference(localCids);
+  syncTrace(
+    'restore: cloud=${cloudCids.join(', ')} '
+    'local=${localCids.join(', ')} pending=${pending.join(', ')}',
+  );
   if (pending.isEmpty) return null;
   final total = cloudCids.length;
-  return (done: total - pending.length, total: total);
+  return (done: total - pending.length, total: total, failed: false);
 });

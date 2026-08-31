@@ -88,17 +88,19 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
   }
 
   Future<void> _save() => _run(() async {
-        final cck = ref.read(cckServiceProvider);
-        if (cck == null) return;
-        await cck.setMemberCapabilities(
-            widget.congregationId, widget.member.uid, _capabilities);
-      });
+    final cck = ref.read(cckServiceProvider);
+    if (cck == null) return;
+    await cck.setMemberCapabilities(
+      widget.congregationId,
+      widget.member.uid,
+      _capabilities,
+    );
+  });
 
   Future<void> _revoke() async {
     final tr = context.t;
-    final name = widget.member.displayName ??
-        widget.member.email ??
-        widget.member.uid;
+    final name =
+        widget.member.displayName ?? widget.member.email ?? widget.member.uid;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -111,8 +113,10 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(tr.congregation.revoke,
-                style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+            child: Text(
+              tr.congregation.revoke,
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -121,19 +125,22 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
     await _run(() async {
       final cck = ref.read(cckServiceProvider);
       if (cck == null) return;
-      await cck.rotateAndRevoke(widget.congregationId,
-          removeUids: [widget.member.uid]);
+      await cck.rotateAndRevoke(
+        widget.congregationId,
+        removeUids: [widget.member.uid],
+      );
     });
   }
 
-  void _toggle({bool? admin, bool? people, bool? programs}) =>
-      setState(() => _capabilities = MemberCapabilities(
-            admin: admin ?? _capabilities.admin,
-            people: people ?? _capabilities.people,
-            editTypes: programs == null
-                ? _capabilities.editTypes
-                : (programs ? const [MemberCapabilities.everyType] : const []),
-          ));
+  void _toggle({bool? admin, bool? people, bool? programs}) => setState(
+    () => _capabilities = MemberCapabilities(
+      admin: admin ?? _capabilities.admin,
+      people: people ?? _capabilities.people,
+      editTypes: programs == null
+          ? _capabilities.editTypes
+          : (programs ? const [MemberCapabilities.everyType] : const []),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -171,8 +178,7 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
               FilterPill(
                 label: tr.invite.capPrograms,
                 active: _capabilities.editTypes.isNotEmpty,
-                onTap: () =>
-                    _toggle(programs: _capabilities.editTypes.isEmpty),
+                onTap: () => _toggle(programs: _capabilities.editTypes.isEmpty),
               ),
             ],
           ),
@@ -181,9 +187,10 @@ class _MemberAccessModalState extends ConsumerState<MemberAccessModal> {
             Text(
               tr.congregation.lastAdmin,
               style: TextStyle(
-                  fontSize: AppText.small,
-                  fontWeight: FontWeight.w600,
-                  color: t.textMute),
+                fontSize: AppText.small,
+                fontWeight: FontWeight.w600,
+                color: t.textMute,
+              ),
             ),
           ],
           if (_error != null) ...[

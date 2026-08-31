@@ -38,13 +38,14 @@ String _withoutComments(String src) {
 /// — every violation still compiles and still animates, just not like the rest
 /// of the app. See lib/ui/widgets/motion.dart.
 void main() {
-  final files = Directory('lib/ui')
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .where((f) => !f.path.endsWith('.g.dart'))
-      .toList()
-    ..sort((a, b) => a.path.compareTo(b.path));
+  final files =
+      Directory('lib/ui')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .where((f) => !f.path.endsWith('.g.dart'))
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
 
   const motion = 'lib/ui/widgets/motion.dart';
 
@@ -79,9 +80,13 @@ void main() {
       }
     }
 
-    expect(violations, isEmpty,
-        reason: 'Pass `curve: Motion.curve` alongside the duration — without '
-            'it the widget animates linearly.\n${violations.join('\n')}');
+    expect(
+      violations,
+      isEmpty,
+      reason:
+          'Pass `curve: Motion.curve` alongside the duration — without '
+          'it the widget animates linearly.\n${violations.join('\n')}',
+    );
   });
 
   test('curves come from Motion, never from Curves', () {
@@ -97,10 +102,14 @@ void main() {
       }
     }
 
-    expect(violations, isEmpty,
-        reason: 'Use `Motion.curve` / `Motion.curveOut`. One ease-out for the '
-            'whole app; overshoot belongs to gestures that carried momentum, '
-            'and we have none.\n${violations.join('\n')}');
+    expect(
+      violations,
+      isEmpty,
+      reason:
+          'Use `Motion.curve` / `Motion.curveOut`. One ease-out for the '
+          'whole app; overshoot belongs to gestures that carried momentum, '
+          'and we have none.\n${violations.join('\n')}',
+    );
   });
 
   test('animation timings come from the Motion scale', () {
@@ -123,9 +132,13 @@ void main() {
       }
     }
 
-    expect(violations, isEmpty,
-        reason: 'Use `Motion.of(context, Motion.<step>)`, or `Motion.stagger` '
-            'for entrance delays.\n${violations.join('\n')}');
+    expect(
+      violations,
+      isEmpty,
+      reason:
+          'Use `Motion.of(context, Motion.<step>)`, or `Motion.stagger` '
+          'for entrance delays.\n${violations.join('\n')}',
+    );
   });
 }
 

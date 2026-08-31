@@ -13,7 +13,11 @@ import 'package:agora/state/sync_provider.dart';
 
 void main() {
   Membership member(String cid, MemberCapabilities caps) => Membership(
-      congregationId: cid, uid: 'me', capabilities: caps, keyVersion: 1);
+    congregationId: cid,
+    uid: 'me',
+    capabilities: caps,
+    keyVersion: 1,
+  );
 
   // A stream that never emits keeps the provider in AsyncLoading.
   Stream<T> pending<T>() => StreamController<T>().stream;
@@ -27,11 +31,15 @@ void main() {
     Stream<List<Membership>>? memberships,
     String? uid = 'me',
   }) async {
-    final c = ProviderContainer(overrides: [
-      syncUidProvider.overrideWithValue(uid),
-      sharedCongregationIdsProvider.overrideWith((ref) => shared ?? pending()),
-      myMembershipsProvider.overrideWith((ref) => memberships ?? pending()),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        syncUidProvider.overrideWithValue(uid),
+        sharedCongregationIdsProvider.overrideWith(
+          (ref) => shared ?? pending(),
+        ),
+        myMembershipsProvider.overrideWith((ref) => memberships ?? pending()),
+      ],
+    );
     c.listen(sharedCongregationIdsProvider, (_, _) {});
     c.listen(myMembershipsProvider, (_, _) {});
     await Future<void>.delayed(Duration.zero);
@@ -99,8 +107,7 @@ void main() {
     expect(resolved!.canEditAnything, isFalse);
   });
 
-  test('rightsProvider: null reads as founder, revoked as read-only',
-      () async {
+  test('rightsProvider: null reads as founder, revoked as read-only', () async {
     final local = await build(); // both loading → null → founder
     addTearDown(local.dispose);
     expect(local.read(rightsProvider(cid)).admin, isTrue);

@@ -48,15 +48,17 @@ Future<PickResult?> showPersonPicker(
       backgroundColor: t.surface,
       barrierColor: _scrim,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(Dimens.rSheet)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Dimens.rSheet),
+        ),
       ),
       builder: (context) {
         final height = MediaQuery.sizeOf(context).height;
         return Padding(
           // Keeps the search box visible when the keyboard appears.
           padding: EdgeInsets.only(
-              bottom: MediaQuery.viewInsetsOf(context).bottom),
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxHeight: height * 0.78),
             child: PersonPickerPanel(
@@ -116,8 +118,11 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
       reduceMotion ? Duration.zero : Motion.instant;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     final t = context.tokens;
     return CustomSingleChildLayout(
       delegate: _PopoverLayout(anchor: anchor),
@@ -136,8 +141,12 @@ class _PickerPopupRoute extends PopupRoute<PickResult> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     // Plain ease-out, not the overshoot this used to have: the popover just
     // appears, it was not thrown by a gesture, so a bounce reads as decoration
     // rather than as physics — and it was the one curve outside the scale.
@@ -184,8 +193,10 @@ class _PopoverLayout extends SingleChildLayoutDelegate {
     }
     if (left < _margen) left = _margen;
     if (top + childSize.height > size.height - _margen) {
-      top = (anchor.top - childSize.height - _gap)
-          .clamp(_margen, size.height - childSize.height - _margen);
+      top = (anchor.top - childSize.height - _gap).clamp(
+        _margen,
+        size.height - childSize.height - _margen,
+      );
     }
     return Offset(left, top);
   }

@@ -18,27 +18,27 @@ enum Gender { male, female, unspecified }
 
 extension GenderX on Gender {
   String label(Translations tr) => switch (this) {
-        Gender.male => tr.gender.male,
-        Gender.female => tr.gender.female,
-        Gender.unspecified => tr.gender.unspecified,
-      };
+    Gender.male => tr.gender.male,
+    Gender.female => tr.gender.female,
+    Gender.unspecified => tr.gender.unspecified,
+  };
 }
 
 enum Role { elder, ministerialServant, publisher }
 
 extension RoleX on Role {
   String label(Translations tr) => switch (this) {
-        Role.elder => tr.roles.elder,
-        Role.ministerialServant => tr.roles.ministerialServant,
-        Role.publisher => tr.roles.publisher,
-      };
+    Role.elder => tr.roles.elder,
+    Role.ministerialServant => tr.roles.ministerialServant,
+    Role.publisher => tr.roles.publisher,
+  };
 
   /// Plural form used by the filter chips on the participants screen.
   String plural(Translations tr) => switch (this) {
-        Role.elder => tr.roles.elderPlural,
-        Role.ministerialServant => tr.roles.ministerialServantPlural,
-        Role.publisher => tr.roles.publisherPlural,
-      };
+    Role.elder => tr.roles.elderPlural,
+    Role.ministerialServant => tr.roles.ministerialServantPlural,
+    Role.publisher => tr.roles.publisherPlural,
+  };
 }
 
 class Person {

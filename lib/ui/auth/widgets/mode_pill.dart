@@ -15,7 +15,10 @@ class ModePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s12, vertical: Space.s4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.s12,
+        vertical: Space.s4,
+      ),
       decoration: BoxDecoration(
         color: t.accentSoft,
         borderRadius: BorderRadius.circular(999),

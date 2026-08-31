@@ -18,10 +18,18 @@ class FakeKeyDocs implements KeyDocsGateway {
 
   /// Every [rotateKey] call, in order — lets tests assert the batch shape
   /// (which is where the rules' atomicity guarantees live).
-  final List<({int version, Set<String> sealedFor, Set<String> removed,
-      Set<String> invitesDeleted})> rotations = [];
+  final List<
+    ({
+      int version,
+      Set<String> sealedFor,
+      Set<String> removed,
+      Set<String> invitesDeleted,
+    })
+  >
+  rotations = [];
 
-  final _memberStreams = <String, StreamController<List<Map<String, dynamic>>>>{};
+  final _memberStreams =
+      <String, StreamController<List<Map<String, dynamic>>>>{};
   final _inviteStreams =
       <String, StreamController<Map<String, Map<String, dynamic>>>>{};
 
@@ -29,8 +37,11 @@ class FakeKeyDocs implements KeyDocsGateway {
   Future<Map<String, dynamic>?> readUserDoc(String uid) async => users[uid];
 
   @override
-  Future<void> createUserDoc(String uid,
-      {required String pubKey, required String privKey}) async {
+  Future<void> createUserDoc(
+    String uid, {
+    required String pubKey,
+    required String privKey,
+  }) async {
     users[uid] = {
       'pubKey': pubKey,
       'privKey': privKey,
@@ -88,14 +99,19 @@ class FakeKeyDocs implements KeyDocsGateway {
   @override
   Stream<List<Map<String, dynamic>>> watchMembers(String cid) {
     final c = _memberStreams.putIfAbsent(
-        cid, () => StreamController<List<Map<String, dynamic>>>.broadcast());
+      cid,
+      () => StreamController<List<Map<String, dynamic>>>.broadcast(),
+    );
     scheduleMicrotask(() => _emitMembers(cid));
     return c.stream;
   }
 
   @override
   Future<void> updateMemberCapabilities(
-      String cid, String uid, Map<String, Object> capabilities) async {
+    String cid,
+    String uid,
+    Map<String, Object> capabilities,
+  ) async {
     final doc = members[cid]?[uid];
     if (doc == null) throw StateError('no member $uid in $cid');
     doc['capabilities'] = capabilities;
@@ -104,7 +120,10 @@ class FakeKeyDocs implements KeyDocsGateway {
 
   @override
   Future<void> appendWrappedCcks(
-      String cid, String uid, Map<int, Map<String, String>> boxes) async {
+    String cid,
+    String uid,
+    Map<int, Map<String, String>> boxes,
+  ) async {
     _append(cid, uid, boxes);
     _emitMembers(cid);
   }
@@ -124,7 +143,10 @@ class FakeKeyDocs implements KeyDocsGateway {
 
   @override
   Future<void> createInvite(
-      String cid, String tokenId, Map<String, dynamic> data) async {
+    String cid,
+    String tokenId,
+    Map<String, dynamic> data,
+  ) async {
     (invites[cid] ??= {})[tokenId] = {
       ...data,
       'createdAt': DateTime.now().toUtc(),
@@ -137,13 +159,16 @@ class FakeKeyDocs implements KeyDocsGateway {
       invites[cid]?[tokenId];
 
   @override
-  Future<Map<String, Map<String, dynamic>>> listInvites(String cid) async =>
-      {for (final e in (invites[cid] ?? const {}).entries) e.key: Map.of(e.value)};
+  Future<Map<String, Map<String, dynamic>>> listInvites(String cid) async => {
+    for (final e in (invites[cid] ?? const {}).entries) e.key: Map.of(e.value),
+  };
 
   @override
   Stream<Map<String, Map<String, dynamic>>> watchInvites(String cid) {
-    final c = _inviteStreams.putIfAbsent(cid,
-        () => StreamController<Map<String, Map<String, dynamic>>>.broadcast());
+    final c = _inviteStreams.putIfAbsent(
+      cid,
+      () => StreamController<Map<String, Map<String, dynamic>>>.broadcast(),
+    );
     scheduleMicrotask(() => _emitInvites(cid));
     return c.stream;
   }
@@ -244,7 +269,8 @@ class FakeKeyDocs implements KeyDocsGateway {
     final c = _inviteStreams[cid];
     if (c != null && !c.isClosed) {
       c.add({
-        for (final e in (invites[cid] ?? const {}).entries) e.key: Map.of(e.value),
+        for (final e in (invites[cid] ?? const {}).entries)
+          e.key: Map.of(e.value),
       });
     }
   }

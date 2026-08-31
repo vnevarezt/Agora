@@ -6,7 +6,11 @@
   },
   "a11y": {
     "skipToContent": "Ir al contenido",
-    "sections": "Secciones"
+    "sections": "Secciones",
+    "themeLabel": "Tema",
+    "themeSystem": "Tema: el del sistema",
+    "themeLight": "Tema: claro",
+    "themeDark": "Tema: oscuro"
   },
   "landing": {
     "nav": {
@@ -23,7 +27,8 @@
       "title": "Tú pones los nombres. Ya está.",
       "subtitle": "Agora calcula las horas y te deja el PDF listo para imprimir.",
       "cta": "Probar ahora",
-      "note": "Sin cuenta. Sin instalar nada."
+      "note": "Sin cuenta. Sin instalar nada.",
+      "shotAlt": "Agora en pantalla, con el programa de la semana asignado"
     },
     "howItWorks": {
       "title": "Son tres pasos.",
@@ -39,20 +44,7 @@
       "body": "Cambia una parte y todas las horas de abajo se mueven solas.",
       "circuit": "¿Viene el superintendente? Lo marcas y el programa se reordena.",
       "slack": "Sobran 26 min · 8·8·10 a las canciones",
-      "sampleLabel": "Semana normal · inicio 18:00",
-      "sampleTargetEnd": "19:45",
-      "sampleOpeningSong": "Canción y oración",
-      "sampleIntro": "Palabras de introducción",
-      "sampleTreasures": "Tesoros de la Biblia",
-      "sampleTreasuresDuration": "25 min",
-      "sampleMinistry": "Seamos mejores maestros",
-      "sampleMinistryDuration": "15 min fijos",
-      "sampleSong2": "Canción",
-      "sampleChristianLife": "Nuestra vida cristiana",
-      "sampleChristianLifeDuration": "5 min",
-      "sampleBibleStudy": "Estudio bíblico de la congregación",
-      "sampleClosingWords": "Palabras de conclusión",
-      "sampleClosingSong": "Canción y oración"
+      "shotAlt": "Agora en un iPhone, con el programa de la semana en la vista previa"
     },
     "preview": {
       "title": "La vista previa no se parece al PDF. Es el PDF.",
@@ -112,6 +104,52 @@
       "license": "El código está a la vista en GitHub, pero no es software libre: se puede mirar y usar sin ánimo de lucro (PolyForm Noncommercial 1.0.0). Hecho por Vicente Nevárez Treviño.",
       "linksLabel": "Enlaces",
       "linkRepo": "Repositorio en GitHub"
+    },
+    "eyebrow": {
+      "howItWorks": "Cómo funciona",
+      "schedules": "Tiempos",
+      "privacy": "Tus datos",
+      "downloads": "Empezar",
+      "whatYouGet": "Lo que obtienes"
+    },
+    "whatYouGet": {
+      "title": "Lo demás ya está resuelto."
+    }
+  },
+  "action": {
+    "meta": {
+      "title": "Agora — Tu cuenta"
+    },
+    "checking": "Comprobando el enlace…",
+    "openApp": "Abrir Agora",
+    "legal": "Agora — programas de la reunión de entresemana.",
+    "errors": {
+      "generic": "No se pudo completar. Inténtalo otra vez en un momento."
+    },
+    "reset": {
+      "title": "Elige una contraseña nueva",
+      "sub": "Para la cuenta",
+      "passwordLabel": "CONTRASEÑA NUEVA",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "confirmLabel": "REPÍTELA",
+      "hint": "Usa algo que no uses en otro sitio.",
+      "cta": "Guardar contraseña",
+      "mismatch": "Las dos contraseñas no coinciden.",
+      "weak": "La contraseña necesita al menos 6 caracteres.",
+      "done": {
+        "title": "Contraseña cambiada",
+        "sub": "Ya puedes entrar en Agora con tu contraseña nueva."
+      }
+    },
+    "verify": {
+      "done": {
+        "title": "Correo confirmado",
+        "sub": "Gracias. Tu dirección quedó verificada."
+      }
+    },
+    "invalid": {
+      "title": "Este enlace ya no sirve",
+      "sub": "Los enlaces caducan en una hora y solo se pueden usar una vez. Pide uno nuevo desde la app."
     }
   }
 }

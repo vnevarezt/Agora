@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/strings.g.dart';
 import '../theme/app_theme.dart';
 import '../theme/dimens.dart';
 import '../theme/tokens.dart';
@@ -21,6 +22,9 @@ class Pressable extends StatefulWidget {
     this.onTap,
     this.tooltip,
     this.semanticLabel,
+    this.selected,
+    this.semanticHint,
+    this.liveRegion = false,
     this.focusRadius = Dimens.rControl,
     this.pressScale = Motion.pressScale,
   });
@@ -41,6 +45,23 @@ class Pressable extends StatefulWidget {
   /// element. Controls that render their own text can leave this null — the
   /// text is already the name.
   final String? semanticLabel;
+
+  /// Whether this control is the chosen one of a set — a tab, a filter, a
+  /// navigation destination. Null for a control that is not part of a set.
+  ///
+  /// Selection is otherwise carried entirely by paint, and a screen reader
+  /// sees none of it: without this the tabs, the filter pills and the rail
+  /// read as identical buttons with no way to tell which one is active.
+  final bool? selected;
+
+  /// Read after the name, for a condition the label cannot carry — a control
+  /// that has stopped responding because it is working, say.
+  final String? semanticHint;
+
+  /// Whether entering the current state should be announced without waiting
+  /// for focus to arrive. Only true while that state is transient: a permanent
+  /// live region re-reads itself on every unrelated rebuild.
+  final bool liveRegion;
 
   /// How far the control shrinks while held. [Motion.pressScaleSurface] for
   /// anything card-sized; 1 to opt out where the scale would fight the
@@ -73,15 +94,17 @@ class _PressableState extends State<Pressable> {
 
     Widget child = FocusableActionDetector(
       enabled: enabled,
-      mouseCursor:
-          enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      mouseCursor: enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onShowHoverHighlight: (v) => setState(() => _hovered = v),
       // Only true when the focus arrived by keyboard, so a mouse click never
       // leaves a ring behind.
       onShowFocusHighlight: (v) => setState(() => _focused = v),
       actions: {
-        ActivateIntent:
-            CallbackAction<ActivateIntent>(onInvoke: (_) => _activate()),
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) => _activate(),
+        ),
       },
       child: GestureDetector(
         // opaque: with the default deferToChild only PAINTED pixels react,
@@ -125,7 +148,10 @@ class _PressableState extends State<Pressable> {
     return Semantics(
       button: true,
       enabled: enabled,
+      selected: widget.selected,
       label: widget.semanticLabel,
+      hint: widget.semanticHint,
+      liveRegion: widget.liveRegion,
       child: child,
     );
   }
@@ -169,6 +195,12 @@ class AppButton extends StatelessWidget {
     return Pressable(
       onTap: enabled ? onPressed : null,
       semanticLabel: semanticLabel,
+      // Busy disables the button, and "dimmed" with no reason is all a screen
+      // reader would otherwise get. The hint says why it stopped responding,
+      // and the live region delivers it when the state arrives rather than
+      // when focus does.
+      semanticHint: busy ? context.t.common.loading : null,
+      liveRegion: busy,
       builder: (context, hovered, pressed) {
         final bg = esPrimary
             ? (hovered ? t.accentStrong : t.accent)
@@ -203,7 +235,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (busy)
-                AppSpinner(size: 15, color: fg)
+                AppSpinner(size: Dimens.spinnerInButton, color: fg)
               else if (icon != null)
                 Icon(icon, size: AppIcon.control, color: fg),
               if (label != null) ...[
@@ -280,7 +312,11 @@ class AppIconButton extends StatelessWidget {
             border: bordered || elevated ? Border.all(color: t.border) : null,
             boxShadow: elevated ? Elevation.raised : null,
           ),
-          child: Icon(icon, size: AppIcon.control, color: hovered ? t.text : t.textDim),
+          child: Icon(
+            icon,
+            size: AppIcon.control,
+            color: hovered ? t.text : t.textDim,
+          ),
         );
         // The paint stays [size]; the tap area never shrinks below the
         // platform touch-target floor. Callers positioning this precisely
